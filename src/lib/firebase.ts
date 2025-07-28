@@ -1,0 +1,26 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyAxex9T9insV0Y5-puRZc6y-QQhn1KLXD8",
+  authDomain: "urbanova-b623e.firebaseapp.com",
+  projectId: "urbanova-b623e",
+  storageBucket: "urbanova-b623e.firebasestorage.app",
+  messagingSenderId: "599892072352",
+  appId: "1:599892072352:web:34553ac67eb39d2b9ab6c5",
+  measurementId: "G-QHNDTK9P3L"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+// Initialize Firebase services
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const storage = getStorage(app);
+
+export default app; 
