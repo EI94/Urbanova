@@ -1,0 +1,310 @@
+// Agente Land Scraping Reale - Urbanova AI
+import { realWebScraper, ScrapedLand, LandSearchCriteria } from './realWebScraper';
+import { realEmailService, EmailNotification } from './realEmailService';
+import { realAIService, LandAnalysis } from './realAIService';
+import { db } from './firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
+export interface RealLandScrapingResult {
+  lands: ScrapedLand[];
+  analysis: LandAnalysis[];
+  emailSent: boolean;
+  summary: {
+    totalFound: number;
+    averagePrice: number;
+    bestOpportunities: ScrapedLand[];
+    marketTrends: string;
+    recommendations: string[];
+  };
+}
+
+export class RealLandScrapingAgent {
+  private name: string;
+  private version: string;
+
+  constructor() {
+    this.name = "Real AI Land Scraper";
+    this.version = "2.0";
+  }
+
+  async runAutomatedSearch(criteria: LandSearchCriteria, email: string): Promise<RealLandScrapingResult> {
+    console.log(`🚀 [${this.name}] Avvio ricerca automatizzata per ${email}`);
+    
+    try {
+      // 1. Web Scraping Reale
+      console.log('🔍 Fase 1: Web Scraping...');
+      const lands = await realWebScraper.scrapeLands(criteria);
+      
+      if (lands.length === 0) {
+        console.log('⚠️ Nessun terreno trovato');
+        return {
+          lands: [],
+          analysis: [],
+          emailSent: false,
+          summary: {
+            totalFound: 0,
+            averagePrice: 0,
+            bestOpportunities: [],
+            marketTrends: 'Nessun dato disponibile',
+            recommendations: ['Ampliare i criteri di ricerca']
+          }
+        };
+      }
+
+      // 2. Analisi AI Reale
+      console.log('🤖 Fase 2: Analisi AI...');
+      const analysis: LandAnalysis[] = [];
+      const topLands = lands.slice(0, 5); // Analizza solo i top 5 per efficienza
+      
+      for (const land of topLands) {
+        try {
+          const landAnalysis = await realAIService.analyzeLand(land);
+          analysis.push(landAnalysis);
+          
+          // Aggiorna AI Score con analisi avanzata
+          land.aiScore = await realAIService.calculateAdvancedAIScore(land, landAnalysis);
+        } catch (error) {
+          console.error(`Errore analisi AI per ${land.title}:`, error);
+          // Fallback analysis
+          analysis.push(realAIService['fallbackAnalysis'](land));
+        }
+      }
+
+      // 3. Analisi Trend di Mercato
+      console.log('📊 Fase 3: Analisi Trend...');
+      const marketTrends = await realAIService.analyzeMarketTrends(criteria.location || 'Italia');
+
+      // 4. Raccomandazioni di Investimento
+      console.log('💡 Fase 4: Raccomandazioni...');
+      const recommendations = await realAIService.generateInvestmentRecommendations(lands);
+
+      // 5. Prepara Summary
+      const summary = {
+        totalFound: lands.length,
+        averagePrice: Math.round(lands.reduce((sum, land) => sum + land.price, 0) / lands.length),
+        bestOpportunities: lands.slice(0, 5),
+        marketTrends,
+        recommendations
+      };
+
+      // 6. Invia Email Reale
+      console.log('📧 Fase 5: Invio Email...');
+      let emailSent = false;
+      try {
+        await this.sendEmailNotification(email, lands, summary, analysis);
+        emailSent = true;
+        console.log('✅ Email inviata con successo');
+      } catch (error) {
+        console.error('❌ Errore invio email:', error);
+      }
+
+      // 7. Salva Risultati nel Database
+      console.log('💾 Fase 6: Salvataggio Database...');
+      await this.saveSearchResults(lands, analysis, summary, criteria, email);
+
+      console.log(`✅ [${this.name}] Ricerca automatizzata completata con successo`);
+      
+      return {
+        lands,
+        analysis,
+        emailSent,
+        summary
+      };
+
+    } catch (error) {
+      console.error(`❌ [${this.name}] Errore nella ricerca automatizzata:`, error);
+      throw error;
+    } finally {
+      // Chiudi browser per liberare risorse
+      await realWebScraper.close();
+    }
+  }
+
+  private async sendEmailNotification(
+    email: string, 
+    lands: ScrapedLand[], 
+    summary: any, 
+    analysis: LandAnalysis[]
+  ): Promise<void> {
+    const bestLands = summary.bestOpportunities;
+    const bestAnalysis = analysis.slice(0, 5);
+
+    const notification: EmailNotification = {
+      to: email,
+      subject: `🏗️ ${lands.length} Nuove Opportunità Terreni - Urbanova AI`,
+      htmlContent: this.generateAdvancedEmailHTML(lands, summary, bestAnalysis),
+      lands,
+      summary
+    };
+
+    await realEmailService.sendEmail(notification);
+  }
+
+  private generateAdvancedEmailHTML(
+    lands: ScrapedLand[], 
+    summary: any, 
+    analysis: LandAnalysis[]
+  ): string {
+    const bestLandsHTML = summary.bestOpportunities.map((land: ScrapedLand, index: number) => {
+      const landAnalysis = analysis[index] || analysis[0];
+      return `
+        <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 16px; background: white;">
+          <h3 style="margin: 0 0 8px 0; color: #1f2937; font-size: 18px;">${land.title}</h3>
+          <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;">📍 ${land.location}</p>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="color: #059669; font-weight: bold; font-size: 16px;">€${land.price.toLocaleString()}</span>
+            <span style="color: #6b7280; font-size: 14px;">${land.area}m² • €${land.pricePerSqm}/m²</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+              AI Score: ${land.aiScore}/100
+            </span>
+            <span style="background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+              ROI: ${landAnalysis?.estimatedROI || 8}%
+            </span>
+          </div>
+          <div style="background: #f9fafb; padding: 8px; border-radius: 4px; margin-bottom: 8px;">
+            <p style="margin: 0; font-size: 12px; color: #6b7280;">
+              <strong>Analisi AI:</strong> ${landAnalysis?.riskAssessment || 'Medio'} rischio, 
+              ${landAnalysis?.timeToMarket || '12-18 mesi'} al mercato
+            </p>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; color: #6b7280;">${land.source}</span>
+            <a href="${land.url}" style="background: #3b82f6; color: white; padding: 6px 12px; text-decoration: none; border-radius: 4px; font-size: 14px;">
+              Vedi Dettagli
+            </a>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    const recommendationsHTML = summary.recommendations.map((rec: string) => 
+      `<li style="margin-bottom: 4px; color: #374151;">${rec}</li>`
+    ).join('');
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Nuove Opportunità Terreni - Urbanova AI</title>
+      </head>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #374151; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 12px; margin-bottom: 30px;">
+          <h1 style="color: white; margin: 0; text-align: center; font-size: 28px;">🏗️ Urbanova AI</h1>
+          <p style="color: white; text-align: center; margin: 10px 0 0 0; font-size: 16px;">
+            Scopri le migliori opportunità immobiliari con AI
+          </p>
+        </div>
+
+        <div style="background: #f9fafb; padding: 24px; border-radius: 8px; margin-bottom: 24px;">
+          <h2 style="margin: 0 0 16px 0; color: #1f2937;">📊 Riepilogo Ricerca</h2>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #3b82f6;">${summary.totalFound}</div>
+              <div style="font-size: 14px; color: #6b7280;">Terreni Trovati</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #059669;">€${summary.averagePrice.toLocaleString()}</div>
+              <div style="font-size: 14px; color: #6b7280;">Prezzo Medio</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+          <h3 style="margin: 0 0 8px 0; color: #92400e;">📈 Trend di Mercato</h3>
+          <p style="margin: 0; color: #92400e; font-size: 14px;">${summary.marketTrends}</p>
+        </div>
+
+        <h2 style="margin: 0 0 16px 0; color: #1f2937;">🏆 Migliori Opportunità</h2>
+        ${bestLandsHTML}
+
+        <div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 16px; margin-top: 24px;">
+          <h3 style="margin: 0 0 8px 0; color: #0c4a6e;">💡 Raccomandazioni AI</h3>
+          <ul style="margin: 0; padding-left: 20px; color: #0c4a6e;">
+            ${recommendationsHTML}
+          </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+          <p style="color: #6b7280; font-size: 14px; margin: 0;">
+            Questa email è stata generata automaticamente da Urbanova AI<br>
+            <a href="https://urbanova.life/dashboard" style="color: #3b82f6;">Accedi al Dashboard</a>
+          </p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  private async saveSearchResults(
+    lands: ScrapedLand[], 
+    analysis: LandAnalysis[], 
+    summary: any, 
+    criteria: LandSearchCriteria, 
+    email: string
+  ): Promise<void> {
+    try {
+      const searchResult = {
+        email,
+        criteria,
+        lands: lands.map(land => ({
+          ...land,
+          dateScraped: land.dateScraped.toISOString()
+        })),
+        analysis,
+        summary,
+        createdAt: serverTimestamp(),
+        status: 'completed'
+      };
+
+      await addDoc(collection(db, 'landSearchResults'), searchResult);
+      console.log('✅ Risultati salvati nel database');
+    } catch (error) {
+      console.error('❌ Errore salvataggio risultati:', error);
+    }
+  }
+
+  // Verifica configurazione di tutti i servizi
+  async verifyAllServices(): Promise<{
+    email: boolean;
+    webScraping: boolean;
+    ai: boolean;
+  }> {
+    const results = {
+      email: false,
+      webScraping: false,
+      ai: false
+    };
+
+    try {
+      // Verifica Email Service
+      results.email = await realEmailService.verifyEmailConfig();
+    } catch (error) {
+      console.error('❌ Errore verifica email service:', error);
+    }
+
+    try {
+      // Verifica Web Scraping
+      await realWebScraper.initialize();
+      results.webScraping = true;
+      await realWebScraper.close();
+    } catch (error) {
+      console.error('❌ Errore verifica web scraping:', error);
+    }
+
+    try {
+      // Verifica AI Service
+      results.ai = await realAIService.verifyAIConfig();
+    } catch (error) {
+      console.error('❌ Errore verifica AI service:', error);
+    }
+
+    console.log('🔍 Stato servizi:', results);
+    return results;
+  }
+}
+
+// Istanza singleton
+export const realLandScrapingAgent = new RealLandScrapingAgent(); 

@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { LandScrapingAgentFactory, LandSearchCriteria, ScrapedLand } from '@/lib/landScrapingAgent';
+import { LandSearchCriteria } from '@/lib/realWebScraper';
 import { emailService, EmailConfig } from '@/lib/emailService';
+import { realLandScrapingAgent, RealLandScrapingResult } from '@/lib/realLandScrapingAgent';
+import { feasibilityService } from '@/lib/feasibilityService';
 import { 
   SearchIcon, 
   MailIcon, 
@@ -16,9 +18,13 @@ import {
   CheckCircleIcon,
   EditIcon,
   TrashIcon,
-  SettingsIcon
+  SettingsIcon,
+  BrainIcon,
+  GlobeIcon,
+  CalculatorIcon
 } from '@/components/icons';
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 export default function LandScrapingPage() {
   const [searchCriteria, setSearchCriteria] = useState<LandSearchCriteria>({
@@ -33,24 +39,45 @@ export default function LandScrapingPage() {
   
   const [email, setEmail] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<ScrapedLand[]>([]);
+  const [searchResults, setSearchResults] = useState<RealLandScrapingResult | null>(null);
   const [searchHistory, setSearchHistory] = useState<Array<{
     id: string;
     criteria: LandSearchCriteria;
     email: string;
     date: Date;
     resultsCount: number;
+    emailSent: boolean;
   }>>([]);
   
   // Nuovi stati per gestione email
   const [emailConfig, setEmailConfig] = useState<EmailConfig | null>(null);
   const [showEmailSettings, setShowEmailSettings] = useState(false);
   const [isLoadingEmail, setIsLoadingEmail] = useState(false);
+  
+  // Stato servizi
+  const [servicesStatus, setServicesStatus] = useState<{
+    email: boolean;
+    webScraping: boolean;
+    ai: boolean;
+  } | null>(null);
+
+  const router = useRouter();
 
   // Carica configurazione email all'avvio
   useEffect(() => {
     loadEmailConfig();
+    verifyServices();
   }, []);
+
+  const verifyServices = async () => {
+    try {
+      const status = await realLandScrapingAgent.verifyAllServices();
+      setServicesStatus(status);
+      console.log('🔍 Stato servizi verificato:', status);
+    } catch (error) {
+      console.error('❌ Errore verifica servizi:', error);
+    }
+  };
 
   const loadEmailConfig = async () => {
     if (!email) return;
@@ -120,18 +147,18 @@ export default function LandScrapingPage() {
       return;
     }
 
+    if (!servicesStatus?.webScraping) {
+      toast.error('❌ Servizio Web Scraping non disponibile');
+      return;
+    }
+
     setIsSearching(true);
     toast.loading('🔍 Ricerca terreni in corso...', { id: 'land-search' });
 
     try {
-      const agent = LandScrapingAgentFactory.createAgent();
-      
-      // Esegui ricerca automatizzata
-      await agent.runAutomatedSearch(searchCriteria, email);
-      
-      // Simula risultati per la visualizzazione
-      const mockResults = await agent.scrapeLands(searchCriteria);
-      setSearchResults(mockResults);
+      // Usa l'agente reale invece del mock
+      const result = await realLandScrapingAgent.runAutomatedSearch(searchCriteria, email);
+      setSearchResults(result);
       
       // Aggiungi alla cronologia
       setSearchHistory(prev => [{
@@ -139,7 +166,8 @@ export default function LandScrapingPage() {
         criteria: { ...searchCriteria },
         email,
         date: new Date(),
-        resultsCount: mockResults.length
+        resultsCount: result.lands.length,
+        emailSent: result.emailSent
       }, ...prev]);
 
       // Salva configurazione email se non esiste
@@ -147,7 +175,11 @@ export default function LandScrapingPage() {
         await saveEmailConfig();
       }
 
-      toast.success(`✅ Trovati ${mockResults.length} terreni! Email inviata a ${email}`, { id: 'land-search' });
+      if (result.emailSent) {
+        toast.success(`✅ Trovati ${result.lands.length} terreni! Email inviata a ${email}`, { id: 'land-search' });
+      } else {
+        toast.success(`✅ Trovati ${result.lands.length} terreni! (Email non inviata)`, { id: 'land-search' });
+      }
     } catch (error) {
       console.error('Errore nella ricerca:', error);
       toast.error('❌ Errore durante la ricerca dei terreni', { id: 'land-search' });
@@ -163,6 +195,31 @@ export default function LandScrapingPage() {
     }
     
     toast.success('📅 Ricerca programmata per l\'esecuzione automatica settimanale');
+  };
+
+  const handleCreateFeasibilityProject = async (land: any) => {
+    try {
+      toast.loading('🏗️ Creazione progetto di fattibilità...', { id: 'feasibility-create' });
+      
+      const projectId = await feasibilityService.createFromLand(land, 'user123');
+      
+      toast.success('✅ Progetto di fattibilità creato!', { id: 'feasibility-create' });
+      
+      // Reindirizza alla pagina del progetto
+      router.push(`/dashboard/feasibility-analysis/${projectId}`);
+    } catch (error) {
+      console.error('Errore creazione progetto fattibilità:', error);
+      toast.error('❌ Errore nella creazione del progetto', { id: 'feasibility-create' });
+    }
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('it-IT', { 
+      style: 'currency', 
+      currency: 'EUR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value);
   };
 
   return (
@@ -181,6 +238,36 @@ export default function LandScrapingPage() {
             <span className="text-sm text-green-600 font-medium">Agente Attivo</span>
           </div>
         </div>
+
+        {/* Status Servizi */}
+        {servicesStatus && (
+          <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">🔧 Stato Servizi</h3>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="flex items-center space-x-2">
+                <div className={`w-3 h-3 rounded-full ${servicesStatus.email ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <span className="text-sm font-medium">Email Service</span>
+                <span className={`text-xs px-2 py-1 rounded ${servicesStatus.email ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                  {servicesStatus.email ? 'Online' : 'Offline'}
+                </span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className={`w-3 h-3 rounded-full ${servicesStatus.webScraping ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <span className="text-sm font-medium">Web Scraping</span>
+                <span className={`text-xs px-2 py-1 rounded ${servicesStatus.webScraping ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                  {servicesStatus.webScraping ? 'Online' : 'Offline'}
+                </span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className={`w-3 h-3 rounded-full ${servicesStatus.ai ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <span className="text-sm font-medium">AI Analysis</span>
+                <span className={`text-xs px-2 py-1 rounded ${servicesStatus.ai ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                  {servicesStatus.ai ? 'Online' : 'Offline'}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Configurazione Ricerca */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -437,17 +524,17 @@ export default function LandScrapingPage() {
                 <h3 className="text-sm font-medium text-blue-900 mb-2">📧 Cosa riceverai via email:</h3>
                 <ul className="text-sm text-blue-800 space-y-1">
                   <li>• Top {emailConfig?.preferences.maxResults || 5} migliori opportunità con AI Score</li>
-                  <li>• Riepilogo statistiche (prezzo medio, numero terreni)</li>
+                  <li>• Analisi AI dettagliata con ROI e rischi</li>
+                  <li>• Trend di mercato per la zona</li>
+                  <li>• Raccomandazioni di investimento personalizzate</li>
                   <li>• Link diretti ai dettagli su portali immobiliari</li>
-                  <li>• Contatti agenti per sopralluoghi</li>
-                  <li>• Suggerimenti per prossimi passi</li>
                 </ul>
               </div>
 
               <div className="flex space-x-3">
                 <button
                   onClick={handleSearch}
-                  disabled={isSearching}
+                  disabled={isSearching || !servicesStatus?.webScraping}
                   className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 >
                   {isSearching ? (
@@ -477,74 +564,96 @@ export default function LandScrapingPage() {
 
         {/* Fonti di Ricerca */}
         <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">🔍 Fonti di Ricerca</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">🔍 Fonti di Ricerca Reali</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {['immobiliare.it', 'casa.it', 'idealista.it', 'subito.it', 'bakeca.it', 'agenziaentrate.gov.it'].map((source) => (
-              <div key={source} className="flex items-center p-3 bg-gray-50 rounded-lg">
-                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                <span className="text-sm font-medium text-gray-700">{source}</span>
+            {[
+              { name: 'immobiliare.it', status: servicesStatus?.webScraping ? 'online' : 'offline' },
+              { name: 'casa.it', status: servicesStatus?.webScraping ? 'online' : 'offline' },
+              { name: 'idealista.it', status: servicesStatus?.webScraping ? 'online' : 'offline' }
+            ].map((source) => (
+              <div key={source.name} className="flex items-center p-3 bg-gray-50 rounded-lg">
+                <div className={`w-2 h-2 rounded-full mr-2 ${source.status === 'online' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <span className="text-sm font-medium text-gray-700">{source.name}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Risultati Ultima Ricerca */}
-        {searchResults.length > 0 && (
-          <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-              <TrendingUpIcon className="h-5 w-5 mr-2 text-purple-600" />
-              Ultimi Risultati ({searchResults.length} terreni)
-            </h2>
-            
+        {searchResults && (
+          <div className="bg-white shadow-sm rounded-lg p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">🏠 Risultati Ultima Ricerca</h3>
+              <div className="text-sm text-gray-500">
+                {searchResults.lands.length} terreni trovati • 
+                Email: {searchResults.emailSent ? '✅ Inviata' : '❌ Non inviata'} • 
+                Analisi AI: {searchResults.analysis.length}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {searchResults.slice(0, 6).map((land) => (
-                <div key={land.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+              {searchResults.lands.slice(0, 6).map((land, index) => (
+                <div key={land.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-medium text-gray-900 text-sm line-clamp-2">{land.title}</h3>
-                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                      {land.aiScore}/100
-                    </span>
+                    <h4 className="font-medium text-gray-900 truncate">{land.title}</h4>
+                    <div className="flex space-x-1">
+                      <button
+                        onClick={() => handleCreateFeasibilityProject(land)}
+                        className="btn btn-ghost btn-xs text-blue-600"
+                        title="Crea Progetto Fattibilità"
+                      >
+                        <CalculatorIcon className="h-3 w-3" />
+                      </button>
+                    </div>
                   </div>
                   
-                  <p className="text-sm text-gray-600 mb-2 flex items-center">
-                    <LocationIcon className="h-3 w-3 mr-1" />
-                    {land.location}
-                  </p>
-                  
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-lg font-bold text-green-600">
-                      €{land.price.toLocaleString()}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {land.area}m²
-                    </span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center text-xs text-gray-500">
-                    <span>€{land.pricePerSqm}/m²</span>
-                    <span>{land.source}</span>
-                  </div>
-                  
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      land.buildingRights === 'Sì' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {land.buildingRights}
-                    </span>
-                    <a 
-                      href={land.url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-600 text-xs hover:underline"
-                    >
-                      Vedi →
-                    </a>
+                  <div className="space-y-1 text-sm">
+                    <div className="flex items-center text-gray-600">
+                      <LocationIcon className="h-3 w-3 mr-1" />
+                      {land.location}
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Prezzo:</span>
+                      <span className="font-medium text-green-600">{land.price.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Superficie:</span>
+                      <span className="font-medium">{land.area} m²</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">€/m²:</span>
+                      <span className="font-medium">{land.pricePerSqm.toLocaleString()}</span>
+                    </div>
+                    
+                    {/* Analisi AI se disponibile */}
+                    {searchResults.analysis[index] && (
+                      <div className="mt-2 pt-2 border-t border-gray-100">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-500">ROI:</span>
+                          <span className="font-medium text-blue-600">
+                            {searchResults.analysis[index].estimatedROI.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-500">Rischio:</span>
+                          <span className="font-medium text-orange-600">
+                            {searchResults.analysis[index].riskAssessment}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
+
+            {searchResults.lands.length > 6 && (
+              <div className="mt-4 text-center">
+                <p className="text-sm text-gray-500">
+                  ... e altri {searchResults.lands.length - 6} terreni
+                </p>
+              </div>
+            )}
           </div>
         )}
 
@@ -574,9 +683,14 @@ export default function LandScrapingPage() {
                     <p className="text-sm font-medium text-gray-900">
                       {search.resultsCount} risultati
                     </p>
-                    <p className="text-xs text-gray-500">
-                      {search.date.toLocaleDateString('it-IT')}
-                    </p>
+                    <div className="flex items-center space-x-2">
+                      <p className="text-xs text-gray-500">
+                        {search.date.toLocaleDateString('it-IT')}
+                      </p>
+                      <span className={`text-xs px-2 py-1 rounded ${search.emailSent ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        {search.emailSent ? 'Email ✓' : 'Email ✗'}
+                      </span>
+                    </div>
                   </div>
                 </div>
               ))}
