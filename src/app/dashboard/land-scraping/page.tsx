@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { LandScrapingAgentFactory, LandSearchCriteria, ScrapedLand } from '@/lib/landScrapingAgent';
+import { emailService, EmailConfig } from '@/lib/emailService';
 import { 
   SearchIcon, 
   MailIcon, 
@@ -12,7 +13,10 @@ import {
   CalendarIcon,
   TrendingUpIcon,
   AlertIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  EditIcon,
+  TrashIcon,
+  SettingsIcon
 } from '@/components/icons';
 import toast from 'react-hot-toast';
 
@@ -37,6 +41,78 @@ export default function LandScrapingPage() {
     date: Date;
     resultsCount: number;
   }>>([]);
+  
+  // Nuovi stati per gestione email
+  const [emailConfig, setEmailConfig] = useState<EmailConfig | null>(null);
+  const [showEmailSettings, setShowEmailSettings] = useState(false);
+  const [isLoadingEmail, setIsLoadingEmail] = useState(false);
+
+  // Carica configurazione email all'avvio
+  useEffect(() => {
+    loadEmailConfig();
+  }, []);
+
+  const loadEmailConfig = async () => {
+    if (!email) return;
+    
+    setIsLoadingEmail(true);
+    try {
+      const config = await emailService.getEmailConfig(email);
+      setEmailConfig(config);
+    } catch (error) {
+      console.error('Errore caricamento email config:', error);
+    } finally {
+      setIsLoadingEmail(false);
+    }
+  };
+
+  const handleEmailChange = async (newEmail: string) => {
+    setEmail(newEmail);
+    
+    if (newEmail) {
+      setIsLoadingEmail(true);
+      try {
+        const config = await emailService.getEmailConfig(newEmail);
+        setEmailConfig(config);
+      } catch (error) {
+        console.error('Errore caricamento email config:', error);
+      } finally {
+        setIsLoadingEmail(false);
+      }
+    }
+  };
+
+  const saveEmailConfig = async () => {
+    if (!email) {
+      toast.error('Inserisci un indirizzo email');
+      return;
+    }
+
+    try {
+      const configId = await emailService.saveEmailConfig(email);
+      const config = await emailService.getEmailConfig(email);
+      setEmailConfig(config);
+      toast.success('✅ Email configurata con successo!');
+      setShowEmailSettings(false);
+    } catch (error) {
+      console.error('Errore salvataggio email config:', error);
+      toast.error('❌ Errore nel salvataggio della configurazione email');
+    }
+  };
+
+  const updateEmailConfig = async (updates: Partial<EmailConfig>) => {
+    if (!emailConfig?.id) return;
+
+    try {
+      await emailService.updateEmailConfig(emailConfig.id, updates);
+      const updatedConfig = await emailService.getEmailConfig(email);
+      setEmailConfig(updatedConfig);
+      toast.success('✅ Configurazione aggiornata!');
+    } catch (error) {
+      console.error('Errore aggiornamento email config:', error);
+      toast.error('❌ Errore nell\'aggiornamento della configurazione');
+    }
+  };
 
   const handleSearch = async () => {
     if (!email) {
@@ -65,6 +141,11 @@ export default function LandScrapingPage() {
         date: new Date(),
         resultsCount: mockResults.length
       }, ...prev]);
+
+      // Salva configurazione email se non esiste
+      if (!emailConfig) {
+        await saveEmailConfig();
+      }
 
       toast.success(`✅ Trovati ${mockResults.length} terreni! Email inviata a ${email}`, { id: 'land-search' });
     } catch (error) {
@@ -241,29 +322,121 @@ export default function LandScrapingPage() {
 
           {/* Configurazione Email */}
           <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-              <MailIcon className="h-5 w-5 mr-2 text-green-600" />
-              Notifiche Email
-            </h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                <MailIcon className="h-5 w-5 mr-2 text-green-600" />
+                Notifiche Email
+              </h2>
+              {emailConfig && (
+                <button
+                  onClick={() => setShowEmailSettings(!showEmailSettings)}
+                  className="flex items-center text-sm text-blue-600 hover:text-blue-800"
+                >
+                  <SettingsIcon className="h-4 w-4 mr-1" />
+                  {showEmailSettings ? 'Chiudi' : 'Impostazioni'}
+                </button>
+              )}
+            </div>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Email per notifiche
                 </label>
-                <input
-                  type="email"
-                  placeholder="tuo@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="email"
+                    placeholder="tuo@email.com"
+                    value={email}
+                    onChange={(e) => handleEmailChange(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {isLoadingEmail && (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                  )}
+                  {emailConfig && (
+                    <div className="flex items-center text-green-600">
+                      <CheckCircleIcon className="h-4 w-4 mr-1" />
+                      <span className="text-xs">Configurata</span>
+                    </div>
+                  )}
+                </div>
               </div>
+
+              {/* Impostazioni Email */}
+              {showEmailSettings && emailConfig && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+                  <h3 className="text-sm font-medium text-blue-900">⚙️ Impostazioni Email</h3>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-blue-800 mb-1">
+                      Frequenza notifiche
+                    </label>
+                    <select
+                      value={emailConfig.preferences.frequency}
+                      onChange={(e) => updateEmailConfig({
+                        preferences: { ...emailConfig.preferences, frequency: e.target.value as any }
+                      })}
+                      className="w-full px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    >
+                      <option value="daily">Giornaliera</option>
+                      <option value="weekly">Settimanale</option>
+                      <option value="monthly">Mensile</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-blue-800 mb-1">
+                      Numero massimo risultati
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="20"
+                      value={emailConfig.preferences.maxResults}
+                      onChange={(e) => updateEmailConfig({
+                        preferences: { ...emailConfig.preferences, maxResults: parseInt(e.target.value) }
+                      })}
+                      className="w-full px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={emailConfig.preferences.includeStats}
+                        onChange={(e) => updateEmailConfig({
+                          preferences: { ...emailConfig.preferences, includeStats: e.target.checked }
+                        })}
+                        className="mr-2"
+                      />
+                      <span className="text-sm text-blue-800">Includi statistiche</span>
+                    </label>
+                    
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={emailConfig.preferences.includeContactInfo}
+                        onChange={(e) => updateEmailConfig({
+                          preferences: { ...emailConfig.preferences, includeContactInfo: e.target.checked }
+                        })}
+                        className="mr-2"
+                      />
+                      <span className="text-sm text-blue-800">Includi contatti agenti</span>
+                    </label>
+                  </div>
+
+                  <div className="text-xs text-blue-600">
+                    Configurata il: {emailConfig.createdAt.toLocaleDateString('it-IT')}
+                  </div>
+                </div>
+              )}
 
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h3 className="text-sm font-medium text-blue-900 mb-2">📧 Cosa riceverai via email:</h3>
                 <ul className="text-sm text-blue-800 space-y-1">
-                  <li>• Top 5 migliori opportunità con AI Score</li>
+                  <li>• Top {emailConfig?.preferences.maxResults || 5} migliori opportunità con AI Score</li>
                   <li>• Riepilogo statistiche (prezzo medio, numero terreni)</li>
                   <li>• Link diretti ai dettagli su portali immobiliari</li>
                   <li>• Contatti agenti per sopralluoghi</li>
