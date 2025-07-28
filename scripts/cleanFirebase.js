@@ -25,11 +25,19 @@ const collectionsToClean = [
   'users', 
   'documents',
   'meetings',
-  'tasks'
+  'tasks',
+  // Nuove collezioni Analisi di Fattibilità
+  'feasibilityProjects',
+  'feasibilityComparisons',
+  // Collezioni AI Land Scraping
+  'emailConfigs',
+  'emailLogs',
+  'landSearchResults'
 ];
 
 async function cleanFirebase() {
   console.log('🧹 Iniziando pulizia database Firebase...');
+  console.log('📊 Collezioni da pulire:', collectionsToClean.join(', '));
   
   try {
     for (const collectionName of collectionsToClean) {
@@ -63,7 +71,11 @@ async function cleanFirebase() {
     }
     
     console.log('\n🎉 Pulizia database completata con successo!');
-    console.log('📝 Il database è ora pulito e pronto per dati reali');
+    console.log('📝 Il database è ora pulito e pronto per testare le nuove funzionalità:');
+    console.log('   • Analisi di Fattibilità');
+    console.log('   • AI Land Scraping');
+    console.log('   • Email Service');
+    console.log('   • Confronti tra Progetti');
     
   } catch (error) {
     console.error('❌ Errore durante la pulizia:', error);
