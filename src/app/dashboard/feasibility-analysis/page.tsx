@@ -70,110 +70,147 @@ export default function FeasibilityAnalysisPage() {
     setAnalyzing(true);
     setLoading(true);
 
-    // Simula analisi AI
-    setTimeout(() => {
+    try {
+      // Calcoli reali di fattibilità
       const totalInvestment = formData.acquisitionCost + formData.constructionCost + formData.additionalCosts;
       const totalRevenue = formData.buildingArea * formData.sellingPricePerSqm;
       const netProfit = totalRevenue - totalInvestment;
-      const roi = ((netProfit / totalInvestment) * 100);
+      const roi = totalInvestment > 0 ? ((netProfit / totalInvestment) * 100) : 0;
       
-      // Calcoli simulati per NPV e IRR
-      const discountRate = 0.08;
-      const npv = netProfit / Math.pow(1 + discountRate, formData.constructionTimeMonths / 12);
-      const irr = roi > 0 ? 12 + (roi * 0.3) : 5;
+      // Calcoli NPV e IRR
+      const discountRate = 0.08; // 8% tasso di sconto
+      const totalTimeYears = (formData.constructionTimeMonths + formData.sellingTimeMonths) / 12;
+      const npv = netProfit / Math.pow(1 + discountRate, totalTimeYears);
       
-      const paybackPeriod = totalInvestment / (netProfit / (formData.constructionTimeMonths + formData.sellingTimeMonths));
+      // IRR semplificato
+      const irr = roi > 0 ? Math.min(roi * 0.8, 25) : 0;
       
-      // Risk score basato su diversi fattori
+      // Payback period
+      const paybackPeriod = totalInvestment > 0 ? totalInvestment / (netProfit / totalTimeYears) : 0;
+      
+      // Risk score basato su fattori reali
       let riskScore = 50;
-      if (roi > 20) riskScore -= 10;
-      if (roi < 10) riskScore += 15;
+      
+      // Fattori di rischio
+      if (roi > 25) riskScore -= 15;
+      else if (roi > 15) riskScore -= 10;
+      else if (roi < 5) riskScore += 20;
+      
       if (formData.projectType === 'COMMERCIALE') riskScore += 5;
-      if (formData.constructionTimeMonths > 36) riskScore += 10;
+      if (formData.projectType === 'INDUSTRIALE') riskScore += 10;
+      
+      if (formData.constructionTimeMonths > 36) riskScore += 15;
+      if (formData.constructionTimeMonths < 12) riskScore -= 5;
+      
+      if (totalInvestment > 10000000) riskScore += 10;
+      if (totalInvestment < 1000000) riskScore -= 5;
+      
       riskScore = Math.max(0, Math.min(100, riskScore));
 
-      const mockResults: FeasibilityResults = {
+      // Scenari
+      const optimistic = {
+        roi: roi * 1.3,
+        npv: npv * 1.2,
+        netProfit: netProfit * 1.25
+      };
+      
+      const realistic = {
+        roi: roi,
+        npv: npv,
+        netProfit: netProfit
+      };
+      
+      const pessimistic = {
+        roi: roi * 0.7,
+        npv: npv * 0.8,
+        netProfit: netProfit * 0.75
+      };
+
+      // Raccomandazioni basate sui risultati
+      const recommendations: string[] = [];
+      
+      if (roi < 10) {
+        recommendations.push('ROI basso: considerare rinegoziazione prezzi o ottimizzazione costi');
+      }
+      if (riskScore > 70) {
+        recommendations.push('Rischio elevato: valutare strategie di mitigazione');
+      }
+      if (paybackPeriod > 5) {
+        recommendations.push('Tempo di ritorno lungo: considerare finanziamenti a lungo termine');
+      }
+      if (formData.constructionTimeMonths > 36) {
+        recommendations.push('Tempi di costruzione elevati: valutare accelerazione lavori');
+      }
+      if (recommendations.length === 0) {
+        recommendations.push('Progetto finanziariamente sostenibile');
+      }
+
+      const calculatedResults: FeasibilityResults = {
         totalInvestment,
         totalRevenue,
         netProfit,
         roi,
         npv,
         irr,
-        paybackPeriod: paybackPeriod / 12, // in anni
+        paybackPeriod,
         riskScore,
-        recommendations: [
-          roi > 15 ? '✅ Progetto altamente redditizio' : roi > 8 ? '⚠️ Redditività moderata' : '❌ Bassa redditività',
-          riskScore < 40 ? '✅ Rischio contenuto' : riskScore < 70 ? '⚠️ Rischio medio' : '❌ Rischio elevato',
-          formData.constructionTimeMonths > 30 ? '⚠️ Tempi di realizzazione lunghi' : '✅ Tempi ragionevoli',
-          npv > 0 ? '✅ Valore attuale netto positivo' : '❌ VAN negativo - valutare alternative'
-        ],
+        recommendations,
         scenarios: {
-          optimistic: {
-            roi: roi * 1.3,
-            npv: npv * 1.4,
-            netProfit: netProfit * 1.35
-          },
-          realistic: {
-            roi,
-            npv,
-            netProfit
-          },
-          pessimistic: {
-            roi: roi * 0.65,
-            npv: npv * 0.55,
-            netProfit: netProfit * 0.6
-          }
+          optimistic,
+          realistic,
+          pessimistic
         }
       };
 
-      setResults(mockResults);
-      setAnalyzing(false);
+      setResults(calculatedResults);
+    } catch (error) {
+      console.error('Errore nel calcolo della fattibilità:', error);
+    } finally {
       setLoading(false);
-    }, 3000);
+      setAnalyzing(false);
+    }
   };
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('it-IT', { 
       style: 'currency', 
       currency: 'EUR',
-      minimumFractionDigits: 0 
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
     }).format(value);
   };
 
   const formatPercentage = (value: number) => {
-    return `${value.toFixed(2)}%`;
+    return `${value.toFixed(1)}%`;
   };
 
   const getRiskColor = (score: number) => {
-    if (score < 40) return 'text-green-600 bg-green-50';
-    if (score < 70) return 'text-yellow-600 bg-yellow-50';
-    return 'text-red-600 bg-red-50';
+    if (score <= 30) return 'text-success';
+    if (score <= 60) return 'text-warning';
+    return 'text-error';
   };
 
   const getROIColor = (roi: number) => {
-    if (roi > 15) return 'text-green-600';
-    if (roi > 8) return 'text-yellow-600';
-    return 'text-red-600';
+    if (roi >= 20) return 'text-success';
+    if (roi >= 10) return 'text-warning';
+    return 'text-error';
   };
 
   return (
-    <DashboardLayout title="Analisi Fattibilità">
+    <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Analisi di Fattibilità AI</h1>
-            <p className="text-gray-600">Valutazione economica intelligente con scenari multipli</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <BuildingIcon className="h-8 w-8 text-blue-600" />
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold text-neutral-900">Analisi di Fattibilità</h1>
+          <p className="text-neutral-600 mt-1">
+            Valutazione finanziaria e di rischio dei progetti immobiliari
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Form Input */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Parametri del Progetto</h3>
+          <div className="bg-white shadow-sm rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-neutral-900 mb-4">Dati Progetto</h2>
             
             <div className="space-y-4">
               <FormInput
@@ -181,26 +218,26 @@ export default function FeasibilityAnalysisPage() {
                 name="projectName"
                 value={formData.projectName}
                 onChange={handleInputChange}
-                placeholder="Es. Residenza Marina"
-                required
+                placeholder="Es. Residenza Milano Centro"
               />
-
+              
               <FormInput
                 label="Località"
                 name="location"
                 value={formData.location}
                 onChange={handleInputChange}
-                placeholder="Es. Milano, Zona Porta Nuova"
-                required
+                placeholder="Es. Milano, Lombardia"
               />
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tipologia Progetto</label>
+              
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-medium">Tipo Progetto</span>
+                </label>
                 <select
                   name="projectType"
                   value={formData.projectType}
                   onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="select select-bordered w-full"
                 >
                   <option value="RESIDENZIALE">Residenziale</option>
                   <option value="COMMERCIALE">Commerciale</option>
@@ -208,8 +245,8 @@ export default function FeasibilityAnalysisPage() {
                   <option value="INDUSTRIALE">Industriale</option>
                 </select>
               </div>
-
-              <div className="grid grid-cols-2 gap-3">
+              
+              <div className="grid grid-cols-2 gap-4">
                 <FormInput
                   label="Superficie Totale (m²)"
                   name="totalArea"
@@ -228,8 +265,8 @@ export default function FeasibilityAnalysisPage() {
                   placeholder="800"
                 />
               </div>
-
-              <div className="grid grid-cols-2 gap-3">
+              
+              <div className="grid grid-cols-2 gap-4">
                 <FormInput
                   label="Costo Acquisizione (€)"
                   name="acquisitionCost"
@@ -245,40 +282,40 @@ export default function FeasibilityAnalysisPage() {
                   type="number"
                   value={formData.constructionCost}
                   onChange={handleInputChange}
-                  placeholder="800000"
+                  placeholder="1200000"
                 />
               </div>
-
+              
               <FormInput
                 label="Costi Aggiuntivi (€)"
                 name="additionalCosts"
                 type="number"
                 value={formData.additionalCosts}
                 onChange={handleInputChange}
-                placeholder="200000"
+                placeholder="100000"
               />
-
-              <div className="grid grid-cols-2 gap-3">
+              
+              <div className="grid grid-cols-2 gap-4">
                 <FormInput
-                  label="Prezzo Vendita al m² (€)"
+                  label="Prezzo Vendita (€/m²)"
                   name="sellingPricePerSqm"
                   type="number"
                   value={formData.sellingPricePerSqm}
                   onChange={handleInputChange}
-                  placeholder="3500"
+                  placeholder="3000"
                 />
                 
                 <FormInput
-                  label="Canone Affitto al m² (€/anno)"
+                  label="Prezzo Affitto (€/m²)"
                   name="rentPricePerSqm"
                   type="number"
                   value={formData.rentPricePerSqm}
                   onChange={handleInputChange}
-                  placeholder="200"
+                  placeholder="15"
                 />
               </div>
-
-              <div className="grid grid-cols-2 gap-3">
+              
+              <div className="grid grid-cols-2 gap-4">
                 <FormInput
                   label="Tempo Costruzione (mesi)"
                   name="constructionTimeMonths"
@@ -297,137 +334,126 @@ export default function FeasibilityAnalysisPage() {
                   placeholder="12"
                 />
               </div>
-
+              
               <Button
                 variant="primary"
                 fullWidth
-                size="lg"
                 isLoading={analyzing}
                 onClick={calculateFeasibility}
-                className="mt-6"
+                disabled={!formData.projectName || !formData.location}
               >
-                {analyzing ? 'AI sta analizzando...' : 'Analizza Fattibilità con AI'}
+                {analyzing ? 'Analizzando...' : 'Calcola Fattibilità'}
               </Button>
             </div>
           </div>
 
           {/* Results */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Risultati Analisi</h3>
+          <div className="bg-white shadow-sm rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-neutral-900 mb-4">Risultati Analisi</h2>
             
-            {loading && (
-              <div className="flex items-center justify-center py-12">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600">L'AI sta elaborando l'analisi...</p>
-                </div>
+            {loading ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="loading loading-spinner loading-lg"></div>
               </div>
-            )}
-
-            {!loading && !results && (
-              <div className="flex items-center justify-center py-12">
-                <div className="text-center text-gray-500">
-                  <BuildingIcon className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                  <p>Inserisci i parametri e avvia l'analisi</p>
-                </div>
-              </div>
-            )}
-
-            {results && (
+            ) : results ? (
               <div className="space-y-6">
-                {/* KPI Cards */}
+                {/* Key Metrics */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <div className="text-sm text-blue-600 mb-1">ROI</div>
-                    <div className={`text-2xl font-bold ${getROIColor(results.roi)}`}>
+                  <div className="stat bg-base-100 rounded-lg p-4">
+                    <div className="stat-title text-neutral-500">ROI</div>
+                    <div className={`stat-value text-2xl ${getROIColor(results.roi)}`}>
                       {formatPercentage(results.roi)}
                     </div>
                   </div>
                   
-                  <div className="p-4 bg-green-50 rounded-lg">
-                    <div className="text-sm text-green-600 mb-1">VAN</div>
-                    <div className="text-2xl font-bold text-green-800">
-                      {formatCurrency(results.npv)}
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 bg-purple-50 rounded-lg">
-                    <div className="text-sm text-purple-600 mb-1">TIR</div>
-                    <div className="text-2xl font-bold text-purple-800">
-                      {formatPercentage(results.irr)}
-                    </div>
-                  </div>
-                  
-                  <div className={`p-4 rounded-lg ${getRiskColor(results.riskScore)}`}>
-                    <div className="text-sm mb-1">Rischio</div>
-                    <div className="text-2xl font-bold">
+                  <div className="stat bg-base-100 rounded-lg p-4">
+                    <div className="stat-title text-neutral-500">Rischio</div>
+                    <div className={`stat-value text-2xl ${getRiskColor(results.riskScore)}`}>
                       {results.riskScore}/100
                     </div>
                   </div>
                 </div>
-
+                
                 {/* Financial Summary */}
-                <div className="border-t pt-4">
-                  <h4 className="font-semibold text-gray-900 mb-3">Riepilogo Finanziario</h4>
-                  <div className="space-y-2 text-sm">
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-neutral-900">Riepilogo Finanziario</h3>
+                  
+                  <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Investimento Totale:</span>
+                      <span className="text-neutral-600">Investimento Totale:</span>
                       <span className="font-medium">{formatCurrency(results.totalInvestment)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Ricavi Previsti:</span>
+                      <span className="text-neutral-600">Ricavi Totali:</span>
                       <span className="font-medium">{formatCurrency(results.totalRevenue)}</span>
                     </div>
-                    <div className="flex justify-between border-t pt-2">
-                      <span className="text-gray-900 font-semibold">Utile Netto:</span>
-                      <span className={`font-bold ${results.netProfit > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <div className="flex justify-between">
+                      <span className="text-neutral-600">Utile Netto:</span>
+                      <span className={`font-medium ${results.netProfit >= 0 ? 'text-success' : 'text-error'}`}>
                         {formatCurrency(results.netProfit)}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Payback Period:</span>
+                      <span className="text-neutral-600">NPV:</span>
+                      <span className={`font-medium ${results.npv >= 0 ? 'text-success' : 'text-error'}`}>
+                        {formatCurrency(results.npv)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-neutral-600">IRR:</span>
+                      <span className="font-medium">{formatPercentage(results.irr)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-neutral-600">Payback Period:</span>
                       <span className="font-medium">{results.paybackPeriod.toFixed(1)} anni</span>
                     </div>
                   </div>
                 </div>
-
-                {/* AI Recommendations */}
-                <div className="border-t pt-4">
-                  <h4 className="font-semibold text-gray-900 mb-3">Raccomandazioni AI</h4>
+                
+                {/* Scenarios */}
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-neutral-900">Scenari</h3>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between p-2 bg-success/10 rounded">
+                      <span className="text-success font-medium">Ottimistico</span>
+                      <span className="text-success font-medium">{formatPercentage(results.scenarios.optimistic.roi)}</span>
+                    </div>
+                    <div className="flex justify-between p-2 bg-base-200 rounded">
+                      <span className="font-medium">Realistico</span>
+                      <span className="font-medium">{formatPercentage(results.scenarios.realistic.roi)}</span>
+                    </div>
+                    <div className="flex justify-between p-2 bg-error/10 rounded">
+                      <span className="text-error font-medium">Pessimistico</span>
+                      <span className="text-error font-medium">{formatPercentage(results.scenarios.pessimistic.roi)}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Recommendations */}
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-neutral-900">Raccomandazioni</h3>
+                  
                   <div className="space-y-2">
                     {results.recommendations.map((rec, index) => (
-                      <div key={index} className="text-sm p-2 bg-gray-50 rounded">
-                        {rec}
+                      <div key={index} className="alert alert-info">
+                        <span className="text-sm">{rec}</span>
                       </div>
                     ))}
                   </div>
                 </div>
-
-                {/* Scenarios */}
-                <div className="border-t pt-4">
-                  <h4 className="font-semibold text-gray-900 mb-3">Scenari di Analisi</h4>
-                  <div className="space-y-3">
-                    {Object.entries(results.scenarios).map(([scenario, data]) => (
-                      <div key={scenario} className="p-3 border rounded-lg">
-                        <div className="font-medium text-gray-900 capitalize mb-2">{scenario}</div>
-                        <div className="grid grid-cols-3 gap-3 text-sm">
-                          <div>
-                            <div className="text-gray-500">ROI</div>
-                            <div className="font-semibold">{formatPercentage(data.roi)}</div>
-                          </div>
-                          <div>
-                            <div className="text-gray-500">VAN</div>
-                            <div className="font-semibold">{formatCurrency(data.npv)}</div>
-                          </div>
-                          <div>
-                            <div className="text-gray-500">Utile</div>
-                            <div className="font-semibold">{formatCurrency(data.netProfit)}</div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="text-neutral-400 mb-4">
+                  <BuildingIcon className="h-16 w-16 mx-auto" />
                 </div>
+                <h3 className="text-lg font-medium text-neutral-700 mb-2">
+                  Inserisci i dati del progetto
+                </h3>
+                <p className="text-neutral-500">
+                  Compila il form per calcolare la fattibilità del progetto
+                </p>
               </div>
             )}
           </div>
