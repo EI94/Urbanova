@@ -19,8 +19,10 @@ export class RealEmailService {
 
   constructor() {
     // Inizializza Resend solo se l'API key è configurata
-    const apiKey = process.env.RESEND_API_KEY;
-    if (apiKey) {
+    const apiKey = process.env.RESEND_API_KEY || process.env.NEXT_PUBLIC_RESEND_API_KEY;
+    console.log('🔧 [RealEmailService] Verifica configurazione Resend...');
+    
+    if (apiKey && apiKey !== 'undefined' && apiKey !== '') {
       try {
         this.resend = new Resend(apiKey);
         this.isConfigured = true;
@@ -30,7 +32,7 @@ export class RealEmailService {
         this.isConfigured = false;
       }
     } else {
-      console.warn('⚠️ [RealEmailService] RESEND_API_KEY non configurata - modalità simulazione');
+      console.log('ℹ️ [RealEmailService] RESEND_API_KEY non configurata - modalità simulazione attiva');
       this.isConfigured = false;
     }
   }

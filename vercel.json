@@ -2,6 +2,7 @@
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "installCommand": "npm install",
+  "outputDirectory": ".next",
   "functions": {
     "src/app/api/web-scraper/route.ts": {
       "maxDuration": 30
@@ -15,5 +16,11 @@
     "src/app/api/market-data/route.ts": {
       "maxDuration": 45
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
+  ]
 }

@@ -45,8 +45,10 @@ export class RealAIService {
 
   constructor() {
     // Inizializza OpenAI solo se l'API key è configurata
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (apiKey) {
+    const apiKey = process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+    console.log('🔧 [RealAIService] Verifica configurazione OpenAI...');
+    
+    if (apiKey && apiKey !== 'undefined' && apiKey !== '') {
       try {
         this.openai = new OpenAI({
           apiKey: apiKey,
@@ -58,7 +60,7 @@ export class RealAIService {
         this.isConfigured = false;
       }
     } else {
-      console.warn('⚠️ [RealAIService] OPENAI_API_KEY non configurata - modalità fallback');
+      console.log('ℹ️ [RealAIService] OPENAI_API_KEY non configurata - modalità fallback attiva');
       this.isConfigured = false;
     }
   }
