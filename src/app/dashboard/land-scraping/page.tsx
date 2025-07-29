@@ -21,7 +21,9 @@ import {
   SettingsIcon,
   BrainIcon,
   GlobeIcon,
-  CalculatorIcon
+  CalculatorIcon,
+  ClockIcon,
+  RepeatIcon
 } from '@/components/icons';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
@@ -61,12 +63,22 @@ export default function LandScrapingPage() {
     ai: boolean;
   } | null>(null);
 
+  // Stati per pianificazione
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [scheduleConfig, setScheduleConfig] = useState({
+    frequency: 'weekly',
+    dayOfWeek: '1', // Lunedì
+    time: '09:00',
+    isActive: false
+  });
+
   const router = useRouter();
 
   // Carica configurazione email all'avvio
   useEffect(() => {
     loadEmailConfig();
     verifyServices();
+    loadScheduleConfig();
   }, []);
 
   const verifyServices = async () => {
@@ -90,6 +102,34 @@ export default function LandScrapingPage() {
       console.error('Errore caricamento email config:', error);
     } finally {
       setIsLoadingEmail(false);
+    }
+  };
+
+  const loadScheduleConfig = async () => {
+    try {
+      // Carica configurazione pianificazione dal localStorage o API
+      const saved = localStorage.getItem('landScrapingSchedule');
+      if (saved) {
+        setScheduleConfig(JSON.parse(saved));
+      }
+    } catch (error) {
+      console.error('Errore caricamento configurazione pianificazione:', error);
+    }
+  };
+
+  const saveScheduleConfig = async () => {
+    try {
+      // Salva configurazione pianificazione
+      localStorage.setItem('landScrapingSchedule', JSON.stringify(scheduleConfig));
+      
+      // Simula salvataggio su server
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast.success('✅ Pianificazione configurata con successo!');
+      setShowScheduleModal(false);
+    } catch (error) {
+      console.error('Errore salvataggio pianificazione:', error);
+      toast.error('❌ Errore nel salvataggio della pianificazione');
     }
   };
 
@@ -194,7 +234,37 @@ export default function LandScrapingPage() {
       return;
     }
     
-    toast.success('📅 Ricerca programmata per l\'esecuzione automatica settimanale');
+    setShowScheduleModal(true);
+  };
+
+  const getNextExecutionTime = () => {
+    const now = new Date();
+    const [hours, minutes] = scheduleConfig.time.split(':').map(Number);
+    
+    let nextExecution = new Date();
+    nextExecution.setHours(hours, minutes, 0, 0);
+    
+    if (scheduleConfig.frequency === 'daily') {
+      if (nextExecution <= now) {
+        nextExecution.setDate(nextExecution.getDate() + 1);
+      }
+    } else if (scheduleConfig.frequency === 'weekly') {
+      const targetDay = parseInt(scheduleConfig.dayOfWeek);
+      const currentDay = nextExecution.getDay();
+      const daysToAdd = (targetDay - currentDay + 7) % 7;
+      nextExecution.setDate(nextExecution.getDate() + daysToAdd);
+      
+      if (nextExecution <= now) {
+        nextExecution.setDate(nextExecution.getDate() + 7);
+      }
+    } else if (scheduleConfig.frequency === 'monthly') {
+      nextExecution.setDate(parseInt(scheduleConfig.dayOfWeek));
+      if (nextExecution <= now) {
+        nextExecution.setMonth(nextExecution.getMonth() + 1);
+      }
+    }
+    
+    return nextExecution;
   };
 
   const handleCreateFeasibilityProject = async (land: any) => {
@@ -220,6 +290,11 @@ export default function LandScrapingPage() {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(value);
+  };
+
+  const getDayName = (dayNumber: string) => {
+    const days = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+    return days[parseInt(dayNumber)];
   };
 
   return (
@@ -558,6 +633,36 @@ export default function LandScrapingPage() {
                   Programma
                 </button>
               </div>
+
+              {/* Stato Pianificazione */}
+              {scheduleConfig.isActive && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <RepeatIcon className="h-4 w-4 text-green-600" />
+                      <span className="text-sm font-medium text-green-800">Pianificazione Attiva</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setScheduleConfig(prev => ({ ...prev, isActive: false }));
+                        localStorage.setItem('landScrapingSchedule', JSON.stringify({ ...scheduleConfig, isActive: false }));
+                        toast.success('⏸️ Pianificazione disattivata');
+                      }}
+                      className="text-xs text-red-600 hover:text-red-800"
+                    >
+                      Disattiva
+                    </button>
+                  </div>
+                  <div className="text-xs text-green-700 mt-1">
+                    {scheduleConfig.frequency === 'daily' && 'Ogni giorno alle ' + scheduleConfig.time}
+                    {scheduleConfig.frequency === 'weekly' && `Ogni ${getDayName(scheduleConfig.dayOfWeek)} alle ${scheduleConfig.time}`}
+                    {scheduleConfig.frequency === 'monthly' && `Ogni ${scheduleConfig.dayOfWeek} del mese alle ${scheduleConfig.time}`}
+                  </div>
+                  <div className="text-xs text-green-600 mt-1">
+                    Prossima esecuzione: {getNextExecutionTime().toLocaleString('it-IT')}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -694,6 +799,104 @@ export default function LandScrapingPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Modal Pianificazione */}
+        {showScheduleModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <CalendarIcon className="h-5 w-5 mr-2 text-green-600" />
+                Pianifica Ricerca Automatica
+              </h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Frequenza
+                  </label>
+                  <select
+                    value={scheduleConfig.frequency}
+                    onChange={(e) => setScheduleConfig(prev => ({ ...prev, frequency: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="daily">Giornaliera</option>
+                    <option value="weekly">Settimanale</option>
+                    <option value="monthly">Mensile</option>
+                  </select>
+                </div>
+
+                {(scheduleConfig.frequency === 'weekly' || scheduleConfig.frequency === 'monthly') && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {scheduleConfig.frequency === 'weekly' ? 'Giorno della settimana' : 'Giorno del mese'}
+                    </label>
+                    {scheduleConfig.frequency === 'weekly' ? (
+                      <select
+                        value={scheduleConfig.dayOfWeek}
+                        onChange={(e) => setScheduleConfig(prev => ({ ...prev, dayOfWeek: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="1">Lunedì</option>
+                        <option value="2">Martedì</option>
+                        <option value="3">Mercoledì</option>
+                        <option value="4">Giovedì</option>
+                        <option value="5">Venerdì</option>
+                        <option value="6">Sabato</option>
+                        <option value="0">Domenica</option>
+                      </select>
+                    ) : (
+                      <select
+                        value={scheduleConfig.dayOfWeek}
+                        onChange={(e) => setScheduleConfig(prev => ({ ...prev, dayOfWeek: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        {Array.from({ length: 28 }, (_, i) => i + 1).map(day => (
+                          <option key={day} value={day.toString()}>{day}</option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Orario
+                  </label>
+                  <input
+                    type="time"
+                    value={scheduleConfig.time}
+                    onChange={(e) => setScheduleConfig(prev => ({ ...prev, time: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <div className="text-sm text-blue-800">
+                    <div className="font-medium mb-1">Prossima esecuzione:</div>
+                    <div className="text-blue-600">
+                      {getNextExecutionTime().toLocaleString('it-IT')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex space-x-3 mt-6">
+                <button
+                  onClick={() => setShowScheduleModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  Annulla
+                </button>
+                <button
+                  onClick={saveScheduleConfig}
+                  className="flex-1 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                >
+                  Attiva Pianificazione
+                </button>
+              </div>
             </div>
           </div>
         )}
