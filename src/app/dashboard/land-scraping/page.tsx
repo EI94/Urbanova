@@ -211,9 +211,51 @@ export default function LandScrapingPage() {
     toast.loading('🔍 Ricerca terreni in corso...', { id: 'land-search' });
 
     try {
-      // Usa l'agente reale invece del mock
-      const result = await realLandScrapingAgent.runAutomatedSearch(searchCriteria, email);
-      setSearchResults(result);
+      // Usa l'API route invece di chiamare direttamente l'agente
+      const response = await fetch('/api/land-scraping', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          location: searchCriteria.location || 'Roma',
+          criteria: {
+            minPrice: searchCriteria.priceRange[0],
+            maxPrice: searchCriteria.priceRange[1],
+            minArea: searchCriteria.areaRange[0],
+            maxArea: searchCriteria.areaRange[1],
+            propertyType: searchCriteria.zoning.length > 0 ? searchCriteria.zoning[0] : 'residenziale'
+          },
+          aiAnalysis: true,
+          email: email
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Errore sconosciuto');
+      }
+
+      // Crea un risultato compatibile con l'interfaccia esistente
+      const formattedResult = {
+        lands: result.data.lands || [],
+        analysis: result.data.analysis || [],
+        emailSent: result.data.emailSent || false,
+        summary: result.data.summary || {
+          totalFound: 0,
+          averagePrice: 0,
+          bestOpportunities: [],
+          marketTrends: 'Nessun dato disponibile',
+          recommendations: []
+        }
+      };
+
+      setSearchResults(formattedResult);
       
       // Aggiungi alla cronologia
       setSearchHistory(prev => [{
@@ -221,8 +263,8 @@ export default function LandScrapingPage() {
         criteria: { ...searchCriteria },
         email,
         date: new Date(),
-        resultsCount: result.lands.length,
-        emailSent: result.emailSent
+        resultsCount: formattedResult.lands.length,
+        emailSent: formattedResult.emailSent
       }, ...prev]);
 
       // Salva configurazione email se non esiste
@@ -230,10 +272,10 @@ export default function LandScrapingPage() {
         await saveEmailConfig();
       }
 
-      if (result.emailSent) {
-        toast.success(`✅ Trovati ${result.lands.length} terreni! Email inviata a ${email}`, { id: 'land-search' });
+      if (formattedResult.emailSent) {
+        toast.success(`✅ Trovati ${formattedResult.lands.length} terreni! Email inviata a ${email}`, { id: 'land-search' });
       } else {
-        toast.success(`✅ Trovati ${result.lands.length} terreni! (Email non inviata)`, { id: 'land-search' });
+        toast.success(`✅ Trovati ${formattedResult.lands.length} terreni! (Email non inviata)`, { id: 'land-search' });
       }
     } catch (error) {
       console.error('Errore nella ricerca:', error);

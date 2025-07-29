@@ -4,21 +4,36 @@ import { realLandScrapingAgent } from '@/lib/realLandScrapingAgent';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { location, criteria, aiAnalysis } = body;
+    const { location, criteria, aiAnalysis, email } = body;
 
-    console.log('🤖 API Land Scraping Agent: Avvio analisi per', location);
+    console.log('🤖 API Land Scraping Agent: Avvio ricerca per', location, 'email:', email);
 
-    // Esegui l'analisi AI
-    const results = await realLandScrapingAgent.analyzeLocation({
-      location: location || 'Italia',
-      criteria: criteria || {},
-      enableAIAnalysis: aiAnalysis !== false
-    });
+    if (!email) {
+      return NextResponse.json({
+        success: false,
+        error: 'Email richiesta per la ricerca'
+      }, { status: 400 });
+    }
+
+    // Converti i criteri nel formato corretto per l'agente
+    const searchCriteria = {
+      location: location || 'Roma',
+      priceRange: [criteria?.minPrice || 0, criteria?.maxPrice || 1000000],
+      areaRange: [criteria?.minArea || 500, criteria?.maxArea || 10000],
+      zoning: criteria?.propertyType ? [criteria.propertyType] : ['residenziale'],
+      buildingRights: true,
+      infrastructure: [],
+      keywords: []
+    };
+
+    // Esegui la ricerca automatizzata
+    const results = await realLandScrapingAgent.runAutomatedSearch(searchCriteria, email);
 
     return NextResponse.json({
       success: true,
       data: results,
       location,
+      email,
       timestamp: new Date().toISOString()
     });
 
@@ -27,7 +42,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: 'Errore durante l\'analisi AI',
+      error: 'Errore durante la ricerca dei terreni',
       message: error instanceof Error ? error.message : 'Errore sconosciuto'
     }, { status: 500 });
   }
@@ -35,9 +50,9 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({
-    message: 'Land Scraping Agent API - Utilizza POST per l\'analisi AI',
+    message: 'Land Scraping Agent API - Utilizza POST per la ricerca automatizzata',
     endpoints: {
-      POST: '/api/land-scraping - Esegue analisi AI dei terreni'
+      POST: '/api/land-scraping - Esegue ricerca automatizzata dei terreni'
     }
   });
 }
