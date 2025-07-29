@@ -212,7 +212,7 @@ export default function LandScrapingPage() {
 
     try {
       // Usa l'API route invece di chiamare direttamente l'agente
-      const response = await fetch('/api/land-scraping', {
+      const response = await fetch('/api/land-search', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -226,7 +226,6 @@ export default function LandScrapingPage() {
             maxArea: searchCriteria.areaRange[1],
             propertyType: searchCriteria.zoning.length > 0 ? searchCriteria.zoning[0] : 'residenziale'
           },
-          aiAnalysis: true,
           email: email
         })
       });
