@@ -16,16 +16,5 @@
     "src/app/api/market-data/route.ts": {
       "maxDuration": 45
     }
-  },
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate"
-        }
-      ]
-    }
-  ]
+  }
 }
