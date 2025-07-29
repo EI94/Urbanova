@@ -126,6 +126,16 @@ export default function NewFeasibilityProjectPage() {
     setTimeout(() => recalculateAll(), 100);
   };
 
+  const handleFinancingChange = (field: string, value: any) => {
+    setFinancingData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    
+    // Ricalcola automaticamente per aggiornare assicurazioni
+    setTimeout(() => recalculateAll(), 100);
+  };
+
   const recalculateAll = () => {
     const costs = feasibilityService.calculateCosts(project);
     
@@ -231,6 +241,21 @@ export default function NewFeasibilityProjectPage() {
     if (margin >= targetMargin) return 'text-success';
     if (margin >= targetMargin * 0.8) return 'text-warning';
     return 'text-error';
+  };
+
+  const calculateMonthlyPayment = () => {
+    const P = financingData.loanAmount;
+    const r = financingData.interestRate / 100 / 12; // Tasso mensile
+    const n = financingData.loanTermYears * 12; // Numero di pagamenti
+
+    if (r === 0) return P / n; // Pagamento rateale se tasso 0
+    return P * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+  };
+
+  const calculateTotalInterest = () => {
+    const monthlyPayment = calculateMonthlyPayment();
+    const totalPayments = monthlyPayment * financingData.loanTermYears * 12;
+    return totalPayments - financingData.loanAmount;
   };
 
   return (
@@ -586,9 +611,70 @@ export default function NewFeasibilityProjectPage() {
                   </div>
                 </div>
 
+                {/* Strategia di Finanziamento */}
+                <div>
+                  <h3 className="font-medium text-gray-900 mb-3 flex items-center">
+                    <BankIcon className="h-4 w-4 mr-2 text-blue-600" />
+                    Strategia di Finanziamento
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="label">
+                        <span className="label-text">Importo Prestito (€)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={financingData.loanAmount || ''}
+                        onChange={(e) => handleFinancingChange('loanAmount', handleNumberInput(e))}
+                        className="input input-bordered w-full"
+                        placeholder="Inserisci importo"
+                      />
+                    </div>
+                    <div>
+                      <label className="label">
+                        <span className="label-text">Tasso di Interesse (%)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={financingData.interestRate || ''}
+                        onChange={(e) => handleFinancingChange('interestRate', handleNumberInput(e))}
+                        className="input input-bordered w-full"
+                        placeholder="Inserisci tasso"
+                      />
+                    </div>
+                    <div>
+                      <label className="label">
+                        <span className="label-text">Durata (anni)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={financingData.loanTermYears || ''}
+                        onChange={(e) => handleFinancingChange('loanTermYears', handleNumberInput(e))}
+                        className="input input-bordered w-full"
+                        placeholder="Inserisci anni"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Calcolo Rate Mensili */}
+                  {financingData.loanAmount > 0 && (
+                    <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                      <div className="text-sm text-blue-800">
+                        <div className="font-medium mb-1">Calcolo Rate:</div>
+                        <div className="text-blue-600">
+                          Rata mensile: {formatCurrency(calculateMonthlyPayment())}
+                        </div>
+                        <div className="text-blue-600">
+                          Totale interessi: {formatCurrency(calculateTotalInterest())}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {/* Altri Costi */}
                 <div>
-                  <h3 className="font-medium text-gray-900 mb-3">4. Altri Costi</h3>
+                  <h3 className="font-medium text-gray-900 mb-3">5. Altri Costi</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label className="label">

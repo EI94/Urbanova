@@ -210,12 +210,14 @@ export default function FeasibilityAnalysisPage() {
               <p className="text-gray-500 mb-4">
                 Crea il tuo primo progetto di fattibilità per iniziare
               </p>
-              <Link href="/dashboard/feasibility-analysis/new">
-                <button className="btn btn-primary">
-                  <PlusIcon className="h-4 w-4 mr-2" />
-                  Crea Primo Progetto
-                </button>
-              </Link>
+              <div className="flex justify-center">
+                <Link href="/dashboard/feasibility-analysis/new">
+                  <button className="btn btn-primary">
+                    <PlusIcon className="h-4 w-4 mr-2" />
+                    Crea Primo Progetto
+                  </button>
+                </Link>
+              </div>
             </div>
           ) : (
             <div className="space-y-4">
