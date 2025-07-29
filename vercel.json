@@ -1,7 +1,6 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
   "framework": "nextjs",
+  "buildCommand": "npm run build",
   "installCommand": "npm install",
   "functions": {
     "src/app/api/web-scraper/route.ts": {
@@ -13,14 +12,5 @@
     "src/app/api/cleanup/route.ts": {
       "maxDuration": 120
     }
-  },
-  "env": {
-    "NODE_ENV": "production"
-  },
-  "build": {
-    "env": {
-      "NODE_ENV": "production"
-    }
-  },
-  "ignoreCommand": "echo 'Build completato'"
+  }
 }

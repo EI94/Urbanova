@@ -1,6 +1,5 @@
 # File da ignorare per il deploy Vercel
 tsconfig.json.backup
-src/types/global.d.ts
 *.log
 .env.local
 .env.development.local
