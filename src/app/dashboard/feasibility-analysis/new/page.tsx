@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
@@ -12,7 +12,12 @@ import {
   LocationIcon,
   SaveIcon,
   ArrowLeftIcon,
-  TrendingUpIcon
+  TrendingUpIcon,
+  ShieldIcon,
+  BankIcon,
+  SearchIcon,
+  RefreshIcon,
+  CheckIcon
 } from '@/components/icons';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
@@ -20,6 +25,18 @@ import Link from 'next/link';
 export default function NewFeasibilityProjectPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [marketDataLoading, setMarketDataLoading] = useState(false);
+  const [marketData, setMarketData] = useState<any>(null);
+  const [insuranceFlags, setInsuranceFlags] = useState({
+    constructionInsurance: false,
+    financingInsurance: false
+  });
+  const [financingData, setFinancingData] = useState({
+    loanAmount: 0,
+    interestRate: 3.5,
+    loanTermYears: 15
+  });
+
   const [project, setProject] = useState<Partial<FeasibilityProject>>({
     name: '',
     address: '',
@@ -74,6 +91,14 @@ export default function NewFeasibilityProjectPage() {
   const [calculatedRevenues, setCalculatedRevenues] = useState(project.revenues);
   const [calculatedResults, setCalculatedResults] = useState(project.results);
 
+  // Funzione per pulire input numerico
+  const handleNumberInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Rimuove tutto tranne numeri e punto decimale
+    const cleanValue = value.replace(/[^0-9.]/g, '');
+    return cleanValue === '' ? 0 : parseFloat(cleanValue) || 0;
+  };
+
   const handleInputChange = (section: string, field: string, value: any) => {
     setProject(prev => {
       const updated = { ...prev };
@@ -103,12 +128,63 @@ export default function NewFeasibilityProjectPage() {
 
   const recalculateAll = () => {
     const costs = feasibilityService.calculateCosts(project);
+    
+    // Calcola assicurazioni se i flag sono attivi
+    let insuranceCost = 0;
+    if (insuranceFlags.constructionInsurance) {
+      insuranceCost += (costs.construction.subtotal * 0.015); // 1.5% del costo costruzione
+    }
+    if (insuranceFlags.financingInsurance) {
+      insuranceCost += (financingData.loanAmount * 0.01); // 1% dell'importo finanziato
+    }
+    costs.insurance = insuranceCost;
+    
     const revenues = feasibilityService.calculateRevenues(project);
     const results = feasibilityService.calculateResults(costs, revenues, project.targetMargin || 30);
 
     setCalculatedCosts(costs);
     setCalculatedRevenues(revenues);
     setCalculatedResults(results);
+  };
+
+  // Funzione per ottenere dati di mercato dal borsino immobiliare
+  const fetchMarketData = async () => {
+    if (!project.address) {
+      toast.error('Inserisci prima l\'indirizzo del progetto');
+      return;
+    }
+
+    setMarketDataLoading(true);
+    try {
+      const response = await fetch('/api/market-data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          address: project.address,
+          projectType: 'RESIDENZIALE'
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setMarketData(data);
+        
+        // Aggiorna automaticamente il prezzo al mq se disponibile
+        if (data.suggestedPricePerSqm) {
+          handleInputChange('revenues', 'pricePerSqm', data.suggestedPricePerSqm);
+          toast.success(`✅ Prezzo suggerito: ${data.suggestedPricePerSqm}€/m²`);
+        }
+      } else {
+        throw new Error('Errore nel recupero dati di mercato');
+      }
+    } catch (error) {
+      console.error('Errore fetch market data:', error);
+      toast.error('❌ Errore nel recupero dati di mercato');
+    } finally {
+      setMarketDataLoading(false);
+    }
   };
 
   const handleSave = async () => {
@@ -223,13 +299,27 @@ export default function NewFeasibilityProjectPage() {
                   <label className="label">
                     <span className="label-text font-medium">Indirizzo *</span>
                   </label>
-                  <input
-                    type="text"
-                    value={project.address || ''}
-                    onChange={(e) => handleInputChange('basic', 'address', e.target.value)}
-                    className="input input-bordered w-full"
-                    placeholder="Es. Via Roma 123, Milano"
-                  />
+                  <div className="flex space-x-2">
+                    <input
+                      type="text"
+                      value={project.address || ''}
+                      onChange={(e) => handleInputChange('basic', 'address', e.target.value)}
+                      className="input input-bordered flex-1"
+                      placeholder="Es. Via Roma 123, Milano"
+                    />
+                    <button
+                      onClick={fetchMarketData}
+                      disabled={marketDataLoading || !project.address}
+                      className="btn btn-outline btn-sm"
+                      title="Ottieni dati di mercato"
+                    >
+                      {marketDataLoading ? (
+                        <div className="loading loading-spinner loading-xs"></div>
+                      ) : (
+                        <SearchIcon className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
                 
                 <div>
@@ -274,6 +364,56 @@ export default function NewFeasibilityProjectPage() {
                   />
                 </div>
               </div>
+
+              {/* Dati di Mercato */}
+              {marketData && (
+                <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                  <h3 className="font-medium text-blue-900 mb-3 flex items-center">
+                    <TrendingUpIcon className="h-4 w-4 mr-2" />
+                    Dati di Mercato - {marketData.location}
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                      <div className="text-blue-600 font-medium">Prezzo Medio</div>
+                      <div className="text-lg font-bold">{formatCurrency(marketData.averagePrice)}/m²</div>
+                    </div>
+                    <div>
+                      <div className="text-blue-600 font-medium">Variazione</div>
+                      <div className={`text-lg font-bold ${marketData.priceChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {marketData.priceChange >= 0 ? '+' : ''}{marketData.priceChange}%
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-blue-600 font-medium">Tempo Vendita</div>
+                      <div className="text-lg font-bold">{marketData.sellingTime} mesi</div>
+                    </div>
+                    <div>
+                      <div className="text-blue-600 font-medium">Domanda</div>
+                      <div className="text-lg font-bold">{marketData.demandLevel}</div>
+                    </div>
+                  </div>
+                  
+                  {marketData.similarProjects && marketData.similarProjects.length > 0 && (
+                    <div className="mt-4">
+                      <h4 className="font-medium text-blue-900 mb-2">Progetti Simili nella Zona</h4>
+                      <div className="space-y-2">
+                        {marketData.similarProjects.slice(0, 3).map((project: any, index: number) => (
+                          <div key={index} className="flex justify-between items-center p-2 bg-white rounded">
+                            <div>
+                              <div className="font-medium">{project.title}</div>
+                              <div className="text-xs text-gray-600">{project.address}</div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-bold">{formatCurrency(project.pricePerSqm)}/m²</div>
+                              <div className="text-xs text-gray-600">{project.area}m²</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Costi */}
@@ -293,35 +433,35 @@ export default function NewFeasibilityProjectPage() {
                         <span className="label-text">Prezzo Acquisto</span>
                       </label>
                       <input
-                        type="number"
-                        value={project.costs?.land?.purchasePrice || 0}
-                        onChange={(e) => handleInputChange('costs', 'land.purchasePrice', parseInt(e.target.value))}
+                        type="text"
+                        value={project.costs?.land?.purchasePrice || ''}
+                        onChange={(e) => handleInputChange('costs', 'land.purchasePrice', handleNumberInput(e))}
                         className="input input-bordered w-full"
-                        placeholder="0"
+                        placeholder="Inserisci importo"
                       />
                     </div>
                     <div>
                       <label className="label">
-                        <span className="label-text">Imposte (9%)</span>
+                        <span className="label-text">Imposte</span>
                       </label>
                       <input
-                        type="number"
-                        value={project.costs?.land?.purchaseTaxes || 0}
-                        onChange={(e) => handleInputChange('costs', 'land.purchaseTaxes', parseInt(e.target.value))}
+                        type="text"
+                        value={project.costs?.land?.purchaseTaxes || ''}
+                        onChange={(e) => handleInputChange('costs', 'land.purchaseTaxes', handleNumberInput(e))}
                         className="input input-bordered w-full"
-                        placeholder="0"
+                        placeholder="Inserisci importo"
                       />
                     </div>
                     <div>
                       <label className="label">
-                        <span className="label-text">Commissioni (3%)</span>
+                        <span className="label-text">Commissioni</span>
                       </label>
                       <input
-                        type="number"
-                        value={project.costs?.land?.intermediationFees || 0}
-                        onChange={(e) => handleInputChange('costs', 'land.intermediationFees', parseInt(e.target.value))}
+                        type="text"
+                        value={project.costs?.land?.intermediationFees || ''}
+                        onChange={(e) => handleInputChange('costs', 'land.intermediationFees', handleNumberInput(e))}
                         className="input input-bordered w-full"
-                        placeholder="0"
+                        placeholder="Inserisci importo"
                       />
                     </div>
                   </div>
@@ -340,11 +480,11 @@ export default function NewFeasibilityProjectPage() {
                         <span className="label-text">Scavi e Fondazioni</span>
                       </label>
                       <input
-                        type="number"
-                        value={project.costs?.construction?.excavation || 0}
-                        onChange={(e) => handleInputChange('costs', 'construction.excavation', parseInt(e.target.value))}
+                        type="text"
+                        value={project.costs?.construction?.excavation || ''}
+                        onChange={(e) => handleInputChange('costs', 'construction.excavation', handleNumberInput(e))}
                         className="input input-bordered w-full"
-                        placeholder="0"
+                        placeholder="Inserisci importo"
                       />
                     </div>
                     <div>
@@ -352,11 +492,11 @@ export default function NewFeasibilityProjectPage() {
                         <span className="label-text">Strutture</span>
                       </label>
                       <input
-                        type="number"
-                        value={project.costs?.construction?.structures || 0}
-                        onChange={(e) => handleInputChange('costs', 'construction.structures', parseInt(e.target.value))}
+                        type="text"
+                        value={project.costs?.construction?.structures || ''}
+                        onChange={(e) => handleInputChange('costs', 'construction.structures', handleNumberInput(e))}
                         className="input input-bordered w-full"
-                        placeholder="0"
+                        placeholder="Inserisci importo"
                       />
                     </div>
                     <div>
@@ -364,11 +504,11 @@ export default function NewFeasibilityProjectPage() {
                         <span className="label-text">Impianti</span>
                       </label>
                       <input
-                        type="number"
-                        value={project.costs?.construction?.systems || 0}
-                        onChange={(e) => handleInputChange('costs', 'construction.systems', parseInt(e.target.value))}
+                        type="text"
+                        value={project.costs?.construction?.systems || ''}
+                        onChange={(e) => handleInputChange('costs', 'construction.systems', handleNumberInput(e))}
                         className="input input-bordered w-full"
-                        placeholder="0"
+                        placeholder="Inserisci importo"
                       />
                     </div>
                     <div>
@@ -376,11 +516,11 @@ export default function NewFeasibilityProjectPage() {
                         <span className="label-text">Finiture</span>
                       </label>
                       <input
-                        type="number"
-                        value={project.costs?.construction?.finishes || 0}
-                        onChange={(e) => handleInputChange('costs', 'construction.finishes', parseInt(e.target.value))}
+                        type="text"
+                        value={project.costs?.construction?.finishes || ''}
+                        onChange={(e) => handleInputChange('costs', 'construction.finishes', handleNumberInput(e))}
                         className="input input-bordered w-full"
-                        placeholder="0"
+                        placeholder="Inserisci importo"
                       />
                     </div>
                   </div>
@@ -390,20 +530,76 @@ export default function NewFeasibilityProjectPage() {
                   </div>
                 </div>
 
+                {/* Assicurazioni */}
+                <div>
+                  <h3 className="font-medium text-gray-900 mb-3">3. Assicurazioni</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <input
+                          type="checkbox"
+                          checked={insuranceFlags.constructionInsurance}
+                          onChange={(e) => {
+                            setInsuranceFlags(prev => ({
+                              ...prev,
+                              constructionInsurance: e.target.checked
+                            }));
+                            setTimeout(() => recalculateAll(), 100);
+                          }}
+                          className="checkbox checkbox-primary"
+                        />
+                        <div>
+                          <div className="font-medium">Assicurazione Garanzie sui Lavori</div>
+                          <div className="text-sm text-gray-600">1.5% del costo di costruzione</div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold">{formatCurrency(calculatedCosts.construction.subtotal * 0.015)}</div>
+                        <div className="text-xs text-gray-500">Calcolato automaticamente</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <input
+                          type="checkbox"
+                          checked={insuranceFlags.financingInsurance}
+                          onChange={(e) => {
+                            setInsuranceFlags(prev => ({
+                              ...prev,
+                              financingInsurance: e.target.checked
+                            }));
+                            setTimeout(() => recalculateAll(), 100);
+                          }}
+                          className="checkbox checkbox-primary"
+                        />
+                        <div>
+                          <div className="font-medium">Assicurazione sul Finanziamento</div>
+                          <div className="text-sm text-gray-600">1% sull'importo finanziato (Legge 210)</div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold">{formatCurrency(financingData.loanAmount * 0.01)}</div>
+                        <div className="text-xs text-gray-500">Calcolato automaticamente</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Altri Costi */}
                 <div>
-                  <h3 className="font-medium text-gray-900 mb-3">Altri Costi</h3>
+                  <h3 className="font-medium text-gray-900 mb-3">4. Altri Costi</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label className="label">
                         <span className="label-text">Opere Esterne</span>
                       </label>
                       <input
-                        type="number"
-                        value={project.costs?.externalWorks || 0}
-                        onChange={(e) => handleInputChange('costs', 'externalWorks', parseInt(e.target.value))}
+                        type="text"
+                        value={project.costs?.externalWorks || ''}
+                        onChange={(e) => handleInputChange('costs', 'externalWorks', handleNumberInput(e))}
                         className="input input-bordered w-full"
-                        placeholder="0"
+                        placeholder="Inserisci importo"
                       />
                     </div>
                     <div>
@@ -411,11 +607,11 @@ export default function NewFeasibilityProjectPage() {
                         <span className="label-text">Oneri Concessori</span>
                       </label>
                       <input
-                        type="number"
-                        value={project.costs?.concessionFees || 0}
-                        onChange={(e) => handleInputChange('costs', 'concessionFees', parseInt(e.target.value))}
+                        type="text"
+                        value={project.costs?.concessionFees || ''}
+                        onChange={(e) => handleInputChange('costs', 'concessionFees', handleNumberInput(e))}
                         className="input input-bordered w-full"
-                        placeholder="0"
+                        placeholder="Inserisci importo"
                       />
                     </div>
                     <div>
@@ -423,11 +619,11 @@ export default function NewFeasibilityProjectPage() {
                         <span className="label-text">Progettazione</span>
                       </label>
                       <input
-                        type="number"
-                        value={project.costs?.design || 0}
-                        onChange={(e) => handleInputChange('costs', 'design', parseInt(e.target.value))}
+                        type="text"
+                        value={project.costs?.design || ''}
+                        onChange={(e) => handleInputChange('costs', 'design', handleNumberInput(e))}
                         className="input input-bordered w-full"
-                        placeholder="0"
+                        placeholder="Inserisci importo"
                       />
                     </div>
                   </div>
@@ -474,11 +670,11 @@ export default function NewFeasibilityProjectPage() {
                     <span className="label-text">Prezzo Vendita (€/m²)</span>
                   </label>
                   <input
-                    type="number"
-                    value={project.revenues?.pricePerSqm || 1700}
-                    onChange={(e) => handleInputChange('revenues', 'pricePerSqm', parseInt(e.target.value))}
+                    type="text"
+                    value={project.revenues?.pricePerSqm || ''}
+                    onChange={(e) => handleInputChange('revenues', 'pricePerSqm', handleNumberInput(e))}
                     className="input input-bordered w-full"
-                    placeholder="1700"
+                    placeholder="Inserisci prezzo"
                   />
                 </div>
                 
@@ -487,11 +683,11 @@ export default function NewFeasibilityProjectPage() {
                     <span className="label-text">Altri Ricavi</span>
                   </label>
                   <input
-                    type="number"
-                    value={project.revenues?.otherRevenues || 0}
-                    onChange={(e) => handleInputChange('revenues', 'otherRevenues', parseInt(e.target.value))}
+                    type="text"
+                    value={project.revenues?.otherRevenues || ''}
+                    onChange={(e) => handleInputChange('revenues', 'otherRevenues', handleNumberInput(e))}
                     className="input input-bordered w-full"
-                    placeholder="0"
+                    placeholder="Inserisci importo"
                   />
                 </div>
               </div>

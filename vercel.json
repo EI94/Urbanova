@@ -11,6 +11,9 @@
     },
     "src/app/api/cleanup/route.ts": {
       "maxDuration": 120
+    },
+    "src/app/api/market-data/route.ts": {
+      "maxDuration": 45
     }
   }
 }
