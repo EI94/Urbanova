@@ -11,7 +11,8 @@ import {
   CalendarIcon,
   LocationIcon,
   SaveIcon,
-  ArrowLeftIcon
+  ArrowLeftIcon,
+  TrendingUpIcon
 } from '@/components/icons';
 import toast from 'react-hot-toast';
 import Link from 'next/link';

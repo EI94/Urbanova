@@ -40,17 +40,37 @@ export interface ScrapedLand {
 }
 
 export class RealAIService {
-  private openai: OpenAI;
+  private openai: OpenAI | null = null;
+  private isConfigured: boolean = false;
 
   constructor() {
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+    // Inizializza OpenAI solo se l'API key è configurata
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (apiKey) {
+      try {
+        this.openai = new OpenAI({
+          apiKey: apiKey,
+        });
+        this.isConfigured = true;
+        console.log('✅ [RealAIService] OpenAI configurato correttamente');
+      } catch (error) {
+        console.warn('⚠️ [RealAIService] Errore configurazione OpenAI:', error);
+        this.isConfigured = false;
+      }
+    } else {
+      console.warn('⚠️ [RealAIService] OPENAI_API_KEY non configurata - modalità fallback');
+      this.isConfigured = false;
+    }
   }
 
   async analyzeLand(land: ScrapedLand, marketContext?: any): Promise<LandAnalysis> {
     try {
       console.log(`🤖 [RealAIService] Analisi AI per terreno: ${land.title}`);
+
+      if (!this.isConfigured || !this.openai) {
+        console.log('🤖 [RealAIService] Modalità fallback - analisi locale');
+        return this.fallbackAnalysis(land);
+      }
 
       const prompt = this.buildAnalysisPrompt(land, marketContext);
       
@@ -86,6 +106,11 @@ export class RealAIService {
 
   async analyzeMarketTrends(location: string): Promise<string> {
     try {
+      if (!this.isConfigured || !this.openai) {
+        console.log('🤖 [RealAIService] Modalità fallback - trend di mercato simulati');
+        return `Analisi trend di mercato per ${location}: Prezzi in crescita moderata, buona domanda per terreni edificabili, sviluppo urbano attivo.`;
+      }
+
       const prompt = `Analizza i trend di mercato immobiliare per la zona: ${location}. 
       Considera: prezzi medi, domanda, offerta, sviluppi urbanistici recenti, 
       progetti futuri e potenziale di crescita. Fornisci un'analisi sintetica ma completa.`;
@@ -102,7 +127,7 @@ export class RealAIService {
             content: prompt
           }
         ],
-        temperature: 0.2,
+        temperature: 0.3,
         max_tokens: 500
       });
 
@@ -110,28 +135,32 @@ export class RealAIService {
 
     } catch (error) {
       console.error('❌ Errore analisi trend:', error);
-      return 'Analisi trend non disponibile';
+      return `Analisi trend di mercato per ${location}: Dati non disponibili al momento.`;
     }
   }
 
   async generateInvestmentRecommendations(lands: ScrapedLand[]): Promise<string[]> {
     try {
-      const landsSummary = lands.map(land => 
-        `${land.title} - ${land.location} - €${land.price.toLocaleString()} - ${land.area}m²`
-      ).join('\n');
+      if (!this.isConfigured || !this.openai) {
+        console.log('🤖 [RealAIService] Modalità fallback - raccomandazioni locali');
+        return [
+          'Considera terreni con buona accessibilità',
+          'Valuta potenziale di sviluppo futuro',
+          'Verifica servizi disponibili nella zona',
+          'Analizza trend di crescita del quartiere'
+        ];
+      }
 
-      const prompt = `Analizza questi terreni e fornisci 5 raccomandazioni di investimento specifiche:
-      
-      ${landsSummary}
-      
-      Considera: diversificazione, rischio/rendimento, timing, strategie di sviluppo.`;
+      const prompt = `Genera raccomandazioni di investimento per ${lands.length} terreni. 
+      Considera: prezzo, localizzazione, potenziale di sviluppo, rischi e opportunità. 
+      Fornisci 5-7 raccomandazioni concrete e actionable.`;
 
       const completion = await this.openai.chat.completions.create({
         model: "gpt-4",
         messages: [
           {
             role: "system",
-            content: "Sei un consulente di investimenti immobiliari. Fornisci raccomandazioni concrete e actionable."
+            content: "Sei un consulente immobiliare esperto. Fornisci raccomandazioni pratiche e concrete."
           },
           {
             role: "user",
@@ -142,41 +171,35 @@ export class RealAIService {
         max_tokens: 800
       });
 
-      const response = completion.choices[0].message.content || '';
-      return this.parseRecommendations(response);
+      return this.parseRecommendations(completion.choices[0].message.content || '');
 
     } catch (error) {
-      console.error('❌ Errore raccomandazioni:', error);
-      return [
-        'Diversifica il portfolio tra diverse zone',
-        'Valuta terreni con permessi edificabilità',
-        'Considera il potenziale di rivalutazione',
-        'Analizza la domanda di mercato locale',
-        'Verifica la sostenibilità finanziaria'
-      ];
+      console.error('❌ Errore generazione raccomandazioni:', error);
+      return ['Analisi raccomandazioni non disponibile al momento.'];
     }
   }
 
   async calculateAdvancedAIScore(land: ScrapedLand, analysis: LandAnalysis): Promise<number> {
     try {
-      const prompt = `Calcola un punteggio AI avanzato (0-100) per questo terreno:
-      
-      Terreno: ${land.title}
-      Prezzo: €${land.price.toLocaleString()}
-      Area: ${land.area}m²
-      Prezzo/m²: €${land.pricePerSqm}
+      if (!this.isConfigured || !this.openai) {
+        console.log('🤖 [RealAIService] Modalità fallback - calcolo score locale');
+        return this.calculateBasicAIScore(land);
+      }
+
+      const prompt = `Calcola un AI Score avanzato (0-100) per questo terreno:
+      Prezzo: €${land.price}
+      Area: ${land.area} mq
       Localizzazione: ${land.location}
       Analisi: ${JSON.stringify(analysis)}
       
-      Considera: prezzo competitivo, localizzazione, potenziale sviluppo, rischi, 
-      infrastrutture, trend di mercato. Fornisci solo il numero.`;
+      Considera: rapporto qualità/prezzo, potenziale di sviluppo, rischi, opportunità di mercato.`;
 
       const completion = await this.openai.chat.completions.create({
         model: "gpt-4",
         messages: [
           {
             role: "system",
-            content: "Sei un sistema di scoring immobiliare. Rispondi solo con un numero da 0 a 100."
+            content: "Sei un valutatore immobiliare esperto. Fornisci solo un numero da 0 a 100."
           },
           {
             role: "user",
@@ -191,7 +214,7 @@ export class RealAIService {
       return Math.max(0, Math.min(100, score));
 
     } catch (error) {
-      console.error('❌ Errore calcolo AI score:', error);
+      console.error('❌ Errore calcolo AI Score:', error);
       return this.calculateBasicAIScore(land);
     }
   }
@@ -333,6 +356,11 @@ export class RealAIService {
   // Verifica configurazione AI
   async verifyAIConfig(): Promise<boolean> {
     try {
+      if (!this.isConfigured || !this.openai) {
+        console.log('⚠️ [RealAIService] AI non configurato, verifica fallita.');
+        return false;
+      }
+
       const completion = await this.openai.chat.completions.create({
         model: "gpt-4",
         messages: [
@@ -350,6 +378,11 @@ export class RealAIService {
       console.error('❌ Errore verifica AI config:', error);
       return false;
     }
+  }
+
+  // Getter per verificare se il servizio è configurato
+  get isAIConfigured(): boolean {
+    return this.isConfigured;
   }
 }
 

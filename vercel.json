@@ -4,11 +4,14 @@
   "framework": "nextjs",
   "installCommand": "npm install",
   "functions": {
-    "src/lib/realWebScraper.ts": {
+    "src/app/api/web-scraper/route.ts": {
       "maxDuration": 30
     },
-    "src/lib/realLandScrapingAgent.ts": {
+    "src/app/api/land-scraping/route.ts": {
       "maxDuration": 60
+    },
+    "src/app/api/cleanup/route.ts": {
+      "maxDuration": 120
     }
   },
   "env": {

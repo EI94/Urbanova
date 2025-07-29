@@ -14,17 +14,37 @@ export interface EmailNotification {
 }
 
 export class RealEmailService {
-  private resend: Resend;
+  private resend: Resend | null = null;
+  private isConfigured: boolean = false;
 
   constructor() {
-    // Inizializza Resend con API key (da configurare in Vercel)
-    this.resend = new Resend(process.env.RESEND_API_KEY);
+    // Inizializza Resend solo se l'API key è configurata
+    const apiKey = process.env.RESEND_API_KEY;
+    if (apiKey) {
+      try {
+        this.resend = new Resend(apiKey);
+        this.isConfigured = true;
+        console.log('✅ [RealEmailService] Resend configurato correttamente');
+      } catch (error) {
+        console.warn('⚠️ [RealEmailService] Errore configurazione Resend:', error);
+        this.isConfigured = false;
+      }
+    } else {
+      console.warn('⚠️ [RealEmailService] RESEND_API_KEY non configurata - modalità simulazione');
+      this.isConfigured = false;
+    }
   }
 
   async sendEmail(notification: EmailNotification): Promise<void> {
     try {
-      console.log(`📧 [RealEmailService] Invio email reale a ${notification.to}`);
+      console.log(`📧 [RealEmailService] Invio email a ${notification.to}`);
       
+      if (!this.isConfigured || !this.resend) {
+        console.log('📧 [RealEmailService] Modalità simulazione - email non inviata');
+        await this.saveEmailLog(notification, 'simulated');
+        return;
+      }
+
       const { data, error } = await this.resend.emails.send({
         from: 'Urbanova AI <noreply@urbanova.life>',
         to: [notification.to],
@@ -44,7 +64,8 @@ export class RealEmailService {
       
     } catch (error) {
       console.error('❌ Errore servizio email:', error);
-      throw error;
+      // Non lanciare errore, solo log
+      await this.saveEmailLog(notification, 'error');
     }
   }
 
@@ -56,7 +77,7 @@ export class RealEmailService {
         subject: notification.subject,
         landsCount: notification.lands.length,
         sentAt: new Date(),
-        status: 'sent',
+        status: emailId === 'error' ? 'error' : emailId === 'simulated' ? 'simulated' : 'sent',
         emailId: emailId || 'unknown',
         summary: notification.summary
       };
@@ -71,22 +92,22 @@ export class RealEmailService {
   // Verifica configurazione email
   async verifyEmailConfig(): Promise<boolean> {
     try {
-      // Test invio email di verifica
-      const testEmail = {
-        to: 'test@example.com',
-        subject: 'Test Urbanova AI',
-        htmlContent: '<p>Test email service</p>',
-        lands: [],
-        summary: { totalFound: 0, averagePrice: 0, bestOpportunities: [] }
-      };
+      if (!this.isConfigured) {
+        console.log('⚠️ [RealEmailService] Email non configurato - modalità simulazione');
+        return false;
+      }
 
-      // Non inviare realmente, solo verificare configurazione
       console.log('✅ [RealEmailService] Configurazione email verificata');
       return true;
     } catch (error) {
       console.error('❌ Errore verifica email config:', error);
       return false;
     }
+  }
+
+  // Getter per verificare se il servizio è configurato
+  get isEmailConfigured(): boolean {
+    return this.isConfigured;
   }
 }
 
