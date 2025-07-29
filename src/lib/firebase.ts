@@ -6,13 +6,13 @@ import { getStorage, connectStorageEmulator } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyAxex9T9insV0Y5-puRZc6y-QQhn1KLXD8",
-  authDomain: "urbanova-b623e.firebaseapp.com",
-  projectId: "urbanova-b623e",
-  storageBucket: "urbanova-b623e.firebasestorage.app",
-  messagingSenderId: "599892072352",
-  appId: "1:599892072352:web:34553ac67eb39d2b9ab6c5",
-  measurementId: "G-QHNDTK9P3L"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyAxex9T9insV0Y5-puRZc6y-QQhn1KLXD8",
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "urbanova-b623e.firebaseapp.com",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "urbanova-b623e",
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "urbanova-b623e.firebasestorage.app",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "599892072352",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:599892072352:web:34553ac67eb39d2b9ab6c5",
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-QHNDTK9P3L"
 };
 
 // Initialize Firebase
