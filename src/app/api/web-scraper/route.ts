@@ -1,51 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { realWebScraper, LandSearchCriteria } from '@/lib/realWebScraper';
-
-export const maxDuration = 30; // Configurazione Vercel
+import { realWebScraper } from '@/lib/realWebScraper';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const criteria: LandSearchCriteria = body.criteria;
+    const { location, minPrice, maxPrice, minArea, maxArea, propertyType } = body;
 
-    console.log('🔍 API Web Scraper: Avvio scraping con criteri:', criteria);
-
-    // Inizializza il web scraper
+    // Inizializza lo scraper
     await realWebScraper.initialize();
 
     // Esegui lo scraping
-    const lands = await realWebScraper.scrapeLands(criteria);
+    const results = await realWebScraper.scrapeLands({
+      location: location || 'Italia',
+      minPrice,
+      maxPrice,
+      minArea,
+      maxArea,
+      propertyType
+    });
 
     // Chiudi il browser
     await realWebScraper.close();
 
-    console.log(`✅ API Web Scraper: Trovati ${lands.length} terreni`);
-
     return NextResponse.json({
       success: true,
-      data: lands,
-      count: lands.length,
-      timestamp: new Date().toISOString()
+      data: results,
+      count: results.length
     });
 
   } catch (error) {
-    console.error('❌ API Web Scraper: Errore:', error);
+    console.error('Errore API web scraper:', error);
     
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : 'Errore sconosciuto',
-      timestamp: new Date().toISOString()
+      error: 'Errore durante lo scraping',
+      message: error instanceof Error ? error.message : 'Errore sconosciuto'
     }, { status: 500 });
   }
 }
 
 export async function GET() {
   return NextResponse.json({
-    message: 'Web Scraper API - Urbanova',
-    version: '2.0',
+    message: 'Web Scraper API - Utilizza POST per eseguire lo scraping',
     endpoints: {
-      POST: '/api/web-scraper - Esegue web scraping terreni'
-    },
-    timestamp: new Date().toISOString()
+      POST: '/api/web-scraper - Esegue lo scraping dei terreni'
+    }
   });
 }

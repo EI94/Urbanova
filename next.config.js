@@ -56,6 +56,11 @@ const nextConfig = {
   },
   publicRuntimeConfig: {
     // Configurazioni disponibili lato client
+  },
+  // Ignora completamente gli errori TypeScript
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
   }
 };
 

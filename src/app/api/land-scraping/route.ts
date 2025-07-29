@@ -1,69 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { RealLandScrapingAgent, LandSearchCriteria } from '@/lib/realLandScrapingAgent';
-
-export const maxDuration = 60; // Configurazione Vercel
+import { realLandScrapingAgent } from '@/lib/realLandScrapingAgent';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { criteria, email }: { criteria: LandSearchCriteria; email: string } = body;
+    const { location, criteria, aiAnalysis } = body;
 
-    if (!criteria || !email) {
-      return NextResponse.json({
-        success: false,
-        error: 'Criteri di ricerca e email sono obbligatori',
-        timestamp: new Date().toISOString()
-      }, { status: 400 });
-    }
+    console.log('🤖 API Land Scraping Agent: Avvio analisi per', location);
 
-    console.log('🚀 API Land Scraping: Avvio ricerca automatizzata per', email);
-
-    // Crea istanza dell'agente
-    const agent = new RealLandScrapingAgent();
-
-    // Esegui ricerca automatizzata
-    const result = await agent.runAutomatedSearch(criteria, email);
-
-    console.log(`✅ API Land Scraping: Completata ricerca con ${result.lands.length} terreni`);
+    // Esegui l'analisi AI
+    const results = await realLandScrapingAgent.analyzeLocation({
+      location: location || 'Italia',
+      criteria: criteria || {},
+      enableAIAnalysis: aiAnalysis !== false
+    });
 
     return NextResponse.json({
       success: true,
-      data: result,
-      summary: {
-        totalFound: result.summary.totalFound,
-        averagePrice: result.summary.averagePrice,
-        emailSent: result.emailSent,
-        marketTrends: result.summary.marketTrends,
-        recommendations: result.summary.recommendations
-      },
+      data: results,
+      location,
       timestamp: new Date().toISOString()
     });
 
   } catch (error) {
-    console.error('❌ API Land Scraping: Errore:', error);
+    console.error('❌ API Land Scraping Agent: Errore:', error);
     
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : 'Errore sconosciuto',
-      timestamp: new Date().toISOString()
+      error: 'Errore durante l\'analisi AI',
+      message: error instanceof Error ? error.message : 'Errore sconosciuto'
     }, { status: 500 });
   }
 }
 
 export async function GET() {
   return NextResponse.json({
-    message: 'Land Scraping Agent API - Urbanova',
-    version: '2.0',
+    message: 'Land Scraping Agent API - Utilizza POST per l\'analisi AI',
     endpoints: {
-      POST: '/api/land-scraping - Esegue ricerca automatizzata con AI'
-    },
-    features: [
-      'Web Scraping automatico',
-      'Analisi AI avanzata',
-      'Invio email con risultati',
-      'Analisi trend di mercato',
-      'Raccomandazioni di investimento'
-    ],
-    timestamp: new Date().toISOString()
+      POST: '/api/land-scraping - Esegue analisi AI dei terreni'
+    }
   });
 }

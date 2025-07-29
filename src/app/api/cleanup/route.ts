@@ -1,24 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cleanupService } from '@/lib/cleanupService';
 
-export const maxDuration = 120; // 2 minuti per operazioni di pulizia
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { collections, dryRun = false } = body;
+    const { collections, confirm } = body;
+
+    if (!confirm) {
+      return NextResponse.json({
+        success: false,
+        error: 'Conferma richiesta per procedere con la pulizia'
+      }, { status: 400 });
+    }
 
     console.log('🧹 API Cleanup: Avvio pulizia database');
 
-    // Esegui pulizia
-    const result = await cleanupService.cleanupDatabase(collections, dryRun);
-
-    console.log(`✅ API Cleanup: Completata pulizia - ${result.deletedCount} documenti eliminati`);
+    // Esegui la pulizia
+    const results = await cleanupService.cleanupDatabase(collections || []);
 
     return NextResponse.json({
       success: true,
-      data: result,
-      message: dryRun ? 'Simulazione completata' : 'Pulizia completata',
+      data: results,
+      message: 'Pulizia completata con successo',
       timestamp: new Date().toISOString()
     });
 
@@ -27,8 +30,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : 'Errore sconosciuto',
-      timestamp: new Date().toISOString()
+      error: 'Errore durante la pulizia',
+      message: error instanceof Error ? error.message : 'Errore sconosciuto'
     }, { status: 500 });
   }
 }
@@ -39,20 +42,18 @@ export async function GET() {
     const stats = await cleanupService.getDatabaseStats();
 
     return NextResponse.json({
-      message: 'Database Cleanup API - Urbanova',
-      version: '2.0',
-      endpoints: {
-        POST: '/api/cleanup - Esegue pulizia database',
-        GET: '/api/cleanup - Ottiene statistiche database'
-      },
-      stats,
-      timestamp: new Date().toISOString()
+      success: true,
+      data: stats,
+      message: 'Statistiche database'
     });
+
   } catch (error) {
+    console.error('❌ API Cleanup Stats: Errore:', error);
+    
     return NextResponse.json({
       success: false,
-      error: 'Errore nel recupero statistiche database',
-      timestamp: new Date().toISOString()
+      error: 'Errore nel recupero statistiche',
+      message: error instanceof Error ? error.message : 'Errore sconosciuto'
     }, { status: 500 });
   }
 }
