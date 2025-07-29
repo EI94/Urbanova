@@ -61,6 +61,10 @@ const nextConfig = {
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 2,
+  },
+  // Disabilita completamente TypeScript per il build
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
   }
 };
 
