@@ -1,8 +1,8 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import { getStorage, connectStorageEmulator } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -22,5 +22,23 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+
+// Configurazione per gestire errori di connessione
+if (typeof window !== 'undefined') {
+  // Gestione errori di connessione Firebase
+  const handleFirebaseError = (error: any) => {
+    console.warn('⚠️ Firebase connection issue:', error);
+    // Non bloccare l'app per errori di connessione
+  };
+
+  // Intercetta errori di rete Firebase
+  window.addEventListener('online', () => {
+    console.log('✅ Connessione ripristinata');
+  });
+
+  window.addEventListener('offline', () => {
+    console.warn('⚠️ Connessione persa - modalità offline');
+  });
+}
 
 export default app; 
