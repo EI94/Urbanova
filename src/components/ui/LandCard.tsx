@@ -9,7 +9,8 @@ import {
   EuroIcon,
   BuildingIcon,
   TrendingUpIcon,
-  ShieldIcon
+  ShieldIcon,
+  BrainIcon
 } from '@/components/icons';
 
 interface LandCardProps {
