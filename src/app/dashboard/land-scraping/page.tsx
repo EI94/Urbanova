@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { LandSearchCriteria } from '@/lib/realWebScraper';
@@ -64,6 +66,8 @@ interface FilterState {
 }
 
 export default function LandScrapingPage() {
+  const [isClient, setIsClient] = useState(false);
+
   // Stati principali
   const [searchCriteria, setSearchCriteria] = useState<LandSearchCriteria>({
     location: '',
@@ -122,6 +126,11 @@ export default function LandScrapingPage() {
   } | null>(null);
 
   const router = useRouter();
+
+  // Controlla se siamo nel browser
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Inizializzazione
   useEffect(() => {
@@ -449,6 +458,20 @@ export default function LandScrapingPage() {
       maxDistance: 50
     });
   };
+
+  // Non renderizzare nulla durante il prerendering
+  if (!isClient) {
+    return (
+      <DashboardLayout title="AI Land Scraping">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Caricamento...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="AI Land Scraping">

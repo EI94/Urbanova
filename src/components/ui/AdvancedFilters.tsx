@@ -29,10 +29,12 @@ export default function AdvancedFilters({
   onReset
 }: AdvancedFiltersProps) {
   const getActiveFiltersCount = () => {
+    if (!filters) return 0;
+    
     let count = 0;
-    if (filters.priceRange[0] > 0 || filters.priceRange[1] < 1000000) count++;
-    if (filters.areaRange[0] > 500 || filters.areaRange[1] < 10000) count++;
-    if (filters.propertyTypes.length !== 1 || filters.propertyTypes[0] !== 'residenziale') count++;
+    if (filters.priceRange?.[0] > 0 || filters.priceRange?.[1] < 1000000) count++;
+    if (filters.areaRange?.[0] > 500 || filters.areaRange?.[1] < 10000) count++;
+    if (filters.propertyTypes?.length !== 1 || filters.propertyTypes?.[0] !== 'residenziale') count++;
     if (filters.hasPermits) count++;
     if (filters.minAIScore > 70) count++;
     if (filters.riskLevel !== 'all') count++;
@@ -91,16 +93,16 @@ export default function AdvancedFilters({
                 <div className="flex gap-2">
                   <input
                     type="number"
-                    value={filters.priceRange[0]}
-                    onChange={(e) => updateFilter('priceRange', [parseInt(e.target.value) || 0, filters.priceRange[1]])}
+                    value={filters.priceRange?.[0] || 0}
+                    onChange={(e) => updateFilter('priceRange', [parseInt(e.target.value) || 0, filters.priceRange?.[1] || 1000000])}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     placeholder="Min"
                   />
                   <span className="text-gray-500 self-center">-</span>
                   <input
                     type="number"
-                    value={filters.priceRange[1]}
-                    onChange={(e) => updateFilter('priceRange', [filters.priceRange[0], parseInt(e.target.value) || 1000000])}
+                    value={filters.priceRange?.[1] || 1000000}
+                    onChange={(e) => updateFilter('priceRange', [filters.priceRange?.[0] || 0, parseInt(e.target.value) || 1000000])}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     placeholder="Max"
                   />
@@ -120,22 +122,22 @@ export default function AdvancedFilters({
                 <div className="flex gap-2">
                   <input
                     type="number"
-                    value={filters.areaRange[0]}
-                    onChange={(e) => updateFilter('areaRange', [parseInt(e.target.value) || 500, filters.areaRange[1]])}
+                    value={filters.areaRange?.[0] || 500}
+                    onChange={(e) => updateFilter('areaRange', [parseInt(e.target.value) || 500, filters.areaRange?.[1] || 10000])}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     placeholder="Min"
                   />
                   <span className="text-gray-500 self-center">-</span>
                   <input
                     type="number"
-                    value={filters.areaRange[1]}
-                    onChange={(e) => updateFilter('areaRange', [filters.areaRange[0], parseInt(e.target.value) || 10000])}
+                    value={filters.areaRange?.[1] || 10000}
+                    onChange={(e) => updateFilter('areaRange', [filters.areaRange?.[0] || 500, parseInt(e.target.value) || 10000])}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     placeholder="Max"
                   />
                 </div>
                 <div className="text-xs text-gray-500">
-                  {filters.areaRange[0]} - {filters.areaRange[1]} m²
+                  {filters.areaRange?.[0] || 500} - {filters.areaRange?.[1] || 10000} m²
                 </div>
               </div>
             </div>
@@ -150,12 +152,12 @@ export default function AdvancedFilters({
                   <label key={option.value} className="flex items-center">
                     <input
                       type="checkbox"
-                      checked={filters.propertyTypes.includes(option.value)}
+                      checked={filters.propertyTypes?.includes(option.value) || false}
                       onChange={(e) => {
                         if (e.target.checked) {
-                          updateFilter('propertyTypes', [...filters.propertyTypes, option.value]);
+                          updateFilter('propertyTypes', [...(filters.propertyTypes || []), option.value]);
                         } else {
-                          updateFilter('propertyTypes', filters.propertyTypes.filter(t => t !== option.value));
+                          updateFilter('propertyTypes', (filters.propertyTypes || []).filter(t => t !== option.value));
                         }
                       }}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
