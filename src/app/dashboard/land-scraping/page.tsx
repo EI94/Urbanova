@@ -715,7 +715,7 @@ export default function LandScrapingPage() {
                     {scheduleConfig.frequency === 'monthly' && `Ogni ${scheduleConfig.dayOfWeek} del mese alle ${scheduleConfig.time}`}
                   </div>
                   <div className="text-xs text-green-600 mt-1">
-                    Prossima esecuzione: {getNextExecutionTime().toLocaleString('it-IT')}
+                    Prossima esecuzione: {getNextExecutionTime()?.toLocaleString('it-IT') || 'Non pianificata'}
                   </div>
                 </div>
               )}
@@ -775,15 +775,19 @@ export default function LandScrapingPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Prezzo:</span>
-                      <span className="font-medium text-green-600">{land.price.toLocaleString()}</span>
+                      <span className="font-medium text-green-600">
+                        {land.price ? land.price.toLocaleString() : 'N/A'}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Superficie:</span>
-                      <span className="font-medium">{land.area} m²</span>
+                      <span className="font-medium">{land.area || 'N/A'} m²</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">€/m²:</span>
-                      <span className="font-medium">{land.pricePerSqm.toLocaleString()}</span>
+                      <span className="font-medium">
+                        {land.pricePerSqm ? land.pricePerSqm.toLocaleString() : 'N/A'}
+                      </span>
                     </div>
                     
                     {/* Analisi AI se disponibile */}
@@ -792,13 +796,13 @@ export default function LandScrapingPage() {
                         <div className="flex justify-between text-xs">
                           <span className="text-gray-500">ROI:</span>
                           <span className="font-medium text-blue-600">
-                            {searchResults.analysis[index].estimatedROI.toFixed(1)}%
+                            {searchResults.analysis[index]?.estimatedROI ? searchResults.analysis[index].estimatedROI.toFixed(1) : 'N/A'}%
                           </span>
                         </div>
                         <div className="flex justify-between text-xs">
                           <span className="text-gray-500">Rischio:</span>
                           <span className="font-medium text-orange-600">
-                            {searchResults.analysis[index].riskAssessment}
+                            {searchResults.analysis[index]?.riskAssessment || 'N/A'}
                           </span>
                         </div>
                       </div>
@@ -835,7 +839,7 @@ export default function LandScrapingPage() {
                         {search.criteria.location || 'Tutta Italia'}
                       </p>
                       <p className="text-sm text-gray-600">
-                        €{search.criteria.priceRange?.[0]?.toLocaleString()} - €{search.criteria.priceRange?.[1]?.toLocaleString()}
+                        €{search.criteria.priceRange?.[0]?.toLocaleString() || '0'} - €{search.criteria.priceRange?.[1]?.toLocaleString() || '0'}
                       </p>
                     </div>
                   </div>
@@ -933,7 +937,7 @@ export default function LandScrapingPage() {
                   <div className="text-sm text-blue-800">
                     <div className="font-medium mb-1">Prossima esecuzione:</div>
                     <div className="text-blue-600">
-                      {getNextExecutionTime().toLocaleString('it-IT')}
+                      {getNextExecutionTime()?.toLocaleString('it-IT') || 'Non pianificata'}
                     </div>
                   </div>
                 </div>
