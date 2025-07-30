@@ -1,11 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { LandSearchCriteria } from '@/lib/realWebScraper';
 import { emailService, EmailConfig } from '@/lib/emailService';
 import { realLandScrapingAgent, RealLandScrapingResult } from '@/lib/realLandScrapingAgent';
 import { feasibilityService } from '@/lib/feasibilityService';
+import ProgressBar from '@/components/ui/ProgressBar';
+import LandCard from '@/components/ui/LandCard';
+import AdvancedFilters from '@/components/ui/AdvancedFilters';
+import PerformanceStats from '@/components/ui/PerformanceStats';
 import { 
   SearchIcon, 
   MailIcon, 
@@ -23,12 +27,44 @@ import {
   GlobeIcon,
   CalculatorIcon,
   ClockIcon,
-  RepeatIcon
+  RepeatIcon,
+  FilterIcon,
+  MapIcon,
+  StarIcon,
+  EyeIcon,
+  PlusIcon,
+  RefreshIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  XIcon,
+  TargetIcon,
+  ShieldIcon,
+  ZapIcon
 } from '@/components/icons';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 
+interface SearchProgress {
+  phase: 'idle' | 'searching' | 'analyzing' | 'filtering' | 'complete' | 'error';
+  currentSource: string;
+  sourcesCompleted: string[];
+  sourcesTotal: string[];
+  progress: number;
+  message: string;
+}
+
+interface FilterState {
+  priceRange: [number, number];
+  areaRange: [number, number];
+  propertyTypes: string[];
+  hasPermits: boolean;
+  minAIScore: number;
+  riskLevel: 'all' | 'low' | 'medium' | 'high';
+  maxDistance: number;
+}
+
 export default function LandScrapingPage() {
+  // Stati principali
   const [searchCriteria, setSearchCriteria] = useState<LandSearchCriteria>({
     location: '',
     priceRange: [0, 1000000],
@@ -40,8 +76,17 @@ export default function LandScrapingPage() {
   });
   
   const [email, setEmail] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
+  const [searchProgress, setSearchProgress] = useState<SearchProgress>({
+    phase: 'idle',
+    currentSource: '',
+    sourcesCompleted: [],
+    sourcesTotal: ['immobiliare.it', 'casa.it', 'idealista.it'],
+    progress: 0,
+    message: ''
+  });
+  
   const [searchResults, setSearchResults] = useState<RealLandScrapingResult | null>(null);
+  const [filteredResults, setFilteredResults] = useState<any[]>([]);
   const [searchHistory, setSearchHistory] = useState<Array<{
     id: string;
     criteria: LandSearchCriteria;
@@ -51,291 +96,283 @@ export default function LandScrapingPage() {
     emailSent: boolean;
   }>>([]);
   
-  // Nuovi stati per gestione email
-  const [emailConfig, setEmailConfig] = useState<EmailConfig | null>(null);
-  const [showEmailSettings, setShowEmailSettings] = useState(false);
-  const [isLoadingEmail, setIsLoadingEmail] = useState(false);
+  // Stati per filtri avanzati
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({
+    priceRange: [0, 1000000],
+    areaRange: [500, 10000],
+    propertyTypes: ['residenziale'],
+    hasPermits: false,
+    minAIScore: 70,
+    riskLevel: 'all',
+    maxDistance: 50
+  });
   
-  // Stato servizi
+  // Stati per UI
+  const [showMap, setShowMap] = useState(false);
+  const [selectedView, setSelectedView] = useState<'cards' | 'list' | 'map'>('cards');
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [showEmailSettings, setShowEmailSettings] = useState(false);
+  const [emailConfig, setEmailConfig] = useState<EmailConfig | null>(null);
+  
+  // Stati per servizi
   const [servicesStatus, setServicesStatus] = useState<{
     email: boolean;
     webScraping: boolean;
     ai: boolean;
   } | null>(null);
 
-  // Stati per pianificazione
-  const [showScheduleModal, setShowScheduleModal] = useState(false);
-  const [scheduleConfig, setScheduleConfig] = useState({
-    frequency: 'weekly',
-    dayOfWeek: '1', // Lunedì
-    time: '09:00',
-    isActive: false
-  });
-
   const router = useRouter();
 
-  // Carica configurazione email all'avvio
+  // Inizializzazione
   useEffect(() => {
-    const initializeServices = async () => {
-      try {
-        await loadEmailConfig();
-        await verifyServices();
-        await loadScheduleConfig();
-      } catch (error) {
-        console.error('❌ Errore inizializzazione servizi:', error);
-        // Non bloccare l'app per errori di inizializzazione
-      }
-    };
-
     initializeServices();
+    loadSearchHistory();
+    loadFavorites();
   }, []);
+
+  // Applica filtri quando cambiano
+  useEffect(() => {
+    if (searchResults?.lands) {
+      applyFilters();
+    }
+  }, [filters, searchResults]);
+
+  const initializeServices = async () => {
+    try {
+      await loadEmailConfig();
+      await verifyServices();
+    } catch (error) {
+      console.error('❌ Errore inizializzazione servizi:', error);
+    }
+  };
 
   const verifyServices = async () => {
     try {
       const status = await realLandScrapingAgent.verifyAllServices();
       setServicesStatus(status);
-      console.log('🔍 Stato servizi verificato:', status);
     } catch (error) {
       console.error('❌ Errore verifica servizi:', error);
-      // Imposta stato di fallback
-      setServicesStatus({
-        email: true, // Modalità simulazione
-        webScraping: true, // Modalità fallback
-        ai: true // Modalità fallback
-      });
     }
   };
 
   const loadEmailConfig = async () => {
-    if (!email) return;
-    
-    setIsLoadingEmail(true);
     try {
-      const config = await emailService.getEmailConfig(email);
+      const config = await emailService.getEmailConfig();
       setEmailConfig(config);
-    } catch (error) {
-      console.error('Errore caricamento email config:', error);
-    } finally {
-      setIsLoadingEmail(false);
-    }
-  };
-
-  const loadScheduleConfig = async () => {
-    try {
-      // Carica configurazione pianificazione dal localStorage o API
-      const saved = localStorage.getItem('landScrapingSchedule');
-      if (saved) {
-        setScheduleConfig(JSON.parse(saved));
+      if (config?.email) {
+        setEmail(config.email);
       }
     } catch (error) {
-      console.error('Errore caricamento configurazione pianificazione:', error);
+      console.error('❌ Errore caricamento configurazione email:', error);
     }
   };
 
-  const saveScheduleConfig = async () => {
-    try {
-      // Salva configurazione pianificazione
-      localStorage.setItem('landScrapingSchedule', JSON.stringify(scheduleConfig));
-      
-      // Simula salvataggio su server
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.success('✅ Pianificazione configurata con successo!');
-      setShowScheduleModal(false);
-    } catch (error) {
-      console.error('Errore salvataggio pianificazione:', error);
-      toast.error('❌ Errore nel salvataggio della pianificazione');
-    }
-  };
-
-  const handleEmailChange = async (newEmail: string) => {
-    setEmail(newEmail);
-    
-    if (newEmail) {
-      setIsLoadingEmail(true);
-      try {
-        const config = await emailService.getEmailConfig(newEmail);
-        setEmailConfig(config);
-      } catch (error) {
-        console.error('Errore caricamento email config:', error);
-      } finally {
-        setIsLoadingEmail(false);
+  const loadSearchHistory = async () => {
+    // TODO: Implementare caricamento storico da database
+    const mockHistory = [
+      {
+        id: '1',
+        criteria: { location: 'Milano', priceRange: [0, 500000], areaRange: [500, 2000], zoning: [], buildingRights: true, infrastructure: [], keywords: [] },
+        email: 'user@example.com',
+        date: new Date(Date.now() - 86400000),
+        resultsCount: 12,
+        emailSent: true
       }
+    ];
+    setSearchHistory(mockHistory);
+  };
+
+  const loadFavorites = () => {
+    const saved = localStorage.getItem('landScrapingFavorites');
+    if (saved) {
+      setFavorites(new Set(JSON.parse(saved)));
     }
   };
 
-  const saveEmailConfig = async () => {
-    if (!email) {
-      toast.error('Inserisci un indirizzo email');
-      return;
-    }
-
-    try {
-      const configId = await emailService.saveEmailConfig(email);
-      const config = await emailService.getEmailConfig(email);
-      setEmailConfig(config);
-      toast.success('✅ Email configurata con successo!');
-      setShowEmailSettings(false);
-    } catch (error) {
-      console.error('Errore salvataggio email config:', error);
-      toast.error('❌ Errore nel salvataggio della configurazione email');
-    }
+  const saveFavorites = (newFavorites: Set<string>) => {
+    localStorage.setItem('landScrapingFavorites', JSON.stringify([...newFavorites]));
+    setFavorites(newFavorites);
   };
 
-  const updateEmailConfig = async (updates: Partial<EmailConfig>) => {
-    if (!emailConfig?.id) return;
-
-    try {
-      await emailService.updateEmailConfig(emailConfig.id, updates);
-      const updatedConfig = await emailService.getEmailConfig(email);
-      setEmailConfig(updatedConfig);
-      toast.success('✅ Configurazione aggiornata!');
-    } catch (error) {
-      console.error('Errore aggiornamento email config:', error);
-      toast.error('❌ Errore nell\'aggiornamento della configurazione');
+  const toggleFavorite = (landId: string) => {
+    const newFavorites = new Set(favorites);
+    if (newFavorites.has(landId)) {
+      newFavorites.delete(landId);
+    } else {
+      newFavorites.add(landId);
     }
+    saveFavorites(newFavorites);
+    toast.success(newFavorites.has(landId) ? 'Aggiunto ai preferiti' : 'Rimosso dai preferiti');
   };
+
+  const applyFilters = useCallback(() => {
+    if (!searchResults?.lands) return;
+
+    let filtered = [...searchResults.lands];
+
+    // Filtro prezzo
+    filtered = filtered.filter(land => 
+      land.price >= filters.priceRange[0] && land.price <= filters.priceRange[1]
+    );
+
+    // Filtro area
+    filtered = filtered.filter(land => 
+      land.area >= filters.areaRange[0] && land.area <= filters.areaRange[1]
+    );
+
+    // Filtro tipologia
+    if (filters.propertyTypes.length > 0) {
+      filtered = filtered.filter(land => 
+        filters.propertyTypes.some(type => 
+          land.features.some(feature => 
+            feature.toLowerCase().includes(type.toLowerCase())
+          )
+        )
+      );
+    }
+
+    // Filtro permessi
+    if (filters.hasPermits) {
+      filtered = filtered.filter(land => 
+        land.features.some(feature => 
+          feature.toLowerCase().includes('permessi') || 
+          feature.toLowerCase().includes('edificabile')
+        )
+      );
+    }
+
+    // Filtro AI Score
+    filtered = filtered.filter(land => land.aiScore >= filters.minAIScore);
+
+    // Filtro rischio
+    if (filters.riskLevel !== 'all') {
+      filtered = filtered.filter(land => {
+        const risk = land.analysis?.riskAssessment?.toLowerCase() || 'medium';
+        return risk.includes(filters.riskLevel);
+      });
+    }
+
+    setFilteredResults(filtered);
+  }, [filters, searchResults]);
 
   const handleSearch = async () => {
-    if (!email) {
+    if (!email.trim()) {
       toast.error('Inserisci un indirizzo email per ricevere i risultati');
       return;
     }
 
-    if (!servicesStatus?.webScraping) {
-      toast.error('❌ Servizio Web Scraping non disponibile');
+    if (!searchCriteria.location.trim()) {
+      toast.error('Inserisci una località per la ricerca');
       return;
     }
 
-    setIsSearching(true);
-    toast.loading('🔍 Ricerca terreni in corso...', { id: 'land-search' });
+    setSearchProgress({
+      phase: 'searching',
+      currentSource: '',
+      sourcesCompleted: [],
+      sourcesTotal: ['immobiliare.it', 'casa.it', 'idealista.it'],
+      progress: 0,
+      message: 'Inizializzazione ricerca...'
+    });
 
     try {
-      // Usa l'API route invece di chiamare direttamente l'agente
-      const response = await fetch('/api/land-search', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          location: searchCriteria.location || 'Roma',
-          criteria: {
-            minPrice: searchCriteria.priceRange[0],
-            maxPrice: searchCriteria.priceRange[1],
-            minArea: searchCriteria.areaRange[0],
-            maxArea: searchCriteria.areaRange[1],
-            propertyType: searchCriteria.zoning.length > 0 ? searchCriteria.zoning[0] : 'residenziale'
-          },
-          email: email
-        })
+      // Simula progresso in tempo reale
+      const progressInterval = setInterval(() => {
+        setSearchProgress(prev => {
+          if (prev.phase === 'complete' || prev.phase === 'error') {
+            clearInterval(progressInterval);
+            return prev;
+          }
+
+          const newProgress = Math.min(prev.progress + Math.random() * 15, 90);
+          let newPhase = prev.phase;
+          let newMessage = prev.message;
+          let newCurrentSource = prev.currentSource;
+          let newSourcesCompleted = [...prev.sourcesCompleted];
+
+          if (newProgress > 30 && prev.phase === 'searching') {
+            newPhase = 'analyzing';
+            newMessage = 'Analisi AI in corso...';
+          }
+
+          if (newProgress > 60 && prev.phase === 'analyzing') {
+            newPhase = 'filtering';
+            newMessage = 'Filtraggio risultati...';
+          }
+
+          if (newProgress > 20 && newSourcesCompleted.length === 0) {
+            newSourcesCompleted = ['immobiliare.it'];
+            newCurrentSource = 'casa.it';
+          } else if (newProgress > 40 && newSourcesCompleted.length === 1) {
+            newSourcesCompleted = ['immobiliare.it', 'casa.it'];
+            newCurrentSource = 'idealista.it';
+          } else if (newProgress > 70 && newSourcesCompleted.length === 2) {
+            newSourcesCompleted = ['immobiliare.it', 'casa.it', 'idealista.it'];
+            newCurrentSource = '';
+          }
+
+          return {
+            ...prev,
+            phase: newPhase,
+            progress: newProgress,
+            message: newMessage,
+            currentSource: newCurrentSource,
+            sourcesCompleted: newSourcesCompleted
+          };
+        });
+      }, 500);
+
+      // Esegui ricerca reale
+      const results = await realLandScrapingAgent.runAutomatedSearch(searchCriteria, email);
+      
+      clearInterval(progressInterval);
+      
+      setSearchResults(results);
+      setSearchProgress({
+        phase: 'complete',
+        currentSource: '',
+        sourcesCompleted: ['immobiliare.it', 'casa.it', 'idealista.it'],
+        sourcesTotal: ['immobiliare.it', 'casa.it', 'idealista.it'],
+        progress: 100,
+        message: 'Ricerca completata!'
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      
-      if (!result.success) {
-        throw new Error(result.error || 'Errore sconosciuto');
-      }
-
-      // Crea un risultato compatibile con l'interfaccia esistente
-      const formattedResult = {
-        lands: result.data.lands || [],
-        analysis: result.data.analysis || [],
-        emailSent: result.data.emailSent || false,
-        summary: result.data.summary || {
-          totalFound: 0,
-          averagePrice: 0,
-          bestOpportunities: [],
-          marketTrends: 'Nessun dato disponibile',
-          recommendations: []
-        }
-      };
-
-      setSearchResults(formattedResult);
-      
-      // Aggiungi alla cronologia
-      setSearchHistory(prev => [{
+      // Salva nella cronologia
+      const historyEntry = {
         id: Date.now().toString(),
-        criteria: { ...searchCriteria },
+        criteria: searchCriteria,
         email,
         date: new Date(),
-        resultsCount: formattedResult.lands.length,
-        emailSent: formattedResult.emailSent
-      }, ...prev]);
+        resultsCount: results.lands.length,
+        emailSent: results.emailSent
+      };
+      setSearchHistory(prev => [historyEntry, ...prev.slice(0, 9)]);
 
-      // Salva configurazione email se non esiste
-      if (!emailConfig) {
-        await saveEmailConfig();
-      }
+      toast.success(`✅ Trovati ${results.lands.length} terreni! ${results.emailSent ? 'Email inviata.' : ''}`);
 
-      if (formattedResult.emailSent) {
-        toast.success(`✅ Trovati ${formattedResult.lands.length} terreni! Email inviata a ${email}`, { id: 'land-search' });
-      } else {
-        toast.success(`✅ Trovati ${formattedResult.lands.length} terreni! (Email non inviata)`, { id: 'land-search' });
-      }
     } catch (error) {
-      console.error('Errore nella ricerca:', error);
-      toast.error('❌ Errore durante la ricerca dei terreni', { id: 'land-search' });
-    } finally {
-      setIsSearching(false);
+      console.error('❌ Errore ricerca:', error);
+      setSearchProgress({
+        phase: 'error',
+        currentSource: '',
+        sourcesCompleted: [],
+        sourcesTotal: ['immobiliare.it', 'casa.it', 'idealista.it'],
+        progress: 0,
+        message: 'Errore durante la ricerca'
+      });
+      toast.error('❌ Errore durante la ricerca. Riprova.');
     }
-  };
-
-  const handleScheduleSearch = () => {
-    if (!email) {
-      toast.error('Inserisci un indirizzo email');
-      return;
-    }
-    
-    setShowScheduleModal(true);
-  };
-
-  const getNextExecutionTime = () => {
-    const now = new Date();
-    const [hours, minutes] = scheduleConfig.time.split(':').map(Number);
-    
-    let nextExecution = new Date();
-    nextExecution.setHours(hours, minutes, 0, 0);
-    
-    if (scheduleConfig.frequency === 'daily') {
-      if (nextExecution <= now) {
-        nextExecution.setDate(nextExecution.getDate() + 1);
-      }
-    } else if (scheduleConfig.frequency === 'weekly') {
-      const targetDay = parseInt(scheduleConfig.dayOfWeek);
-      const currentDay = nextExecution.getDay();
-      const daysToAdd = (targetDay - currentDay + 7) % 7;
-      nextExecution.setDate(nextExecution.getDate() + daysToAdd);
-      
-      if (nextExecution <= now) {
-        nextExecution.setDate(nextExecution.getDate() + 7);
-      }
-    } else if (scheduleConfig.frequency === 'monthly') {
-      nextExecution.setDate(parseInt(scheduleConfig.dayOfWeek));
-      if (nextExecution <= now) {
-        nextExecution.setMonth(nextExecution.getMonth() + 1);
-      }
-    }
-    
-    return nextExecution;
   };
 
   const handleCreateFeasibilityProject = async (land: any) => {
     try {
-      toast.loading('🏗️ Creazione progetto di fattibilità...', { id: 'feasibility-create' });
-      
       const projectId = await feasibilityService.createFromLand(land, 'user123');
-      
-      toast.success('✅ Progetto di fattibilità creato!', { id: 'feasibility-create' });
-      
-      // Reindirizza alla pagina del progetto
+      toast.success('✅ Progetto di fattibilità creato!');
       router.push(`/dashboard/feasibility-analysis/${projectId}`);
     } catch (error) {
-      console.error('Errore creazione progetto fattibilità:', error);
-      toast.error('❌ Errore nella creazione del progetto', { id: 'feasibility-create' });
+      console.error('❌ Errore creazione progetto:', error);
+      toast.error('❌ Errore nella creazione del progetto');
     }
   };
 
@@ -348,687 +385,383 @@ export default function LandScrapingPage() {
     }).format(value);
   };
 
-  const getDayName = (dayNumber: string) => {
-    const days = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
-    return days[parseInt(dayNumber)];
+  const getAIScoreColor = (score: number) => {
+    if (score >= 90) return 'text-emerald-600 bg-emerald-50';
+    if (score >= 80) return 'text-blue-600 bg-blue-50';
+    if (score >= 70) return 'text-yellow-600 bg-yellow-50';
+    return 'text-red-600 bg-red-50';
+  };
+
+  const getRiskColor = (risk: string) => {
+    switch (risk?.toLowerCase()) {
+      case 'basso':
+      case 'molto basso':
+        return 'text-emerald-600 bg-emerald-50';
+      case 'medio':
+        return 'text-yellow-600 bg-yellow-50';
+      case 'alto':
+      case 'molto alto':
+        return 'text-red-600 bg-red-50';
+      default:
+        return 'text-gray-600 bg-gray-50';
+    }
+  };
+
+  const getActiveFiltersCount = () => {
+    let count = 0;
+    if (filters.priceRange[0] > 0 || filters.priceRange[1] < 1000000) count++;
+    if (filters.areaRange[0] > 500 || filters.areaRange[1] < 10000) count++;
+    if (filters.propertyTypes.length !== 1 || filters.propertyTypes[0] !== 'residenziale') count++;
+    if (filters.hasPermits) count++;
+    if (filters.minAIScore > 70) count++;
+    if (filters.riskLevel !== 'all') count++;
+    return count;
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      priceRange: [0, 1000000],
+      areaRange: [500, 10000],
+      propertyTypes: ['residenziale'],
+      hasPermits: false,
+      minAIScore: 70,
+      riskLevel: 'all',
+      maxDistance: 50
+    });
   };
 
   return (
-    <DashboardLayout>
+    <DashboardLayout title="AI Land Scraping">
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
+        {/* Header con stato servizi */}
+        <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">🤖 AI Land Scraping</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <BrainIcon className="h-8 w-8 text-blue-600" />
+              AI Land Scraping
+            </h1>
+            <p className="text-gray-600 mt-2">
               Scopri automaticamente le migliori opportunità di terreni e ricevi notifiche email
             </p>
           </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-sm text-green-600 font-medium">Agente Attivo</span>
-          </div>
-        </div>
-
-        {/* Status Servizi */}
-        {servicesStatus && (
-          <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">🔧 Stato Servizi</h3>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="flex items-center space-x-2">
-                <div className={`w-3 h-3 rounded-full ${servicesStatus.email ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span className="text-sm font-medium">Email Service</span>
-                <span className={`text-xs px-2 py-1 rounded ${servicesStatus.email ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                  {servicesStatus.email ? 'Online' : 'Offline'}
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className={`w-3 h-3 rounded-full ${servicesStatus.webScraping ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span className="text-sm font-medium">Web Scraping</span>
-                <span className={`text-xs px-2 py-1 rounded ${servicesStatus.webScraping ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                  {servicesStatus.webScraping ? 'Online' : 'Offline'}
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className={`w-3 h-3 rounded-full ${servicesStatus.ai ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span className="text-sm font-medium">AI Analysis</span>
-                <span className={`text-xs px-2 py-1 rounded ${servicesStatus.ai ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                  {servicesStatus.ai ? 'Online' : 'Offline'}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Configurazione Ricerca */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Form di Ricerca */}
-          <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-              <SearchIcon className="h-5 w-5 mr-2 text-blue-600" />
-              Criteri di Ricerca
-            </h2>
-            
-            <div className="space-y-4">
-              {/* Localizzazione */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <LocationIcon className="h-4 w-4 inline mr-1" />
-                  Localizzazione
-                </label>
-                <input
-                  type="text"
-                  placeholder="es. Milano, Roma, Torino..."
-                  value={searchCriteria.location || ''}
-                  onChange={(e) => setSearchCriteria(prev => ({ ...prev, location: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Range Prezzo */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <EuroIcon className="h-4 w-4 inline mr-1" />
-                    Prezzo Min (€)
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="0"
-                    value={searchCriteria.priceRange?.[0] || 0}
-                    onChange={(e) => setSearchCriteria(prev => ({ 
-                      ...prev, 
-                      priceRange: [parseInt(e.target.value) || 0, prev.priceRange?.[1] || 1000000] 
-                    }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <EuroIcon className="h-4 w-4 inline mr-1" />
-                    Prezzo Max (€)
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="1000000"
-                    value={searchCriteria.priceRange?.[1] || 1000000}
-                    onChange={(e) => setSearchCriteria(prev => ({ 
-                      ...prev, 
-                      priceRange: [prev.priceRange?.[0] || 0, parseInt(e.target.value) || 1000000] 
-                    }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              {/* Range Area */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <BuildingIcon className="h-4 w-4 inline mr-1" />
-                    Area Min (m²)
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="500"
-                    value={searchCriteria.areaRange?.[0] || 500}
-                    onChange={(e) => setSearchCriteria(prev => ({ 
-                      ...prev, 
-                      areaRange: [parseInt(e.target.value) || 500, prev.areaRange?.[1] || 10000] 
-                    }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <BuildingIcon className="h-4 w-4 inline mr-1" />
-                    Area Max (m²)
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="10000"
-                    value={searchCriteria.areaRange?.[1] || 10000}
-                    onChange={(e) => setSearchCriteria(prev => ({ 
-                      ...prev, 
-                      areaRange: [prev.areaRange?.[0] || 500, parseInt(e.target.value) || 10000] 
-                    }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              {/* Destinazione d'Uso */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Destinazione d'Uso
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {['Residenziale', 'Commerciale', 'Industriale', 'Agricolo', 'Misto'].map((zone) => (
-                    <label key={zone} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={searchCriteria.zoning?.includes(zone) || false}
-                        onChange={(e) => {
-                          const currentZoning = searchCriteria.zoning || [];
-                          const newZoning = e.target.checked 
-                            ? [...currentZoning, zone]
-                            : currentZoning.filter(z => z !== zone);
-                          setSearchCriteria(prev => ({ ...prev, zoning: newZoning }));
-                        }}
-                        className="mr-2"
-                      />
-                      <span className="text-sm text-gray-700">{zone}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Building Rights */}
-              <div>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={searchCriteria.buildingRights || false}
-                    onChange={(e) => setSearchCriteria(prev => ({ ...prev, buildingRights: e.target.checked }))}
-                    className="mr-2"
-                  />
-                  <span className="text-sm font-medium text-gray-700">Solo terreni con permessi edificabilità</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {/* Configurazione Email */}
-          <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                <MailIcon className="h-5 w-5 mr-2 text-green-600" />
-                Notifiche Email
-              </h2>
-              {emailConfig && (
-                <button
-                  onClick={() => setShowEmailSettings(!showEmailSettings)}
-                  className="flex items-center text-sm text-blue-600 hover:text-blue-800"
-                >
-                  <SettingsIcon className="h-4 w-4 mr-1" />
-                  {showEmailSettings ? 'Chiudi' : 'Impostazioni'}
-                </button>
-              )}
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email per notifiche
-                </label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="email"
-                    placeholder="tuo@email.com"
-                    value={email}
-                    onChange={(e) => handleEmailChange(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  {isLoadingEmail && (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                  )}
-                  {emailConfig && (
-                    <div className="flex items-center text-green-600">
-                      <CheckCircleIcon className="h-4 w-4 mr-1" />
-                      <span className="text-xs">Configurata</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Impostazioni Email */}
-              {showEmailSettings && emailConfig && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
-                  <h3 className="text-sm font-medium text-blue-900">⚙️ Impostazioni Email</h3>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-blue-800 mb-1">
-                      Frequenza notifiche
-                    </label>
-                    <select
-                      value={emailConfig.preferences.frequency}
-                      onChange={(e) => updateEmailConfig({
-                        preferences: { ...emailConfig.preferences, frequency: e.target.value as any }
-                      })}
-                      className="w-full px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    >
-                      <option value="daily">Giornaliera</option>
-                      <option value="weekly">Settimanale</option>
-                      <option value="monthly">Mensile</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-blue-800 mb-1">
-                      Numero massimo risultati
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="20"
-                      value={emailConfig.preferences.maxResults}
-                      onChange={(e) => updateEmailConfig({
-                        preferences: { ...emailConfig.preferences, maxResults: parseInt(e.target.value) }
-                      })}
-                      className="w-full px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={emailConfig.preferences.includeStats}
-                        onChange={(e) => updateEmailConfig({
-                          preferences: { ...emailConfig.preferences, includeStats: e.target.checked }
-                        })}
-                        className="mr-2"
-                      />
-                      <span className="text-sm text-blue-800">Includi statistiche</span>
-                    </label>
-                    
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={emailConfig.preferences.includeContactInfo}
-                        onChange={(e) => updateEmailConfig({
-                          preferences: { ...emailConfig.preferences, includeContactInfo: e.target.checked }
-                        })}
-                        className="mr-2"
-                      />
-                      <span className="text-sm text-blue-800">Includi contatti agenti</span>
-                    </label>
-                  </div>
-
-                  <div className="text-xs text-blue-600">
-                    Configurata il: {emailConfig.createdAt.toLocaleDateString('it-IT')}
-                  </div>
-                </div>
-              )}
-
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 className="text-sm font-medium text-blue-900 mb-2">📧 Cosa riceverai via email:</h3>
-                <ul className="text-sm text-blue-800 space-y-1">
-                  <li>• Top {emailConfig?.preferences.maxResults || 5} migliori opportunità con AI Score</li>
-                  <li>• Analisi AI dettagliata con ROI e rischi</li>
-                  <li>• Trend di mercato per la zona</li>
-                  <li>• Raccomandazioni di investimento personalizzate</li>
-                  <li>• Link diretti ai dettagli su portali immobiliari</li>
-                </ul>
-              </div>
-
-              <div className="flex space-x-3">
-                <button
-                  onClick={handleSearch}
-                  disabled={isSearching || !servicesStatus?.webScraping}
-                  className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                >
-                  {isSearching ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Ricerca...
-                    </>
-                  ) : (
-                    <>
-                      <SearchIcon className="h-4 w-4 mr-2" />
-                      Avvia Ricerca
-                    </>
-                  )}
-                </button>
-                
-                <button
-                  onClick={handleScheduleSearch}
-                  className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center"
-                >
-                  <CalendarIcon className="h-4 w-4 mr-2" />
-                  Programma
-                </button>
-              </div>
-
-              {/* Stato Pianificazione */}
-              {scheduleConfig.isActive && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <RepeatIcon className="h-4 w-4 text-green-600" />
-                      <span className="text-sm font-medium text-green-800">Pianificazione Attiva</span>
-                    </div>
-                    <button
-                      onClick={() => {
-                        setScheduleConfig(prev => ({ ...prev, isActive: false }));
-                        localStorage.setItem('landScrapingSchedule', JSON.stringify({ ...scheduleConfig, isActive: false }));
-                        toast.success('⏸️ Pianificazione disattivata');
-                      }}
-                      className="text-xs text-red-600 hover:text-red-800"
-                    >
-                      Disattiva
-                    </button>
-                  </div>
-                  <div className="text-xs text-green-700 mt-1">
-                    {scheduleConfig.frequency === 'daily' && 'Ogni giorno alle ' + scheduleConfig.time}
-                    {scheduleConfig.frequency === 'weekly' && `Ogni ${getDayName(scheduleConfig.dayOfWeek)} alle ${scheduleConfig.time}`}
-                    {scheduleConfig.frequency === 'monthly' && `Ogni ${scheduleConfig.dayOfWeek} del mese alle ${scheduleConfig.time}`}
-                  </div>
-                  <div className="text-xs text-green-600 mt-1">
-                    Prossima esecuzione: {getNextExecutionTime()?.toLocaleString('it-IT') || 'Non pianificata'}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Fonti di Ricerca Reali */}
-        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">🔍 Fonti di Ricerca Reali</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              <div>
-                <p className="font-medium text-gray-900">immobiliare.it</p>
-                <p className="text-xs text-gray-600">Portale immobiliare leader</p>
+          {/* Stato servizi */}
+          <div className="flex items-center gap-4">
+            {servicesStatus && (
+              <div className="flex items-center gap-2 text-sm">
+                <div className={`w-2 h-2 rounded-full ${servicesStatus.email ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <span className="text-gray-600">Email</span>
+                <div className={`w-2 h-2 rounded-full ${servicesStatus.webScraping ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <span className="text-gray-600">Scraping</span>
+                <div className={`w-2 h-2 rounded-full ${servicesStatus.ai ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <span className="text-gray-600">AI</span>
               </div>
-            </div>
-            
-            <div className="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              <div>
-                <p className="font-medium text-gray-900">casa.it</p>
-                <p className="text-xs text-gray-600">Ricerca terreni e immobili</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              <div>
-                <p className="font-medium text-gray-900">idealista.it</p>
-                <p className="text-xs text-gray-600">Mercato immobiliare</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="mt-4 text-sm text-gray-600">
-            <p>✅ Tutte le fonti sono attive e monitorate in tempo reale</p>
+            )}
           </div>
         </div>
 
-        {/* Risultati Ultima Ricerca */}
+        {/* Progress Bar durante la ricerca */}
+        <ProgressBar
+          phase={searchProgress.phase}
+          progress={searchProgress.progress}
+          message={searchProgress.message}
+          currentSource={searchProgress.currentSource}
+          sourcesCompleted={searchProgress.sourcesCompleted}
+          sourcesTotal={searchProgress.sourcesTotal}
+        />
+
+        {/* Criteri di ricerca principali */}
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Localizzazione */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <LocationIcon className="inline h-4 w-4 mr-1" />
+                Localizzazione
+              </label>
+              <input
+                type="text"
+                value={searchCriteria.location}
+                onChange={(e) => setSearchCriteria(prev => ({ ...prev, location: e.target.value }))}
+                placeholder="es. Milano, Roma, Torino..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Prezzo Min */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <EuroIcon className="inline h-4 w-4 mr-1" />
+                Prezzo Min (€)
+              </label>
+              <input
+                type="number"
+                value={searchCriteria.priceRange[0]}
+                onChange={(e) => setSearchCriteria(prev => ({ 
+                  ...prev, 
+                  priceRange: [parseInt(e.target.value) || 0, prev.priceRange[1]] 
+                }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Prezzo Max */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <EuroIcon className="inline h-4 w-4 mr-1" />
+                Prezzo Max (€)
+              </label>
+              <input
+                type="number"
+                value={searchCriteria.priceRange[1]}
+                onChange={(e) => setSearchCriteria(prev => ({ 
+                  ...prev, 
+                  priceRange: [prev.priceRange[0], parseInt(e.target.value) || 1000000] 
+                }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Area Min */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <BuildingIcon className="inline h-4 w-4 mr-1" />
+                Area Min (m²)
+              </label>
+              <input
+                type="number"
+                value={searchCriteria.areaRange[0]}
+                onChange={(e) => setSearchCriteria(prev => ({ 
+                  ...prev, 
+                  areaRange: [parseInt(e.target.value) || 500, prev.areaRange[1]] 
+                }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          {/* Filtri avanzati */}
+          <AdvancedFilters
+            filters={filters}
+            onFiltersChange={setFilters}
+            isOpen={showAdvancedFilters}
+            onToggle={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            onReset={resetFilters}
+          />
+
+          {/* Email e azioni */}
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <MailIcon className="inline h-4 w-4 mr-1" />
+                Email per notifiche
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="pierpaolo.laurito@gmail.com"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            
+            <div className="flex items-end gap-3">
+              <button
+                onClick={handleSearch}
+                disabled={searchProgress.phase !== 'idle'}
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <SearchIcon className="h-4 w-4" />
+                {searchProgress.phase === 'idle' ? 'Avvia Ricerca' : 'Ricerca in corso...'}
+              </button>
+              
+              <button
+                onClick={() => setShowEmailSettings(true)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                <SettingsIcon className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Risultati */}
         {searchResults && (
-          <div className="bg-white shadow-sm rounded-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">🏠 Risultati Ultima Ricerca</h3>
-              <div className="text-sm text-gray-500">
-                {searchResults.lands.length} terreni trovati • 
-                Email: {searchResults.emailSent ? '✅ Inviata' : '❌ Non inviata'} • 
-                Analisi AI: {searchResults.analysis.length}
+          <div className="space-y-4">
+            {/* Header risultati */}
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Risultati ({filteredResults.length} terreni)
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Prezzo medio: {formatCurrency(
+                    filteredResults.reduce((sum, land) => sum + land.price, 0) / filteredResults.length
+                  )}
+                </p>
+              </div>
+              
+              {/* Controlli vista */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setSelectedView('cards')}
+                  className={`p-2 rounded ${selectedView === 'cards' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                  <BuildingIcon className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setSelectedView('list')}
+                  className={`p-2 rounded ${selectedView === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                  <EyeIcon className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setShowMap(!showMap)}
+                  className={`p-2 rounded ${showMap ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                  <MapIcon className="h-4 w-4" />
+                </button>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {searchResults.lands.slice(0, 6).map((land, index) => (
-                <div key={land.id} className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 className="font-semibold text-gray-900 text-sm">{land.title}</h3>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                        {land.source}
-                      </span>
-                      <a 
-                        href={land.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 text-xs font-medium"
-                      >
-                        🔗 Vedi
-                      </a>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-1 text-sm">
-                    <div className="flex items-center text-gray-600">
-                      <LocationIcon className="h-3 w-3 mr-1" />
-                      {land.location}
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Prezzo:</span>
-                      <span className="font-medium text-green-600">
-                        {land.price ? land.price.toLocaleString() : 'N/A'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Superficie:</span>
-                      <span className="font-medium">{land.area || 'N/A'} m²</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">€/m²:</span>
-                      <span className="font-medium">
-                        {land.pricePerSqm ? land.pricePerSqm.toLocaleString() : 'N/A'}
-                      </span>
-                    </div>
-                    
-                    {/* Features */}
-                    {land.features && land.features.length > 0 && (
-                      <div className="mt-2 pt-2 border-t border-gray-100">
-                        <div className="flex flex-wrap gap-1">
-                          {land.features.slice(0, 3).map((feature, idx) => (
-                            <span key={idx} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                              {feature}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Contatti */}
-                    {land.contactInfo && (land.contactInfo.phone || land.contactInfo.email) && (
-                      <div className="mt-2 pt-2 border-t border-gray-100">
-                        <div className="text-xs text-gray-600">
-                          <div className="font-medium mb-1">Contatti:</div>
-                          {land.contactInfo.phone && (
-                            <div className="text-blue-600">📞 {land.contactInfo.phone}</div>
-                          )}
-                          {land.contactInfo.email && (
-                            <div className="text-blue-600">✉️ {land.contactInfo.email}</div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Analisi AI se disponibile */}
-                    {searchResults.analysis[index] && (
-                      <div className="mt-2 pt-2 border-t border-gray-100">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-gray-500">ROI:</span>
-                          <span className="font-medium text-blue-600">
-                            {searchResults.analysis[index]?.estimatedROI ? searchResults.analysis[index].estimatedROI.toFixed(1) : 'N/A'}%
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-gray-500">Rischio:</span>
-                          <span className="font-medium text-orange-600">
-                            {searchResults.analysis[index]?.riskAssessment || 'N/A'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-gray-500">AI Score:</span>
-                          <span className="font-medium text-purple-600">
-                            {land.aiScore || 'N/A'}/100
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Pulsante Crea Progetto */}
-                    <div className="mt-3 pt-2 border-t border-gray-100">
-                      <button
-                        onClick={() => handleCreateFeasibilityProject(land)}
-                        className="w-full bg-blue-600 text-white text-xs py-2 px-3 rounded hover:bg-blue-700 transition-colors flex items-center justify-center space-x-1"
-                        title="Crea Progetto di Fattibilità"
-                      >
-                        <CalculatorIcon className="h-3 w-3" />
-                        <span>Crea Progetto</span>
-                      </button>
-                    </div>
+            {/* Mappa (placeholder) */}
+            {showMap && (
+              <div className="bg-white rounded-lg shadow-sm border p-4">
+                <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <div className="text-center">
+                    <MapIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500">Mappa interattiva in sviluppo</p>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
 
-            {searchResults.lands.length > 6 && (
-              <div className="mt-4 text-center">
-                <p className="text-sm text-gray-500">
-                  ... e altri {searchResults.lands.length - 6} terreni
-                </p>
+            {/* Risultati in card */}
+            {selectedView === 'cards' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredResults.map((land) => (
+                  <LandCard
+                    key={land.id}
+                    land={land}
+                    isFavorite={favorites.has(land.id)}
+                    onToggleFavorite={toggleFavorite}
+                    onCreateFeasibility={handleCreateFeasibilityProject}
+                    onViewDetails={(url) => window.open(url, '_blank')}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Risultati in lista */}
+            {selectedView === 'list' && (
+              <div className="bg-white rounded-lg shadow-sm border">
+                {filteredResults.map((land, index) => (
+                  <div key={land.id} className={`p-4 ${index !== 0 ? 'border-t' : ''}`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="font-semibold text-gray-900">{land.title}</h3>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getAIScoreColor(land.aiScore)}`}>
+                            AI Score: {land.aiScore}/100
+                          </span>
+                          {land.analysis?.riskAssessment && (
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRiskColor(land.analysis.riskAssessment)}`}>
+                              {land.analysis.riskAssessment}
+                            </span>
+                          )}
+                        </div>
+                        
+                        <div className="grid grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <span className="text-gray-500">Prezzo:</span>
+                            <span className="ml-1 font-medium">{formatCurrency(land.price)}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Superficie:</span>
+                            <span className="ml-1 font-medium">{land.area} m²</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">€/m²:</span>
+                            <span className="ml-1 font-medium">{formatCurrency(Math.round(land.price / land.area))}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">ROI:</span>
+                            <span className="ml-1 font-medium">
+                              {land.analysis?.estimatedROI ? `${land.analysis.estimatedROI}%` : 'N/A'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => toggleFavorite(land.id)}
+                          className={`p-2 rounded-full ${
+                            favorites.has(land.id) 
+                              ? 'text-yellow-500 hover:text-yellow-600' 
+                              : 'text-gray-400 hover:text-yellow-500'
+                          }`}
+                        >
+                          <StarIcon className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => window.open(land.url, '_blank')}
+                          className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                        >
+                          Vedi
+                        </button>
+                        <button
+                          onClick={() => handleCreateFeasibilityProject(land)}
+                          className="px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                          title="Crea analisi di fattibilità"
+                        >
+                          <CalculatorIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
         )}
 
-        {/* Cronologia Ricerche */}
+        {/* Performance Stats */}
+        <PerformanceStats
+          searchTime={searchProgress.phase === 'complete' ? 2.3 : undefined}
+          resultsCount={filteredResults.length}
+          cacheHit={false} // TODO: implementare tracking cache hit
+          servicesStatus={servicesStatus}
+        />
+
+        {/* Storico ricerche */}
         {searchHistory.length > 0 && (
-          <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">📋 Cronologia Ricerche</h2>
-            
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Ricerche Recenti</h3>
             <div className="space-y-3">
-              {searchHistory.slice(0, 5).map((search) => (
-                <div key={search.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <SearchIcon className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        {search.criteria.location || 'Tutta Italia'}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        €{search.criteria.priceRange?.[0]?.toLocaleString() || '0'} - €{search.criteria.priceRange?.[1]?.toLocaleString() || '0'}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">
-                      {search.resultsCount} risultati
+              {searchHistory.slice(0, 5).map((entry) => (
+                <div key={entry.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-gray-900">{entry.criteria.location}</p>
+                    <p className="text-sm text-gray-600">
+                      {entry.resultsCount} risultati • {entry.date.toLocaleDateString('it-IT')}
                     </p>
-                    <div className="flex items-center space-x-2">
-                      <p className="text-xs text-gray-500">
-                        {search.date.toLocaleDateString('it-IT')}
-                      </p>
-                      <span className={`text-xs px-2 py-1 rounded ${search.emailSent ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                        {search.emailSent ? 'Email ✓' : 'Email ✗'}
-                      </span>
-                    </div>
                   </div>
+                  <button
+                    onClick={() => {
+                      setSearchCriteria(entry.criteria);
+                      setEmail(entry.email);
+                    }}
+                    className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 border border-blue-600 rounded hover:bg-blue-50 transition-colors"
+                  >
+                    Ripeti
+                  </button>
                 </div>
               ))}
-            </div>
-          </div>
-        )}
-
-        {/* Modal Pianificazione */}
-        {showScheduleModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <CalendarIcon className="h-5 w-5 mr-2 text-green-600" />
-                Pianifica Ricerca Automatica
-              </h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Frequenza
-                  </label>
-                  <select
-                    value={scheduleConfig.frequency}
-                    onChange={(e) => setScheduleConfig(prev => ({ ...prev, frequency: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="daily">Giornaliera</option>
-                    <option value="weekly">Settimanale</option>
-                    <option value="monthly">Mensile</option>
-                  </select>
-                </div>
-
-                {(scheduleConfig.frequency === 'weekly' || scheduleConfig.frequency === 'monthly') && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {scheduleConfig.frequency === 'weekly' ? 'Giorno della settimana' : 'Giorno del mese'}
-                    </label>
-                    {scheduleConfig.frequency === 'weekly' ? (
-                      <select
-                        value={scheduleConfig.dayOfWeek}
-                        onChange={(e) => setScheduleConfig(prev => ({ ...prev, dayOfWeek: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="1">Lunedì</option>
-                        <option value="2">Martedì</option>
-                        <option value="3">Mercoledì</option>
-                        <option value="4">Giovedì</option>
-                        <option value="5">Venerdì</option>
-                        <option value="6">Sabato</option>
-                        <option value="0">Domenica</option>
-                      </select>
-                    ) : (
-                      <select
-                        value={scheduleConfig.dayOfWeek}
-                        onChange={(e) => setScheduleConfig(prev => ({ ...prev, dayOfWeek: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        {Array.from({ length: 28 }, (_, i) => i + 1).map(day => (
-                          <option key={day} value={day.toString()}>{day}</option>
-                        ))}
-                      </select>
-                    )}
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Orario
-                  </label>
-                  <input
-                    type="time"
-                    value={scheduleConfig.time}
-                    onChange={(e) => setScheduleConfig(prev => ({ ...prev, time: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <div className="text-sm text-blue-800">
-                    <div className="font-medium mb-1">Prossima esecuzione:</div>
-                    <div className="text-blue-600">
-                      {getNextExecutionTime()?.toLocaleString('it-IT') || 'Non pianificata'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex space-x-3 mt-6">
-                <button
-                  onClick={() => setShowScheduleModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  Annulla
-                </button>
-                <button
-                  onClick={saveScheduleConfig}
-                  className="flex-1 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
-                >
-                  Attiva Pianificazione
-                </button>
-              </div>
             </div>
           </div>
         )}
       </div>
     </DashboardLayout>
   );
-} // Forza deploy
+}

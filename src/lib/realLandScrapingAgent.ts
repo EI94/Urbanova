@@ -2,6 +2,7 @@
 import { realWebScraper, ScrapedLand, LandSearchCriteria } from './realWebScraper';
 import { realEmailService, EmailNotification } from './realEmailService';
 import { realAIService, LandAnalysis } from './realAIService';
+import { cacheService } from './cacheService';
 import { db } from './firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
@@ -31,9 +32,38 @@ export class RealLandScrapingAgent {
     console.log(`🚀 [${this.name}] Avvio ricerca automatizzata per ${email}`);
     
     try {
-      // 1. Web Scraping Reale
-      console.log('🔍 Fase 1: Web Scraping...');
-      const lands = await realWebScraper.scrapeLands(criteria);
+      // 0. Controlla Cache per velocità
+      console.log('🔍 Fase 0: Controllo Cache...');
+      const cachedResult = await cacheService.get(criteria);
+      if (cachedResult) {
+        console.log('⚡ Risultati trovati in cache!');
+        return cachedResult;
+      }
+      
+      // 1. Web Scraping PARALLELO per velocità
+      console.log('🔍 Fase 1: Web Scraping Parallelo...');
+      const scrapingPromises = [
+        realWebScraper.scrapeImmobiliare(criteria).catch(e => {
+          console.error('❌ Errore scraping Immobiliare.it:', e);
+          return [];
+        }),
+        realWebScraper.scrapeCasa(criteria).catch(e => {
+          console.error('❌ Errore scraping Casa.it:', e);
+          return [];
+        }),
+        realWebScraper.scrapeIdealista(criteria).catch(e => {
+          console.error('❌ Errore scraping Idealista.it:', e);
+          return [];
+        })
+      ];
+      
+      const [immobiliareResults, casaResults, idealistaResults] = await Promise.allSettled(scrapingPromises);
+      
+      // Combina risultati con gestione errori
+      const lands: any[] = [];
+      if (immobiliareResults.status === 'fulfilled') lands.push(...immobiliareResults.value);
+      if (casaResults.status === 'fulfilled') lands.push(...casaResults.value);
+      if (idealistaResults.status === 'fulfilled') lands.push(...idealistaResults.value);
       
       if (lands.length === 0) {
         console.log('⚠️ Nessun terreno trovato');
@@ -51,34 +81,34 @@ export class RealLandScrapingAgent {
         };
       }
 
-      // 2. Analisi AI Reale
-      console.log('🤖 Fase 2: Analisi AI...');
-      const analysis: LandAnalysis[] = [];
+      // 2. Analisi AI PARALLELA per velocità
+      console.log('🤖 Fase 2: Analisi AI Parallela...');
       const topLands = lands.slice(0, 5); // Analizza solo i top 5 per efficienza
       
-      for (const land of topLands) {
+      const analysisPromises = topLands.map(async (land) => {
         try {
           const landAnalysis = await realAIService.analyzeLand(land);
-          analysis.push(landAnalysis);
-          
-          // Aggiorna AI Score con analisi avanzata
           land.aiScore = await realAIService.calculateAdvancedAIScore(land, landAnalysis);
+          return landAnalysis;
         } catch (error) {
           console.error(`Errore analisi AI per ${land.title}:`, error);
-          // Fallback analysis
-          analysis.push(realAIService['fallbackAnalysis'](land));
+          return realAIService['fallbackAnalysis'](land);
         }
-      }
+      });
+      
+      const analysisResults = await Promise.allSettled(analysisPromises);
+      const analysis = analysisResults
+        .filter(result => result.status === 'fulfilled')
+        .map(result => (result as PromiseFulfilledResult<LandAnalysis>).value);
 
-      // 3. Analisi Trend di Mercato
-      console.log('📊 Fase 3: Analisi Trend...');
-      const marketTrends = await realAIService.analyzeMarketTrends(criteria.location || 'Italia');
+      // 3. Analisi Trend e Raccomandazioni PARALLELE
+      console.log('📊 Fase 3: Analisi Trend e Raccomandazioni...');
+      const [marketTrends, recommendations] = await Promise.all([
+        realAIService.analyzeMarketTrends(criteria.location || 'Italia'),
+        realAIService.generateInvestmentRecommendations(lands)
+      ]);
 
-      // 4. Raccomandazioni di Investimento
-      console.log('💡 Fase 4: Raccomandazioni...');
-      const recommendations = await realAIService.generateInvestmentRecommendations(lands);
-
-      // 5. Prepara Summary
+      // 4. Prepara Summary
       const summary = {
         totalFound: lands.length,
         averagePrice: Math.round(lands.reduce((sum, land) => sum + land.price, 0) / lands.length),
@@ -87,29 +117,38 @@ export class RealLandScrapingAgent {
         recommendations
       };
 
-      // 6. Invia Email Reale
-      console.log('📧 Fase 5: Invio Email...');
-      let emailSent = false;
-      try {
-        await this.sendEmailNotification(email, lands, summary, analysis);
-        emailSent = true;
-        console.log('✅ Email inviata con successo');
-      } catch (error) {
-        console.error('❌ Errore invio email:', error);
-      }
+      // 5. Salvataggio e Email NON BLOCCANTI
+      console.log('💾 Fase 4: Salvataggio e Email...');
+      const savePromise = this.saveSearchResults(lands, analysis, summary, criteria, email)
+        .catch(error => console.error('❌ Errore salvataggio:', error));
+      
+      const emailPromise = this.sendEmailNotification(email, lands, summary, analysis)
+        .then(() => {
+          console.log('✅ Email inviata con successo');
+          return true;
+        })
+        .catch(error => {
+          console.error('❌ Errore invio email:', error);
+          return false;
+        });
+      
+      // Attendi solo il salvataggio, email in background
+      await savePromise;
 
-      // 7. Salva Risultati nel Database
-      console.log('💾 Fase 6: Salvataggio Database...');
-      await this.saveSearchResults(lands, analysis, summary, criteria, email);
+      // 6. Prepara risultato finale
+      const result = {
+        lands,
+        analysis,
+        emailSent: await emailPromise,
+        summary
+      };
+
+      // 7. Salva in cache per future ricerche
+      await cacheService.set(criteria, result, 15 * 60 * 1000); // 15 minuti
 
       console.log(`✅ [${this.name}] Ricerca automatizzata completata con successo`);
       
-      return {
-        lands,
-        analysis,
-        emailSent,
-        summary
-      };
+      return result;
 
     } catch (error) {
       console.error(`❌ [${this.name}] Errore nella ricerca automatizzata:`, error);
