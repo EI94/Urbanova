@@ -67,12 +67,11 @@ export default function LandScrapingPage() {
   // Stati principali
   const [searchCriteria, setSearchCriteria] = useState<LandSearchCriteria>({
     location: '',
-    priceRange: [0, 1000000],
-    areaRange: [500, 10000],
-    zoning: [],
-    buildingRights: true,
-    infrastructure: [],
-    keywords: []
+    minPrice: 0,
+    maxPrice: 1000000,
+    minArea: 500,
+    maxArea: 10000,
+    propertyType: 'residenziale'
   });
   
   const [email, setEmail] = useState('');
@@ -505,10 +504,10 @@ export default function LandScrapingPage() {
               </label>
               <input
                 type="number"
-                value={searchCriteria.priceRange[0]}
+                value={searchCriteria.minPrice || 0}
                 onChange={(e) => setSearchCriteria(prev => ({ 
                   ...prev, 
-                  priceRange: [parseInt(e.target.value) || 0, prev.priceRange[1]] 
+                  minPrice: parseInt(e.target.value) || 0
                 }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
@@ -522,10 +521,10 @@ export default function LandScrapingPage() {
               </label>
               <input
                 type="number"
-                value={searchCriteria.priceRange[1]}
+                value={searchCriteria.maxPrice || 1000000}
                 onChange={(e) => setSearchCriteria(prev => ({ 
                   ...prev, 
-                  priceRange: [prev.priceRange[0], parseInt(e.target.value) || 1000000] 
+                  maxPrice: parseInt(e.target.value) || 1000000
                 }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
