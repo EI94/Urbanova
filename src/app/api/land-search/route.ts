@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { location, criteria, email } = body;
 
-    console.log('🔍 API Land Search: Ricerca REALE per', location, 'email:', email);
+    console.log('🔍 AI Agent: Avvio ricerca intelligente per', location, 'email:', email);
 
     if (!email) {
       return NextResponse.json({
@@ -19,19 +19,19 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // WEB SCRAPING REALE CON AXIOS + CHEERIO
-    console.log('⏳ Avvio ricerca web scraping (può richiedere 30-60 secondi)...');
-    const realResults = await performRealWebScraping(location || 'Roma', criteria);
+    // AGENT REACT: REASONING + ACTING
+    console.log('🤖 Avvio processo ReAct...');
+    const intelligentResults = await performReActSearch(location || 'Roma', criteria, email);
 
-    // Invia email con i risultati reali
+    // Invia email con i risultati filtrati dall'AI
     let emailSent = false;
     try {
-      const emailHtml = generateEmailHTML(realResults, location || 'Roma');
+      const emailHtml = generateEmailHTML(intelligentResults, location || 'Roma');
       
       await resend.emails.send({
         from: 'Urbanova AI <noreply@urbanova.life>',
         to: email,
-        subject: `🏗️ Trovati ${realResults.lands.length} terreni a ${location || 'Roma'} - Urbanova AI`,
+        subject: `🏗️ AI Agent: ${intelligentResults.lands.length} terreni selezionati a ${location || 'Roma'} - Urbanova`,
         html: emailHtml
       });
       
@@ -42,12 +42,11 @@ export async function POST(request: NextRequest) {
       emailSent = false;
     }
 
-    // Aggiorna il risultato con lo stato dell'email
-    realResults.emailSent = emailSent;
+    intelligentResults.emailSent = emailSent;
 
     return NextResponse.json({
       success: true,
-      data: realResults,
+      data: intelligentResults,
       location,
       email,
       emailSent,
@@ -55,72 +54,280 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('❌ API Land Search: Errore:', error);
+    console.error('❌ AI Agent: Errore:', error);
     
     return NextResponse.json({
       success: false,
-      error: 'Errore durante la ricerca dei terreni',
+      error: 'Errore durante la ricerca intelligente',
       message: error instanceof Error ? error.message : 'Errore sconosciuto'
     }, { status: 500 });
   }
 }
 
-async function performRealWebScraping(location: string, criteria: any) {
-  console.log('🌐 Avvio web scraping reale per:', location);
+async function performReActSearch(location: string, criteria: any, email: string) {
+  console.log('🤖 REACT AGENT: Fase 1 - RACCOLTA DATI');
+  
+  // STEP 1: REASONING - Analizza i criteri di ricerca
+  const searchCriteria = analyzeSearchCriteria(criteria, location);
+  console.log('🧠 Criteri analizzati:', searchCriteria);
+  
+  // STEP 2: ACTING - Web scraping reale
+  const allLands = await performRealWebScraping(location, searchCriteria);
+  console.log(`📊 Trovati ${allLands.length} terreni grezzi`);
+  
+  // STEP 3: REASONING - Filtraggio intelligente con AI
+  console.log('🤖 REACT AGENT: Fase 2 - FILTRAGGIO INTELLIGENTE');
+  const filteredLands = await intelligentFiltering(allLands, searchCriteria);
+  console.log(`✅ ${filteredLands.length} terreni selezionati dall'AI`);
+  
+  // STEP 4: REASONING - Analisi AI avanzata
+  console.log('🤖 REACT AGENT: Fase 3 - ANALISI AI');
+  const aiAnalysis = await performAIAnalysis(filteredLands, searchCriteria);
+  
+  // STEP 5: ACTING - Genera raccomandazioni
+  const recommendations = generateIntelligentRecommendations(filteredLands, searchCriteria, location);
+  
+  return {
+    lands: filteredLands,
+    analysis: aiAnalysis,
+    emailSent: false,
+    summary: {
+      totalFound: filteredLands.length,
+      totalScraped: allLands.length,
+      averagePrice: filteredLands.length > 0 ? Math.round(filteredLands.reduce((sum, land) => sum + land.price, 0) / filteredLands.length) : 0,
+      bestOpportunities: filteredLands.slice(0, 3),
+      marketTrends: analyzeMarketTrends(filteredLands, location),
+      recommendations: recommendations,
+      searchCriteria: searchCriteria
+    }
+  };
+}
+
+function analyzeSearchCriteria(criteria: any, location: string) {
+  return {
+    location: location,
+    priceRange: {
+      min: criteria?.minPrice || 0,
+      max: criteria?.maxPrice || 1000000
+    },
+    areaRange: {
+      min: criteria?.minArea || 500,
+      max: criteria?.maxArea || 10000
+    },
+    propertyType: criteria?.propertyType || 'residenziale',
+    mustHaveFeatures: ['edificabile'],
+    preferredFeatures: ['permessi', 'residenziale', 'commerciale'],
+    maxDistance: criteria?.maxDistance || 50,
+    priority: criteria?.priority || 'price' // price, area, location
+  };
+}
+
+async function performRealWebScraping(location: string, searchCriteria: any) {
+  console.log('🌐 Web scraping reale per:', location);
   
   const allLands = [];
   
   try {
     // RICERCA SU IMMOBILIARE.IT
     console.log('🔍 Scraping immobiliare.it...');
-    const immobiliareResults = await scrapeImmobiliare(location, criteria);
+    const immobiliareResults = await scrapeImmobiliare(location, searchCriteria);
     allLands.push(...immobiliareResults);
-    
-    // Attesa tra le ricerche
-    await new Promise(resolve => setTimeout(resolve, 3000));
     
     // RICERCA SU CASA.IT
     console.log('🔍 Scraping casa.it...');
-    const casaResults = await scrapeCasa(location, criteria);
+    const casaResults = await scrapeCasa(location, searchCriteria);
     allLands.push(...casaResults);
-    
-    // Attesa tra le ricerche
-    await new Promise(resolve => setTimeout(resolve, 3000));
     
     // RICERCA SU IDEALISTA.IT
     console.log('🔍 Scraping idealista.it...');
-    const idealistaResults = await scrapeIdealista(location, criteria);
+    const idealistaResults = await scrapeIdealista(location, searchCriteria);
     allLands.push(...idealistaResults);
     
     console.log(`✅ Web scraping completato: ${allLands.length} terreni trovati`);
-
-    return {
-      lands: allLands,
-      analysis: generateAIAnalysis(allLands),
-      emailSent: false,
-      summary: {
-        totalFound: allLands.length,
-        averagePrice: allLands.length > 0 ? Math.round(allLands.reduce((sum, land) => sum + land.price, 0) / allLands.length) : 0,
-        bestOpportunities: allLands.slice(0, 3),
-        marketTrends: 'Analisi di mercato basata sui dati reali trovati',
-        recommendations: generateRecommendations(allLands, location)
-      }
-    };
+    return allLands;
 
   } catch (error) {
     console.error('❌ Errore web scraping:', error);
-    return getFallbackResults(location);
+    return [];
   }
 }
 
-async function scrapeImmobiliare(location: string, criteria: any) {
+async function intelligentFiltering(lands: any[], searchCriteria: any) {
+  console.log('🧠 AI Agent: Filtraggio intelligente...');
+  
+  const filteredLands = lands.filter(land => {
+    // FILTRO 1: Prezzo
+    const priceInRange = land.price >= searchCriteria.priceRange.min && 
+                        land.price <= searchCriteria.priceRange.max;
+    
+    // FILTRO 2: Area
+    const areaInRange = land.area >= searchCriteria.areaRange.min && 
+                       land.area <= searchCriteria.areaRange.max;
+    
+    // FILTRO 3: Caratteristiche richieste
+    const hasRequiredFeatures = searchCriteria.mustHaveFeatures.every((feature: string) =>
+      land.features.some((f: string) => f.toLowerCase().includes(feature.toLowerCase()))
+    );
+    
+    // FILTRO 4: Località (controllo fuzzy)
+    const locationMatch = land.location.toLowerCase().includes(searchCriteria.location.toLowerCase()) ||
+                         searchCriteria.location.toLowerCase().includes(land.location.toLowerCase());
+    
+    // CALCOLO SCORE AI
+    let aiScore = 70; // Base score
+    
+    if (priceInRange) aiScore += 10;
+    if (areaInRange) aiScore += 10;
+    if (hasRequiredFeatures) aiScore += 15;
+    if (locationMatch) aiScore += 5;
+    
+    // Bonus per caratteristiche preferite
+    const preferredFeatures = searchCriteria.preferredFeatures.filter((feature: string) =>
+      land.features.some((f: string) => f.toLowerCase().includes(feature.toLowerCase()))
+    );
+    aiScore += preferredFeatures.length * 5;
+    
+    // Bonus per prezzo competitivo
+    const pricePerSqm = land.price / land.area;
+    if (pricePerSqm < 200) aiScore += 10; // Prezzo competitivo
+    if (pricePerSqm < 150) aiScore += 5;  // Molto competitivo
+    
+    land.aiScore = Math.min(100, aiScore);
+    
+    return priceInRange && areaInRange && hasRequiredFeatures && locationMatch;
+  });
+  
+  // ORDINA PER SCORE AI
+  filteredLands.sort((a, b) => b.aiScore - a.aiScore);
+  
+  console.log(`✅ AI Agent: ${filteredLands.length} terreni filtrati e ordinati`);
+  return filteredLands;
+}
+
+async function performAIAnalysis(lands: any[], searchCriteria: any) {
+  console.log('🧠 AI Agent: Analisi avanzata...');
+  
+  return lands.map((land, index) => {
+    // CALCOLO ROI STIMATO
+    const baseROI = 8; // ROI base 8%
+    const priceBonus = land.price < 200000 ? 2 : 0; // Bonus per prezzo basso
+    const areaBonus = land.area > 1000 ? 1 : 0; // Bonus per area grande
+    const featureBonus = land.features.length * 0.5; // Bonus per caratteristiche
+    const estimatedROI = baseROI + priceBonus + areaBonus + featureBonus;
+    
+    // VALUTAZIONE RISCHIO
+    let riskAssessment = 'Medio';
+    if (land.aiScore >= 90) riskAssessment = 'Molto Basso';
+    else if (land.aiScore >= 80) riskAssessment = 'Basso';
+    else if (land.aiScore >= 70) riskAssessment = 'Medio';
+    else riskAssessment = 'Alto';
+    
+    // TREND DI MERCATO
+    const marketTrend = land.price < 150000 ? 'Crescente' : 
+                       land.price < 300000 ? 'Stabile' : 'Decrescente';
+    
+    // RACCOMANDAZIONE PERSONALIZZATA
+    let recommendation = 'Valutare attentamente';
+    if (land.aiScore >= 90) recommendation = 'Ottima opportunità - Consigliato';
+    else if (land.aiScore >= 80) recommendation = 'Buona opportunità - Considerare';
+    else if (land.aiScore >= 70) recommendation = 'Opportunità valida - Valutare';
+    else recommendation = 'Richiede attenta analisi';
+    
+    return {
+      landId: land.id,
+      estimatedROI: Math.round(estimatedROI * 10) / 10,
+      riskAssessment: riskAssessment,
+      marketTrend: marketTrend,
+      recommendation: recommendation,
+      aiScore: land.aiScore,
+      pricePerSqm: Math.round(land.price / land.area),
+      investmentPotential: calculateInvestmentPotential(land, searchCriteria)
+    };
+  });
+}
+
+function calculateInvestmentPotential(land: any, searchCriteria: any) {
+  let potential = 0;
+  
+  // Potenziale basato su prezzo
+  if (land.price < searchCriteria.priceRange.max * 0.7) potential += 25;
+  else if (land.price < searchCriteria.priceRange.max * 0.85) potential += 15;
+  
+  // Potenziale basato su area
+  if (land.area > searchCriteria.areaRange.min * 1.5) potential += 20;
+  else if (land.area > searchCriteria.areaRange.min) potential += 10;
+  
+  // Potenziale basato su caratteristiche
+  potential += land.features.length * 5;
+  
+  // Potenziale basato su località
+  if (land.location.toLowerCase().includes('centro') || 
+      land.location.toLowerCase().includes('zona')) potential += 15;
+  
+  return Math.min(100, potential);
+}
+
+function generateIntelligentRecommendations(lands: any[], searchCriteria: any, location: string) {
+  const recommendations = [];
+  
+  if (lands.length === 0) {
+    recommendations.push(
+      `Nessun terreno trovato a ${location} con i criteri specificati`,
+      'Prova ad ampliare i criteri di ricerca',
+      'Considera località limitrofe'
+    );
+    return recommendations;
+  }
+  
+  // Analisi del mercato
+  const avgPrice = lands.reduce((sum, land) => sum + land.price, 0) / lands.length;
+  const avgArea = lands.reduce((sum, land) => sum + land.area, 0) / lands.length;
+  
+  recommendations.push(
+    `Analisi di ${lands.length} terreni selezionati a ${location}`,
+    `Prezzo medio: €${avgPrice.toLocaleString()} (range: €${searchCriteria.priceRange.min.toLocaleString()} - €${searchCriteria.priceRange.max.toLocaleString()})`,
+    `Superficie media: ${Math.round(avgArea)} m² (range: ${searchCriteria.areaRange.min} - ${searchCriteria.areaRange.max} m²)`
+  );
+  
+  // Raccomandazioni specifiche
+  const bestLand = lands[0];
+  if (bestLand && bestLand.aiScore >= 85) {
+    recommendations.push(
+      `Migliore opportunità: ${bestLand.title} (AI Score: ${bestLand.aiScore}/100)`,
+      `Prezzo competitivo: €${bestLand.price.toLocaleString()} (€${Math.round(bestLand.price / bestLand.area)}/m²)`
+    );
+  }
+  
+  // Raccomandazioni di mercato
+  if (avgPrice < searchCriteria.priceRange.max * 0.8) {
+    recommendations.push('Mercato favorevole: prezzi sotto la media richiesta');
+  }
+  
+  if (lands.filter(l => l.features.includes('permessi')).length > 0) {
+    recommendations.push('Terreni con permessi disponibili - riducono tempi di sviluppo');
+  }
+  
+  return recommendations;
+}
+
+function analyzeMarketTrends(lands: any[], location: string) {
+  if (lands.length === 0) return 'Nessun dato disponibile';
+  
+  const avgPrice = lands.reduce((sum, land) => sum + land.price, 0) / lands.length;
+  const avgPricePerSqm = lands.reduce((sum, land) => sum + (land.price / land.area), 0) / lands.length;
+  
+  let trend = 'Stabile';
+  if (avgPricePerSqm < 150) trend = 'Crescente - Opportunità di investimento';
+  else if (avgPricePerSqm > 250) trend = 'Decrescente - Mercato saturo';
+  
+  return `${trend}. Prezzo medio: €${avgPrice.toLocaleString()}, €${Math.round(avgPricePerSqm)}/m²`;
+}
+
+async function scrapeImmobiliare(location: string, searchCriteria: any) {
   try {
     console.log('🔍 Scraping immobiliare.it per:', location);
     
-    // URL di ricerca per terreni
     const searchUrl = `https://www.immobiliare.it/terreni/${location.toLowerCase().replace(/\s+/g, '-')}/`;
-    
-    console.log('📡 Richiesta HTTP a:', searchUrl);
     
     const response = await axios.get(searchUrl, {
       timeout: 30000,
@@ -134,12 +341,10 @@ async function scrapeImmobiliare(location: string, criteria: any) {
       }
     });
     
-    console.log('✅ Risposta ricevuta da immobiliare.it, status:', response.status);
-    
     const $ = cheerio.load(response.data);
     const lands = [];
     
-    // Cerca diversi selettori possibili
+    // Selettori multipli per robustezza
     const selectors = [
       '.listing-item',
       '.announcement-card',
@@ -152,16 +357,11 @@ async function scrapeImmobiliare(location: string, criteria: any) {
     let items = null;
     for (const selector of selectors) {
       items = $(selector);
-      if (items.length > 0) {
-        console.log(`✅ Trovati ${items.length} elementi con selettore: ${selector}`);
-        break;
-      }
+      if (items.length > 0) break;
     }
     
     if (!items || items.length === 0) {
-      console.log('⚠️ Nessun elemento trovato, provo selettori alternativi...');
-      
-      // Selettori alternativi per titoli e prezzi
+      // Selettori alternativi
       const titleSelectors = ['h2', 'h3', '.title', '.listing-title', '.announcement-title'];
       const priceSelectors = ['.price', '.listing-price', '.announcement-price', '[class*="price"]'];
       
@@ -185,15 +385,14 @@ async function scrapeImmobiliare(location: string, criteria: any) {
             features: ['Edificabile'],
             contactInfo: {},
             timestamp: new Date(),
-            aiScore: Math.floor(Math.random() * 30) + 70,
-            pricePerSqm: Math.floor(Math.random() * 200) + 150
+            aiScore: 0, // Sarà calcolato dal filtro AI
+            pricePerSqm: 0
           });
         }
       }
     } else {
-      // Processa elementi trovati
       items.each((index, element) => {
-        if (index >= 5) return; // Limita a 5 risultati
+        if (index >= 5) return;
         
         const $el = $(element);
         const title = $el.find('h2, h3, .title, .listing-title').first().text().trim();
@@ -217,8 +416,8 @@ async function scrapeImmobiliare(location: string, criteria: any) {
             features: ['Edificabile'],
             contactInfo: {},
             timestamp: new Date(),
-            aiScore: Math.floor(Math.random() * 30) + 70,
-            pricePerSqm: Math.floor(Math.random() * 200) + 150
+            aiScore: 0,
+            pricePerSqm: 0
           });
         }
       });
@@ -233,13 +432,11 @@ async function scrapeImmobiliare(location: string, criteria: any) {
   }
 }
 
-async function scrapeCasa(location: string, criteria: any) {
+async function scrapeCasa(location: string, searchCriteria: any) {
   try {
     console.log('🔍 Scraping casa.it per:', location);
     
     const searchUrl = `https://www.casa.it/terreni/${location.toLowerCase().replace(/\s+/g, '-')}`;
-    
-    console.log('📡 Richiesta HTTP a:', searchUrl);
     
     const response = await axios.get(searchUrl, {
       timeout: 30000,
@@ -253,18 +450,12 @@ async function scrapeCasa(location: string, criteria: any) {
       }
     });
     
-    console.log('✅ Risposta ricevuta da casa.it, status:', response.status);
-    
     const $ = cheerio.load(response.data);
     const lands = [];
     
-    // Cerca elementi di annunci
     const items = $('.announcement-card, .property-card, .listing-item, [class*="announcement"]');
     
     if (items.length === 0) {
-      console.log('⚠️ Nessun elemento trovato su casa.it, uso selettori alternativi...');
-      
-      // Selettori alternativi
       const titleSelectors = ['h2', 'h3', '.title', '[class*="title"]'];
       const priceSelectors = ['.price', '[class*="price"]', '.amount'];
       
@@ -288,8 +479,8 @@ async function scrapeCasa(location: string, criteria: any) {
             features: ['Commerciale'],
             contactInfo: {},
             timestamp: new Date(),
-            aiScore: Math.floor(Math.random() * 30) + 70,
-            pricePerSqm: Math.floor(Math.random() * 200) + 150
+            aiScore: 0,
+            pricePerSqm: 0
           });
         }
       }
@@ -319,8 +510,8 @@ async function scrapeCasa(location: string, criteria: any) {
             features: ['Commerciale'],
             contactInfo: {},
             timestamp: new Date(),
-            aiScore: Math.floor(Math.random() * 30) + 70,
-            pricePerSqm: Math.floor(Math.random() * 200) + 150
+            aiScore: 0,
+            pricePerSqm: 0
           });
         }
       });
@@ -335,13 +526,11 @@ async function scrapeCasa(location: string, criteria: any) {
   }
 }
 
-async function scrapeIdealista(location: string, criteria: any) {
+async function scrapeIdealista(location: string, searchCriteria: any) {
   try {
     console.log('🔍 Scraping idealista.it per:', location);
     
     const searchUrl = `https://www.idealista.it/terreni/${location.toLowerCase().replace(/\s+/g, '-')}`;
-    
-    console.log('📡 Richiesta HTTP a:', searchUrl);
     
     const response = await axios.get(searchUrl, {
       timeout: 30000,
@@ -355,18 +544,12 @@ async function scrapeIdealista(location: string, criteria: any) {
       }
     });
     
-    console.log('✅ Risposta ricevuta da idealista.it, status:', response.status);
-    
     const $ = cheerio.load(response.data);
     const lands = [];
     
-    // Cerca elementi di annunci
     const items = $('.item-info-container, .property-item, .listing-item, [class*="item"]');
     
     if (items.length === 0) {
-      console.log('⚠️ Nessun elemento trovato su idealista.it, uso selettori alternativi...');
-      
-      // Selettori alternativi
       const titleSelectors = ['h2', 'h3', '.title', '[class*="title"]'];
       const priceSelectors = ['.price', '[class*="price"]', '.amount'];
       
@@ -390,8 +573,8 @@ async function scrapeIdealista(location: string, criteria: any) {
             features: ['Misto'],
             contactInfo: {},
             timestamp: new Date(),
-            aiScore: Math.floor(Math.random() * 30) + 70,
-            pricePerSqm: Math.floor(Math.random() * 200) + 150
+            aiScore: 0,
+            pricePerSqm: 0
           });
         }
       }
@@ -421,8 +604,8 @@ async function scrapeIdealista(location: string, criteria: any) {
             features: ['Misto'],
             contactInfo: {},
             timestamp: new Date(),
-            aiScore: Math.floor(Math.random() * 30) + 70,
-            pricePerSqm: Math.floor(Math.random() * 200) + 150
+            aiScore: 0,
+            pricePerSqm: 0
           });
         }
       });
@@ -435,40 +618,6 @@ async function scrapeIdealista(location: string, criteria: any) {
     console.error('❌ Errore scraping idealista.it:', error.message);
     return [];
   }
-}
-
-function generateAIAnalysis(lands: any[]) {
-  return lands.map((land, index) => ({
-    landId: land.id,
-    estimatedROI: Math.floor(Math.random() * 15) + 5,
-    riskAssessment: ['Basso', 'Medio', 'Alto'][Math.floor(Math.random() * 3)],
-    marketTrend: ['Crescente', 'Stabile', 'Decrescente'][Math.floor(Math.random() * 3)],
-    recommendation: 'Analisi basata sui dati reali del mercato'
-  }));
-}
-
-function generateRecommendations(lands: any[], location: string) {
-  return [
-    `Analisi di ${lands.length} terreni reali trovati a ${location}`,
-    'Raccomandazioni basate sui dati di mercato attuali',
-    'Valutazione ROI e rischi per ogni opportunità'
-  ];
-}
-
-function getFallbackResults(location: string) {
-  console.log('⚠️ Usando risultati di fallback');
-  return {
-    lands: [],
-    analysis: [],
-    emailSent: false,
-    summary: {
-      totalFound: 0,
-      averagePrice: 0,
-      bestOpportunities: [],
-      marketTrends: 'Web scraping non disponibile',
-      recommendations: ['Verificare connessione internet', 'Riprova più tardi']
-    }
-  };
 }
 
 function generateEmailHTML(results: any, location: string): string {
@@ -493,14 +642,14 @@ function generateEmailHTML(results: any, location: string): string {
       <body>
         <div class="container">
           <div class="header">
-            <h1>🤖 Urbanova AI</h1>
-            <p>Ricerca Terreni - ${location}</p>
+            <h1>🤖 Urbanova AI Agent</h1>
+            <p>Ricerca Intelligente Terreni - ${location}</p>
           </div>
           
           <div class="content">
             <div class="no-results">
               <h2>🔍 Nessun terreno trovato</h2>
-              <p>La ricerca a ${location} non ha prodotto risultati.</p>
+              <p>L'AI Agent ha analizzato ${summary.totalScraped || 0} terreni ma nessuno corrisponde ai criteri specificati.</p>
               <p>Prova a:</p>
               <ul>
                 <li>Ampliare i criteri di ricerca</li>
@@ -520,7 +669,7 @@ function generateEmailHTML(results: any, location: string): string {
     <html>
     <head>
       <meta charset="utf-8">
-      <title>Risultati Ricerca Terreni - Urbanova AI</title>
+      <title>Risultati AI Agent - Urbanova</title>
       <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -540,19 +689,19 @@ function generateEmailHTML(results: any, location: string): string {
     <body>
       <div class="container">
         <div class="header">
-          <h1>🤖 Urbanova AI</h1>
-          <p>Risultati Ricerca Terreni - ${location}</p>
+          <h1>🤖 Urbanova AI Agent</h1>
+          <p>Risultati Ricerca Intelligente - ${location}</p>
         </div>
         
         <div class="content">
           <div class="summary">
-            <h2>📊 Riepilogo Ricerca</h2>
-            <p><strong>${lands.length} terreni</strong> trovati a ${location}</p>
+            <h2>📊 Riepilogo AI Agent</h2>
+            <p><strong>${lands.length} terreni selezionati</strong> su ${summary.totalScraped} analizzati</p>
             <p><strong>Prezzo medio:</strong> €${summary.averagePrice.toLocaleString()}</p>
             <p><strong>Trend di mercato:</strong> ${summary.marketTrends}</p>
           </div>
           
-          <h2>🏗️ Opportunità Trovate</h2>
+          <h2>🏗️ Opportunità Selezionate dall'AI</h2>
           
           ${lands.map((land: any, index: number) => `
             <div class="land-card">
@@ -569,7 +718,7 @@ function generateEmailHTML(results: any, location: string): string {
                   <strong>Superficie:</strong> ${land.area} m²
                 </div>
                 <div class="land-detail">
-                  <strong>€/m²:</strong> €${land.pricePerSqm.toLocaleString()}
+                  <strong>€/m²:</strong> €${Math.round(land.price / land.area).toLocaleString()}
                 </div>
                 <div class="land-detail">
                   <strong>Fonte:</strong> ${land.source}
@@ -585,7 +734,7 @@ function generateEmailHTML(results: any, location: string): string {
           `).join('')}
           
           <div class="summary">
-            <h3>💡 Raccomandazioni AI</h3>
+            <h3>💡 Raccomandazioni AI Agent</h3>
             <ul>
               ${summary.recommendations.map((rec: string) => `<li>${rec}</li>`).join('')}
             </ul>
@@ -593,7 +742,7 @@ function generateEmailHTML(results: any, location: string): string {
         </div>
         
         <div class="footer">
-          <p>Questo report è stato generato automaticamente da Urbanova AI</p>
+          <p>Questo report è stato generato dall'AI Agent di Urbanova</p>
           <p>Per assistenza: support@urbanova.life</p>
         </div>
       </div>
@@ -604,9 +753,9 @@ function generateEmailHTML(results: any, location: string): string {
 
 export async function GET() {
   return NextResponse.json({
-    message: 'Land Search API - Utilizza POST per la ricerca REALE',
+    message: 'AI Agent Land Search API - Utilizza POST per la ricerca intelligente',
     endpoints: {
-      POST: '/api/land-search - Esegue ricerca terreni REALE con web scraping'
+      POST: '/api/land-search - Esegue ricerca ReAct con AI Agent'
     }
   });
 } 
