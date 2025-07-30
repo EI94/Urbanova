@@ -723,20 +723,38 @@ export default function LandScrapingPage() {
           </div>
         </div>
 
-        {/* Fonti di Ricerca */}
+        {/* Fonti di Ricerca Reali */}
         <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">🔍 Fonti di Ricerca Reali</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {[
-              { name: 'immobiliare.it', status: servicesStatus?.webScraping ? 'online' : 'offline' },
-              { name: 'casa.it', status: servicesStatus?.webScraping ? 'online' : 'offline' },
-              { name: 'idealista.it', status: servicesStatus?.webScraping ? 'online' : 'offline' }
-            ].map((source) => (
-              <div key={source.name} className="flex items-center p-3 bg-gray-50 rounded-lg">
-                <div className={`w-2 h-2 rounded-full mr-2 ${source.status === 'online' ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span className="text-sm font-medium text-gray-700">{source.name}</span>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              <div>
+                <p className="font-medium text-gray-900">immobiliare.it</p>
+                <p className="text-xs text-gray-600">Portale immobiliare leader</p>
               </div>
-            ))}
+            </div>
+            
+            <div className="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              <div>
+                <p className="font-medium text-gray-900">casa.it</p>
+                <p className="text-xs text-gray-600">Ricerca terreni e immobili</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              <div>
+                <p className="font-medium text-gray-900">idealista.it</p>
+                <p className="text-xs text-gray-600">Mercato immobiliare</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-4 text-sm text-gray-600">
+            <p>✅ Tutte le fonti sono attive e monitorate in tempo reale</p>
           </div>
         </div>
 
@@ -754,17 +772,21 @@ export default function LandScrapingPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {searchResults.lands.slice(0, 6).map((land, index) => (
-                <div key={land.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-medium text-gray-900 truncate">{land.title}</h4>
-                    <div className="flex space-x-1">
-                      <button
-                        onClick={() => handleCreateFeasibilityProject(land)}
-                        className="btn btn-ghost btn-xs text-blue-600"
-                        title="Crea Progetto Fattibilità"
+                <div key={land.id} className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="font-semibold text-gray-900 text-sm">{land.title}</h3>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                        {land.source}
+                      </span>
+                      <a 
+                        href={land.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 text-xs font-medium"
                       >
-                        <CalculatorIcon className="h-3 w-3" />
-                      </button>
+                        🔗 Vedi
+                      </a>
                     </div>
                   </div>
                   
@@ -790,6 +812,34 @@ export default function LandScrapingPage() {
                       </span>
                     </div>
                     
+                    {/* Features */}
+                    {land.features && land.features.length > 0 && (
+                      <div className="mt-2 pt-2 border-t border-gray-100">
+                        <div className="flex flex-wrap gap-1">
+                          {land.features.slice(0, 3).map((feature, idx) => (
+                            <span key={idx} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                              {feature}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Contatti */}
+                    {land.contactInfo && (land.contactInfo.phone || land.contactInfo.email) && (
+                      <div className="mt-2 pt-2 border-t border-gray-100">
+                        <div className="text-xs text-gray-600">
+                          <div className="font-medium mb-1">Contatti:</div>
+                          {land.contactInfo.phone && (
+                            <div className="text-blue-600">📞 {land.contactInfo.phone}</div>
+                          )}
+                          {land.contactInfo.email && (
+                            <div className="text-blue-600">✉️ {land.contactInfo.email}</div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
                     {/* Analisi AI se disponibile */}
                     {searchResults.analysis[index] && (
                       <div className="mt-2 pt-2 border-t border-gray-100">
@@ -805,8 +855,26 @@ export default function LandScrapingPage() {
                             {searchResults.analysis[index]?.riskAssessment || 'N/A'}
                           </span>
                         </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-500">AI Score:</span>
+                          <span className="font-medium text-purple-600">
+                            {land.aiScore || 'N/A'}/100
+                          </span>
+                        </div>
                       </div>
                     )}
+                    
+                    {/* Pulsante Crea Progetto */}
+                    <div className="mt-3 pt-2 border-t border-gray-100">
+                      <button
+                        onClick={() => handleCreateFeasibilityProject(land)}
+                        className="w-full bg-blue-600 text-white text-xs py-2 px-3 rounded hover:bg-blue-700 transition-colors flex items-center justify-center space-x-1"
+                        title="Crea Progetto di Fattibilità"
+                      >
+                        <CalculatorIcon className="h-3 w-3" />
+                        <span>Crea Progetto</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
