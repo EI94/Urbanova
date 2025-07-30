@@ -169,18 +169,19 @@ export default function LandScrapingPage() {
   };
 
   const loadSearchHistory = async () => {
-    // TODO: Implementare caricamento storico da database
-    const mockHistory = [
-      {
-        id: '1',
-        criteria: { location: 'Milano', priceRange: [0, 500000], areaRange: [500, 2000], zoning: [], buildingRights: true, infrastructure: [], keywords: [] },
-        email: 'user@example.com',
-        date: new Date(Date.now() - 86400000),
-        resultsCount: 12,
-        emailSent: true
+    // Carica cronologia reale da localStorage o database
+    try {
+      const savedHistory = localStorage.getItem('landScrapingHistory');
+      if (savedHistory) {
+        const history = JSON.parse(savedHistory);
+        setSearchHistory(history);
+      } else {
+        setSearchHistory([]);
       }
-    ];
-    setSearchHistory(mockHistory);
+    } catch (error) {
+      console.error('Errore caricamento cronologia:', error);
+      setSearchHistory([]);
+    }
   };
 
   const loadFavorites = () => {
@@ -347,7 +348,15 @@ export default function LandScrapingPage() {
         resultsCount: results.lands.length,
         emailSent: results.emailSent
       };
-      setSearchHistory(prev => [historyEntry, ...prev.slice(0, 9)]);
+      const newHistory = [historyEntry, ...searchHistory.slice(0, 9)];
+      setSearchHistory(newHistory);
+      
+      // Salva in localStorage per persistenza
+      try {
+        localStorage.setItem('landScrapingHistory', JSON.stringify(newHistory));
+      } catch (error) {
+        console.error('Errore salvataggio cronologia:', error);
+      }
 
       toast.success(`✅ Trovati ${results.lands.length} terreni! ${results.emailSent ? 'Email inviata.' : ''}`);
 

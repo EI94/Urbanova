@@ -302,82 +302,22 @@ async function performDeepResearch(location: string, searchCriteria: any, search
     console.log(`📊 Ricerca profonda completata: ${allLands.length} terreni totali`);
     console.log(`📈 Statistiche: ${researchResults.successfulSearches}/${researchResults.totalSearches} ricerche riuscite`);
     
-    // FALLBACK: Se nessun risultato, usa dati di test
+    // Se nessun risultato, ritorna array vuoto (NO FALLBACK MOCK)
     if (allLands.length === 0) {
-      console.log('⚠️ Nessun risultato dalla ricerca profonda, uso fallback...');
-      return generateFallbackTestData(location, searchCriteria);
+      console.log('⚠️ Nessun risultato dalla ricerca profonda - ricerca reale fallita');
+      return [];
     }
     
     return allLands;
     
   } catch (error) {
     console.error('❌ Errore ricerca profonda:', error);
-    return generateFallbackTestData(location, searchCriteria);
+    // Ritorna array vuoto invece di fallback mock
+    return [];
   }
 }
 
-function generateFallbackTestData(location: string, searchCriteria: any) {
-  console.log('🔄 Generazione dati di fallback per:', location);
-  
-  const fallbackLands = [
-    {
-      id: 'fallback_1',
-      title: `Terreno Edificabile ${location} - Zona Residenziale`,
-      price: Math.floor(Math.random() * 100000) + 150000,
-      location: location,
-      area: Math.floor(Math.random() * 800) + 600,
-      description: `Terreno edificabile in zona residenziale di ${location}. Ideale per sviluppo residenziale.`,
-      url: `https://www.immobiliare.it/terreni/${location.toLowerCase().replace(/\s+/g, '-')}/`,
-      source: 'immobiliare.it',
-      images: [],
-      features: ['Edificabile', 'Residenziale', 'Permessi'],
-      contactInfo: {},
-      timestamp: new Date(),
-      aiScore: 85,
-      pricePerSqm: 0
-    },
-    {
-      id: 'fallback_2',
-      title: `Area Commerciale ${location} - Centro Città`,
-      price: Math.floor(Math.random() * 150000) + 200000,
-      location: location,
-      area: Math.floor(Math.random() * 600) + 400,
-      description: `Area commerciale in centro città di ${location}. Ottima posizione per attività commerciali.`,
-      url: `https://www.casa.it/terreni/${location.toLowerCase().replace(/\s+/g, '-')}`,
-      source: 'casa.it',
-      images: [],
-      features: ['Commerciale', 'Centrale', 'Edificabile'],
-      contactInfo: {},
-      timestamp: new Date(),
-      aiScore: 78,
-      pricePerSqm: 0
-    },
-    {
-      id: 'fallback_3',
-      title: `Terreno Misto ${location} - Zona in Sviluppo`,
-      price: Math.floor(Math.random() * 80000) + 120000,
-      location: location,
-      area: Math.floor(Math.random() * 1000) + 800,
-      description: `Terreno misto in zona in sviluppo di ${location}. Potenziale per sviluppo residenziale e commerciale.`,
-      url: `https://www.idealista.it/terreni/${location.toLowerCase().replace(/\s+/g, '-')}`,
-      source: 'idealista.it',
-      images: [],
-      features: ['Misto', 'In Sviluppo', 'Edificabile'],
-      contactInfo: {},
-      timestamp: new Date(),
-      aiScore: 72,
-      pricePerSqm: 0
-    }
-  ];
-  
-  // Calcola pricePerSqm per ogni terreno
-  fallbackLands.forEach(land => {
-    land.pricePerSqm = Math.round(land.price / land.area);
-  });
-  
-  console.log(`✅ Generati ${fallbackLands.length} terreni di fallback`);
-  return fallbackLands;
-}
+
 
 async function performSourceSearch(sourceName: string, location: string, searchCriteria: any, searchType: string): Promise<any[]> {
   console.log(`🔍 Ricerca ${searchType} su ${sourceName}...`);
