@@ -170,10 +170,14 @@ export default function LandScrapingPage() {
   const loadSearchHistory = async () => {
     // Carica cronologia reale da localStorage o database
     try {
-      const savedHistory = localStorage.getItem('landScrapingHistory');
-      if (savedHistory) {
-        const history = JSON.parse(savedHistory);
-        setSearchHistory(history);
+      if (typeof window !== 'undefined') {
+        const savedHistory = localStorage.getItem('landScrapingHistory');
+        if (savedHistory) {
+          const history = JSON.parse(savedHistory);
+          setSearchHistory(history);
+        } else {
+          setSearchHistory([]);
+        }
       } else {
         setSearchHistory([]);
       }
@@ -184,14 +188,18 @@ export default function LandScrapingPage() {
   };
 
   const loadFavorites = () => {
-    const saved = localStorage.getItem('landScrapingFavorites');
-    if (saved) {
-      setFavorites(new Set(JSON.parse(saved)));
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('landScrapingFavorites');
+      if (saved) {
+        setFavorites(new Set(JSON.parse(saved)));
+      }
     }
   };
 
   const saveFavorites = (newFavorites: Set<string>) => {
-    localStorage.setItem('landScrapingFavorites', JSON.stringify([...newFavorites]));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('landScrapingFavorites', JSON.stringify([...newFavorites]));
+    }
     setFavorites(newFavorites);
   };
 
@@ -352,7 +360,9 @@ export default function LandScrapingPage() {
       
       // Salva in localStorage per persistenza
       try {
-        localStorage.setItem('landScrapingHistory', JSON.stringify(newHistory));
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('landScrapingHistory', JSON.stringify(newHistory));
+        }
       } catch (error) {
         console.error('Errore salvataggio cronologia:', error);
       }
@@ -416,10 +426,12 @@ export default function LandScrapingPage() {
   };
 
   const getActiveFiltersCount = () => {
+    if (!filters) return 0;
+    
     let count = 0;
-    if (filters.priceRange[0] > 0 || filters.priceRange[1] < 1000000) count++;
-    if (filters.areaRange[0] > 500 || filters.areaRange[1] < 10000) count++;
-    if (filters.propertyTypes.length !== 1 || filters.propertyTypes[0] !== 'residenziale') count++;
+    if (filters.priceRange?.[0] > 0 || filters.priceRange?.[1] < 1000000) count++;
+    if (filters.areaRange?.[0] > 500 || filters.areaRange?.[1] < 10000) count++;
+    if (filters.propertyTypes?.length !== 1 || filters.propertyTypes?.[0] !== 'residenziale') count++;
     if (filters.hasPermits) count++;
     if (filters.minAIScore > 70) count++;
     if (filters.riskLevel !== 'all') count++;
