@@ -386,7 +386,7 @@ export class RealWebScraper {
       });
 
       // Aspetta che il contenuto si carichi
-      await page.waitForTimeout(2000);
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       const lands = await page.evaluate(() => {
         const items: any[] = [];
@@ -510,7 +510,7 @@ export class RealWebScraper {
         timeout: 15000 
       });
 
-      await page.waitForTimeout(2000);
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       const lands = await page.evaluate(() => {
         const items: any[] = [];
@@ -633,7 +633,7 @@ export class RealWebScraper {
         timeout: 15000 
       });
 
-      await page.waitForTimeout(2000);
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       const lands = await page.evaluate(() => {
         const items: any[] = [];
@@ -756,7 +756,7 @@ export class RealWebScraper {
         timeout: 15000 
       });
 
-      await page.waitForTimeout(2000);
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       const lands = await page.evaluate(() => {
         const items: any[] = [];
