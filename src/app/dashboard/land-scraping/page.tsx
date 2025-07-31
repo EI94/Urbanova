@@ -573,10 +573,26 @@ export default function LandScrapingPage() {
               </label>
               <input
                 type="number"
-                value={searchCriteria.areaRange[0]}
+                value={searchCriteria.minArea || 500}
                 onChange={(e) => setSearchCriteria(prev => ({ 
                   ...prev, 
-                  areaRange: [parseInt(e.target.value) || 500, prev.areaRange[1]] 
+                  minArea: parseInt(e.target.value) || 500
+                }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <BuildingIcon className="inline h-4 w-4 mr-1" />
+                Area Max (m²)
+              </label>
+              <input
+                type="number"
+                value={searchCriteria.maxArea || 10000}
+                onChange={(e) => setSearchCriteria(prev => ({ 
+                  ...prev, 
+                  maxArea: parseInt(e.target.value) || 10000
                 }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
