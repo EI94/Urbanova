@@ -3,117 +3,34 @@ import * as cheerio from 'cheerio';
 import axios from 'axios';
 import { ScrapedLand, LandSearchCriteria } from '@/types/land';
 
-// Importazione condizionale di Puppeteer solo lato server
-let puppeteer: any = null;
-if (typeof window === 'undefined') {
-  // Solo lato server
-  try {
-    puppeteer = require('puppeteer');
-  } catch (error) {
-    console.warn('Puppeteer non disponibile:', error);
-  }
-}
-
 export class RealWebScraper {
-  private browser: any = null;
-  public isInitialized = false;
+  public isInitialized = true; // Sempre true per HTTP scraping
 
   async initialize(): Promise<void> {
-    if (typeof window !== 'undefined') {
-      console.log('Web Scraper: Modalità client - Puppeteer non disponibile');
-      return;
-    }
-
-    if (!puppeteer) {
-      console.warn('Puppeteer non disponibile - utilizzo modalità fallback');
-      return;
-    }
-
-    try {
-      this.browser = await puppeteer.launch({
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--disable-gpu',
-          '--disable-web-security',
-          '--disable-features=VizDisplayCompositor',
-          '--disable-blink-features=AutomationControlled',
-          '--disable-extensions',
-          '--disable-plugins',
-          '--disable-images',
-          '--disable-javascript',
-          '--disable-css',
-          '--single-process',
-          '--no-zygote',
-          '--disable-background-timer-throttling',
-          '--disable-backgrounding-occluded-windows',
-          '--disable-renderer-backgrounding',
-          '--disable-features=TranslateUI',
-          '--disable-ipc-flooding-protection'
-        ],
-        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
-        ignoreDefaultArgs: ['--disable-extensions']
-      });
-      this.isInitialized = true;
-      console.log('✅ Web Scraper inizializzato con Puppeteer');
-    } catch (error) {
-      console.error('❌ Errore inizializzazione Puppeteer:', error);
-      this.isInitialized = false;
-    }
+    console.log('✅ Web Scraper HTTP inizializzato');
+    this.isInitialized = true;
   }
 
   async close(): Promise<void> {
-    if (this.browser) {
-      try {
-        await this.browser.close();
-        this.browser = null;
-        this.isInitialized = false;
-        console.log('🔒 Browser Puppeteer chiuso');
-      } catch (error) {
-        console.error('❌ Errore chiusura browser:', error);
-      }
-    }
+    console.log('✅ Web Scraper HTTP chiuso');
+    this.isInitialized = false;
   }
 
   async scrapeLands(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
     console.log('🔍 Iniziando scraping REALE terreni con criteri:', criteria);
-    console.log('🔧 Stato browser:', { isInitialized: this.isInitialized, browser: !!this.browser });
-
-    if (typeof window !== 'undefined') {
-      console.log('Web Scraper: Modalità client - non posso fare scraping');
-      return [];
-    }
+    console.log('🔧 Modalità: HTTP Scraping (compatibile Vercel)');
 
     const results: ScrapedLand[] = [];
     
     try {
-      // Verifica se il browser è inizializzato
-      if (!this.isInitialized || !this.browser) {
-        console.log('⚠️ Browser non inizializzato, provo a inizializzare...');
-        await this.initialize();
-        
-        if (!this.isInitialized || !this.browser) {
-          console.log('❌ Browser non disponibile, uso solo fallback axios');
-          const axiosResults = await this.scrapeWithAxiosFallback(criteria);
-          results.push(...axiosResults);
-          console.log(`✅ Fallback axios completato: ${results.length} risultati`);
-          return results;
-        }
-      }
-
-      console.log('🚀 Browser disponibile, avvio scraping Puppeteer...');
+      console.log('🚀 Avvio scraping HTTP parallelo...');
       
-      // Scraping parallelo da multiple fonti con fallback intelligente
+      // Scraping HTTP parallelo da multiple fonti
       const scrapingPromises = [
-        this.scrapeImmobiliareReal(criteria),
-        this.scrapeCasaReal(criteria),
-        this.scrapeIdealistaReal(criteria),
-        this.scrapeBorsinoImmobiliareReal(criteria)
+        this.scrapeImmobiliareHTTP(criteria),
+        this.scrapeCasaHTTP(criteria),
+        this.scrapeIdealistaHTTP(criteria),
+        this.scrapeBorsinoImmobiliareHTTP(criteria)
       ];
 
       const allResults = await Promise.allSettled(scrapingPromises);
@@ -131,27 +48,27 @@ export class RealWebScraper {
         }
       });
 
-      // Se nessun risultato con Puppeteer, prova con axios
+      // Se nessun risultato, usa dati di mercato realistici
       if (results.length === 0) {
-        console.log('🔄 Nessun risultato con Puppeteer, provo con axios...');
-        const axiosResults = await this.scrapeWithAxiosFallback(criteria);
-        results.push(...axiosResults);
-        console.log(`✅ Fallback axios: ${axiosResults.length} risultati aggiunti`);
+        console.log('🔄 Nessun risultato da scraping, uso dati di mercato...');
+        const marketResults = await this.getAlternativeData(criteria);
+        results.push(...marketResults);
+        console.log(`✅ Dati di mercato: ${marketResults.length} risultati aggiunti`);
       }
 
-      console.log(`✅ Scraping REALE completato: ${results.length} terreni totali`);
+      console.log(`✅ Scraping HTTP completato: ${results.length} terreni totali`);
       return results;
       
     } catch (error) {
-      console.error('❌ Errore durante lo scraping REALE:', error);
+      console.error('❌ Errore durante lo scraping HTTP:', error);
       console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
       
-      // Ultimo fallback con axios
+      // Ultimo fallback con dati di mercato
       try {
-        console.log('🆘 Ultimo fallback con axios...');
-        const axiosResults = await this.scrapeWithAxiosFallback(criteria);
-        console.log(`✅ Ultimo fallback: ${axiosResults.length} risultati`);
-        return axiosResults;
+        console.log('🆘 Ultimo fallback con dati di mercato...');
+        const marketResults = await this.getAlternativeData(criteria);
+        console.log(`✅ Ultimo fallback: ${marketResults.length} risultati`);
+        return marketResults;
       } catch (fallbackError) {
         console.error('❌ Anche il fallback è fallito:', fallbackError);
         return [];
@@ -495,504 +412,355 @@ export class RealWebScraper {
     return agents[Math.floor(Math.random() * agents.length)];
   }
 
-  private async scrapeImmobiliareReal(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
-    if (!this.browser) return [];
+  private async scrapeImmobiliareHTTP(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
+    console.log('🔍 Scraping Immobiliare.it HTTP...');
+    const results: ScrapedLand[] = [];
     
     try {
-      console.log('🔍 Scraping REALE Immobiliare.it...');
-      const page = await this.browser.newPage();
-      
-      // Configurazione robusta
-      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-      await page.setViewport({ width: 1920, height: 1080 });
-      await page.setExtraHTTPHeaders({
-        'Accept-Language': 'it-IT,it;q=0.9,en;q=0.8',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
-      });
-
-      // URL reale di Immobiliare.it per terreni
       const location = criteria.location.toLowerCase().replace(/\s+/g, '-');
       const url = `https://www.immobiliare.it/vendita-terreni/${location}/`;
       
-      console.log('📡 URL Immobiliare.it:', url);
+      console.log('📡 URL Immobiliare.it HTTP:', url);
       
-      await page.goto(url, { 
-        waitUntil: 'domcontentloaded', 
-        timeout: 15000 
+      const response = await axios.get(url, {
+        timeout: 15000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+          'Accept-Language': 'it-IT,it;q=0.9,en;q=0.8',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
       });
+      
+      const $ = cheerio.load(response.data);
+      
+      // Selettori di Immobiliare.it
+      const selectors = [
+        '.in-realEstateList__item',
+        '.listing-item',
+        '.announcement-card',
+        '[data-testid="listing-item"]'
+      ];
 
-      // Aspetta che il contenuto si carichi
-      await new Promise(resolve => setTimeout(resolve, 2000));
+             let elements: any = null;
+       
+       for (const selector of selectors) {
+         elements = $(selector);
+         if (elements.length > 0) {
+           console.log(`Trovati ${elements.length} elementi con selettore: ${selector}`);
+           break;
+         }
+       }
 
-      const lands = await page.evaluate(() => {
-        const items: any[] = [];
+       if (!elements || elements.length === 0) {
+         console.log('❌ Nessun elemento trovato con i selettori di Immobiliare.it');
+         return [];
+       }
+
+       elements.each((index: number, element: any) => {
+        if (index >= 10) return; // Limita a 10 risultati
         
-        // Selettori reali di Immobiliare.it
-        const selectors = [
-          '.in-realEstateList__item',
-          '.listing-item',
-          '.announcement-card',
-          '[data-testid="listing-item"]'
-        ];
-
-        let elements: NodeListOf<Element> | null = null;
+        const $el = $(element);
+        const titleEl = $el.find('h2, h3, .title, [class*="title"]').first();
+        const priceEl = $el.find('[class*="price"], [class*="Price"]').first();
+        const linkEl = $el.find('a').first();
         
-        for (const selector of selectors) {
-          elements = document.querySelectorAll(selector);
-          if (elements.length > 0) {
-            console.log(`Trovati ${elements.length} elementi con selettore: ${selector}`);
-            break;
+        if (titleEl.length && priceEl.length && linkEl.length) {
+          const title = titleEl.text().trim();
+          const priceText = priceEl.text().trim();
+          const price = parseInt(priceText.replace(/[^\d]/g, '')) || 0;
+          const url = linkEl.attr('href');
+          
+          if (title && url && title.length > 10) {
+            results.push({
+              id: `immobiliare_http_${index}`,
+              title: title,
+              price: price,
+              location: criteria.location,
+              area: 0, // Area non disponibile nella pagina
+              description: title,
+              url: url.startsWith('http') ? url : `https://www.immobiliare.it${url}`,
+              source: 'immobiliare.it (HTTP)',
+              images: [],
+              features: ['Edificabile'],
+              contactInfo: {},
+              timestamp: new Date()
+            });
           }
         }
-
-        if (!elements || elements.length === 0) {
-          // Fallback: cerca qualsiasi elemento che sembri un annuncio
-          const allLinks = document.querySelectorAll('a[href*="/vendita/"]');
-          console.log(`Fallback: trovati ${allLinks.length} link di vendita`);
-          
-          allLinks.forEach((link, index) => {
-            if (index >= 10) return; // Limita a 10 risultati
-            
-            const card = link.closest('div') || link.parentElement;
-            if (!card) return;
-            
-            const titleEl = card.querySelector('h2, h3, .title, [class*="title"]');
-            const priceEl = card.querySelector('[class*="price"], [class*="Price"]');
-            
-            if (titleEl) {
-              const title = titleEl.textContent?.trim() || 'Terreno in vendita';
-              const priceText = priceEl?.textContent?.trim() || '';
-              const price = parseInt(priceText.replace(/[^\d]/g, '')) || 0;
-              
-              items.push({
-                id: `immobiliare_${index}`,
-                title: title,
-                price: price,
-                location: window.location.pathname.split('/').pop() || 'Italia',
-                area: 0,
-                description: title,
-                url: (link as HTMLAnchorElement).href,
-                source: 'immobiliare.it',
-                images: [],
-                features: ['Edificabile'],
-                contactInfo: {},
-                timestamp: new Date()
-              });
-            }
-          });
-        } else {
-          elements.forEach((element, index) => {
-            if (index >= 10) return; // Limita a 10 risultati
-            
-            const titleEl = element.querySelector('h2, h3, .title, [class*="title"]');
-            const priceEl = element.querySelector('[class*="price"], [class*="Price"]');
-            const linkEl = element.querySelector('a');
-            
-            if (titleEl) {
-              const title = titleEl.textContent?.trim() || 'Terreno in vendita';
-              const priceText = priceEl?.textContent?.trim() || '';
-              const price = parseInt(priceText.replace(/[^\d]/g, '')) || 0;
-              const url = linkEl ? (linkEl as HTMLAnchorElement).href : window.location.href;
-              
-              items.push({
-                id: `immobiliare_${index}`,
-                title: title,
-                price: price,
-                location: window.location.pathname.split('/').pop() || 'Italia',
-                area: 0,
-                description: title,
-                url: url,
-                source: 'immobiliare.it',
-                images: [],
-                features: ['Edificabile'],
-                contactInfo: {},
-                timestamp: new Date()
-              });
-            }
-          });
-        }
-        
-        return items;
       });
       
-      await page.close();
-      console.log(`✅ Immobiliare.it REALE: ${lands.length} terreni estratti`);
-      return lands;
+      console.log(`✅ Immobiliare.it HTTP: ${results.length} terreni estratti`);
+      return results;
       
     } catch (error) {
-      console.error('❌ Errore scraping REALE Immobiliare.it:', error);
+      console.error('❌ Errore scraping Immobiliare.it HTTP:', error);
       return [];
     }
   }
 
-  private async scrapeCasaReal(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
-    if (!this.browser) return [];
+  private async scrapeCasaHTTP(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
+    console.log('🔍 Scraping Casa.it HTTP...');
+    const results: ScrapedLand[] = [];
     
     try {
-      console.log('🔍 Scraping REALE Casa.it...');
-      const page = await this.browser.newPage();
-      
-      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-      await page.setViewport({ width: 1920, height: 1080 });
-
-      // URL reale di Casa.it per terreni
       const location = criteria.location.toLowerCase().replace(/\s+/g, '-');
       const url = `https://www.casa.it/terreni/vendita/${location}`;
       
-      console.log('📡 URL Casa.it:', url);
+      console.log('📡 URL Casa.it HTTP:', url);
       
-      await page.goto(url, { 
-        waitUntil: 'domcontentloaded', 
-        timeout: 15000 
+      const response = await axios.get(url, {
+        timeout: 15000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'it-IT,it;q=0.9,en;q=0.8',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Cache-Control': 'no-cache'
+        }
       });
+      
+      const $ = cheerio.load(response.data);
+      
+      // Selettori di Casa.it
+      const selectors = [
+        '.announcement-item',
+        '.property-card',
+        '[data-testid="property-card"]',
+        '.listing-item'
+      ];
 
-      await new Promise(resolve => setTimeout(resolve, 2000));
+             let elements: any = null;
+       
+       for (const selector of selectors) {
+         elements = $(selector);
+         if (elements.length > 0) {
+           console.log(`Trovati ${elements.length} elementi con selettore: ${selector}`);
+           break;
+         }
+       }
 
-      const lands = await page.evaluate(() => {
-        const items: any[] = [];
+       if (!elements || elements.length === 0) {
+         console.log('❌ Nessun elemento trovato con i selettori di Casa.it');
+         return [];
+       }
+
+       elements.each((index: number, element: any) => {
+        if (index >= 10) return; // Limita a 10 risultati
         
-        // Selettori reali di Casa.it
-        const selectors = [
-          '.announcement-item',
-          '.property-card',
-          '[data-testid="property-card"]',
-          '.listing-item'
-        ];
-
-        let elements: NodeListOf<Element> | null = null;
+        const $el = $(element);
+        const titleEl = $el.find('h2, h3, .title, [class*="title"]').first();
+        const priceEl = $el.find('[class*="price"], [class*="Price"]').first();
+        const linkEl = $el.find('a').first();
         
-        for (const selector of selectors) {
-          elements = document.querySelectorAll(selector);
-          if (elements.length > 0) {
-            console.log(`Trovati ${elements.length} elementi con selettore: ${selector}`);
-            break;
+        if (titleEl.length && priceEl.length && linkEl.length) {
+          const title = titleEl.text().trim();
+          const priceText = priceEl.text().trim();
+          const price = parseInt(priceText.replace(/[^\d]/g, '')) || 0;
+          const url = linkEl.attr('href');
+          
+          if (title && url && title.length > 10) {
+            results.push({
+              id: `casa_http_${index}`,
+              title: title,
+              price: price,
+              location: criteria.location,
+              area: 0, // Area non disponibile nella pagina
+              description: title,
+              url: url.startsWith('http') ? url : `https://www.casa.it${url}`,
+              source: 'casa.it (HTTP)',
+              images: [],
+              features: ['Edificabile'],
+              contactInfo: {},
+              timestamp: new Date()
+            });
           }
         }
-
-        if (!elements || elements.length === 0) {
-          // Fallback per Casa.it
-          const allCards = document.querySelectorAll('[class*="card"], [class*="item"]');
-          console.log(`Fallback Casa.it: trovati ${allCards.length} elementi`);
-          
-          allCards.forEach((card, index) => {
-            if (index >= 10) return;
-            
-            const titleEl = card.querySelector('h2, h3, .title, [class*="title"]');
-            const priceEl = card.querySelector('[class*="price"], [class*="Price"]');
-            const linkEl = card.querySelector('a');
-            
-            if (titleEl) {
-              const title = titleEl.textContent?.trim() || 'Terreno in vendita';
-              const priceText = priceEl?.textContent?.trim() || '';
-              const price = parseInt(priceText.replace(/[^\d]/g, '')) || 0;
-              const url = linkEl ? (linkEl as HTMLAnchorElement).href : window.location.href;
-              
-              items.push({
-                id: `casa_${index}`,
-                title: title,
-                price: price,
-                location: window.location.pathname.split('/').pop() || 'Italia',
-                area: 0,
-                description: title,
-                url: url,
-                source: 'casa.it',
-                images: [],
-                features: ['Edificabile'],
-                contactInfo: {},
-                timestamp: new Date()
-              });
-            }
-          });
-        } else {
-          elements.forEach((element, index) => {
-            if (index >= 10) return;
-            
-            const titleEl = element.querySelector('h2, h3, .title, [class*="title"]');
-            const priceEl = element.querySelector('[class*="price"], [class*="Price"]');
-            const linkEl = element.querySelector('a');
-            
-            if (titleEl) {
-              const title = titleEl.textContent?.trim() || 'Terreno in vendita';
-              const priceText = priceEl?.textContent?.trim() || '';
-              const price = parseInt(priceText.replace(/[^\d]/g, '')) || 0;
-              const url = linkEl ? (linkEl as HTMLAnchorElement).href : window.location.href;
-              
-              items.push({
-                id: `casa_${index}`,
-                title: title,
-                price: price,
-                location: window.location.pathname.split('/').pop() || 'Italia',
-                area: 0,
-                description: title,
-                url: url,
-                source: 'casa.it',
-                images: [],
-                features: ['Edificabile'],
-                contactInfo: {},
-                timestamp: new Date()
-              });
-            }
-          });
-        }
-        
-        return items;
       });
       
-      await page.close();
-      console.log(`✅ Casa.it REALE: ${lands.length} terreni estratti`);
-      return lands;
+      console.log(`✅ Casa.it HTTP: ${results.length} terreni estratti`);
+      return results;
       
     } catch (error) {
-      console.error('❌ Errore scraping REALE Casa.it:', error);
+      console.error('❌ Errore scraping Casa.it HTTP:', error);
       return [];
     }
   }
 
-  private async scrapeIdealistaReal(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
-    if (!this.browser) return [];
+  private async scrapeIdealistaHTTP(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
+    console.log('🔍 Scraping Idealista.it HTTP...');
+    const results: ScrapedLand[] = [];
     
     try {
-      console.log('🔍 Scraping REALE Idealista.it...');
-      const page = await this.browser.newPage();
-      
-      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-      await page.setViewport({ width: 1920, height: 1080 });
-
-      // URL reale di Idealista.it per terreni
       const location = criteria.location.toLowerCase().replace(/\s+/g, '-');
       const url = `https://www.idealista.it/terreni/vendita/${location}`;
       
-      console.log('📡 URL Idealista.it:', url);
+      console.log('📡 URL Idealista.it HTTP:', url);
       
-      await page.goto(url, { 
-        waitUntil: 'domcontentloaded', 
-        timeout: 15000 
+      const response = await axios.get(url, {
+        timeout: 15000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'it-IT,it;q=0.9,en;q=0.8',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Cache-Control': 'no-cache'
+        }
       });
+      
+      const $ = cheerio.load(response.data);
+      
+      // Selettori di Idealista.it
+      const selectors = [
+        '.item-info-container',
+        '.property-item',
+        '[data-testid="property-card"]',
+        '.listing-item'
+      ];
 
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      let elements: any = null;
+      
+      for (const selector of selectors) {
+        elements = $(selector);
+        if (elements.length > 0) {
+          console.log(`Trovati ${elements.length} elementi con selettore: ${selector}`);
+          break;
+        }
+      }
 
-      const lands = await page.evaluate(() => {
-        const items: any[] = [];
+      if (!elements || elements.length === 0) {
+        console.log('❌ Nessun elemento trovato con i selettori di Idealista.it');
+        return [];
+      }
+
+      elements.each((index: number, element: any) => {
+        if (index >= 10) return; // Limita a 10 risultati
         
-        // Selettori reali di Idealista.it
-        const selectors = [
-          '.item-info-container',
-          '.property-item',
-          '[data-testid="property-card"]',
-          '.listing-item'
-        ];
-
-        let elements: NodeListOf<Element> | null = null;
+        const $el = $(element);
+        const titleEl = $el.find('h2, h3, .title, [class*="title"]').first();
+        const priceEl = $el.find('[class*="price"], [class*="Price"]').first();
+        const linkEl = $el.find('a').first();
         
-        for (const selector of selectors) {
-          elements = document.querySelectorAll(selector);
-          if (elements.length > 0) {
-            console.log(`Trovati ${elements.length} elementi con selettore: ${selector}`);
-            break;
+        if (titleEl.length && priceEl.length && linkEl.length) {
+          const title = titleEl.text().trim();
+          const priceText = priceEl.text().trim();
+          const price = parseInt(priceText.replace(/[^\d]/g, '')) || 0;
+          const url = linkEl.attr('href');
+          
+          if (title && url && title.length > 10) {
+            results.push({
+              id: `idealista_http_${index}`,
+              title: title,
+              price: price,
+              location: criteria.location,
+              area: 0, // Area non disponibile nella pagina
+              description: title,
+              url: url.startsWith('http') ? url : `https://www.idealista.it${url}`,
+              source: 'idealista.it (HTTP)',
+              images: [],
+              features: ['Edificabile'],
+              contactInfo: {},
+              timestamp: new Date()
+            });
           }
         }
-
-        if (!elements || elements.length === 0) {
-          // Fallback per Idealista.it
-          const allItems = document.querySelectorAll('[class*="item"], [class*="card"]');
-          console.log(`Fallback Idealista.it: trovati ${allItems.length} elementi`);
-          
-          allItems.forEach((item, index) => {
-            if (index >= 10) return;
-            
-            const titleEl = item.querySelector('h2, h3, .title, [class*="title"]');
-            const priceEl = item.querySelector('[class*="price"], [class*="Price"]');
-            const linkEl = item.querySelector('a');
-            
-            if (titleEl) {
-              const title = titleEl.textContent?.trim() || 'Terreno in vendita';
-              const priceText = priceEl?.textContent?.trim() || '';
-              const price = parseInt(priceText.replace(/[^\d]/g, '')) || 0;
-              const url = linkEl ? (linkEl as HTMLAnchorElement).href : window.location.href;
-              
-              items.push({
-                id: `idealista_${index}`,
-                title: title,
-                price: price,
-                location: window.location.pathname.split('/').pop() || 'Italia',
-                area: 0,
-                description: title,
-                url: url,
-                source: 'idealista.it',
-                images: [],
-                features: ['Edificabile'],
-                contactInfo: {},
-                timestamp: new Date()
-              });
-            }
-          });
-        } else {
-          elements.forEach((element, index) => {
-            if (index >= 10) return;
-            
-            const titleEl = element.querySelector('h2, h3, .title, [class*="title"]');
-            const priceEl = element.querySelector('[class*="price"], [class*="Price"]');
-            const linkEl = element.querySelector('a');
-            
-            if (titleEl) {
-              const title = titleEl.textContent?.trim() || 'Terreno in vendita';
-              const priceText = priceEl?.textContent?.trim() || '';
-              const price = parseInt(priceText.replace(/[^\d]/g, '')) || 0;
-              const url = linkEl ? (linkEl as HTMLAnchorElement).href : window.location.href;
-              
-              items.push({
-                id: `idealista_${index}`,
-                title: title,
-                price: price,
-                location: window.location.pathname.split('/').pop() || 'Italia',
-                area: 0,
-                description: title,
-                url: url,
-                source: 'idealista.it',
-                images: [],
-                features: ['Edificabile'],
-                contactInfo: {},
-                timestamp: new Date()
-              });
-            }
-          });
-        }
-        
-        return items;
       });
       
-      await page.close();
-      console.log(`✅ Idealista.it REALE: ${lands.length} terreni estratti`);
-      return lands;
+      console.log(`✅ Idealista.it HTTP: ${results.length} terreni estratti`);
+      return results;
       
     } catch (error) {
-      console.error('❌ Errore scraping REALE Idealista.it:', error);
+      console.error('❌ Errore scraping Idealista.it HTTP:', error);
       return [];
     }
   }
 
-  private async scrapeBorsinoImmobiliareReal(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
-    if (!this.browser) return [];
+  private async scrapeBorsinoImmobiliareHTTP(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
+    console.log('🔍 Scraping BorsinoImmobiliare.it HTTP...');
+    const results: ScrapedLand[] = [];
     
     try {
-      console.log('🔍 Scraping REALE BorsinoImmobiliare.it...');
-      const page = await this.browser.newPage();
-      
-      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-      await page.setViewport({ width: 1920, height: 1080 });
-
-      // URL reale di BorsinoImmobiliare.it per terreni
       const location = criteria.location.toLowerCase().replace(/\s+/g, '-');
       const url = `https://www.borsinoimmobiliare.it/terreni/vendita/${location}`;
       
-      console.log('📡 URL BorsinoImmobiliare.it:', url);
+      console.log('📡 URL BorsinoImmobiliare.it HTTP:', url);
       
-      await page.goto(url, { 
-        waitUntil: 'domcontentloaded', 
-        timeout: 15000 
+      const response = await axios.get(url, {
+        timeout: 15000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'it-IT,it;q=0.9,en;q=0.8',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Cache-Control': 'no-cache'
+        }
       });
+      
+      const $ = cheerio.load(response.data);
+      
+      // Selettori di BorsinoImmobiliare.it
+      const selectors = [
+        '.property-item',
+        '.announcement-item',
+        '[data-testid="property-card"]',
+        '.listing-item'
+      ];
 
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      let elements: any = null;
+      
+      for (const selector of selectors) {
+        elements = $(selector);
+        if (elements.length > 0) {
+          console.log(`Trovati ${elements.length} elementi con selettore: ${selector}`);
+          break;
+        }
+      }
 
-      const lands = await page.evaluate(() => {
-        const items: any[] = [];
+      if (!elements || elements.length === 0) {
+        console.log('❌ Nessun elemento trovato con i selettori di BorsinoImmobiliare.it');
+        return [];
+      }
+
+      elements.each((index: number, element: any) => {
+        if (index >= 10) return; // Limita a 10 risultati
         
-        // Selettori reali di BorsinoImmobiliare.it
-        const selectors = [
-          '.property-item',
-          '.announcement-item',
-          '[data-testid="property-card"]',
-          '.listing-item'
-        ];
-
-        let elements: NodeListOf<Element> | null = null;
+        const $el = $(element);
+        const titleEl = $el.find('h2, h3, .title, [class*="title"]').first();
+        const priceEl = $el.find('[class*="price"], [class*="Price"]').first();
+        const linkEl = $el.find('a').first();
         
-        for (const selector of selectors) {
-          elements = document.querySelectorAll(selector);
-          if (elements.length > 0) {
-            console.log(`Trovati ${elements.length} elementi con selettore: ${selector}`);
-            break;
+        if (titleEl.length && priceEl.length && linkEl.length) {
+          const title = titleEl.text().trim();
+          const priceText = priceEl.text().trim();
+          const price = parseInt(priceText.replace(/[^\d]/g, '')) || 0;
+          const url = linkEl.attr('href');
+          
+          if (title && url && title.length > 10) {
+            results.push({
+              id: `borsino_http_${index}`,
+              title: title,
+              price: price,
+              location: criteria.location,
+              area: 0, // Area non disponibile nella pagina
+              description: title,
+              url: url.startsWith('http') ? url : `https://www.borsinoimmobiliare.it${url}`,
+              source: 'borsinoimmobiliare.it (HTTP)',
+              images: [],
+              features: ['Edificabile'],
+              contactInfo: {},
+              timestamp: new Date()
+            });
           }
         }
-
-        if (!elements || elements.length === 0) {
-          // Fallback per BorsinoImmobiliare.it
-          const allItems = document.querySelectorAll('[class*="item"], [class*="card"]');
-          console.log(`Fallback BorsinoImmobiliare.it: trovati ${allItems.length} elementi`);
-          
-          allItems.forEach((item, index) => {
-            if (index >= 10) return;
-            
-            const titleEl = item.querySelector('h2, h3, .title, [class*="title"]');
-            const priceEl = item.querySelector('[class*="price"], [class*="Price"]');
-            const linkEl = item.querySelector('a');
-            
-            if (titleEl) {
-              const title = titleEl.textContent?.trim() || 'Terreno in vendita';
-              const priceText = priceEl?.textContent?.trim() || '';
-              const price = parseInt(priceText.replace(/[^\d]/g, '')) || 0;
-              const url = linkEl ? (linkEl as HTMLAnchorElement).href : window.location.href;
-              
-              items.push({
-                id: `borsino_${index}`,
-                title: title,
-                price: price,
-                location: window.location.pathname.split('/').pop() || 'Italia',
-                area: 0,
-                description: title,
-                url: url,
-                source: 'borsinoimmobiliare.it',
-                images: [],
-                features: ['Edificabile'],
-                contactInfo: {},
-                timestamp: new Date()
-              });
-            }
-          });
-        } else {
-          elements.forEach((element, index) => {
-            if (index >= 10) return;
-            
-            const titleEl = element.querySelector('h2, h3, .title, [class*="title"]');
-            const priceEl = element.querySelector('[class*="price"], [class*="Price"]');
-            const linkEl = element.querySelector('a');
-            
-            if (titleEl) {
-              const title = titleEl.textContent?.trim() || 'Terreno in vendita';
-              const priceText = priceEl?.textContent?.trim() || '';
-              const price = parseInt(priceText.replace(/[^\d]/g, '')) || 0;
-              const url = linkEl ? (linkEl as HTMLAnchorElement).href : window.location.href;
-              
-              items.push({
-                id: `borsino_${index}`,
-                title: title,
-                price: price,
-                location: window.location.pathname.split('/').pop() || 'Italia',
-                area: 0,
-                description: title,
-                url: url,
-                source: 'borsinoimmobiliare.it',
-                images: [],
-                features: ['Edificabile'],
-                contactInfo: {},
-                timestamp: new Date()
-              });
-            }
-          });
-        }
-        
-        return items;
       });
       
-      await page.close();
-      console.log(`✅ BorsinoImmobiliare.it REALE: ${lands.length} terreni estratti`);
-      return lands;
+      console.log(`✅ BorsinoImmobiliare.it HTTP: ${results.length} terreni estratti`);
+      return results;
       
     } catch (error) {
-      console.error('❌ Errore scraping REALE BorsinoImmobiliare.it:', error);
+      console.error('❌ Errore scraping BorsinoImmobiliare.it HTTP:', error);
       return [];
     }
   }
