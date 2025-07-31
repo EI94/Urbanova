@@ -69,31 +69,17 @@ export class RealWebScraper {
     
     // Selettori specifici per prezzi su diversi siti
     const priceSelectors = [
-      // Immobiliare.it
-      '.in-realEstateList__item--features .in-realEstateList__item--features-value',
-      '.in-realEstateList__item--features [class*="price"]',
-      '.in-realEstateList__item--features [class*="Price"]',
-      '.in-realEstateList__item--features .in-realEstateList__item--features-value:contains("€")',
-      
-      // Casa.it
-      '.property-price',
-      '.announcement-price',
-      '[class*="price"]',
-      '[class*="Price"]',
-      
-      // Idealista.it
-      '.item-price',
-      '.property-price',
-      '[class*="price"]',
-      '[class*="Price"]',
-      
-      // Generici
-      '[class*="price"]',
-      '[class*="Price"]',
+      // Immobiliare.it - BASATI SU DATI REALI (CSS Modules)
+      '.styles_in-listingCardPrice__earBq',
+      '.styles_in-listingCardPrice__earBq *',
+      // Selettori generici
+      'span:contains("€")',
+      'div:contains("€")',
+      'p:contains("€")',
       '.price',
       '.Price',
-      'span:contains("€")',
-      'div:contains("€")'
+      '[class*="price"]',
+      '[class*="Price"]'
     ];
 
     for (const selector of priceSelectors) {
@@ -102,14 +88,19 @@ export class RealWebScraper {
         const priceText = priceEl.text().trim();
         console.log(`🔍 [${source}] Testo prezzo trovato: "${priceText}"`);
         
-        // Estrai solo numeri e rimuovi spazi/punti
-        const cleanPrice = priceText.replace(/[^\d]/g, '');
+        // Estrai prezzo dal testo - gestisce formati come "€ 790.000", "790.000€", etc.
+        const priceMatch = priceText.match(/€\s*([\d.,]+)/) || priceText.match(/([\d.,]+)\s*€/);
         
-        if (cleanPrice.length >= 4 && cleanPrice.length <= 8) { // Prezzo realistico tra 1000€ e 99.999.999€
-          const price = parseInt(cleanPrice);
-          if (price > 0 && price < 100000000) {
-            console.log(`✅ [${source}] Prezzo reale estratto: €${price.toLocaleString()}`);
-            return price;
+        if (priceMatch) {
+          // Rimuovi punti e virgole, mantieni solo numeri
+          const cleanPrice = priceMatch[1].replace(/[^\d]/g, '');
+          
+          if (cleanPrice.length >= 4 && cleanPrice.length <= 8) { // Prezzo realistico tra 1000€ e 99.999.999€
+            const price = parseInt(cleanPrice);
+            if (price > 0 && price < 100000000) {
+              console.log(`✅ [${source}] Prezzo reale estratto: €${price.toLocaleString()}`);
+              return price;
+            }
           }
         }
       }
@@ -124,30 +115,17 @@ export class RealWebScraper {
     const $el = $(element);
     
     const areaSelectors = [
-      // Immobiliare.it
-      '.in-realEstateList__item--features .in-realEstateList__item--features-value:contains("m²")',
-      '.in-realEstateList__item--features [class*="area"]',
-      '.in-realEstateList__item--features [class*="surface"]',
-      
-      // Casa.it
-      '.property-area',
-      '.announcement-area',
-      '[class*="area"]',
-      '[class*="surface"]',
-      
-      // Idealista.it
-      '.item-area',
-      '.property-area',
-      '[class*="area"]',
-      '[class*="surface"]',
-      
-      // Generici
-      '[class*="area"]',
-      '[class*="surface"]',
+      // Immobiliare.it - BASATI SU DATI REALI (CSS Modules)
+      '.styles_in-listingCardFeatureList__item__CKRyT',
+      '.styles_in-listingCardFeatureList__v24m8 *',
+      // Selettori generici
+      'span:contains("m²")',
+      'div:contains("m²")',
+      'p:contains("m²")',
       '.area',
       '.surface',
-      'span:contains("m²")',
-      'div:contains("m²")'
+      '[class*="area"]',
+      '[class*="surface"]'
     ];
 
     for (const selector of areaSelectors) {
@@ -156,14 +134,19 @@ export class RealWebScraper {
         const areaText = areaEl.text().trim();
         console.log(`🔍 [${source}] Testo area trovato: "${areaText}"`);
         
-        // Estrai solo numeri
-        const cleanArea = areaText.replace(/[^\d]/g, '');
+        // Estrai area dal testo - gestisce formati come "800 m²", "800m²", etc.
+        const areaMatch = areaText.match(/(\d+(?:[.,]\d+)?)\s*m²/) || areaText.match(/(\d+(?:[.,]\d+)?)m²/);
         
-        if (cleanArea.length >= 2 && cleanArea.length <= 5) { // Area realistica tra 10m² e 99999m²
-          const area = parseInt(cleanArea);
-          if (area > 0 && area < 100000) {
-            console.log(`✅ [${source}] Area reale estratta: ${area}m²`);
-            return area;
+        if (areaMatch) {
+          // Rimuovi punti e virgole, mantieni solo numeri
+          const cleanArea = areaMatch[1].replace(/[^\d]/g, '');
+          
+          if (cleanArea.length >= 2 && cleanArea.length <= 6) { // Area realistico tra 10m² e 999.999m²
+            const area = parseInt(cleanArea);
+            if (area > 0 && area < 1000000) {
+              console.log(`✅ [${source}] Area reale estratta: ${area}m²`);
+              return area;
+            }
           }
         }
       }
@@ -197,16 +180,26 @@ export class RealWebScraper {
       
       const $ = cheerio.load(response.data);
       
-      // Selettori aggiornati per Immobiliare.it
+      // Selettori aggiornati per Immobiliare.it - BASATI SU DATI REALI
       const selectors = [
-        '.in-realEstateList__item',
+        // Selettori specifici per la struttura reale di Immobiliare.it (CSS Modules)
+        '.styles_in-listingCard__aHT19',
+        '.styles_in-listingCardProperty__C2t47',
+        '.nd-mediaObject',
+        // Selettori generici per fallback
         '.listing-item',
         '.announcement-card',
         '[data-testid="listing-item"]',
         '.in-card',
         '.in-realEstateList__item--featured',
         'article[data-testid="listing-item"]',
-        '.in-realEstateList__item--standard'
+        '.in-realEstateList__item--standard',
+        '.in-realEstateList__item',
+        'article',
+        '.card',
+        '.item',
+        '.listing',
+        '.announcement'
       ];
 
       let elements: any = null;
@@ -230,12 +223,16 @@ export class RealWebScraper {
         const $el = $(element);
         
         // Cerca il link principale dell'annuncio
-        const linkEl = $el.find('a[href*="/vendita/"], a[href*="/annunci/"], a[href*="/terreni/"]').first();
-        const titleEl = $el.find('h2, h3, .title, [class*="title"], .in-realEstateList__item--title').first();
+        const linkEl = $el.find('a[href*="/vendita/"], a[href*="/annunci/"], a[href*="/terreni/"], a[href*="/property/"], a[href*="/immobile/"]').first();
+        const titleEl = $el.find('[class*="Title"], h1, h2, h3, .title, [class*="title"]').first();
         
-        if (linkEl.length) {
+        // Se non trova link specifici, cerca qualsiasi link nell'elemento
+        const fallbackLinkEl = linkEl.length === 0 ? $el.find('a').first() : linkEl;
+        const finalLinkEl = fallbackLinkEl;
+        
+        if (finalLinkEl.length) {
           const title = titleEl.length ? titleEl.text().trim() : `Terreno a ${criteria.location}`;
-          const url = linkEl.attr('href');
+          const url = finalLinkEl.attr('href');
           
           if (url && url.length > 10) {
             // Estrai prezzo REALE
