@@ -399,7 +399,24 @@ export default function LandScrapingPage() {
       
       clearInterval(progressInterval);
       
-      setSearchResults(results.data || results);
+      const finalResults = results.data || results;
+      console.log('📊 Risultati ricevuti:', {
+        landsCount: finalResults.lands?.length || 0,
+        emailSent: finalResults.emailSent,
+        summary: finalResults.summary
+      });
+      
+      setSearchResults(finalResults);
+      
+      // Applica filtri ai nuovi risultati
+      setTimeout(() => {
+        if (finalResults.lands) {
+          let filtered = [...finalResults.lands];
+          setFilteredResults(filtered);
+          console.log('✅ Filtri applicati:', filtered.length, 'risultati');
+        }
+      }, 100);
+      
       setSearchProgress({
         phase: 'complete',
         currentSource: '',
@@ -701,6 +718,35 @@ export default function LandScrapingPage() {
               >
                 <SearchIcon className="h-4 w-4" />
                 {searchProgress.phase === 'idle' ? 'Avvia Ricerca' : 'Ricerca in corso...'}
+              </button>
+              
+              <button
+                onClick={async () => {
+                  if (!email) {
+                    toast.error('Inserisci prima un indirizzo email');
+                    return;
+                  }
+                  try {
+                    const response = await fetch('/api/test-email', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ email })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                      toast.success('✅ Email di test inviata! Controlla la tua casella');
+                    } else {
+                      toast.error(`❌ Errore email: ${result.error}`);
+                    }
+                  } catch (error) {
+                    toast.error('❌ Errore invio email di test');
+                    console.error('Test email error:', error);
+                  }
+                }}
+                className="px-4 py-2 text-green-600 hover:text-green-800 border border-green-300 rounded-md hover:bg-green-50 transition-colors"
+                title="Test Email"
+              >
+                <MailIcon className="h-4 w-4" />
               </button>
               
               <button

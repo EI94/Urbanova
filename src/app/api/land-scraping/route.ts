@@ -34,7 +34,13 @@ export async function POST(request: NextRequest) {
     };
 
     // Esegui la ricerca automatizzata
+    console.log('🔍 Avvio ricerca automatizzata con criteri:', searchCriteria);
     const results = await realLandScrapingAgent.runAutomatedSearch(searchCriteria, email);
+    console.log('✅ Ricerca completata:', {
+      landsFound: results.lands?.length || 0,
+      emailSent: results.emailSent,
+      summary: results.summary
+    });
 
     return NextResponse.json({
       success: true,
