@@ -6,7 +6,6 @@ import { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { LandSearchCriteria, RealLandScrapingResult } from '@/types/land';
 import { emailService, EmailConfig } from '@/lib/emailService';
-import { realLandScrapingAgent } from '@/lib/realLandScrapingAgent';
 import { feasibilityService } from '@/lib/feasibilityService';
 import ProgressBar from '@/components/ui/ProgressBar';
 import LandCard from '@/components/ui/LandCard';
@@ -157,10 +156,28 @@ export default function LandScrapingPage() {
 
   const verifyServices = async () => {
     try {
-      const status = await realLandScrapingAgent.verifyAllServices();
-      setServicesStatus(status);
+      // Verifica servizi tramite API
+      const response = await fetch('/api/health');
+      if (response.ok) {
+        setServicesStatus({
+          email: true,
+          webScraping: true,
+          ai: true
+        });
+      } else {
+        setServicesStatus({
+          email: false,
+          webScraping: false,
+          ai: false
+        });
+      }
     } catch (error) {
       console.error('❌ Errore verifica servizi:', error);
+      setServicesStatus({
+        email: false,
+        webScraping: false,
+        ai: false
+      });
     }
   };
 
@@ -345,8 +362,35 @@ export default function LandScrapingPage() {
         });
       }, 500);
 
-      // Esegui ricerca reale
-      const results = await realLandScrapingAgent.runAutomatedSearch(searchCriteria, email);
+      // Esegui ricerca tramite API route (server-side)
+      const response = await fetch('/api/land-scraping', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          location: searchCriteria.location,
+          criteria: {
+            minPrice: searchCriteria.minPrice,
+            maxPrice: searchCriteria.maxPrice,
+            minArea: searchCriteria.minArea,
+            maxArea: searchCriteria.maxArea,
+            propertyType: searchCriteria.propertyType
+          },
+          aiAnalysis: true,
+          email: email
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Errore API: ${response.status} ${response.statusText}`);
+      }
+
+      const results = await response.json();
+      
+      if (!results.success) {
+        throw new Error(results.error || 'Errore durante la ricerca');
+      }
       
       clearInterval(progressInterval);
       
