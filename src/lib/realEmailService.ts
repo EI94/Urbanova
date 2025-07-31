@@ -60,7 +60,7 @@ export class RealEmailService {
         console.log('📧 [RealEmailService] 1. Vai su https://resend.com');
         console.log('📧 [RealEmailService] 2. Crea un account e ottieni API key');
         console.log('📧 [RealEmailService] 3. Aggiungi RESEND_API_KEY nelle variabili ambiente');
-        console.log('📧 [RealEmailService] 4. Verifica il dominio o usa onboarding@resend.dev');
+        console.log('📧 [RealEmailService] 4. Verifica il dominio o usa hello@resend.dev');
         
         // Simula invio per non bloccare il sistema
         await this.saveEmailLog(notification, 'simulated');
@@ -70,7 +70,7 @@ export class RealEmailService {
       console.log('📧 [RealEmailService] Invio email tramite Resend...');
       
       const { data, error } = await this.resend.emails.send({
-        from: 'Urbanova AI <onboarding@resend.dev>',
+        from: 'Urbanova AI <hello@resend.dev>',
         to: [notification.to],
         subject: notification.subject,
         html: notification.htmlContent,
@@ -142,7 +142,7 @@ export class RealEmailService {
       };
 
       const { data, error } = await this.resend.emails.send({
-        from: 'Urbanova AI <onboarding@resend.dev>',
+        from: 'Urbanova AI <hello@resend.dev>',
         to: [testNotification.to],
         subject: testNotification.subject,
         html: testNotification.htmlContent,
