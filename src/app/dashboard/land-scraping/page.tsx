@@ -183,7 +183,12 @@ export default function LandScrapingPage() {
         const savedHistory = localStorage.getItem('landScrapingHistory');
         if (savedHistory) {
           const history = JSON.parse(savedHistory);
-          setSearchHistory(history);
+          // Converti le date da stringhe a oggetti Date
+          const historyWithDates = history.map((entry: any) => ({
+            ...entry,
+            date: new Date(entry.date)
+          }));
+          setSearchHistory(historyWithDates);
         } else {
           setSearchHistory([]);
         }
@@ -818,7 +823,7 @@ export default function LandScrapingPage() {
                   <div>
                     <p className="font-medium text-gray-900">{entry.criteria.location}</p>
                     <p className="text-sm text-gray-600">
-                      {entry.resultsCount} risultati • {entry.date.toLocaleDateString('it-IT')}
+                      {entry.resultsCount} risultati • {entry.date instanceof Date ? entry.date.toLocaleDateString('it-IT') : 'Data non disponibile'}
                     </p>
                   </div>
                   <button
