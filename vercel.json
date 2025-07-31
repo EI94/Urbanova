@@ -10,6 +10,5 @@
     "src/app/api/market-data/route.ts": { "maxDuration": 45 },
     "src/app/api/land-search/route.ts": { "maxDuration": 120 },
     "src/app/api/test-email/route.ts": { "maxDuration": 30 }
-  },
-
+  }
 }
