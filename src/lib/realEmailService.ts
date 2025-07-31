@@ -24,6 +24,9 @@ export class RealEmailService {
     console.log('🔑 [RealEmailService] API Key presente:', !!apiKey);
     console.log('🔑 [RealEmailService] API Key lunghezza:', apiKey ? apiKey.length : 0);
     console.log('🔑 [RealEmailService] API Key inizia con:', apiKey ? apiKey.substring(0, 10) + '...' : 'N/A');
+    console.log('🔑 [RealEmailService] API Key valore completo:', apiKey);
+    console.log('🔑 [RealEmailService] RESEND_API_KEY diretto:', process.env.RESEND_API_KEY);
+    console.log('🔑 [RealEmailService] NEXT_PUBLIC_RESEND_API_KEY:', process.env.NEXT_PUBLIC_RESEND_API_KEY);
     
     if (apiKey && apiKey !== 'undefined' && apiKey !== '' && apiKey !== 'your-resend-api-key') {
       try {
@@ -38,6 +41,7 @@ export class RealEmailService {
     } else {
       console.log('ℹ️ [RealEmailService] RESEND_API_KEY non configurata - modalità simulazione attiva');
       console.log('ℹ️ [RealEmailService] Valore API Key:', apiKey);
+      console.log('ℹ️ [RealEmailService] Controlla le variabili ambiente su Vercel');
       this.isConfigured = false;
       this.resend = null;
     }
