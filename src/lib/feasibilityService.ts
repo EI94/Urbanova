@@ -10,6 +10,7 @@ export interface FeasibilityProject {
   startDate: Date;
   constructionStartDate: Date;
   duration: number; // mesi
+  totalArea?: number; // mq totali del progetto
   
   // Costi
   costs: {
