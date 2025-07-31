@@ -123,6 +123,8 @@ export default function LandScrapingPage() {
     webScraping: boolean;
     ai: boolean;
   } | null>(null);
+  
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -447,7 +449,22 @@ export default function LandScrapingPage() {
         console.error('Errore salvataggio cronologia:', error);
       }
 
-      toast.success(`✅ Trovati ${results.data?.lands?.length || 0} terreni! ${results.data?.emailSent ? 'Email inviata.' : ''}`);
+      const landsCount = results.data?.lands?.length || 0;
+      const emailSent = results.data?.emailSent;
+      const emailError = results.emailError;
+      
+      if (emailError) {
+        setEmailError(emailError);
+        toast.error(`⚠️ ${emailError}`);
+        toast.success(`✅ Trovati ${landsCount} terreni! Email non inviata - configura RESEND_API_KEY`);
+      } else {
+        setEmailError(null);
+        if (emailSent) {
+          toast.success(`✅ Trovati ${landsCount} terreni! Email inviata con successo.`);
+        } else {
+          toast.success(`✅ Trovati ${landsCount} terreni!`);
+        }
+      }
 
     } catch (error) {
       console.error('❌ Errore ricerca:', error);
@@ -720,34 +737,7 @@ export default function LandScrapingPage() {
                 {searchProgress.phase === 'idle' ? 'Avvia Ricerca' : 'Ricerca in corso...'}
               </button>
               
-              <button
-                onClick={async () => {
-                  if (!email) {
-                    toast.error('Inserisci prima un indirizzo email');
-                    return;
-                  }
-                  try {
-                    const response = await fetch('/api/test-email', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ email })
-                    });
-                    const result = await response.json();
-                    if (result.success) {
-                      toast.success('✅ Email di test inviata! Controlla la tua casella');
-                    } else {
-                      toast.error(`❌ Errore email: ${result.error}`);
-                    }
-                  } catch (error) {
-                    toast.error('❌ Errore invio email di test');
-                    console.error('Test email error:', error);
-                  }
-                }}
-                className="px-4 py-2 text-green-600 hover:text-green-800 border border-green-300 rounded-md hover:bg-green-50 transition-colors"
-                title="Test Email"
-              >
-                <MailIcon className="h-4 w-4" />
-              </button>
+
               
               <button
                 onClick={() => setShowEmailSettings(true)}
@@ -907,6 +897,31 @@ export default function LandScrapingPage() {
           cacheHit={false} // TODO: implementare tracking cache hit
           servicesStatus={servicesStatus}
         />
+
+        {/* Notifiche Email */}
+        {emailError && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <AlertIcon className="h-5 w-5 text-yellow-400" />
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-yellow-800">
+                  Configurazione Email Richiesta
+                </h3>
+                <div className="mt-2 text-sm text-yellow-700">
+                  <p>Per ricevere i risultati via email, configura Resend:</p>
+                  <ol className="list-decimal list-inside mt-2 space-y-1">
+                    <li>Vai su <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="underline">https://resend.com</a></li>
+                    <li>Crea un account e ottieni l'API key</li>
+                    <li>Aggiungi <code className="bg-yellow-100 px-1 rounded">RESEND_API_KEY</code> nelle variabili ambiente</li>
+                    <li>Verifica il dominio o usa <code className="bg-yellow-100 px-1 rounded">onboarding@resend.dev</code></li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Storico ricerche */}
         {searchHistory.length > 0 && (

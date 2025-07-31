@@ -35,19 +35,47 @@ export async function POST(request: NextRequest) {
 
     // Esegui la ricerca automatizzata
     console.log('🔍 Avvio ricerca automatizzata con criteri:', searchCriteria);
-    const results = await realLandScrapingAgent.runAutomatedSearch(searchCriteria, email);
-    console.log('✅ Ricerca completata:', {
-      landsFound: results.lands?.length || 0,
-      emailSent: results.emailSent,
-      summary: results.summary
-    });
+    let results;
+    let emailError = null;
+    
+    try {
+      results = await realLandScrapingAgent.runAutomatedSearch(searchCriteria, email);
+      console.log('✅ Ricerca completata:', {
+        landsFound: results.lands?.length || 0,
+        emailSent: results.emailSent,
+        summary: results.summary
+      });
+    } catch (error) {
+      console.error('❌ Errore durante la ricerca:', error);
+      
+      // Se l'errore è relativo all'email, salva i risultati ma segna l'errore email
+      if (error instanceof Error && error.message.includes('RESEND_API_KEY')) {
+        emailError = 'Email non inviata: RESEND_API_KEY non configurata';
+        // Continua con i risultati anche se l'email fallisce
+        results = {
+          lands: [],
+          analysis: [],
+          emailSent: false,
+          summary: {
+            totalFound: 0,
+            averagePrice: 0,
+            bestOpportunities: [],
+            marketTrends: 'Non disponibile',
+            recommendations: ['Configura RESEND_API_KEY per ricevere email']
+          }
+        };
+      } else {
+        throw error; // Rilancia altri errori
+      }
+    }
 
     return NextResponse.json({
       success: true,
       data: results,
       location,
       email,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      emailError: emailError
     }, {
       headers: {
         'Access-Control-Allow-Origin': '*',

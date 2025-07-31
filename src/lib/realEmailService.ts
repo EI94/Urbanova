@@ -51,9 +51,16 @@ export class RealEmailService {
       console.log(`📧 [RealEmailService] Resend instance: ${!!this.resend}`);
       
       if (!this.isConfigured || !this.resend) {
-        console.log('📧 [RealEmailService] Modalità simulazione - email non inviata');
+        console.log('📧 [RealEmailService] RESEND_API_KEY non configurata!');
+        console.log('📧 [RealEmailService] Per configurare Resend:');
+        console.log('📧 [RealEmailService] 1. Vai su https://resend.com');
+        console.log('📧 [RealEmailService] 2. Crea un account e ottieni API key');
+        console.log('📧 [RealEmailService] 3. Aggiungi RESEND_API_KEY nelle variabili ambiente');
+        console.log('📧 [RealEmailService] 4. Verifica il dominio o usa onboarding@resend.dev');
+        
+        // Simula invio per non bloccare il sistema
         await this.saveEmailLog(notification, 'simulated');
-        return;
+        throw new Error('RESEND_API_KEY non configurata. Configura Resend per inviare email reali.');
       }
 
       console.log('📧 [RealEmailService] Invio email tramite Resend...');
