@@ -4,9 +4,9 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { LandSearchCriteria } from '@/lib/realWebScraper';
+import { LandSearchCriteria, RealLandScrapingResult } from '@/types/land';
 import { emailService, EmailConfig } from '@/lib/emailService';
-import { realLandScrapingAgent, RealLandScrapingResult } from '@/lib/realLandScrapingAgent';
+import { realLandScrapingAgent } from '@/lib/realLandScrapingAgent';
 import { feasibilityService } from '@/lib/feasibilityService';
 import ProgressBar from '@/components/ui/ProgressBar';
 import LandCard from '@/components/ui/LandCard';
@@ -380,15 +380,30 @@ export default function LandScrapingPage() {
 
     } catch (error) {
       console.error('❌ Errore ricerca:', error);
+      
+      // Log dettagliato per debugging
+      if (error instanceof Error) {
+        console.error('Dettagli errore:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        });
+      }
+      
       setSearchProgress({
         phase: 'error',
         currentSource: '',
         sourcesCompleted: [],
         sourcesTotal: ['immobiliare.it', 'casa.it', 'idealista.it'],
         progress: 0,
-        message: 'Errore durante la ricerca'
+        message: `Errore: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`
       });
-      toast.error('❌ Errore durante la ricerca. Riprova.');
+      
+      // Messaggio di errore più dettagliato
+      const errorMessage = error instanceof Error 
+        ? `❌ Errore: ${error.message}` 
+        : '❌ Errore durante la ricerca. Riprova.';
+      toast.error(errorMessage);
     }
   };
 

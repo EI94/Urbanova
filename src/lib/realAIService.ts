@@ -1,43 +1,6 @@
 // Servizio AI Reale per Analisi Terreni - Urbanova AI
 import OpenAI from 'openai';
-
-export interface LandAnalysis {
-  aiScore: number;
-  investmentPotential: number;
-  riskAssessment: string;
-  marketTrends: string;
-  recommendations: string[];
-  opportunities: string[];
-  warnings: string[];
-  estimatedROI: number;
-  timeToMarket: string;
-  competitiveAdvantage: string;
-}
-
-export interface ScrapedLand {
-  id: string;
-  title: string;
-  location: string;
-  price: number;
-  pricePerSqm: number;
-  area: number;
-  zoning: string;
-  buildingRights: string;
-  infrastructure: string[];
-  description: string;
-  coordinates: [number, number];
-  source: string;
-  url: string;
-  dateScraped: Date;
-  aiScore: number;
-  features: string[];
-  images?: string[];
-  contactInfo?: {
-    phone?: string;
-    email?: string;
-    agent?: string;
-  };
-}
+import { ScrapedLand, LandAnalysis } from '@/types/land';
 
 export class RealAIService {
   private openai: OpenAI | null = null;

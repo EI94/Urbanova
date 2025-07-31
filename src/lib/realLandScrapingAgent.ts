@@ -1,23 +1,11 @@
 // Agente Land Scraping Reale - Urbanova AI
-import { realWebScraper, ScrapedLand, LandSearchCriteria } from './realWebScraper';
+import { realWebScraper } from './realWebScraper';
 import { realEmailService, EmailNotification } from './realEmailService';
-import { realAIService, LandAnalysis } from './realAIService';
+import { realAIService } from './realAIService';
 import { cacheService } from './cacheService';
 import { db } from './firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-
-export interface RealLandScrapingResult {
-  lands: ScrapedLand[];
-  analysis: LandAnalysis[];
-  emailSent: boolean;
-  summary: {
-    totalFound: number;
-    averagePrice: number;
-    bestOpportunities: ScrapedLand[];
-    marketTrends: string;
-    recommendations: string[];
-  };
-}
+import { ScrapedLand, LandSearchCriteria, LandAnalysis, RealLandScrapingResult } from '@/types/land';
 
 export class RealLandScrapingAgent {
   private name: string;
@@ -32,41 +20,26 @@ export class RealLandScrapingAgent {
     console.log(`🚀 [${this.name}] Avvio ricerca automatizzata per ${email}`);
     
     try {
-      // 0. Controlla Cache per velocità
-      console.log('🔍 Fase 0: Controllo Cache...');
+      // 0. Inizializza Web Scraper
+      console.log('🔧 Fase 0: Inizializzazione Web Scraper...');
+      await realWebScraper.initialize();
+      
+      // 1. Controlla Cache per velocità
+      console.log('🔍 Fase 1: Controllo Cache...');
       const cachedResult = await cacheService.get(criteria);
       if (cachedResult) {
         console.log('⚡ Risultati trovati in cache!');
+        await realWebScraper.close();
         return cachedResult;
       }
       
-      // 1. Web Scraping PARALLELO per velocità
-      console.log('🔍 Fase 1: Web Scraping Parallelo...');
-      const scrapingPromises = [
-        realWebScraper.scrapeImmobiliare(criteria).catch(e => {
-          console.error('❌ Errore scraping Immobiliare.it:', e);
-          return [];
-        }),
-        realWebScraper.scrapeCasa(criteria).catch(e => {
-          console.error('❌ Errore scraping Casa.it:', e);
-          return [];
-        }),
-        realWebScraper.scrapeIdealista(criteria).catch(e => {
-          console.error('❌ Errore scraping Idealista.it:', e);
-          return [];
-        })
-      ];
-      
-      const [immobiliareResults, casaResults, idealistaResults] = await Promise.allSettled(scrapingPromises);
-      
-      // Combina risultati con gestione errori
-      const lands: any[] = [];
-      if (immobiliareResults.status === 'fulfilled') lands.push(...immobiliareResults.value);
-      if (casaResults.status === 'fulfilled') lands.push(...casaResults.value);
-      if (idealistaResults.status === 'fulfilled') lands.push(...idealistaResults.value);
+      // 2. Web Scraping PARALLELO per velocità
+      console.log('🔍 Fase 2: Web Scraping Parallelo...');
+      const lands = await realWebScraper.scrapeLands(criteria);
       
       if (lands.length === 0) {
         console.log('⚠️ Nessun terreno trovato');
+        await realWebScraper.close();
         return {
           lands: [],
           analysis: [],
@@ -290,7 +263,7 @@ export class RealLandScrapingAgent {
         criteria,
         lands: lands.map(land => ({
           ...land,
-          dateScraped: land.dateScraped.toISOString()
+          dateScraped: land.dateScraped?.toISOString() || new Date().toISOString()
         })),
         analysis,
         summary,

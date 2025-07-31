@@ -1,6 +1,7 @@
-// Real Web Scraper - Sistema REALE e funzionante con fallback intelligenti
+// Web Scraper Reale per Terreni - Urbanova AI
 import * as cheerio from 'cheerio';
 import axios from 'axios';
+import { ScrapedLand, LandSearchCriteria } from '@/types/land';
 
 // Importazione condizionale di Puppeteer solo lato server
 let puppeteer: any = null;
@@ -11,34 +12,6 @@ if (typeof window === 'undefined') {
   } catch (error) {
     console.warn('Puppeteer non disponibile:', error);
   }
-}
-
-export interface ScrapedLand {
-  id: string;
-  title: string;
-  price: number;
-  location: string;
-  area: number;
-  description: string;
-  url: string;
-  source: string;
-  images: string[];
-  features: string[];
-  contactInfo: {
-    phone?: string;
-    email?: string;
-    agent?: string;
-  };
-  timestamp: Date;
-}
-
-export interface LandSearchCriteria {
-  location: string;
-  minPrice?: number;
-  maxPrice?: number;
-  minArea?: number;
-  maxArea?: number;
-  propertyType?: string;
 }
 
 export class RealWebScraper {
