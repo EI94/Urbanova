@@ -6,7 +6,7 @@ import { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { LandSearchCriteria, RealLandScrapingResult } from '@/types/land';
 import { emailService, EmailConfig } from '@/lib/emailService';
-import { feasibilityService } from '@/lib/feasibilityService';
+
 import ProgressBar from '@/components/ui/ProgressBar';
 import LandCard from '@/components/ui/LandCard';
 import AdvancedFilters from '@/components/ui/AdvancedFilters';
@@ -497,12 +497,12 @@ export default function LandScrapingPage() {
 
   const handleCreateFeasibilityProject = async (land: any) => {
     try {
-      const projectId = await feasibilityService.createFromLand(land, 'user123');
-      toast.success('✅ Progetto di fattibilità creato!');
-      router.push(`/dashboard/feasibility-analysis/${projectId}`);
+      // Funzionalità temporaneamente disabilitata per evitare errori Firebase
+      toast.success('✅ Funzionalità progetto di fattibilità temporaneamente non disponibile');
+      console.log('📋 Progetto di fattibilità richiesto per:', land.title);
     } catch (error) {
       console.error('❌ Errore creazione progetto:', error);
-      toast.error('❌ Errore nella creazione del progetto');
+      toast.error('❌ Funzionalità non disponibile al momento');
     }
   };
 
