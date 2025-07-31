@@ -24,6 +24,9 @@ export interface ScrapedLand {
     agent?: string;
   };
   timestamp?: Date;
+  // Campi per tracciare la veridicità dei dati
+  hasRealPrice?: boolean;
+  hasRealArea?: boolean;
 }
 
 export interface LandSearchCriteria {

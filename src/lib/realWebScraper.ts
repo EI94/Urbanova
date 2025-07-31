@@ -64,7 +64,7 @@ export class RealWebScraper {
   }
 
   // Funzione per estrarre e validare il prezzo reale
-  private extractRealPrice($: cheerio.CheerioAPI, element: cheerio.Element, source: string): number | null {
+  private extractRealPrice($: cheerio.CheerioAPI, element: any, source: string): number | null {
     const $el = $(element);
     
     // Selettori specifici per prezzi su diversi siti
@@ -120,7 +120,7 @@ export class RealWebScraper {
   }
 
   // Funzione per estrarre e validare l'area reale
-  private extractRealArea($: cheerio.CheerioAPI, element: cheerio.Element, source: string): number | null {
+  private extractRealArea($: cheerio.CheerioAPI, element: any, source: string): number | null {
     const $el = $(element);
     
     const areaSelectors = [
@@ -244,28 +244,37 @@ export class RealWebScraper {
             // Estrai area REALE
             const realArea = this.extractRealArea($, element, 'Immobiliare.it');
             
-            // SOLO se abbiamo sia prezzo che area REALI, aggiungi il risultato
-            if (realPrice && realArea) {
+            // ACCETTA se abbiamo ALMENO UN dato reale (prezzo O area)
+            if (realPrice || realArea) {
               const fullUrl = url.startsWith('http') ? url : `https://www.immobiliare.it${url}`;
+              
+              // Usa valori di fallback solo se necessario, ma marca come non verificati
+              const finalPrice = realPrice || 0; // 0 indica prezzo non disponibile
+              const finalArea = realArea || 0; // 0 indica area non disponibile
               
               results.push({
                 id: `immobiliare_real_${index}`,
                 title: title,
-                price: realPrice,
+                price: finalPrice,
                 location: criteria.location,
-                area: realArea,
+                area: finalArea,
                 description: title,
                 url: fullUrl,
                 source: 'immobiliare.it (REALE)',
                 images: [],
                 features: ['Edificabile'],
                 contactInfo: {},
-                timestamp: new Date()
+                timestamp: new Date(),
+                // Marca i dati mancanti per trasparenza
+                hasRealPrice: !!realPrice,
+                hasRealArea: !!realArea
               });
               
-              console.log(`✅ Annuncio REALE Immobiliare.it: ${title} - €${realPrice.toLocaleString()} - ${realArea}m²`);
+              const priceInfo = realPrice ? `€${realPrice.toLocaleString()}` : 'Prezzo non disponibile';
+              const areaInfo = realArea ? `${realArea}m²` : 'Area non disponibile';
+              console.log(`✅ Annuncio REALE Immobiliare.it: ${title} - ${priceInfo} - ${areaInfo}`);
             } else {
-              console.log(`⚠️ Annuncio scartato - dati incompleti: ${title}`);
+              console.log(`⚠️ Annuncio scartato - nessun dato reale trovato: ${title}`);
             }
           }
         }
@@ -349,28 +358,37 @@ export class RealWebScraper {
             // Estrai area REALE
             const realArea = this.extractRealArea($, element, 'Casa.it');
             
-            // SOLO se abbiamo sia prezzo che area REALI, aggiungi il risultato
-            if (realPrice && realArea) {
+            // ACCETTA se abbiamo ALMENO UN dato reale (prezzo O area)
+            if (realPrice || realArea) {
               const fullUrl = url.startsWith('http') ? url : `https://www.casa.it${url}`;
+              
+              // Usa valori di fallback solo se necessario, ma marca come non verificati
+              const finalPrice = realPrice || 0; // 0 indica prezzo non disponibile
+              const finalArea = realArea || 0; // 0 indica area non disponibile
               
               results.push({
                 id: `casa_real_${index}`,
                 title: title,
-                price: realPrice,
+                price: finalPrice,
                 location: criteria.location,
-                area: realArea,
+                area: finalArea,
                 description: title,
                 url: fullUrl,
                 source: 'casa.it (REALE)',
                 images: [],
                 features: ['Edificabile'],
                 contactInfo: {},
-                timestamp: new Date()
+                timestamp: new Date(),
+                // Marca i dati mancanti per trasparenza
+                hasRealPrice: !!realPrice,
+                hasRealArea: !!realArea
               });
               
-              console.log(`✅ Annuncio REALE Casa.it: ${title} - €${realPrice.toLocaleString()} - ${realArea}m²`);
+              const priceInfo = realPrice ? `€${realPrice.toLocaleString()}` : 'Prezzo non disponibile';
+              const areaInfo = realArea ? `${realArea}m²` : 'Area non disponibile';
+              console.log(`✅ Annuncio REALE Casa.it: ${title} - ${priceInfo} - ${areaInfo}`);
             } else {
-              console.log(`⚠️ Annuncio scartato - dati incompleti: ${title}`);
+              console.log(`⚠️ Annuncio scartato - nessun dato reale trovato: ${title}`);
             }
           }
         }
@@ -455,28 +473,37 @@ export class RealWebScraper {
             // Estrai area REALE
             const realArea = this.extractRealArea($, element, 'Idealista.it');
             
-            // SOLO se abbiamo sia prezzo che area REALI, aggiungi il risultato
-            if (realPrice && realArea) {
+            // ACCETTA se abbiamo ALMENO UN dato reale (prezzo O area)
+            if (realPrice || realArea) {
               const fullUrl = url.startsWith('http') ? url : `https://www.idealista.it${url}`;
+              
+              // Usa valori di fallback solo se necessario, ma marca come non verificati
+              const finalPrice = realPrice || 0; // 0 indica prezzo non disponibile
+              const finalArea = realArea || 0; // 0 indica area non disponibile
               
               results.push({
                 id: `idealista_real_${index}`,
                 title: title,
-                price: realPrice,
+                price: finalPrice,
                 location: criteria.location,
-                area: realArea,
+                area: finalArea,
                 description: title,
                 url: fullUrl,
                 source: 'idealista.it (REALE)',
                 images: [],
                 features: ['Edificabile'],
                 contactInfo: {},
-                timestamp: new Date()
+                timestamp: new Date(),
+                // Marca i dati mancanti per trasparenza
+                hasRealPrice: !!realPrice,
+                hasRealArea: !!realArea
               });
               
-              console.log(`✅ Annuncio REALE Idealista.it: ${title} - €${realPrice.toLocaleString()} - ${realArea}m²`);
+              const priceInfo = realPrice ? `€${realPrice.toLocaleString()}` : 'Prezzo non disponibile';
+              const areaInfo = realArea ? `${realArea}m²` : 'Area non disponibile';
+              console.log(`✅ Annuncio REALE Idealista.it: ${title} - ${priceInfo} - ${areaInfo}`);
             } else {
-              console.log(`⚠️ Annuncio scartato - dati incompleti: ${title}`);
+              console.log(`⚠️ Annuncio scartato - nessun dato reale trovato: ${title}`);
             }
           }
         }
@@ -561,28 +588,37 @@ export class RealWebScraper {
             // Estrai area REALE
             const realArea = this.extractRealArea($, element, 'BorsinoImmobiliare.it');
             
-            // SOLO se abbiamo sia prezzo che area REALI, aggiungi il risultato
-            if (realPrice && realArea) {
+            // ACCETTA se abbiamo ALMENO UN dato reale (prezzo O area)
+            if (realPrice || realArea) {
               const fullUrl = url.startsWith('http') ? url : `https://www.borsinoimmobiliare.it${url}`;
+              
+              // Usa valori di fallback solo se necessario, ma marca come non verificati
+              const finalPrice = realPrice || 0; // 0 indica prezzo non disponibile
+              const finalArea = realArea || 0; // 0 indica area non disponibile
               
               results.push({
                 id: `borsino_real_${index}`,
                 title: title,
-                price: realPrice,
+                price: finalPrice,
                 location: criteria.location,
-                area: realArea,
+                area: finalArea,
                 description: title,
                 url: fullUrl,
                 source: 'borsinoimmobiliare.it (REALE)',
                 images: [],
                 features: ['Edificabile'],
                 contactInfo: {},
-                timestamp: new Date()
+                timestamp: new Date(),
+                // Marca i dati mancanti per trasparenza
+                hasRealPrice: !!realPrice,
+                hasRealArea: !!realArea
               });
               
-              console.log(`✅ Annuncio REALE BorsinoImmobiliare.it: ${title} - €${realPrice.toLocaleString()} - ${realArea}m²`);
+              const priceInfo = realPrice ? `€${realPrice.toLocaleString()}` : 'Prezzo non disponibile';
+              const areaInfo = realArea ? `${realArea}m²` : 'Area non disponibile';
+              console.log(`✅ Annuncio REALE BorsinoImmobiliare.it: ${title} - ${priceInfo} - ${areaInfo}`);
             } else {
-              console.log(`⚠️ Annuncio scartato - dati incompleti: ${title}`);
+              console.log(`⚠️ Annuncio scartato - nessun dato reale trovato: ${title}`);
             }
           }
         }
