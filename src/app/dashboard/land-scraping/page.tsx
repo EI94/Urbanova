@@ -158,13 +158,18 @@ export default function LandScrapingPage() {
     try {
       // Verifica servizi tramite API
       const response = await fetch('/api/health');
-      if (response.ok) {
+      const data = await response.json();
+      
+      console.log('🔍 Health check response:', data);
+      
+      if (response.ok && data.services) {
         setServicesStatus({
-          email: true,
-          webScraping: true,
-          ai: true
+          email: data.services.email === 'configured',
+          webScraping: data.services.webScraping === 'operational',
+          ai: data.services.ai === 'configured'
         });
       } else {
+        console.error('❌ Health check failed:', data);
         setServicesStatus({
           email: false,
           webScraping: false,
@@ -394,7 +399,7 @@ export default function LandScrapingPage() {
       
       clearInterval(progressInterval);
       
-      setSearchResults(results);
+      setSearchResults(results.data || results);
       setSearchProgress({
         phase: 'complete',
         currentSource: '',
@@ -410,8 +415,8 @@ export default function LandScrapingPage() {
         criteria: searchCriteria,
         email,
         date: new Date(),
-        resultsCount: results.lands.length,
-        emailSent: results.emailSent
+        resultsCount: results.data?.lands?.length || 0,
+        emailSent: results.data?.emailSent || false
       };
       const newHistory = [historyEntry, ...searchHistory.slice(0, 9)];
       setSearchHistory(newHistory);
@@ -425,7 +430,7 @@ export default function LandScrapingPage() {
         console.error('Errore salvataggio cronologia:', error);
       }
 
-      toast.success(`✅ Trovati ${results.lands.length} terreni! ${results.emailSent ? 'Email inviata.' : ''}`);
+      toast.success(`✅ Trovati ${results.data?.lands?.length || 0} terreni! ${results.data?.emailSent ? 'Email inviata.' : ''}`);
 
     } catch (error) {
       console.error('❌ Errore ricerca:', error);
