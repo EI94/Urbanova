@@ -3,8 +3,7 @@ import { realWebScraper } from './realWebScraper';
 import { realEmailService, EmailNotification } from './realEmailService';
 import { realAIService } from './realAIService';
 import { cacheService } from './cacheService';
-import { db } from './firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
 import { ScrapedLand, LandSearchCriteria, LandAnalysis, RealLandScrapingResult } from '@/types/land';
 
 export class RealLandScrapingAgent {
@@ -267,14 +266,19 @@ export class RealLandScrapingAgent {
         })),
         analysis,
         summary,
-        createdAt: serverTimestamp(),
+        createdAt: new Date().toISOString(),
         status: 'completed'
       };
 
-      await addDoc(collection(db, 'landSearchResults'), searchResult);
-      console.log('✅ Risultati salvati nel database');
+      // Log dei risultati invece di salvare in Firebase
+      console.log('✅ Risultati ricerca completati:', {
+        email,
+        landsCount: lands.length,
+        summary: summary,
+        timestamp: new Date().toISOString()
+      });
     } catch (error) {
-      console.error('❌ Errore salvataggio risultati:', error);
+      console.error('❌ Errore logging risultati:', error);
     }
   }
 
