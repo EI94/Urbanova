@@ -606,6 +606,27 @@ export default function LandScrapingPage() {
           </div>
         </div>
 
+        {/* Messaggio informativo sui dati reali */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <CheckCircleIcon className="h-5 w-5 text-blue-400" />
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-blue-800">
+                ✅ Solo Dati Reali
+              </h3>
+              <div className="mt-2 text-sm text-blue-700">
+                <p>
+                  Il sistema ora estrae <strong>esclusivamente dati reali</strong> dagli annunci. 
+                  Vengono mostrati solo terreni con prezzo e superficie verificati. 
+                  Se non vengono trovati dati completi, l'annuncio non viene incluso nei risultati.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Progress Bar durante la ricerca */}
         <ProgressBar
           phase={searchProgress.phase}
