@@ -9,5 +9,9 @@
     "src/app/api/cleanup/route.ts": { "maxDuration": 120 },
     "src/app/api/market-data/route.ts": { "maxDuration": 45 },
     "src/app/api/land-search/route.ts": { "maxDuration": 120 }
+  },
+  "env": {
+    "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD": "true",
+    "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/google-chrome-stable"
   }
 }
