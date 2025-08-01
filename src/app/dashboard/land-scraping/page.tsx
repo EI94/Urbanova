@@ -11,6 +11,7 @@ import ProgressBar from '@/components/ui/ProgressBar';
 import LandCard from '@/components/ui/LandCard';
 import AdvancedFilters from '@/components/ui/AdvancedFilters';
 import PerformanceStats from '@/components/ui/PerformanceStats';
+import ScheduledSearchModal from '@/components/ui/ScheduledSearchModal';
 import { 
   SearchIcon, 
   MailIcon, 
@@ -118,6 +119,19 @@ export default function LandScrapingPage() {
   const [showEmailSettings, setShowEmailSettings] = useState(false);
   const [emailConfig, setEmailConfig] = useState<EmailConfig | null>(null);
   
+  // Stati per ricerca automatica programmata
+  const [showScheduledSearch, setShowScheduledSearch] = useState(false);
+  const [scheduledSearches, setScheduledSearches] = useState<Array<{
+    id: string;
+    name: string;
+    criteria: LandSearchCriteria;
+    email: string;
+    frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
+    isActive: boolean;
+    lastRun?: Date;
+    nextRun?: Date;
+  }>>([]);
+  
   // Stati per servizi
   const [servicesStatus, setServicesStatus] = useState<{
     email: boolean;
@@ -139,6 +153,7 @@ export default function LandScrapingPage() {
     initializeServices();
     loadSearchHistory();
     loadFavorites();
+    loadScheduledSearches();
   }, []);
 
   // Gestione stato connessione internet
@@ -315,6 +330,75 @@ export default function LandScrapingPage() {
         setFavorites(new Set(JSON.parse(saved)));
       }
     }
+  };
+
+  const loadScheduledSearches = () => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('landScrapingScheduled');
+      if (saved) {
+        const searches = JSON.parse(saved);
+        // Converti le date da stringhe a oggetti Date
+        const searchesWithDates = searches.map((search: any) => ({
+          ...search,
+          lastRun: search.lastRun ? new Date(search.lastRun) : undefined,
+          nextRun: search.nextRun ? new Date(search.nextRun) : undefined
+        }));
+        setScheduledSearches(searchesWithDates);
+      }
+    }
+  };
+
+  const saveScheduledSearches = (searches: any[]) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('landScrapingScheduled', JSON.stringify(searches));
+    }
+  };
+
+  const addScheduledSearch = (search: any) => {
+    const newSearch = {
+      ...search,
+      id: Date.now().toString(),
+      isActive: true,
+      lastRun: undefined,
+      nextRun: calculateNextRun(search.frequency)
+    };
+    
+    const updatedSearches = [...scheduledSearches, newSearch];
+    setScheduledSearches(updatedSearches);
+    saveScheduledSearches(updatedSearches);
+    toast.success('Ricerca programmata aggiunta con successo!');
+  };
+
+  const calculateNextRun = (frequency: string) => {
+    const now = new Date();
+    switch (frequency) {
+      case 'daily':
+        return new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      case 'weekly':
+        return new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      case 'monthly':
+        return new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      case 'yearly':
+        return new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+      default:
+        return new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    }
+  };
+
+  const toggleScheduledSearch = (id: string) => {
+    const updatedSearches = scheduledSearches.map(search => 
+      search.id === id ? { ...search, isActive: !search.isActive } : search
+    );
+    setScheduledSearches(updatedSearches);
+    saveScheduledSearches(updatedSearches);
+    toast.success('Stato ricerca programmata aggiornato!');
+  };
+
+  const deleteScheduledSearch = (id: string) => {
+    const updatedSearches = scheduledSearches.filter(search => search.id !== id);
+    setScheduledSearches(updatedSearches);
+    saveScheduledSearches(updatedSearches);
+    toast.success('Ricerca programmata eliminata!');
   };
 
   const saveFavorites = (newFavorites: Set<string>) => {
@@ -753,26 +837,7 @@ export default function LandScrapingPage() {
           </div>
         </div>
 
-        {/* Messaggio informativo sui dati reali */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <CheckCircleIcon className="h-5 w-5 text-blue-400" />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-blue-800">
-                ✅ Solo Dati Reali
-              </h3>
-              <div className="mt-2 text-sm text-blue-700">
-                <p>
-                  Il sistema ora estrae <strong>esclusivamente dati reali</strong> dagli annunci. 
-                  Vengono mostrati solo terreni con prezzo e superficie verificati. 
-                  Se non vengono trovati dati completi, l'annuncio non viene incluso nei risultati.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+
 
         {/* Avviso offline */}
         {!isOnline && (
@@ -934,8 +999,17 @@ export default function LandScrapingPage() {
 
               
               <button
+                onClick={() => setShowScheduledSearch(true)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                title="Ricerche Programmate"
+              >
+                <CalendarIcon className="h-4 w-4" />
+              </button>
+              
+              <button
                 onClick={() => setShowEmailSettings(true)}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                title="Impostazioni Email"
               >
                 <SettingsIcon className="h-4 w-4" />
               </button>
@@ -1117,6 +1191,60 @@ export default function LandScrapingPage() {
           </div>
         )}
 
+        {/* Ricerche Programmate */}
+        {scheduledSearches.length > 0 && (
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <CalendarIcon className="h-5 w-5 text-blue-600" />
+                Ricerche Programmate
+              </h3>
+              <button
+                onClick={() => setShowScheduledSearch(true)}
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Gestisci
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {scheduledSearches.slice(0, 3).map((search) => (
+                <div key={search.id} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium text-gray-900 text-sm">{search.name}</h4>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      search.isActive 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {search.isActive ? 'Attiva' : 'Inattiva'}
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-600 space-y-1">
+                    <div>📍 {search.criteria.location}</div>
+                    <div>📅 {search.frequency === 'daily' ? 'Giornaliera' : 
+                           search.frequency === 'weekly' ? 'Settimanale' : 
+                           search.frequency === 'monthly' ? 'Mensile' : 'Annuale'}</div>
+                    <div>📧 {search.email}</div>
+                    {search.nextRun && (
+                      <div>⏰ Prossima: {search.nextRun.toLocaleDateString('it-IT')}</div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {scheduledSearches.length > 3 && (
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => setShowScheduledSearch(true)}
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  Vedi tutte ({scheduledSearches.length})
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Storico ricerche */}
         {searchHistory.length > 0 && (
           <div className="bg-white rounded-lg shadow-sm border p-6">
@@ -1144,6 +1272,18 @@ export default function LandScrapingPage() {
             </div>
           </div>
         )}
+
+        {/* Modale Ricerche Programmate */}
+        <ScheduledSearchModal
+          isOpen={showScheduledSearch}
+          onClose={() => setShowScheduledSearch(false)}
+          scheduledSearches={scheduledSearches}
+          onAddScheduledSearch={addScheduledSearch}
+          onToggleScheduledSearch={toggleScheduledSearch}
+          onDeleteScheduledSearch={deleteScheduledSearch}
+          currentCriteria={searchCriteria}
+          currentEmail={email}
+        />
       </div>
     </DashboardLayout>
   );
