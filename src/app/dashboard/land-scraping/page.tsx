@@ -66,6 +66,7 @@ interface FilterState {
 
 export default function LandScrapingPage() {
   const [isClient, setIsClient] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
 
   // Stati principali
   const [searchCriteria, setSearchCriteria] = useState<LandSearchCriteria>({
@@ -140,6 +141,38 @@ export default function LandScrapingPage() {
     loadFavorites();
   }, []);
 
+  // Gestione stato connessione internet
+  useEffect(() => {
+    const handleOnline = () => {
+      console.log('🌐 Connessione internet ripristinata');
+      setIsOnline(true);
+      toast.success('Connessione internet ripristinata!');
+      // Riprova a verificare i servizi
+      setTimeout(() => {
+        verifyServices();
+      }, 1000);
+    };
+
+    const handleOffline = () => {
+      console.log('❌ Connessione internet persa');
+      setIsOnline(false);
+      toast.error('Connessione internet persa. Verifica la tua connessione.');
+    };
+
+    // Imposta lo stato iniziale
+    setIsOnline(navigator.onLine);
+
+    // Aggiungi event listeners
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   // Applica filtri quando cambiano
   useEffect(() => {
     if (searchResults?.lands) {
@@ -158,28 +191,78 @@ export default function LandScrapingPage() {
 
   const verifyServices = async () => {
     try {
-      // Verifica servizi tramite API
-      const response = await fetch('/api/health');
-      const data = await response.json();
-      
-      console.log('🔍 Health check response:', data);
-      
-      if (response.ok && data.services) {
-        setServicesStatus({
-          email: data.services.email === 'configured',
-          webScraping: data.services.webScraping === 'operational',
-          ai: data.services.ai === 'configured'
-        });
-      } else {
-        console.error('❌ Health check failed:', data);
-        setServicesStatus({
-          email: false,
-          webScraping: false,
-          ai: false
-        });
+      // Retry logic per gestire errori di rete
+      let attempts = 0;
+      const maxAttempts = 3;
+      let lastError: any = null;
+
+      while (attempts < maxAttempts) {
+        try {
+          console.log(`🔍 Tentativo ${attempts + 1}/${maxAttempts} - Health check...`);
+          
+          // Timeout di 10 secondi per evitare blocchi
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+          const response = await fetch('/api/health', {
+            signal: controller.signal,
+            headers: {
+              'Cache-Control': 'no-cache',
+              'Pragma': 'no-cache'
+            }
+          });
+
+          clearTimeout(timeoutId);
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log('✅ Health check riuscito:', data);
+            
+            setServicesStatus({
+              email: data.services?.email === 'configured' || false,
+              webScraping: data.services?.webScraping === 'operational' || false,
+              ai: data.services?.ai === 'configured' || false
+            });
+            return; // Successo, esci dal loop
+          } else {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+        } catch (error: any) {
+          lastError = error;
+          attempts++;
+          
+          if (error.name === 'AbortError') {
+            console.warn(`⏰ Timeout tentativo ${attempts}/${maxAttempts}`);
+          } else if (error.message.includes('ERR_NETWORK_CHANGED') || 
+                     error.message.includes('ERR_INTERNET_DISCONNECTED') ||
+                     error.message.includes('Failed to fetch')) {
+            console.warn(`🌐 Errore di rete tentativo ${attempts}/${maxAttempts}:`, error.message);
+          } else {
+            console.error(`❌ Errore tentativo ${attempts}/${maxAttempts}:`, error);
+          }
+
+          // Attendi prima del retry (backoff esponenziale)
+          if (attempts < maxAttempts) {
+            const delay = Math.min(1000 * Math.pow(2, attempts - 1), 5000);
+            console.log(`⏳ Attendo ${delay}ms prima del prossimo tentativo...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+        }
       }
+
+      // Tutti i tentativi falliti
+      console.error('❌ Tutti i tentativi di health check falliti:', lastError);
+      setServicesStatus({
+        email: false,
+        webScraping: false,
+        ai: false
+      });
+
+      // Mostra errore all'utente
+      toast.error('Problemi di connessione. Verifica la tua connessione internet e riprova.');
+
     } catch (error) {
-      console.error('❌ Errore verifica servizi:', error);
+      console.error('❌ Errore critico verifica servizi:', error);
       setServicesStatus({
         email: false,
         webScraping: false,
@@ -369,102 +452,158 @@ export default function LandScrapingPage() {
         });
       }, 500);
 
-      // Esegui ricerca tramite API route (server-side)
-      const response = await fetch('/api/land-scraping', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          location: searchCriteria.location,
-          criteria: {
-            minPrice: searchCriteria.minPrice,
-            maxPrice: searchCriteria.maxPrice,
-            minArea: searchCriteria.minArea,
-            maxArea: searchCriteria.maxArea,
-            propertyType: searchCriteria.propertyType
-          },
-          aiAnalysis: true,
-          email: email
-        })
-      });
+      // Esegui ricerca tramite API route (server-side) con retry logic
+      let searchAttempts = 0;
+      const maxSearchAttempts = 3;
+      let searchLastError: any = null;
 
-      if (!response.ok) {
-        throw new Error(`Errore API: ${response.status} ${response.statusText}`);
-      }
+      while (searchAttempts < maxSearchAttempts) {
+        try {
+          console.log(`🔍 Tentativo ricerca ${searchAttempts + 1}/${maxSearchAttempts}...`);
+          
+          // Timeout di 120 secondi per la ricerca
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 120000);
 
-      const results = await response.json();
-      
-      if (!results.success) {
-        throw new Error(results.error || 'Errore durante la ricerca');
-      }
-      
-      clearInterval(progressInterval);
-      
-      const finalResults = results.data || results;
-      console.log('📊 Risultati ricevuti:', {
-        landsCount: finalResults.lands?.length || 0,
-        emailSent: finalResults.emailSent,
-        summary: finalResults.summary
-      });
-      
-      setSearchResults(finalResults);
-      
-      // Applica filtri ai nuovi risultati
-      setTimeout(() => {
-        if (finalResults.lands) {
-          let filtered = [...finalResults.lands];
-          setFilteredResults(filtered);
-          console.log('✅ Filtri applicati:', filtered.length, 'risultati');
+          const response = await fetch('/api/land-scraping', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-cache',
+              'Pragma': 'no-cache'
+            },
+            signal: controller.signal,
+            body: JSON.stringify({
+              location: searchCriteria.location,
+              criteria: {
+                minPrice: searchCriteria.minPrice,
+                maxPrice: searchCriteria.maxPrice,
+                minArea: searchCriteria.minArea,
+                maxArea: searchCriteria.maxArea,
+                propertyType: searchCriteria.propertyType
+              },
+              aiAnalysis: true,
+              email: email
+            })
+          });
+
+          clearTimeout(timeoutId);
+
+          if (!response.ok) {
+            throw new Error(`Errore API: ${response.status} ${response.statusText}`);
+          }
+
+          const results = await response.json();
+          
+          if (!results.success) {
+            throw new Error(results.error || 'Errore durante la ricerca');
+          }
+          
+          clearInterval(progressInterval);
+          
+          const finalResults = results.data || results;
+          console.log('📊 Risultati ricevuti:', {
+            landsCount: finalResults.lands?.length || 0,
+            emailSent: finalResults.emailSent,
+            summary: finalResults.summary
+          });
+          
+          setSearchResults(finalResults);
+          
+          // Applica filtri ai nuovi risultati
+          setTimeout(() => {
+            if (finalResults.lands) {
+              let filtered = [...finalResults.lands];
+              setFilteredResults(filtered);
+              console.log('✅ Filtri applicati:', filtered.length, 'risultati');
+            }
+          }, 100);
+          
+          setSearchProgress({
+            phase: 'complete',
+            currentSource: '',
+            sourcesCompleted: ['immobiliare.it', 'casa.it', 'idealista.it'],
+            sourcesTotal: ['immobiliare.it', 'casa.it', 'idealista.it'],
+            progress: 100,
+            message: 'Ricerca completata!'
+          });
+
+          // Salva nella cronologia
+          const historyEntry = {
+            id: Date.now().toString(),
+            criteria: searchCriteria,
+            email,
+            date: new Date(),
+            resultsCount: results.data?.lands?.length || 0,
+            emailSent: results.data?.emailSent || false
+          };
+          const newHistory = [historyEntry, ...searchHistory.slice(0, 9)];
+          setSearchHistory(newHistory);
+          
+          // Salva in localStorage per persistenza
+          try {
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('landScrapingHistory', JSON.stringify(newHistory));
+            }
+          } catch (error) {
+            console.error('Errore salvataggio cronologia:', error);
+          }
+
+          const landsCount = results.data?.lands?.length || 0;
+          const emailSent = results.data?.emailSent;
+          const emailError = results.emailError;
+          
+          if (emailError) {
+            setEmailError(emailError);
+            toast.error(`⚠️ ${emailError}`);
+            toast.success(`✅ Trovati ${landsCount} terreni! Email non inviata - configura RESEND_API_KEY`);
+          } else {
+            setEmailError(null);
+            if (emailSent) {
+              toast.success(`✅ Trovati ${landsCount} terreni! Email inviata con successo.`);
+            } else {
+              toast.success(`✅ Trovati ${landsCount} terreni!`);
+            }
+          }
+          return; // Exit the retry loop on success
+        } catch (error: any) {
+          searchLastError = error;
+          searchAttempts++;
+          
+          if (error.name === 'AbortError') {
+            console.warn(`⏰ Timeout tentativo ricerca ${searchAttempts}/${maxSearchAttempts}`);
+          } else if (error.message.includes('ERR_NETWORK_CHANGED') || 
+                     error.message.includes('ERR_INTERNET_DISCONNECTED') ||
+                     error.message.includes('Failed to fetch')) {
+            console.warn(`🌐 Errore di rete tentativo ricerca ${searchAttempts}/${maxSearchAttempts}:`, error.message);
+          } else {
+            console.error(`❌ Errore tentativo ricerca ${searchAttempts}/${maxSearchAttempts}:`, error);
+          }
+
+          if (searchAttempts < maxSearchAttempts) {
+            const delay = Math.min(1000 * Math.pow(2, searchAttempts - 1), 5000);
+            console.log(`⏳ Attendo ${delay}ms prima del prossimo tentativo ricerca...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
         }
-      }, 100);
-      
+      }
+
+      // Tutti i tentativi di ricerca falliti
+      console.error('❌ Tutti i tentativi di ricerca falliti:', searchLastError);
       setSearchProgress({
-        phase: 'complete',
+        phase: 'error',
         currentSource: '',
-        sourcesCompleted: ['immobiliare.it', 'casa.it', 'idealista.it'],
+        sourcesCompleted: [],
         sourcesTotal: ['immobiliare.it', 'casa.it', 'idealista.it'],
-        progress: 100,
-        message: 'Ricerca completata!'
+        progress: 0,
+        message: `Errore: ${searchLastError instanceof Error ? searchLastError.message : 'Errore sconosciuto'}`
       });
-
-      // Salva nella cronologia
-      const historyEntry = {
-        id: Date.now().toString(),
-        criteria: searchCriteria,
-        email,
-        date: new Date(),
-        resultsCount: results.data?.lands?.length || 0,
-        emailSent: results.data?.emailSent || false
-      };
-      const newHistory = [historyEntry, ...searchHistory.slice(0, 9)];
-      setSearchHistory(newHistory);
       
-      // Salva in localStorage per persistenza
-      try {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('landScrapingHistory', JSON.stringify(newHistory));
-        }
-      } catch (error) {
-        console.error('Errore salvataggio cronologia:', error);
-      }
-
-      const landsCount = results.data?.lands?.length || 0;
-      const emailSent = results.data?.emailSent;
-      const emailError = results.emailError;
-      
-      if (emailError) {
-        setEmailError(emailError);
-        toast.error(`⚠️ ${emailError}`);
-        toast.success(`✅ Trovati ${landsCount} terreni! Email non inviata - configura RESEND_API_KEY`);
-      } else {
-        setEmailError(null);
-        if (emailSent) {
-          toast.success(`✅ Trovati ${landsCount} terreni! Email inviata con successo.`);
-        } else {
-          toast.success(`✅ Trovati ${landsCount} terreni!`);
-        }
-      }
+      // Messaggio di errore più dettagliato
+      const errorMessage = searchLastError instanceof Error 
+        ? `❌ Errore: ${searchLastError.message}` 
+        : '❌ Errore durante la ricerca. Riprova.';
+      toast.error(errorMessage);
 
     } catch (error) {
       console.error('❌ Errore ricerca:', error);
@@ -593,6 +732,14 @@ export default function LandScrapingPage() {
           
           {/* Stato servizi */}
           <div className="flex items-center gap-4">
+            {/* Indicatore stato connessione */}
+            <div className="flex items-center gap-2 text-sm">
+              <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
+              <span className={`text-sm ${isOnline ? 'text-green-600' : 'text-red-600'}`}>
+                {isOnline ? 'Online' : 'Offline'}
+              </span>
+            </div>
+            
             {servicesStatus && (
               <div className="flex items-center gap-2 text-sm">
                 <div className={`w-2 h-2 rounded-full ${servicesStatus.email ? 'bg-green-500' : 'bg-red-500'}`}></div>
@@ -626,6 +773,30 @@ export default function LandScrapingPage() {
             </div>
           </div>
         </div>
+
+        {/* Avviso offline */}
+        {!isOnline && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <div className="w-5 h-5 bg-red-400 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs">!</span>
+                </div>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">
+                  ⚠️ Connessione Internet Assente
+                </h3>
+                <div className="mt-2 text-sm text-red-700">
+                  <p>
+                    Non hai una connessione internet attiva. Alcune funzionalità potrebbero non funzionare correttamente. 
+                    Verifica la tua connessione e riprova.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Progress Bar durante la ricerca */}
         <ProgressBar
@@ -751,11 +922,13 @@ export default function LandScrapingPage() {
             <div className="flex items-end gap-3">
               <button
                 onClick={handleSearch}
-                disabled={searchProgress.phase !== 'idle'}
+                disabled={searchProgress.phase !== 'idle' || !isOnline}
                 className="flex-1 flex items-center justify-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title={!isOnline ? 'Connessione internet richiesta per la ricerca' : ''}
               >
                 <SearchIcon className="h-4 w-4" />
-                {searchProgress.phase === 'idle' ? 'Avvia Ricerca' : 'Ricerca in corso...'}
+                {!isOnline ? 'Offline' : 
+                 searchProgress.phase === 'idle' ? 'Avvia Ricerca' : 'Ricerca in corso...'}
               </button>
               
 
