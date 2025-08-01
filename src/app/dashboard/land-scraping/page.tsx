@@ -83,7 +83,7 @@ export default function LandScrapingPage() {
     phase: 'idle',
     currentSource: '',
     sourcesCompleted: [],
-    sourcesTotal: ['casa.it', 'idealista.it', 'borsinoimmobiliare.it', 'subito.it', 'kijiji.it'],
+    sourcesTotal: ['subito.it', 'kijiji.it', 'bakeca.it', 'annunci.it'],
     progress: 0,
     message: ''
   });
@@ -400,7 +400,7 @@ export default function LandScrapingPage() {
       phase: 'searching',
       currentSource: '',
       sourcesCompleted: [],
-      sourcesTotal: ['casa.it', 'idealista.it', 'borsinoimmobiliare.it', 'subito.it', 'kijiji.it'],
+      sourcesTotal: ['subito.it', 'kijiji.it', 'bakeca.it', 'annunci.it'],
       progress: 0,
       message: 'Inizializzazione ricerca...'
     });

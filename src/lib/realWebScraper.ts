@@ -79,11 +79,10 @@ export class RealWebScraper {
       
       // Fonti alternative che non hanno protezioni anti-bot aggressive
       const sources = [
-        { name: 'Casa.it', scraper: () => this.scrapeCasaHTTP(criteria) },
-        { name: 'Idealista.it', scraper: () => this.scrapeIdealistaHTTP(criteria) },
-        { name: 'BorsinoImmobiliare.it', scraper: () => this.scrapeBorsinoImmobiliareHTTP(criteria) },
         { name: 'Subito.it', scraper: () => this.scrapeSubitoHTTP(criteria) },
-        { name: 'Kijiji.it', scraper: () => this.scrapeKijijiHTTP(criteria) }
+        { name: 'Kijiji.it', scraper: () => this.scrapeKijijiHTTP(criteria) },
+        { name: 'Bakeca.it', scraper: () => this.scrapeBakecaHTTP(criteria) },
+        { name: 'Annunci.it', scraper: () => this.scrapeAnnunciHTTP(criteria) }
       ];
 
       // Scraping sequenziale con delay per evitare blocchi
@@ -357,26 +356,29 @@ export class RealWebScraper {
     
     try {
       const location = criteria.location.toLowerCase().replace(/\s+/g, '-');
+      // URL corretto per Casa.it
       const url = `https://www.casa.it/terreni/vendita/${location}`;
       
       console.log('📡 URL Casa.it HTTP:', url);
       
-      const response = await axios.get(url, {
-        timeout: 10000, // Ridotto da 15000 a 10000 per evitare errori di rete
-        headers: this.getRealisticHeaders()
+      const response = await this.retryRequest(async () => {
+        return axios.get(url, {
+          timeout: 10000,
+          headers: this.getRealisticHeaders()
+        });
       });
       
       const $ = cheerio.load(response.data);
       
       // Selettori aggiornati per Casa.it
       const selectors = [
-        '.announcement-item',
-        '.property-card',
-        '[data-testid="property-card"]',
         '.listing-item',
-        '.casa-card',
+        '.announcement-card',
+        '[data-testid="listing-item"]',
+        '.card',
+        '.item',
         '.property-item',
-        'article[data-testid="property-card"]'
+        '.real-estate-item'
       ];
 
       let elements: any = null;
@@ -395,66 +397,56 @@ export class RealWebScraper {
       }
 
       elements.each((index: number, element: any) => {
-        if (index >= 10) return; // Limita a 10 risultati
+        if (index >= 10) return;
         
         const $el = $(element);
         
-        // Cerca il link principale dell'annuncio
-        const linkEl = $el.find('a[href*="/vendita/"], a[href*="/annunci/"], a[href*="/terreni/"], a[href*="/property/"]').first();
-        const titleEl = $el.find('h2, h3, .title, [class*="title"], .property-title').first();
+        // Estrai prezzo
+        const realPrice = this.extractRealPrice($, $el, 'casa.it');
         
-        if (linkEl.length) {
-          const title = titleEl.length ? titleEl.text().trim() : `Terreno a ${criteria.location}`;
-          const url = linkEl.attr('href');
+        // Estrai area
+        const realArea = this.extractRealArea($, $el, 'casa.it');
+        
+        // Estrai titolo
+        const titleEl = $el.find('h2, h3, .title, [class*="title"]').first();
+        const title = titleEl.length ? titleEl.text().trim() : `Terreno Casa ${index + 1}`;
+        
+        // Estrai link
+        const linkEl = $el.find('a').first();
+        const url = linkEl.length ? linkEl.attr('href') : '';
+        const fullUrl = url && url.startsWith('http') ? url : `https://www.casa.it${url || ''}`;
+        
+        // Aggiungi solo se abbiamo dati reali
+        if (realPrice || realArea) {
+          const finalPrice = realPrice || 0;
+          const finalArea = realArea || 0;
           
-          if (url && url.length > 10) {
-            // Estrai prezzo REALE
-            const realPrice = this.extractRealPrice($, element, 'Casa.it');
-            
-            // Estrai area REALE
-            const realArea = this.extractRealArea($, element, 'Casa.it');
-            
-            // ACCETTA se abbiamo ALMENO UN dato reale (prezzo O area)
-            if (realPrice || realArea) {
-            const fullUrl = url.startsWith('http') ? url : `https://www.casa.it${url}`;
-              
-              // Usa valori di fallback solo se necessario, ma marca come non verificati
-              const finalPrice = realPrice || 0; // 0 indica prezzo non disponibile
-              const finalArea = realArea || 0; // 0 indica area non disponibile
-            
-            results.push({
-                id: `casa_real_${index}`,
-              title: title,
-                price: finalPrice,
-              location: criteria.location,
-                area: finalArea,
-              description: title,
-              url: fullUrl,
-                source: 'casa.it (REALE)',
-              images: [],
-              features: ['Edificabile'],
-              contactInfo: {},
-                timestamp: new Date(),
-                // Marca i dati mancanti per trasparenza
-                hasRealPrice: !!realPrice,
-                hasRealArea: !!realArea
-              });
-              
-              const priceInfo = realPrice ? `€${realPrice.toLocaleString()}` : 'Prezzo non disponibile';
-              const areaInfo = realArea ? `${realArea}m²` : 'Area non disponibile';
-              console.log(`✅ Annuncio REALE Casa.it: ${title} - ${priceInfo} - ${areaInfo}`);
-            } else {
-              console.log(`⚠️ Annuncio scartato - nessun dato reale trovato: ${title}`);
-            }
-          }
+          results.push({
+            id: `casa_real_${index}`,
+            title: title,
+            price: finalPrice,
+            location: criteria.location,
+            area: finalArea,
+            description: title,
+            url: fullUrl,
+            source: 'casa.it (REALE)',
+            images: [],
+            features: ['Edificabile'],
+            contactInfo: {},
+            timestamp: new Date(),
+            hasRealPrice: !!realPrice,
+            hasRealArea: !!realArea
+          });
+          
+          console.log(`✅ Casa.it - Terreno ${index + 1}: ${title} - €${finalPrice.toLocaleString()} - ${finalArea}m²`);
         }
       });
       
-      console.log(`✅ Casa.it HTTP: ${results.length} terreni REALI estratti`);
+      console.log(`✅ Casa.it: ${results.length} terreni REALI estratti`);
       return results;
       
     } catch (error) {
-      console.error('❌ Errore scraping Casa.it HTTP:', error);
+      console.error('❌ Errore scraping Casa.it:', error instanceof Error ? error.message : 'Errore sconosciuto');
       return [];
     }
   }
@@ -465,13 +457,16 @@ export class RealWebScraper {
     
     try {
       const location = criteria.location.toLowerCase().replace(/\s+/g, '-');
+      // URL corretto per Idealista.it
       const url = `https://www.idealista.it/terreni/vendita/${location}`;
       
       console.log('📡 URL Idealista.it HTTP:', url);
       
-      const response = await axios.get(url, {
-        timeout: 10000, // Ridotto da 15000 a 10000 per evitare errori di rete
-        headers: this.getRealisticHeaders()
+      const response = await this.retryRequest(async () => {
+        return axios.get(url, {
+          timeout: 10000,
+          headers: this.getRealisticHeaders()
+        });
       });
       
       const $ = cheerio.load(response.data);
@@ -479,13 +474,12 @@ export class RealWebScraper {
       // Selettori aggiornati per Idealista.it
       const selectors = [
         '.item-info-container',
-        '.property-item',
-        '[data-testid="property-card"]',
-        '.listing-item',
+        '.item-detail',
+        '[data-testid="listing-item"]',
+        '.card',
         '.item',
-        '.property-card',
-        'article[data-testid="property-card"]',
-        '.item-detail'
+        '.property-item',
+        '.real-estate-item'
       ];
 
       let elements: any = null;
@@ -504,66 +498,56 @@ export class RealWebScraper {
       }
 
       elements.each((index: number, element: any) => {
-        if (index >= 10) return; // Limita a 10 risultati
+        if (index >= 10) return;
         
         const $el = $(element);
         
-        // Cerca il link principale dell'annuncio
-        const linkEl = $el.find('a[href*="/vendita/"], a[href*="/annunci/"], a[href*="/terreni/"], a[href*="/property/"], a[href*="/inmueble/"]').first();
-        const titleEl = $el.find('h2, h3, .title, [class*="title"], .item-title').first();
+        // Estrai prezzo
+        const realPrice = this.extractRealPrice($, $el, 'idealista.it');
         
-        if (linkEl.length) {
-          const title = titleEl.length ? titleEl.text().trim() : `Terreno a ${criteria.location}`;
-          const url = linkEl.attr('href');
+        // Estrai area
+        const realArea = this.extractRealArea($, $el, 'idealista.it');
+        
+        // Estrai titolo
+        const titleEl = $el.find('h2, h3, .title, [class*="title"]').first();
+        const title = titleEl.length ? titleEl.text().trim() : `Terreno Idealista ${index + 1}`;
+        
+        // Estrai link
+        const linkEl = $el.find('a').first();
+        const url = linkEl.length ? linkEl.attr('href') : '';
+        const fullUrl = url && url.startsWith('http') ? url : `https://www.idealista.it${url || ''}`;
+        
+        // Aggiungi solo se abbiamo dati reali
+        if (realPrice || realArea) {
+          const finalPrice = realPrice || 0;
+          const finalArea = realArea || 0;
           
-          if (url && url.length > 10) {
-            // Estrai prezzo REALE
-            const realPrice = this.extractRealPrice($, element, 'Idealista.it');
-            
-            // Estrai area REALE
-            const realArea = this.extractRealArea($, element, 'Idealista.it');
-            
-            // ACCETTA se abbiamo ALMENO UN dato reale (prezzo O area)
-            if (realPrice || realArea) {
-            const fullUrl = url.startsWith('http') ? url : `https://www.idealista.it${url}`;
-              
-              // Usa valori di fallback solo se necessario, ma marca come non verificati
-              const finalPrice = realPrice || 0; // 0 indica prezzo non disponibile
-              const finalArea = realArea || 0; // 0 indica area non disponibile
-            
-            results.push({
-                id: `idealista_real_${index}`,
-              title: title,
-                price: finalPrice,
-              location: criteria.location,
-                area: finalArea,
-              description: title,
-              url: fullUrl,
-                source: 'idealista.it (REALE)',
-              images: [],
-              features: ['Edificabile'],
-              contactInfo: {},
-                timestamp: new Date(),
-                // Marca i dati mancanti per trasparenza
-                hasRealPrice: !!realPrice,
-                hasRealArea: !!realArea
-              });
-              
-              const priceInfo = realPrice ? `€${realPrice.toLocaleString()}` : 'Prezzo non disponibile';
-              const areaInfo = realArea ? `${realArea}m²` : 'Area non disponibile';
-              console.log(`✅ Annuncio REALE Idealista.it: ${title} - ${priceInfo} - ${areaInfo}`);
-            } else {
-              console.log(`⚠️ Annuncio scartato - nessun dato reale trovato: ${title}`);
-            }
-          }
+          results.push({
+            id: `idealista_real_${index}`,
+            title: title,
+            price: finalPrice,
+            location: criteria.location,
+            area: finalArea,
+            description: title,
+            url: fullUrl,
+            source: 'idealista.it (REALE)',
+            images: [],
+            features: ['Edificabile'],
+            contactInfo: {},
+            timestamp: new Date(),
+            hasRealPrice: !!realPrice,
+            hasRealArea: !!realArea
+          });
+          
+          console.log(`✅ Idealista.it - Terreno ${index + 1}: ${title} - €${finalPrice.toLocaleString()} - ${finalArea}m²`);
         }
       });
       
-      console.log(`✅ Idealista.it HTTP: ${results.length} terreni REALI estratti`);
+      console.log(`✅ Idealista.it: ${results.length} terreni REALI estratti`);
       return results;
       
     } catch (error) {
-      console.error('❌ Errore scraping Idealista.it HTTP:', error);
+      console.error('❌ Errore scraping Idealista.it:', error instanceof Error ? error.message : 'Errore sconosciuto');
       return [];
     }
   }
@@ -683,6 +667,7 @@ export class RealWebScraper {
     
     try {
       const location = criteria.location || 'Roma';
+      // URL corretto per Subito.it
       const url = `https://www.subito.it/immobili/terreni-e-aree-edificabili/${location}/vendita/`;
       
       console.log(`📡 Richiesta HTTP: ${url}`);
@@ -696,8 +681,8 @@ export class RealWebScraper {
       
       const $ = cheerio.load(response.data);
       
-      // Selettori per Subito.it
-      const listings = $('[data-testid="item-card"], .item-card, .listing-item');
+      // Selettori corretti per Subito.it
+      const listings = $('[data-testid="item-card"], .item-card, .listing-item, .card, .item, article, .announcement');
       
       console.log(`📊 Trovati ${listings.length} annunci su Subito.it`);
       
@@ -707,15 +692,13 @@ export class RealWebScraper {
         const $el = $(element);
         
         // Estrai prezzo
-        const priceEl = $el.find('[data-testid="price"], .price, [class*="price"]');
-        const realPrice = this.extractRealPrice($, priceEl, 'subito.it');
+        const realPrice = this.extractRealPrice($, $el, 'subito.it');
         
         // Estrai area
-        const areaEl = $el.find('[data-testid="features"], .features, [class*="features"]');
-        const realArea = this.extractRealArea($, areaEl, 'subito.it');
+        const realArea = this.extractRealArea($, $el, 'subito.it');
         
         // Estrai titolo
-        const titleEl = $el.find('[data-testid="title"], .title, h2, h3');
+        const titleEl = $el.find('[data-testid="title"], .title, h2, h3, [class*="title"]').first();
         const title = titleEl.length ? titleEl.text().trim() : `Terreno Subito ${index + 1}`;
         
         // Estrai link
@@ -835,6 +818,168 @@ export class RealWebScraper {
       
     } catch (error) {
       console.error('❌ Errore scraping Kijiji.it:', error instanceof Error ? error.message : 'Errore sconosciuto');
+      return [];
+    }
+  }
+
+  private async scrapeBakecaHTTP(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
+    console.log('🔍 Scraping Bakeca.it per terreni...');
+    const results: ScrapedLand[] = [];
+    
+    try {
+      const location = criteria.location || 'Roma';
+      const url = `https://www.bakeca.it/annunci/vendita/terreni/${location}/`;
+      
+      console.log(`📡 Richiesta HTTP: ${url}`);
+      
+      const response = await this.retryRequest(async () => {
+        return axios.get(url, {
+          timeout: 10000,
+          headers: this.getRealisticHeaders()
+        });
+      });
+      
+      const $ = cheerio.load(response.data);
+      
+      // Selettori per Bakeca.it
+      const listings = $('[data-testid="listing"], .listing, .item-card');
+      
+      console.log(`📊 Trovati ${listings.length} annunci su Bakeca.it`);
+      
+      listings.each((index, element) => {
+        if (index >= 10) return; // Limita a 10 risultati
+        
+        const $el = $(element);
+        
+        // Estrai prezzo
+        const priceEl = $el.find('[data-testid="price"], .price, [class*="price"]');
+        const realPrice = this.extractRealPrice($, priceEl, 'bakeca.it');
+        
+        // Estrai area
+        const areaEl = $el.find('[data-testid="features"], .features, [class*="features"]');
+        const realArea = this.extractRealArea($, areaEl, 'bakeca.it');
+        
+        // Estrai titolo
+        const titleEl = $el.find('[data-testid="title"], .title, h2, h3');
+        const title = titleEl.length ? titleEl.text().trim() : `Terreno Bakeca ${index + 1}`;
+        
+        // Estrai link
+        const linkEl = $el.find('a').first();
+        const url = linkEl.length ? linkEl.attr('href') : '';
+        const fullUrl = url && url.startsWith('http') ? url : `https://www.bakeca.it${url || ''}`;
+        
+        // Aggiungi solo se abbiamo dati reali
+        if (realPrice || realArea) {
+          const finalPrice = realPrice || 0;
+          const finalArea = realArea || 0;
+          
+          results.push({
+            id: `bakeca_real_${index}`,
+            title: title,
+            price: finalPrice,
+            location: criteria.location,
+            area: finalArea,
+            description: title,
+            url: fullUrl,
+            source: 'bakeca.it (REALE)',
+            images: [],
+            features: ['Edificabile'],
+            contactInfo: {},
+            timestamp: new Date(),
+            hasRealPrice: !!realPrice,
+            hasRealArea: !!realArea
+          });
+          
+          console.log(`✅ Bakeca.it - Terreno ${index + 1}: ${title} - €${finalPrice.toLocaleString()} - ${finalArea}m²`);
+        }
+      });
+      
+      console.log(`✅ Bakeca.it: ${results.length} terreni REALI estratti`);
+      return results;
+      
+    } catch (error) {
+      console.error('❌ Errore scraping Bakeca.it:', error instanceof Error ? error.message : 'Errore sconosciuto');
+      return [];
+    }
+  }
+
+  private async scrapeAnnunciHTTP(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
+    console.log('🔍 Scraping Annunci.it per terreni...');
+    const results: ScrapedLand[] = [];
+    
+    try {
+      const location = criteria.location || 'Roma';
+      const url = `https://www.annunci.it/vendita/terreni/${location}/`;
+      
+      console.log(`📡 Richiesta HTTP: ${url}`);
+      
+      const response = await this.retryRequest(async () => {
+        return axios.get(url, {
+          timeout: 10000,
+          headers: this.getRealisticHeaders()
+        });
+      });
+      
+      const $ = cheerio.load(response.data);
+      
+      // Selettori per Annunci.it
+      const listings = $('[data-testid="listing"], .listing, .item-card');
+      
+      console.log(`📊 Trovati ${listings.length} annunci su Annunci.it`);
+      
+      listings.each((index, element) => {
+        if (index >= 10) return; // Limita a 10 risultati
+        
+        const $el = $(element);
+        
+        // Estrai prezzo
+        const priceEl = $el.find('[data-testid="price"], .price, [class*="price"]');
+        const realPrice = this.extractRealPrice($, priceEl, 'annunci.it');
+        
+        // Estrai area
+        const areaEl = $el.find('[data-testid="features"], .features, [class*="features"]');
+        const realArea = this.extractRealArea($, areaEl, 'annunci.it');
+        
+        // Estrai titolo
+        const titleEl = $el.find('[data-testid="title"], .title, h2, h3');
+        const title = titleEl.length ? titleEl.text().trim() : `Terreno Annunci ${index + 1}`;
+        
+        // Estrai link
+        const linkEl = $el.find('a').first();
+        const url = linkEl.length ? linkEl.attr('href') : '';
+        const fullUrl = url && url.startsWith('http') ? url : `https://www.annunci.it${url || ''}`;
+        
+        // Aggiungi solo se abbiamo dati reali
+        if (realPrice || realArea) {
+          const finalPrice = realPrice || 0;
+          const finalArea = realArea || 0;
+          
+          results.push({
+            id: `annunci_real_${index}`,
+            title: title,
+            price: finalPrice,
+            location: criteria.location,
+            area: finalArea,
+            description: title,
+            url: fullUrl,
+            source: 'annunci.it (REALE)',
+            images: [],
+            features: ['Edificabile'],
+            contactInfo: {},
+            timestamp: new Date(),
+            hasRealPrice: !!realPrice,
+            hasRealArea: !!realArea
+          });
+          
+          console.log(`✅ Annunci.it - Terreno ${index + 1}: ${title} - €${finalPrice.toLocaleString()} - ${finalArea}m²`);
+        }
+      });
+      
+      console.log(`✅ Annunci.it: ${results.length} terreni REALI estratti`);
+      return results;
+      
+    } catch (error) {
+      console.error('❌ Errore scraping Annunci.it:', error instanceof Error ? error.message : 'Errore sconosciuto');
       return [];
     }
   }
