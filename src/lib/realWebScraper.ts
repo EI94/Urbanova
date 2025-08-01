@@ -89,6 +89,41 @@ export class RealWebScraper {
     };
   }
 
+  // Headers ultra-aggressivi per bypassare tutte le protezioni
+  private getUltraAggressiveHeaders(): any {
+    const userAgent = this.getRandomUserAgent();
+    return {
+      'User-Agent': userAgent,
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+      'Accept-Language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'DNT': '1',
+      'Connection': 'keep-alive',
+      'Upgrade-Insecure-Requests': '1',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'none',
+      'Sec-Fetch-User': '?1',
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache',
+      'Referer': 'https://www.google.com/search?q=immobili+terreni+vendita',
+      'sec-ch-ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+      'sec-ch-ua-mobile': '?0',
+      'sec-ch-ua-platform': '"Windows"',
+      'sec-ch-ua-arch': '"x86"',
+      'sec-ch-ua-full-version-list': '"Not_A Brand";v="8.0.0.0", "Chromium";v="120.0.6099.109", "Google Chrome";v="120.0.6099.109"',
+      'sec-ch-ua-model': '""',
+      'sec-ch-device-memory': '"8"',
+      'sec-ch-viewport-width': '"1920"',
+      'sec-ch-viewport-height': '"1080"',
+      'sec-ch-dpr': '"1"',
+      'sec-ch-ua-bitness': '"64"',
+      'sec-ch-ua-full-version': '"120.0.6099.109"',
+      'sec-ch-ua-platform-version': '"15.0.0"',
+      'sec-ch-ua-wow64': '?0'
+    };
+  }
+
   async initialize(): Promise<void> {
     console.log('✅ Web Scraper HTTP inizializzato');
     this.isInitialized = true;
@@ -108,16 +143,15 @@ export class RealWebScraper {
     try {
       console.log('🚀 Avvio scraping HTTP per dati reali...');
       
-      // Fonti ottimizzate basate sui test massivi
-      // Immobiliare.it FUNZIONA - altri bloccati
+      // Fonti principali immobiliari - strategia aggressiva anti-bot
       const sources = [
         { name: 'Immobiliare.it', scraper: () => this.scrapeImmobiliareAdvanced(criteria) },
-        { name: 'Bakeca.it', scraper: () => this.scrapeBakecaHTTP(criteria) },
-        { name: 'Annunci.it', scraper: () => this.scrapeAnnunciHTTP(criteria) },
-        { name: 'Casa.it', scraper: () => this.scrapeCasaAdvanced(criteria) }
+        { name: 'Casa.it', scraper: () => this.scrapeCasaAggressive(criteria) },
+        { name: 'Idealista.it', scraper: () => this.scrapeIdealistaAggressive(criteria) },
+        { name: 'BorsinoImmobiliare.it', scraper: () => this.scrapeBorsinoAggressive(criteria) }
       ];
 
-      // Scraping sequenziale con delay per evitare blocchi
+      // Scraping sequenziale con strategia aggressiva
       for (const source of sources) {
         try {
           console.log(`🔍 Scraping ${source.name}...`);
@@ -132,7 +166,7 @@ export class RealWebScraper {
           
           // Delay tra le richieste per evitare blocchi
           if (source !== sources[sources.length - 1]) {
-            const delay = Math.random() * 2000 + 1000; // 1-3 secondi
+            const delay = Math.random() * 3000 + 2000; // 2-5 secondi
             console.log(`⏳ Attendo ${Math.round(delay)}ms prima del prossimo sito...`);
             await new Promise(resolve => setTimeout(resolve, delay));
           }
@@ -142,8 +176,8 @@ export class RealWebScraper {
           
           // Se è un errore 403, aggiungi delay extra
           if (error instanceof Error && error.message.includes('403')) {
-            console.log(`🚫 ${source.name} bloccato (403). Attendo 5 secondi...`);
-            await new Promise(resolve => setTimeout(resolve, 5000));
+            console.log(`🚫 ${source.name} bloccato (403). Attendo 10 secondi...`);
+            await new Promise(resolve => setTimeout(resolve, 10000));
           }
         }
       }
@@ -400,9 +434,9 @@ export class RealWebScraper {
     }
   }
 
-  // Strategia avanzata per Casa.it
-  private async scrapeCasaAdvanced(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
-    console.log('🔍 Scraping Casa.it AVANZATO per dati REALI...');
+  // Strategia ultra-aggressiva per Casa.it
+  private async scrapeCasaAggressive(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
+    console.log('🔍 Scraping Casa.it ULTRA-AGGRESSIVO per dati REALI...');
     const results: ScrapedLand[] = [];
     
     try {
@@ -410,12 +444,12 @@ export class RealWebScraper {
       // URL corretto per Casa.it
       const url = `https://www.casa.it/terreni/vendita/${location}`;
       
-      console.log('📡 URL Casa.it AVANZATO:', url);
+      console.log('📡 URL Casa.it ULTRA-AGGRESSIVO:', url);
       
-      // Strategia multi-tentativo con headers diversi
+      // Strategia ultra-aggressiva con più tentativi e headers diversi
       let response = null;
       let attempts = 0;
-      const maxAttempts = 3;
+      const maxAttempts = 5; // Aumentato a 5 tentativi
       
       while (attempts < maxAttempts && !response) {
         attempts++;
@@ -423,19 +457,26 @@ export class RealWebScraper {
         
         try {
           // Usa headers diversi per ogni tentativo
-          const headers = attempts === 1 ? this.getRealisticHeaders() : this.getAdvancedHeaders();
+          let headers;
+          if (attempts === 1) {
+            headers = this.getRealisticHeaders();
+          } else if (attempts === 2) {
+            headers = this.getAdvancedHeaders();
+          } else {
+            headers = this.getUltraAggressiveHeaders();
+          }
           
           response = await axios.get(url, {
-            timeout: 15000,
+            timeout: 20000, // Aumentato timeout
             headers: headers,
-            maxRedirects: 5,
+            maxRedirects: 10, // Aumentato redirects
             validateStatus: (status) => status < 500
           });
           
           if (response.status === 403) {
             console.log(`🚫 Tentativo ${attempts}: 403 Forbidden, riprovo...`);
             response = null;
-            await new Promise(resolve => setTimeout(resolve, 5000 * attempts));
+            await new Promise(resolve => setTimeout(resolve, 8000 * attempts));
             continue;
           }
           
@@ -447,7 +488,7 @@ export class RealWebScraper {
         } catch (error) {
           console.log(`❌ Tentativo ${attempts} fallito:`, error instanceof Error ? error.message : 'Errore sconosciuto');
           if (attempts < maxAttempts) {
-            await new Promise(resolve => setTimeout(resolve, 3000 * attempts));
+            await new Promise(resolve => setTimeout(resolve, 5000 * attempts));
           }
         }
       }
@@ -467,7 +508,10 @@ export class RealWebScraper {
         '.card',
         '.item',
         '.property-item',
-        '.real-estate-item'
+        '.real-estate-item',
+        'article',
+        '.ad-item',
+        '.listing'
       ];
 
       let elements: any = null;
@@ -535,7 +579,7 @@ export class RealWebScraper {
       return results;
       
     } catch (error) {
-      console.error('❌ Errore scraping Casa.it avanzato:', error instanceof Error ? error.message : 'Errore sconosciuto');
+      console.error('❌ Errore scraping Casa.it ultra-aggressivo:', error instanceof Error ? error.message : 'Errore sconosciuto');
       return [];
     }
   }
@@ -882,118 +926,9 @@ export class RealWebScraper {
     }
   }
 
-  private async scrapeBorsinoImmobiliareHTTP(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
-    console.log('🔍 Scraping BorsinoImmobiliare.it HTTP per dati REALI...');
-    const results: ScrapedLand[] = [];
-    
-    try {
-      const location = criteria.location.toLowerCase().replace(/\s+/g, '-');
-      const url = `https://www.borsinoimmobiliare.it/terreni/vendita/${location}`;
-      
-      console.log('📡 URL BorsinoImmobiliare.it HTTP:', url);
-      
-      const response = await axios.get(url, {
-        timeout: 10000, // Ridotto da 15000 a 10000 per evitare errori di rete
-        headers: this.getRealisticHeaders()
-      });
-      
-      const $ = cheerio.load(response.data);
-      
-      // Selettori aggiornati per BorsinoImmobiliare.it
-      const selectors = [
-        '.property-item',
-        '.announcement-item',
-        '[data-testid="property-card"]',
-        '.listing-item',
-        '.borsino-card',
-        '.property-card',
-        'article[data-testid="property-card"]',
-        '.announcement-card'
-      ];
-
-      let elements: any = null;
-      
-      for (const selector of selectors) {
-        elements = $(selector);
-        if (elements.length > 0) {
-          console.log(`Trovati ${elements.length} elementi con selettore: ${selector}`);
-          break;
-        }
-      }
-
-      if (!elements || elements.length === 0) {
-        console.log('❌ Nessun elemento trovato con i selettori di BorsinoImmobiliare.it');
-        return [];
-      }
-
-      elements.each((index: number, element: any) => {
-        if (index >= 10) return; // Limita a 10 risultati
-        
-        const $el = $(element);
-        
-        // Cerca il link principale dell'annuncio
-        const linkEl = $el.find('a[href*="/vendita/"], a[href*="/annunci/"], a[href*="/terreni/"], a[href*="/property/"], a[href*="/immobile/"]').first();
-        const titleEl = $el.find('h2, h3, .title, [class*="title"], .property-title').first();
-        
-        if (linkEl.length) {
-          const title = titleEl.length ? titleEl.text().trim() : `Terreno a ${criteria.location}`;
-          const url = linkEl.attr('href');
-          
-          if (url && url.length > 10) {
-            // Estrai prezzo REALE
-            const realPrice = this.extractRealPrice($, element, 'BorsinoImmobiliare.it');
-            
-            // Estrai area REALE
-            const realArea = this.extractRealArea($, element, 'BorsinoImmobiliare.it');
-            
-            // ACCETTA se abbiamo ALMENO UN dato reale (prezzo O area)
-            if (realPrice || realArea) {
-            const fullUrl = url.startsWith('http') ? url : `https://www.borsinoimmobiliare.it${url}`;
-              
-              // Usa valori di fallback solo se necessario, ma marca come non verificati
-              const finalPrice = realPrice || 0; // 0 indica prezzo non disponibile
-              const finalArea = realArea || 0; // 0 indica area non disponibile
-            
-            results.push({
-                id: `borsino_real_${index}`,
-              title: title,
-                price: finalPrice,
-              location: criteria.location,
-                area: finalArea,
-              description: title,
-              url: fullUrl,
-                source: 'borsinoimmobiliare.it (REALE)',
-              images: [],
-              features: ['Edificabile'],
-              contactInfo: {},
-                timestamp: new Date(),
-                // Marca i dati mancanti per trasparenza
-                hasRealPrice: !!realPrice,
-                hasRealArea: !!realArea
-              });
-              
-              const priceInfo = realPrice ? `€${realPrice.toLocaleString()}` : 'Prezzo non disponibile';
-              const areaInfo = realArea ? `${realArea}m²` : 'Area non disponibile';
-              console.log(`✅ Annuncio REALE BorsinoImmobiliare.it: ${title} - ${priceInfo} - ${areaInfo}`);
-            } else {
-              console.log(`⚠️ Annuncio scartato - nessun dato reale trovato: ${title}`);
-            }
-          }
-        }
-      });
-      
-      console.log(`✅ BorsinoImmobiliare.it HTTP: ${results.length} terreni REALI estratti`);
-      return results;
-      
-    } catch (error) {
-      console.error('❌ Errore scraping BorsinoImmobiliare.it HTTP:', error);
-      return [];
-    }
-  }
-
-  // Strategia avanzata per BorsinoImmobiliare.it
-  private async scrapeBorsinoAdvanced(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
-    console.log('🔍 Scraping BorsinoImmobiliare.it AVANZATO per dati REALI...');
+  // Strategia ultra-aggressiva per BorsinoImmobiliare.it
+  private async scrapeBorsinoAggressive(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
+    console.log('🔍 Scraping BorsinoImmobiliare.it ULTRA-AGGRESSIVO per dati REALI...');
     const results: ScrapedLand[] = [];
     
     try {
@@ -1001,12 +936,12 @@ export class RealWebScraper {
       // URL corretto per BorsinoImmobiliare.it
       const url = `https://www.borsinoimmobiliare.it/terreni/vendita/${location}`;
       
-      console.log('📡 URL BorsinoImmobiliare.it AVANZATO:', url);
+      console.log('📡 URL BorsinoImmobiliare.it ULTRA-AGGRESSIVO:', url);
       
-      // Strategia multi-tentativo con headers diversi
+      // Strategia ultra-aggressiva con più tentativi e headers diversi
       let response = null;
       let attempts = 0;
-      const maxAttempts = 3;
+      const maxAttempts = 5; // Aumentato a 5 tentativi
       
       while (attempts < maxAttempts && !response) {
         attempts++;
@@ -1014,19 +949,26 @@ export class RealWebScraper {
         
         try {
           // Usa headers diversi per ogni tentativo
-          const headers = attempts === 1 ? this.getRealisticHeaders() : this.getAdvancedHeaders();
+          let headers;
+          if (attempts === 1) {
+            headers = this.getRealisticHeaders();
+          } else if (attempts === 2) {
+            headers = this.getAdvancedHeaders();
+          } else {
+            headers = this.getUltraAggressiveHeaders();
+          }
           
           response = await axios.get(url, {
-            timeout: 15000,
+            timeout: 20000, // Aumentato timeout
             headers: headers,
-            maxRedirects: 5,
+            maxRedirects: 10, // Aumentato redirects
             validateStatus: (status) => status < 500
           });
           
           if (response.status === 403) {
             console.log(`🚫 Tentativo ${attempts}: 403 Forbidden, riprovo...`);
             response = null;
-            await new Promise(resolve => setTimeout(resolve, 5000 * attempts));
+            await new Promise(resolve => setTimeout(resolve, 8000 * attempts));
             continue;
           }
           
@@ -1038,7 +980,7 @@ export class RealWebScraper {
         } catch (error) {
           console.log(`❌ Tentativo ${attempts} fallito:`, error instanceof Error ? error.message : 'Errore sconosciuto');
           if (attempts < maxAttempts) {
-            await new Promise(resolve => setTimeout(resolve, 3000 * attempts));
+            await new Promise(resolve => setTimeout(resolve, 5000 * attempts));
           }
         }
       }
@@ -1058,7 +1000,10 @@ export class RealWebScraper {
         '.card',
         '.item',
         '.property-item',
-        '.real-estate-item'
+        '.real-estate-item',
+        'article',
+        '.ad-item',
+        '.listing'
       ];
 
       let elements: any = null;
@@ -1126,7 +1071,7 @@ export class RealWebScraper {
       return results;
       
     } catch (error) {
-      console.error('❌ Errore scraping BorsinoImmobiliare.it avanzato:', error instanceof Error ? error.message : 'Errore sconosciuto');
+      console.error('❌ Errore scraping BorsinoImmobiliare.it ultra-aggressivo:', error instanceof Error ? error.message : 'Errore sconosciuto');
       return [];
     }
   }

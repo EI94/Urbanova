@@ -83,7 +83,7 @@ export default function LandScrapingPage() {
     phase: 'idle',
     currentSource: '',
     sourcesCompleted: [],
-    sourcesTotal: ['immobiliare.it', 'bakeca.it', 'annunci.it', 'casa.it'],
+    sourcesTotal: ['immobiliare.it', 'casa.it', 'idealista.it', 'borsinoimmobiliare.it'],
     progress: 0,
     message: ''
   });
@@ -400,7 +400,7 @@ export default function LandScrapingPage() {
       phase: 'searching',
       currentSource: '',
       sourcesCompleted: [],
-      sourcesTotal: ['immobiliare.it', 'bakeca.it', 'annunci.it', 'casa.it'],
+      sourcesTotal: ['immobiliare.it', 'casa.it', 'idealista.it', 'borsinoimmobiliare.it'],
       progress: 0,
       message: 'Inizializzazione ricerca...'
     });
