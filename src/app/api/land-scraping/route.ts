@@ -33,13 +33,21 @@ export async function POST(request: NextRequest) {
       keywords: []
     };
 
-    // Esegui la ricerca automatizzata
+    // Esegui la ricerca automatizzata con timeout e retry
     console.log('🔍 Avvio ricerca automatizzata con criteri:', searchCriteria);
     let results;
     let emailError = null;
     
     try {
-      results = await realLandScrapingAgent.runAutomatedSearch(searchCriteria, email);
+      // Timeout di 60 secondi per evitare errori di rete
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout: Ricerca troppo lunga')), 60000);
+      });
+      
+      const searchPromise = realLandScrapingAgent.runAutomatedSearch(searchCriteria, email);
+      
+      results = await Promise.race([searchPromise, timeoutPromise]);
+      
       console.log('✅ Ricerca completata:', {
         landsFound: results.lands?.length || 0,
         emailSent: results.emailSent,
@@ -64,8 +72,36 @@ export async function POST(request: NextRequest) {
             recommendations: ['Configura RESEND_API_KEY per ricevere email']
           }
         };
+      } else if (error instanceof Error && error.message.includes('Timeout')) {
+        // Gestione timeout
+        results = {
+          lands: [],
+          analysis: [],
+          emailSent: false,
+          summary: {
+            totalFound: 0,
+            averagePrice: 0,
+            bestOpportunities: [],
+            marketTrends: 'Non disponibile',
+            recommendations: ['Timeout: Riprova la ricerca tra qualche minuto']
+          }
+        };
+        emailError = 'Timeout: Ricerca interrotta per problemi di rete';
       } else {
-        throw error; // Rilancia altri errori
+        // Altri errori di rete
+        results = {
+          lands: [],
+          analysis: [],
+          emailSent: false,
+          summary: {
+            totalFound: 0,
+            averagePrice: 0,
+            bestOpportunities: [],
+            marketTrends: 'Non disponibile',
+            recommendations: ['Errore di rete: Riprova più tardi']
+          }
+        };
+        emailError = `Errore di rete: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`;
       }
     }
 

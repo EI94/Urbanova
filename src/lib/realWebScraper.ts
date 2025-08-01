@@ -6,6 +6,25 @@ import { ScrapedLand, LandSearchCriteria } from '@/types/land';
 export class RealWebScraper {
   public isInitialized = true; // Sempre true per HTTP scraping
 
+  // Funzione di retry per gestire errori di rete
+  private async retryRequest<T>(requestFn: () => Promise<T>, maxRetries: number = 2): Promise<T> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await requestFn();
+      } catch (error) {
+        console.log(`⚠️ Tentativo ${attempt}/${maxRetries} fallito:`, error instanceof Error ? error.message : 'Errore sconosciuto');
+        
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        
+        // Attendi prima del retry (backoff esponenziale)
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      }
+    }
+    throw new Error('Tutti i tentativi falliti');
+  }
+
   async initialize(): Promise<void> {
     console.log('✅ Web Scraper HTTP inizializzato');
     this.isInitialized = true;
@@ -25,15 +44,35 @@ export class RealWebScraper {
     try {
       console.log('🚀 Avvio scraping HTTP per dati reali...');
       
-      // Scraping HTTP parallelo per dati reali
+      // Scraping HTTP parallelo per dati reali con timeout individuale
       const scrapingPromises = [
-        this.scrapeImmobiliareHTTP(criteria),
-        this.scrapeCasaHTTP(criteria),
-        this.scrapeIdealistaHTTP(criteria),
-        this.scrapeBorsinoImmobiliareHTTP(criteria)
+        this.scrapeImmobiliareHTTP(criteria).catch(error => {
+          console.error('❌ Errore Immobiliare.it:', error.message);
+          return [];
+        }),
+        this.scrapeCasaHTTP(criteria).catch(error => {
+          console.error('❌ Errore Casa.it:', error.message);
+          return [];
+        }),
+        this.scrapeIdealistaHTTP(criteria).catch(error => {
+          console.error('❌ Errore Idealista.it:', error.message);
+          return [];
+        }),
+        this.scrapeBorsinoImmobiliareHTTP(criteria).catch(error => {
+          console.error('❌ Errore BorsinoImmobiliare.it:', error.message);
+          return [];
+        })
       ];
 
-      const allResults = await Promise.allSettled(scrapingPromises);
+      // Timeout globale di 45 secondi per tutto lo scraping
+      const timeoutPromise = new Promise<PromiseSettledResult<ScrapedLand[]>[]>((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout: Scraping troppo lungo')), 45000);
+      });
+
+      const allResults = await Promise.race([
+        Promise.allSettled(scrapingPromises),
+        timeoutPromise
+      ]);
       
       allResults.forEach((result, index) => {
         const sourceNames = ['Immobiliare.it', 'Casa.it', 'Idealista.it', 'Borsino Immobiliare'];
@@ -166,16 +205,19 @@ export class RealWebScraper {
       
       console.log('📡 URL Immobiliare.it HTTP:', url);
       
-      const response = await axios.get(url, {
-        timeout: 15000,
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-          'Accept-Language': 'it-IT,it;q=0.9,en;q=0.8',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
+      // Usa retry logic per gestire errori di rete
+      const response = await this.retryRequest(async () => {
+        return axios.get(url, {
+          timeout: 10000, // Ridotto da 15000 a 10000 per evitare errori di rete
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'it-IT,it;q=0.9,en;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        });
       });
       
       const $ = cheerio.load(response.data);
@@ -297,7 +339,7 @@ export class RealWebScraper {
       console.log('📡 URL Casa.it HTTP:', url);
       
       const response = await axios.get(url, {
-        timeout: 15000,
+        timeout: 10000, // Ridotto da 15000 a 10000 per evitare errori di rete
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -411,7 +453,7 @@ export class RealWebScraper {
       console.log('📡 URL Idealista.it HTTP:', url);
       
       const response = await axios.get(url, {
-        timeout: 15000,
+        timeout: 10000, // Ridotto da 15000 a 10000 per evitare errori di rete
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -526,7 +568,7 @@ export class RealWebScraper {
       console.log('📡 URL BorsinoImmobiliare.it HTTP:', url);
       
       const response = await axios.get(url, {
-        timeout: 15000,
+        timeout: 10000, // Ridotto da 15000 a 10000 per evitare errori di rete
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
