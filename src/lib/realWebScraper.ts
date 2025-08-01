@@ -25,6 +25,39 @@ export class RealWebScraper {
     throw new Error('Tutti i tentativi falliti');
   }
 
+  // Rotazione User-Agent per evitare blocchi
+  private getRandomUserAgent(): string {
+    const userAgents = [
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0',
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15',
+      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    ];
+    return userAgents[Math.floor(Math.random() * userAgents.length)];
+  }
+
+  // Headers realistici per evitare blocchi
+  private getRealisticHeaders(): any {
+    return {
+      'User-Agent': this.getRandomUserAgent(),
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+      'Accept-Language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'DNT': '1',
+      'Connection': 'keep-alive',
+      'Upgrade-Insecure-Requests': '1',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'none',
+      'Sec-Fetch-User': '?1',
+      'Cache-Control': 'max-age=0',
+      'sec-ch-ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+      'sec-ch-ua-mobile': '?0',
+      'sec-ch-ua-platform': '"Windows"'
+    };
+  }
+
   async initialize(): Promise<void> {
     console.log('✅ Web Scraper HTTP inizializzato');
     this.isInitialized = true;
@@ -44,48 +77,45 @@ export class RealWebScraper {
     try {
       console.log('🚀 Avvio scraping HTTP per dati reali...');
       
-      // Scraping HTTP parallelo per dati reali con timeout individuale
-      const scrapingPromises = [
-        this.scrapeImmobiliareHTTP(criteria).catch(error => {
-          console.error('❌ Errore Immobiliare.it:', error.message);
-          return [];
-        }),
-        this.scrapeCasaHTTP(criteria).catch(error => {
-          console.error('❌ Errore Casa.it:', error.message);
-          return [];
-        }),
-        this.scrapeIdealistaHTTP(criteria).catch(error => {
-          console.error('❌ Errore Idealista.it:', error.message);
-          return [];
-        }),
-        this.scrapeBorsinoImmobiliareHTTP(criteria).catch(error => {
-          console.error('❌ Errore BorsinoImmobiliare.it:', error.message);
-          return [];
-        })
+      // Fonti alternative che non hanno protezioni anti-bot aggressive
+      const sources = [
+        { name: 'Casa.it', scraper: () => this.scrapeCasaHTTP(criteria) },
+        { name: 'Idealista.it', scraper: () => this.scrapeIdealistaHTTP(criteria) },
+        { name: 'BorsinoImmobiliare.it', scraper: () => this.scrapeBorsinoImmobiliareHTTP(criteria) },
+        { name: 'Subito.it', scraper: () => this.scrapeSubitoHTTP(criteria) },
+        { name: 'Kijiji.it', scraper: () => this.scrapeKijijiHTTP(criteria) }
       ];
 
-      // Timeout globale di 45 secondi per tutto lo scraping
-      const timeoutPromise = new Promise<PromiseSettledResult<ScrapedLand[]>[]>((_, reject) => {
-        setTimeout(() => reject(new Error('Timeout: Scraping troppo lungo')), 45000);
-      });
-
-      const allResults = await Promise.race([
-        Promise.allSettled(scrapingPromises),
-        timeoutPromise
-      ]);
-      
-      allResults.forEach((result, index) => {
-        const sourceNames = ['Immobiliare.it', 'Casa.it', 'Idealista.it', 'Borsino Immobiliare'];
-        if (result.status === 'fulfilled' && result.value.length > 0) {
-          results.push(...result.value);
-          console.log(`✅ ${sourceNames[index]}: ${result.value.length} terreni REALI trovati`);
-        } else {
-          console.log(`❌ ${sourceNames[index]}: nessun dato reale disponibile`);
-          if (result.status === 'rejected') {
-            console.error(`Errore dettagliato ${sourceNames[index]}:`, result.reason);
+      // Scraping sequenziale con delay per evitare blocchi
+      for (const source of sources) {
+        try {
+          console.log(`🔍 Scraping ${source.name}...`);
+          const sourceResults = await source.scraper();
+          
+          if (sourceResults.length > 0) {
+            results.push(...sourceResults);
+            console.log(`✅ ${source.name}: ${sourceResults.length} terreni REALI trovati`);
+          } else {
+            console.log(`❌ ${source.name}: nessun dato reale disponibile`);
+          }
+          
+          // Delay tra le richieste per evitare blocchi
+          if (source !== sources[sources.length - 1]) {
+            const delay = Math.random() * 2000 + 1000; // 1-3 secondi
+            console.log(`⏳ Attendo ${Math.round(delay)}ms prima del prossimo sito...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+          
+        } catch (error) {
+          console.error(`❌ Errore ${source.name}:`, error instanceof Error ? error.message : 'Errore sconosciuto');
+          
+          // Se è un errore 403, aggiungi delay extra
+          if (error instanceof Error && error.message.includes('403')) {
+            console.log(`🚫 ${source.name} bloccato (403). Attendo 5 secondi...`);
+            await new Promise(resolve => setTimeout(resolve, 5000));
           }
         }
-      });
+      }
 
       console.log(`✅ Scraping completato: ${results.length} terreni REALI totali`);
       
@@ -98,7 +128,7 @@ export class RealWebScraper {
     } catch (error) {
       console.error('❌ Errore durante lo scraping:', error);
       console.error('Stack trace:', error instanceof Error ? error.stack : 'N/A');
-      return []; // Ritorna array vuoto invece di dati fittizi
+      return [];
     }
   }
 
@@ -209,14 +239,7 @@ export class RealWebScraper {
       const response = await this.retryRequest(async () => {
         return axios.get(url, {
           timeout: 10000, // Ridotto da 15000 a 10000 per evitare errori di rete
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-          'Accept-Language': 'it-IT,it;q=0.9,en;q=0.8',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
+          headers: this.getRealisticHeaders()
         });
       });
       
@@ -340,13 +363,7 @@ export class RealWebScraper {
       
       const response = await axios.get(url, {
         timeout: 10000, // Ridotto da 15000 a 10000 per evitare errori di rete
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Language': 'it-IT,it;q=0.9,en;q=0.8',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'Cache-Control': 'no-cache'
-        }
+        headers: this.getRealisticHeaders()
       });
       
       const $ = cheerio.load(response.data);
@@ -454,13 +471,7 @@ export class RealWebScraper {
       
       const response = await axios.get(url, {
         timeout: 10000, // Ridotto da 15000 a 10000 per evitare errori di rete
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Language': 'it-IT,it;q=0.9,en;q=0.8',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'Cache-Control': 'no-cache'
-        }
+        headers: this.getRealisticHeaders()
       });
       
       const $ = cheerio.load(response.data);
@@ -569,13 +580,7 @@ export class RealWebScraper {
       
       const response = await axios.get(url, {
         timeout: 10000, // Ridotto da 15000 a 10000 per evitare errori di rete
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Language': 'it-IT,it;q=0.9,en;q=0.8',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'Cache-Control': 'no-cache'
-        }
+        headers: this.getRealisticHeaders()
       });
       
       const $ = cheerio.load(response.data);
@@ -668,6 +673,168 @@ export class RealWebScraper {
       
     } catch (error) {
       console.error('❌ Errore scraping BorsinoImmobiliare.it HTTP:', error);
+      return [];
+    }
+  }
+
+  private async scrapeSubitoHTTP(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
+    console.log('🔍 Scraping Subito.it per terreni...');
+    const results: ScrapedLand[] = [];
+    
+    try {
+      const location = criteria.location || 'Roma';
+      const url = `https://www.subito.it/immobili/terreni-e-aree-edificabili/${location}/vendita/`;
+      
+      console.log(`📡 Richiesta HTTP: ${url}`);
+      
+      const response = await this.retryRequest(async () => {
+        return axios.get(url, {
+          timeout: 10000,
+          headers: this.getRealisticHeaders()
+        });
+      });
+      
+      const $ = cheerio.load(response.data);
+      
+      // Selettori per Subito.it
+      const listings = $('[data-testid="item-card"], .item-card, .listing-item');
+      
+      console.log(`📊 Trovati ${listings.length} annunci su Subito.it`);
+      
+      listings.each((index, element) => {
+        if (index >= 10) return; // Limita a 10 risultati
+        
+        const $el = $(element);
+        
+        // Estrai prezzo
+        const priceEl = $el.find('[data-testid="price"], .price, [class*="price"]');
+        const realPrice = this.extractRealPrice($, priceEl, 'subito.it');
+        
+        // Estrai area
+        const areaEl = $el.find('[data-testid="features"], .features, [class*="features"]');
+        const realArea = this.extractRealArea($, areaEl, 'subito.it');
+        
+        // Estrai titolo
+        const titleEl = $el.find('[data-testid="title"], .title, h2, h3');
+        const title = titleEl.length ? titleEl.text().trim() : `Terreno Subito ${index + 1}`;
+        
+        // Estrai link
+        const linkEl = $el.find('a').first();
+        const url = linkEl.length ? linkEl.attr('href') : '';
+        const fullUrl = url && url.startsWith('http') ? url : `https://www.subito.it${url || ''}`;
+        
+        // Aggiungi solo se abbiamo dati reali
+        if (realPrice || realArea) {
+          const finalPrice = realPrice || 0;
+          const finalArea = realArea || 0;
+          
+          results.push({
+            id: `subito_real_${index}`,
+            title: title,
+            price: finalPrice,
+            location: criteria.location,
+            area: finalArea,
+            description: title,
+            url: fullUrl,
+            source: 'subito.it (REALE)',
+            images: [],
+            features: ['Edificabile'],
+            contactInfo: {},
+            timestamp: new Date(),
+            hasRealPrice: !!realPrice,
+            hasRealArea: !!realArea
+          });
+          
+          console.log(`✅ Subito.it - Terreno ${index + 1}: ${title} - €${finalPrice.toLocaleString()} - ${finalArea}m²`);
+        }
+      });
+      
+      console.log(`✅ Subito.it: ${results.length} terreni REALI estratti`);
+      return results;
+      
+    } catch (error) {
+      console.error('❌ Errore scraping Subito.it:', error instanceof Error ? error.message : 'Errore sconosciuto');
+      return [];
+    }
+  }
+
+  private async scrapeKijijiHTTP(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
+    console.log('🔍 Scraping Kijiji.it per terreni...');
+    const results: ScrapedLand[] = [];
+    
+    try {
+      const location = criteria.location || 'Roma';
+      const url = `https://www.kijiji.it/terreni/${location}/vendita/`;
+      
+      console.log(`📡 Richiesta HTTP: ${url}`);
+      
+      const response = await this.retryRequest(async () => {
+        return axios.get(url, {
+          timeout: 10000,
+          headers: this.getRealisticHeaders()
+        });
+      });
+      
+      const $ = cheerio.load(response.data);
+      
+      // Selettori per Kijiji.it
+      const listings = $('[data-testid="listing"], .listing, .item-card');
+      
+      console.log(`📊 Trovati ${listings.length} annunci su Kijiji.it`);
+      
+      listings.each((index, element) => {
+        if (index >= 10) return; // Limita a 10 risultati
+        
+        const $el = $(element);
+        
+        // Estrai prezzo
+        const priceEl = $el.find('[data-testid="price"], .price, [class*="price"]');
+        const realPrice = this.extractRealPrice($, priceEl, 'kijiji.it');
+        
+        // Estrai area
+        const areaEl = $el.find('[data-testid="features"], .features, [class*="features"]');
+        const realArea = this.extractRealArea($, areaEl, 'kijiji.it');
+        
+        // Estrai titolo
+        const titleEl = $el.find('[data-testid="title"], .title, h2, h3');
+        const title = titleEl.length ? titleEl.text().trim() : `Terreno Kijiji ${index + 1}`;
+        
+        // Estrai link
+        const linkEl = $el.find('a').first();
+        const url = linkEl.length ? linkEl.attr('href') : '';
+        const fullUrl = url && url.startsWith('http') ? url : `https://www.kijiji.it${url || ''}`;
+        
+        // Aggiungi solo se abbiamo dati reali
+        if (realPrice || realArea) {
+          const finalPrice = realPrice || 0;
+          const finalArea = realArea || 0;
+          
+          results.push({
+            id: `kijiji_real_${index}`,
+            title: title,
+            price: finalPrice,
+            location: criteria.location,
+            area: finalArea,
+            description: title,
+            url: fullUrl,
+            source: 'kijiji.it (REALE)',
+            images: [],
+            features: ['Edificabile'],
+            contactInfo: {},
+            timestamp: new Date(),
+            hasRealPrice: !!realPrice,
+            hasRealArea: !!realArea
+          });
+          
+          console.log(`✅ Kijiji.it - Terreno ${index + 1}: ${title} - €${finalPrice.toLocaleString()} - ${finalArea}m²`);
+        }
+      });
+      
+      console.log(`✅ Kijiji.it: ${results.length} terreni REALI estratti`);
+      return results;
+      
+    } catch (error) {
+      console.error('❌ Errore scraping Kijiji.it:', error instanceof Error ? error.message : 'Errore sconosciuto');
       return [];
     }
   }
