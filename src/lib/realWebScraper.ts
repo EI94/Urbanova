@@ -151,7 +151,7 @@ export class RealWebScraper {
 
   // Funzione per estrarre e validare l'area reale
   private extractRealArea($: cheerio.CheerioAPI, element: any, source: string): number | null {
-    const $el = $(element);
+          const $el = $(element);
     
     const areaSelectors = [
       // Immobiliare.it - BASATI SU DATI REALI (CSS Modules)
@@ -209,14 +209,14 @@ export class RealWebScraper {
       const response = await this.retryRequest(async () => {
         return axios.get(url, {
           timeout: 10000, // Ridotto da 15000 a 10000 per evitare errori di rete
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Language': 'it-IT,it;q=0.9,en;q=0.8',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+          'Accept-Language': 'it-IT,it;q=0.9,en;q=0.8',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
         });
       });
       
@@ -285,24 +285,24 @@ export class RealWebScraper {
             
             // ACCETTA se abbiamo ALMENO UN dato reale (prezzo O area)
             if (realPrice || realArea) {
-              const fullUrl = url.startsWith('http') ? url : `https://www.immobiliare.it${url}`;
+            const fullUrl = url.startsWith('http') ? url : `https://www.immobiliare.it${url}`;
               
               // Usa valori di fallback solo se necessario, ma marca come non verificati
               const finalPrice = realPrice || 0; // 0 indica prezzo non disponibile
               const finalArea = realArea || 0; // 0 indica area non disponibile
-              
-              results.push({
+            
+            results.push({
                 id: `immobiliare_real_${index}`,
-                title: title,
+              title: title,
                 price: finalPrice,
-                location: criteria.location,
+              location: criteria.location,
                 area: finalArea,
-                description: title,
-                url: fullUrl,
+              description: title,
+              url: fullUrl,
                 source: 'immobiliare.it (REALE)',
-                images: [],
-                features: ['Edificabile'],
-                contactInfo: {},
+              images: [],
+              features: ['Edificabile'],
+              contactInfo: {},
                 timestamp: new Date(),
                 // Marca i dati mancanti per trasparenza
                 hasRealPrice: !!realPrice,
@@ -399,24 +399,24 @@ export class RealWebScraper {
             
             // ACCETTA se abbiamo ALMENO UN dato reale (prezzo O area)
             if (realPrice || realArea) {
-              const fullUrl = url.startsWith('http') ? url : `https://www.casa.it${url}`;
+            const fullUrl = url.startsWith('http') ? url : `https://www.casa.it${url}`;
               
               // Usa valori di fallback solo se necessario, ma marca come non verificati
               const finalPrice = realPrice || 0; // 0 indica prezzo non disponibile
               const finalArea = realArea || 0; // 0 indica area non disponibile
-              
-              results.push({
+            
+            results.push({
                 id: `casa_real_${index}`,
-                title: title,
+              title: title,
                 price: finalPrice,
-                location: criteria.location,
+              location: criteria.location,
                 area: finalArea,
-                description: title,
-                url: fullUrl,
+              description: title,
+              url: fullUrl,
                 source: 'casa.it (REALE)',
-                images: [],
-                features: ['Edificabile'],
-                contactInfo: {},
+              images: [],
+              features: ['Edificabile'],
+              contactInfo: {},
                 timestamp: new Date(),
                 // Marca i dati mancanti per trasparenza
                 hasRealPrice: !!realPrice,
@@ -514,24 +514,24 @@ export class RealWebScraper {
             
             // ACCETTA se abbiamo ALMENO UN dato reale (prezzo O area)
             if (realPrice || realArea) {
-              const fullUrl = url.startsWith('http') ? url : `https://www.idealista.it${url}`;
+            const fullUrl = url.startsWith('http') ? url : `https://www.idealista.it${url}`;
               
               // Usa valori di fallback solo se necessario, ma marca come non verificati
               const finalPrice = realPrice || 0; // 0 indica prezzo non disponibile
               const finalArea = realArea || 0; // 0 indica area non disponibile
-              
-              results.push({
+            
+            results.push({
                 id: `idealista_real_${index}`,
-                title: title,
+              title: title,
                 price: finalPrice,
-                location: criteria.location,
+              location: criteria.location,
                 area: finalArea,
-                description: title,
-                url: fullUrl,
+              description: title,
+              url: fullUrl,
                 source: 'idealista.it (REALE)',
-                images: [],
-                features: ['Edificabile'],
-                contactInfo: {},
+              images: [],
+              features: ['Edificabile'],
+              contactInfo: {},
                 timestamp: new Date(),
                 // Marca i dati mancanti per trasparenza
                 hasRealPrice: !!realPrice,
@@ -629,24 +629,24 @@ export class RealWebScraper {
             
             // ACCETTA se abbiamo ALMENO UN dato reale (prezzo O area)
             if (realPrice || realArea) {
-              const fullUrl = url.startsWith('http') ? url : `https://www.borsinoimmobiliare.it${url}`;
+            const fullUrl = url.startsWith('http') ? url : `https://www.borsinoimmobiliare.it${url}`;
               
               // Usa valori di fallback solo se necessario, ma marca come non verificati
               const finalPrice = realPrice || 0; // 0 indica prezzo non disponibile
               const finalArea = realArea || 0; // 0 indica area non disponibile
-              
-              results.push({
+            
+            results.push({
                 id: `borsino_real_${index}`,
-                title: title,
+              title: title,
                 price: finalPrice,
-                location: criteria.location,
+              location: criteria.location,
                 area: finalArea,
-                description: title,
-                url: fullUrl,
+              description: title,
+              url: fullUrl,
                 source: 'borsinoimmobiliare.it (REALE)',
-                images: [],
-                features: ['Edificabile'],
-                contactInfo: {},
+              images: [],
+              features: ['Edificabile'],
+              contactInfo: {},
                 timestamp: new Date(),
                 // Marca i dati mancanti per trasparenza
                 hasRealPrice: !!realPrice,

@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { BuildingIcon } from '@/components/icons';
 import Button from '@/components/ui/Button';
 
 interface Permit {
@@ -222,7 +221,7 @@ export default function PermitsCompliancePage() {
   };
 
   return (
-    <DashboardLayout title="Permessi & Compliance">
+    <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
@@ -230,7 +229,7 @@ export default function PermitsCompliancePage() {
             <h1 className="text-2xl font-bold text-gray-900">Sistema Permessi Intelligente</h1>
             <p className="text-gray-600">AI-powered compliance tracking e gestione autorizzazioni</p>
           </div>
-          <BuildingIcon className="h-8 w-8 text-blue-600" />
+          {/* BuildingIcon removed */}
         </div>
 
         {/* Tab Navigation */}
