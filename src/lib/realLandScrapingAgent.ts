@@ -36,6 +36,8 @@ export class RealLandScrapingAgent {
       console.log('🔍 Fase 2: Web Scraping Parallelo...');
       const lands = await realWebScraper.scrapeLands(criteria);
       
+      console.log(`📊 Terreni estratti: ${lands.length}`);
+      
       if (lands.length === 0) {
         console.log('⚠️ Nessun terreno trovato');
         await realWebScraper.close();
@@ -53,48 +55,115 @@ export class RealLandScrapingAgent {
         };
       }
 
-      // 2. Analisi AI PARALLELA per velocità
-      console.log('🤖 Fase 2: Analisi AI Parallela...');
-      const topLands = lands.slice(0, 5); // Analizza solo i top 5 per efficienza
-      
-      const analysisPromises = topLands.map(async (land) => {
-        try {
-          const landAnalysis = await realAIService.analyzeLand(land);
-          land.aiScore = await realAIService.calculateAdvancedAIScore(land, landAnalysis);
-          return landAnalysis;
-        } catch (error) {
-          console.error(`Errore analisi AI per ${land.title}:`, error);
-          return realAIService['fallbackAnalysis'](land);
+      // 2.1. Filtra terreni per criteri di prezzo e area
+      console.log('🔍 Fase 2.1: Filtro criteri...');
+      const filteredLands = lands.filter(land => {
+        // Filtra per prezzo se specificato
+        if (criteria.minPrice !== undefined || criteria.maxPrice !== undefined) {
+          const minPrice = criteria.minPrice || 0;
+          const maxPrice = criteria.maxPrice || Number.MAX_SAFE_INTEGER;
+          if (land.price < minPrice || land.price > maxPrice) {
+            console.log(`❌ Terreno ${land.title} scartato: prezzo €${land.price} fuori range [${minPrice}, ${maxPrice}]`);
+            return false;
+          }
         }
+        
+        // Filtra per area se specificata
+        if (criteria.minArea !== undefined || criteria.maxArea !== undefined) {
+          const minArea = criteria.minArea || 0;
+          const maxArea = criteria.maxArea || Number.MAX_SAFE_INTEGER;
+          if (land.area < minArea || land.area > maxArea) {
+            console.log(`❌ Terreno ${land.title} scartato: area ${land.area}m² fuori range [${minArea}, ${maxArea}]`);
+            return false;
+          }
+        }
+        
+        return true;
       });
       
-      const analysisResults = await Promise.allSettled(analysisPromises);
-      const analysis = analysisResults
-        .filter(result => result.status === 'fulfilled')
-        .map(result => (result as PromiseFulfilledResult<LandAnalysis>).value);
+      console.log(`📊 Terreni dopo filtro: ${filteredLands.length} (${lands.length - filteredLands.length} scartati)`);
+      
+      if (filteredLands.length === 0) {
+        console.log('⚠️ Nessun terreno passa i filtri');
+        await realWebScraper.close();
+        return {
+          lands: [],
+          analysis: [],
+          emailSent: false,
+          summary: {
+            totalFound: 0,
+            averagePrice: 0,
+            bestOpportunities: [],
+            marketTrends: 'Nessun dato disponibile',
+            recommendations: ['Ampliare i criteri di ricerca o verificare i filtri']
+          }
+        };
+      }
+
+      // 3. Analisi AI PARALLELA per velocità (NON BLOCCANTE)
+      console.log('🤖 Fase 3: Analisi AI Parallela...');
+      const topLands = filteredLands.slice(0, 5); // Analizza solo i top 5 per efficienza
+      
+      let analysis: LandAnalysis[] = [];
+      
+      try {
+        const analysisPromises = topLands.map(async (land) => {
+          try {
+            const landAnalysis = await realAIService.analyzeLand(land);
+            land.aiScore = await realAIService.calculateAdvancedAIScore(land, landAnalysis);
+            return landAnalysis;
+          } catch (error) {
+            console.error(`Errore analisi AI per ${land.title}:`, error);
+            // Fallback analysis senza bloccare
+            return {
+              aiScore: 70,
+              investmentPotential: 7,
+              riskAssessment: 'Medio',
+              marketTrends: 'Stabile',
+              recommendations: ['Verificare dati sul campo'],
+              opportunities: ['Buona posizione'],
+              warnings: ['Analisi AI non disponibile'],
+              estimatedROI: 8,
+              timeToMarket: '12-18 mesi',
+              competitiveAdvantage: 'Posizione strategica'
+            } as LandAnalysis;
+          }
+        });
+        
+        const analysisResults = await Promise.allSettled(analysisPromises);
+        analysis = analysisResults
+          .filter(result => result.status === 'fulfilled')
+          .map(result => (result as PromiseFulfilledResult<LandAnalysis>).value);
+          
+        console.log(`✅ Analisi AI completata: ${analysis.length} analisi`);
+      } catch (error) {
+        console.error('❌ Errore generale analisi AI:', error);
+        // Continua senza analisi AI
+        analysis = [];
+      }
 
       // 3. Analisi Trend e Raccomandazioni PARALLELE
       console.log('📊 Fase 3: Analisi Trend e Raccomandazioni...');
       const [marketTrends, recommendations] = await Promise.all([
         realAIService.analyzeMarketTrends(criteria.location || 'Italia'),
-        realAIService.generateInvestmentRecommendations(lands)
+        realAIService.generateInvestmentRecommendations(filteredLands)
       ]);
 
       // 4. Prepara Summary
       const summary = {
-        totalFound: lands.length,
-        averagePrice: Math.round(lands.reduce((sum, land) => sum + land.price, 0) / lands.length),
-        bestOpportunities: lands.slice(0, 5),
+        totalFound: filteredLands.length,
+        averagePrice: Math.round(filteredLands.reduce((sum, land) => sum + land.price, 0) / filteredLands.length),
+        bestOpportunities: filteredLands.slice(0, 5),
         marketTrends,
         recommendations
       };
 
       // 5. Salvataggio e Email NON BLOCCANTI
       console.log('💾 Fase 4: Salvataggio e Email...');
-      const savePromise = this.saveSearchResults(lands, analysis, summary, criteria, email)
+      const savePromise = this.saveSearchResults(filteredLands, analysis, summary, criteria, email)
         .catch(error => console.error('❌ Errore salvataggio:', error));
       
-      const emailPromise = this.sendEmailNotification(email, lands, summary, analysis)
+      const emailPromise = this.sendEmailNotification(email, filteredLands, summary, analysis)
         .then(() => {
           console.log('✅ Email inviata con successo');
           return true;
@@ -109,7 +178,7 @@ export class RealLandScrapingAgent {
 
       // 6. Prepara risultato finale
       const result = {
-        lands,
+        lands: filteredLands,
         analysis,
         emailSent: await emailPromise,
         summary

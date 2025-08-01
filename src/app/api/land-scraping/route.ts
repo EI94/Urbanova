@@ -25,12 +25,11 @@ export async function POST(request: NextRequest) {
     // Converti i criteri nel formato corretto per l'agente
     const searchCriteria = {
       location: location || 'Roma',
-      priceRange: [criteria?.minPrice || 0, criteria?.maxPrice || 1000000],
-      areaRange: [criteria?.minArea || 500, criteria?.maxArea || 10000],
-      zoning: criteria?.propertyType ? [criteria.propertyType] : ['residenziale'],
-      buildingRights: true,
-      infrastructure: [],
-      keywords: []
+      minPrice: criteria?.minPrice || 0,
+      maxPrice: criteria?.maxPrice || 1000000,
+      minArea: criteria?.minArea || 500,
+      maxArea: criteria?.maxArea || 10000,
+      propertyType: criteria?.propertyType || 'residenziale'
     };
 
     // Esegui la ricerca automatizzata con timeout e retry
