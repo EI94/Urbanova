@@ -108,14 +108,13 @@ export class RealWebScraper {
     try {
       console.log('🚀 Avvio scraping HTTP per dati reali...');
       
-      // Fonti principali con strategie avanzate anti-bot
+      // Fonti ottimizzate basate sui test massivi
+      // Immobiliare.it FUNZIONA - altri bloccati
       const sources = [
         { name: 'Immobiliare.it', scraper: () => this.scrapeImmobiliareAdvanced(criteria) },
-        { name: 'Casa.it', scraper: () => this.scrapeCasaAdvanced(criteria) },
-        { name: 'Idealista.it', scraper: () => this.scrapeIdealistaAdvanced(criteria) },
-        { name: 'BorsinoImmobiliare.it', scraper: () => this.scrapeBorsinoAdvanced(criteria) },
-        { name: 'Subito.it', scraper: () => this.scrapeSubitoHTTP(criteria) },
-        { name: 'Kijiji.it', scraper: () => this.scrapeKijijiHTTP(criteria) }
+        { name: 'Bakeca.it', scraper: () => this.scrapeBakecaHTTP(criteria) },
+        { name: 'Annunci.it', scraper: () => this.scrapeAnnunciHTTP(criteria) },
+        { name: 'Casa.it', scraper: () => this.scrapeCasaAdvanced(criteria) }
       ];
 
       // Scraping sequenziale con delay per evitare blocchi
@@ -133,7 +132,7 @@ export class RealWebScraper {
           
           // Delay tra le richieste per evitare blocchi
           if (source !== sources[sources.length - 1]) {
-            const delay = Math.random() * 3000 + 2000; // 2-5 secondi
+            const delay = Math.random() * 2000 + 1000; // 1-3 secondi
             console.log(`⏳ Attendo ${Math.round(delay)}ms prima del prossimo sito...`);
             await new Promise(resolve => setTimeout(resolve, delay));
           }
@@ -143,8 +142,8 @@ export class RealWebScraper {
           
           // Se è un errore 403, aggiungi delay extra
           if (error instanceof Error && error.message.includes('403')) {
-            console.log(`🚫 ${source.name} bloccato (403). Attendo 10 secondi...`);
-            await new Promise(resolve => setTimeout(resolve, 10000));
+            console.log(`🚫 ${source.name} bloccato (403). Attendo 5 secondi...`);
+            await new Promise(resolve => setTimeout(resolve, 5000));
           }
         }
       }
