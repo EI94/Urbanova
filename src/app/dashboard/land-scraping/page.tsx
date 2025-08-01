@@ -11,7 +11,7 @@ import ProgressBar from '@/components/ui/ProgressBar';
 import LandCard from '@/components/ui/LandCard';
 import AdvancedFilters from '@/components/ui/AdvancedFilters';
 import PerformanceStats from '@/components/ui/PerformanceStats';
-import ScheduledSearchModal from '@/components/ui/ScheduledSearchModal';
+import SearchSchedulerModal from '@/components/ui/SearchSchedulerModal';
 import { 
   SearchIcon, 
   MailIcon, 
@@ -120,13 +120,14 @@ export default function LandScrapingPage() {
   const [emailConfig, setEmailConfig] = useState<EmailConfig | null>(null);
   
   // Stati per ricerca automatica programmata
-  const [showScheduledSearch, setShowScheduledSearch] = useState(false);
+  const [showSearchScheduler, setShowSearchScheduler] = useState(false);
   const [scheduledSearches, setScheduledSearches] = useState<Array<{
     id: string;
     name: string;
     criteria: LandSearchCriteria;
     email: string;
     frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
+    time: string;
     isActive: boolean;
     lastRun?: Date;
     nextRun?: Date;
@@ -354,35 +355,54 @@ export default function LandScrapingPage() {
     }
   };
 
-  const addScheduledSearch = (search: any) => {
+  const addScheduledSearch = (scheduleData: {
+    name: string;
+    criteria: LandSearchCriteria;
+    email: string;
+    frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
+    time: string;
+  }) => {
     const newSearch = {
-      ...search,
+      ...scheduleData,
       id: Date.now().toString(),
       isActive: true,
       lastRun: undefined,
-      nextRun: calculateNextRun(search.frequency)
+      nextRun: calculateNextRun(scheduleData.frequency, scheduleData.time)
     };
     
     const updatedSearches = [...scheduledSearches, newSearch];
     setScheduledSearches(updatedSearches);
     saveScheduledSearches(updatedSearches);
-    toast.success('Ricerca programmata aggiunta con successo!');
+    toast.success(`Ricerca programmata "${scheduleData.name}" aggiunta con successo!`);
   };
 
-  const calculateNextRun = (frequency: string) => {
+  const calculateNextRun = (frequency: string, time: string) => {
     const now = new Date();
-    switch (frequency) {
-      case 'daily':
-        return new Date(now.getTime() + 24 * 60 * 60 * 1000);
-      case 'weekly':
-        return new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-      case 'monthly':
-        return new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-      case 'yearly':
-        return new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
-      default:
-        return new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    const [hours, minutes] = time.split(':');
+    const nextRun = new Date(now);
+    nextRun.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+    
+    // Se l'orario di oggi è già passato, calcola per il prossimo periodo
+    if (nextRun <= now) {
+      switch (frequency) {
+        case 'daily':
+          nextRun.setDate(nextRun.getDate() + 1);
+          break;
+        case 'weekly':
+          nextRun.setDate(nextRun.getDate() + 7);
+          break;
+        case 'monthly':
+          nextRun.setMonth(nextRun.getMonth() + 1);
+          break;
+        case 'yearly':
+          nextRun.setFullYear(nextRun.getFullYear() + 1);
+          break;
+        default:
+          nextRun.setDate(nextRun.getDate() + 1);
+      }
     }
+    
+    return nextRun;
   };
 
   const toggleScheduledSearch = (id: string) => {
@@ -469,13 +489,16 @@ export default function LandScrapingPage() {
     setFilteredResults(filtered);
   }, [filters, searchResults]);
 
-  const handleSearch = async () => {
-    if (!email.trim()) {
+  const handleSearch = async (criteria?: LandSearchCriteria, searchEmail?: string) => {
+    const searchCriteriaToUse = criteria || searchCriteria;
+    const emailToUse = searchEmail || email;
+    
+    if (!emailToUse.trim()) {
       toast.error('Inserisci un indirizzo email per ricevere i risultati');
       return;
     }
 
-    if (!searchCriteria.location.trim()) {
+    if (!searchCriteriaToUse.location.trim()) {
       toast.error('Inserisci una località per la ricerca');
       return;
     }
@@ -558,16 +581,16 @@ export default function LandScrapingPage() {
             },
             signal: controller.signal,
             body: JSON.stringify({
-              location: searchCriteria.location,
+              location: searchCriteriaToUse.location,
               criteria: {
-                minPrice: searchCriteria.minPrice,
-                maxPrice: searchCriteria.maxPrice,
-                minArea: searchCriteria.minArea,
-                maxArea: searchCriteria.maxArea,
-                propertyType: searchCriteria.propertyType
+                minPrice: searchCriteriaToUse.minPrice,
+                maxPrice: searchCriteriaToUse.maxPrice,
+                minArea: searchCriteriaToUse.minArea,
+                maxArea: searchCriteriaToUse.maxArea,
+                propertyType: searchCriteriaToUse.propertyType
               },
               aiAnalysis: true,
-              email: email
+              email: emailToUse
             })
           });
 
@@ -615,8 +638,8 @@ export default function LandScrapingPage() {
           // Salva nella cronologia
           const historyEntry = {
             id: Date.now().toString(),
-            criteria: searchCriteria,
-            email,
+            criteria: searchCriteriaToUse,
+            email: emailToUse,
             date: new Date(),
             resultsCount: results.data?.lands?.length || 0,
             emailSent: results.data?.emailSent || false
@@ -986,24 +1009,14 @@ export default function LandScrapingPage() {
             
             <div className="flex items-end gap-3">
               <button
-                onClick={handleSearch}
+                onClick={() => setShowSearchScheduler(true)}
                 disabled={searchProgress.phase !== 'idle' || !isOnline}
                 className="flex-1 flex items-center justify-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                title={!isOnline ? 'Connessione internet richiesta per la ricerca' : ''}
+                title={!isOnline ? 'Connessione internet richiesta per la ricerca' : 'Avvia Ricerca o Programmala'}
               >
                 <SearchIcon className="h-4 w-4" />
                 {!isOnline ? 'Offline' : 
-                 searchProgress.phase === 'idle' ? 'Avvia Ricerca' : 'Ricerca in corso...'}
-              </button>
-              
-
-              
-              <button
-                onClick={() => setShowScheduledSearch(true)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                title="Ricerche Programmate"
-              >
-                <CalendarIcon className="h-4 w-4" />
+                 searchProgress.phase === 'idle' ? 'Cerca o Programma' : 'Ricerca in corso...'}
               </button>
               
               <button
@@ -1200,7 +1213,7 @@ export default function LandScrapingPage() {
                 Ricerche Programmate
               </h3>
               <button
-                onClick={() => setShowScheduledSearch(true)}
+                onClick={() => setShowSearchScheduler(true)}
                 className="text-sm text-blue-600 hover:text-blue-700 font-medium"
               >
                 Gestisci
@@ -1235,7 +1248,7 @@ export default function LandScrapingPage() {
             {scheduledSearches.length > 3 && (
               <div className="mt-4 text-center">
                 <button
-                  onClick={() => setShowScheduledSearch(true)}
+                  onClick={() => setShowSearchScheduler(true)}
                   className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                 >
                   Vedi tutte ({scheduledSearches.length})
@@ -1273,14 +1286,12 @@ export default function LandScrapingPage() {
           </div>
         )}
 
-        {/* Modale Ricerche Programmate */}
-        <ScheduledSearchModal
-          isOpen={showScheduledSearch}
-          onClose={() => setShowScheduledSearch(false)}
-          scheduledSearches={scheduledSearches}
-          onAddScheduledSearch={addScheduledSearch}
-          onToggleScheduledSearch={toggleScheduledSearch}
-          onDeleteScheduledSearch={deleteScheduledSearch}
+        {/* Modale Ricerca e Programmazione Unificato */}
+        <SearchSchedulerModal
+          isOpen={showSearchScheduler}
+          onClose={() => setShowSearchScheduler(false)}
+          onScheduleSearch={addScheduledSearch}
+          onExecuteSearch={handleSearch}
           currentCriteria={searchCriteria}
           currentEmail={email}
         />
