@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { LandSearchCriteria, RealLandScrapingResult } from '@/types/land';
 import { emailService, EmailConfig } from '@/lib/emailService';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 import ProgressBar from '@/components/ui/ProgressBar';
 import LandCard from '@/components/ui/LandCard';
@@ -66,6 +67,7 @@ interface FilterState {
 }
 
 export default function LandScrapingPage() {
+  const { t } = useLanguage();
   const [isClient, setIsClient] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
 

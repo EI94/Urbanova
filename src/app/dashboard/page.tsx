@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { getProjectStats } from '@/lib/firestoreService';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { 
   BuildingIcon, 
   EuroIcon, 
@@ -42,6 +43,7 @@ interface ProjectStats {
 }
 
 export default function DashboardPage() {
+  const { t } = useLanguage();
   const [stats, setStats] = useState<ProjectStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -87,11 +89,11 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600 mt-1">Panoramica generale dei tuoi progetti immobiliari</p>
+            <h1 className="text-3xl font-bold text-gray-900">{t('title', 'dashboard')}</h1>
+            <p className="text-gray-600 mt-1">{t('subtitle', 'dashboard')}</p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-gray-500">Ultimo aggiornamento</p>
+            <p className="text-sm text-gray-500">{t('lastUpdate', 'common')}</p>
             <p className="text-sm font-medium">{new Date().toLocaleString('it-IT')}</p>
           </div>
         </div>

@@ -4,6 +4,8 @@ import React, { ReactNode, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import LanguageSelector from '@/components/ui/LanguageSelector';
 import { 
   HomeIcon, 
   DashboardIcon, 
@@ -85,6 +87,7 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
   const router = useRouter();
   const pathname = usePathname();
   const { currentUser, logout } = useAuth();
+  const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -99,48 +102,48 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
 
   const navigation = {
     main: [
-      { href: '/dashboard', icon: <DashboardIcon />, text: 'Dashboard' },
+      { href: '/dashboard', icon: <DashboardIcon />, text: t('dashboard', 'navigation') },
     ],
-             intelligence: [
-           { href: '/dashboard/market-intelligence', icon: <SearchIcon />, text: 'Market Intelligence' },
-           { href: '/dashboard/land-scraping', icon: <SearchIcon />, text: 'AI Land Scraping' },
-           { href: '/dashboard/feasibility-analysis', icon: <CalculatorIcon />, text: 'Analisi Fattibilità' },
-           { href: '/dashboard/design-center', icon: <PaletteIcon />, text: 'Design Center' },
-         ],
+    intelligence: [
+      { href: '/dashboard/market-intelligence', icon: <SearchIcon />, text: t('marketIntelligence', 'navigation') },
+      { href: '/dashboard/land-scraping', icon: <SearchIcon />, text: t('landScraping', 'navigation') },
+      { href: '/dashboard/feasibility-analysis', icon: <CalculatorIcon />, text: t('feasibilityAnalysis', 'navigation') },
+      { href: '/dashboard/design-center', icon: <PaletteIcon />, text: t('designCenter', 'navigation') },
+    ],
     planning: [
-      { href: '/dashboard/business-plan', icon: <BusinessPlanIcon />, text: 'Business Plan Generator' },
-      { href: '/dashboard/permits-compliance', icon: <PermitIcon />, text: 'Permessi & Compliance' },
-      { href: '/dashboard/project-timeline', icon: <CalendarIcon />, text: 'Project Timeline AI' },
+      { href: '/dashboard/business-plan', icon: <BusinessPlanIcon />, text: t('businessPlan', 'navigation') },
+      { href: '/dashboard/permits-compliance', icon: <PermitIcon />, text: t('permitsCompliance', 'navigation') },
+      { href: '/dashboard/project-timeline', icon: <CalendarIcon />, text: t('projectTimeline', 'navigation') },
     ],
     progetti: [
-      { href: '/dashboard/progetti', icon: <BuildingIcon />, text: 'Progetti' },
-      { href: '/dashboard/progetti/nuovo', icon: <NewProjectIcon />, text: 'Nuovo Progetto' },
-      { href: '/dashboard/mappa', icon: <LocationIcon />, text: 'Mappa Progetti' },
+      { href: '/dashboard/progetti', icon: <BuildingIcon />, text: t('projects', 'navigation') },
+      { href: '/dashboard/progetti/nuovo', icon: <NewProjectIcon />, text: t('newProject', 'navigation') },
+      { href: '/dashboard/mappa', icon: <LocationIcon />, text: t('projectMap', 'navigation') },
     ],
     gestioneProgetti: [
-      { href: '/dashboard/project-management', icon: <ProjectIcon />, text: 'Gestione' },
-      { href: '/dashboard/project-management/documents', icon: <DocumentIcon />, text: 'Documenti' },
-      { href: '/dashboard/project-management/meetings', icon: <MeetingIcon />, text: 'Riunioni' },
+      { href: '/dashboard/project-management', icon: <ProjectIcon />, text: t('projectManagement', 'navigation') },
+      { href: '/dashboard/project-management/documents', icon: <DocumentIcon />, text: t('documents', 'navigation') },
+      { href: '/dashboard/project-management/meetings', icon: <MeetingIcon />, text: t('meetings', 'navigation') },
     ],
     marketing: [
-      { href: '/dashboard/marketing', icon: <MarketingIcon />, text: 'Marketing' },
-      { href: '/dashboard/marketing/campaigns', icon: <CampaignIcon />, text: 'Campagne' },
-      { href: '/dashboard/marketing/materials', icon: <DocumentIcon />, text: 'Materiali' },
+      { href: '/dashboard/marketing', icon: <MarketingIcon />, text: t('marketing', 'navigation') },
+      { href: '/dashboard/marketing/campaigns', icon: <CampaignIcon />, text: t('campaigns', 'navigation') },
+      { href: '/dashboard/marketing/materials', icon: <DocumentIcon />, text: t('materials', 'navigation') },
     ],
     epc: [
-      { href: '/dashboard/epc', icon: <ConstructionIcon />, text: 'EPC' },
-      { href: '/dashboard/epc/construction-site', icon: <ConstructionIcon />, text: 'Cantieri' },
-      { href: '/dashboard/epc/technical-documents', icon: <DocumentIcon />, text: 'Doc. Tecnici' },
-      { href: '/dashboard/epc/permits', icon: <PermitIcon />, text: 'Permessi' },
+      { href: '/dashboard/epc', icon: <ConstructionIcon />, text: t('epc', 'navigation') },
+      { href: '/dashboard/epc/construction-site', icon: <ConstructionIcon />, text: t('constructionSite', 'navigation') },
+      { href: '/dashboard/epc/technical-documents', icon: <DocumentIcon />, text: t('technicalDocuments', 'navigation') },
+      { href: '/dashboard/epc/permits', icon: <PermitIcon />, text: t('permits', 'navigation') },
     ],
     businessPlan: [
-      { href: '/dashboard/business-plan', icon: <BusinessPlanIcon />, text: 'Business Plan' },
+      { href: '/dashboard/business-plan', icon: <BusinessPlanIcon />, text: t('businessPlan', 'navigation') },
     ],
     altro: [
-      { href: '/dashboard/clienti', icon: <ClientIcon />, text: 'Clienti' },
-      { href: '/dashboard/documenti', icon: <DocumentIcon />, text: 'Documenti' },
-      { href: '/dashboard/notifiche', icon: <AlertIcon />, text: 'Notifiche' },
-      { href: '/dashboard/impostazioni', icon: <SettingsIcon />, text: 'Impostazioni' },
+      { href: '/dashboard/clienti', icon: <ClientIcon />, text: t('clients', 'navigation') },
+      { href: '/dashboard/documenti', icon: <DocumentIcon />, text: t('documents', 'navigation') },
+      { href: '/dashboard/notifiche', icon: <AlertIcon />, text: t('notifications', 'navigation') },
+      { href: '/dashboard/impostazioni', icon: <SettingsIcon />, text: t('settings', 'navigation') },
     ],
   };
 
@@ -397,10 +400,13 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
                 </svg>
                 <input 
                   type="text" 
-                  placeholder="Cerca..." 
+                  placeholder={t('search', 'common')} 
                   className="bg-transparent border-none outline-none text-sm text-slate-600 w-36 ml-2"
                 />
               </div>
+              
+              {/* Language Selector */}
+              <LanguageSelector variant="header" />
               
               <button className="p-1.5 rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-700 relative">
                 <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full"></span>
@@ -416,7 +422,7 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
                   <UserIcon className="h-4 w-4" />
                 </div>
                 <div className="ml-2">
-                  <p className="text-xs font-medium text-slate-800">{currentUser?.displayName || 'Utente'}</p>
+                  <p className="text-xs font-medium text-slate-800">{currentUser?.displayName || t('user', 'common')}</p>
                 </div>
               </div>
             </div>
