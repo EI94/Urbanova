@@ -16,33 +16,33 @@ import SearchSchedulerModal from '@/components/ui/SearchSchedulerModal';
 import { 
   SearchIcon, 
   MailIcon, 
-  BuildingIcon, 
+  // BuildingIcon, 
   EuroIcon, 
-  LocationIcon,
+  // LocationIcon,
   CalendarIcon,
   TrendingUpIcon,
-  AlertIcon,
+  // AlertIcon,
   CheckCircleIcon,
   EditIcon,
-  TrashIcon,
+  // TrashIcon,
   SettingsIcon,
-  BrainIcon,
-  GlobeIcon,
+  // BrainIcon,
+  // GlobeIcon,
   CalculatorIcon,
   ClockIcon,
-  RepeatIcon,
+  // RepeatIcon,
   FilterIcon,
   MapIcon,
-  StarIcon,
+  // StarIcon,
   EyeIcon,
   PlusIcon,
-  RefreshIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-  XIcon,
-  TargetIcon,
-  ShieldIcon,
-  ZapIcon
+  // RefreshIcon,
+  // ChevronDownIcon,
+  // ChevronUpIcon,
+  // XIcon,
+  // TargetIcon,
+  // ShieldIcon,
+  // ZapIcon
 } from '@/components/icons';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
@@ -817,7 +817,7 @@ export default function LandScrapingPage() {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Caricamento...</p>
+            <p className="text-gray-600">{t('loading', 'common')}</p>
           </div>
         </div>
       </DashboardLayout>
@@ -831,11 +831,11 @@ export default function LandScrapingPage() {
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <BrainIcon className="h-8 w-8 text-blue-600" />
-              AI Land Scraping
+              {/* <BrainIcon className="h-8 w-8 text-blue-600" /> */}
+              {t('title', 'aiLandScraping')}
             </h1>
             <p className="text-gray-600 mt-2">
-              Scopri automaticamente le migliori opportunità di terreni e ricevi notifiche email
+              {t('subtitle', 'aiLandScraping')}
             </p>
           </div>
           
@@ -845,18 +845,18 @@ export default function LandScrapingPage() {
             <div className="flex items-center gap-2 text-sm">
               <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
               <span className={`text-sm ${isOnline ? 'text-green-600' : 'text-red-600'}`}>
-                {isOnline ? 'Online' : 'Offline'}
+                {isOnline ? t('online', 'aiLandScraping') : 'Offline'}
               </span>
             </div>
             
             {servicesStatus && (
               <div className="flex items-center gap-2 text-sm">
                 <div className={`w-2 h-2 rounded-full ${servicesStatus.email ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span className="text-gray-600">Email</span>
+                <span className="text-gray-600">{t('email', 'aiLandScraping')}</span>
                 <div className={`w-2 h-2 rounded-full ${servicesStatus.webScraping ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span className="text-gray-600">Scraping</span>
+                <span className="text-gray-600">{t('scraping', 'aiLandScraping')}</span>
                 <div className={`w-2 h-2 rounded-full ${servicesStatus.ai ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span className="text-gray-600">AI</span>
+                <span className="text-gray-600">{t('ai', 'aiLandScraping')}</span>
               </div>
             )}
           </div>

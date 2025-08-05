@@ -67,6 +67,7 @@ export default function DashboardPage() {
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
           <div className="loading loading-spinner loading-lg"></div>
+          <span className="ml-3">{t('loadingStats', 'dashboard')}</span>
         </div>
       </DashboardLayout>
     );
@@ -77,7 +78,7 @@ export default function DashboardPage() {
       <DashboardLayout>
         <div className="alert alert-error">
           <AlertIcon />
-          <span>Errore nel caricamento delle statistiche</span>
+          <span>{t('errorLoadingStats', 'dashboard')}</span>
         </div>
       </DashboardLayout>
     );
@@ -94,7 +95,7 @@ export default function DashboardPage() {
           </div>
           <div className="text-right">
             <p className="text-sm text-gray-500">{t('lastUpdate', 'common')}</p>
-            <p className="text-sm font-medium">{new Date().toLocaleString('it-IT')}</p>
+            <p className="text-sm font-medium">{new Date().toLocaleString()}</p>
           </div>
         </div>
 
@@ -106,7 +107,7 @@ export default function DashboardPage() {
                 <BuildingIcon className="h-6 w-6 text-blue-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Progetti Totali</p>
+                <p className="text-sm font-medium text-gray-600">{t('totalProjects', 'dashboard')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.totalProjects}</p>
               </div>
             </div>
@@ -118,7 +119,7 @@ export default function DashboardPage() {
                 <TrendingUpIcon className="h-6 w-6 text-green-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Progetti Attivi</p>
+                <p className="text-sm font-medium text-gray-600">{t('activeProjects', 'dashboard')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.activeProjects}</p>
               </div>
             </div>
@@ -130,7 +131,7 @@ export default function DashboardPage() {
                 <EuroIcon className="h-6 w-6 text-yellow-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Budget Totale</p>
+                <p className="text-sm font-medium text-gray-600">{t('totalBudget', 'dashboard')}</p>
                                   <p className="text-2xl font-bold text-gray-900">
                     €{((stats.totalBudget || 0) / 1000000).toFixed(1)}M
                   </p>
@@ -144,7 +145,7 @@ export default function DashboardPage() {
                 <TrendingUpIcon className="h-6 w-6 text-purple-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">ROI Medio</p>
+                <p className="text-sm font-medium text-gray-600">{t('averageROI', 'dashboard')}</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.averageROI?.toFixed(1) || '0.0'}%</p>
               </div>
             </div>
@@ -155,10 +156,10 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Progetti per Tipo */}
           <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Progetti per Tipo</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('projectsByType', 'dashboard')}</h3>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Residenziale</span>
+                <span className="text-sm text-gray-600">{t('residential', 'dashboard')}</span>
                 <div className="flex items-center">
                   <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
                     <div 
@@ -170,7 +171,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Commerciale</span>
+                <span className="text-sm text-gray-600">{t('commercial', 'dashboard')}</span>
                 <div className="flex items-center">
                   <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
                     <div 
@@ -182,7 +183,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Misto</span>
+                <span className="text-sm text-gray-600">{t('mixed', 'dashboard')}</span>
                 <div className="flex items-center">
                   <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
                     <div 
@@ -194,7 +195,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Industriale</span>
+                <span className="text-sm text-gray-600">{t('industrial', 'dashboard')}</span>
                 <div className="flex items-center">
                   <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
                     <div 
@@ -210,33 +211,33 @@ export default function DashboardPage() {
 
           {/* Progetti per Status */}
           <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Stato Progetti</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('projectsByStatus', 'dashboard')}</h3>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
                   <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-                  <span className="text-sm text-gray-600">Pianificazione</span>
+                  <span className="text-sm text-gray-600">{t('planning', 'dashboard')}</span>
                 </div>
                 <span className="text-sm font-medium">{stats.projectsByStatus.PIANIFICAZIONE}</span>
               </div>
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
                   <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                  <span className="text-sm text-gray-600">In Corso</span>
+                  <span className="text-sm text-gray-600">{t('inProgress', 'dashboard')}</span>
                 </div>
                 <span className="text-sm font-medium">{stats.projectsByStatus.IN_CORSO}</span>
               </div>
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
                   <div className="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
-                  <span className="text-sm text-gray-600">In Attesa</span>
+                  <span className="text-sm text-gray-600">{t('onHold', 'dashboard')}</span>
                 </div>
                 <span className="text-sm font-medium">{stats.projectsByStatus.IN_ATTESA}</span>
               </div>
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
                   <div className="w-3 h-3 bg-purple-500 rounded-full mr-2"></div>
-                  <span className="text-sm text-gray-600">Completato</span>
+                  <span className="text-sm text-gray-600">{t('completed', 'dashboard')}</span>
                 </div>
                 <span className="text-sm font-medium">{stats.projectsByStatus.COMPLETATO}</span>
               </div>
@@ -246,7 +247,7 @@ export default function DashboardPage() {
 
         {/* Attività Recenti */}
         <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Attività Recenti</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('recentActivity', 'dashboard')}</h3>
           <div className="space-y-3">
             {stats.recentActivity.slice(0, 5).map((activity) => (
               <div key={activity.id} className="flex items-center p-3 bg-gray-50 rounded-lg">
@@ -275,7 +276,7 @@ export default function DashboardPage() {
                 <div className="ml-3 flex-1">
                   <p className="text-sm text-gray-900">{activity.message}</p>
                   <p className="text-xs text-gray-500">
-                    {activity.timestamp.toLocaleString('it-IT')}
+                    {activity.timestamp.toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -285,28 +286,28 @@ export default function DashboardPage() {
 
         {/* Quick Actions */}
         <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Azioni Rapide</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('quickActions', 'dashboard')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <a 
               href="/dashboard/progetti/nuovo" 
               className="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
             >
               <BuildingIcon className="h-5 w-5 text-blue-600 mr-3" />
-              <span className="text-sm font-medium text-blue-900">Nuovo Progetto</span>
+              <span className="text-sm font-medium text-blue-900">{t('newProject', 'dashboard')}</span>
             </a>
             <a 
               href="/dashboard/market-intelligence" 
               className="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
             >
               <TrendingUpIcon className="h-5 w-5 text-green-600 mr-3" />
-              <span className="text-sm font-medium text-green-900">Market Intelligence</span>
+              <span className="text-sm font-medium text-green-900">{t('marketIntelligence', 'dashboard')}</span>
             </a>
             <a 
               href="/dashboard/feasibility-analysis" 
               className="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
             >
               <EuroIcon className="h-5 w-5 text-purple-600 mr-3" />
-              <span className="text-sm font-medium text-purple-900">Analisi Fattibilità</span>
+              <span className="text-sm font-medium text-purple-900">{t('feasibilityAnalysis', 'dashboard')}</span>
             </a>
           </div>
         </div>

@@ -12,6 +12,7 @@ import {
   AlertTriangleIcon
 } from '@/components/icons';
 import Button from '@/components/ui/Button';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface MarketOpportunity {
   id: string;
@@ -31,6 +32,7 @@ interface MarketOpportunity {
 }
 
 export default function MarketIntelligencePage() {
+  const { t } = useLanguage();
   const [opportunities, setOpportunities] = useState<MarketOpportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOpportunity, setSelectedOpportunity] = useState<MarketOpportunity | null>(null);
@@ -65,7 +67,7 @@ export default function MarketIntelligencePage() {
   }, []);
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('it-IT', { 
+    return new Intl.NumberFormat(navigator.language, { 
       style: 'currency', 
       currency: 'EUR',
       minimumFractionDigits: 0,
@@ -113,9 +115,9 @@ export default function MarketIntelligencePage() {
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-neutral-900">Market Intelligence</h1>
+            <h1 className="text-2xl font-bold text-neutral-900">{t('title', 'marketIntelligence')}</h1>
             <p className="text-neutral-600 mt-1">
-              Opportunità di mercato scoperte dall'AI
+              {t('subtitle', 'marketIntelligence')}
             </p>
           </div>
           <Button 
@@ -123,7 +125,7 @@ export default function MarketIntelligencePage() {
             leftIcon={<SearchIcon className="h-4 w-4" />}
             onClick={() => console.log('Avvia ricerca AI')}
           >
-            Nuova Ricerca AI
+            {t('newAISearch', 'marketIntelligence')}
           </Button>
         </div>
 
@@ -133,14 +135,14 @@ export default function MarketIntelligencePage() {
             <div className="stat-figure text-primary">
               <TrendingUpIcon className="h-6 w-6" />
             </div>
-            <div className="stat-title text-neutral-500">Opportunità Totali</div>
+            <div className="stat-title text-neutral-500">{t('totalOpportunities', 'marketIntelligence')}</div>
             <div className="stat-value text-2xl">{opportunities.length}</div>
           </div>
           <div className="stat bg-white shadow-sm rounded-lg p-4">
             <div className="stat-figure text-success">
               <EuroIcon className="h-6 w-6" />
             </div>
-            <div className="stat-title text-neutral-500">Valore Medio</div>
+            <div className="stat-title text-neutral-500">{t('averageValue', 'marketIntelligence')}</div>
             <div className="stat-value text-2xl">
               {opportunities.length > 0 
                 ? formatPrice(opportunities.reduce((sum, opp) => sum + opp.price, 0) / opportunities.length)
@@ -152,7 +154,7 @@ export default function MarketIntelligencePage() {
             <div className="stat-figure text-info">
               <MapIcon className="h-6 w-6" />
             </div>
-            <div className="stat-title text-neutral-500">Zone Coperte</div>
+            <div className="stat-title text-neutral-500">{t('coveredZones', 'marketIntelligence')}</div>
             <div className="stat-value text-2xl">
               {new Set(opportunities.map(opp => opp.location.split(',')[0])).size}
             </div>
@@ -161,7 +163,7 @@ export default function MarketIntelligencePage() {
             <div className="stat-figure text-warning">
               <AlertTriangleIcon className="h-6 w-6" />
             </div>
-            <div className="stat-title text-neutral-500">Alta Priorità</div>
+            <div className="stat-title text-neutral-500">{t('highPriority', 'marketIntelligence')}</div>
             <div className="stat-value text-2xl">
               {opportunities.filter(opp => opp.aiScore >= 90).length}
             </div>
@@ -173,7 +175,7 @@ export default function MarketIntelligencePage() {
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1">
               <label className="label">
-                <span className="label-text font-medium">Prezzo Min</span>
+                <span className="label-text font-medium">{t('minPrice', 'marketIntelligence')}</span>
               </label>
               <input
                 type="number"
@@ -185,7 +187,7 @@ export default function MarketIntelligencePage() {
             </div>
             <div className="flex-1">
               <label className="label">
-                <span className="label-text font-medium">Prezzo Max</span>
+                <span className="label-text font-medium">{t('maxPrice', 'marketIntelligence')}</span>
               </label>
               <input
                 type="number"
@@ -197,7 +199,7 @@ export default function MarketIntelligencePage() {
             </div>
             <div className="flex-1">
               <label className="label">
-                <span className="label-text font-medium">Zona</span>
+                <span className="label-text font-medium">{t('zone', 'marketIntelligence')}</span>
               </label>
               <input
                 type="text"
@@ -209,14 +211,14 @@ export default function MarketIntelligencePage() {
             </div>
             <div className="flex-1">
               <label className="label">
-                <span className="label-text font-medium">Destinazione</span>
+                <span className="label-text font-medium">{t('destination', 'marketIntelligence')}</span>
               </label>
               <select
                 className="select select-bordered w-full"
                 value={filters.zoning}
                 onChange={(e) => setFilters(prev => ({ ...prev, zoning: e.target.value }))}
               >
-                <option value="">Tutte</option>
+                <option value="">{t('all', 'marketIntelligence')}</option>
                 <option value="Residenziale">Residenziale</option>
                 <option value="Commerciale">Commerciale</option>
                 <option value="Industriale">Industriale</option>
@@ -233,11 +235,11 @@ export default function MarketIntelligencePage() {
               <SearchIcon className="h-16 w-16 mx-auto" />
             </div>
             <h3 className="text-lg font-medium text-neutral-700 mb-2">
-              Nessuna opportunità trovata
+              {t('noOpportunitiesFound', 'marketIntelligence')}
             </h3>
             <p className="text-neutral-500">
               {opportunities.length === 0 
-                ? 'Inizia una nuova ricerca AI per scoprire opportunità di mercato'
+                ? t('startNewSearch', 'marketIntelligence')
                 : 'Prova a modificare i filtri di ricerca'
               }
             </p>
@@ -247,7 +249,7 @@ export default function MarketIntelligencePage() {
                 className="mt-4"
                 onClick={() => console.log('Avvia prima ricerca')}
               >
-                Avvia Prima Ricerca
+                {t('startFirstSearch', 'marketIntelligence')}
               </Button>
             )}
           </div>
@@ -304,7 +306,7 @@ export default function MarketIntelligencePage() {
                   
                   <div className="flex justify-between items-center text-xs text-neutral-500">
                     <span>{opportunity.source}</span>
-                    <span>{opportunity.dateAdded.toLocaleDateString('it-IT')}</span>
+                    <span>{opportunity.dateAdded.toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
