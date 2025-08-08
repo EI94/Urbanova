@@ -1,5 +1,6 @@
 // Agente Land Scraping Reale - Urbanova AI
 import { realWebScraper } from './realWebScraper';
+import { advancedWebScraper } from './advancedWebScraper';
 import { realEmailService, EmailNotification } from './realEmailService';
 import { realAIService } from './realAIService';
 import { cacheService } from './cacheService';
@@ -32,9 +33,15 @@ export class RealLandScrapingAgent {
         return cachedResult;
       }
       
-      // 2. Web Scraping PARALLELO per velocità
-      console.log('🔍 Fase 2: Web Scraping Parallelo...');
-      const lands = await realWebScraper.scrapeLands(criteria);
+      // 2. Web Scraping AVANZATO con localizzazione intelligente
+      console.log('🔍 Fase 2: Web Scraping Avanzato...');
+      let lands = await advancedWebScraper.scrapeLandsAdvanced(criteria);
+      
+      // Se non ci sono risultati, prova con il metodo tradizionale
+      if (lands.length === 0) {
+        console.log('⚠️ Nessun risultato con scraping avanzato, provo metodo tradizionale...');
+        lands = await realWebScraper.scrapeLands(criteria);
+      }
       
       console.log(`📊 Terreni estratti: ${lands.length}`);
       
