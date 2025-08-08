@@ -1,7 +1,6 @@
 // Agente Land Scraping Reale - Urbanova AI
 import { realWebScraper } from './realWebScraper';
 import { advancedWebScraper } from './advancedWebScraper';
-import { apiProxyService } from './apiProxyService';
 import { realEmailService, EmailNotification } from './realEmailService';
 import { realAIService } from './realAIService';
 import { cacheService } from './cacheService';
@@ -44,28 +43,18 @@ export class RealLandScrapingAgent {
         lands = await realWebScraper.scrapeLands(criteria);
       }
       
-      // Se ancora non ci sono risultati, prova con servizi proxy
+      // Se ancora non ci sono risultati, prova con strategie più aggressive
       if (lands.length === 0) {
-        console.log('⚠️ Nessun risultato con metodi diretti, provo servizi proxy...');
+        console.log('⚠️ Nessun risultato con metodi standard, provo strategie aggressive...');
         try {
-          const proxyStats = apiProxyService.getServiceStats();
-          if (proxyStats.availableServices > 0) {
-            console.log(`🌐 Tentativo con ${proxyStats.availableServices} servizi proxy disponibili...`);
-            
-            // Prova Idealista con proxy
-            const idealistaLands = await apiProxyService.scrapeIdealista(criteria);
-            lands.push(...idealistaLands);
-            
-            // Prova Casa.it con proxy
-            const casaLands = await apiProxyService.scrapeCasa(criteria);
-            lands.push(...casaLands);
-            
-            console.log(`✅ Proxy services: ${lands.length} terreni aggiuntivi`);
-          } else {
-            console.log('⚠️ Nessun servizio proxy configurato');
-          }
+          // Prova con delay più lungo e retry multipli
+          console.log('🔄 Tentativo con strategie aggressive...');
+          
+          // Qui potremmo implementare strategie più aggressive
+          // Per ora, continuiamo con i risultati disponibili
+          console.log('ℹ️ Strategie aggressive non implementate - continuando con risultati disponibili');
         } catch (error) {
-          console.error('❌ Errore servizi proxy:', error);
+          console.error('❌ Errore strategie aggressive:', error);
         }
       }
       

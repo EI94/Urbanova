@@ -156,22 +156,28 @@ export class AdvancedWebScraper {
     }
   }
 
-  // Strategia 6: Selenium WebDriver (se disponibile)
-  private async strategyWithSelenium(url: string, domain: string): Promise<any> {
+  // Strategia 6: Strategia con rotazione IP (simulata)
+  private async strategyWithIPRotation(url: string, domain: string): Promise<any> {
     try {
-      // Prova a usare Selenium se disponibile
-      const selenium = await this.getSelenium();
-      if (!selenium) {
-        throw new Error('Selenium non disponibile');
-      }
-
-      console.log(`🤖 Tentativo con Selenium per ${domain}...`);
+      console.log(`🌐 Tentativo con rotazione IP per ${domain}...`);
       
-      // Implementazione Selenium (placeholder)
-      throw new Error('Selenium non ancora implementato');
+      // Simula rotazione IP cambiando headers
+      const headers = {
+        ...this.getUltraRealisticHeaders(domain),
+        'X-Forwarded-For': `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
+        'X-Real-IP': `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
+        'CF-Connecting-IP': `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`
+      };
+
+      return axios.get(url, {
+        headers,
+        timeout: 15000,
+        maxRedirects: 5,
+        validateStatus: (status) => status < 500
+      });
       
     } catch (error) {
-      console.log(`❌ Selenium fallito per ${domain}:`, error instanceof Error ? error.message : 'Errore sconosciuto');
+      console.log(`❌ Rotazione IP fallita per ${domain}:`, error instanceof Error ? error.message : 'Errore sconosciuto');
       throw error;
     }
   }
@@ -230,42 +236,26 @@ export class AdvancedWebScraper {
     }
   }
 
-  // Strategia 8: API alternative e proxy
-  private async strategyWithAPIProxy(url: string, domain: string): Promise<any> {
+  // Strategia 8: OpenAI Web Scraping (gratuito con API key esistente)
+  private async strategyWithOpenAI(url: string, domain: string): Promise<any> {
     try {
-      console.log(`🌐 Tentativo con API proxy per ${domain}...`);
+      console.log(`🤖 Tentativo con OpenAI per ${domain}...`);
       
-      // Prova servizi di proxy API
-      const proxyServices = [
-        `https://api.scrapingbee.com/api/v1/?api_key=DEMO&url=${encodeURIComponent(url)}&render_js=false`,
-        `https://api.scrapingant.com/v2/general?url=${encodeURIComponent(url)}&x-api-key=DEMO`,
-        `https://api.scraperapi.com/?api_key=DEMO&url=${encodeURIComponent(url)}&render=true`
-      ];
-
-      for (const proxyUrl of proxyServices) {
-        try {
-          const response = await axios.get(proxyUrl, {
-            timeout: 30000,
-            headers: {
-              'User-Agent': this.getRandomUserAgent(),
-              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-            }
-          });
-          
-          if (response.status === 200 && response.data) {
-            console.log(`✅ Proxy API riuscito per ${domain}`);
-            return response;
-          }
-        } catch (error) {
-          console.log(`❌ Proxy API fallito:`, error instanceof Error ? error.message : 'Errore sconosciuto');
-          continue;
-        }
+      // Usa OpenAI per analizzare la pagina (se disponibile)
+      const openaiKey = process.env.OPENAI_API_KEY;
+      if (!openaiKey) {
+        throw new Error('OpenAI API key non configurata');
       }
+
+      // Per ora, questa è una strategia placeholder
+      // In futuro potremmo usare OpenAI per analizzare contenuti web
+      console.log(`✅ OpenAI disponibile per ${domain}`);
       
-      throw new Error('Tutti i proxy API falliti');
+      // Fallback alla strategia semplice
+      return await this.strategySimple(url, domain);
       
     } catch (error) {
-      console.log(`❌ Strategia proxy API fallita per ${domain}:`, error instanceof Error ? error.message : 'Errore sconosciuto');
+      console.log(`❌ Strategia OpenAI fallita per ${domain}:`, error instanceof Error ? error.message : 'Errore sconosciuto');
       throw error;
     }
   }
@@ -296,16 +286,17 @@ export class AdvancedWebScraper {
     }
   }
 
-  // Richiesta con retry e rotazione strategie AGGIORNATA
+  // Richiesta con retry e rotazione strategie AGGIORNATA (solo gratuite)
   private async makeRequest(url: string, domain: string, maxRetries: number = 3): Promise<any> {
     const strategies = [
       () => this.strategySimple(url, domain),
       () => this.strategyWithSession(url, domain),
       () => this.strategyWithProxy(url, domain),
       () => this.strategyWithDelay(url, domain),
+      () => this.strategyWithIPRotation(url, domain),
       () => this.strategyWithPuppeteer(url, domain),
       () => this.strategyWithPlaywright(url, domain),
-      () => this.strategyWithAPIProxy(url, domain)
+      () => this.strategyWithOpenAI(url, domain)
     ];
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -344,14 +335,6 @@ export class AdvancedWebScraper {
   private async getPuppeteer(): Promise<any> {
     try {
       return await import('puppeteer');
-    } catch (error) {
-      return null;
-    }
-  }
-
-  private async getSelenium(): Promise<any> {
-    try {
-      return await import('selenium-webdriver');
     } catch (error) {
       return null;
     }
