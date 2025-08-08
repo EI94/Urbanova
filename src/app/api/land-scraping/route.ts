@@ -38,9 +38,9 @@ export async function POST(request: NextRequest) {
     let emailError = null;
     
     try {
-      // Timeout di 60 secondi per evitare errori di rete
+      // Timeout di 90 secondi per scraping parallelo
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Timeout: Ricerca troppo lunga')), 60000);
+        setTimeout(() => reject(new Error('Timeout: Ricerca troppo lunga')), 90000);
       });
       
       const searchPromise = realLandScrapingAgent.runAutomatedSearch(searchCriteria, email);

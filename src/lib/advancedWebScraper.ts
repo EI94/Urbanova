@@ -286,49 +286,62 @@ export class AdvancedWebScraper {
     }
   }
 
-  // Richiesta con retry e rotazione strategie AGGIORNATA (solo gratuite)
-  private async makeRequest(url: string, domain: string, maxRetries: number = 3): Promise<any> {
-    const strategies = [
+  // Richiesta con retry e rotazione strategie VELOCI (solo gratuite)
+  private async makeRequest(url: string, domain: string, maxRetries: number = 2): Promise<any> {
+    // Strategie veloci per bypassare DataDome
+    const fastStrategies = [
       () => this.strategySimple(url, domain),
       () => this.strategyWithSession(url, domain),
-      () => this.strategyWithProxy(url, domain),
-      () => this.strategyWithDelay(url, domain),
-      () => this.strategyWithIPRotation(url, domain),
-      () => this.strategyWithPuppeteer(url, domain),
-      () => this.strategyWithPlaywright(url, domain),
-      () => this.strategyWithOpenAI(url, domain)
+      () => this.strategyWithIPRotation(url, domain)
     ];
 
+    const slowStrategies = [
+      () => this.strategyWithPuppeteer(url, domain),
+      () => this.strategyWithPlaywright(url, domain)
+    ];
+
+    // Prima prova le strategie veloci
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      for (const strategy of strategies) {
+      for (let i = 0; i < fastStrategies.length; i++) {
         try {
-          console.log(`🔍 Tentativo ${attempt} con strategia ${strategies.indexOf(strategy) + 1} per ${domain}`);
-          const result = await strategy();
+          console.log(`⚡ Tentativo ${attempt} con strategia veloce ${i + 1} per ${domain}`);
+          const result = await fastStrategies[i]();
           
           if (result && result.status === 200) {
-            console.log(`✅ Strategia ${strategies.indexOf(strategy) + 1} riuscita per ${domain}`);
+            console.log(`✅ Strategia veloce ${i + 1} riuscita per ${domain}`);
             return result;
           }
         } catch (error) {
-          console.log(`❌ Strategia ${strategies.indexOf(strategy) + 1} fallita per ${domain}:`, error instanceof Error ? error.message : 'Errore sconosciuto');
-          
-          // Se è un errore 403, cambia strategia
-          if (error instanceof Error && error.message.includes('403')) {
-            console.log(`🚫 ${domain} bloccato (403). Cambio strategia...`);
-            continue;
-          }
+          console.log(`❌ Strategia veloce ${i + 1} fallita per ${domain}:`, error instanceof Error ? error.message : 'Errore sconosciuto');
         }
       }
 
-      // Delay tra i tentativi
+      // Delay molto breve tra i tentativi
       if (attempt < maxRetries) {
-        const delay = Math.random() * 5000 + 2000; // 2-7 secondi
+        const delay = Math.random() * 500 + 200; // 0.2-0.7 secondi
         console.log(`⏳ Attendo ${Math.round(delay)}ms prima del prossimo tentativo...`);
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
 
-    throw new Error(`Tutti i tentativi falliti per ${domain}`);
+    // Se le strategie veloci falliscono, prova una strategia lenta (solo una)
+    console.log(`🐌 Tentativo con strategia lenta per ${domain}...`);
+    for (let i = 0; i < slowStrategies.length; i++) {
+      try {
+        console.log(`🤖 Tentativo con strategia lenta ${i + 1} per ${domain}`);
+        const result = await slowStrategies[i]();
+        
+        if (result && result.status === 200) {
+          console.log(`✅ Strategia lenta ${i + 1} riuscita per ${domain}`);
+          return result;
+        }
+      } catch (error) {
+        console.log(`❌ Strategia lenta ${i + 1} fallita per ${domain}:`, error instanceof Error ? error.message : 'Errore sconosciuto');
+        break; // Se una strategia lenta fallisce, non provare le altre
+      }
+    }
+
+    throw new Error(`Tutte le strategie fallite per ${domain}`);
   }
 
   // Funzioni helper per ottenere librerie browser automation
@@ -461,37 +474,48 @@ export class AdvancedWebScraper {
   private async scrapeWithGenericLocation(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
     const results: ScrapedLand[] = [];
     
-    // Fonti alternative che funzionano meglio
+    // Tutte le fonti con timeout parallelo
     const sources = [
-      { name: 'Subito.it', scraper: () => this.scrapeSubitoAdvanced(criteria) },
       { name: 'Kijiji.it', scraper: () => this.scrapeKijijiAdvanced(criteria) },
-      { name: 'Bakeca.it', scraper: () => this.scrapeBakecaAdvanced(criteria) },
+      { name: 'Subito.it', scraper: () => this.scrapeSubitoAdvanced(criteria) },
       { name: 'Annunci.it', scraper: () => this.scrapeAnnunciAdvanced(criteria) },
+      { name: 'Immobiliare.it', scraper: () => this.scrapeImmobiliareAdvanced(criteria) },
       { name: 'Idealista.it', scraper: () => this.scrapeIdealistaAdvanced(criteria) },
-      { name: 'Casa.it', scraper: () => this.scrapeCasaAdvanced(criteria) },
-      { name: 'Immobiliare.it', scraper: () => this.scrapeImmobiliareAdvanced(criteria) }
+      { name: 'Casa.it', scraper: () => this.scrapeCasaAdvanced(criteria) }
     ];
 
-    for (const source of sources) {
+    // Scraping parallelo con timeout di 60 secondi
+    console.log(`🚀 Avvio scraping parallelo per ${sources.length} fonti...`);
+    
+    const scrapingPromises = sources.map(async (source) => {
       try {
-        console.log(`🔍 Scraping ${source.name}...`);
-        const sourceResults = await source.scraper();
+        console.log(`🔍 Avvio scraping ${source.name}...`);
         
-        if (sourceResults.length > 0) {
-          results.push(...sourceResults);
-          console.log(`✅ ${source.name}: ${sourceResults.length} terreni trovati`);
-        } else {
-          console.log(`❌ ${source.name}: nessun risultato`);
-        }
+        // Timeout di 30 secondi per ogni fonte (più veloce)
+        const sourceResults = await Promise.race([
+          source.scraper(),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error(`Timeout ${source.name}`)), 30000)
+          )
+        ]);
         
-        // Delay tra le fonti
-        if (source !== sources[sources.length - 1]) {
-          const delay = Math.random() * 2000 + 1000;
-          await new Promise(resolve => setTimeout(resolve, delay));
-        }
+        console.log(`✅ ${source.name}: ${sourceResults.length} terreni trovati`);
+        return { source: source.name, results: sourceResults, success: true };
         
       } catch (error) {
-        console.error(`❌ Errore ${source.name}:`, error instanceof Error ? error.message : 'Errore sconosciuto');
+        console.log(`❌ ${source.name} fallito:`, error instanceof Error ? error.message : 'Errore sconosciuto');
+        return { source: source.name, results: [], success: false, error: error instanceof Error ? error.message : 'Errore sconosciuto' };
+      }
+    });
+
+    // Attendi tutti i risultati (massimo 60 secondi totali)
+    const allResults = await Promise.allSettled(scrapingPromises);
+    
+    // Raccogli tutti i risultati
+    for (const result of allResults) {
+      if (result.status === 'fulfilled' && result.value.success) {
+        results.push(...result.value.results);
+        console.log(`📊 ${result.value.source}: ${result.value.results.length} terreni aggiunti`);
       }
     }
 
