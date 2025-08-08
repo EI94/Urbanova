@@ -52,9 +52,13 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Gestione multiple località
+    const locations = location ? location.split(',').map(loc => loc.trim()) : ['Roma'];
+    
     // Converti i criteri nel formato corretto per l'agente
     const searchCriteria = {
-      location: location || 'Roma',
+      location: locations[0] || 'Roma', // Prima località come principale
+      locations: locations, // Tutte le località per ricerca multipla
       minPrice: criteria?.minPrice || 0,
       maxPrice: criteria?.maxPrice || 1000000,
       minArea: criteria?.minArea || 500,

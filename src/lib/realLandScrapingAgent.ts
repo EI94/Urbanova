@@ -35,12 +35,32 @@ export class RealLandScrapingAgent {
       
       // 2. Web Scraping AVANZATO con localizzazione intelligente
       console.log('🔍 Fase 2: Web Scraping Avanzato...');
-      let lands = await advancedWebScraper.scrapeLandsAdvanced(criteria);
+      let lands: ScrapedLand[] = [];
       
-      // Se non ci sono risultati, prova con il metodo tradizionale
-      if (lands.length === 0) {
-        console.log('⚠️ Nessun risultato con scraping avanzato, provo metodo tradizionale...');
-        lands = await realWebScraper.scrapeLands(criteria);
+      // Gestione multiple località
+      const locations = (criteria as any).locations || [criteria.location];
+      console.log(`📍 Ricerca in ${locations.length} località: ${locations.join(', ')}`);
+      
+      // Esegui ricerca per ogni località
+      for (const loc of locations) {
+        console.log(`🔍 Ricerca in: ${loc}`);
+        const locationCriteria = { ...criteria, location: loc };
+        
+        try {
+          const locationLands = await advancedWebScraper.scrapeLandsAdvanced(locationCriteria);
+          lands.push(...locationLands);
+          console.log(`✅ ${locationLands.length} terreni trovati a ${loc}`);
+          
+          // Se non ci sono risultati con scraping avanzato, prova metodo tradizionale
+          if (locationLands.length === 0) {
+            console.log(`⚠️ Nessun risultato avanzato per ${loc}, provo metodo tradizionale...`);
+            const traditionalLands = await realWebScraper.scrapeLands(locationCriteria);
+            lands.push(...traditionalLands);
+            console.log(`✅ ${traditionalLands.length} terreni tradizionali trovati a ${loc}`);
+          }
+        } catch (error) {
+          console.error(`❌ Errore ricerca per ${loc}:`, error);
+        }
       }
       
       // Se ancora non ci sono risultati, prova con strategie più aggressive

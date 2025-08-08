@@ -31,6 +31,7 @@ export interface ScrapedLand {
 
 export interface LandSearchCriteria {
   location: string;
+  locations?: string[]; // Per supportare multiple località
   minPrice?: number;
   maxPrice?: number;
   minArea?: number;
