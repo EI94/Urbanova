@@ -79,6 +79,197 @@ export class AdvancedWebScraper {
     }
   }
 
+  // Strategia 5: Browser simulation con Puppeteer (se disponibile)
+  private async strategyWithPuppeteer(url: string, domain: string): Promise<any> {
+    try {
+      // Prova a usare Puppeteer se disponibile
+      const puppeteer = await this.getPuppeteer();
+      if (!puppeteer) {
+        throw new Error('Puppeteer non disponibile');
+      }
+
+      console.log(`🤖 Tentativo con Puppeteer per ${domain}...`);
+      
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--disable-gpu',
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding'
+        ]
+      });
+
+      const page = await browser.newPage();
+      
+      // Imposta User-Agent realistico
+      await page.setUserAgent(this.userAgentPool[Math.floor(Math.random() * this.userAgentPool.length)]);
+      
+      // Imposta viewport realistico
+      await page.setViewport({ width: 1920, height: 1080 });
+      
+      // Imposta headers extra
+      await page.setExtraHTTPHeaders({
+        'Accept-Language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'DNT': '1',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1'
+      });
+
+      // Naviga alla pagina
+      await page.goto(url, { 
+        waitUntil: 'networkidle2',
+        timeout: 30000 
+      });
+
+      // Attendi che la pagina sia completamente caricata
+      await page.waitForTimeout(3000);
+
+      // Gestisci eventuali popup o cookie banner
+      try {
+        await page.click('[data-testid="cookie-accept"], .cookie-accept, #accept-cookies, .accept-cookies', { timeout: 5000 });
+      } catch (e) {
+        // Ignora se non trova il banner
+      }
+
+      // Ottieni il contenuto HTML
+      const html = await page.content();
+      
+      await browser.close();
+      
+      return {
+        status: 200,
+        data: html,
+        headers: {}
+      };
+      
+    } catch (error) {
+      console.log(`❌ Puppeteer fallito per ${domain}:`, error instanceof Error ? error.message : 'Errore sconosciuto');
+      throw error;
+    }
+  }
+
+  // Strategia 6: Selenium WebDriver (se disponibile)
+  private async strategyWithSelenium(url: string, domain: string): Promise<any> {
+    try {
+      // Prova a usare Selenium se disponibile
+      const selenium = await this.getSelenium();
+      if (!selenium) {
+        throw new Error('Selenium non disponibile');
+      }
+
+      console.log(`🤖 Tentativo con Selenium per ${domain}...`);
+      
+      // Implementazione Selenium (placeholder)
+      throw new Error('Selenium non ancora implementato');
+      
+    } catch (error) {
+      console.log(`❌ Selenium fallito per ${domain}:`, error instanceof Error ? error.message : 'Errore sconosciuto');
+      throw error;
+    }
+  }
+
+  // Strategia 7: Playwright (se disponibile)
+  private async strategyWithPlaywright(url: string, domain: string): Promise<any> {
+    try {
+      // Prova a usare Playwright se disponibile
+      const playwright = await this.getPlaywright();
+      if (!playwright) {
+        throw new Error('Playwright non disponibile');
+      }
+
+      console.log(`🤖 Tentativo con Playwright per ${domain}...`);
+      
+      const browser = await playwright.chromium.launch({
+        headless: true
+      });
+
+      const context = await browser.newContext({
+        userAgent: this.userAgentPool[Math.floor(Math.random() * this.userAgentPool.length)],
+        viewport: { width: 1920, height: 1080 },
+        extraHTTPHeaders: {
+          'Accept-Language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7'
+        }
+      });
+
+      const page = await context.newPage();
+      
+      // Naviga alla pagina
+      await page.goto(url, { waitUntil: 'networkidle' });
+      
+      // Attendi caricamento
+      await page.waitForTimeout(3000);
+      
+      // Gestisci cookie banner
+      try {
+        await page.click('[data-testid="cookie-accept"], .cookie-accept, #accept-cookies, .accept-cookies', { timeout: 5000 });
+      } catch (e) {
+        // Ignora se non trova il banner
+      }
+      
+      const html = await page.content();
+      
+      await browser.close();
+      
+      return {
+        status: 200,
+        data: html,
+        headers: {}
+      };
+      
+    } catch (error) {
+      console.log(`❌ Playwright fallito per ${domain}:`, error instanceof Error ? error.message : 'Errore sconosciuto');
+      throw error;
+    }
+  }
+
+  // Strategia 8: API alternative e proxy
+  private async strategyWithAPIProxy(url: string, domain: string): Promise<any> {
+    try {
+      console.log(`🌐 Tentativo con API proxy per ${domain}...`);
+      
+      // Prova servizi di proxy API
+      const proxyServices = [
+        `https://api.scrapingbee.com/api/v1/?api_key=DEMO&url=${encodeURIComponent(url)}&render_js=false`,
+        `https://api.scrapingant.com/v2/general?url=${encodeURIComponent(url)}&x-api-key=DEMO`,
+        `https://api.scraperapi.com/?api_key=DEMO&url=${encodeURIComponent(url)}&render=true`
+      ];
+
+      for (const proxyUrl of proxyServices) {
+        try {
+          const response = await axios.get(proxyUrl, {
+            timeout: 30000,
+            headers: {
+              'User-Agent': this.getRandomUserAgent(),
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+            }
+          });
+          
+          if (response.status === 200 && response.data) {
+            console.log(`✅ Proxy API riuscito per ${domain}`);
+            return response;
+          }
+        } catch (error) {
+          console.log(`❌ Proxy API fallito:`, error instanceof Error ? error.message : 'Errore sconosciuto');
+          continue;
+        }
+      }
+      
+      throw new Error('Tutti i proxy API falliti');
+      
+    } catch (error) {
+      console.log(`❌ Strategia proxy API fallita per ${domain}:`, error instanceof Error ? error.message : 'Errore sconosciuto');
+      throw error;
+    }
+  }
+
   // Strategia di bypass DataDome con sessioni multiple
   private async createSession(domain: string): Promise<string> {
     try {
@@ -105,13 +296,16 @@ export class AdvancedWebScraper {
     }
   }
 
-  // Richiesta con retry e rotazione strategie
+  // Richiesta con retry e rotazione strategie AGGIORNATA
   private async makeRequest(url: string, domain: string, maxRetries: number = 3): Promise<any> {
     const strategies = [
       () => this.strategySimple(url, domain),
       () => this.strategyWithSession(url, domain),
       () => this.strategyWithProxy(url, domain),
-      () => this.strategyWithDelay(url, domain)
+      () => this.strategyWithDelay(url, domain),
+      () => this.strategyWithPuppeteer(url, domain),
+      () => this.strategyWithPlaywright(url, domain),
+      () => this.strategyWithAPIProxy(url, domain)
     ];
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -144,6 +338,31 @@ export class AdvancedWebScraper {
     }
 
     throw new Error(`Tutti i tentativi falliti per ${domain}`);
+  }
+
+  // Funzioni helper per ottenere librerie browser automation
+  private async getPuppeteer(): Promise<any> {
+    try {
+      return await import('puppeteer');
+    } catch (error) {
+      return null;
+    }
+  }
+
+  private async getSelenium(): Promise<any> {
+    try {
+      return await import('selenium-webdriver');
+    } catch (error) {
+      return null;
+    }
+  }
+
+  private async getPlaywright(): Promise<any> {
+    try {
+      return await import('playwright');
+    } catch (error) {
+      return null;
+    }
   }
 
   // Strategia 1: Richiesta semplice
@@ -265,6 +484,8 @@ export class AdvancedWebScraper {
       { name: 'Kijiji.it', scraper: () => this.scrapeKijijiAdvanced(criteria) },
       { name: 'Bakeca.it', scraper: () => this.scrapeBakecaAdvanced(criteria) },
       { name: 'Annunci.it', scraper: () => this.scrapeAnnunciAdvanced(criteria) },
+      { name: 'Idealista.it', scraper: () => this.scrapeIdealistaAdvanced(criteria) },
+      { name: 'Casa.it', scraper: () => this.scrapeCasaAdvanced(criteria) },
       { name: 'Immobiliare.it', scraper: () => this.scrapeImmobiliareAdvanced(criteria) }
     ];
 
@@ -689,6 +910,172 @@ export class AdvancedWebScraper {
       return url && url.startsWith('http') ? url : `https://www.${domain}${url || ''}`;
     } catch (error) {
       return '';
+    }
+  }
+
+  // Scraping avanzato per Idealista.it con strategie multiple
+  private async scrapeIdealistaAdvanced(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
+    const results: ScrapedLand[] = [];
+    
+    try {
+      const location = criteria.location.toLowerCase().replace(/\s+/g, '-');
+      const url = `https://www.idealista.it/terreni/vendita/${location}/`;
+      
+      console.log(`📡 Idealista.it URL: ${url}`);
+      
+      const response = await this.makeRequest(url, 'idealista.it');
+      const $ = cheerio.load(response.data);
+      
+      // Selettori multipli per Idealista.it
+      const selectors = [
+        '.item-info-container',
+        '.item-detail',
+        '[data-testid="listing-item"]',
+        '.card',
+        '.item',
+        '.property-item',
+        '.real-estate-item',
+        'article',
+        '.ad-item',
+        '.listing',
+        '.in-list-item',
+        '.nd-list-item'
+      ];
+
+      let elements: any = null;
+      
+      for (const selector of selectors) {
+        elements = $(selector);
+        if (elements.length > 0) {
+          console.log(`✅ Trovati ${elements.length} elementi con selettore: ${selector}`);
+          break;
+        }
+      }
+
+      if (!elements || elements.length === 0) {
+        console.log('❌ Nessun elemento trovato su Idealista.it');
+        return [];
+      }
+
+      elements.each((index: number, element: any) => {
+        if (index >= 15) return;
+        
+        const $el = $(element);
+        
+        const price = this.extractPrice($el);
+        const area = this.extractArea($el);
+        const title = this.extractTitle($el) || `Terreno Idealista ${index + 1}`;
+        const url = this.extractUrl($el, 'idealista.it');
+        
+        if (price || area) {
+          results.push({
+            id: `idealista_adv_${index}`,
+            title,
+            price: price || 0,
+            location: criteria.location,
+            area: area || 0,
+            description: title,
+            url,
+            source: 'idealista.it (AVANZATO)',
+            images: [],
+            features: ['Edificabile'],
+            contactInfo: {},
+            timestamp: new Date(),
+            hasRealPrice: !!price,
+            hasRealArea: !!area
+          });
+        }
+      });
+      
+      console.log(`✅ Idealista.it: ${results.length} terreni estratti`);
+      return results;
+      
+    } catch (error) {
+      console.error('❌ Errore scraping Idealista.it avanzato:', error);
+      return [];
+    }
+  }
+
+  // Scraping avanzato per Casa.it con strategie multiple
+  private async scrapeCasaAdvanced(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
+    const results: ScrapedLand[] = [];
+    
+    try {
+      const location = criteria.location.toLowerCase().replace(/\s+/g, '-');
+      const url = `https://www.casa.it/terreni/vendita/${location}/`;
+      
+      console.log(`📡 Casa.it URL: ${url}`);
+      
+      const response = await this.makeRequest(url, 'casa.it');
+      const $ = cheerio.load(response.data);
+      
+      // Selettori multipli per Casa.it
+      const selectors = [
+        '.listing-item',
+        '.announcement-card',
+        '[data-testid="listing-item"]',
+        '.card',
+        '.item',
+        '.property-item',
+        '.real-estate-item',
+        'article',
+        '.ad-item',
+        '.listing',
+        '.in-listing-item',
+        '.nd-listing-item'
+      ];
+
+      let elements: any = null;
+      
+      for (const selector of selectors) {
+        elements = $(selector);
+        if (elements.length > 0) {
+          console.log(`✅ Trovati ${elements.length} elementi con selettore: ${selector}`);
+          break;
+        }
+      }
+
+      if (!elements || elements.length === 0) {
+        console.log('❌ Nessun elemento trovato su Casa.it');
+        return [];
+      }
+
+      elements.each((index: number, element: any) => {
+        if (index >= 15) return;
+        
+        const $el = $(element);
+        
+        const price = this.extractPrice($el);
+        const area = this.extractArea($el);
+        const title = this.extractTitle($el) || `Terreno Casa ${index + 1}`;
+        const url = this.extractUrl($el, 'casa.it');
+        
+        if (price || area) {
+          results.push({
+            id: `casa_adv_${index}`,
+            title,
+            price: price || 0,
+            location: criteria.location,
+            area: area || 0,
+            description: title,
+            url,
+            source: 'casa.it (AVANZATO)',
+            images: [],
+            features: ['Edificabile'],
+            contactInfo: {},
+            timestamp: new Date(),
+            hasRealPrice: !!price,
+            hasRealArea: !!area
+          });
+        }
+      });
+      
+      console.log(`✅ Casa.it: ${results.length} terreni estratti`);
+      return results;
+      
+    } catch (error) {
+      console.error('❌ Errore scraping Casa.it avanzato:', error);
+      return [];
     }
   }
 }

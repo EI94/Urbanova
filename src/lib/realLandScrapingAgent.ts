@@ -1,6 +1,7 @@
 // Agente Land Scraping Reale - Urbanova AI
 import { realWebScraper } from './realWebScraper';
 import { advancedWebScraper } from './advancedWebScraper';
+import { apiProxyService } from './apiProxyService';
 import { realEmailService, EmailNotification } from './realEmailService';
 import { realAIService } from './realAIService';
 import { cacheService } from './cacheService';
@@ -41,6 +42,31 @@ export class RealLandScrapingAgent {
       if (lands.length === 0) {
         console.log('⚠️ Nessun risultato con scraping avanzato, provo metodo tradizionale...');
         lands = await realWebScraper.scrapeLands(criteria);
+      }
+      
+      // Se ancora non ci sono risultati, prova con servizi proxy
+      if (lands.length === 0) {
+        console.log('⚠️ Nessun risultato con metodi diretti, provo servizi proxy...');
+        try {
+          const proxyStats = apiProxyService.getServiceStats();
+          if (proxyStats.availableServices > 0) {
+            console.log(`🌐 Tentativo con ${proxyStats.availableServices} servizi proxy disponibili...`);
+            
+            // Prova Idealista con proxy
+            const idealistaLands = await apiProxyService.scrapeIdealista(criteria);
+            lands.push(...idealistaLands);
+            
+            // Prova Casa.it con proxy
+            const casaLands = await apiProxyService.scrapeCasa(criteria);
+            lands.push(...casaLands);
+            
+            console.log(`✅ Proxy services: ${lands.length} terreni aggiuntivi`);
+          } else {
+            console.log('⚠️ Nessun servizio proxy configurato');
+          }
+        } catch (error) {
+          console.error('❌ Errore servizi proxy:', error);
+        }
       }
       
       console.log(`📊 Terreni estratti: ${lands.length}`);
