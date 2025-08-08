@@ -17,7 +17,7 @@ import SearchSchedulerModal from '@/components/ui/SearchSchedulerModal';
 import { 
   SearchIcon, 
   MailIcon, 
-  BuildingIcon, 
+  BuildingIcon,
   EuroIcon, 
   LocationIcon,
   CalendarIcon,
@@ -25,25 +25,17 @@ import {
   AlertIcon,
   CheckCircleIcon,
   EditIcon,
-  TrashIcon,
   SettingsIcon,
-  BrainIcon,
-  GlobeIcon,
   CalculatorIcon,
   ClockIcon,
-  RepeatIcon,
   FilterIcon,
   MapIcon,
   StarIcon,
   EyeIcon,
   PlusIcon,
-  RefreshIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
   XIcon,
   TargetIcon,
-  ShieldIcon,
-  ZapIcon
+  ShieldIcon
 } from '@/components/icons';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
@@ -292,7 +284,7 @@ export default function LandScrapingPage() {
 
   const loadEmailConfig = async () => {
     try {
-      const config = await emailService.getEmailConfig();
+      const config = await emailService.getEmailConfig(email);
       setEmailConfig(config);
       if (config?.email) {
         setEmail(config.email);
@@ -426,7 +418,7 @@ export default function LandScrapingPage() {
 
   const saveFavorites = (newFavorites: Set<string>) => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('landScrapingFavorites', JSON.stringify([...newFavorites]));
+      localStorage.setItem('landScrapingFavorites', JSON.stringify(Array.from(newFavorites)));
     }
     setFavorites(newFavorites);
   };
@@ -479,12 +471,12 @@ export default function LandScrapingPage() {
     }
 
     // Filtro AI Score
-    filtered = filtered.filter(land => land.aiScore >= filters.minAIScore);
+    filtered = filtered.filter(land => (land.aiScore || 0) >= filters.minAIScore);
 
     // Filtro rischio
     if (filters.riskLevel !== 'all') {
       filtered = filtered.filter(land => {
-        const risk = land.analysis?.riskAssessment?.toLowerCase() || 'medium';
+        const risk = (land as any).analysis?.riskAssessment?.toLowerCase() || 'medium';
         return risk.includes(filters.riskLevel);
       });
     }
@@ -814,7 +806,7 @@ export default function LandScrapingPage() {
   // Non renderizzare nulla durante il prerendering
   if (!isClient) {
     return (
-      <DashboardLayout title="AI Land Scraping">
+      <DashboardLayout>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -826,7 +818,7 @@ export default function LandScrapingPage() {
   }
 
   return (
-    <DashboardLayout title="AI Land Scraping">
+    <DashboardLayout>
       <div className="space-y-6">
         {/* Header con stato servizi */}
         <div className="flex justify-between items-start">
@@ -850,7 +842,7 @@ export default function LandScrapingPage() {
               </span>
             </div>
             
-            {servicesStatus && (
+            {servicesStatus ? (
               <div className="flex items-center gap-2 text-sm">
                 <div className={`w-2 h-2 rounded-full ${servicesStatus.email ? 'bg-green-500' : 'bg-red-500'}`}></div>
                 <span className="text-gray-600">{t('email', 'aiLandScraping')}</span>
@@ -859,7 +851,7 @@ export default function LandScrapingPage() {
                 <div className={`w-2 h-2 rounded-full ${servicesStatus.ai ? 'bg-green-500' : 'bg-red-500'}`}></div>
                 <span className="text-gray-600">{t('ai', 'aiLandScraping')}</span>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
 
