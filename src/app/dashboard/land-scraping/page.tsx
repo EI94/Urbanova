@@ -900,7 +900,7 @@ export default function LandScrapingPage() {
                 <LocationIcon className="inline h-4 w-4 mr-1" />
                 Localizzazione Avanzata
               </label>
-              <AdvancedLocationSelector
+              <MultiLocationSelector
                 value={searchCriteria.location}
                 onChange={(location) => setSearchCriteria(prev => ({ ...prev, location }))}
                 placeholder="Cerca localizzazioni (es. Latina, Roma, Milano...)"
