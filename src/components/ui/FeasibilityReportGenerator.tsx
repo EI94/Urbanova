@@ -4,8 +4,9 @@ import React, { useState } from 'react';
 import Button from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { Download, FileText, Sparkles, TrendingUp, TrendingDown, Building2, MapPin, Calculator, Target } from 'lucide-react';
+import { Download, FileText, Sparkles, TrendingUp, TrendingDown, Building2, MapPin, Calculator, Target, Mail, Share2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import EmailSharingModal from './EmailSharingModal';
 
 interface FeasibilityAnalysis {
   id: string;
@@ -30,6 +31,7 @@ interface FeasibilityReportGeneratorProps {
 
 export default function FeasibilityReportGenerator({ analysis, onGenerateReport }: FeasibilityReportGeneratorProps) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
 
   const generateReport = async () => {
     setIsGenerating(true);
@@ -65,6 +67,14 @@ export default function FeasibilityReportGenerator({ analysis, onGenerateReport 
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const openEmailSharing = () => {
+    setIsEmailModalOpen(true);
+  };
+
+  const closeEmailSharing = () => {
+    setIsEmailModalOpen(false);
   };
 
   const getRiskColor = (risk: string) => {
@@ -238,23 +248,34 @@ export default function FeasibilityReportGenerator({ analysis, onGenerateReport 
           <p className="text-blue-100 mb-4">
             Report PDF professionale con analisi dettagliata e raccomandazioni AI
           </p>
-          <Button
-            onClick={generateReport}
-            disabled={isGenerating}
-            className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-3 text-lg font-semibold shadow-lg"
-          >
-            {isGenerating ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-2"></div>
-                Generando...
-              </>
-            ) : (
-              <>
-                <Download className="w-5 h-5 mr-2" />
-                Scarica Report PDF
-              </>
-            )}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button
+              onClick={generateReport}
+              disabled={isGenerating}
+              className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-3 text-lg font-semibold shadow-lg"
+            >
+              {isGenerating ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-2"></div>
+                  Generando...
+                </>
+              ) : (
+                <>
+                  <Download className="w-5 h-5 mr-2" />
+                  Scarica Report PDF
+                </>
+              )}
+            </Button>
+            
+            <Button
+              onClick={openEmailSharing}
+              variant="outline"
+              className="border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3 text-lg font-semibold shadow-lg"
+            >
+              <Mail className="w-5 h-5 mr-2" />
+              Condividi via Email
+            </Button>
+          </div>
         </div>
 
         {/* Footer */}
@@ -270,6 +291,17 @@ export default function FeasibilityReportGenerator({ analysis, onGenerateReport 
           </p>
         </div>
       </CardContent>
+
+      {/* Modal Condivisione Email */}
+      <EmailSharingModal
+        isOpen={isEmailModalOpen}
+        onClose={closeEmailSharing}
+        reportTitle={analysis.title}
+        reportUrl={`${window.location.origin}/dashboard/feasibility-analysis/${analysis.id}`}
+        onShareSuccess={() => {
+          toast.success('Report condiviso con successo! 📧✨');
+        }}
+      />
     </Card>
   );
 }
