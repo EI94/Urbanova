@@ -56,7 +56,7 @@ export default function RegisterPage() {
       await signup(formData.email, formData.password, displayName);
       
       // Mostra messaggio di successo
-      toast.success('Richiesta di accesso inviata con successo! Verrai contattato a breve per l\'attivazione del tuo account.');
+      toast('Richiesta di accesso inviata con successo! Verrai contattato a breve per l\'attivazione del tuo account.', { icon: '✅' });
       
       // Reindirizza alla login
       router.push('/auth/login');
@@ -73,7 +73,7 @@ export default function RegisterPage() {
       }
       
       setError(errorMessage);
-      toast.error(errorMessage);
+      toast(errorMessage, { icon: '❌' });
     } finally {
       setLoading(false);
     }

@@ -35,7 +35,7 @@ export class RealLandScrapingAgent {
       
       // 2. Web Scraping AVANZATO con localizzazione intelligente
       console.log('🔍 Fase 2: Web Scraping Avanzato...');
-      let lands: ScrapedLand[] = [];
+      const lands: ScrapedLand[] = [];
       
       // Gestione multiple località
       const locations = (criteria as any).locations || [criteria.location];

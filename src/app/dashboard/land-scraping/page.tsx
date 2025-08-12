@@ -37,7 +37,7 @@ import {
   TargetIcon,
   ShieldIcon
 } from '@/components/icons';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 
 interface SearchProgress {
@@ -157,7 +157,7 @@ export default function LandScrapingPage() {
     const handleOnline = () => {
       console.log('🌐 Connessione internet ripristinata');
       setIsOnline(true);
-      toast.success('Connessione internet ripristinata!');
+      toast('Connessione internet ripristinata!', { icon: '✅' });
       // Riprova a verificare i servizi
       setTimeout(() => {
         verifyServices();
@@ -167,7 +167,7 @@ export default function LandScrapingPage() {
     const handleOffline = () => {
       console.log('❌ Connessione internet persa');
       setIsOnline(false);
-      toast.error('Connessione internet persa. Verifica la tua connessione.');
+      toast('Connessione internet persa. Verifica la tua connessione.', { icon: '❌' });
     };
 
     // Imposta lo stato iniziale
@@ -270,7 +270,7 @@ export default function LandScrapingPage() {
       });
 
       // Mostra errore all'utente
-      toast.error('Problemi di connessione. Verifica la tua connessione internet e riprova.');
+      toast('Problemi di connessione. Verifica la tua connessione internet e riprova.', { icon: '❌' });
 
     } catch (error) {
       console.error('❌ Errore critico verifica servizi:', error);
@@ -368,7 +368,7 @@ export default function LandScrapingPage() {
     const updatedSearches = [...scheduledSearches, newSearch];
     setScheduledSearches(updatedSearches);
     saveScheduledSearches(updatedSearches);
-    toast.success(`Ricerca programmata "${scheduleData.name}" aggiunta con successo!`);
+          toast(`Ricerca programmata "${scheduleData.name}" aggiunta con successo!`, { icon: '✅' });
   };
 
   const calculateNextRun = (frequency: string, time: string) => {
@@ -406,14 +406,14 @@ export default function LandScrapingPage() {
     );
     setScheduledSearches(updatedSearches);
     saveScheduledSearches(updatedSearches);
-    toast.success('Stato ricerca programmata aggiornato!');
+          toast('Stato ricerca programmata aggiornato!', { icon: '✅' });
   };
 
   const deleteScheduledSearch = (id: string) => {
     const updatedSearches = scheduledSearches.filter(search => search.id !== id);
     setScheduledSearches(updatedSearches);
     saveScheduledSearches(updatedSearches);
-    toast.success('Ricerca programmata eliminata!');
+            toast('Ricerca programmata eliminata!', { icon: '✅' });
   };
 
   const saveFavorites = (newFavorites: Set<string>) => {
@@ -431,7 +431,7 @@ export default function LandScrapingPage() {
       newFavorites.add(landId);
     }
     saveFavorites(newFavorites);
-    toast.success(newFavorites.has(landId) ? 'Aggiunto ai preferiti' : 'Rimosso dai preferiti');
+            toast(newFavorites.has(landId) ? 'Aggiunto ai preferiti' : 'Rimosso dai preferiti', { icon: '✅' });
   };
 
   const applyFilters = useCallback(() => {
@@ -489,12 +489,12 @@ export default function LandScrapingPage() {
     const emailToUse = searchEmail || email;
     
     if (!emailToUse.trim()) {
-      toast.error('Inserisci un indirizzo email per ricevere i risultati');
+      toast('Inserisci un indirizzo email per ricevere i risultati', { icon: '⚠️' });
       return;
     }
 
     if (!searchCriteriaToUse.location.trim()) {
-      toast.error('Inserisci una località per la ricerca');
+      toast('Inserisci una località per la ricerca', { icon: '⚠️' });
       return;
     }
 
@@ -502,7 +502,7 @@ export default function LandScrapingPage() {
       phase: 'searching',
       currentSource: '',
       sourcesCompleted: [],
-      sourcesTotal: ['immobiliare.it', 'casa.it', 'idealista.it', 'borsinoimmobiliare.it'],
+      sourcesTotal: ['immobiliare.it', 'casa.it', 'idealista.it', 'borsinoimmobiliare.it', 'kijiji.it', 'subito.it'],
       progress: 0,
       message: 'Inizializzazione ricerca...'
     });
@@ -532,14 +532,23 @@ export default function LandScrapingPage() {
             newMessage = 'Filtraggio risultati...';
           }
 
-          if (newProgress > 20 && newSourcesCompleted.length === 0) {
+          if (newProgress > 15 && newSourcesCompleted.length === 0) {
             newSourcesCompleted = ['immobiliare.it'];
             newCurrentSource = 'casa.it';
-          } else if (newProgress > 40 && newSourcesCompleted.length === 1) {
+          } else if (newProgress > 30 && newSourcesCompleted.length === 1) {
             newSourcesCompleted = ['immobiliare.it', 'casa.it'];
             newCurrentSource = 'idealista.it';
-          } else if (newProgress > 70 && newSourcesCompleted.length === 2) {
+          } else if (newProgress > 45 && newSourcesCompleted.length === 2) {
             newSourcesCompleted = ['immobiliare.it', 'casa.it', 'idealista.it'];
+            newCurrentSource = 'borsinoimmobiliare.it';
+          } else if (newProgress > 60 && newSourcesCompleted.length === 3) {
+            newSourcesCompleted = ['immobiliare.it', 'casa.it', 'idealista.it', 'borsinoimmobiliare.it'];
+            newCurrentSource = 'kijiji.it';
+          } else if (newProgress > 75 && newSourcesCompleted.length === 4) {
+            newSourcesCompleted = ['immobiliare.it', 'casa.it', 'idealista.it', 'borsinoimmobiliare.it', 'kijiji.it'];
+            newCurrentSource = 'subito.it';
+          } else if (newProgress > 90 && newSourcesCompleted.length === 5) {
+            newSourcesCompleted = ['immobiliare.it', 'casa.it', 'idealista.it', 'borsinoimmobiliare.it', 'kijiji.it', 'subito.it'];
             newCurrentSource = '';
           }
 
@@ -615,7 +624,7 @@ export default function LandScrapingPage() {
           // Applica filtri ai nuovi risultati
           setTimeout(() => {
             if (finalResults.lands) {
-              let filtered = [...finalResults.lands];
+              const filtered = [...finalResults.lands];
               setFilteredResults(filtered);
               console.log('✅ Filtri applicati:', filtered.length, 'risultati');
             }
@@ -624,8 +633,8 @@ export default function LandScrapingPage() {
           setSearchProgress({
             phase: 'complete',
             currentSource: '',
-            sourcesCompleted: ['immobiliare.it', 'casa.it', 'idealista.it'],
-            sourcesTotal: ['immobiliare.it', 'casa.it', 'idealista.it'],
+            sourcesCompleted: ['immobiliare.it', 'casa.it', 'idealista.it', 'borsinoimmobiliare.it', 'kijiji.it', 'subito.it'],
+            sourcesTotal: ['immobiliare.it', 'casa.it', 'idealista.it', 'borsinoimmobiliare.it', 'kijiji.it', 'subito.it'],
             progress: 100,
             message: 'Ricerca completata!'
           });
@@ -657,14 +666,14 @@ export default function LandScrapingPage() {
           
           if (emailError) {
             setEmailError(emailError);
-            toast.error(`⚠️ ${emailError}`);
-            toast.success(`✅ Trovati ${landsCount} terreni! Email non inviata - configura RESEND_API_KEY`);
+            toast(`⚠️ ${emailError}`, { icon: '⚠️' });
+            toast(`✅ Trovati ${landsCount} terreni! Email non inviata - configura RESEND_API_KEY`, { icon: '✅' });
           } else {
             setEmailError(null);
             if (emailSent) {
-              toast.success(`✅ Trovati ${landsCount} terreni! Email inviata con successo.`);
+              toast(`✅ Trovati ${landsCount} terreni! Email inviata con successo.`, { icon: '✅' });
             } else {
-              toast.success(`✅ Trovati ${landsCount} terreni!`);
+              toast(`✅ Trovati ${landsCount} terreni!`, { icon: '✅' });
             }
           }
           return; // Exit the retry loop on success
@@ -696,7 +705,7 @@ export default function LandScrapingPage() {
         phase: 'error',
         currentSource: '',
         sourcesCompleted: [],
-        sourcesTotal: ['immobiliare.it', 'casa.it', 'idealista.it'],
+        sourcesTotal: ['immobiliare.it', 'casa.it', 'idealista.it', 'borsinoimmobiliare.it', 'kijiji.it', 'subito.it'],
         progress: 0,
         message: `Errore: ${searchLastError instanceof Error ? searchLastError.message : 'Errore sconosciuto'}`
       });
@@ -705,7 +714,7 @@ export default function LandScrapingPage() {
       const errorMessage = searchLastError instanceof Error 
         ? `❌ Errore: ${searchLastError.message}` 
         : '❌ Errore durante la ricerca. Riprova.';
-      toast.error(errorMessage);
+      toast(errorMessage, { icon: '❌' });
 
     } catch (error) {
       console.error('❌ Errore ricerca:', error);
@@ -732,18 +741,18 @@ export default function LandScrapingPage() {
       const errorMessage = error instanceof Error 
         ? `❌ Errore: ${error.message}` 
         : '❌ Errore durante la ricerca. Riprova.';
-      toast.error(errorMessage);
+      toast(errorMessage, { icon: '❌' });
     }
   };
 
   const handleCreateFeasibilityProject = async (land: any) => {
     try {
       // Funzionalità temporaneamente disabilitata per evitare errori Firebase
-      toast.success('✅ Funzionalità progetto di fattibilità temporaneamente non disponibile');
+      toast('✅ Funzionalità progetto di fattibilità temporaneamente non disponibile', { icon: '✅' });
       console.log('📋 Progetto di fattibilità richiesto per:', land.title);
     } catch (error) {
       console.error('❌ Errore creazione progetto:', error);
-      toast.error('❌ Funzionalità non disponibile al momento');
+      toast('❌ Funzionalità non disponibile al momento', { icon: '❌' });
     }
   };
 
@@ -1170,7 +1179,7 @@ export default function LandScrapingPage() {
           searchTime={searchProgress.phase === 'complete' ? 2.3 : undefined}
           resultsCount={filteredResults.length}
           cacheHit={false} // TODO: implementare tracking cache hit
-          servicesStatus={servicesStatus}
+          servicesStatus={servicesStatus || undefined}
         />
 
         {/* Notifiche Email */}

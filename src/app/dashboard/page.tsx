@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { getProjectStats } from '@/lib/firestoreService';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -288,27 +289,27 @@ export default function DashboardPage() {
         <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('quickActions', 'dashboard')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <a 
+            <Link 
               href="/dashboard/progetti/nuovo" 
               className="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
             >
               <BuildingIcon className="h-5 w-5 text-blue-600 mr-3" />
               <span className="text-sm font-medium text-blue-900">{t('newProject', 'dashboard')}</span>
-            </a>
-            <a 
+            </Link>
+            <Link 
               href="/dashboard/market-intelligence" 
               className="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
             >
               <TrendingUpIcon className="h-5 w-5 text-green-600 mr-3" />
               <span className="text-sm font-medium text-green-900">{t('marketIntelligence', 'dashboard')}</span>
-            </a>
-            <a 
+            </Link>
+            <Link 
               href="/dashboard/feasibility-analysis" 
               className="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
             >
               <EuroIcon className="h-5 w-5 text-purple-600 mr-3" />
               <span className="text-sm font-medium text-purple-900">{t('feasibilityAnalysis', 'dashboard')}</span>
-            </a>
+            </Link>
           </div>
         </div>
       </div>

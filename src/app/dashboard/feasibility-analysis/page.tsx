@@ -50,7 +50,7 @@ export default function FeasibilityAnalysisPage() {
       setStatistics(stats);
     } catch (error) {
       console.error('Errore caricamento dati:', error);
-      toast.error('❌ Errore nel caricamento dei dati');
+      toast('❌ Errore nel caricamento dei dati', { icon: '❌' });
     } finally {
       setLoading(false);
     }
@@ -61,29 +61,29 @@ export default function FeasibilityAnalysisPage() {
     
     try {
       await feasibilityService.deleteProject(projectId);
-      toast.success('✅ Progetto eliminato');
+      toast('✅ Progetto eliminato', { icon: '✅' });
       loadData();
     } catch (error) {
       console.error('Errore eliminazione progetto:', error);
-      toast.error('❌ Errore nell\'eliminazione del progetto');
+      toast('❌ Errore nell\'eliminazione del progetto', { icon: '❌' });
     }
   };
 
   const handleCompareProjects = async () => {
     if (!project1Id || !project2Id) {
-      toast.error('Seleziona due progetti da confrontare');
+      toast('Seleziona due progetti da confrontare', { icon: '⚠️' });
       return;
     }
 
     try {
       const comparison = await feasibilityService.compareProjects(project1Id, project2Id, 'user123');
-      toast.success('✅ Confronto creato con successo');
+      toast('✅ Confronto creato con successo', { icon: '✅' });
       setShowComparison(false);
       setProject1Id('');
       setProject2Id('');
     } catch (error) {
       console.error('Errore confronto progetti:', error);
-      toast.error('❌ Errore nella creazione del confronto');
+      toast('❌ Errore nella creazione del confronto', { icon: '❌' });
     }
   };
 

@@ -30,7 +30,7 @@ export default function ForgotPasswordPage() {
       
       // Mostra messaggio di successo
       setSuccess(true);
-      toast.success('Email di recupero inviata! Controlla la tua casella di posta');
+      toast('Email di recupero inviata! Controlla la tua casella di posta', { icon: '✅' });
     } catch (error: any) {
       // Gestisci gli errori di Firebase
       let errorMessage = 'Si è verificato un errore durante l\'invio dell\'email di recupero';
@@ -42,7 +42,7 @@ export default function ForgotPasswordPage() {
       }
       
       setError(errorMessage);
-      toast.error(errorMessage);
+      toast(errorMessage, { icon: '❌' });
     } finally {
       setLoading(false);
     }

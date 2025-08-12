@@ -27,6 +27,14 @@ export interface ScrapedLand {
   // Campi per tracciare la veridicità dei dati
   hasRealPrice?: boolean;
   hasRealArea?: boolean;
+  // Campi aggiuntivi per ROI e analisi di mercato
+  marketTrend?: string;
+  roiData?: {
+    pricePerSqm: number;
+    location: string;
+    trend: string;
+    source: string;
+  };
 }
 
 export interface LandSearchCriteria {
