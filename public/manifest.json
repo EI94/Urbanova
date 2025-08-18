@@ -1,0 +1,212 @@
+{
+  "name": "Urbanova AI - Urban Planning & Development Platform",
+  "short_name": "Urbanova AI",
+  "description": "Piattaforma avanzata per la pianificazione urbana e lo sviluppo immobiliare con intelligenza artificiale",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#1e40af",
+  "theme_color": "#1e40af",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "it",
+  "dir": "ltr",
+  "categories": [
+    "business",
+    "productivity",
+    "utilities"
+  ],
+  "icons": [
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nuovo Progetto",
+      "short_name": "Nuovo",
+      "description": "Crea un nuovo progetto immobiliare",
+      "url": "/dashboard/progetti/nuovo",
+      "icons": [
+        {
+          "src": "/icons/shortcut-new-project.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Analisi Fattibilità",
+      "short_name": "Analisi",
+      "description": "Conduci analisi di fattibilità",
+      "url": "/dashboard/feasibility-analysis",
+      "icons": [
+        {
+          "src": "/icons/shortcut-analysis.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Land Scraping",
+      "short_name": "Scraping",
+      "description": "Cerca terreni disponibili",
+      "url": "/dashboard/land-scraping",
+      "icons": [
+        {
+          "src": "/icons/shortcut-scraping.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Notifiche",
+      "short_name": "Notifiche",
+      "description": "Visualizza le tue notifiche",
+      "url": "/dashboard/notifiche",
+      "icons": [
+        {
+          "src": "/icons/shortcut-notifications.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/dashboard-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Dashboard principale di Urbanova AI"
+    },
+    {
+      "src": "/screenshots/dashboard-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Dashboard mobile di Urbanova AI"
+    },
+    {
+      "src": "/screenshots/feasibility-analysis.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Analisi di fattibilità avanzata"
+    },
+    {
+      "src": "/screenshots/land-scraping.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Ricerca terreni intelligente"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "handle_links": "preferred",
+  "protocol_handlers": [
+    {
+      "protocol": "web+urbanova",
+      "url": "/dashboard?action=%s"
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "/dashboard/documents/upload",
+      "accept": {
+        "application/pdf": [".pdf"],
+        "image/*": [".png", ".jpg", ".jpeg", ".gif", ".svg"],
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation": [".pptx"]
+      }
+    }
+  ],
+  "share_target": {
+    "action": "/dashboard/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "files",
+          "accept": ["*/*"]
+        }
+      ]
+    }
+  },
+  "permissions": [
+    "notifications",
+    "geolocation",
+    "camera",
+    "microphone"
+  ],
+  "features": [
+    "Cross Platform",
+    "Offline Support",
+    "Push Notifications",
+    "Background Sync",
+    "File Handling",
+    "Share Target",
+    "Protocol Handling"
+  ],
+  "developer": {
+    "name": "Urbanova AI Team",
+    "url": "https://urbanova.ai"
+  },
+  "version": "2.0.0",
+  "minimum_version": "1.0.0"
+}

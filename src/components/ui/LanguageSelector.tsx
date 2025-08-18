@@ -26,6 +26,14 @@ export default function LanguageSelector({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const supportedLanguages = getSupportedLanguages();
 
+  // Aggiorna il lang del documento quando cambia la lingua
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = currentLanguage;
+      document.documentElement.dir = languageConfig.direction;
+    }
+  }, [currentLanguage, languageConfig.direction]);
+
   // Chiudi dropdown quando si clicca fuori
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -50,8 +58,8 @@ export default function LanguageSelector({
       
       await changeLanguage(language);
       
-      // Forza re-render della pagina per aggiornare tutti i contenuti
-      window.location.reload();
+      // Non serve più il reload forzato - la lingua cambia dinamicamente
+      console.log(`✅ [LanguageSelector] Lingua cambiata con successo: ${language}`);
       
     } catch (error) {
       console.error('❌ [LanguageSelector] Errore cambio lingua:', error);

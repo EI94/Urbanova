@@ -5,8 +5,10 @@ import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { addProject, NewProjectData } from '@/lib/firestoreService';
 import { BuildingIcon } from '@/components/icons';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function NuovoProgettoPage() {
+  const { t } = useLanguage();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -47,7 +49,7 @@ export default function NuovoProgettoPage() {
     try {
       // Validazione
       if (!formData.name || !formData.description || !formData.location) {
-        throw new Error('Compila tutti i campi obbligatori');
+        throw new Error(t('form.validation.requiredFields', 'newProject'));
       }
       
       // Invio dati
@@ -56,7 +58,7 @@ export default function NuovoProgettoPage() {
       // Reindirizzamento
       router.push('/dashboard/progetti');
     } catch (err: any) {
-      setError(err.message || 'Si è verificato un errore durante il salvataggio del progetto');
+      setError(err.message || t('form.validation.saveError', 'newProject'));
       console.error('Errore durante il salvataggio:', err);
     } finally {
       setLoading(false);
@@ -64,12 +66,12 @@ export default function NuovoProgettoPage() {
   };
   
   return (
-    <DashboardLayout title="Nuovo Progetto">
+    <DashboardLayout>
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center mb-6">
             <BuildingIcon className="h-8 w-8 text-blue-600 mr-3" />
-            <h2 className="text-2xl font-semibold text-gray-800">Crea un nuovo progetto immobiliare</h2>
+            <h2 className="text-2xl font-semibold text-gray-800">{t('subtitle', 'newProject')}</h2>
           </div>
           
           {error && (
@@ -83,7 +85,7 @@ export default function NuovoProgettoPage() {
               {/* Nome progetto */}
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nome Progetto<span className="text-red-500">*</span>
+                  {t('form.projectName', 'newProject')}<span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -98,13 +100,13 @@ export default function NuovoProgettoPage() {
               {/* Descrizione */}
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Descrizione<span className="text-red-500">*</span>
+                  {t('form.description', 'newProject')}<span className="text-red-500">*</span>
                 </label>
                 <textarea
                   name="description"
-                  rows={3}
                   value={formData.description}
                   onChange={handleChange}
+                  rows={3}
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
                   required
                 />
@@ -113,7 +115,7 @@ export default function NuovoProgettoPage() {
               {/* Stato */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Stato<span className="text-red-500">*</span>
+                  {t('form.status', 'newProject')}<span className="text-red-500">*</span>
                 </label>
                 <select
                   name="status"
@@ -122,17 +124,17 @@ export default function NuovoProgettoPage() {
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
                   required
                 >
-                  <option value="PIANIFICAZIONE">Pianificazione</option>
-                  <option value="IN_CORSO">In Corso</option>
-                  <option value="IN_ATTESA">In Attesa</option>
-                  <option value="COMPLETATO">Completato</option>
+                  <option value="PIANIFICAZIONE">{t('statuses.planning', 'newProject')}</option>
+                  <option value="IN_CORSO">{t('statuses.inProgress', 'newProject')}</option>
+                  <option value="SOSPESO">{t('statuses.onHold', 'newProject')}</option>
+                  <option value="COMPLETATO">{t('statuses.completed', 'newProject')}</option>
                 </select>
               </div>
               
               {/* Tipologia */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tipologia<span className="text-red-500">*</span>
+                  {t('form.type', 'newProject')}<span className="text-red-500">*</span>
                 </label>
                 <select
                   name="propertyType"
@@ -141,17 +143,17 @@ export default function NuovoProgettoPage() {
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
                   required
                 >
-                  <option value="RESIDENZIALE">Residenziale</option>
-                  <option value="COMMERCIALE">Commerciale</option>
-                  <option value="MISTO">Misto</option>
-                  <option value="INDUSTRIALE">Industriale</option>
+                  <option value="RESIDENZIALE">{t('types.residential', 'newProject')}</option>
+                  <option value="COMMERCIALE">{t('types.commercial', 'newProject')}</option>
+                  <option value="MISTO">{t('types.mixed', 'newProject')}</option>
+                  <option value="INDUSTRIALE">{t('types.industrial', 'newProject')}</option>
                 </select>
               </div>
               
               {/* Località */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Località<span className="text-red-500">*</span>
+                  {t('form.location', 'newProject')}<span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -166,7 +168,7 @@ export default function NuovoProgettoPage() {
               {/* Responsabile */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Responsabile
+                  {t('form.responsible', 'newProject')}
                 </label>
                 <input
                   type="text"
@@ -180,12 +182,12 @@ export default function NuovoProgettoPage() {
               {/* Data inizio */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Data Inizio
+                  {t('form.startDate', 'newProject')}
                 </label>
                 <input
                   type="date"
                   name="startDate"
-                  value={formData.startDate ? new Date(formData.startDate).toISOString().split('T')[0] : ''}
+                  value={formData.startDate ? formData.startDate.toISOString().split('T')[0] : ''}
                   onChange={handleChange}
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -194,12 +196,12 @@ export default function NuovoProgettoPage() {
               {/* Data fine prevista */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Data Fine Prevista
+                  {t('form.endDate', 'newProject')}
                 </label>
                 <input
                   type="date"
                   name="endDate"
-                  value={formData.endDate ? new Date(formData.endDate).toISOString().split('T')[0] : ''}
+                  value={formData.endDate ? formData.endDate.toISOString().split('T')[0] : ''}
                   onChange={handleChange}
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -208,13 +210,15 @@ export default function NuovoProgettoPage() {
               {/* Budget */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Budget (€)
+                  {t('form.budget', 'newProject')}
                 </label>
                 <input
                   type="number"
                   name="budget"
                   value={formData.budget || ''}
                   onChange={handleChange}
+                  min="0"
+                  step="1000"
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
@@ -222,27 +226,31 @@ export default function NuovoProgettoPage() {
               {/* Superficie */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Superficie (m²)
+                  {t('form.surface', 'newProject')}
                 </label>
                 <input
                   type="number"
                   name="surface"
                   value={formData.surface || ''}
                   onChange={handleChange}
+                  min="0"
+                  step="10"
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
               
-              {/* Unità */}
+              {/* Numero unità */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Numero Unità
+                  {t('form.units', 'newProject')}
                 </label>
                 <input
                   type="number"
                   name="units"
                   value={formData.units || ''}
                   onChange={handleChange}
+                  min="0"
+                  step="1"
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
@@ -250,34 +258,33 @@ export default function NuovoProgettoPage() {
               {/* Classe energetica */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Classe Energetica
+                  {t('form.energyClass', 'newProject')}
                 </label>
                 <input
                   type="text"
                   name="energyClass"
                   value={formData.energyClass}
                   onChange={handleChange}
+                  placeholder={t('form.energyClassPlaceholder', 'newProject')}
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="A, B, C, D, ecc."
                 />
               </div>
             </div>
             
-            <div className="flex justify-end space-x-3 border-t pt-6">
+            <div className="flex justify-end space-x-3">
               <button
                 type="button"
-                onClick={() => router.push('/dashboard/progetti')}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                disabled={loading}
+                onClick={() => router.back()}
+                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                Annulla
+                {t('buttons.cancel', 'newProject')}
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 disabled={loading}
+                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
               >
-                {loading ? 'Salvataggio...' : 'Salva Progetto'}
+                {loading ? 'Salvataggio...' : t('buttons.saveProject', 'newProject')}
               </button>
             </div>
           </form>

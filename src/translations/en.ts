@@ -59,6 +59,17 @@ export const en = {
     notifications: 'Notifications',
     settings: 'Settings'
   },
+  navigationSections: {
+    dashboard: 'Dashboard',
+    intelligence: 'Intelligence & Discovery',
+    planning: 'Planning & Compliance',
+    projects: 'Projects',
+    projectManagement: 'Project Management',
+    marketing: 'Marketing & Sales',
+    epc: 'Construction (EPC)',
+    businessPlan: 'Business Plan',
+    other: 'Other'
+  },
   dashboard: {
     title: 'Dashboard',
     subtitle: 'Overview of your real estate projects',
@@ -83,6 +94,53 @@ export const en = {
     completed: 'Completed',
     errorLoadingStats: 'Error loading statistics',
     loadingStats: 'Loading statistics...'
+  },
+  feasibility: {
+    title: 'Feasibility Analysis',
+    subtitle: 'Manage and compare your real estate projects',
+    rankingTitle: 'Ranking by Margin',
+    newProject: 'New Project',
+    compare: 'Compare',
+    stats: {
+      totalProjects: 'Total Projects',
+      averageMargin: 'Average Margin',
+      totalInvestment: 'Total Investment',
+      onTarget: 'On Target',
+      fromMostProfitable: 'From most profitable'
+    },
+    emptyRankingTitle: 'No feasibility projects',
+    emptyRankingSubtitle: 'Create your first feasibility project to get started',
+    createFirstProject: 'Create First Project',
+    allProjects: 'All Projects',
+    noProjects: 'No projects available',
+    table: {
+      project: 'Project',
+      location: 'Location',
+      status: 'Status',
+      landCost: 'Land Cost',
+      margin: 'Margin',
+      target: 'Target',
+      profit: 'Profit',
+      actions: 'Actions',
+      view: 'View',
+      edit: 'Edit',
+      delete: 'Delete'
+    },
+    modal: {
+      compareProjects: 'Compare Projects',
+      firstProject: 'First Project',
+      secondProject: 'Second Project',
+      selectProject: 'Select project...'
+    },
+    toasts: {
+      loadError: 'Error loading data',
+      deleted: 'Project deleted',
+      deleteError: 'Error deleting project',
+      selectTwo: 'Select two projects to compare',
+      compareCreated: 'Comparison created successfully',
+      compareError: 'Error creating comparison'
+    },
+    confirmDelete: 'Are you sure you want to delete this project?'
   },
   landScraping: {
     title: 'AI Land Scraping',
@@ -157,5 +215,239 @@ export const en = {
     online: 'Online',
     scraping: 'Scraping',
     ai: 'AI'
+  },
+  newProject: {
+    title: 'New Project',
+    subtitle: 'Create a new real estate project',
+    form: {
+      projectName: 'Project Name*',
+      description: 'Description*',
+      status: 'Status*',
+      type: 'Type*',
+      location: 'Location*',
+      responsible: 'Responsible',
+      startDate: 'Start Date',
+      endDate: 'Estimated End Date',
+      budget: 'Budget (€)',
+      surface: 'Surface (m²)',
+      units: 'Number of Units',
+      energyClass: 'Energy Class',
+      energyClassPlaceholder: 'A, B, C, D, etc.',
+      datePlaceholder: 'dd/mm/yyyy',
+      validation: {
+        requiredFields: 'Fill in all required fields',
+        saveError: 'An error occurred while saving the project'
+      }
+    },
+    statuses: {
+      planning: 'Planning',
+      inProgress: 'In Progress',
+      onHold: 'On Hold',
+      completed: 'Completed'
+    },
+    types: {
+      residential: 'Residential',
+      commercial: 'Commercial',
+      mixed: 'Mixed',
+      industrial: 'Industrial'
+    },
+    buttons: {
+      cancel: 'Cancel',
+      saveProject: 'Save Project'
+    }
+  },
+  permitsCompliance: {
+    title: 'Intelligent Permit System',
+    subtitle: 'AI-powered compliance tracking and authorization management',
+    tabs: {
+      overview: 'Overview',
+      permits: 'Permits',
+      timeline: 'Timeline',
+      alerts: 'Alerts'
+    },
+    stats: {
+      totalPermits: 'Total Permits',
+      approved: 'Approved',
+      inProgress: 'In Progress',
+      critical: 'Critical',
+      totalCost: 'Total Cost',
+      averageProgress: 'Average Progress'
+    },
+    quickActions: {
+      newPermit: 'New Permit',
+      generateReport: 'Generate Compliance Report',
+      scheduleInspection: 'Schedule Inspection',
+      updateTimeline: 'Update Project Timeline'
+    },
+    categories: {
+      urban: 'URBAN PLANNING',
+      environmental: 'ENVIRONMENTAL',
+      safety: 'SAFETY',
+      energy: 'ENERGY'
+    },
+    criticalAlerts: {
+      title: 'Critical Alerts',
+      buildingPermitExpiry: 'Building Permit Expiration',
+      buildingPermitMessage: 'Submit extension request within 10 days',
+      viaDelay: 'VIA Delay',
+      viaMessage: 'Expedite collection of missing documentation',
+      seeAllAlerts: 'See all alerts →'
+    }
+  },
+  projectTimeline: {
+    title: 'Project Timeline AI',
+    subtitle: 'Intelligent timeline management with Gantt charts and milestones',
+    projectSummary: 'Project Summary',
+    totalTasks: 'Total Tasks',
+    completed: 'Completed',
+    inProgress: 'In Progress',
+    delayed: 'Delayed',
+    tabs: {
+      ganttChart: 'Gantt Chart',
+      kanbanBoard: 'Kanban Board',
+      milestoneTimeline: 'Milestone Timeline',
+      resources: 'Resources'
+    },
+    filters: {
+      all: 'All',
+      design: 'DESIGN',
+      permits: 'PERMITS',
+      construction: 'CONSTRUCTION',
+      marketing: 'MARKETING'
+    },
+    months: {
+      jan: 'Jan',
+      feb: 'Feb',
+      mar: 'Mar',
+      apr: 'Apr',
+      may: 'May',
+      jun: 'Jun',
+      jul: 'Jul',
+      aug: 'Aug',
+      sep: 'Sep',
+      oct: 'Oct',
+      nov: 'Nov',
+      dec: 'Dec'
+    },
+    timelineViews: {
+      threeMonths: '3M',
+      sixMonths: '6M',
+      oneYear: '1Y'
+    }
+  },
+  notifications: {
+    title: 'Notifications',
+    subtitle: 'Manage your notifications and preferences',
+    all: 'All',
+    unread: 'Unread',
+    read: 'Read',
+    markAllAsRead: 'Mark all as read',
+    markAsRead: 'Mark as read',
+    markAsUnread: 'Mark as unread',
+    delete: 'Delete',
+    noNotifications: 'No notifications',
+    noUnreadNotifications: 'No unread notifications',
+    loading: 'Loading notifications...',
+    error: 'Error loading notifications',
+    types: {
+      project: 'Project',
+      permit: 'Permit',
+      task: 'Task',
+      system: 'System',
+      marketing: 'Marketing'
+    },
+    priorities: {
+      low: 'Low',
+      medium: 'Medium',
+      high: 'High',
+      critical: 'Critical'
+    },
+    actions: {
+      view: 'View',
+      dismiss: 'Dismiss',
+      snooze: 'Snooze'
+    }
+  },
+  userProfile: {
+    title: 'User Profile',
+    subtitle: 'Manage your personal information',
+    personalInfo: 'Personal Information',
+    contactInfo: 'Contact Information',
+    preferences: 'Preferences',
+    security: 'Security',
+    avatar: 'Profile Picture',
+    changeAvatar: 'Change Picture',
+    removeAvatar: 'Remove Picture',
+    uploadImage: 'Upload Image',
+    dragAndDrop: 'Drag an image here or click to select',
+    supportedFormats: 'Supported formats: JPG, PNG, GIF (max 5MB)',
+    firstName: 'First Name',
+    lastName: 'Last Name',
+    displayName: 'Display Name',
+    email: 'Email',
+    phone: 'Phone',
+    company: 'Company',
+    role: 'Role',
+    timezone: 'Time Zone',
+    language: 'Language',
+    dateFormat: 'Date Format',
+    currency: 'Currency',
+    saveChanges: 'Save Changes',
+    changesSaved: 'Changes saved successfully',
+    errorSaving: 'Error saving changes',
+    password: 'Current Password',
+    newPassword: 'New Password',
+    confirmPassword: 'Confirm New Password',
+    changePassword: 'Change Password',
+    passwordChanged: 'Password changed successfully',
+    passwordError: 'Error changing password',
+    twoFactorAuth: 'Two-Factor Authentication',
+    enable2FA: 'Enable 2FA',
+    disable2FA: 'Disable 2FA',
+    backupCodes: 'Backup Codes',
+    generateBackupCodes: 'Generate New Codes'
+  },
+  projects: {
+    title: 'Projects',
+    subtitle: 'Manage all your real estate projects',
+    newProject: 'New Project',
+    totalProjects: 'Total Projects',
+    completedProjects: 'Completed',
+    inProgressProjects: 'In Progress',
+    planningProjects: 'Planning',
+    noProjects: 'No projects found',
+    createFirstProject: 'Create your first project',
+    loadingProjects: 'Loading projects...',
+    errorTitle: 'Loading error',
+    errorLoadingProjects: 'Error loading projects',
+    progress: 'Progress',
+    budget: 'Budget',
+    units: 'units',
+    details: 'Details'
+  },
+  settings: {
+    title: 'Settings',
+    subtitle: 'Configure your account and system settings',
+    profile: {
+      title: 'Profile',
+      subtitle: 'Manage personal data and preferences',
+      personalData: 'Personal Data',
+      languagePreferences: 'Language Preferences',
+      timezone: 'Time Zone'
+    },
+    security: {
+      title: 'Security',
+      subtitle: 'Configure security and privacy',
+      password: 'Password',
+      twoFactorAuth: '2FA Authentication',
+      privacy: 'Privacy'
+    },
+    system: {
+      title: 'System',
+      subtitle: 'System and API configuration',
+      apiKeys: 'API Keys',
+      integrations: 'Integrations',
+      backup: 'Backup'
+    }
   }
 }; 

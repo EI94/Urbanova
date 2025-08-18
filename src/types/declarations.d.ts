@@ -122,6 +122,24 @@ declare module '@/components/icons' {
   export function MailIcon(props?: IconProps): JSX.Element;
   export function BusinessPlanIcon(props?: IconProps): JSX.Element;
   export function PermitIcon(props?: IconProps): JSX.Element;
+  export function BuildingIcon(props?: IconProps): JSX.Element;
+  export function DocumentIcon(props?: IconProps): JSX.Element;
+  export function ClientIcon(props?: IconProps): JSX.Element;
+  export function ConstructionIcon(props?: IconProps): JSX.Element;
+  export function MeetingIcon(props?: IconProps): JSX.Element;
+  export function CampaignIcon(props?: IconProps): JSX.Element;
+  export function NewProjectIcon(props?: IconProps): JSX.Element;
+  export function LocationIcon(props?: IconProps): JSX.Element;
+  export function MarketingIcon(props?: IconProps): JSX.Element;
+  export function ChartBarIcon(props?: IconProps): JSX.Element;
+  export function CompareIcon(props?: IconProps): JSX.Element;
+  export function TrophyIcon(props?: IconProps): JSX.Element;
+  export function SaveIcon(props?: IconProps): JSX.Element;
+  export function ArrowLeftIcon(props?: IconProps): JSX.Element;
+  export function TrashIcon(props?: IconProps): JSX.Element;
+  export function GlobeIcon(props?: IconProps): JSX.Element;
+  export function ChevronDownIcon(props?: IconProps): JSX.Element;
+  export function TargetIcon(props?: IconProps): JSX.Element;
 }
 
 // Dichiarazioni per servizi

@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { BuildingIcon, LocationIcon } from '@/components/icons';
+import { BuildingIcon, LocationIcon, PlusIcon } from '@/components/icons';
 import Link from 'next/link';
 import { getProjects, RealEstateProject } from '@/lib/firestoreService';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Componente Card Progetto
 interface ProjectCardProps {
@@ -12,6 +13,8 @@ interface ProjectCardProps {
 }
 
 const ProjectCard = ({ project }: ProjectCardProps) => {
+  const { t, formatCurrency: fmtCurrency } = useLanguage();
+  
   const getStatusColor = () => {
     switch (project.status) {
       case 'COMPLETATO':
@@ -38,7 +41,7 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
 
   const formatBudget = (budget?: number) => {
     if (!budget) return 'N/D';
-    return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(budget);
+    return fmtCurrency(budget);
   };
 
   const progress = getProgress();
@@ -59,7 +62,7 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
             <BuildingIcon className="h-4 w-4 text-blue-500 mr-1" />
             <span className="text-sm text-neutral-700">{project.propertyType}</span>
             {project.units && (
-              <span className="ml-2 text-sm text-neutral-500">{project.units} unità</span>
+              <span className="ml-2 text-sm text-neutral-500">{project.units} {t('units', 'projects')}</span>
             )}
           </div>
         )}
@@ -67,7 +70,7 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
         {progress > 0 && (
           <div className="mt-4">
             <div className="flex justify-between items-center mb-1">
-              <span className="text-xs font-medium text-neutral-700">Progresso</span>
+              <span className="text-xs font-medium text-neutral-700">{t('progress', 'projects')}</span>
               <span className="text-xs font-medium text-neutral-700">{progress}%</span>
             </div>
             <div className="w-full bg-base-200 rounded-full h-2">
@@ -86,14 +89,14 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
         
         {project.budget && (
           <div className="mt-1 text-sm text-neutral-700">
-            <span className="font-medium">Budget: </span>
+            <span className="font-medium">{t('budget', 'projects')}: </span>
             <span>{formatBudget(project.budget)}</span>
           </div>
         )}
         
         <div className="card-actions justify-end mt-4">
           <Link href={`/dashboard/progetti/${project.id}`} className="btn btn-sm btn-outline">
-            Dettagli
+            {t('details', 'projects')}
           </Link>
         </div>
       </div>
@@ -101,151 +104,117 @@ const ProjectCard = ({ project }: ProjectCardProps) => {
   );
 };
 
-// Filtri stato
-interface FilterButtonProps {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}
-
-const FilterButton = ({ active, onClick, children }: FilterButtonProps) => (
-  <button
-    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-      active 
-        ? 'bg-blue-700 text-white' 
-        : 'bg-white text-neutral-700 hover:bg-blue-50'
-    }`}
-    onClick={onClick}
-  >
-    {children}
-  </button>
-);
-
 export default function ProgettiPage() {
+  const { t } = useLanguage();
   const [projects, setProjects] = useState<RealEstateProject[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<string | null>(null);
-  
+  const [error, setError] = useState('');
+
   useEffect(() => {
     const loadProjects = async () => {
       try {
-        const data = await getProjects();
-        setProjects(data);
-      } catch (error) {
-        console.error('Errore nel caricamento dei progetti:', error);
+        const projectsData = await getProjects();
+        setProjects(projectsData);
+      } catch (err) {
+        console.error('Errore nel caricamento dei progetti:', err);
+        setError(t('errorLoadingProjects', 'projects'));
       } finally {
         setLoading(false);
       }
     };
-    
+
     loadProjects();
-  }, []);
-  
-  // Filtraggio dei progetti in base allo stato selezionato
-  const filteredProjects = filter
-    ? projects.filter(project => project.status === filter)
-    : projects;
-  
-  // Conteggio per tipologia
-  const projectCounts = {
-    total: projects.length,
-    residenziali: projects.filter(p => p.propertyType === 'RESIDENZIALE').length,
-    commerciali: projects.filter(p => p.propertyType === 'COMMERCIALE').length,
-    misti: projects.filter(p => p.propertyType === 'MISTO').length,
-    industriali: projects.filter(p => p.propertyType === 'INDUSTRIALE').length,
-  };
+  }, [t]);
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="loading loading-spinner loading-lg"></div>
+          <span className="ml-4 text-lg">{t('loadingProjects', 'projects')}</span>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="text-red-500 text-6xl mb-4">⚠️</div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('errorTitle', 'projects')}</h2>
+            <p className="text-gray-600">{error}</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
-    <DashboardLayout title="Progetti">
-      {/* Statistiche */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-        <div className="stat bg-white shadow-sm rounded-lg p-4">
-          <div className="stat-title text-neutral-500">Totale</div>
-          <div className="stat-value text-2xl">{projectCounts.total}</div>
-        </div>
-        <div className="stat bg-white shadow-sm rounded-lg p-4">
-          <div className="stat-title text-neutral-500">Residenziali</div>
-          <div className="stat-value text-2xl">{projectCounts.residenziali}</div>
-        </div>
-        <div className="stat bg-white shadow-sm rounded-lg p-4">
-          <div className="stat-title text-neutral-500">Commerciali</div>
-          <div className="stat-value text-2xl">{projectCounts.commerciali}</div>
-        </div>
-        <div className="stat bg-white shadow-sm rounded-lg p-4">
-          <div className="stat-title text-neutral-500">Misti</div>
-          <div className="stat-value text-2xl">{projectCounts.misti}</div>
-        </div>
-        <div className="stat bg-white shadow-sm rounded-lg p-4">
-          <div className="stat-title text-neutral-500">Industriali</div>
-          <div className="stat-value text-2xl">{projectCounts.industriali}</div>
-        </div>
-      </div>
-      
-      {/* Header con filtri e azioni */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <div className="flex space-x-2 overflow-x-auto pb-2 sm:pb-0">
-          <FilterButton 
-            active={filter === null} 
-            onClick={() => setFilter(null)}
-          >
-            Tutti
-          </FilterButton>
-          <FilterButton 
-            active={filter === 'IN_CORSO'} 
-            onClick={() => setFilter('IN_CORSO')}
-          >
-            In Corso
-          </FilterButton>
-          <FilterButton 
-            active={filter === 'PIANIFICAZIONE'} 
-            onClick={() => setFilter('PIANIFICAZIONE')}
-          >
-            Pianificazione
-          </FilterButton>
-          <FilterButton 
-            active={filter === 'COMPLETATO'} 
-            onClick={() => setFilter('COMPLETATO')}
-          >
-            Completati
-          </FilterButton>
-          <FilterButton 
-            active={filter === 'IN_ATTESA'} 
-            onClick={() => setFilter('IN_ATTESA')}
-          >
-            In Attesa
-          </FilterButton>
-        </div>
-        
-        <Link href="/dashboard/progetti/nuovo" className="btn btn-primary">
-          Nuovo Progetto
-        </Link>
-      </div>
-      
-      {/* Lista Progetti */}
-      {loading ? (
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-700"></div>
-        </div>
-      ) : filteredProjects.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProjects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-12 bg-white rounded-lg shadow-sm">
-          <BuildingIcon className="h-12 w-12 text-neutral-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-neutral-700">Nessun progetto trovato</h3>
-          <p className="mt-1 text-neutral-500">
-            {filter 
-              ? `Non ci sono progetti con lo stato selezionato.` 
-              : `Non hai ancora creato alcun progetto.`}
-          </p>
-          <Link href="/dashboard/progetti/nuovo" className="btn btn-primary mt-4">
-            Crea Nuovo Progetto
+    <DashboardLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">🏗️ {t('title', 'projects')}</h1>
+            <p className="text-gray-600 mt-1">{t('subtitle', 'projects')}</p>
+          </div>
+          <Link href="/dashboard/progetti/nuovo">
+            <button className="btn btn-primary">
+              <PlusIcon className="h-4 w-4 mr-2" />
+              {t('newProject', 'projects')}
+            </button>
           </Link>
         </div>
-      )}
+
+        {/* Statistiche */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="text-2xl font-bold text-blue-600">{projects.length}</div>
+            <div className="text-sm text-gray-600">{t('totalProjects', 'projects')}</div>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="text-2xl font-bold text-green-600">
+              {projects.filter(p => p.status === 'COMPLETATO').length}
+            </div>
+            <div className="text-sm text-gray-600">{t('completedProjects', 'projects')}</div>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="text-2xl font-bold text-yellow-600">
+              {projects.filter(p => p.status === 'IN_CORSO').length}
+            </div>
+            <div className="text-sm text-gray-600">{t('inProgressProjects', 'projects')}</div>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="text-2xl font-bold text-purple-600">
+              {projects.filter(p => p.status === 'PIANIFICAZIONE').length}
+            </div>
+            <div className="text-sm text-gray-600">{t('planningProjects', 'projects')}</div>
+          </div>
+        </div>
+
+        {/* Lista Progetti */}
+        {projects.length === 0 ? (
+          <div className="text-center py-12">
+            <BuildingIcon className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+            <h3 className="text-lg font-medium text-gray-700 mb-2">{t('noProjects', 'projects')}</h3>
+            <p className="text-gray-500 mb-4">{t('createFirstProject', 'projects')}</p>
+            <Link href="/dashboard/progetti/nuovo">
+              <button className="btn btn-primary">
+                <PlusIcon className="h-4 w-4 mr-2" />
+                {t('newProject', 'projects')}
+              </button>
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {projects.map((project) => (
+              <ProjectCard key={project.id} project={project} />
+            ))}
+          </div>
+        )}
+      </div>
     </DashboardLayout>
   );
 } 

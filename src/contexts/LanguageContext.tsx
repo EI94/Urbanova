@@ -119,6 +119,12 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
       if (typeof document !== 'undefined') {
         document.documentElement.lang = language;
         document.documentElement.dir = getLanguageConfig(language).direction;
+        
+        // Aggiorna anche il title e meta tags se necessario
+        const titleElement = document.querySelector('title');
+        if (titleElement) {
+          titleElement.textContent = `Urbanova - ${getLanguageConfig(language).nativeName}`;
+        }
       }
       
       console.log(`✅ [LanguageProvider] Lingua cambiata con successo: ${language}`);

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { BuildingIcon } from '@/components/icons';
 import Button from '@/components/ui/Button';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Task {
   id: string;
@@ -48,6 +49,7 @@ interface ProjectTimeline {
 }
 
 export default function ProjectTimelinePage() {
+  const { t, formatCurrency: fmtCurrency, formatDate: fmtDate } = useLanguage();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [timeline, setTimeline] = useState<ProjectTimeline | null>(null);
@@ -233,42 +235,43 @@ export default function ProjectTimelinePage() {
     }, 1200);
   }, []);
 
+  // Helper functions
+  const formatCurrency = (value: number) => fmtCurrency(value);
+  const formatDate = (date: Date) => fmtDate(date);
+
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'COMPLETATO': case 'RAGGIUNTO': return 'text-green-600 bg-green-50';
-      case 'IN_CORSO': return 'text-blue-600 bg-blue-50';
-      case 'NON_INIZIATO': return 'text-gray-600 bg-gray-50';
-      case 'IN_RITARDO': return 'text-red-600 bg-red-50';
-      case 'BLOCCATO': return 'text-red-600 bg-red-100';
-      case 'A_RISCHIO': return 'text-orange-600 bg-orange-50';
-      default: return 'text-gray-600 bg-gray-50';
+      case 'COMPLETATO': return 'bg-green-100 text-green-800';
+      case 'IN_CORSO': return 'bg-blue-100 text-blue-800';
+      case 'NON_INIZIATO': return 'bg-gray-100 text-gray-800';
+      case 'IN_RITARDO': return 'bg-red-100 text-red-800';
+      case 'BLOCCATO': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'CRITICA': case 'CRITICO': return 'text-red-600 bg-red-50 border-red-200';
-      case 'ALTA': case 'IMPORTANTE': return 'text-orange-600 bg-orange-50 border-orange-200';
-      case 'MEDIA': case 'NORMALE': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'BASSA': return 'text-green-600 bg-green-50 border-green-200';
-      default: return 'text-gray-600 bg-gray-50 border-gray-200';
+      case 'CRITICA': return 'bg-red-100 text-red-800 border-red-300';
+      case 'ALTA': return 'bg-orange-100 text-orange-800 border-orange-300';
+      case 'MEDIA': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'BASSA': return 'bg-green-100 text-green-800 border-green-300';
+      default: return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('it-IT', { 
-      style: 'currency', 
-      currency: 'EUR',
-      minimumFractionDigits: 0 
-    }).format(value);
-  };
-
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('it-IT').format(date);
+  const getMilestoneStatusColor = (status: string) => {
+    switch (status) {
+      case 'RAGGIUNTO': return 'bg-green-100 text-green-600 border-green-300';
+      case 'IN_CORSO': return 'bg-blue-100 text-blue-600 border-blue-300';
+      case 'A_RISCHIO': return 'bg-orange-100 text-orange-600 border-orange-300';
+      case 'IN_RITARDO': return 'bg-red-100 text-red-600 border-red-300';
+      default: return 'bg-gray-100 text-gray-600 border-gray-300';
+    }
   };
 
   const getDaysFromStart = (startDate: Date, targetDate: Date) => {
-    const diffTime = targetDate.getTime() - startDate.getTime();
+    const diffTime = Math.abs(targetDate.getTime() - startDate.getTime());
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
@@ -276,126 +279,119 @@ export default function ProjectTimelinePage() {
     ? tasks 
     : tasks.filter(t => t.category === selectedCategory);
 
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="loading loading-spinner loading-lg"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   const stats = {
     totalTasks: tasks.length,
     completedTasks: tasks.filter(t => t.status === 'COMPLETATO').length,
     inProgressTasks: tasks.filter(t => t.status === 'IN_CORSO').length,
     delayedTasks: tasks.filter(t => t.status === 'IN_RITARDO').length,
-    totalBudget: tasks.reduce((sum, t) => sum + t.cost, 0),
-    avgProgress: Math.round(tasks.reduce((sum, t) => sum + t.progress, 0) / tasks.length)
+    totalBudget: tasks.reduce((sum, t) => sum + t.cost, 0)
   };
 
   return (
-    <DashboardLayout title="Project Timeline">
+    <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Project Timeline AI</h1>
-            <p className="text-gray-600">Gestione intelligente timeline con diagrammi Gantt e milestone</p>
+            <h1 className="text-3xl font-bold text-gray-900">📅 {t('title', 'projectTimeline')}</h1>
+            <p className="text-gray-600 mt-1">{t('subtitle', 'projectTimeline')}</p>
           </div>
-          <BuildingIcon className="h-8 w-8 text-blue-600" />
         </div>
 
-        {/* Project Overview */}
+        {/* Project Summary */}
         {timeline && (
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">{timeline.projectName}</h2>
-                <p className="text-gray-600">
-                  {formatDate(timeline.startDate)} - {formatDate(timeline.plannedEndDate)}
-                </p>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('projectSummary', 'projectTimeline')}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900">{stats.totalTasks}</div>
+                <div className="text-sm text-gray-600">{t('totalTasks', 'projectTimeline')}</div>
               </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-blue-600">{timeline.progress}%</div>
-                <div className="text-sm text-gray-500">Completato</div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">{stats.completedTasks}</div>
+                <div className="text-sm text-gray-600">{t('completed', 'projectTimeline')}</div>
               </div>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <div className="text-lg font-bold text-gray-900">{stats.totalTasks}</div>
-                <div className="text-sm text-gray-600">Totale Task</div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">{stats.inProgressTasks}</div>
+                <div className="text-sm text-gray-600">{t('inProgress', 'projectTimeline')}</div>
               </div>
-              <div className="text-center p-3 bg-green-50 rounded-lg">
-                <div className="text-lg font-bold text-green-600">{stats.completedTasks}</div>
-                <div className="text-sm text-green-800">Completate</div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-red-600">{stats.delayedTasks}</div>
+                <div className="text-sm text-gray-600">{t('delayed', 'projectTimeline')}</div>
               </div>
-              <div className="text-center p-3 bg-blue-50 rounded-lg">
-                <div className="text-lg font-bold text-blue-600">{stats.inProgressTasks}</div>
-                <div className="text-sm text-blue-800">In Corso</div>
-              </div>
-              <div className="text-center p-3 bg-red-50 rounded-lg">
-                <div className="text-lg font-bold text-red-600">{stats.delayedTasks}</div>
-                <div className="text-sm text-red-800">In Ritardo</div>
-              </div>
-            </div>
-
-            <div className="w-full bg-gray-200 rounded-full h-3">
-              <div 
-                className="bg-blue-600 h-3 rounded-full" 
-                style={{ width: `${timeline.progress}%` }}
-              ></div>
             </div>
           </div>
         )}
 
-        {/* View Selector */}
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-            {[
-              { id: 'gantt', name: 'Gantt Chart', icon: '📊' },
-              { id: 'kanban', name: 'Kanban Board', icon: '📋' },
-              { id: 'timeline', name: 'Milestone Timeline', icon: '⏱️' },
-              { id: 'resources', name: 'Risorse', icon: '👥' }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveView(tab.id as any)}
-                className={`${
-                  activeView === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center gap-2`}
-              >
-                <span>{tab.icon}</span>
-                {tab.name}
-              </button>
-            ))}
-          </nav>
-        </div>
+        {/* Navigation Tabs */}
+        <div className="bg-white rounded-lg shadow-sm">
+          <div className="border-b">
+            <nav className="flex space-x-8 px-6">
+              {[
+                { key: 'gantt', label: t('tabs.ganttChart', 'projectTimeline') },
+                { key: 'kanban', label: t('tabs.kanbanBoard', 'projectTimeline') },
+                { key: 'timeline', label: t('tabs.milestoneTimeline', 'projectTimeline') },
+                { key: 'resources', label: t('tabs.resources', 'projectTimeline') }
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveView(tab.key as any)}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeView === tab.key
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
 
-        {/* Gantt Chart View */}
-        {activeView === 'gantt' && (
-          <div className="space-y-4">
-            {/* Filters */}
-            <div className="flex justify-between items-center">
+          {/* Filters */}
+          <div className="p-4 border-b bg-gray-50">
+            <div className="flex items-center justify-between">
               <div className="flex space-x-2">
-                {['ALL', 'PROGETTAZIONE', 'PERMESSI', 'COSTRUZIONE', 'MARKETING'].map((filter) => (
+                {[
+                  { key: 'ALL', label: t('filters.all', 'projectTimeline') },
+                  { key: 'PROGETTAZIONE', label: t('filters.design', 'projectTimeline') },
+                  { key: 'PERMESSI', label: t('filters.permits', 'projectTimeline') },
+                  { key: 'COSTRUZIONE', label: t('filters.construction', 'projectTimeline') },
+                  { key: 'MARKETING', label: t('filters.marketing', 'projectTimeline') }
+                ].map((filter) => (
                   <button
-                    key={filter}
-                    onClick={() => setSelectedCategory(filter)}
-                    className={`px-3 py-2 rounded-md text-sm font-medium ${
-                      selectedCategory === filter
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    key={filter.key}
+                    onClick={() => setSelectedCategory(filter.key)}
+                    className={`px-3 py-1 rounded-md text-sm font-medium ${
+                      selectedCategory === filter.key
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-white text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    {filter === 'ALL' ? 'Tutte' : filter}
+                    {filter.label}
                   </button>
                 ))}
               </div>
-              
+
               <div className="flex space-x-2">
                 {['3M', '6M', '1Y'].map((range) => (
                   <button
                     key={range}
                     onClick={() => setTimeRange(range as any)}
-                    className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    className={`px-3 py-1 rounded-md text-sm font-medium ${
                       timeRange === range
-                        ? 'bg-gray-800 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-white text-gray-700 hover:bg-gray-100'
                     }`}
                   >
                     {range}
@@ -403,71 +399,71 @@ export default function ProjectTimelinePage() {
                 ))}
               </div>
             </div>
+          </div>
 
-            {/* Gantt Chart */}
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-              <div className="p-4 border-b bg-gray-50">
-                <h3 className="text-lg font-semibold text-gray-900">Diagramma di Gantt</h3>
-              </div>
-              
-              <div className="overflow-x-auto">
-                <div className="min-w-full">
-                  {/* Header Timeline */}
-                  <div className="flex bg-gray-100 border-b">
-                    <div className="w-80 p-4 font-medium text-gray-700 border-r">Task</div>
-                    <div className="flex-1 flex">
-                      {timeline && Array.from({length: 12}, (_, i) => (
-                        <div key={i} className="flex-1 p-2 text-center text-xs text-gray-600 border-r">
-                          {new Date(2024, i).toLocaleDateString('it-IT', { month: 'short' })}
-                        </div>
-                      ))}
-                    </div>
+          {/* Gantt Chart */}
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div className="p-4 border-b bg-gray-50">
+              <h3 className="text-lg font-semibold text-gray-900">{t('tabs.ganttChart', 'projectTimeline')}</h3>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <div className="min-w-full">
+                {/* Header Timeline */}
+                <div className="flex bg-gray-100 border-b">
+                  <div className="w-80 p-4 font-medium text-gray-700 border-r">Task</div>
+                  <div className="flex-1 flex">
+                    {timeline && Array.from({length: 12}, (_, i) => (
+                      <div key={i} className="flex-1 p-2 text-center text-xs text-gray-600 border-r">
+                        {new Date(2024, i).toLocaleDateString('it-IT', { month: 'short' })}
+                      </div>
+                    ))}
                   </div>
+                </div>
 
-                  {/* Tasks */}
-                  {filteredTasks.map((task) => {
-                    const startOffset = getDaysFromStart(timeline?.startDate || new Date(), task.startDate);
-                    const taskDuration = getDaysFromStart(task.startDate, task.endDate);
-                    const totalDays = 365;
-                    
-                    return (
-                      <div key={task.id} className="flex border-b hover:bg-gray-50">
-                        <div className="w-80 p-4 border-r">
-                          <div className="flex items-center space-x-3">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
-                              {task.status === 'COMPLETATO' ? '✓' : 
-                               task.status === 'IN_CORSO' ? '⏳' :
-                               task.status === 'NON_INIZIATO' ? '○' : '⚠️'}
-                            </span>
-                            <div>
-                              <div className="font-medium text-gray-900 text-sm">{task.name}</div>
-                              <div className="text-xs text-gray-500">{task.assignedTo}</div>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex-1 relative h-16 flex items-center">
-                          <div 
-                            className="absolute h-6 rounded flex items-center justify-center text-xs text-white font-medium"
-                            style={{
-                              left: `${(startOffset / totalDays) * 100}%`,
-                              width: `${Math.max((taskDuration / totalDays) * 100, 2)}%`,
-                              backgroundColor: task.status === 'COMPLETATO' ? '#10b981' : 
-                                             task.status === 'IN_CORSO' ? '#3b82f6' :
-                                             task.status === 'IN_RITARDO' ? '#ef4444' : '#6b7280'
-                            }}
-                          >
-                            {task.progress > 0 && `${task.progress}%`}
+                {/* Tasks */}
+                {filteredTasks.map((task) => {
+                  const startOffset = getDaysFromStart(timeline?.startDate || new Date(), task.startDate);
+                  const taskDuration = getDaysFromStart(task.startDate, task.endDate);
+                  const totalDays = 365;
+                  
+                  return (
+                    <div key={task.id} className="flex border-b hover:bg-gray-50">
+                      <div className="w-80 p-4 border-r">
+                        <div className="flex items-center space-x-3">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
+                            {task.status === 'COMPLETATO' ? '✓' : 
+                             task.status === 'IN_CORSO' ? '⏳' :
+                             task.status === 'NON_INIZIATO' ? '○' : '⚠️'}
+                          </span>
+                          <div>
+                            <div className="font-medium text-gray-900 text-sm">{task.name}</div>
+                            <div className="text-xs text-gray-500">{task.assignedTo}</div>
                           </div>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
+                      
+                      <div className="flex-1 relative h-16 flex items-center">
+                        <div 
+                          className="absolute h-6 rounded flex items-center justify-center text-xs text-white font-medium"
+                          style={{
+                            left: `${(startOffset / totalDays) * 100}%`,
+                            width: `${Math.max((taskDuration / totalDays) * 100, 2)}%`,
+                            backgroundColor: task.status === 'COMPLETATO' ? '#10b981' : 
+                                           task.status === 'IN_CORSO' ? '#3b82f6' :
+                                           task.status === 'IN_RITARDO' ? '#ef4444' : '#6b7280'
+                          }}
+                        >
+                          {task.progress > 0 && `${task.progress}%`}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
-        )}
+        </div>
 
         {/* Kanban Board View */}
         {activeView === 'kanban' && (
@@ -498,24 +494,14 @@ export default function ProjectTimelinePage() {
                         </div>
                         
                         <div className="flex items-center justify-between">
-                          <div className="text-xs text-gray-500">{formatCurrency(task.cost)}</div>
-                          <div className="flex items-center space-x-1">
-                            <div className="w-8 bg-gray-200 rounded-full h-1">
-                              <div 
-                                className="bg-blue-600 h-1 rounded-full" 
-                                style={{ width: `${task.progress}%` }}
-                              ></div>
-                            </div>
-                            <span className="text-xs text-gray-500">{task.progress}%</span>
+                          <div className="w-full bg-gray-200 rounded-full h-2 mr-2">
+                            <div 
+                              className="bg-blue-600 h-2 rounded-full" 
+                              style={{ width: `${task.progress}%` }}
+                            ></div>
                           </div>
+                          <span className="text-xs text-gray-500">{task.progress}%</span>
                         </div>
-
-                        {task.aiSuggestions && task.aiSuggestions.length > 0 && (
-                          <div className="mt-3 p-2 bg-blue-50 rounded text-xs">
-                            <span className="font-medium text-blue-900">🤖 AI: </span>
-                            <span className="text-blue-800">{task.aiSuggestions[0]}</span>
-                          </div>
-                        )}
                       </div>
                     ))}
                   </div>
@@ -525,50 +511,27 @@ export default function ProjectTimelinePage() {
           </div>
         )}
 
-        {/* Timeline View */}
+        {/* Milestone Timeline View */}
         {activeView === 'timeline' && (
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">📍 Milestone Timeline</h3>
-            
-            <div className="space-y-6">
-              {milestones.map((milestone, idx) => (
-                <div key={milestone.id} className="relative">
-                  {idx !== milestones.length - 1 && (
-                    <div className="absolute left-6 top-12 bottom-0 w-0.5 bg-gray-300"></div>
-                  )}
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {milestones.map((milestone) => (
+                <div key={milestone.id} className="bg-white rounded-lg shadow-sm p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-gray-900">{milestone.name}</h3>
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${getMilestoneStatusColor(milestone.status)}`}>
+                      {milestone.status}
+                    </span>
+                  </div>
                   
-                  <div className="flex items-start space-x-4">
-                    <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center border-4 ${
-                      milestone.status === 'RAGGIUNTO' ? 'bg-green-100 text-green-600 border-green-300' :
-                      milestone.status === 'IN_CORSO' ? 'bg-blue-100 text-blue-600 border-blue-300' :
-                      milestone.status === 'A_RISCHIO' ? 'bg-orange-100 text-orange-600 border-orange-300' :
-                      'bg-red-100 text-red-600 border-red-300'
-                    }`}>
-                      {milestone.status === 'RAGGIUNTO' ? '✓' : 
-                       milestone.status === 'IN_CORSO' ? '⏳' :
-                       milestone.status === 'A_RISCHIO' ? '⚠️' : '❌'}
-                    </div>
-                    
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-lg font-semibold text-gray-900">{milestone.name}</h4>
-                        <div className="text-right">
-                          <span className="text-sm font-medium text-gray-900">{formatDate(milestone.date)}</span>
-                          <span className={`ml-3 px-2 py-1 rounded text-xs font-medium border ${getPriorityColor(milestone.importance)}`}>
-                            {milestone.importance}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <p className="text-gray-600 mt-1 mb-3">{milestone.description}</p>
-                      
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(milestone.status)}`}>
-                          {milestone.status.replace('_', ' ')}
-                        </span>
-                        <span>Task correlate: {milestone.relatedTasks.length}</span>
-                      </div>
-                    </div>
+                  <div className="text-sm text-gray-600 mb-4">
+                    <p className="mb-2">{milestone.description}</p>
+                    <p className="font-medium">{formatDate(milestone.date)}</p>
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span>Importanza: {milestone.importance}</span>
+                    <span>Task correlate: {milestone.relatedTasks.length}</span>
                   </div>
                 </div>
               ))}

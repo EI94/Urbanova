@@ -11,7 +11,7 @@ import {
   PlusIcon,
   ChartBarIcon,
   CompareIcon,
-  TargetIcon,
+  CheckCircleIcon,
   CalendarIcon,
   LocationIcon,
   EditIcon,
@@ -19,10 +19,12 @@ import {
   EyeIcon,
   TrophyIcon
 } from '@/components/icons';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import Link from 'next/link';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function FeasibilityAnalysisPage() {
+  const { t, formatCurrency: fmtCurrency } = useLanguage();
   const [projects, setProjects] = useState<FeasibilityProject[]>([]);
   const [ranking, setRanking] = useState<FeasibilityProject[]>([]);
   const [statistics, setStatistics] = useState<any>(null);
@@ -50,51 +52,44 @@ export default function FeasibilityAnalysisPage() {
       setStatistics(stats);
     } catch (error) {
       console.error('Errore caricamento dati:', error);
-      toast('❌ Errore nel caricamento dei dati', { icon: '❌' });
+      toast(`❌ ${t('loadError', 'feasibility.toasts')}` as string, { icon: '❌' });
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteProject = async (projectId: string) => {
-    if (!confirm('Sei sicuro di voler eliminare questo progetto?')) return;
+    if (!confirm(t('confirmDelete', 'feasibility'))) return;
     
     try {
       await feasibilityService.deleteProject(projectId);
-      toast('✅ Progetto eliminato', { icon: '✅' });
+      toast(`✅ ${t('deleted', 'feasibility.toasts')}` as string, { icon: '✅' });
       loadData();
     } catch (error) {
       console.error('Errore eliminazione progetto:', error);
-      toast('❌ Errore nell\'eliminazione del progetto', { icon: '❌' });
+      toast(`❌ ${t('deleteError', 'feasibility.toasts')}` as string, { icon: '❌' });
     }
   };
 
   const handleCompareProjects = async () => {
     if (!project1Id || !project2Id) {
-      toast('Seleziona due progetti da confrontare', { icon: '⚠️' });
+      toast(t('selectTwo', 'feasibility.toasts'), { icon: '⚠️' });
       return;
     }
 
     try {
       const comparison = await feasibilityService.compareProjects(project1Id, project2Id, 'user123');
-      toast('✅ Confronto creato con successo', { icon: '✅' });
+      toast(`✅ ${t('compareCreated', 'feasibility.toasts')}`, { icon: '✅' });
       setShowComparison(false);
       setProject1Id('');
       setProject2Id('');
     } catch (error) {
       console.error('Errore confronto progetti:', error);
-      toast('❌ Errore nella creazione del confronto', { icon: '❌' });
+      toast(`❌ ${t('compareError', 'feasibility.toasts')}` as string, { icon: '❌' });
     }
   };
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('it-IT', { 
-      style: 'currency', 
-      currency: 'EUR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(value);
-  };
+  const formatCurrency = (value: number) => fmtCurrency(value);
 
   const formatPercentage = (value: number) => {
     return `${value.toFixed(1)}%`;
@@ -132,16 +127,14 @@ export default function FeasibilityAnalysisPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">📊 Analisi di Fattibilità</h1>
-            <p className="text-gray-600 mt-1">
-              Gestisci e confronta i tuoi progetti immobiliari
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900">📊 {t('title', 'feasibility')}</h1>
+            <p className="text-gray-600 mt-1">{t('subtitle', 'feasibility')}</p>
           </div>
           <div className="flex space-x-3">
             <Link href="/dashboard/feasibility-analysis/new">
               <button className="btn btn-primary">
                 <PlusIcon className="h-4 w-4 mr-2" />
-                Nuovo Progetto
+                {t('newProject', 'feasibility')}
               </button>
             </Link>
             <button 
@@ -149,7 +142,7 @@ export default function FeasibilityAnalysisPage() {
               className="btn btn-outline"
             >
               <CompareIcon className="h-4 w-4 mr-2" />
-              Confronta
+              {t('compare', 'feasibility')}
             </button>
           </div>
         </div>
@@ -161,7 +154,7 @@ export default function FeasibilityAnalysisPage() {
               <div className="stat-figure text-primary">
                 <BuildingIcon className="h-6 w-6" />
               </div>
-              <div className="stat-title text-gray-500">Progetti Totali</div>
+              <div className="stat-title text-gray-500">{t('stats.totalProjects', 'feasibility')}</div>
               <div className="stat-value text-2xl">{statistics.totalProjects}</div>
             </div>
             
@@ -169,7 +162,7 @@ export default function FeasibilityAnalysisPage() {
               <div className="stat-figure text-success">
                 <TrendingUpIcon className="h-6 w-6" />
               </div>
-              <div className="stat-title text-gray-500">Marginalità Media</div>
+              <div className="stat-title text-gray-500">{t('stats.averageMargin', 'feasibility')}</div>
               <div className="stat-value text-2xl">{formatPercentage(statistics.averageMargin)}</div>
             </div>
             
@@ -177,15 +170,15 @@ export default function FeasibilityAnalysisPage() {
               <div className="stat-figure text-info">
                 <EuroIcon className="h-6 w-6" />
               </div>
-              <div className="stat-title text-gray-500">Investimento Totale</div>
+              <div className="stat-title text-gray-500">{t('stats.totalInvestment', 'feasibility')}</div>
               <div className="stat-value text-2xl">{formatCurrency(statistics.totalInvestment)}</div>
             </div>
             
             <div className="stat bg-white shadow-sm rounded-lg p-6">
               <div className="stat-figure text-warning">
-                <TargetIcon className="h-6 w-6" />
+                <CheckCircleIcon className="h-6 w-6" />
               </div>
-              <div className="stat-title text-gray-500">Su Target</div>
+              <div className="stat-title text-gray-500">{t('stats.onTarget', 'feasibility')}</div>
               <div className="stat-value text-2xl">{statistics.projectsOnTarget}/{statistics.totalProjects}</div>
             </div>
           </div>
@@ -196,25 +189,21 @@ export default function FeasibilityAnalysisPage() {
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold text-gray-900 flex items-center">
               <TrophyIcon className="h-5 w-5 mr-2 text-yellow-600" />
-              Classifica per Marginalità
+              {t('rankingTitle', 'feasibility')}
             </h2>
-            <span className="text-sm text-gray-500">Dal più profittevole</span>
+            <span className="text-sm text-gray-500">{t('stats.fromMostProfitable', 'feasibility')}</span>
           </div>
           
           {ranking.length === 0 ? (
             <div className="text-center py-12">
               <CalculatorIcon className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-700 mb-2">
-                Nessun progetto di fattibilità
-              </h3>
-              <p className="text-gray-500 mb-4">
-                Crea il tuo primo progetto di fattibilità per iniziare
-              </p>
+              <h3 className="text-lg font-medium text-gray-700 mb-2">{t('emptyRankingTitle', 'feasibility')}</h3>
+              <p className="text-gray-500 mb-4">{t('emptyRankingSubtitle', 'feasibility')}</p>
               <div className="flex justify-center">
                 <Link href="/dashboard/feasibility-analysis/new">
                   <button className="btn btn-primary">
                     <PlusIcon className="h-4 w-4 mr-2" />
-                    Crea Primo Progetto
+                    {t('createFirstProject', 'feasibility')}
                   </button>
                 </Link>
               </div>
@@ -297,25 +286,25 @@ export default function FeasibilityAnalysisPage() {
 
         {/* Lista Completa Progetti */}
         <div className="bg-white shadow-sm rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">📋 Tutti i Progetti</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">📋 {t('allProjects', 'feasibility')}</h2>
           
           {projects.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-500">Nessun progetto disponibile</p>
+              <p className="text-gray-500">{t('noProjects', 'feasibility')}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="table table-zebra w-full">
                 <thead>
                   <tr>
-                    <th>Progetto</th>
-                    <th>Località</th>
-                    <th>Stato</th>
-                    <th>Costo Terreno</th>
-                    <th>Marginalità</th>
-                    <th>Target</th>
-                    <th>Utile</th>
-                    <th>Azioni</th>
+                    <th>{t('table.project', 'feasibility')}</th>
+                    <th>{t('table.location', 'feasibility')}</th>
+                    <th>{t('table.status', 'feasibility')}</th>
+                    <th>{t('table.landCost', 'feasibility')}</th>
+                    <th>{t('table.margin', 'feasibility')}</th>
+                    <th>{t('table.target', 'feasibility')}</th>
+                    <th>{t('table.profit', 'feasibility')}</th>
+                    <th>{t('table.actions', 'feasibility')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -325,7 +314,7 @@ export default function FeasibilityAnalysisPage() {
                         <div>
                           <div className="font-medium">{project.name}</div>
                           <div className="text-sm text-gray-500">
-                            {project.createdAt.toLocaleDateString('it-IT')}
+                            {project.createdAt.toLocaleDateString()}
                           </div>
                         </div>
                       </td>
@@ -379,19 +368,19 @@ export default function FeasibilityAnalysisPage() {
         {showComparison && (
           <div className="modal modal-open">
             <div className="modal-box">
-              <h3 className="font-bold text-lg mb-4">🔍 Confronta Progetti</h3>
+              <h3 className="font-bold text-lg mb-4">🔍 {t('compareProjects', 'feasibility.modal')}</h3>
               
               <div className="space-y-4">
                 <div>
                   <label className="label">
-                    <span className="label-text">Primo Progetto</span>
+                    <span className="label-text">{t('firstProject', 'feasibility.modal')}</span>
                   </label>
                   <select 
                     className="select select-bordered w-full"
                     value={project1Id}
                     onChange={(e) => setProject1Id(e.target.value)}
                   >
-                    <option value="">Seleziona progetto...</option>
+                    <option value="">{t('selectProject', 'feasibility.modal')}</option>
                     {projects.map((project) => (
                       <option key={project.id} value={project.id}>
                         {project.name} ({formatPercentage(project.results.margin)})
@@ -402,14 +391,14 @@ export default function FeasibilityAnalysisPage() {
                 
                 <div>
                   <label className="label">
-                    <span className="label-text">Secondo Progetto</span>
+                    <span className="label-text">{t('secondProject', 'feasibility.modal')}</span>
                   </label>
                   <select 
                     className="select select-bordered w-full"
                     value={project2Id}
                     onChange={(e) => setProject2Id(e.target.value)}
                   >
-                    <option value="">Seleziona progetto...</option>
+                    <option value="">{t('selectProject', 'feasibility.modal')}</option>
                     {projects.map((project) => (
                       <option key={project.id} value={project.id}>
                         {project.name} ({formatPercentage(project.results.margin)})
@@ -424,14 +413,14 @@ export default function FeasibilityAnalysisPage() {
                   className="btn"
                   onClick={() => setShowComparison(false)}
                 >
-                  Annulla
+                  {t('cancel', 'common')}
                 </button>
                 <button 
                   className="btn btn-primary"
                   onClick={handleCompareProjects}
                   disabled={!project1Id || !project2Id}
                 >
-                  Confronta
+                  {t('compare', 'feasibility')}
                 </button>
               </div>
             </div>

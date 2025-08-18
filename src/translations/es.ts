@@ -59,6 +59,17 @@ export const es = {
     notifications: 'Notificaciones',
     settings: 'Configuración'
   },
+  navigationSections: {
+    dashboard: 'Panel de Control',
+    intelligence: 'Inteligencia y Descubrimiento',
+    planning: 'Planificación y Cumplimiento',
+    projects: 'Proyectos',
+    projectManagement: 'Gestión de Proyectos',
+    marketing: 'Marketing y Ventas',
+    epc: 'Construcción (EPC)',
+    businessPlan: 'Plan de Negocio',
+    other: 'Otros'
+  },
   dashboard: {
     title: 'Panel de Control',
     subtitle: 'Vista general de tus proyectos inmobiliarios',
@@ -83,6 +94,53 @@ export const es = {
     completed: 'Completado',
     errorLoadingStats: 'Error al cargar estadísticas',
     loadingStats: 'Cargando estadísticas...'
+  },
+  feasibility: {
+    title: 'Análisis de Viabilidad',
+    subtitle: 'Gestiona y compara tus proyectos inmobiliarios',
+    rankingTitle: 'Clasificación por Marginalidad',
+    newProject: 'Nuevo Proyecto',
+    compare: 'Comparar',
+    stats: {
+      totalProjects: 'Proyectos Totales',
+      averageMargin: 'Marginalidad Media',
+      totalInvestment: 'Inversión Total',
+      onTarget: 'En Objetivo',
+      fromMostProfitable: 'Del más rentable'
+    },
+    emptyRankingTitle: 'No hay proyectos de viabilidad',
+    emptyRankingSubtitle: 'Crea tu primer proyecto de viabilidad para empezar',
+    createFirstProject: 'Crear Primer Proyecto',
+    allProjects: 'Todos los Proyectos',
+    noProjects: 'No hay proyectos disponibles',
+    table: {
+      project: 'Proyecto',
+      location: 'Ubicación',
+      status: 'Estado',
+      landCost: 'Costo del Terreno',
+      margin: 'Marginalidad',
+      target: 'Objetivo',
+      profit: 'Beneficio',
+      actions: 'Acciones',
+      view: 'Ver',
+      edit: 'Editar',
+      delete: 'Eliminar'
+    },
+    modal: {
+      compareProjects: 'Comparar Proyectos',
+      firstProject: 'Primer Proyecto',
+      secondProject: 'Segundo Proyecto',
+      selectProject: 'Selecciona proyecto...'
+    },
+    toasts: {
+      loadError: 'Error al cargar datos',
+      deleted: 'Proyecto eliminado',
+      deleteError: 'Error al eliminar el proyecto',
+      selectTwo: 'Selecciona dos proyectos para comparar',
+      compareCreated: 'Comparación creada con éxito',
+      compareError: 'Error al crear la comparación'
+    },
+    confirmDelete: '¿Seguro que quieres eliminar este proyecto?'
   },
   landScraping: {
     title: 'Búsqueda AI de Terrenos',
@@ -157,5 +215,239 @@ export const es = {
     online: 'En Línea',
     scraping: 'Scraping',
     ai: 'IA'
+  },
+  newProject: {
+    title: 'Nuevo Proyecto',
+    subtitle: 'Crea un nuevo proyecto inmobiliario',
+    form: {
+      projectName: 'Nombre del Proyecto*',
+      description: 'Descripción*',
+      status: 'Estado*',
+      type: 'Tipo*',
+      location: 'Ubicación*',
+      responsible: 'Responsable',
+      startDate: 'Fecha de Inicio',
+      endDate: 'Fecha de Finalización Estimada',
+      budget: 'Presupuesto (€)',
+      surface: 'Superficie (m²)',
+      units: 'Número de Unidades',
+      energyClass: 'Clase Energética',
+      energyClassPlaceholder: 'A, B, C, D, etc.',
+      datePlaceholder: 'dd/mm/aaaa',
+      validation: {
+        requiredFields: 'Completa todos los campos obligatorios',
+        saveError: 'Ocurrió un error al guardar el proyecto'
+      }
+    },
+    statuses: {
+      planning: 'Planificación',
+      inProgress: 'En Progreso',
+      onHold: 'En Espera',
+      completed: 'Completado'
+    },
+    types: {
+      residential: 'Residencial',
+      commercial: 'Comercial',
+      mixed: 'Mixto',
+      industrial: 'Industrial'
+    },
+    buttons: {
+      cancel: 'Cancelar',
+      saveProject: 'Guardar Proyecto'
+    }
+  },
+  permitsCompliance: {
+    title: 'Sistema de Permisos Inteligente',
+    subtitle: 'Seguimiento de cumplimiento con IA y gestión de autorizaciones',
+    tabs: {
+      overview: 'Resumen',
+      permits: 'Permisos',
+      timeline: 'Cronograma',
+      alerts: 'Alertas'
+    },
+    stats: {
+      totalPermits: 'Total de Permisos',
+      approved: 'Aprobados',
+      inProgress: 'En Progreso',
+      critical: 'Críticos',
+      totalCost: 'Costo Total',
+      averageProgress: 'Progreso Promedio'
+    },
+    quickActions: {
+      newPermit: 'Nuevo Permiso',
+      generateReport: 'Generar Reporte de Cumplimiento',
+      scheduleInspection: 'Programar Inspección',
+      updateTimeline: 'Actualizar Cronograma del Proyecto'
+    },
+    categories: {
+      urban: 'PLANIFICACIÓN URBANA',
+      environmental: 'AMBIENTAL',
+      safety: 'SEGURIDAD',
+      energy: 'ENERGÍA'
+    },
+    criticalAlerts: {
+      title: 'Alertas Críticas',
+      buildingPermitExpiry: 'Vencimiento del Permiso de Construcción',
+      buildingPermitMessage: 'Presentar solicitud de prórroga dentro de 10 días',
+      viaDelay: 'Retraso VIA',
+      viaMessage: 'Acelerar recolección de documentación faltante',
+      seeAllAlerts: 'Ver todas las alertas →'
+    }
+  },
+  projectTimeline: {
+    title: 'Cronograma AI del Proyecto',
+    subtitle: 'Gestión inteligente de cronogramas con diagramas Gantt y hitos',
+    projectSummary: 'Resumen del Proyecto',
+    totalTasks: 'Total de Tareas',
+    completed: 'Completadas',
+    inProgress: 'En Progreso',
+    delayed: 'Retrasadas',
+    tabs: {
+      ganttChart: 'Diagrama Gantt',
+      kanbanBoard: 'Tablero Kanban',
+      milestoneTimeline: 'Cronograma de Hitos',
+      resources: 'Recursos'
+    },
+    filters: {
+      all: 'Todas',
+      design: 'DISEÑO',
+      permits: 'PERMISOS',
+      construction: 'CONSTRUCCIÓN',
+      marketing: 'MARKETING'
+    },
+    months: {
+      jan: 'ene',
+      feb: 'feb',
+      mar: 'mar',
+      apr: 'abr',
+      may: 'may',
+      jun: 'jun',
+      jul: 'jul',
+      aug: 'ago',
+      sep: 'sep',
+      oct: 'oct',
+      nov: 'nov',
+      dec: 'dic'
+    },
+    timelineViews: {
+      threeMonths: '3M',
+      sixMonths: '6M',
+      oneYear: '1Y'
+    }
+  },
+  notifications: {
+    title: 'Notificaciones',
+    subtitle: 'Gestiona tus notificaciones y preferencias',
+    all: 'Todas',
+    unread: 'No leídas',
+    read: 'Leídas',
+    markAllAsRead: 'Marcar todas como leídas',
+    markAsRead: 'Marcar como leída',
+    markAsUnread: 'Marcar como no leída',
+    delete: 'Eliminar',
+    noNotifications: 'No hay notificaciones',
+    noUnreadNotifications: 'No hay notificaciones no leídas',
+    loading: 'Cargando notificaciones...',
+    error: 'Error al cargar notificaciones',
+    types: {
+      project: 'Proyecto',
+      permit: 'Permiso',
+      task: 'Tarea',
+      system: 'Sistema',
+      marketing: 'Marketing'
+    },
+    priorities: {
+      low: 'Baja',
+      medium: 'Media',
+      high: 'Alta',
+      critical: 'Crítica'
+    },
+    actions: {
+      view: 'Ver',
+      dismiss: 'Descartar',
+      snooze: 'Posponer'
+    }
+  },
+  userProfile: {
+    title: 'Perfil de Usuario',
+    subtitle: 'Gestiona tu información personal',
+    personalInfo: 'Información Personal',
+    contactInfo: 'Información de Contacto',
+    preferences: 'Preferencias',
+    security: 'Seguridad',
+    avatar: 'Foto de Perfil',
+    changeAvatar: 'Cambiar Foto',
+    removeAvatar: 'Eliminar Foto',
+    uploadImage: 'Subir Imagen',
+    dragAndDrop: 'Arrastra una imagen aquí o haz clic para seleccionar',
+    supportedFormats: 'Formatos soportados: JPG, PNG, GIF (máx 5MB)',
+    firstName: 'Nombre',
+    lastName: 'Apellido',
+    displayName: 'Nombre para Mostrar',
+    email: 'Email',
+    phone: 'Teléfono',
+    company: 'Empresa',
+    role: 'Rol',
+    timezone: 'Zona Horaria',
+    language: 'Idioma',
+    dateFormat: 'Formato de Fecha',
+    currency: 'Moneda',
+    saveChanges: 'Guardar Cambios',
+    changesSaved: 'Cambios guardados exitosamente',
+    errorSaving: 'Error al guardar cambios',
+    password: 'Contraseña Actual',
+    newPassword: 'Nueva Contraseña',
+    confirmPassword: 'Confirmar Nueva Contraseña',
+    changePassword: 'Cambiar Contraseña',
+    passwordChanged: 'Contraseña cambiada exitosamente',
+    passwordError: 'Error al cambiar contraseña',
+    twoFactorAuth: 'Autenticación de Dos Factores',
+    enable2FA: 'Habilitar 2FA',
+    disable2FA: 'Deshabilitar 2FA',
+    backupCodes: 'Códigos de Respaldo',
+    generateBackupCodes: 'Generar Nuevos Códigos'
+  },
+  projects: {
+    title: 'Proyectos',
+    subtitle: 'Gestiona todos tus proyectos inmobiliarios',
+    newProject: 'Nuevo Proyecto',
+    totalProjects: 'Total de Proyectos',
+    completedProjects: 'Completados',
+    inProgressProjects: 'En Progreso',
+    planningProjects: 'En Planificación',
+    noProjects: 'No se encontraron proyectos',
+    createFirstProject: 'Crea tu primer proyecto',
+    loadingProjects: 'Cargando proyectos...',
+    errorTitle: 'Error de carga',
+    errorLoadingProjects: 'Error al cargar proyectos',
+    progress: 'Progreso',
+    budget: 'Presupuesto',
+    units: 'unidades',
+    details: 'Detalles'
+  },
+  settings: {
+    title: 'Configuración',
+    subtitle: 'Configura tu cuenta y configuración del sistema',
+    profile: {
+      title: 'Perfil',
+      subtitle: 'Gestiona datos personales y preferencias',
+      personalData: 'Datos Personales',
+      languagePreferences: 'Preferencias de Idioma',
+      timezone: 'Zona Horaria'
+    },
+    security: {
+      title: 'Seguridad',
+      subtitle: 'Configura seguridad y privacidad',
+      password: 'Contraseña',
+      twoFactorAuth: 'Autenticación 2FA',
+      privacy: 'Privacidad'
+    },
+    system: {
+      title: 'Sistema',
+      subtitle: 'Configuración del sistema y API',
+      apiKeys: 'Claves API',
+      integrations: 'Integraciones',
+      backup: 'Respaldo'
+    }
   }
 }; 

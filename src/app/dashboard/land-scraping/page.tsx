@@ -14,15 +14,31 @@ import AdvancedFilters from '@/components/ui/AdvancedFilters';
 import MultiLocationSelector from '@/components/ui/MultiLocationSelector';
 import PerformanceStats from '@/components/ui/PerformanceStats';
 import SearchSchedulerModal from '@/components/ui/SearchSchedulerModal';
+import TeamCollaborationPanel from '@/components/ui/TeamCollaborationPanel';
+import CollaborativeSearchSession from '@/components/ui/CollaborativeSearchSession';
+import TeamCommentsVoting from '@/components/ui/TeamCommentsVoting';
+import SharedFavorites from '@/components/ui/SharedFavorites';
+import AdvancedTeamManagement from '@/components/ui/AdvancedTeamManagement';
+import WorkflowManagement from '@/components/ui/WorkflowManagement';
+import RealtimeCollaboration from '@/components/ui/RealtimeCollaboration';
+import AdvancedAnalytics from '@/components/ui/AdvancedAnalytics';
+import KnowledgeManagement from '@/components/ui/KnowledgeManagement';
+import SecurityCompliance from '@/components/ui/SecurityCompliance';
+import MonitoringObservability from '@/components/ui/MonitoringObservability';
+import AIMLCenter from '@/components/ui/AIMLCenter';
+import Web3Center from '@/components/ui/Web3Center';
+import APIGatewayCenter from '@/components/ui/APIGatewayCenter';
+import DevOpsCenter from '@/components/ui/DevOpsCenter';
+import SecurityCenter from '@/components/ui/SecurityCenter';
+import { teamRoleManager, ROLE_PERMISSIONS } from '@/lib/teamRoleManager';
+import { TeamRole, TeamMember, Permission } from '@/types/team';
+
 import { 
   SearchIcon, 
   MailIcon, 
-  BuildingIcon,
   EuroIcon, 
-  LocationIcon,
   CalendarIcon,
   TrendingUpIcon,
-  AlertIcon,
   CheckCircleIcon,
   EditIcon,
   SettingsIcon,
@@ -30,12 +46,9 @@ import {
   ClockIcon,
   FilterIcon,
   MapIcon,
-  StarIcon,
   EyeIcon,
   PlusIcon,
-  XIcon,
-  TargetIcon,
-  ShieldIcon
+  BuildingIcon
 } from '@/components/icons';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
@@ -79,7 +92,7 @@ export default function LandScrapingPage() {
     phase: 'idle',
     currentSource: '',
     sourcesCompleted: [],
-    sourcesTotal: ['immobiliare.it', 'casa.it', 'idealista.it', 'borsinoimmobiliare.it'],
+    sourcesTotal: ['immobiliare.it', 'borsinoimmobiliare.it'],
     progress: 0,
     message: ''
   });
@@ -137,6 +150,32 @@ export default function LandScrapingPage() {
   
   const [emailError, setEmailError] = useState<string | null>(null);
 
+  // Stati per collaborazione team
+  const [showTeamCollaboration, setShowTeamCollaboration] = useState(false);
+  const [showCollaborativeSearch, setShowCollaborativeSearch] = useState(false);
+  const [showTeamComments, setShowTeamComments] = useState(false);
+  const [showSharedFavorites, setShowSharedFavorites] = useState(false);
+  const [showAdvancedTeamManagement, setShowAdvancedTeamManagement] = useState(false);
+  const [showWorkflowManagement, setShowWorkflowManagement] = useState(false);
+  
+  // Stati per gestione avanzata team
+  const [currentUserRole, setCurrentUserRole] = useState<TeamRole>('PROJECT_MANAGER');
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [teamPermissions, setTeamPermissions] = useState<Permission[]>([]);
+  const [selectedLandForComments, setSelectedLandForComments] = useState<{id: string, title: string} | null>(null);
+
+  // Stati per Realtime Collaboration
+  const [showRealtimeCollaboration, setShowRealtimeCollaboration] = useState(false);
+  const [showAdvancedAnalytics, setShowAdvancedAnalytics] = useState(false);
+  const [showKnowledgeManagement, setShowKnowledgeManagement] = useState(false);
+  const [showSecurityCompliance, setShowSecurityCompliance] = useState(false);
+  const [showMonitoringObservability, setShowMonitoringObservability] = useState(false);
+  const [showAIMLCenter, setShowAIMLCenter] = useState(false);
+  const [showWeb3Center, setShowWeb3Center] = useState(false);
+  const [showAPIGatewayCenter, setShowAPIGatewayCenter] = useState(false);
+  const [showDevOpsCenter, setShowDevOpsCenter] = useState(false);
+  const [showSecurityCenter, setShowSecurityCenter] = useState(false);
+
   const router = useRouter();
 
   // Controlla se siamo nel browser
@@ -190,6 +229,35 @@ export default function LandScrapingPage() {
       applyFilters();
     }
   }, [filters, searchResults]);
+
+  // Inizializza team con utente corrente
+  useEffect(() => {
+    const currentUser: TeamMember = {
+      id: 'current-user',
+      userId: 'current-user',
+      name: 'Utente Corrente',
+      email: 'utente@urbanova.com',
+      avatar: '👨‍💻',
+      role: currentUserRole,
+      permissions: ROLE_PERMISSIONS.find(r => r.role === currentUserRole)?.permissions || [],
+      isOnline: true,
+      lastSeen: new Date(),
+      currentActivity: 'Gestione team',
+      joinDate: new Date(),
+      isActive: true,
+      performance: {
+        commentsCount: 0,
+        votesCount: 0,
+        favoritesCount: 0,
+        sessionsCreated: 0,
+        sessionsJoined: 0,
+        lastActivity: new Date()
+      }
+    };
+    
+    setTeamMembers([currentUser]);
+    setTeamPermissions(currentUser.permissions);
+  }, [currentUserRole]);
 
   const initializeServices = async () => {
     try {
@@ -416,6 +484,93 @@ export default function LandScrapingPage() {
             toast('Ricerca programmata eliminata!', { icon: '✅' });
   };
 
+  // Funzioni per collaborazione team
+  const handleAddTeamComment = (landId: string, comment: string) => {
+    toast('💬 Commento team aggiunto con successo!', { icon: '💬' });
+    // TODO: Implementare salvataggio commento team
+  };
+
+  const handleTeamVote = (landId: string, vote: 'like' | 'dislike') => {
+    toast(`👍 Voto ${vote === 'like' ? 'positivo' : 'negativo'} registrato!`, { icon: '👍' });
+    // TODO: Implementare salvataggio voto team
+  };
+
+  const handleTeamReply = (commentId: string, reply: string) => {
+    toast('💬 Risposta team inviata!', { icon: '💬' });
+    // TODO: Implementare salvataggio risposta team
+  };
+
+  const handleAddToSharedFavorites = (landId: string) => {
+    toast('⭐ Terreno aggiunto ai preferiti condivisi!', { icon: '⭐' });
+    // TODO: Implementare salvataggio preferiti condivisi
+  };
+
+  // Funzioni per gestione avanzata team
+  const handleInviteTeamMember = (email: string, role: TeamRole) => {
+    const newMember: TeamMember = {
+      id: Date.now().toString(),
+      userId: `user-${Date.now()}`,
+      name: email.split('@')[0],
+      email,
+      avatar: '👤',
+      role,
+      permissions: ROLE_PERMISSIONS.find(r => r.role === role)?.permissions || [],
+      isOnline: false,
+      lastSeen: new Date(),
+      currentActivity: 'Invitato',
+      joinDate: new Date(),
+      isActive: true,
+      performance: {
+        commentsCount: 0,
+        votesCount: 0,
+        favoritesCount: 0,
+        sessionsCreated: 0,
+        sessionsJoined: 0,
+        lastActivity: new Date()
+      }
+    };
+    
+    setTeamMembers(prev => [...prev, newMember]);
+    toast(`Membro invitato con ruolo ${role}`, { icon: '👥' });
+  };
+
+  const handleUpdateMemberRole = (memberId: string, newRole: TeamRole) => {
+    setTeamMembers(prev => prev.map(member => 
+      member.id === memberId 
+        ? { ...member, role: newRole, permissions: ROLE_PERMISSIONS.find(r => r.role === newRole)?.permissions || [] }
+        : member
+    ));
+    toast('Ruolo aggiornato', { icon: '🔄' });
+  };
+
+  const handleRemoveTeamMember = (memberId: string) => {
+    setTeamMembers(prev => prev.filter(member => member.id !== memberId));
+    toast('Membro rimosso dal team', { icon: '👋' });
+  };
+
+  const handleUpdateMemberPermissions = (memberId: string, permissions: Permission[]) => {
+    setTeamMembers(prev => prev.map(member => 
+      member.id === memberId ? { ...member, permissions } : member
+    ));
+    toast('Permessi aggiornati', { icon: '🔐' });
+  };
+
+  const handleCreateCollaborativeSession = (session: any) => {
+    toast('👥 Sessione collaborativa creata!', { icon: '👥' });
+    setShowCollaborativeSearch(false);
+    // TODO: Implementare creazione sessione collaborativa
+  };
+
+  const handleJoinCollaborativeSession = (sessionId: string) => {
+    toast(`🤝 Unito alla sessione ${sessionId}!`, { icon: '🤝' });
+    // TODO: Implementare unione sessione collaborativa
+  };
+
+  const handleShareCollaborativeSession = (sessionId: string) => {
+    toast('📤 Sessione condivisa con il team!', { icon: '📤' });
+    // TODO: Implementare condivisione sessione collaborativa
+  };
+
   const saveFavorites = (newFavorites: Set<string>) => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('landScrapingFavorites', JSON.stringify(Array.from(newFavorites)));
@@ -502,7 +657,7 @@ export default function LandScrapingPage() {
       phase: 'searching',
       currentSource: '',
       sourcesCompleted: [],
-      sourcesTotal: ['immobiliare.it', 'casa.it', 'idealista.it', 'borsinoimmobiliare.it', 'kijiji.it', 'subito.it'],
+              sourcesTotal: ['immobiliare.it', 'borsinoimmobiliare.it'],
       progress: 0,
       message: 'Inizializzazione ricerca...'
     });
@@ -534,22 +689,13 @@ export default function LandScrapingPage() {
 
           if (newProgress > 15 && newSourcesCompleted.length === 0) {
             newSourcesCompleted = ['immobiliare.it'];
-            newCurrentSource = 'casa.it';
-          } else if (newProgress > 30 && newSourcesCompleted.length === 1) {
-            newSourcesCompleted = ['immobiliare.it', 'casa.it'];
-            newCurrentSource = 'idealista.it';
-          } else if (newProgress > 45 && newSourcesCompleted.length === 2) {
-            newSourcesCompleted = ['immobiliare.it', 'casa.it', 'idealista.it'];
             newCurrentSource = 'borsinoimmobiliare.it';
-          } else if (newProgress > 60 && newSourcesCompleted.length === 3) {
-            newSourcesCompleted = ['immobiliare.it', 'casa.it', 'idealista.it', 'borsinoimmobiliare.it'];
-            newCurrentSource = 'kijiji.it';
-          } else if (newProgress > 75 && newSourcesCompleted.length === 4) {
-            newSourcesCompleted = ['immobiliare.it', 'casa.it', 'idealista.it', 'borsinoimmobiliare.it', 'kijiji.it'];
-            newCurrentSource = 'subito.it';
-          } else if (newProgress > 90 && newSourcesCompleted.length === 5) {
-            newSourcesCompleted = ['immobiliare.it', 'casa.it', 'idealista.it', 'borsinoimmobiliare.it', 'kijiji.it', 'subito.it'];
-            newCurrentSource = '';
+          } else if (newProgress > 50 && newSourcesCompleted.length === 1) {
+            newSourcesCompleted = ['immobiliare.it', 'borsinoimmobiliare.it'];
+            newCurrentSource = 'completato';
+          } else {
+            newSourcesCompleted = ['immobiliare.it', 'borsinoimmobiliare.it'];
+            newCurrentSource = 'completato';
           }
 
           return {
@@ -633,8 +779,8 @@ export default function LandScrapingPage() {
           setSearchProgress({
             phase: 'complete',
             currentSource: '',
-            sourcesCompleted: ['immobiliare.it', 'casa.it', 'idealista.it', 'borsinoimmobiliare.it', 'kijiji.it', 'subito.it'],
-            sourcesTotal: ['immobiliare.it', 'casa.it', 'idealista.it', 'borsinoimmobiliare.it', 'kijiji.it', 'subito.it'],
+            sourcesCompleted: ['immobiliare.it', 'borsinoimmobiliare.it'],
+            sourcesTotal: ['immobiliare.it', 'borsinoimmobiliare.it'],
             progress: 100,
             message: 'Ricerca completata!'
           });
@@ -705,7 +851,7 @@ export default function LandScrapingPage() {
         phase: 'error',
         currentSource: '',
         sourcesCompleted: [],
-        sourcesTotal: ['immobiliare.it', 'casa.it', 'idealista.it', 'borsinoimmobiliare.it', 'kijiji.it', 'subito.it'],
+        sourcesTotal: ['immobiliare.it', 'borsinoimmobiliare.it'],
         progress: 0,
         message: `Errore: ${searchLastError instanceof Error ? searchLastError.message : 'Errore sconosciuto'}`
       });
@@ -732,7 +878,7 @@ export default function LandScrapingPage() {
         phase: 'error',
         currentSource: '',
         sourcesCompleted: [],
-        sourcesTotal: ['immobiliare.it', 'casa.it', 'idealista.it'],
+        sourcesTotal: ['immobiliare.it', 'borsinoimmobiliare.it'],
         progress: 0,
         message: `Errore: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`
       });
@@ -843,12 +989,127 @@ export default function LandScrapingPage() {
           
           {/* Stato servizi */}
           <div className="flex items-center gap-4">
-            {/* Indicatore stato connessione */}
-            <div className="flex items-center gap-2 text-sm">
-              <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
-              <span className={`text-sm ${isOnline ? 'text-green-600' : 'text-red-600'}`}>
-                {isOnline ? t('online', 'aiLandScraping') : 'Offline'}
-              </span>
+            {/* Pulsanti Collaborazione Team */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowTeamCollaboration(true)}
+                className="px-3 py-2 text-sm bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 transition-colors"
+              >
+                👥 Team
+              </button>
+              
+              <button
+                onClick={() => setShowCollaborativeSearch(true)}
+                className="px-3 py-2 text-sm bg-green-50 text-green-700 border border-green-200 rounded hover:bg-green-100 transition-colors"
+              >
+                👥 Sessioni
+              </button>
+              
+              <button
+                onClick={() => setShowSharedFavorites(true)}
+                className="px-3 py-2 text-sm bg-yellow-50 text-yellow-700 border border-yellow-200 rounded hover:bg-yellow-100 transition-colors"
+              >
+                ⭐ Preferiti
+              </button>
+
+              <button
+                onClick={() => setShowAdvancedTeamManagement(true)}
+                className="px-3 py-2 text-sm bg-purple-50 text-purple-700 border border-purple-200 rounded hover:bg-purple-100 transition-colors"
+              >
+                🛡️ Gestione Avanzata
+              </button>
+
+              <button
+                onClick={() => setShowWorkflowManagement(true)}
+                className="px-3 py-2 text-sm bg-indigo-50 text-indigo-700 border border-indigo-200 rounded hover:bg-indigo-100 transition-colors"
+              >
+                🔄 Workflow & Approvazioni
+              </button>
+
+                              <button
+                  onClick={() => setShowRealtimeCollaboration(true)}
+                  className="px-3 py-2 text-sm bg-green-50 text-green-700 border border-green-200 rounded hover:bg-green-100 transition-colors"
+                >
+                  ⚡ Real-time Collaboration
+                </button>
+                
+                <button
+                  onClick={() => setShowAdvancedAnalytics(true)}
+                  className="px-3 py-2 text-sm bg-purple-50 text-purple-700 border border-purple-200 rounded hover:bg-purple-100 transition-colors"
+                >
+                  📊 Advanced Analytics
+                </button>
+                
+                <button
+                  onClick={() => setShowKnowledgeManagement(true)}
+                  className="px-3 py-2 text-sm bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 transition-colors"
+                >
+                  📚 Knowledge Base
+                </button>
+                
+                <button
+                  onClick={() => setShowSecurityCenter(true)}
+                  className="px-3 py-2 text-sm bg-red-50 text-red-700 border border-red-200 rounded hover:bg-red-100 transition-colors"
+                >
+                  🛡️ Security Center
+                </button>
+                
+                <button
+                  onClick={() => setShowMonitoringObservability(true)}
+                  className="px-3 py-2 text-sm bg-indigo-50 text-indigo-700 border border-indigo-200 rounded hover:bg-indigo-100 transition-colors"
+                >
+                  📊 Monitoring & Observability
+                </button>
+                
+                <button
+                  onClick={() => setShowAIMLCenter(true)}
+                  className="px-3 py-2 text-sm bg-purple-50 text-purple-700 border border-purple-200 rounded hover:bg-purple-100 transition-colors"
+                >
+                  🤖 AI & Machine Learning
+                </button>
+                
+                <button
+                  onClick={() => setShowWeb3Center(true)}
+                  className="px-3 py-2 text-sm bg-indigo-50 text-indigo-700 border border-indigo-200 rounded hover:bg-indigo-100 transition-colors"
+                >
+                  ⛓️ Web3 & Blockchain
+                </button>
+                
+                <button
+                  onClick={() => setShowAPIGatewayCenter(true)}
+                  className="px-3 py-2 text-sm bg-teal-50 text-teal-700 border border-teal-200 rounded hover:bg-teal-100 transition-colors"
+                >
+                  🔗 API Gateway & Microservices
+                </button>
+                
+                <button
+                  onClick={() => setShowDevOpsCenter(true)}
+                  className="px-3 py-2 text-sm bg-orange-50 text-orange-700 border border-orange-200 rounded hover:bg-orange-100 transition-colors"
+                >
+                  🚀 DevOps & CI/CD Pipeline
+                </button>
+            </div>
+            
+            {/* Indicatore stato connessione e ruolo */}
+            <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <span className={`text-sm ${isOnline ? 'text-green-600' : 'text-red-600'}`}>
+                  {isOnline ? t('online', 'aiLandScraping') : 'Offline'}
+                </span>
+              </div>
+              
+              {/* Indicatore ruolo corrente */}
+              <div className="flex items-center gap-2 px-3 py-1 bg-purple-100 text-purple-700 rounded-full">
+                <span className="text-xs">👑</span>
+                <span className="text-xs font-medium">
+                  {currentUserRole === 'PROJECT_MANAGER' && 'Project Manager'}
+                  {currentUserRole === 'FINANCIAL_ANALYST' && 'Analista Finanziario'}
+                  {currentUserRole === 'ARCHITECT' && 'Architetto'}
+                  {currentUserRole === 'DEVELOPER' && 'Sviluppatore'}
+                  {currentUserRole === 'TEAM_MEMBER' && 'Membro Team'}
+                </span>
+              </div>
             </div>
             
             {servicesStatus ? (
@@ -890,6 +1151,8 @@ export default function LandScrapingPage() {
           </div>
         )}
 
+
+
         {/* Progress Bar durante la ricerca */}
         <ProgressBar
           phase={searchProgress.phase}
@@ -902,12 +1165,13 @@ export default function LandScrapingPage() {
 
         {/* Criteri di ricerca principali */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
+
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Localizzazione Avanzata */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                <LocationIcon className="inline h-4 w-4 mr-1" />
-                Localizzazione Avanzata
+                📍 Localizzazione Avanzata
               </label>
               <MultiLocationSelector
                 value={searchCriteria.location}
@@ -1036,6 +1300,13 @@ export default function LandScrapingPage() {
         {/* Risultati */}
         {searchResults && (
           <div className="space-y-4">
+            {/* Informazioni semplici sulla fonte */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-700">
+                ℹ️ <strong>Nota:</strong> I risultati provengono da <strong>immobiliare.it</strong> e <strong>borsinoimmobiliare.it</strong>
+              </p>
+            </div>
+
             {/* Header risultati */}
             <div className="flex justify-between items-center">
               <div>
@@ -1047,6 +1318,7 @@ export default function LandScrapingPage() {
                     filteredResults.reduce((sum, land) => sum + land.price, 0) / filteredResults.length
                   )}
                 </p>
+
               </div>
               
               {/* Controlli vista */}
@@ -1055,19 +1327,19 @@ export default function LandScrapingPage() {
                   onClick={() => setSelectedView('cards')}
                   className={`p-2 rounded ${selectedView === 'cards' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
                 >
-                  <BuildingIcon className="h-4 w-4" />
+                  📋
                 </button>
                 <button
                   onClick={() => setSelectedView('list')}
                   className={`p-2 rounded ${selectedView === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
                 >
-                  <EyeIcon className="h-4 w-4" />
+                  👁️
                 </button>
                 <button
                   onClick={() => setShowMap(!showMap)}
                   className={`p-2 rounded ${showMap ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
                 >
-                  <MapIcon className="h-4 w-4" />
+                  🗺️
                 </button>
               </div>
             </div>
@@ -1077,7 +1349,7 @@ export default function LandScrapingPage() {
               <div className="bg-white rounded-lg shadow-sm border p-4">
                 <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
                   <div className="text-center">
-                    <MapIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                    <span className="text-4xl text-gray-400 mb-2">🗺️</span>
                     <p className="text-gray-500">Mappa interattiva in sviluppo</p>
                   </div>
                 </div>
@@ -1150,7 +1422,7 @@ export default function LandScrapingPage() {
                               : 'text-gray-400 hover:text-yellow-500'
                           }`}
                         >
-                          <StarIcon className="h-5 w-5" />
+                          ⭐
                         </button>
                         <button
                           onClick={() => window.open(land.url, '_blank')}
@@ -1187,7 +1459,7 @@ export default function LandScrapingPage() {
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
             <div className="flex items-start">
               <div className="flex-shrink-0">
-                <AlertIcon className="h-5 w-5 text-yellow-400" />
+                <span className="text-yellow-400 text-xl">⚠️</span>
               </div>
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-yellow-800">
@@ -1212,8 +1484,7 @@ export default function LandScrapingPage() {
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <CalendarIcon className="h-5 w-5 text-blue-600" />
-                Ricerche Programmate
+                📅 Ricerche Programmate
               </h3>
               <button
                 onClick={() => setShowSearchScheduler(true)}
@@ -1297,6 +1568,174 @@ export default function LandScrapingPage() {
           onExecuteSearch={handleSearch}
           currentCriteria={searchCriteria}
           currentEmail={email}
+        />
+
+        {/* Componenti Collaborazione Team */}
+        <TeamCollaborationPanel
+          isOpen={showTeamCollaboration}
+          onClose={() => setShowTeamCollaboration(false)}
+          currentSearchId={searchResults?.id}
+          onAddComment={handleAddTeamComment}
+          onVote={handleTeamVote}
+          onAddToSharedFavorites={handleAddToSharedFavorites}
+        />
+
+        <CollaborativeSearchSession
+          isOpen={showCollaborativeSearch}
+          onClose={() => setShowCollaborativeSearch(false)}
+          currentSearchCriteria={searchCriteria}
+          onCreateSession={handleCreateCollaborativeSession}
+          onJoinSession={handleJoinCollaborativeSession}
+          onShareSession={handleShareCollaborativeSession}
+        />
+
+        <TeamCommentsVoting
+          isOpen={showTeamComments}
+          onClose={() => setShowTeamComments(false)}
+          landId={selectedLandForComments?.id || ''}
+          landTitle={selectedLandForComments?.title || ''}
+          onAddComment={handleAddTeamComment}
+          onVote={handleTeamVote}
+          onReply={handleTeamReply}
+          onAddToFavorites={handleAddToSharedFavorites}
+        />
+
+        <SharedFavorites
+          isOpen={showSharedFavorites}
+          onClose={() => setShowSharedFavorites(false)}
+          onViewLand={(landId) => {
+            // TODO: Implementare visualizzazione terreno
+            toast('Visualizzazione terreno in sviluppo', { icon: '🔧' });
+          }}
+          onAddComment={handleAddTeamComment}
+          onVote={handleTeamVote}
+          onUpdatePriority={(landId, priority) => {
+            toast(`Priorità aggiornata a ${priority}`, { icon: '📊' });
+          }}
+          onUpdateStatus={(landId, status) => {
+            toast(`Stato aggiornato a ${status}`, { icon: '🔄' });
+          }}
+          onRemove={(landId) => {
+            toast('Terreno rimosso dai preferiti condivisi', { icon: '🗑️' });
+          }}
+        />
+
+        {/* Gestione Avanzata Team */}
+        <AdvancedTeamManagement
+          isOpen={showAdvancedTeamManagement}
+          onClose={() => setShowAdvancedTeamManagement(false)}
+          onInviteMember={handleInviteTeamMember}
+          onUpdateMemberRole={handleUpdateMemberRole}
+          onRemoveMember={handleRemoveTeamMember}
+          onUpdatePermissions={handleUpdateMemberPermissions}
+        />
+
+        {/* Workflow Management & Approvals */}
+        <WorkflowManagement
+          isOpen={showWorkflowManagement}
+          onClose={() => setShowWorkflowManagement(false)}
+          currentUserId="current-user"
+          currentUserRole={currentUserRole}
+        />
+
+        {/* Real-time Collaboration */}
+        <RealtimeCollaboration
+          isOpen={showRealtimeCollaboration}
+          onClose={() => setShowRealtimeCollaboration(false)}
+          currentUserId="current-user"
+          currentUserName="Utente Corrente"
+          currentUserRole={currentUserRole}
+          currentUserAvatar="👨‍💻"
+        />
+
+        {/* Advanced Analytics */}
+        <AdvancedAnalytics
+          isOpen={showAdvancedAnalytics}
+          onClose={() => setShowAdvancedAnalytics(false)}
+          currentUserId="current-user"
+          currentUserName="Utente Corrente"
+          currentUserRole={currentUserRole}
+          currentUserAvatar="👨‍💻"
+        />
+
+        {/* Knowledge Management */}
+        <KnowledgeManagement
+          isOpen={showKnowledgeManagement}
+          onClose={() => setShowKnowledgeManagement(false)}
+          currentUserId="current-user"
+          currentUserName="Utente Corrente"
+          currentUserRole={currentUserRole}
+          currentUserAvatar="👨‍💻"
+        />
+
+        {/* Security & Compliance */}
+        <SecurityCompliance
+          isOpen={showSecurityCompliance}
+          onClose={() => setShowSecurityCompliance(false)}
+          currentUserId="current-user"
+          currentUserName="Utente Corrente"
+          currentUserRole={currentUserRole}
+          currentUserAvatar="👨‍💻"
+        />
+
+        {/* Monitoring & Observability */}
+        <MonitoringObservability
+          isOpen={showMonitoringObservability}
+          onClose={() => setShowMonitoringObservability(false)}
+          currentUserId="current-user"
+          currentUserName="Utente Corrente"
+          currentUserRole={currentUserRole}
+          currentUserAvatar="👨‍💻"
+        />
+
+        {/* AI & Machine Learning Center */}
+        <AIMLCenter
+          isOpen={showAIMLCenter}
+          onClose={() => setShowAIMLCenter(false)}
+          currentUserId="current-user"
+          currentUserName="Utente Corrente"
+          currentUserRole={currentUserRole}
+          currentUserAvatar="👨‍💻"
+        />
+
+        {/* Web3 & Blockchain Center */}
+        <Web3Center
+          isOpen={showWeb3Center}
+          onClose={() => setShowWeb3Center(false)}
+          currentUserId="current-user"
+          currentUserName="Utente Corrente"
+          currentUserRole={currentUserRole}
+          currentUserAvatar="👨‍💻"
+        />
+
+        {/* API Gateway & Microservices Center */}
+        <APIGatewayCenter
+          isOpen={showAPIGatewayCenter}
+          onClose={() => setShowAPIGatewayCenter(false)}
+          currentUserId="current-user"
+          currentUserName="Utente Corrente"
+          currentUserRole={currentUserRole}
+          currentUserAvatar="👨‍💻"
+        />
+
+        {/* DevOps & CI/CD Pipeline Center */}
+        <DevOpsCenter
+          isOpen={showDevOpsCenter}
+          onClose={() => setShowDevOpsCenter(false)}
+          currentUserId="current-user"
+          currentUserName="Utente Corrente"
+          currentUserRole={currentUserRole}
+          currentUserAvatar="👨‍💻"
+        />
+
+        {/* Security & Threat Intelligence Center */}
+        <SecurityCenter
+          isOpen={showSecurityCenter}
+          onClose={() => setShowSecurityCenter(false)}
+          currentUserId="current-user"
+          currentUserName="Utente Corrente"
+          currentUserRole={currentUserRole}
+          currentUserAvatar="👨‍💻"
         />
       </div>
     </DashboardLayout>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import Button from '@/components/ui/Button';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Permit {
   id: string;
@@ -38,6 +39,7 @@ interface ComplianceAlert {
 }
 
 export default function PermitsCompliancePage() {
+  const { t, formatCurrency: fmtCurrency, formatDate: fmtDate } = useLanguage();
   const [permits, setPermits] = useState<Permit[]>([]);
   const [alerts, setAlerts] = useState<ComplianceAlert[]>([]);
   const [loading, setLoading] = useState(true);
@@ -156,26 +158,30 @@ export default function PermitsCompliancePage() {
     }, 1000);
   }, []);
 
+  // Helper functions
+  const formatCurrency = (value: number) => fmtCurrency(value);
+  const formatDate = (date: Date) => fmtDate(date);
+
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'APPROVATO': return 'text-green-600 bg-green-50';
-      case 'IN_ESAME': return 'text-blue-600 bg-blue-50';
-      case 'IN_PREPARAZIONE': return 'text-yellow-600 bg-yellow-50';
-      case 'PRESENTATO': return 'text-purple-600 bg-purple-50';
-      case 'NON_RICHIESTO': return 'text-gray-600 bg-gray-50';
-      case 'RIGETTATO': return 'text-red-600 bg-red-50';
-      case 'SCADUTO': return 'text-red-600 bg-red-100';
-      default: return 'text-gray-600 bg-gray-50';
+      case 'APPROVATO': return 'bg-green-100 text-green-800';
+      case 'IN_ESAME': return 'bg-blue-100 text-blue-800';
+      case 'PRESENTATO': return 'bg-yellow-100 text-yellow-800';
+      case 'IN_PREPARAZIONE': return 'bg-orange-100 text-orange-800';
+      case 'NON_RICHIESTO': return 'bg-gray-100 text-gray-800';
+      case 'RIGETTATO': return 'bg-red-100 text-red-800';
+      case 'SCADUTO': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'CRITICO': return 'text-red-600 bg-red-50 border-red-200';
-      case 'ALTO': return 'text-orange-600 bg-orange-50 border-orange-200';
-      case 'MEDIO': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'BASSO': return 'text-green-600 bg-green-50 border-green-200';
-      default: return 'text-gray-600 bg-gray-50 border-gray-200';
+      case 'CRITICO': return 'bg-red-100 text-red-800 border-red-300';
+      case 'ALTO': return 'bg-orange-100 text-orange-800 border-orange-300';
+      case 'MEDIO': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'BASSO': return 'bg-green-100 text-green-800 border-green-300';
+      default: return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
 
@@ -188,23 +194,10 @@ export default function PermitsCompliancePage() {
     }
   };
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('it-IT', { 
-      style: 'currency', 
-      currency: 'EUR',
-      minimumFractionDigits: 0 
-    }).format(value);
-  };
-
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('it-IT').format(date);
-  };
-
   const getDaysUntil = (date: Date) => {
     const today = new Date();
     const diffTime = date.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
   const filteredPermits = selectedFilter === 'ALL' 
@@ -212,13 +205,23 @@ export default function PermitsCompliancePage() {
     : permits.filter(p => p.category === selectedFilter);
 
   const stats = {
-    total: permits.length,
+    totalPermits: permits.length,
     approved: permits.filter(p => p.status === 'APPROVATO').length,
-    inProgress: permits.filter(p => ['IN_ESAME', 'PRESENTATO', 'IN_PREPARAZIONE'].includes(p.status)).length,
+    inProgress: permits.filter(p => ['IN_PREPARAZIONE', 'PRESENTATO', 'IN_ESAME'].includes(p.status)).length,
     critical: permits.filter(p => p.priority === 'CRITICO').length,
     totalCost: permits.reduce((sum, p) => sum + p.cost, 0),
-    avgProgress: Math.round(permits.reduce((sum, p) => sum + p.progress, 0) / permits.length)
+    averageProgress: Math.round(permits.reduce((sum, p) => sum + p.progress, 0) / permits.length)
   };
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="loading loading-spinner loading-lg"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -226,218 +229,283 @@ export default function PermitsCompliancePage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Sistema Permessi Intelligente</h1>
-            <p className="text-gray-600">AI-powered compliance tracking e gestione autorizzazioni</p>
+            <h1 className="text-3xl font-bold text-gray-900">📋 {t('title', 'permitsCompliance')}</h1>
+            <p className="text-gray-600 mt-1">{t('subtitle', 'permitsCompliance')}</p>
           </div>
-          {/* BuildingIcon removed */}
         </div>
 
-        {/* Tab Navigation */}
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-            {[
-              { id: 'overview', name: 'Overview', icon: '📊' },
-              { id: 'permits', name: 'Permessi', icon: '📋' },
-              { id: 'timeline', name: 'Timeline', icon: '⏱️' },
-              { id: 'alerts', name: 'Alert', icon: '🚨', badge: alerts.length }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`${
-                  activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center gap-2`}
-              >
-                <span>{tab.icon}</span>
-                {tab.name}
-                {tab.badge && (
-                  <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
-                    {tab.badge}
-                  </span>
-                )}
-              </button>
-            ))}
-          </nav>
-        </div>
+        {/* Navigation Tabs */}
+        <div className="bg-white rounded-lg shadow-sm">
+          <div className="border-b">
+            <nav className="flex space-x-8 px-6">
+              {[
+                { key: 'overview', label: t('tabs.overview', 'permitsCompliance') },
+                { key: 'permits', label: t('tabs.permits', 'permitsCompliance') },
+                { key: 'timeline', label: t('tabs.timeline', 'permitsCompliance') },
+                { key: 'alerts', label: t('tabs.alerts', 'permitsCompliance') }
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key as any)}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === tab.key
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
 
-        {/* Overview Tab */}
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-              <div className="bg-white rounded-lg shadow-sm p-4">
-                <div className="text-sm text-gray-600">Totale Permessi</div>
-                <div className="text-2xl font-bold text-blue-600">{stats.total}</div>
-              </div>
-              <div className="bg-white rounded-lg shadow-sm p-4">
-                <div className="text-sm text-gray-600">Approvati</div>
-                <div className="text-2xl font-bold text-green-600">{stats.approved}</div>
-              </div>
-              <div className="bg-white rounded-lg shadow-sm p-4">
-                <div className="text-sm text-gray-600">In Corso</div>
-                <div className="text-2xl font-bold text-yellow-600">{stats.inProgress}</div>
-              </div>
-              <div className="bg-white rounded-lg shadow-sm p-4">
-                <div className="text-sm text-gray-600">Critici</div>
-                <div className="text-2xl font-bold text-red-600">{stats.critical}</div>
-              </div>
-              <div className="bg-white rounded-lg shadow-sm p-4">
-                <div className="text-sm text-gray-600">Costo Totale</div>
-                <div className="text-2xl font-bold text-purple-600">{formatCurrency(stats.totalCost)}</div>
-              </div>
-              <div className="bg-white rounded-lg shadow-sm p-4">
-                <div className="text-sm text-gray-600">Progresso Medio</div>
-                <div className="text-2xl font-bold text-indigo-600">{stats.avgProgress}%</div>
-              </div>
-            </div>
+          {/* Overview Tab */}
+          {activeTab === 'overview' && (
+            <div className="p-6">
+              {/* Key Metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div className="bg-white rounded-lg shadow-sm p-6 border">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">{t('stats.totalPermits', 'permitsCompliance')}</p>
+                      <p className="text-2xl font-bold text-gray-900">{stats.totalPermits}</p>
+                    </div>
+                    <div className="p-3 bg-blue-100 rounded-full">
+                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
 
-            {/* Quick Actions & Recent Activity */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">⚡ Azioni Rapide</h3>
-                <div className="space-y-3">
-                  <Button variant="primary" fullWidth>
-                    🆕 Nuovo Permesso
+                <div className="bg-white rounded-lg shadow-sm p-6 border">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">{t('stats.approved', 'permitsCompliance')}</p>
+                      <p className="text-2xl font-bold text-green-600">{stats.approved}</p>
+                    </div>
+                    <div className="p-3 bg-green-100 rounded-full">
+                      <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow-sm p-6 border">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">{t('stats.inProgress', 'permitsCompliance')}</p>
+                      <p className="text-2xl font-bold text-blue-600">{stats.inProgress}</p>
+                    </div>
+                    <div className="p-3 bg-blue-100 rounded-full">
+                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow-sm p-6 border">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">{t('stats.critical', 'permitsCompliance')}</p>
+                      <p className="text-2xl font-bold text-red-600">{stats.critical}</p>
+                    </div>
+                    <div className="p-3 bg-red-100 rounded-full">
+                      <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow-sm p-6 border">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">{t('stats.totalCost', 'permitsCompliance')}</p>
+                      <p className="text-2xl font-bold text-purple-600">{formatCurrency(stats.totalCost)}</p>
+                    </div>
+                    <div className="p-3 bg-purple-100 rounded-full">
+                      <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow-sm p-6 border">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">{t('stats.averageProgress', 'permitsCompliance')}</p>
+                      <p className="text-2xl font-bold text-orange-600">{stats.averageProgress}%</p>
+                    </div>
+                    <div className="p-3 bg-orange-100 rounded-full">
+                      <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">🚀 {t('quickActions.newPermit', 'permitsCompliance')}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <Button variant="primary" className="w-full">
+                    <span className="text-sm">🆕 {t('quickActions.newPermit', 'permitsCompliance')}</span>
                   </Button>
-                  <Button variant="outline" fullWidth>
-                    📊 Genera Report Compliance
+                  <Button variant="outline" className="w-full">
+                    <span className="text-sm">📊 {t('quickActions.generateReport', 'permitsCompliance')}</span>
                   </Button>
-                  <Button variant="outline" fullWidth>
-                    📅 Programma Sopralluogo
+                  <Button variant="outline" className="w-full">
+                    <span className="text-sm">📅 {t('quickActions.scheduleInspection', 'permitsCompliance')}</span>
                   </Button>
-                  <Button variant="outline" fullWidth>
-                    🔄 Aggiorna Timeline Progetto
+                  <Button variant="outline" className="w-full">
+                    <span className="text-sm">⏰ {t('quickActions.updateTimeline', 'permitsCompliance')}</span>
                   </Button>
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">📈 Permessi per Categoria</h3>
-                <div className="space-y-3">
-                  {['URBANISTICO', 'AMBIENTALE', 'SICUREZZA', 'ENERGETICO'].map((category) => {
-                    const count = permits.filter(p => p.category === category).length;
-                    const percentage = permits.length > 0 ? (count / permits.length) * 100 : 0;
+              {/* Permits by Category */}
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">📂 {t('categories.urban', 'permitsCompliance')}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[
+                    { key: 'URBANISTICO', label: t('categories.urban', 'permitsCompliance') },
+                    { key: 'AMBIENTALE', label: t('categories.environmental', 'permitsCompliance') },
+                    { key: 'SICUREZZA', label: t('categories.safety', 'permitsCompliance') },
+                    { key: 'ENERGETICO', label: t('categories.energy', 'permitsCompliance') }
+                  ].map((category) => {
+                    const categoryPermits = permits.filter(p => p.category === category.key);
+                    const categoryProgress = categoryPermits.length > 0 
+                      ? Math.round(categoryPermits.reduce((sum, p) => sum + p.progress, 0) / categoryPermits.length)
+                      : 0;
                     
                     return (
-                      <div key={category} className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">{category}</span>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-20 bg-gray-200 rounded-full h-2">
-                            <div 
-                              className="bg-blue-600 h-2 rounded-full" 
-                              style={{ width: `${percentage}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-sm font-medium text-gray-900">{count}</span>
+                      <div key={category.key} className="bg-white rounded-lg shadow-sm p-4 border">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium text-gray-900">{category.label}</h4>
+                          <span className="text-sm text-gray-500">{categoryPermits.length}</span>
                         </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full" 
+                            style={{ width: `${categoryProgress}%` }}
+                          ></div>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">{categoryProgress}% {t('stats.averageProgress', 'permitsCompliance')}</p>
                       </div>
                     );
                   })}
                 </div>
               </div>
-            </div>
 
-            {/* Critical Alerts Preview */}
-            {alerts.filter(a => a.severity === 'HIGH').length > 0 && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-red-900 mb-3">🚨 Alert Critici</h3>
-                <div className="space-y-2">
-                  {alerts.filter(a => a.severity === 'HIGH').slice(0, 3).map((alert) => (
-                    <div key={alert.id} className="flex items-start space-x-3">
-                      <div className="flex-shrink-0 w-2 h-2 bg-red-500 rounded-full mt-2"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-red-900">{alert.title}</p>
-                        <p className="text-sm text-red-700">{alert.actionRequired}</p>
+              {/* Critical Alerts */}
+              {alerts.filter(a => a.severity === 'HIGH').length > 0 && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-red-900 mb-3">⚠️ {t('criticalAlerts.title', 'permitsCompliance')}</h3>
+                  <div className="space-y-3">
+                    {alerts.filter(a => a.severity === 'HIGH').slice(0, 3).map((alert) => (
+                      <div key={alert.id} className="flex items-start space-x-3">
+                        <div className="flex-shrink-0 w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-red-900">{alert.title}</h4>
+                          <p className="text-sm text-red-700">{alert.actionRequired}</p>
+                        </div>
                       </div>
-                    </div>
+                    ))}
+                  </div>
+                  <div className="mt-3">
+                    <a href="#" className="text-sm text-red-600 hover:text-red-800 font-medium">
+                      {t('criticalAlerts.seeAllAlerts', 'permitsCompliance')}
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Permits Tab */}
+          {activeTab === 'permits' && (
+            <div className="p-6">
+              {/* Filters */}
+              <div className="mb-6">
+                <div className="flex space-x-2">
+                  {[
+                    { key: 'ALL', label: t('filters.all', 'projectTimeline') },
+                    { key: 'URBANISTICO', label: t('categories.urban', 'permitsCompliance') },
+                    { key: 'AMBIENTALE', label: t('categories.environmental', 'permitsCompliance') },
+                    { key: 'SICUREZZA', label: t('categories.safety', 'permitsCompliance') },
+                    { key: 'ENERGETICO', label: t('categories.energy', 'permitsCompliance') }
+                  ].map((filter) => (
+                    <button
+                      key={filter.key}
+                      onClick={() => setSelectedFilter(filter.key)}
+                      className={`px-3 py-1 rounded-md text-sm font-medium ${
+                        selectedFilter === filter.key
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-white text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      {filter.label}
+                    </button>
                   ))}
                 </div>
-                <div className="mt-3">
-                  <Button variant="outline" size="sm" onClick={() => setActiveTab('alerts')}>
-                    Vedi tutti gli alert →
-                  </Button>
-                </div>
               </div>
-            )}
-          </div>
-        )}
 
-        {/* Permits Tab */}
-        {activeTab === 'permits' && (
-          <div className="space-y-6">
-            {/* Filters */}
-            <div className="flex flex-wrap gap-2">
-              {['ALL', 'URBANISTICO', 'AMBIENTALE', 'SICUREZZA', 'ENERGETICO', 'COMMERCIALE'].map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setSelectedFilter(filter)}
-                  className={`px-3 py-2 rounded-md text-sm font-medium ${
-                    selectedFilter === filter
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {filter === 'ALL' ? 'Tutti' : filter}
-                </button>
-              ))}
-            </div>
-
-            {/* Permits List */}
-            <div className="space-y-4">
-              {loading ? (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
-                </div>
-              ) : (
-                filteredPermits.map((permit) => (
-                  <div key={permit.id} className="bg-white rounded-lg shadow-sm border p-6">
+              {/* Permits List */}
+              <div className="space-y-4">
+                {filteredPermits.map((permit) => (
+                  <div key={permit.id} className="bg-white rounded-lg shadow-sm p-6 border">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900">{permit.name}</h3>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(permit.status)}`}>
-                            {permit.status.replace('_', ' ')}
-                          </span>
-                          <span className={`px-2 py-1 rounded text-xs font-medium border ${getPriorityColor(permit.priority)}`}>
-                            {permit.priority}
-                          </span>
-                        </div>
-                        <div className="text-sm text-gray-600 space-y-1">
-                          <p><strong>Autorità:</strong> {permit.authority}</p>
-                          <p><strong>Scadenza:</strong> {formatDate(permit.requiredBy)} 
-                            <span className={`ml-2 ${getDaysUntil(permit.requiredBy) < 30 ? 'text-red-600' : 'text-gray-500'}`}>
-                              ({getDaysUntil(permit.requiredBy)} giorni)
-                            </span>
-                          </p>
-                          <p><strong>Costo:</strong> {formatCurrency(permit.cost)}</p>
-                          <p><strong>Responsabile:</strong> {permit.assignedTo || 'Non assegnato'}</p>
-                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900">{permit.name}</h3>
+                        <p className="text-sm text-gray-600">{permit.authority}</p>
                       </div>
-                      
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-gray-900 mb-1">{permit.progress}%</div>
-                        <div className="w-20 bg-gray-200 rounded-full h-2 mb-2">
-                          <div 
-                            className="bg-blue-600 h-2 rounded-full" 
-                            style={{ width: `${permit.progress}%` }}
-                          ></div>
+                      <div className="flex items-center space-x-2">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(permit.status)}`}>
+                          {permit.status}
+                        </span>
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${getPriorityColor(permit.priority)}`}>
+                          {permit.priority}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Costo</p>
+                        <p className="text-lg font-semibold text-gray-900">{formatCurrency(permit.cost)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Durata Stimata</p>
+                        <p className="text-lg font-semibold text-gray-900">{permit.estimatedDuration} giorni</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Progresso</p>
+                        <div className="flex items-center space-x-2">
+                          <div className="flex-1 bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-blue-600 h-2 rounded-full" 
+                              style={{ width: `${permit.progress}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-sm font-medium text-gray-900">{permit.progress}%</span>
                         </div>
-                        <div className="text-xs text-gray-500">{permit.currentStep}</div>
                       </div>
                     </div>
 
-                    {permit.dependencies.length > 0 && (
-                      <div className="mb-3">
-                        <span className="text-sm font-medium text-gray-700">Dipendenze: </span>
-                        <span className="text-sm text-gray-600">{permit.dependencies.join(', ')}</span>
+                    {permit.assignedTo && (
+                      <div className="text-sm text-gray-600 mb-3">
+                        <span className="font-medium">Assegnato a:</span> {permit.assignedTo}
                       </div>
                     )}
 
                     {permit.aiRecommendations && permit.aiRecommendations.length > 0 && (
-                      <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                        <h5 className="text-sm font-medium text-blue-900 mb-2">🤖 Raccomandazioni AI:</h5>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <h4 className="text-sm font-medium text-blue-900 mb-2">🤖 AI Recommendations</h4>
                         <ul className="text-sm text-blue-800 space-y-1">
                           {permit.aiRecommendations.map((rec, idx) => (
                             <li key={idx}>• {rec}</li>
@@ -445,129 +513,54 @@ export default function PermitsCompliancePage() {
                         </ul>
                       </div>
                     )}
-
-                    <div className="mt-4 flex space-x-3">
-                      <Button variant="primary" size="sm">
-                        Dettagli
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        Aggiorna Stato
-                      </Button>
-                      {permit.status === 'NON_RICHIESTO' && (
-                        <Button variant="outline" size="sm">
-                          Avvia Pratica
-                        </Button>
-                      )}
-                    </div>
                   </div>
-                ))
-              )}
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Timeline Tab */}
-        {activeTab === 'timeline' && (
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">📅 Timeline Permessi</h3>
-            
-            <div className="space-y-6">
-              {permits.map((permit, idx) => (
-                <div key={permit.id} className="relative">
-                  {idx !== permits.length - 1 && (
-                    <div className="absolute left-4 top-8 bottom-0 w-0.5 bg-gray-300"></div>
-                  )}
-                  
-                  <div className="flex items-start space-x-4">
-                    <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                      permit.status === 'APPROVATO' ? 'bg-green-100 text-green-600' :
-                      permit.status === 'IN_ESAME' ? 'bg-blue-100 text-blue-600' :
-                      permit.status === 'IN_PREPARAZIONE' ? 'bg-yellow-100 text-yellow-600' :
-                      'bg-gray-100 text-gray-600'
-                    }`}>
-                      {permit.status === 'APPROVATO' ? '✓' : 
-                       permit.status === 'IN_ESAME' ? '⏳' :
-                       permit.status === 'IN_PREPARAZIONE' ? '📝' : '○'}
-                    </div>
-                    
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-semibold text-gray-900">{permit.name}</h4>
-                        <span className="text-sm text-gray-500">{formatDate(permit.requiredBy)}</span>
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">{permit.currentStep}</p>
-                      
-                      <div className="mt-2 flex items-center space-x-4">
-                        <div className="flex items-center space-x-1">
-                          <div className="w-16 bg-gray-200 rounded-full h-1.5">
-                            <div 
-                              className="bg-blue-600 h-1.5 rounded-full" 
-                              style={{ width: `${permit.progress}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-xs text-gray-500">{permit.progress}%</span>
-                        </div>
-                        
-                        <span className="text-xs text-gray-500">
-                          {permit.assignedTo || 'Non assegnato'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+          {/* Timeline Tab */}
+          {activeTab === 'timeline' && (
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">📅 Timeline Permessi</h3>
+              <p className="text-gray-600">Timeline view implementation...</p>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Alerts Tab */}
-        {activeTab === 'alerts' && (
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900">🚨 Alert & Notifiche</h3>
-              <Button variant="outline" size="sm">
-                Segna tutti come letti
-              </Button>
-            </div>
-
-            {alerts.map((alert) => (
-              <div key={alert.id} className="bg-white rounded-lg shadow-sm border p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h4 className="font-semibold text-gray-900">{alert.title}</h4>
-                      <span className={`px-2 py-1 rounded text-xs font-medium border ${getSeverityColor(alert.severity)}`}>
+          {/* Alerts Tab */}
+          {activeTab === 'alerts' && (
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">🚨 {t('tabs.alerts', 'permitsCompliance')}</h3>
+              <div className="space-y-4">
+                {alerts.map((alert) => (
+                  <div key={alert.id} className={`bg-white rounded-lg shadow-sm p-6 border-l-4 ${
+                    alert.severity === 'HIGH' ? 'border-red-500' :
+                    alert.severity === 'MEDIUM' ? 'border-yellow-500' :
+                    'border-blue-500'
+                  }`}>
+                    <div className="flex items-start justify-between mb-3">
+                      <h4 className="text-lg font-semibold text-gray-900">{alert.title}</h4>
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${
+                        alert.severity === 'HIGH' ? 'bg-red-100 text-red-800' :
+                        alert.severity === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-blue-100 text-blue-800'
+                      }`}>
                         {alert.severity}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 mb-3">{alert.description}</p>
-                    <div className="bg-yellow-50 border border-yellow-200 rounded p-3 mb-3">
-                      <p className="text-sm font-medium text-yellow-800">Azione richiesta:</p>
-                      <p className="text-sm text-yellow-700">{alert.actionRequired}</p>
-                      {alert.deadline && (
-                        <p className="text-xs text-yellow-600 mt-1">
-                          Scadenza: {formatDate(alert.deadline)}
-                        </p>
-                      )}
-                    </div>
+                    <p className="text-gray-600 mb-3">{alert.description}</p>
+                    <p className="text-sm font-medium text-gray-900">{alert.actionRequired}</p>
+                    {alert.deadline && (
+                      <p className="text-sm text-gray-500 mt-2">
+                        Scadenza: {formatDate(alert.deadline)}
+                      </p>
+                    )}
                   </div>
-                </div>
-                
-                <div className="flex space-x-3">
-                  <Button variant="primary" size="sm">
-                    Gestisci
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    Posticipa
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    Segna come letto
-                  </Button>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
     </DashboardLayout>
   );

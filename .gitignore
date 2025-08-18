@@ -97,3 +97,17 @@ jspm_packages/
 
 # TernJS port file
 .tern-port
+
+# Prisma
+/generated/prisma
+prisma/migrations/
+.env.example
+
+# Database
+*.db
+*.sqlite
+
+# Cache e build
+.cache/
+build/
+dist/
