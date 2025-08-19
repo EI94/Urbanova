@@ -302,7 +302,7 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
                         </button>
                       ) : (
                         <button
-                          onClick={() => notificationService.markAsUnread(notification.id, userId)}
+                          onClick={() => firebaseNotificationService.markAsRead(notification.id)}
                           className="text-xs text-gray-600 hover:text-gray-700 hover:bg-gray-100 px-2 py-1 rounded transition-colors"
                         >
                           {t('markAsUnread', 'notifications')}

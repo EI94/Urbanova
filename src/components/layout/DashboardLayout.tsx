@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { notificationService } from '@/lib/notificationService';
-import { userProfileService } from '@/lib/userProfileService';
+import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
+import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 import { UserProfile } from '@/types/userProfile';
 import { NotificationStats } from '@/types/notifications';
 import LanguageSelector from '@/components/ui/LanguageSelector';
@@ -63,32 +63,34 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
 
   useEffect(() => {
     // Sottoscrizione agli eventi per aggiornamenti in tempo reale
-    const unsubscribeNotifications = notificationService.subscribe((event) => {
-      if (event.detail.type === 'notification_created' || 
-          event.detail.type === 'notification_updated' ||
-          event.detail.type === 'notification_deleted') {
-        loadNotificationStats();
-      }
-    });
+    // Rimuovo il listener per ora - Firebase ha real-time updates nativi
+    // const unsubscribeNotifications = notificationService.subscribe((event) => {
+    //   if (event.detail.type === 'notification_created' || 
+    //       event.detail.type === 'notification_updated' ||
+    //       event.detail.type === 'notification_deleted') {
+    //     loadNotificationStats();
+    //   }
+    // });
 
-    const unsubscribeProfile = userProfileService.subscribe((event) => {
-      if (event.detail.type === 'profile_updated' || 
-          event.detail.type === 'avatar_updated') {
-        loadUserProfile();
-      }
-    });
+    // Rimuovo il listener per ora - Firebase ha real-time updates nativi
+    // const unsubscribeProfile = userProfileService.subscribe((event) => {
+    //   if (event.detail.type === 'profile_updated' || 
+    //       event.detail.type === 'avatar_updated') {
+    //     loadUserProfile();
+    //   }
+    // });
 
     return () => {
-      unsubscribeNotifications();
-      unsubscribeProfile();
+      // unsubscribeNotifications();
+      // unsubscribeProfile();
     };
   }, []);
 
   const loadUserData = async () => {
     try {
       const [profile, stats] = await Promise.all([
-        userProfileService.getUserProfile(userId),
-        notificationService.getNotificationStats(userId),
+        firebaseUserProfileService.getUserProfile(userId),
+        firebaseNotificationService.getNotificationStats(userId),
       ]);
       
       setUserProfile(profile);
@@ -100,7 +102,7 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
 
   const loadUserProfile = async () => {
     try {
-      const profile = await userProfileService.getUserProfile(userId);
+      const profile = await firebaseUserProfileService.getUserProfile(userId);
       setUserProfile(profile);
     } catch (error) {
       console.error('Error loading user profile:', error);
@@ -109,7 +111,7 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
 
   const loadNotificationStats = async () => {
     try {
-      const stats = await notificationService.getNotificationStats(userId);
+      const stats = await firebaseNotificationService.getNotificationStats(userId);
       setNotificationStats(stats);
     } catch (error) {
       console.error('Error loading notification stats:', error);
