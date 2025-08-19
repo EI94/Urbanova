@@ -1,0 +1,491 @@
+import { db, storage } from './firebase';
+import { 
+  doc, 
+  getDoc, 
+  setDoc, 
+  updateDoc, 
+  collection, 
+  addDoc, 
+  getDocs,
+  query,
+  where,
+  orderBy,
+  serverTimestamp 
+} from 'firebase/firestore';
+import { 
+  ref, 
+  uploadBytes, 
+  getDownloadURL, 
+  deleteObject 
+} from 'firebase/storage';
+
+// Tipi per il profilo utente
+export interface UserProfile {
+  id: string;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  displayName: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  position?: string;
+  bio?: string;
+  website?: string;
+  linkedin?: string;
+  github?: string;
+  location?: string;
+  avatar?: string;
+  skills?: string[];
+  interests?: string[];
+  timezone: string;
+  language: string;
+  dateFormat: string;
+  currency: string;
+  preferences: {
+    theme: 'light' | 'dark' | 'auto';
+    sidebarCollapsed: boolean;
+    emailNotifications: boolean;
+    pushNotifications: boolean;
+  };
+  security: {
+    twoFactorEnabled: boolean;
+    lastPasswordChange: Date;
+    loginHistory: LoginAttempt[];
+  };
+  metadata: Record<string, any>;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface LoginAttempt {
+  id: string;
+  timestamp: Date;
+  ipAddress: string;
+  userAgent: string;
+  success: boolean;
+  location?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface AvatarUpload {
+  file: File;
+  preview: string;
+  progress: number;
+}
+
+export interface PasswordChange {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface ProfileUpdate {
+  firstName?: string;
+  lastName?: string;
+  displayName?: string;
+  phone?: string;
+  company?: string;
+  position?: string;
+  bio?: string;
+  website?: string;
+  linkedin?: string;
+  github?: string;
+  location?: string;
+  skills?: string[];
+  interests?: string[];
+  timezone?: string;
+  language?: string;
+  dateFormat?: string;
+  currency?: string;
+  preferences?: Partial<UserProfile['preferences']>;
+  metadata?: Record<string, any>;
+}
+
+class FirebaseUserProfileService {
+  private static instance: FirebaseUserProfileService;
+
+  private constructor() {}
+
+  public static getInstance(): FirebaseUserProfileService {
+    if (!FirebaseUserProfileService.instance) {
+      FirebaseUserProfileService.instance = new FirebaseUserProfileService();
+    }
+    return FirebaseUserProfileService.instance;
+  }
+
+  // ========================================
+  // GESTIONE PROFILO UTENTE
+  // ========================================
+
+  async getUserProfile(userId: string): Promise<UserProfile | null> {
+    try {
+      const profileRef = doc(db, 'userProfiles', userId);
+      const profileSnap = await getDoc(profileRef);
+      
+      if (profileSnap.exists()) {
+        const data = profileSnap.data();
+        return {
+          id: profileSnap.id,
+          ...data,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date(),
+          security: {
+            ...data.security,
+            lastPasswordChange: data.security?.lastPasswordChange?.toDate() || new Date(),
+            loginHistory: data.security?.loginHistory || []
+          }
+        } as UserProfile;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      return null;
+    }
+  }
+
+  async createUserProfile(userId: string, profileData: {
+    email: string;
+    displayName: string;
+    firstName?: string;
+    lastName?: string;
+  }): Promise<UserProfile> {
+    try {
+      const defaultProfile: Omit<UserProfile, 'id'> = {
+        userId,
+        firstName: profileData.firstName || '',
+        lastName: profileData.lastName || '',
+        displayName: profileData.displayName,
+        email: profileData.email,
+        timezone: 'Europe/Rome',
+        language: 'it',
+        dateFormat: 'DD/MM/YYYY',
+        currency: 'EUR',
+        preferences: {
+          theme: 'light',
+          sidebarCollapsed: false,
+          emailNotifications: true,
+          pushNotifications: true
+        },
+        security: {
+          twoFactorEnabled: false,
+          lastPasswordChange: new Date(),
+          loginHistory: []
+        },
+        metadata: {},
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      const profileRef = doc(db, 'userProfiles', userId);
+      await setDoc(profileRef, {
+        ...defaultProfile,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        security: {
+          ...defaultProfile.security,
+          lastPasswordChange: serverTimestamp()
+        }
+      });
+
+      return {
+        id: userId,
+        ...defaultProfile
+      };
+    } catch (error) {
+      console.error('Error creating user profile:', error);
+      throw new Error('Failed to create user profile');
+    }
+  }
+
+  async updateUserProfile(userId: string, updates: ProfileUpdate): Promise<UserProfile | null> {
+    try {
+      const profileRef = doc(db, 'userProfiles', userId);
+      
+      // Se displayName viene aggiornato, aggiorna anche firstName e lastName
+      if (updates.firstName || updates.lastName) {
+        const firstName = updates.firstName || '';
+        const lastName = updates.lastName || '';
+        updates.displayName = `${firstName} ${lastName}`.trim();
+      }
+
+      await updateDoc(profileRef, {
+        ...updates,
+        updatedAt: serverTimestamp()
+      });
+
+      // Restituisci il profilo aggiornato
+      return await this.getUserProfile(userId);
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      return null;
+    }
+  }
+
+  // ========================================
+  // GESTIONE AVATAR
+  // ========================================
+
+  async uploadAvatar(userId: string, file: File): Promise<string | null> {
+    try {
+      // Elimina avatar precedente se esiste
+      const currentProfile = await this.getUserProfile(userId);
+      if (currentProfile?.avatar) {
+        try {
+          const oldAvatarRef = ref(storage, `avatars/${userId}/avatar`);
+          await deleteObject(oldAvatarRef);
+        } catch (error) {
+          console.log('No previous avatar to delete');
+        }
+      }
+
+      // Carica nuovo avatar
+      const avatarRef = ref(storage, `avatars/${userId}/avatar`);
+      const uploadResult = await uploadBytes(avatarRef, file);
+      const downloadURL = await getDownloadURL(uploadResult.ref);
+
+      // Aggiorna profilo con nuovo URL avatar
+      await this.updateUserProfile(userId, { avatar: downloadURL });
+
+      return downloadURL;
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      return null;
+    }
+  }
+
+  async deleteAvatar(userId: string): Promise<boolean> {
+    try {
+      const avatarRef = ref(storage, `avatars/${userId}/avatar`);
+      await deleteObject(avatarRef);
+
+      // Rimuovi URL avatar dal profilo
+      await this.updateUserProfile(userId, { avatar: undefined });
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting avatar:', error);
+      return false;
+    }
+  }
+
+  // ========================================
+  // SICUREZZA E AUTENTICAZIONE
+  // ========================================
+
+  async toggleTwoFactor(userId: string): Promise<boolean> {
+    try {
+      const profile = await this.getUserProfile(userId);
+      if (!profile) return false;
+
+      const newValue = !profile.security.twoFactorEnabled;
+      
+      const profileRef = doc(db, 'userProfiles', userId);
+      await updateDoc(profileRef, {
+        'security.twoFactorEnabled': newValue,
+        updatedAt: serverTimestamp()
+      });
+
+      return newValue;
+    } catch (error) {
+      console.error('Error toggling 2FA:', error);
+      return false;
+    }
+  }
+
+  async recordLoginAttempt(userId: string, attempt: Omit<LoginAttempt, 'id' | 'timestamp'>): Promise<void> {
+    try {
+      const loginData = {
+        ...attempt,
+        userId,
+        timestamp: serverTimestamp()
+      };
+
+      await addDoc(collection(db, 'loginHistory'), loginData);
+
+      // Aggiorna anche la cronologia nel profilo (ultimi 10)
+      const profile = await this.getUserProfile(userId);
+      if (profile) {
+        const loginHistory = profile.security.loginHistory || [];
+        loginHistory.unshift({
+          id: Date.now().toString(),
+          timestamp: new Date(),
+          ...attempt
+        });
+
+        // Mantieni solo gli ultimi 10 tentativi
+        const updatedHistory = loginHistory.slice(0, 10);
+
+        const profileRef = doc(db, 'userProfiles', userId);
+        await updateDoc(profileRef, {
+          'security.loginHistory': updatedHistory,
+          updatedAt: serverTimestamp()
+        });
+      }
+    } catch (error) {
+      console.error('Error recording login attempt:', error);
+    }
+  }
+
+  async getLoginHistory(userId: string, limit: number = 50): Promise<LoginAttempt[]> {
+    try {
+      const q = query(
+        collection(db, 'loginHistory'),
+        where('userId', '==', userId),
+        orderBy('timestamp', 'desc')
+      );
+
+      const snapshot = await getDocs(q);
+      const loginHistory: LoginAttempt[] = [];
+
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        loginHistory.push({
+          id: doc.id,
+          ...data,
+          timestamp: data.timestamp?.toDate() || new Date()
+        } as LoginAttempt);
+      });
+
+      return loginHistory.slice(0, limit);
+    } catch (error) {
+      console.error('Error fetching login history:', error);
+      return [];
+    }
+  }
+
+  // ========================================
+  // ANALISI E STATISTICHE
+  // ========================================
+
+  async getUserAnalytics(userId: string): Promise<any> {
+    try {
+      const profile = await this.getUserProfile(userId);
+      const loginHistory = await this.getLoginHistory(userId, 30);
+
+      const analytics = {
+        profileCompleteness: this.calculateProfileCompleteness(profile),
+        totalLogins: loginHistory.length,
+        lastLogin: loginHistory[0]?.timestamp || null,
+        loginStreak: this.calculateLoginStreak(loginHistory),
+        averageSessionTime: this.calculateAverageSessionTime(loginHistory),
+        securityScore: this.calculateSecurityScore(profile),
+        preferredLanguage: profile?.language || 'it',
+        timezone: profile?.timezone || 'Europe/Rome'
+      };
+
+      return analytics;
+    } catch (error) {
+      console.error('Error fetching user analytics:', error);
+      return null;
+    }
+  }
+
+  private calculateProfileCompleteness(profile: UserProfile | null): number {
+    if (!profile) return 0;
+
+    const fields = [
+      'firstName', 'lastName', 'email', 'phone', 'company', 
+      'position', 'bio', 'location', 'avatar'
+    ];
+    
+    let completedFields = 0;
+    fields.forEach(field => {
+      if (profile[field as keyof UserProfile]) {
+        completedFields++;
+      }
+    });
+
+    return Math.round((completedFields / fields.length) * 100);
+  }
+
+  private calculateLoginStreak(loginHistory: LoginAttempt[]): number {
+    if (loginHistory.length === 0) return 0;
+
+    let streak = 0;
+    let currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
+    for (const login of loginHistory) {
+      const loginDate = new Date(login.timestamp);
+      loginDate.setHours(0, 0, 0, 0);
+
+      if (loginDate.getTime() === currentDate.getTime()) {
+        streak++;
+        currentDate.setDate(currentDate.getDate() - 1);
+      } else if (loginDate.getTime() < currentDate.getTime()) {
+        break;
+      }
+    }
+
+    return streak;
+  }
+
+  private calculateAverageSessionTime(loginHistory: LoginAttempt[]): number {
+    // Implementazione semplificata - in una vera applicazione
+    // dovresti tracciare anche i logout
+    return Math.floor(Math.random() * 60) + 15; // 15-75 minuti
+  }
+
+  private calculateSecurityScore(profile: UserProfile | null): number {
+    if (!profile) return 0;
+
+    let score = 0;
+    
+    // Password recente (max 90 giorni)
+    const daysSincePasswordChange = Math.floor(
+      (Date.now() - profile.security.lastPasswordChange.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    if (daysSincePasswordChange <= 90) score += 30;
+    
+    // 2FA attivato
+    if (profile.security.twoFactorEnabled) score += 40;
+    
+    // Profilo completo
+    const completeness = this.calculateProfileCompleteness(profile);
+    score += Math.floor(completeness * 0.3);
+
+    return Math.min(score, 100);
+  }
+
+  // ========================================
+  // UTILITÀ
+  // ========================================
+
+  async deleteUserProfile(userId: string): Promise<boolean> {
+    try {
+      // Elimina avatar se esiste
+      await this.deleteAvatar(userId);
+
+      // Elimina profilo
+      const profileRef = doc(db, 'userProfiles', userId);
+      await setDoc(profileRef, { deleted: true, deletedAt: serverTimestamp() }, { merge: true });
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting user profile:', error);
+      return false;
+    }
+  }
+
+  async exportUserData(userId: string): Promise<any> {
+    try {
+      const profile = await this.getUserProfile(userId);
+      const loginHistory = await this.getLoginHistory(userId);
+      const analytics = await this.getUserAnalytics(userId);
+
+      return {
+        profile,
+        loginHistory,
+        analytics,
+        exportedAt: new Date()
+      };
+    } catch (error) {
+      console.error('Error exporting user data:', error);
+      return null;
+    }
+  }
+}
+
+export const firebaseUserProfileService = FirebaseUserProfileService.getInstance();

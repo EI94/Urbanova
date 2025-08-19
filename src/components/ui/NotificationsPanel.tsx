@@ -3,8 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { notificationService } from '@/lib/notificationService';
-import { Notification, NotificationStats } from '@/types/notifications';
+import { firebaseNotificationService, Notification, NotificationStats } from '@/lib/firebaseNotificationService';
 import { 
   BellIcon, 
   CheckIcon, 
@@ -35,31 +34,33 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
   useEffect(() => {
     if (isOpen && currentUser) {
       loadNotifications();
+      // Crea notifica di benvenuto se è il primo accesso
       if (notifications.length === 0) {
-        notificationService.createSampleNotifications(userId);
+        firebaseNotificationService.createWelcomeNotification(userId);
       }
     }
   }, [isOpen, currentUser]);
 
-  useEffect(() => {
-    const unsubscribe = notificationService.subscribe((event) => {
-      if (event.detail.type === 'notification_created' || 
-          event.detail.type === 'notification_updated' ||
-          event.detail.type === 'notification_deleted') {
-        loadNotifications();
-      }
-    });
+  // Rimuovo il listener per ora - Firebase ha real-time updates nativi
+  // useEffect(() => {
+  //   const unsubscribe = notificationService.subscribe((event) => {
+  //     if (event.detail.type === 'notification_created' || 
+  //         event.detail.type === 'notification_updated' ||
+  //         event.detail.type === 'notification_deleted') {
+  //       loadNotifications();
+  //     }
+  //   });
 
-    return unsubscribe;
-  }, []);
+  //   return unsubscribe;
+  // }, []);
 
   const loadNotifications = async () => {
     try {
       setLoading(true);
       const [allNotifs, unreadNotifs, notifStats] = await Promise.all([
-        notificationService.getNotifications(userId),
-        notificationService.getUnreadNotifications(userId),
-        notificationService.getNotificationStats(userId),
+        firebaseNotificationService.getNotifications(userId),
+        firebaseNotificationService.getNotifications(userId, { unreadOnly: true }),
+        firebaseNotificationService.getNotificationStats(userId),
       ]);
       
       setNotifications(allNotifs);
@@ -73,7 +74,8 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
-      await notificationService.markAsRead(notificationId, userId);
+      await firebaseNotificationService.markAsRead(notificationId);
+      loadNotifications();
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }
@@ -81,7 +83,8 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
 
   const handleMarkAllAsRead = async () => {
     try {
-      await notificationService.markAllAsRead(userId);
+      await firebaseNotificationService.markAllAsRead(userId);
+      loadNotifications();
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
     }
@@ -89,7 +92,8 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
 
   const handleDeleteNotification = async (notificationId: string) => {
     try {
-      await notificationService.deleteNotification(notificationId, userId);
+      await firebaseNotificationService.deleteNotification(notificationId);
+      loadNotifications();
     } catch (error) {
       console.error('Error deleting notification:', error);
     }
@@ -97,7 +101,8 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
 
   const handleDismissNotification = async (notificationId: string) => {
     try {
-      await notificationService.dismissNotification(notificationId, userId);
+      await firebaseNotificationService.archiveNotification(notificationId);
+      loadNotifications();
     } catch (error) {
       console.error('Error dismissing notification:', error);
     }

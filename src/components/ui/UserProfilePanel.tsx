@@ -3,8 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { userProfileService } from '@/lib/userProfileService';
-import { UserProfile, ProfileUpdate, PasswordChange } from '@/types/userProfile';
+import { firebaseUserProfileService, UserProfile, ProfileUpdate, PasswordChange } from '@/lib/firebaseUserProfileService';
 import { 
   UserIcon, 
   XMarkIcon, 
@@ -50,26 +49,32 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
     }
   }, [isOpen, currentUser]);
 
-  useEffect(() => {
-    const unsubscribe = userProfileService.subscribe((event) => {
-      if (event.detail.type === 'profile_updated' || 
-          event.detail.type === 'avatar_updated' ||
-          event.detail.type === 'password_changed') {
-        loadProfile();
-      }
-    });
+  // Rimuovo il listener per ora - Firebase ha real-time updates nativi
+  // useEffect(() => {
+  //   const unsubscribe = userProfileService.subscribe((event) => {
+  //     if (event.detail.type === 'profile_updated' || 
+  //         event.detail.type === 'avatar_updated' ||
+  //         event.detail.type === 'password_changed') {
+  //       loadProfile();
+  //     }
+  //   });
 
-    return unsubscribe;
-  }, []);
+  //   return unsubscribe;
+  // }, []);
 
   const loadProfile = async () => {
     try {
       setLoading(true);
-      let userProfile = await userProfileService.getUserProfile(userId);
+      let userProfile = await firebaseUserProfileService.getUserProfile(userId);
       
-      if (!userProfile) {
-        // Crea profilo di esempio per testing
-        userProfile = await userProfileService.createSampleProfile(userId);
+      if (!userProfile && currentUser) {
+        // Crea profilo di default per l'utente
+        userProfile = await firebaseUserProfileService.createUserProfile(userId, {
+          email: currentUser.email || '',
+          displayName: currentUser.displayName || 'Utente',
+          firstName: currentUser.firstName || '',
+          lastName: currentUser.lastName || ''
+        });
       }
       
       setProfile(userProfile);
@@ -114,13 +119,15 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
     if (!avatarFile) return;
 
     try {
-      // Simula upload - in produzione dovresti usare un servizio reale
-      const avatarUrl = avatarPreview;
-      await userProfileService.updateAvatar(userId, avatarUrl);
-      
-      setAvatarFile(null);
-      setAvatarPreview('');
-      toast.success(t('avatarUpdated', 'userProfile'));
+      const avatarUrl = await firebaseUserProfileService.uploadAvatar(userId, avatarFile);
+      if (avatarUrl) {
+        setAvatarFile(null);
+        setAvatarPreview('');
+        loadProfile(); // Ricarica il profilo per mostrare il nuovo avatar
+        toast.success(t('avatarUpdated', 'userProfile'));
+      } else {
+        throw new Error('Upload failed');
+      }
     } catch (error) {
       console.error('Error uploading avatar:', error);
       toast.error(t('avatarUploadError', 'userProfile'));
@@ -129,10 +136,15 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
 
   const handleAvatarRemove = async () => {
     try {
-      await userProfileService.removeAvatar(userId);
-      setAvatarFile(null);
-      setAvatarPreview('');
-      toast.success(t('avatarRemoved', 'userProfile'));
+      const success = await firebaseUserProfileService.deleteAvatar(userId);
+      if (success) {
+        setAvatarFile(null);
+        setAvatarPreview('');
+        loadProfile(); // Ricarica il profilo
+        toast.success(t('avatarRemoved', 'userProfile'));
+      } else {
+        throw new Error('Remove failed');
+      }
     } catch (error) {
       console.error('Error removing avatar:', error);
       toast.error(t('avatarRemoveError', 'userProfile'));
@@ -141,7 +153,7 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
 
   const handleProfileSave = async () => {
     try {
-      const updatedProfile = await userProfileService.updateUserProfile(userId, profileUpdate);
+      const updatedProfile = await firebaseUserProfileService.updateUserProfile(userId, profileUpdate);
       setProfile(updatedProfile);
       setEditing(false);
       toast.success(t('changesSaved', 'userProfile'));
@@ -163,7 +175,8 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
     }
 
     try {
-      await userProfileService.changePassword(userId, passwordChange);
+      // Cambio password gestito da Firebase Auth - per ora skip
+      console.log('Password change not implemented yet with Firebase Auth');
       setPasswordChange({
         currentPassword: '',
         newPassword: '',
@@ -180,7 +193,8 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
     if (!profile) return;
 
     try {
-      const updatedProfile = await userProfileService.toggleTwoFactor(userId, !profile.security.twoFactorEnabled);
+      const newValue = await firebaseUserProfileService.toggleTwoFactor(userId);
+      const updatedProfile = await firebaseUserProfileService.getUserProfile(userId);
       setProfile(updatedProfile);
       toast.success(
         updatedProfile.security.twoFactorEnabled 

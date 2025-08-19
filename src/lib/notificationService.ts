@@ -1,4 +1,18 @@
-import { prisma } from './database';
+import { db } from './firebase';
+import { 
+  collection, 
+  doc, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  getDocs, 
+  getDoc, 
+  query, 
+  where, 
+  orderBy, 
+  limit,
+  serverTimestamp 
+} from 'firebase/firestore';
 import { 
   Notification, 
   NotificationPreferences, 
@@ -39,28 +53,34 @@ class NotificationService {
     }>;
   }): Promise<Notification> {
     try {
-      const notification = await prisma.notification.create({
-        data: {
-          userId: data.userId,
-          type: data.type,
-          priority: data.priority,
-          title: data.title,
-          message: data.message,
-          data: data.data,
-          expiresAt: data.expiresAt,
-          actions: data.actions ? {
-            create: data.actions
-          } : undefined
-        },
-        include: {
-          actions: true
-        }
-      });
+      const notificationData = {
+        userId: data.userId,
+        type: data.type,
+        priority: data.priority,
+        title: data.title,
+        message: data.message,
+        data: data.data || {},
+        expiresAt: data.expiresAt || null,
+        actions: data.actions || [],
+        isRead: false,
+        isArchived: false,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      const docRef = await addDoc(collection(db, 'notifications'), notificationData);
+      
+      const notification: Notification = {
+        id: docRef.id,
+        ...notificationData,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      } as Notification;
 
       // Emetti evento per aggiornamenti real-time
       this.emitEvent('notification_created', { notification });
 
-      return this.mapToNotificationType(notification);
+      return notification;
     } catch (error) {
       console.error('Error creating notification:', error);
       throw new Error('Failed to create notification');
