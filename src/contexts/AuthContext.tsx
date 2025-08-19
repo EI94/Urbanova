@@ -1,20 +1,13 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-// Rimosso le importazioni di Firebase non necessarie per il mock
-
-// Interfaccia per l'utente
-interface User {
-  uid: string;
-  email: string | null;
-  displayName: string | null;
-}
+import { firebaseAuthService, User } from '@/lib/firebaseAuthService';
 
 // Interfaccia per il contesto di autenticazione
 interface AuthContextType {
   currentUser: User | null;
   loading: boolean;
-  signup: (email: string, password: string, displayName: string) => Promise<void>;
+  signup: (email: string, password: string, displayName: string, firstName?: string, lastName?: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
@@ -42,58 +35,67 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Per ora utilizziamo funzioni mock per simulare l'autenticazione
-  // In un'implementazione reale, qui utilizzeresti Firebase, NextAuth o altra soluzione
-  async function signup(email: string, password: string, displayName: string) {
-    // Simulazione registrazione
-    console.log('Registrazione con:', email, password, displayName);
-    // Simuliamo un utente creato
-    setCurrentUser({
-      uid: Math.random().toString(36).substring(2),
-      email,
-      displayName
-    });
-    // In una vera implementazione qui chiameresti createUserWithEmailAndPassword di Firebase
-    return Promise.resolve();
+  // Funzione per registrazione
+  async function signup(email: string, password: string, displayName: string, firstName?: string, lastName?: string) {
+    try {
+      const result = await firebaseAuthService.signup(email, password, displayName, firstName, lastName);
+      
+      if (result.success) {
+        setCurrentUser(result.user);
+      } else {
+        throw new Error(result.error || 'Errore durante la registrazione');
+      }
+    } catch (error: any) {
+      console.error('Errore durante la registrazione:', error);
+      throw error;
+    }
   }
 
+  // Funzione per login
   async function login(email: string, password: string) {
-    // Simulazione login
-    console.log('Login con:', email, password);
-    // Simuliamo un utente autenticato
-    setCurrentUser({
-      uid: Math.random().toString(36).substring(2),
-      email,
-      displayName: 'Utente di prova'
-    });
-    // In una vera implementazione qui chiameresti signInWithEmailAndPassword di Firebase
-    return Promise.resolve();
+    try {
+      const result = await firebaseAuthService.login(email, password);
+      
+      if (result.success) {
+        setCurrentUser(result.user);
+      } else {
+        throw new Error(result.error || 'Errore durante il login');
+      }
+    } catch (error: any) {
+      console.error('Errore durante il login:', error);
+      throw error;
+    }
   }
 
+  // Funzione per logout
   async function logout() {
-    // Simulazione logout
-    console.log('Logout');
-    setCurrentUser(null);
-    // In una vera implementazione qui chiameresti signOut di Firebase
-    return Promise.resolve();
+    try {
+      await firebaseAuthService.logout();
+      setCurrentUser(null);
+    } catch (error: any) {
+      console.error('Errore durante il logout:', error);
+      throw error;
+    }
   }
 
+  // Funzione per reset password
   async function resetPassword(email: string) {
-    // Simulazione reset password
-    console.log('Reset password per:', email);
-    // In una vera implementazione qui chiameresti sendPasswordResetEmail di Firebase
-    return Promise.resolve();
+    try {
+      await firebaseAuthService.resetPassword(email);
+    } catch (error: any) {
+      console.error('Errore durante il reset password:', error);
+      throw error;
+    }
   }
 
-  // Effetto per controllare lo stato dell'autenticazione al montaggio del componente
+  // Effetto per controllare lo stato dell'autenticazione
   useEffect(() => {
-    // Simuliamo il caricamento iniziale
-    const timer = setTimeout(() => {
+    const unsubscribe = firebaseAuthService.onAuthStateChanged((user: User | null) => {
+      setCurrentUser(user);
       setLoading(false);
-    }, 1000);
+    });
 
-    return () => clearTimeout(timer);
-    // In una vera implementazione qui utilizzeresti onAuthStateChanged di Firebase
+    return unsubscribe;
   }, []);
 
   const value = {

@@ -41,10 +41,14 @@ export default function LoginPage() {
       // Gestisci gli errori di Firebase
       let errorMessage = 'Si è verificato un errore durante il login';
       
-      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+      if (error.message) {
+        errorMessage = error.message;
+      } else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
         errorMessage = 'Email o password non validi';
       } else if (error.code === 'auth/too-many-requests') {
         errorMessage = 'Troppi tentativi di accesso. Riprova più tardi';
+      } else if (error.code === 'auth/user-disabled') {
+        errorMessage = 'Account disabilitato';
       }
       
       setError(errorMessage);

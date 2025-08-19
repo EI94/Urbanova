@@ -53,7 +53,7 @@ export default function RegisterPage() {
     try {
       // Registrazione con Firebase
       const displayName = `${formData.firstName} ${formData.lastName}`;
-      await signup(formData.email, formData.password, displayName);
+      await signup(formData.email, formData.password, displayName, formData.firstName, formData.lastName);
       
       // Mostra messaggio di successo
       toast('Richiesta di accesso inviata con successo! Verrai contattato a breve per l\'attivazione del tuo account.', { icon: '✅' });
@@ -64,7 +64,9 @@ export default function RegisterPage() {
       // Gestisci gli errori di Firebase
       let errorMessage = 'Si è verificato un errore durante la registrazione';
       
-      if (error.code === 'auth/email-already-in-use') {
+      if (error.message) {
+        errorMessage = error.message;
+      } else if (error.code === 'auth/email-already-in-use') {
         errorMessage = 'Questo indirizzo email è già in uso';
       } else if (error.code === 'auth/invalid-email') {
         errorMessage = 'L\'indirizzo email non è valido';
