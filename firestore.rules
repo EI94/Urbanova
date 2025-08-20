@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Regole per utenti
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Regole per progetti
+    match /projects/{projectId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Regole per progetti di fattibilità
+    match /feasibilityProjects/{projectId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Regole per notifiche
+    match /notifications/{notificationId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+    }
+    
+    // Regole per preferenze notifiche
+    match /notificationPreferences/{userId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid == userId;
+    }
+    
+    // Regole per profili utente
+    match /userProfiles/{userId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid == userId;
+    }
+    
+    // Regole per cronologia login
+    match /loginHistory/{logId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Regole per documenti
+    match /documents/{documentId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Regole per meeting
+    match /meetings/{meetingId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Regole per task
+    match /tasks/{taskId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Regole per confronti fattibilità
+    match /feasibilityComparisons/{comparisonId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Regole per test di connessione
+    match /test/{docId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Regole per altre collezioni
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

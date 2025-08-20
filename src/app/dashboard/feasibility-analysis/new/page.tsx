@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
+import { firebaseDebugService } from '@/lib/firebaseDebugService';
 import { 
   CalculatorIcon, 
   BuildingIcon, 
@@ -281,6 +282,18 @@ export default function NewFeasibilityProjectPage() {
 
     setLoading(true);
     try {
+      console.log('🔄 Avvio salvataggio progetto fattibilità...');
+      
+      // Test connessione Firebase prima del salvataggio
+      console.log('🔍 Test connessione Firebase...');
+      const diagnostic = await firebaseDebugService.runFullDiagnostic();
+      
+      if (diagnostic.overall === 'failed') {
+        console.error('❌ Problemi di connessione Firebase rilevati:', diagnostic);
+        toast.error('❌ Problemi di connessione Firebase. Controlla la console per dettagli.');
+        return;
+      }
+      
       const finalProject = {
         ...project,
         costs: calculatedCosts,
@@ -289,12 +302,56 @@ export default function NewFeasibilityProjectPage() {
         isTargetAchieved: calculatedResults.margin >= (project.targetMargin || 30)
       } as Omit<FeasibilityProject, 'id' | 'createdAt' | 'updatedAt'>;
 
-      const projectId = await feasibilityService.createProject(finalProject);
+      console.log('📝 Dati progetto da salvare:', finalProject);
+      
+      // Prova prima con il metodo standard
+      let projectId: string;
+      try {
+        projectId = await feasibilityService.createProject(finalProject);
+        console.log('✅ Progetto creato con metodo standard:', projectId);
+      } catch (standardError) {
+        console.warn('⚠️ Metodo standard fallito, prova con transazione:', standardError);
+        
+        // Fallback: prova con transazione
+        try {
+          projectId = await feasibilityService.createProjectWithTransaction(finalProject);
+          console.log('✅ Progetto creato con transazione:', projectId);
+        } catch (transactionError) {
+          console.error('❌ Anche la transazione è fallita:', transactionError);
+          
+          // Fallback finale: prova con batch
+          try {
+            projectId = await feasibilityService.createProjectWithBatch(finalProject);
+            console.log('✅ Progetto creato con batch:', projectId);
+          } catch (batchError) {
+            console.error('❌ Tutti i metodi sono falliti:', batchError);
+            throw batchError;
+          }
+        }
+      }
+      
       toast.success('✅ Progetto creato con successo!');
       router.push(`/dashboard/feasibility-analysis/${projectId}`);
-    } catch (error) {
-      console.error('Errore creazione progetto:', error);
-      toast.error('❌ Errore nella creazione del progetto');
+    } catch (error: any) {
+      console.error('❌ Errore creazione progetto:', error);
+      
+      // Log dettagliato dell'errore
+      firebaseDebugService.logFirebaseError(error, 'Creazione progetto fattibilità');
+      
+      // Messaggio di errore più specifico
+      let errorMessage = '❌ Errore nella creazione del progetto';
+      
+      if (error.code === 'permission-denied') {
+        errorMessage = '❌ Errore permessi: Verifica le regole di sicurezza Firestore';
+      } else if (error.code === 'unavailable') {
+        errorMessage = '❌ Errore connessione: Verifica la connessione internet e lo stato Firebase';
+      } else if (error.code === 'unauthenticated') {
+        errorMessage = '❌ Errore autenticazione: Effettua nuovamente il login';
+      } else if (error.message) {
+        errorMessage = `❌ Errore: ${error.message}`;
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

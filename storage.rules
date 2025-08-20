@@ -1,0 +1,20 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Regole per avatar utente
+    match /avatars/{userId}/{allPaths=**} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid == userId;
+    }
+    
+    // Regole per documenti progetto
+    match /projects/{projectId}/{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Regole per altri file
+    match /{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

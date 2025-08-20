@@ -1,6 +1,6 @@
 // Servizio Analisi di Fattibilità - Urbanova AI
 import { db } from './firebase';
-import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where, orderBy, serverTimestamp, DocumentData, getDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where, orderBy, serverTimestamp, DocumentData, getDoc, writeBatch, runTransaction } from 'firebase/firestore';
 
 export interface FeasibilityProject {
   id?: string;
@@ -84,6 +84,18 @@ export class FeasibilityService {
   // Crea nuovo progetto di fattibilità
   async createProject(projectData: Omit<FeasibilityProject, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
     try {
+      console.log('🔄 Creazione progetto fattibilità:', projectData);
+      
+      // Verifica che i dati siano validi
+      if (!projectData.name || !projectData.address) {
+        throw new Error('Nome e indirizzo sono obbligatori');
+      }
+      
+      // Verifica che l'utente sia autenticato
+      if (!projectData.createdBy) {
+        throw new Error('Utente non autenticato');
+      }
+      
       const project: Omit<FeasibilityProject, 'id'> = {
         ...projectData,
         createdAt: new Date(),
@@ -91,29 +103,134 @@ export class FeasibilityService {
       };
 
       const docRef = await addDoc(collection(db, this.COLLECTION), project);
-      console.log(`✅ Progetto fattibilità creato: ${project.name}`);
+      console.log(`✅ Progetto fattibilità creato: ${project.name} con ID: ${docRef.id}`);
       return docRef.id;
     } catch (error) {
       console.error('❌ Errore creazione progetto:', error);
-      throw error;
+      throw new Error(`Impossibile creare il progetto: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`);
     }
   }
 
-  // Ottieni tutti i progetti
+  // Crea progetto con transazione per maggiore sicurezza
+  async createProjectWithTransaction(projectData: Omit<FeasibilityProject, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    try {
+      console.log('🔄 Creazione progetto fattibilità con transazione:', projectData);
+      
+      // Verifica che i dati siano validi
+      if (!projectData.name || !projectData.address) {
+        throw new Error('Nome e indirizzo sono obbligatori');
+      }
+      
+      // Verifica che l'utente sia autenticato
+      if (!projectData.createdBy) {
+        throw new Error('Utente non autenticato');
+      }
+      
+      return await runTransaction(db, async (transaction) => {
+        const project: Omit<FeasibilityProject, 'id'> = {
+          ...projectData,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+
+        const docRef = doc(collection(db, this.COLLECTION));
+        transaction.set(docRef, project);
+        
+        console.log(`✅ Progetto fattibilità creato con transazione: ${project.name} con ID: ${docRef.id}`);
+        return docRef.id;
+      });
+    } catch (error) {
+      console.error('❌ Errore creazione progetto con transazione:', error);
+      throw new Error(`Impossibile creare il progetto: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`);
+    }
+  }
+
+  // Crea progetto con batch per operazioni multiple
+  async createProjectWithBatch(projectData: Omit<FeasibilityProject, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    try {
+      console.log('🔄 Creazione progetto fattibilità con batch:', projectData);
+      
+      // Verifica che i dati siano validi
+      if (!projectData.name || !projectData.address) {
+        throw new Error('Nome e indirizzo sono obbligatori');
+      }
+      
+      // Verifica che l'utente sia autenticato
+      if (!projectData.createdBy) {
+        throw new Error('Utente non autenticato');
+      }
+      
+      const batch = writeBatch(db);
+      
+      const project: Omit<FeasibilityProject, 'id'> = {
+        ...projectData,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      const docRef = doc(collection(db, this.COLLECTION));
+      batch.set(docRef, project);
+      
+      // Commit del batch
+      await batch.commit();
+      
+      console.log(`✅ Progetto fattibilità creato con batch: ${project.name} con ID: ${docRef.id}`);
+      return docRef.id;
+    } catch (error) {
+      console.error('❌ Errore creazione progetto con batch:', error);
+      throw new Error(`Impossibile creare il progetto: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`);
+    }
+  }
+
+  // Ottieni tutti i progetti di fattibilità
   async getAllProjects(): Promise<FeasibilityProject[]> {
     try {
+      console.log('🔄 Caricamento tutti i progetti fattibilità...');
+      
+      const projectsRef = collection(db, this.COLLECTION);
+      const q = query(projectsRef, orderBy('createdAt', 'desc'));
+      const snapshot = await getDocs(q);
+      
+      const projects = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as FeasibilityProject[];
+      
+      console.log(`✅ Progetti fattibilità caricati: ${projects.length}`);
+      return projects;
+    } catch (error) {
+      console.error('❌ Errore caricamento progetti:', error);
+      return [];
+    }
+  }
+
+  // Ottieni progetti per utente
+  async getProjectsByUser(userId: string): Promise<FeasibilityProject[]> {
+    try {
+      console.log(`🔄 Caricamento progetti fattibilità per utente: ${userId}`);
+      
+      if (!userId) {
+        console.warn('⚠️ UserId non fornito');
+        return [];
+      }
+      
+      const projectsRef = collection(db, this.COLLECTION);
       const q = query(
-        collection(db, this.COLLECTION),
+        projectsRef, 
+        where('createdBy', '==', userId),
         orderBy('createdAt', 'desc')
       );
       
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({
+      const projects = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       })) as FeasibilityProject[];
+      
+      console.log(`✅ Progetti fattibilità utente caricati: ${projects.length}`);
+      return projects;
     } catch (error) {
-      console.error('❌ Errore recupero progetti:', error);
+      console.error(`❌ Errore caricamento progetti utente ${userId}:`, error);
       return [];
     }
   }
@@ -121,298 +238,184 @@ export class FeasibilityService {
   // Ottieni progetto per ID
   async getProjectById(id: string): Promise<FeasibilityProject | null> {
     try {
+      console.log(`🔄 Caricamento progetto fattibilità: ${id}`);
+      
+      if (!id) {
+        console.warn('⚠️ ID progetto non fornito');
+        return null;
+      }
+      
       const docRef = doc(db, this.COLLECTION, id);
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
-        return {
+        const project = {
           id: docSnap.id,
           ...docSnap.data()
         } as FeasibilityProject;
+        
+        console.log(`✅ Progetto fattibilità caricato: ${project.name}`);
+        return project;
+      } else {
+        console.log(`⚠️ Progetto fattibilità non trovato: ${id}`);
+        return null;
       }
-      return null;
     } catch (error) {
-      console.error('❌ Errore recupero progetto:', error);
+      console.error(`❌ Errore caricamento progetto ${id}:`, error);
       return null;
     }
   }
 
-  // Aggiorna progetto
+  // Aggiorna progetto esistente
   async updateProject(id: string, updates: Partial<FeasibilityProject>): Promise<void> {
     try {
-      const docRef = doc(db, this.COLLECTION, id);
-      await updateDoc(docRef, {
+      console.log(`🔄 Aggiornamento progetto fattibilità: ${id}`, updates);
+      
+      if (!id) {
+        throw new Error('ID progetto non fornito');
+      }
+      
+      const projectRef = doc(db, this.COLLECTION, id);
+      await updateDoc(projectRef, {
         ...updates,
         updatedAt: new Date()
       });
-      console.log(`✅ Progetto aggiornato: ${id}`);
+      
+      console.log(`✅ Progetto fattibilità ${id} aggiornato`);
     } catch (error) {
-      console.error('❌ Errore aggiornamento progetto:', error);
-      throw error;
+      console.error(`❌ Errore aggiornamento progetto ${id}:`, error);
+      throw new Error(`Impossibile aggiornare il progetto: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`);
     }
   }
 
   // Elimina progetto
   async deleteProject(id: string): Promise<void> {
     try {
-      const docRef = doc(db, this.COLLECTION, id);
-      await deleteDoc(docRef);
-      console.log(`✅ Progetto eliminato: ${id}`);
+      console.log(`🔄 Eliminazione progetto fattibilità: ${id}`);
+      
+      if (!id) {
+        throw new Error('ID progetto non fornito');
+      }
+      
+      const projectRef = doc(db, this.COLLECTION, id);
+      await deleteDoc(projectRef);
+      
+      console.log(`✅ Progetto fattibilità ${id} eliminato`);
     } catch (error) {
-      console.error('❌ Errore eliminazione progetto:', error);
-      throw error;
+      console.error(`❌ Errore eliminazione progetto ${id}:`, error);
+      throw new Error(`Impossibile eliminare il progetto: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`);
     }
   }
 
-  // Calcola automaticamente i costi
-  calculateCosts(project: Partial<FeasibilityProject>): FeasibilityProject['costs'] {
-    const land = project.costs?.land || {
-      purchasePrice: 0,
-      purchaseTaxes: 0,
-      intermediationFees: 0,
-      subtotal: 0
-    };
-
-    const construction = project.costs?.construction || {
-      excavation: 0,
-      structures: 0,
-      systems: 0,
-      finishes: 0,
-      subtotal: 0
-    };
-
-    // Calcoli automatici
-    const landSubtotal = land.purchasePrice + land.purchaseTaxes + land.intermediationFees;
-    const constructionSubtotal = construction.excavation + construction.structures + construction.systems + construction.finishes;
-    
-    const externalWorks = project.costs?.externalWorks || 0;
-    const concessionFees = project.costs?.concessionFees || 0;
-    const design = project.costs?.design || (constructionSubtotal * 0.07); // 7% del costo costruzione
-    const bankCharges = project.costs?.bankCharges || 0;
-    const exchange = project.costs?.exchange || 0;
-    const insurance = project.costs?.insurance || (constructionSubtotal * 0.025); // 2.5% del costo costruzione
-
-    const total = landSubtotal + constructionSubtotal + externalWorks + concessionFees + design + bankCharges + exchange + insurance;
-
-    return {
-      land: { ...land, subtotal: landSubtotal },
-      construction: { ...construction, subtotal: constructionSubtotal },
-      externalWorks,
-      concessionFees,
-      design,
-      bankCharges,
-      exchange,
-      insurance,
-      total
-    };
-  }
-
-  // Calcola automaticamente i ricavi
-  calculateRevenues(project: Partial<FeasibilityProject>): FeasibilityProject['revenues'] {
-    const units = project.revenues?.units || 0;
-    const averageArea = project.revenues?.averageArea || 0;
-    const pricePerSqm = project.revenues?.pricePerSqm || 0;
-    const otherRevenues = project.revenues?.otherRevenues || 0;
-
-    const revenuePerUnit = averageArea * pricePerSqm;
-    const totalSales = units * revenuePerUnit;
-    const total = totalSales + otherRevenues;
-
-    return {
-      units,
-      averageArea,
-      pricePerSqm,
-      revenuePerUnit,
-      totalSales,
-      otherRevenues,
-      total
-    };
-  }
-
-  // Calcola risultati finanziari
-  calculateResults(costs: FeasibilityProject['costs'], revenues: FeasibilityProject['revenues'], targetMargin: number): FeasibilityProject['results'] {
-    const profit = revenues.total - costs.total;
-    const margin = costs.total > 0 ? (profit / costs.total) * 100 : 0;
-    const roi = costs.total > 0 ? (profit / costs.total) * 100 : 0;
-    const paybackPeriod = profit > 0 ? (costs.total / profit) * 12 : 0; // mesi
-
-    return {
-      profit,
-      margin,
-      roi,
-      paybackPeriod
-    };
-  }
-
-  // Crea progetto da terreno AI Land Scraping
-  async createFromLand(landData: any, userId: string): Promise<string> {
-    const projectName = `Progetto ${landData.location} - ${landData.area}m²`;
-    
-    const project: Omit<FeasibilityProject, 'id' | 'createdAt' | 'updatedAt'> = {
-      name: projectName,
-      address: landData.location,
-      status: 'PIANIFICAZIONE',
-      startDate: new Date(),
-      constructionStartDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // +90 giorni
-      duration: 18,
-      costs: {
-        land: {
-          purchasePrice: landData.price,
-          purchaseTaxes: landData.price * 0.09, // 9% imposte
-          intermediationFees: landData.price * 0.03, // 3% commissioni
-          subtotal: 0
-        },
-        construction: {
-          excavation: 0,
-          structures: 0,
-          systems: 0,
-          finishes: 0,
-          subtotal: 0
-        },
-        externalWorks: 0,
-        concessionFees: 0,
-        design: 0,
-        bankCharges: 0,
-        exchange: 0,
-        insurance: 0,
-        total: 0
-      },
-      revenues: {
-        units: 2,
-        averageArea: landData.area / 2,
-        pricePerSqm: 1700,
-        revenuePerUnit: 0,
-        totalSales: 0,
-        otherRevenues: 0,
-        total: 0
-      },
-      results: {
-        profit: 0,
-        margin: 0,
-        roi: 0,
-        paybackPeriod: 0
-      },
-      targetMargin: 30,
-      isTargetAchieved: false,
-      createdBy: userId,
-      sourceLandId: landData.id,
-      notes: `Creato automaticamente da terreno: ${landData.title}`
-    };
-
-    // Calcola automaticamente tutti i valori
-    project.costs = this.calculateCosts(project);
-    project.revenues = this.calculateRevenues(project);
-    project.results = this.calculateResults(project.costs, project.revenues, project.targetMargin);
-    project.isTargetAchieved = project.results.margin >= project.targetMargin;
-
-    return await this.createProject(project);
-  }
-
-  // Ottieni classifica progetti per marginalità
-  async getProjectsRanking(): Promise<FeasibilityProject[]> {
-    const projects = await this.getAllProjects();
-    return projects.sort((a, b) => b.results.margin - a.results.margin);
-  }
-
-  // Confronta due progetti
-  async compareProjects(project1Id: string, project2Id: string, userId: string): Promise<FeasibilityComparison> {
-    const project1 = await this.getProjectById(project1Id);
-    const project2 = await this.getProjectById(project2Id);
-
-    if (!project1 || !project2) {
-      throw new Error('Progetti non trovati');
+  // Test connessione Firestore
+  async testConnection(): Promise<boolean> {
+    try {
+      console.log('🔄 Test connessione Firestore per fattibilità...');
+      
+      // Prova a leggere un documento di test
+      const testRef = doc(db, 'test', 'feasibility');
+      await getDoc(testRef);
+      
+      console.log('✅ Connessione Firestore fattibilità OK');
+      return true;
+    } catch (error) {
+      console.error('❌ Errore connessione Firestore fattibilità:', error);
+      return false;
     }
-
-    const insights = this.generateComparisonInsights(project1, project2);
-
-    const comparison: Omit<FeasibilityComparison, 'id'> = {
-      name: `Confronto: ${project1.name} vs ${project2.name}`,
-      project1Id,
-      project2Id,
-      comparisonDate: new Date(),
-      createdBy: userId,
-      insights
-    };
-
-    const docRef = await addDoc(collection(db, this.COMPARISON_COLLECTION), comparison);
-    return { id: docRef.id, ...comparison };
   }
 
-  // Genera insights per confronto
-  private generateComparisonInsights(project1: FeasibilityProject, project2: FeasibilityProject): string[] {
-    const insights: string[] = [];
-
-    // Confronto marginalità
-    if (project1.results.margin > project2.results.margin) {
-      insights.push(`${project1.name} ha una marginalità superiore del ${(project1.results.margin - project2.results.margin).toFixed(1)}%`);
-    } else {
-      insights.push(`${project2.name} ha una marginalità superiore del ${(project2.results.margin - project1.results.margin).toFixed(1)}%`);
-    }
-
-    // Confronto ROI
-    if (project1.results.roi > project2.results.roi) {
-      insights.push(`${project1.name} offre un ROI migliore (${project1.results.roi.toFixed(1)}% vs ${project2.results.roi.toFixed(1)}%)`);
-    } else {
-      insights.push(`${project2.name} offre un ROI migliore (${project2.results.roi.toFixed(1)}% vs ${project1.results.roi.toFixed(1)}%)`);
-    }
-
-    // Confronto payback
-    if (project1.results.paybackPeriod < project2.results.paybackPeriod) {
-      insights.push(`${project1.name} ha un tempo di ritorno più breve (${project1.results.paybackPeriod.toFixed(1)} mesi vs ${project2.results.paybackPeriod.toFixed(1)} mesi)`);
-    } else {
-      insights.push(`${project2.name} ha un tempo di ritorno più breve (${project2.results.paybackPeriod.toFixed(1)} mesi vs ${project1.results.paybackPeriod.toFixed(1)} mesi)`);
-    }
-
-    // Confronto costi
-    const costDiff = ((project1.costs.total - project2.costs.total) / project2.costs.total) * 100;
-    if (costDiff > 0) {
-      insights.push(`${project1.name} ha costi totali superiori del ${costDiff.toFixed(1)}%`);
-    } else {
-      insights.push(`${project2.name} ha costi totali superiori del ${Math.abs(costDiff).toFixed(1)}%`);
-    }
-
-    return insights;
-  }
-
-  // Ottieni statistiche generali
-  async getStatistics(): Promise<{
-    totalProjects: number;
-    averageMargin: number;
-    totalInvestment: number;
-    totalProfit: number;
-    projectsOnTarget: number;
-    bestProject: FeasibilityProject | null;
-  }> {
-    const projects = await this.getAllProjects();
-    
-    if (projects.length === 0) {
+  // Calcola fattibilità del progetto
+  calculateFeasibility(project: FeasibilityProject): {
+    isFeasible: boolean;
+    score: number;
+    risks: string[];
+    recommendations: string[];
+  } {
+    try {
+      console.log('🔄 Calcolo fattibilità progetto:', project.name);
+      
+      let score = 0;
+      const risks: string[] = [];
+      const recommendations: string[] = [];
+      
+      // Analisi costi
+      const totalCosts = project.costs.total;
+      const totalRevenues = project.revenues.total;
+      
+      if (totalCosts > 0 && totalRevenues > 0) {
+        const margin = ((totalRevenues - totalCosts) / totalRevenues) * 100;
+        score += Math.min(margin * 2, 40); // Max 40 punti per margine
+        
+        if (margin < project.targetMargin) {
+          risks.push(`Margine inferiore al target (${margin.toFixed(1)}% vs ${project.targetMargin}%)`);
+          recommendations.push('Ridurre i costi o aumentare i ricavi');
+        }
+      }
+      
+      // Analisi durata
+      if (project.duration <= 24) {
+        score += 20; // Progetti brevi sono preferibili
+      } else if (project.duration <= 36) {
+        score += 15;
+      } else {
+        score += 10;
+        risks.push('Durata progetto elevata');
+        recommendations.push('Valutare possibilità di accelerazione');
+      }
+      
+      // Analisi area
+      if (project.totalArea && project.totalArea > 0) {
+        if (project.totalArea <= 500) {
+          score += 15;
+        } else if (project.totalArea <= 1000) {
+          score += 10;
+        } else {
+          score += 5;
+          risks.push('Area progetto molto estesa');
+        }
+      }
+      
+      // Analisi ROI
+      if (project.results.roi > 0) {
+        if (project.results.roi >= 20) {
+          score += 25;
+        } else if (project.results.roi >= 15) {
+          score += 20;
+        } else if (project.results.roi >= 10) {
+          score += 15;
+        } else {
+          score += 10;
+          risks.push('ROI basso');
+          recommendations.push('Valutare strategie per migliorare la redditività');
+        }
+      }
+      
+      const isFeasible = score >= 60;
+      
+      if (isFeasible) {
+        recommendations.push('Progetto fattibile - procedere con cautela');
+      } else {
+        recommendations.push('Progetto non fattibile - richiede revisione');
+      }
+      
+      console.log(`✅ Fattibilità calcolata: ${score}/100 - Fattibile: ${isFeasible}`);
+      
       return {
-        totalProjects: 0,
-        averageMargin: 0,
-        totalInvestment: 0,
-        totalProfit: 0,
-        projectsOnTarget: 0,
-        bestProject: null
+        isFeasible,
+        score: Math.round(score),
+        risks,
+        recommendations
+      };
+    } catch (error) {
+      console.error('❌ Errore calcolo fattibilità:', error);
+      return {
+        isFeasible: false,
+        score: 0,
+        risks: ['Errore nel calcolo'],
+        recommendations: ['Contattare supporto tecnico']
       };
     }
-
-    const totalProjects = projects.length;
-    const averageMargin = projects.reduce((sum, p) => sum + p.results.margin, 0) / totalProjects;
-    const totalInvestment = projects.reduce((sum, p) => sum + p.costs.total, 0);
-    const totalProfit = projects.reduce((sum, p) => sum + p.results.profit, 0);
-    const projectsOnTarget = projects.filter(p => p.isTargetAchieved).length;
-    const bestProject = projects.sort((a, b) => b.results.margin - a.results.margin)[0];
-
-    return {
-      totalProjects,
-      averageMargin,
-      totalInvestment,
-      totalProfit,
-      projectsOnTarget,
-      bestProject
-    };
   }
 }
 
-// Istanza singleton
 export const feasibilityService = new FeasibilityService(); 
