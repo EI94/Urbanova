@@ -324,6 +324,167 @@ export class FeasibilityService {
     }
   }
 
+  // Calcola i costi del progetto
+  calculateCosts(project: Partial<FeasibilityProject>): {
+    land: {
+      purchasePrice: number;
+      purchaseTaxes: number;
+      intermediationFees: number;
+      subtotal: number;
+    };
+    construction: {
+      excavation: number;
+      structures: number;
+      systems: number;
+      finishes: number;
+      subtotal: number;
+    };
+    externalWorks: number;
+    concessionFees: number;
+    design: number;
+    bankCharges: number;
+    exchange: number;
+    insurance: number;
+    total: number;
+  } {
+    try {
+      console.log('🔄 Calcolo costi progetto...');
+      
+      const costs = {
+        land: {
+          purchasePrice: project.costs?.land?.purchasePrice || 0,
+          purchaseTaxes: project.costs?.land?.purchaseTaxes || 0,
+          intermediationFees: project.costs?.land?.intermediationFees || 0,
+          subtotal: 0
+        },
+        construction: {
+          excavation: project.costs?.construction?.excavation || 0,
+          structures: project.costs?.construction?.structures || 0,
+          systems: project.costs?.construction?.systems || 0,
+          finishes: project.costs?.construction?.finishes || 0,
+          subtotal: 0
+        },
+        externalWorks: project.costs?.externalWorks || 0,
+        concessionFees: project.costs?.concessionFees || 0,
+        design: project.costs?.design || 0,
+        bankCharges: project.costs?.bankCharges || 0,
+        exchange: project.costs?.exchange || 0,
+        insurance: project.costs?.insurance || 0,
+        total: 0
+      };
+      
+      // Calcola subtotali
+      costs.land.subtotal = costs.land.purchasePrice + costs.land.purchaseTaxes + costs.land.intermediationFees;
+      costs.construction.subtotal = costs.construction.excavation + costs.construction.structures + costs.construction.systems + costs.construction.finishes;
+      
+      // Calcola totale
+      costs.total = costs.land.subtotal + costs.construction.subtotal + costs.externalWorks + costs.concessionFees + costs.design + costs.bankCharges + costs.exchange + costs.insurance;
+      
+      console.log('✅ Costi calcolati:', costs);
+      return costs;
+    } catch (error) {
+      console.error('❌ Errore calcolo costi:', error);
+      return {
+        land: { purchasePrice: 0, purchaseTaxes: 0, intermediationFees: 0, subtotal: 0 },
+        construction: { excavation: 0, structures: 0, systems: 0, finishes: 0, subtotal: 0 },
+        externalWorks: 0,
+        concessionFees: 0,
+        design: 0,
+        bankCharges: 0,
+        exchange: 0,
+        insurance: 0,
+        total: 0
+      };
+    }
+  }
+
+  // Calcola i ricavi del progetto
+  calculateRevenues(project: Partial<FeasibilityProject>): {
+    units: number;
+    averageArea: number;
+    pricePerSqm: number;
+    revenuePerUnit: number;
+    totalSales: number;
+    otherRevenues: number;
+    total: number;
+  } {
+    try {
+      console.log('🔄 Calcolo ricavi progetto...');
+      
+      const revenues = {
+        units: project.revenues?.units || 0,
+        averageArea: project.revenues?.averageArea || 0,
+        pricePerSqm: project.revenues?.pricePerSqm || 0,
+        revenuePerUnit: 0,
+        totalSales: 0,
+        otherRevenues: project.revenues?.otherRevenues || 0,
+        total: 0
+      };
+      
+      // Calcola ricavi per unità e totali
+      revenues.revenuePerUnit = revenues.averageArea * revenues.pricePerSqm;
+      revenues.totalSales = revenues.units * revenues.revenuePerUnit;
+      revenues.total = revenues.totalSales + revenues.otherRevenues;
+      
+      console.log('✅ Ricavi calcolati:', revenues);
+      return revenues;
+    } catch (error) {
+      console.error('❌ Errore calcolo ricavi:', error);
+      return {
+        units: 0,
+        averageArea: 0,
+        pricePerSqm: 0,
+        revenuePerUnit: 0,
+        totalSales: 0,
+        otherRevenues: 0,
+        total: 0
+      };
+    }
+  }
+
+  // Calcola i risultati del progetto
+  calculateResults(costs: any, revenues: any, targetMargin: number): {
+    profit: number;
+    margin: number;
+    roi: number;
+    paybackPeriod: number;
+  } {
+    try {
+      console.log('🔄 Calcolo risultati progetto...');
+      
+      const totalCosts = costs.total || 0;
+      const totalRevenues = revenues.total || 0;
+      
+      const profit = totalRevenues - totalCosts;
+      const margin = totalRevenues > 0 ? (profit / totalRevenues) * 100 : 0;
+      const roi = totalCosts > 0 ? (profit / totalCosts) * 100 : 0;
+      
+      // Calcola payback period (semplificato)
+      let paybackPeriod = 0;
+      if (profit > 0 && totalCosts > 0) {
+        paybackPeriod = (totalCosts / profit) * 12; // in mesi
+      }
+      
+      const results = {
+        profit: Math.round(profit),
+        margin: Math.round(margin * 100) / 100, // 2 decimali
+        roi: Math.round(roi * 100) / 100,
+        paybackPeriod: Math.round(paybackPeriod * 10) / 10 // 1 decimale
+      };
+      
+      console.log('✅ Risultati calcolati:', results);
+      return results;
+    } catch (error) {
+      console.error('❌ Errore calcolo risultati:', error);
+      return {
+        profit: 0,
+        margin: 0,
+        roi: 0,
+        paybackPeriod: 0
+      };
+    }
+  }
+
   // Calcola fattibilità del progetto
   calculateFeasibility(project: FeasibilityProject): {
     isFeasible: boolean;

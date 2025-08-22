@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
 import { firebaseDebugService } from '@/lib/firebaseDebugService';
+import { feasibilityTestService } from '@/lib/feasibilityTestService';
 import { 
   CalculatorIcon, 
   BuildingIcon, 
@@ -410,23 +411,47 @@ export default function NewFeasibilityProjectPage() {
               </p>
             </div>
           </div>
-          <button 
-            onClick={handleSave}
-            disabled={loading}
-            className="btn btn-primary"
-          >
-            {loading ? (
-              <>
-                <div className="loading loading-spinner loading-sm mr-2"></div>
-                Salvataggio...
-              </>
-            ) : (
-              <>
-                <SaveIcon className="h-4 w-4 mr-2" />
-                Salva Progetto
-              </>
-            )}
-          </button>
+          <div className="flex space-x-2">
+            <button 
+              onClick={async () => {
+                try {
+                  console.log('🧪 Test connessione Firebase...');
+                  const testResults = await feasibilityTestService.runAllTests();
+                  console.log('🧪 Risultati test:', testResults);
+                  
+                  if (testResults.summary.successful > 0) {
+                    toast.success(`✅ Test completati: ${testResults.summary.successful}/${testResults.summary.total} metodi funzionano`);
+                  } else {
+                    toast.error('❌ Tutti i test sono falliti. Controlla la console per dettagli.');
+                  }
+                } catch (error) {
+                  console.error('❌ Errore durante i test:', error);
+                  toast.error('❌ Errore durante i test Firebase');
+                }
+              }}
+              className="btn btn-secondary"
+            >
+              🧪 Test Firebase
+            </button>
+            
+            <button 
+              onClick={handleSave}
+              disabled={loading}
+              className="btn btn-primary"
+            >
+              {loading ? (
+                <>
+                  <div className="loading loading-spinner loading-sm mr-2"></div>
+                  Salvataggio...
+                </>
+              ) : (
+                <>
+                  <SaveIcon className="h-4 w-4 mr-2" />
+                  Salva Progetto
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
