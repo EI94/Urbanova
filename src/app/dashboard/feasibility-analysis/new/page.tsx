@@ -6,6 +6,8 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
 import { firebaseDebugService } from '@/lib/firebaseDebugService';
 import { feasibilityTestService } from '@/lib/feasibilityTestService';
+import FeasibilityReportGenerator from '@/components/ui/FeasibilityReportGenerator';
+import { useState } from 'react';
 import { 
   CalculatorIcon, 
   BuildingIcon, 
@@ -30,6 +32,8 @@ export default function NewFeasibilityProjectPage() {
   const [loading, setLoading] = useState(false);
   const [marketDataLoading, setMarketDataLoading] = useState(false);
   const [marketData, setMarketData] = useState<any>(null);
+  const [showReportGenerator, setShowReportGenerator] = useState(false);
+  const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
   const [insuranceFlags, setInsuranceFlags] = useState({
     constructionInsurance: false,
     financingInsurance: false
@@ -331,8 +335,9 @@ export default function NewFeasibilityProjectPage() {
         }
       }
       
-      toast.success('✅ Progetto creato con successo!');
-      router.push(`/dashboard/feasibility-analysis/${projectId}`);
+      setSavedProjectId(projectId);
+      toast.success('✅ Progetto creato con successo! Ora puoi generare il report.');
+      setShowReportGenerator(true);
     } catch (error: any) {
       console.error('❌ Errore creazione progetto:', error);
       
@@ -450,6 +455,14 @@ export default function NewFeasibilityProjectPage() {
                   Salva Progetto
                 </>
               )}
+            </button>
+            
+            <button 
+              onClick={() => setShowReportGenerator(true)}
+              disabled={!project.name || !project.address}
+              className="btn btn-secondary"
+            >
+              📊 Genera Report
             </button>
           </div>
         </div>
@@ -1247,9 +1260,117 @@ export default function NewFeasibilityProjectPage() {
                 </div>
               </div>
             </div>
+
+            {/* Azioni Rapide */}
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-200">
+              <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
+                🚀 Azioni Rapide
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button
+                  onClick={() => setShowReportGenerator(true)}
+                  disabled={!project.name || !project.address}
+                  className="btn btn-primary w-full"
+                >
+                  📊 Genera Report
+                </button>
+                
+                <button
+                  onClick={() => {
+                    if (savedProjectId) {
+                      router.push(`/dashboard/feasibility-analysis/${savedProjectId}`);
+                    } else {
+                      toast.error('Salva prima il progetto per visualizzarlo');
+                    }
+                  }}
+                  disabled={!savedProjectId}
+                  className="btn btn-secondary w-full"
+                >
+                  👁️ Visualizza Progetto
+                </button>
+                
+                <button
+                  onClick={() => {
+                    if (savedProjectId) {
+                      // Condividi link diretto
+                      const url = `${window.location.origin}/dashboard/feasibility-analysis/${savedProjectId}`;
+                      navigator.clipboard.writeText(url);
+                      toast.success('Link copiato negli appunti! 📋');
+                    } else {
+                      toast.error('Salva prima il progetto per condividerlo');
+                    }
+                  }}
+                  disabled={!savedProjectId}
+                  className="btn btn-outline w-full"
+                >
+                  🔗 Condividi Link
+                </button>
+              </div>
+              
+              <div className="mt-4 text-sm text-gray-600 text-center">
+                {savedProjectId ? (
+                  <span className="text-green-600">✅ Progetto salvato e pronto per la condivisione</span>
+                ) : (
+                  <span className="text-orange-600">⚠️ Salva il progetto per abilitare tutte le funzionalità</span>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Generatore Report - Mostrato quando richiesto */}
+      {showReportGenerator && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">🎯 Genera Report di Fattibilità</h2>
+                <button
+                  onClick={() => setShowReportGenerator(false)}
+                  className="text-gray-400 hover:text-gray-600 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+              
+                             <FeasibilityReportGenerator
+                 analysis={{
+                   id: savedProjectId || 'draft-project',
+                  title: project.name || 'Studio di Fattibilità',
+                  location: project.address || 'Località non specificata',
+                  propertyType: 'Progetto Immobiliare',
+                  totalInvestment: calculatedCosts.total,
+                  expectedROI: calculatedResults.roi,
+                  paybackPeriod: calculatedResults.paybackPeriod,
+                  netPresentValue: calculatedResults.profit,
+                  internalRateOfReturn: calculatedResults.roi,
+                  riskLevel: calculatedResults.margin < 0 ? 'HIGH' : calculatedResults.margin < 15 ? 'MEDIUM' : 'LOW',
+                  marketTrend: calculatedResults.margin > 20 ? 'POSITIVE' : calculatedResults.margin > 0 ? 'NEUTRAL' : 'NEGATIVE',
+                  recommendations: [
+                    calculatedResults.margin >= (project.targetMargin || 30) 
+                      ? 'Progetto fattibile con margine target raggiunto'
+                      : 'Progetto richiede ottimizzazione per raggiungere il margine target',
+                    `ROI previsto: ${calculatedResults.roi.toFixed(1)}%`,
+                    `Periodo di recupero: ${calculatedResults.paybackPeriod.toFixed(1)} mesi`,
+                    calculatedResults.profit > 0 
+                      ? 'Progetto redditizio con profitto positivo'
+                      : 'Progetto in perdita - valutare strategie di ottimizzazione'
+                  ],
+                  createdAt: new Date().toISOString()
+                }}
+                                 onGenerateReport={() => {
+                   setShowReportGenerator(false);
+                   if (savedProjectId) {
+                     router.push(`/dashboard/feasibility-analysis/${savedProjectId}`);
+                   }
+                 }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 } 
