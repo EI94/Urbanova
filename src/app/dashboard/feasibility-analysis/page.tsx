@@ -40,21 +40,28 @@ export default function FeasibilityAnalysisPage() {
     loadData();
   }, []);
 
-  const loadData = async () => {
+  const loadData = async (forceRefresh = false) => {
     setLoading(true);
     setError(null);
     try {
+      console.log('🔄 Caricamento dati progetti...', forceRefresh ? '(FORCE REFRESH)' : '');
+      
+      // Forza il refresh dei dati se richiesto
+      const timestamp = forceRefresh ? Date.now() : 0;
+      
       const [allProjects, projectsRanking, stats] = await Promise.all([
         feasibilityService.getAllProjects(),
         feasibilityService.getProjectsRanking(),
         feasibilityService.getStatistics()
       ]);
       
+      console.log('📊 Progetti caricati:', allProjects?.length || 0);
+      
       setProjects(allProjects || []);
       setRanking(projectsRanking || []);
       setStatistics(stats || {});
     } catch (error) {
-      console.error('Errore caricamento dati:', error);
+      console.error('❌ Errore caricamento dati:', error);
       setError('Errore nel caricamento dei dati. Riprova più tardi.');
       toast(`❌ Errore nel caricamento dei dati`, { icon: '❌' });
     } finally {
@@ -81,8 +88,11 @@ export default function FeasibilityAnalysisPage() {
       toast(`✅ Progetto "${projectName}" cancellato con successo`, { icon: '✅' });
       console.log('✅ Progetto cancellato direttamente:', projectId);
       
-      // Ricarica i dati
-      await loadData();
+      // AGGIORNAMENTO IMMEDIATO: rimuovi il progetto dalla lista locale e ricarica
+      setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
+      
+      // Ricarica anche i dati completi per aggiornare statistiche e ranking
+      await loadData(true);
       
     } catch (error) {
       console.error('❌ Errore eliminazione progetto:', error);
@@ -162,7 +172,7 @@ export default function FeasibilityAnalysisPage() {
         <div className="flex flex-col items-center justify-center h-64 space-y-4">
           <div className="text-red-600 text-xl">❌ {error}</div>
           <button 
-            onClick={loadData}
+            onClick={() => loadData()}
             className="btn btn-primary"
           >
             🔄 Riprova
