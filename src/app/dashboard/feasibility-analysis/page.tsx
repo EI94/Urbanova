@@ -35,6 +35,8 @@ export default function FeasibilityAnalysisPage() {
   const [showComparison, setShowComparison] = useState(false);
   const [project1Id, setProject1Id] = useState('');
   const [project2Id, setProject2Id] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<FeasibilityProject | null>(null);
 
   useEffect(() => {
     loadData();
@@ -108,14 +110,24 @@ export default function FeasibilityAnalysisPage() {
   };
 
   const handleDeleteProject = async (projectId: string) => {
-    // Conferma più dettagliata
+    // Mostra modal di conferma invece di window.confirm()
     const project = projects.find(p => p.id === projectId);
-    const projectName = project?.name || 'Progetto';
-    const projectAddress = project?.address || '';
+    if (!project) return;
     
-    const confirmMessage = `Sei sicuro di voler cancellare il progetto "${projectName}"${projectAddress ? ` (${projectAddress})` : ''}?\n\nQuesta azione non può essere annullata.`;
+    setProjectToDelete(project);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteProject = async () => {
+    if (!projectToDelete || !projectToDelete.id) return;
     
-    if (!confirm(confirmMessage)) return;
+    const projectId = projectToDelete.id;
+    const projectName = projectToDelete.name || 'Progetto';
+    const projectAddress = projectToDelete.address || '';
+    
+    // Chiudi il modal
+    setShowDeleteConfirm(false);
+    setProjectToDelete(null);
     
     try {
       console.log('🗑️ Avvio cancellazione progetto:', projectId);
@@ -573,6 +585,60 @@ export default function FeasibilityAnalysisPage() {
                   disabled={!project1Id || !project2Id}
                 >
                   {t('compare', 'feasibility')}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Conferma Cancellazione */}
+        {showDeleteConfirm && projectToDelete && (
+          <div className="modal modal-open">
+            <div className="modal-box">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-lg text-red-600">🗑️ Conferma Cancellazione</h3>
+                                  <button 
+                    onClick={() => {
+                      setShowDeleteConfirm(false);
+                      setProjectToDelete(null);
+                    }}
+                    className="btn btn-ghost btn-sm"
+                  >
+                    ✕
+                  </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                  <p className="text-red-800 font-medium">
+                    Sei sicuro di voler cancellare il progetto <strong>"{projectToDelete.name}"</strong>?
+                  </p>
+                  {projectToDelete.address && (
+                    <p className="text-red-700 mt-2">
+                      Indirizzo: <strong>{projectToDelete.address}</strong>
+                    </p>
+                  )}
+                  <p className="text-red-600 text-sm mt-3">
+                    ⚠️ Questa azione non può essere annullata.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="modal-action">
+                <button 
+                  className="btn btn-outline"
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setProjectToDelete(null);
+                  }}
+                >
+                  Annulla
+                </button>
+                <button 
+                  className="btn btn-error"
+                  onClick={confirmDeleteProject}
+                >
+                  Elimina Progetto
                 </button>
               </div>
             </div>
