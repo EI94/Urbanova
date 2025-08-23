@@ -577,6 +577,169 @@ export class FeasibilityService {
       };
     }
   }
+
+  // Ottieni ranking dei progetti per fattibilità
+  async getProjectsRanking(): Promise<FeasibilityProject[]> {
+    try {
+      console.log('🔄 Caricamento ranking progetti fattibilità...');
+      
+      const projects = await this.getAllProjects();
+      
+      // Calcola il punteggio di fattibilità per ogni progetto
+      const projectsWithScore = projects.map(project => {
+        const feasibility = this.calculateFeasibility(project);
+        return {
+          ...project,
+          feasibilityScore: feasibility.score
+        };
+      });
+      
+      // Ordina per punteggio decrescente
+      const rankedProjects = projectsWithScore.sort((a, b) => 
+        (b.feasibilityScore || 0) - (a.feasibilityScore || 0)
+      );
+      
+      console.log(`✅ Ranking progetti fattibilità calcolato: ${rankedProjects.length} progetti`);
+      return rankedProjects;
+    } catch (error) {
+      console.error('❌ Errore calcolo ranking progetti:', error);
+      return [];
+    }
+  }
+
+  // Ottieni statistiche generali
+  async getStatistics(): Promise<any> {
+    try {
+      console.log('🔄 Caricamento statistiche fattibilità...');
+      
+      const projects = await this.getAllProjects();
+      
+      if (projects.length === 0) {
+        return {
+          totalProjects: 0,
+          averageROI: 0,
+          averageMargin: 0,
+          averageDuration: 0,
+          totalInvestment: 0,
+          totalRevenue: 0,
+          feasibilityDistribution: {
+            high: 0,
+            medium: 0,
+            low: 0
+          }
+        };
+      }
+      
+      // Calcola statistiche aggregate
+      const totalInvestment = projects.reduce((sum, p) => sum + (p.costs.total || 0), 0);
+      const totalRevenue = projects.reduce((sum, p) => sum + (p.revenues.total || 0), 0);
+      const totalROI = projects.reduce((sum, p) => sum + (p.results.roi || 0), 0);
+      const totalMargin = projects.reduce((sum, p) => sum + (p.results.margin || 0), 0);
+      const totalDuration = projects.reduce((sum, p) => sum + (p.duration || 0), 0);
+      
+      // Calcola medie
+      const averageROI = totalROI / projects.length;
+      const averageMargin = totalMargin / projects.length;
+      const averageDuration = totalDuration / projects.length;
+      
+      // Distribuzione fattibilità
+      const feasibilityDistribution = {
+        high: projects.filter(p => this.calculateFeasibility(p).score >= 80).length,
+        medium: projects.filter(p => {
+          const score = this.calculateFeasibility(p).score;
+          return score >= 60 && score < 80;
+        }).length,
+        low: projects.filter(p => this.calculateFeasibility(p).score < 60).length
+      };
+      
+      const stats = {
+        totalProjects: projects.length,
+        averageROI: Math.round(averageROI * 100) / 100,
+        averageMargin: Math.round(averageMargin * 100) / 100,
+        averageDuration: Math.round(averageDuration * 10) / 10,
+        totalInvestment: Math.round(totalInvestment),
+        totalRevenue: Math.round(totalRevenue),
+        feasibilityDistribution
+      };
+      
+      console.log('✅ Statistiche fattibilità calcolate:', stats);
+      return stats;
+    } catch (error) {
+      console.error('❌ Errore calcolo statistiche fattibilità:', error);
+      return {
+        totalProjects: 0,
+        averageROI: 0,
+        averageMargin: 0,
+        averageDuration: 0,
+        totalInvestment: 0,
+        totalRevenue: 0,
+        feasibilityDistribution: {
+          high: 0,
+          medium: 0,
+          low: 0
+        }
+      };
+    }
+  }
+
+  // Confronta due progetti
+  async compareProjects(project1Id: string, project2Id: string, userId: string): Promise<any> {
+    try {
+      console.log(`🔄 Confronto progetti: ${project1Id} vs ${project2Id}`);
+      
+      const [project1, project2] = await Promise.all([
+        this.getProjectById(project1Id),
+        this.getProjectById(project2Id)
+      ]);
+      
+      if (!project1 || !project2) {
+        throw new Error('Uno o entrambi i progetti non trovati');
+      }
+      
+      // Calcola fattibilità per entrambi
+      const feasibility1 = this.calculateFeasibility(project1);
+      const feasibility2 = this.calculateFeasibility(project2);
+      
+      // Crea confronto
+      const comparison = {
+        id: `comp_${Date.now()}`,
+        project1: {
+          id: project1.id,
+          name: project1.name,
+          feasibility: feasibility1,
+          costs: project1.costs.total,
+          revenues: project1.revenues.total,
+          roi: project1.results.roi,
+          margin: project1.results.margin,
+          duration: project1.duration
+        },
+        project2: {
+          id: project2.id,
+          name: project2.name,
+          feasibility: feasibility2,
+          costs: project2.costs.total,
+          revenues: project2.revenues.total,
+          roi: project2.results.roi,
+          margin: project2.results.margin,
+          duration: project2.duration
+        },
+        createdBy: userId,
+        createdAt: new Date(),
+        winner: feasibility1.score > feasibility2.score ? project1.id : project2.id,
+        scoreDifference: Math.abs(feasibility1.score - feasibility2.score)
+      };
+      
+      // Salva confronto in Firestore
+      const comparisonRef = collection(db, 'feasibilityComparisons');
+      await addDoc(comparisonRef, comparison);
+      
+      console.log(`✅ Confronto progetti creato: ${comparison.id}`);
+      return comparison;
+    } catch (error) {
+      console.error('❌ Errore confronto progetti:', error);
+      throw error;
+    }
+  }
 }
 
 export const feasibilityService = new FeasibilityService(); 
