@@ -6,6 +6,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
 import { firebaseDebugService } from '@/lib/firebaseDebugService';
 import FeasibilityReportGenerator from '@/components/ui/FeasibilityReportGenerator';
+import ProjectReminderModal from '@/components/ui/ProjectReminderModal';
 import { 
   CalculatorIcon, 
   BuildingIcon, 
@@ -28,6 +29,7 @@ export default function NewFeasibilityProjectPage() {
   const [marketData, setMarketData] = useState<any>(null);
   const [showReportGenerator, setShowReportGenerator] = useState(false);
   const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
+  const [showReminderModal, setShowReminderModal] = useState(false);
   const [insuranceFlags, setInsuranceFlags] = useState({
     constructionInsurance: false,
     financingInsurance: false
@@ -1410,7 +1412,7 @@ export default function NewFeasibilityProjectPage() {
                 🚀 Azioni Rapide
               </h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <button
                   onClick={() => setShowReportGenerator(true)}
                   disabled={!project.name || !project.address}
@@ -1448,6 +1450,14 @@ export default function NewFeasibilityProjectPage() {
                   className="btn btn-outline w-full"
                 >
                   🔗 Condividi Link
+                </button>
+
+                <button
+                  onClick={() => setShowReminderModal(true)}
+                  disabled={!project.name || !project.address}
+                  className="btn btn-accent w-full"
+                >
+                  ⏰ Crea Reminder
                 </button>
               </div>
               
@@ -1514,6 +1524,16 @@ export default function NewFeasibilityProjectPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Modale Reminder */}
+      {showReminderModal && (
+        <ProjectReminderModal
+          isOpen={showReminderModal}
+          onClose={() => setShowReminderModal(false)}
+          projectId={savedProjectId || 'draft-project'}
+          projectName={project.name || 'Studio di Fattibilità'}
+        />
       )}
     </DashboardLayout>
   );
