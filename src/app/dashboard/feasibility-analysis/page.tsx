@@ -287,27 +287,68 @@ export default function FeasibilityAnalysisPage() {
               <CompareIcon className="h-4 w-4 mr-2" />
               {t('compare', 'feasibility')}
             </button>
-            <button 
-              onClick={async () => {
-                try {
-                  console.log('🧪 Test connessione Firebase...');
-                  const { db } = await import('@/lib/firebase');
-                  const { collection, getDocs } = await import('firebase/firestore');
-                  
-                  const testCollection = collection(db, 'feasibilityProjects');
-                  const snapshot = await getDocs(testCollection);
-                  console.log('✅ Firebase OK - Progetti trovati:', snapshot.size);
-                  
-                  toast(`✅ Firebase OK - ${snapshot.size} progetti`, { icon: '✅' });
-                } catch (error) {
-                  console.error('❌ Test Firebase fallito:', error);
-                  toast(`❌ Firebase KO: ${error}`, { icon: '❌' });
+                      <button 
+            onClick={async () => {
+              try {
+                console.log('🧪 Test connessione Firebase...');
+                const { db } = await import('@/lib/firebase');
+                const { collection, getDocs } = await import('firebase/firestore');
+                
+                const testCollection = collection(db, 'feasibilityProjects');
+                const snapshot = await getDocs(testCollection);
+                console.log('✅ Firebase OK - Progetti trovati:', snapshot.size);
+                
+                toast(`✅ Firebase OK - ${snapshot.size} progetti`, { icon: '✅' });
+              } catch (error) {
+                console.error('❌ Test Firebase fallito:', error);
+                toast(`❌ Firebase KO: ${error}`, { icon: '❌' });
+              }
+            }}
+            className="btn btn-warning"
+          >
+            🧪 Test Firebase
+          </button>
+          
+          <button 
+            onClick={async () => {
+              if (projects.length === 0) {
+                toast('❌ Nessun progetto da testare', { icon: '❌' });
+                return;
+              }
+              
+              const testProject = projects[0];
+              console.log('🔍 DEBUG CANCELLAZIONE - Test progetto:', testProject.id);
+              
+              try {
+                const response = await fetch('/api/debug-project-deletion', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ 
+                    projectId: testProject.id, 
+                    action: 'debug' 
+                  })
+                });
+                
+                const result = await response.json();
+                console.log('🔍 RISULTATO DEBUG COMPLETO:', result);
+                
+                if (result.success) {
+                  toast(`✅ Debug OK - Progetto ${testProject.name} cancellato`, { icon: '✅' });
+                  // Ricarica i dati
+                  loadData(true);
+                } else {
+                  toast(`❌ Debug KO: ${result.error}`, { icon: '❌' });
+                  console.error('🔍 DEBUG ERROR:', result.debug);
                 }
-              }}
-              className="btn btn-warning"
-            >
-              🧪 Test Firebase
-            </button>
+              } catch (error) {
+                console.error('❌ Errore debug:', error);
+                toast(`❌ Errore debug: ${error}`, { icon: '❌' });
+              }
+            }}
+            className="btn btn-error"
+          >
+            🔍 Debug Cancellazione
+          </button>
           </div>
         </div>
 
