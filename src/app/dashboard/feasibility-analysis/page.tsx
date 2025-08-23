@@ -344,7 +344,7 @@ export default function FeasibilityAnalysisPage() {
                             </Link>
                           </li>
                           <li>
-                            <Link href={`/dashboard/feasibility-analysis/${project.id}/edit`}>
+                            <Link href={`/dashboard/feasibility-analysis/${project.id}`}>
                               <EditIcon className="h-4 w-4" />
                               Modifica
                             </Link>

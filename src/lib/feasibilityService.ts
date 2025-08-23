@@ -351,11 +351,9 @@ export class FeasibilityService {
       console.log('🔄 Calcolo costi progetto...');
       
       // Determina se i costi sono per metro quadro o totali
-      const isPerSqm = project.costs?.construction?.excavation !== undefined && 
-                      (project.costs.construction.excavation > 0 || 
-                       project.costs.construction.structures > 0 || 
-                       project.costs.construction.systems > 0 || 
-                       project.costs.construction.finishes > 0);
+      // NOTA: Questa logica è stata semplificata per evitare calcoli errati
+      // I costi vengono sempre trattati come totali, non come per metro quadro
+      const isPerSqm = false; // Forza sempre il trattamento come totali
       
       const totalArea = project.totalArea || 0;
       
