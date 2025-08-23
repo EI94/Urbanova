@@ -56,7 +56,10 @@ export interface NotificationPreferences {
 export interface NotificationStats {
   total: number;
   unread: number;
-  today: number;
+  read: number;
+  dismissed: number;
+  byType: Record<string, number>;
+  byPriority: Record<string, number>;
 }
 
 class FirebaseNotificationService {
@@ -251,25 +254,68 @@ class FirebaseNotificationService {
       const unreadSnapshot = await getDocs(unreadQuery);
       const unread = unreadSnapshot.size;
 
-      // Today's notifications
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const todayQuery = query(
+      // Read count
+      const readQuery = query(
         collection(db, 'notifications'),
         where('userId', '==', userId),
-        where('createdAt', '>=', Timestamp.fromDate(today))
+        where('isRead', '==', true)
       );
-      const todaySnapshot = await getDocs(todayQuery);
-      const todayCount = todaySnapshot.size;
+      const readSnapshot = await getDocs(readQuery);
+      const read = readSnapshot.size;
+
+      // Dismissed count
+      const dismissedQuery = query(
+        collection(db, 'notifications'),
+        where('userId', '==', userId),
+        where('isDismissed', '==', true)
+      );
+      const dismissedSnapshot = await getDocs(dismissedQuery);
+      const dismissed = dismissedSnapshot.size;
+
+      // Count by type
+      const typeQuery = query(
+        collection(db, 'notifications'),
+        where('userId', '==', userId)
+      );
+      const typeSnapshot = await getDocs(typeQuery);
+      const byType: Record<string, number> = {};
+      typeSnapshot.docs.forEach(doc => {
+        const data = doc.data();
+        const type = data.type || 'unknown';
+        byType[type] = (byType[type] || 0) + 1;
+      });
+
+      // Count by priority
+      const priorityQuery = query(
+        collection(db, 'notifications'),
+        where('userId', '==', userId)
+      );
+      const prioritySnapshot = await getDocs(priorityQuery);
+      const byPriority: Record<string, number> = {};
+      prioritySnapshot.docs.forEach(doc => {
+        const data = doc.data();
+        const priority = data.priority || 'unknown';
+        byPriority[priority] = (byPriority[priority] || 0) + 1;
+      });
 
       return {
         total,
         unread,
-        today: todayCount
+        read,
+        dismissed,
+        byType,
+        byPriority
       };
     } catch (error) {
       console.error('Error fetching notification stats:', error);
-      return { total: 0, unread: 0, today: 0 };
+      return { 
+        total: 0, 
+        unread: 0, 
+        read: 0, 
+        dismissed: 0, 
+        byType: {}, 
+        byPriority: {} 
+      };
     }
   }
 
