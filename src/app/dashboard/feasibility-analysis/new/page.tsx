@@ -7,7 +7,6 @@ import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService
 import { firebaseDebugService } from '@/lib/firebaseDebugService';
 import { feasibilityTestService } from '@/lib/feasibilityTestService';
 import FeasibilityReportGenerator from '@/components/ui/FeasibilityReportGenerator';
-import { useState } from 'react';
 import { 
   CalculatorIcon, 
   BuildingIcon, 
@@ -17,11 +16,7 @@ import {
   SaveIcon,
   ArrowLeftIcon,
   TrendingUpIcon,
-  ShieldIcon,
-  BankIcon,
   SearchIcon,
-  RefreshIcon,
-  CheckIcon,
   AlertTriangleIcon
 } from '@/components/icons';
 import toast from 'react-hot-toast';
