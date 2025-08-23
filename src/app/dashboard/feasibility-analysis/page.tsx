@@ -317,10 +317,15 @@ export default function FeasibilityAnalysisPage() {
                 
                 if (result.success) {
                   toast(`✅ Database pulito! ${result.projectsDeleted} progetti eliminati`, { icon: '✅' });
-                  // Pulisci la lista locale
+                  // Pulisci TUTTE le liste locali
                   setProjects([]);
                   setRanking([]);
                   setStatistics({});
+                  
+                  // Forza refresh completo per sincronizzare tutto
+                  setTimeout(() => {
+                    loadData(true);
+                  }, 500);
                 } else {
                   toast(`❌ Errore pulizia: ${result.error}`, { icon: '❌' });
                   console.error('🧹 ERRORE PULIZIA:', result);
