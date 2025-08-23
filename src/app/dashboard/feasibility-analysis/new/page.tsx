@@ -99,9 +99,50 @@ export default function NewFeasibilityProjectPage() {
     notes: ''
   });
 
-  const [calculatedCosts, setCalculatedCosts] = useState(project.costs);
-  const [calculatedRevenues, setCalculatedRevenues] = useState(project.revenues);
-  const [calculatedResults, setCalculatedResults] = useState(project.results);
+  const [calculatedCosts, setCalculatedCosts] = useState({
+    land: {
+      purchasePrice: 0,
+      purchaseTaxes: 0,
+      intermediationFees: 0,
+      subtotal: 0
+    },
+    construction: {
+      excavation: 0,
+      structures: 0,
+      systems: 0,
+      finishes: 0,
+      subtotal: 0
+    },
+    externalWorks: 0,
+    concessionFees: 0,
+    design: 0,
+    bankCharges: 0,
+    exchange: 0,
+    insurance: 0,
+    total: 0
+  });
+  
+  const [calculatedRevenues, setCalculatedRevenues] = useState({
+    units: 2,
+    averageArea: 144,
+    pricePerSqm: 1700,
+    revenuePerUnit: 0,
+    totalSales: 0,
+    otherRevenues: 0,
+    total: 0
+  });
+  
+  const [calculatedResults, setCalculatedResults] = useState({
+    profit: 0,
+    margin: 0,
+    roi: 0,
+    paybackPeriod: 0
+  });
+
+  // Inizializza i calcoli al primo render
+  useEffect(() => {
+    recalculateAll();
+  }, []);
 
   // Funzione per pulire input numerico
   const handleNumberInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -214,24 +255,29 @@ export default function NewFeasibilityProjectPage() {
   };
 
   const recalculateAll = () => {
-    const costs = feasibilityService.calculateCosts(project);
-    
-    // Calcola assicurazioni se i flag sono attivi
-    let insuranceCost = 0;
-    if (insuranceFlags.constructionInsurance) {
-      insuranceCost += (costs.construction.subtotal * 0.015); // 1.5% del costo costruzione
+    try {
+      const costs = feasibilityService.calculateCosts(project);
+      
+      // Calcola assicurazioni se i flag sono attivi
+      let insuranceCost = 0;
+      if (insuranceFlags.constructionInsurance && costs.construction?.subtotal) {
+        insuranceCost += (costs.construction.subtotal * 0.015); // 1.5% del costo costruzione
+      }
+      if (insuranceFlags.financingInsurance) {
+        insuranceCost += (financingData.loanAmount * 0.01); // 1% dell'importo finanziato
+      }
+      costs.insurance = insuranceCost;
+      
+      const revenues = feasibilityService.calculateRevenues(project);
+      const results = feasibilityService.calculateResults(costs, revenues, project.targetMargin || 30);
+      
+      setCalculatedCosts(costs);
+      setCalculatedRevenues(revenues);
+      setCalculatedResults(results);
+    } catch (error) {
+      console.error('Errore durante il ricalcolo:', error);
+      // In caso di errore, mantieni i valori di default
     }
-    if (insuranceFlags.financingInsurance) {
-      insuranceCost += (financingData.loanAmount * 0.01); // 1% dell'importo finanziato
-    }
-    costs.insurance = insuranceCost;
-    
-    const revenues = feasibilityService.calculateRevenues(project);
-    const results = feasibilityService.calculateResults(costs, revenues, project.targetMargin || 30);
-    
-    setCalculatedCosts(costs);
-    setCalculatedRevenues(revenues);
-    setCalculatedResults(results);
   };
 
   // Funzione per ottenere dati di mercato dal borsino immobiliare
