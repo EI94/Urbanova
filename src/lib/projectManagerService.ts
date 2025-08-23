@@ -121,6 +121,34 @@ export class ProjectManagerService {
   }
 
   /**
+   * Trova un progetto per ID
+   */
+  async findProjectById(projectId: string): Promise<FeasibilityProject | null> {
+    try {
+      console.log('🔍 Ricerca progetto per ID:', projectId);
+
+      // Usa il servizio esistente per trovare il progetto
+      const project = await feasibilityService.getProjectById(projectId);
+      
+      if (project) {
+        console.log('✅ Progetto trovato per ID:', {
+          id: project.id,
+          name: project.name,
+          address: project.address
+        });
+        return project;
+      }
+
+      console.log('❌ Nessun progetto trovato per ID:', projectId);
+      return null;
+
+    } catch (error) {
+      console.error('❌ Errore ricerca progetto per ID:', error);
+      return null;
+    }
+  }
+
+  /**
    * Verifica se un progetto è duplicato
    */
   async isProjectDuplicate(identifier: ProjectIdentifier): Promise<boolean> {
@@ -293,8 +321,8 @@ export class ProjectManagerService {
     try {
       console.log('🗑️ Cancellazione sicura progetto:', projectId);
 
-      // Verifica che il progetto esista
-      const project = await feasibilityService.getProjectById(projectId);
+      // Verifica che il progetto esista usando la ricerca per ID
+      const project = await this.findProjectById(projectId);
       if (!project) {
         throw new Error('Progetto non trovato');
       }
@@ -387,7 +415,7 @@ export class ProjectManagerService {
     project?: FeasibilityProject;
   }> {
     try {
-      const project = await feasibilityService.getProjectById(projectId);
+      const project = await this.findProjectById(projectId);
       if (!project) {
         return {
           canDelete: false,
