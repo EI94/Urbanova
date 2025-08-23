@@ -67,12 +67,40 @@ export default function FeasibilityProjectDetailPage() {
     return `${value.toFixed(1)}%`;
   };
 
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('it-IT', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    }).format(new Date(date));
+  const formatDate = (date: Date | string | any) => {
+    try {
+      // Gestisce diversi tipi di input per le date
+      let dateObj: Date;
+      
+      if (date instanceof Date) {
+        dateObj = date;
+      } else if (typeof date === 'string') {
+        dateObj = new Date(date);
+      } else if (date && typeof date === 'object' && date.toDate) {
+        // Per timestamp Firestore
+        dateObj = date.toDate();
+      } else if (date && typeof date === 'object' && date.seconds) {
+        // Per timestamp Firestore con seconds
+        dateObj = new Date(date.seconds * 1000);
+      } else {
+        // Fallback per date invalide
+        return 'Data non disponibile';
+      }
+      
+      // Verifica se la data è valida
+      if (isNaN(dateObj.getTime())) {
+        return 'Data non valida';
+      }
+      
+      return new Intl.DateTimeFormat('it-IT', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }).format(dateObj);
+    } catch (error) {
+      console.error('Errore formattazione data:', error, 'Input:', date);
+      return 'Data non valida';
+    }
   };
 
   const getMarginColor = (margin: number, targetMargin: number) => {
@@ -478,11 +506,11 @@ export default function FeasibilityProjectDetailPage() {
             </div>
             <div>
               <span className="text-gray-500">Data creazione:</span>
-              <p className="font-medium">{formatDate(project.createdAt)}</p>
+              <p className="font-medium">{project.createdAt ? formatDate(project.createdAt) : 'Non disponibile'}</p>
             </div>
             <div>
               <span className="text-gray-500">Ultimo aggiornamento:</span>
-              <p className="font-medium">{formatDate(project.updatedAt)}</p>
+              <p className="font-medium">{project.updatedAt ? formatDate(project.updatedAt) : 'Non disponibile'}</p>
             </div>
           </div>
         </div>
@@ -492,9 +520,9 @@ export default function FeasibilityProjectDetailPage() {
           <FeasibilityReportGenerator 
             analysis={{
               id: project.id,
-              title: project.title,
-              location: project.location,
-              propertyType: project.propertyType,
+              title: project.title || project.name || 'Progetto senza titolo',
+              location: project.location || project.address || 'Località non specificata',
+              propertyType: project.propertyType || 'Non specificato',
               totalInvestment: project.costs.total,
               expectedROI: ((project.revenues.total - project.costs.total) / project.costs.total) * 100,
               paybackPeriod: project.costs.total / (project.revenues.total - project.costs.total),
@@ -508,7 +536,12 @@ export default function FeasibilityProjectDetailPage() {
                 `Località strategica: ${project.location}`,
                 `Tipo immobile: ${project.propertyType}`
               ],
-              createdAt: project.createdAt.toISOString()
+              createdAt: project.createdAt ? 
+                (typeof project.createdAt === 'string' ? project.createdAt : 
+                 project.createdAt instanceof Date ? project.createdAt.toISOString() : 
+                 project.createdAt.toDate ? project.createdAt.toDate().toISOString() : 
+                 new Date().toISOString()) : 
+                new Date().toISOString()
             }}
             onGenerateReport={() => {
               toast.success('Report generato con successo! 📊');
