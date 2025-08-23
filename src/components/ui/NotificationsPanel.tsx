@@ -7,12 +7,8 @@ import { firebaseNotificationService, Notification, NotificationStats } from '@/
 import { 
   BellIcon, 
   CheckIcon, 
-  XMarkIcon, 
   ClockIcon,
-  ExclamationTriangleIcon,
-  InformationCircleIcon,
-  CheckCircleIcon,
-  XCircleIcon
+  CheckCircleIcon
 } from '@/components/icons';
 
 interface NotificationsPanelProps {
@@ -111,11 +107,11 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'project': return <CheckCircleIcon className="h-4 w-4 text-blue-500" />;
-      case 'permit': return <ExclamationTriangleIcon className="h-4 w-4 text-orange-500" />;
+      case 'permit': return <span className="text-orange-500">⚠️</span>;
       case 'task': return <CheckIcon className="h-4 w-4 text-green-500" />;
-      case 'system': return <InformationCircleIcon className="h-4 w-4 text-gray-500" />;
+      case 'system': return <span className="text-gray-500">ℹ️</span>;
       case 'marketing': return <CheckCircleIcon className="h-4 w-4 text-purple-500" />;
-      default: return <InformationCircleIcon className="h-4 w-4 text-gray-500" />;
+      default: return <span className="text-gray-500">ℹ️</span>;
     }
   };
 
@@ -193,7 +189,7 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
             onClick={onClose}
             className="p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
           >
-            <XMarkIcon className="h-5 w-5" />
+                            ✕
           </button>
         </div>
 
@@ -319,7 +315,7 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
                       onClick={() => handleDeleteNotification(notification.id)}
                       className="text-xs text-red-600 hover:text-red-700 hover:bg-red-100 p-1 rounded transition-colors"
                     >
-                      <XMarkIcon className="h-3 w-3" />
+                      ✕
                     </button>
                   </div>
                 </div>
