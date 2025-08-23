@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
 import { firebaseDebugService } from '@/lib/firebaseDebugService';
-import { feasibilityTestService } from '@/lib/feasibilityTestService';
 import FeasibilityReportGenerator from '@/components/ui/FeasibilityReportGenerator';
 import { 
   CalculatorIcon, 
@@ -13,13 +12,13 @@ import {
   EuroIcon, 
   CalendarIcon,
   LocationIcon,
-  SaveIcon,
+
   ArrowLeftIcon,
   TrendingUpIcon,
   SearchIcon,
   AlertTriangleIcon
 } from '@/components/icons';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 
 export default function NewFeasibilityProjectPage() {
@@ -47,6 +46,10 @@ export default function NewFeasibilityProjectPage() {
     systems: 0,
     finishes: 0
   });
+
+  const [autoSaving, setAutoSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const [project, setProject] = useState<Partial<FeasibilityProject>>({
     name: '',
@@ -142,6 +145,39 @@ export default function NewFeasibilityProjectPage() {
   // Inizializza i calcoli al primo render
   useEffect(() => {
     recalculateAll();
+  }, []);
+
+  // Auto-save con debounce di 3 secondi
+  useEffect(() => {
+    // Cancella il timeout precedente se esiste
+    if (autoSaveTimeout) {
+      clearTimeout(autoSaveTimeout);
+    }
+
+    // Solo se ci sono nome e indirizzo (campi obbligatori)
+    if (project.name && project.address && project.name.trim() && project.address.trim()) {
+      const timeout = setTimeout(() => {
+        autoSaveProject();
+      }, 3000); // 3 secondi di debounce
+
+      setAutoSaveTimeout(timeout);
+    }
+
+    // Cleanup function
+    return () => {
+      if (autoSaveTimeout) {
+        clearTimeout(autoSaveTimeout);
+      }
+    };
+  }, [project, calculatedCosts, calculatedRevenues, calculatedResults]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimeout) {
+        clearTimeout(autoSaveTimeout);
+      }
+    };
   }, []);
 
   // Funzione per pulire input numerico
@@ -320,6 +356,57 @@ export default function NewFeasibilityProjectPage() {
     }
   };
 
+  const autoSaveProject = async () => {
+    // Non salvare se mancano i campi obbligatori
+    if (!project.name || !project.address) {
+      return;
+    }
+
+    setAutoSaving(true);
+    try {
+      console.log('💾 Salvataggio automatico in corso...');
+      
+      const finalProject = {
+        ...project,
+        costs: calculatedCosts,
+        revenues: calculatedRevenues,
+        results: calculatedResults,
+        isTargetAchieved: calculatedResults.margin >= (project.targetMargin || 30)
+      } as Omit<FeasibilityProject, 'id' | 'createdAt' | 'updatedAt'>;
+
+      let projectId: string;
+      try {
+        projectId = await feasibilityService.createProject(finalProject);
+        console.log('✅ Progetto salvato automaticamente:', projectId);
+      } catch (standardError) {
+        // Fallback con transazione
+        try {
+          projectId = await feasibilityService.createProjectWithTransaction(finalProject);
+          console.log('✅ Progetto salvato automaticamente con transazione:', projectId);
+        } catch (transactionError) {
+          // Fallback finale con batch
+          projectId = await feasibilityService.createProjectWithBatch(finalProject);
+          console.log('✅ Progetto salvato automaticamente con batch:', projectId);
+        }
+      }
+      
+      setSavedProjectId(projectId);
+      setLastSaved(new Date());
+      
+      // Toast discreta per il salvataggio automatico
+      toast.success('💾 Progetto salvato automaticamente', { 
+        duration: 2000,
+        position: 'bottom-right' 
+      });
+      
+    } catch (error: any) {
+      console.error('❌ Errore salvataggio automatico:', error);
+      // Non mostrare errori per il salvataggio automatico per non disturbare l'utente
+    } finally {
+      setAutoSaving(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!project.name || !project.address) {
       toast.error('Compila i campi obbligatori');
@@ -451,53 +538,29 @@ export default function NewFeasibilityProjectPage() {
               </button>
             </Link>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">🏗️ Nuovo Progetto di Fattibilità</h1>
+              <div className="flex items-center space-x-3">
+                <h1 className="text-3xl font-bold text-gray-900">🏗️ Nuovo Progetto di Fattibilità</h1>
+                {autoSaving && (
+                  <div className="flex items-center space-x-2 text-sm text-blue-600">
+                    <div className="loading loading-spinner loading-sm"></div>
+                    <span>Salvataggio...</span>
+                  </div>
+                )}
+                {lastSaved && !autoSaving && (
+                  <div className="flex items-center space-x-2 text-sm text-green-600">
+                    <span>✅</span>
+                    <span>Salvato {lastSaved.toLocaleTimeString()}</span>
+                  </div>
+                )}
+              </div>
               <p className="text-gray-600 mt-1">
                 Crea un nuovo studio di fattibilità immobiliare
               </p>
             </div>
           </div>
           <div className="flex space-x-2">
-            <button 
-              onClick={async () => {
-                try {
-                  console.log('🧪 Test connessione Firebase...');
-                  const testResults = await feasibilityTestService.runAllTests();
-                  console.log('🧪 Risultati test:', testResults);
-                  
-                  if (testResults.summary.successful > 0) {
-                    toast.success(`✅ Test completati: ${testResults.summary.successful}/${testResults.summary.total} metodi funzionano`);
-                  } else {
-                    toast.error('❌ Tutti i test sono falliti. Controlla la console per dettagli.');
-                  }
-                } catch (error) {
-                  console.error('❌ Errore durante i test:', error);
-                  toast.error('❌ Errore durante i test Firebase');
-                }
-              }}
-              className="btn btn-secondary"
-            >
-              🧪 Test Firebase
-            </button>
-            
-            <button 
-              onClick={handleSave}
-              disabled={loading}
-              className="btn btn-primary"
-            >
-              {loading ? (
-                <>
-                  <div className="loading loading-spinner loading-sm mr-2"></div>
-                  Salvataggio...
-                </>
-              ) : (
-                <>
-                  <SaveIcon className="h-4 w-4 mr-2" />
-                  Salva Progetto
-                </>
-              )}
-            </button>
-            
+
+
             <button 
               onClick={() => setShowReportGenerator(true)}
               disabled={!project.name || !project.address}
