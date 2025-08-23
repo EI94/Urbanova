@@ -17,7 +17,7 @@ import SearchSchedulerModal from '@/components/ui/SearchSchedulerModal';
 import TeamCollaborationPanel from '@/components/ui/TeamCollaborationPanel';
 import CollaborativeSearchSession from '@/components/ui/CollaborativeSearchSession';
 import TeamCommentsVoting from '@/components/ui/TeamCommentsVoting';
-import SharedFavorites from '@/components/ui/SharedFavorites';
+
 import AdvancedTeamManagement from '@/components/ui/AdvancedTeamManagement';
 import WorkflowManagement from '@/components/ui/WorkflowManagement';
 import RealtimeCollaboration from '@/components/ui/RealtimeCollaboration';
@@ -25,11 +25,11 @@ import AdvancedAnalytics from '@/components/ui/AdvancedAnalytics';
 import KnowledgeManagement from '@/components/ui/KnowledgeManagement';
 import SecurityCompliance from '@/components/ui/SecurityCompliance';
 import MonitoringObservability from '@/components/ui/MonitoringObservability';
-import AIMLCenter from '@/components/ui/AIMLCenter';
-import Web3Center from '@/components/ui/Web3Center';
+
+
 import APIGatewayCenter from '@/components/ui/APIGatewayCenter';
-import DevOpsCenter from '@/components/ui/DevOpsCenter';
-import SecurityCenter from '@/components/ui/SecurityCenter';
+
+
 import { teamRoleManager, ROLE_PERMISSIONS } from '@/lib/teamRoleManager';
 import { TeamRole, TeamMember, Permission } from '@/types/team';
 
@@ -154,7 +154,7 @@ export default function LandScrapingPage() {
   const [showTeamCollaboration, setShowTeamCollaboration] = useState(false);
   const [showCollaborativeSearch, setShowCollaborativeSearch] = useState(false);
   const [showTeamComments, setShowTeamComments] = useState(false);
-  const [showSharedFavorites, setShowSharedFavorites] = useState(false);
+
   const [showAdvancedTeamManagement, setShowAdvancedTeamManagement] = useState(false);
   const [showWorkflowManagement, setShowWorkflowManagement] = useState(false);
   
@@ -170,11 +170,11 @@ export default function LandScrapingPage() {
   const [showKnowledgeManagement, setShowKnowledgeManagement] = useState(false);
   const [showSecurityCompliance, setShowSecurityCompliance] = useState(false);
   const [showMonitoringObservability, setShowMonitoringObservability] = useState(false);
-  const [showAIMLCenter, setShowAIMLCenter] = useState(false);
-  const [showWeb3Center, setShowWeb3Center] = useState(false);
+
+
   const [showAPIGatewayCenter, setShowAPIGatewayCenter] = useState(false);
-  const [showDevOpsCenter, setShowDevOpsCenter] = useState(false);
-  const [showSecurityCenter, setShowSecurityCenter] = useState(false);
+
+
 
   const router = useRouter();
 
@@ -500,10 +500,7 @@ export default function LandScrapingPage() {
     // TODO: Implementare salvataggio risposta team
   };
 
-  const handleAddToSharedFavorites = (landId: string) => {
-    toast('⭐ Terreno aggiunto ai preferiti condivisi!', { icon: '⭐' });
-    // TODO: Implementare salvataggio preferiti condivisi
-  };
+
 
   // Funzioni per gestione avanzata team
   const handleInviteTeamMember = (email: string, role: TeamRole) => {
@@ -1005,12 +1002,7 @@ export default function LandScrapingPage() {
                 👥 Sessioni
               </button>
               
-              <button
-                onClick={() => setShowSharedFavorites(true)}
-                className="px-3 py-2 text-sm bg-yellow-50 text-yellow-700 border border-yellow-200 rounded hover:bg-yellow-100 transition-colors"
-              >
-                ⭐ Preferiti
-              </button>
+
 
               <button
                 onClick={() => setShowAdvancedTeamManagement(true)}
@@ -1047,12 +1039,7 @@ export default function LandScrapingPage() {
                   📚 Knowledge Base
                 </button>
                 
-                <button
-                  onClick={() => setShowSecurityCenter(true)}
-                  className="px-3 py-2 text-sm bg-red-50 text-red-700 border border-red-200 rounded hover:bg-red-100 transition-colors"
-                >
-                  🛡️ Security Center
-                </button>
+
                 
                 <button
                   onClick={() => setShowMonitoringObservability(true)}
@@ -1061,19 +1048,9 @@ export default function LandScrapingPage() {
                   📊 Monitoring & Observability
                 </button>
                 
-                <button
-                  onClick={() => setShowAIMLCenter(true)}
-                  className="px-3 py-2 text-sm bg-purple-50 text-purple-700 border border-purple-200 rounded hover:bg-purple-100 transition-colors"
-                >
-                  🤖 AI & Machine Learning
-                </button>
+
                 
-                <button
-                  onClick={() => setShowWeb3Center(true)}
-                  className="px-3 py-2 text-sm bg-indigo-50 text-indigo-700 border border-indigo-200 rounded hover:bg-indigo-100 transition-colors"
-                >
-                  ⛓️ Web3 & Blockchain
-                </button>
+
                 
                 <button
                   onClick={() => setShowAPIGatewayCenter(true)}
@@ -1082,12 +1059,7 @@ export default function LandScrapingPage() {
                   🔗 API Gateway & Microservices
                 </button>
                 
-                <button
-                  onClick={() => setShowDevOpsCenter(true)}
-                  className="px-3 py-2 text-sm bg-orange-50 text-orange-700 border border-orange-200 rounded hover:bg-orange-100 transition-colors"
-                >
-                  🚀 DevOps & CI/CD Pipeline
-                </button>
+
             </div>
             
             {/* Indicatore stato connessione e ruolo */}
@@ -1577,7 +1549,7 @@ export default function LandScrapingPage() {
           currentSearchId={searchResults?.id}
           onAddComment={handleAddTeamComment}
           onVote={handleTeamVote}
-          onAddToSharedFavorites={handleAddToSharedFavorites}
+          
         />
 
         <CollaborativeSearchSession
@@ -1597,28 +1569,10 @@ export default function LandScrapingPage() {
           onAddComment={handleAddTeamComment}
           onVote={handleTeamVote}
           onReply={handleTeamReply}
-          onAddToFavorites={handleAddToSharedFavorites}
+          
         />
 
-        <SharedFavorites
-          isOpen={showSharedFavorites}
-          onClose={() => setShowSharedFavorites(false)}
-          onViewLand={(landId) => {
-            // TODO: Implementare visualizzazione terreno
-            toast('Visualizzazione terreno in sviluppo', { icon: '🔧' });
-          }}
-          onAddComment={handleAddTeamComment}
-          onVote={handleTeamVote}
-          onUpdatePriority={(landId, priority) => {
-            toast(`Priorità aggiornata a ${priority}`, { icon: '📊' });
-          }}
-          onUpdateStatus={(landId, status) => {
-            toast(`Stato aggiornato a ${status}`, { icon: '🔄' });
-          }}
-          onRemove={(landId) => {
-            toast('Terreno rimosso dai preferiti condivisi', { icon: '🗑️' });
-          }}
-        />
+
 
         {/* Gestione Avanzata Team */}
         <AdvancedTeamManagement
@@ -1688,25 +1642,9 @@ export default function LandScrapingPage() {
           currentUserAvatar="👨‍💻"
         />
 
-        {/* AI & Machine Learning Center */}
-        <AIMLCenter
-          isOpen={showAIMLCenter}
-          onClose={() => setShowAIMLCenter(false)}
-          currentUserId="current-user"
-          currentUserName="Utente Corrente"
-          currentUserRole={currentUserRole}
-          currentUserAvatar="👨‍💻"
-        />
 
-        {/* Web3 & Blockchain Center */}
-        <Web3Center
-          isOpen={showWeb3Center}
-          onClose={() => setShowWeb3Center(false)}
-          currentUserId="current-user"
-          currentUserName="Utente Corrente"
-          currentUserRole={currentUserRole}
-          currentUserAvatar="👨‍💻"
-        />
+
+
 
         {/* API Gateway & Microservices Center */}
         <APIGatewayCenter
@@ -1718,25 +1656,9 @@ export default function LandScrapingPage() {
           currentUserAvatar="👨‍💻"
         />
 
-        {/* DevOps & CI/CD Pipeline Center */}
-        <DevOpsCenter
-          isOpen={showDevOpsCenter}
-          onClose={() => setShowDevOpsCenter(false)}
-          currentUserId="current-user"
-          currentUserName="Utente Corrente"
-          currentUserRole={currentUserRole}
-          currentUserAvatar="👨‍💻"
-        />
 
-        {/* Security & Threat Intelligence Center */}
-        <SecurityCenter
-          isOpen={showSecurityCenter}
-          onClose={() => setShowSecurityCenter(false)}
-          currentUserId="current-user"
-          currentUserName="Utente Corrente"
-          currentUserRole={currentUserRole}
-          currentUserAvatar="👨‍💻"
-        />
+
+
       </div>
     </DashboardLayout>
   );
