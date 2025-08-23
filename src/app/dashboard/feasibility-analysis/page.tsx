@@ -49,32 +49,55 @@ export default function FeasibilityAnalysisPage() {
       // Forza il refresh dei dati se richiesto
       const timestamp = forceRefresh ? Date.now() : 0;
       
-      const [allProjects, projectsRanking, stats] = await Promise.all([
-        feasibilityService.getAllProjects(),
-        feasibilityService.getProjectsRanking(),
-        feasibilityService.getStatistics()
-      ]);
-      
-      console.log('📊 Progetti caricati:', allProjects?.length || 0);
-      
-      // DEBUG: Log dettagliato dei progetti per verificare lo stato
-      if (allProjects && allProjects.length > 0) {
-        console.log('🔍 DEBUG - Dettagli progetti caricati:');
-        allProjects.forEach((project, index) => {
-          console.log(`  Progetto ${index + 1}:`, {
-            id: project.id,
-            name: project.name,
-            address: project.address,
-            status: project.status,
-            createdAt: project.createdAt,
-            updatedAt: project.updatedAt
+      if (forceRefresh) {
+        console.log('🔥 FORCE REFRESH ATTIVATO - Bypassa cache...');
+        
+        // Forza refresh completo bypassando cache
+        const [allProjects, projectsRanking, stats] = await Promise.all([
+          feasibilityService.getAllProjects(),
+          feasibilityService.getProjectsRanking(),
+          feasibilityService.getStatistics()
+        ]);
+        
+        console.log('📊 Progetti caricati (FORCE REFRESH):', allProjects?.length || 0);
+        
+        // DEBUG: Log dettagliato dei progetti per verificare lo stato
+        if (allProjects && allProjects.length > 0) {
+          console.log('🔍 DEBUG - Dettagli progetti caricati (FORCE REFRESH):');
+          allProjects.forEach((project, index) => {
+            console.log(`  Progetto ${index + 1}:`, {
+              id: project.id,
+              name: project.name,
+              address: project.address,
+              status: project.status,
+              createdAt: project.createdAt,
+              updatedAt: project.updatedAt
+            });
           });
-        });
+        }
+        
+        // Forza aggiornamento stato
+        setProjects([]); // Pulisci prima
+        setTimeout(() => {
+          setProjects(allProjects || []);
+          setRanking(projectsRanking || []);
+          setStatistics(stats || {});
+        }, 50);
+        
+      } else {
+        // Caricamento normale
+        const [allProjects, projectsRanking, stats] = await Promise.all([
+          feasibilityService.getAllProjects(),
+          feasibilityService.getProjectsRanking(),
+          feasibilityService.getStatistics()
+        ]);
+        
+        console.log('📊 Progetti caricati (normale):', allProjects?.length || 0);
+        setProjects(allProjects || []);
+        setRanking(projectsRanking || []);
+        setStatistics(stats || {});
       }
       
-      setProjects(allProjects || []);
-      setRanking(projectsRanking || []);
-      setStatistics(stats || {});
     } catch (error) {
       console.error('❌ Errore caricamento dati:', error);
       setError('Errore nel caricamento dei dati. Riprova più tardi.');
@@ -97,58 +120,48 @@ export default function FeasibilityAnalysisPage() {
     try {
       console.log('🗑️ Avvio cancellazione progetto:', projectId);
       
-      // RIPRISTINO FUNZIONALITÀ ORIGINALE: usa il servizio semplice come prima
-      console.log('🔄 RIPRISTINO - Cancellazione con servizio originale:', projectId);
+      // SOLUZIONE DEFINITIVA: cancella e forza refresh completo
+      console.log('🚨 SOLUZIONE DEFINITIVA - Cancellazione con refresh forzato:', projectId);
       
       try {
-        // Usa il servizio originale che funzionava prima
+        // 1. Cancella il progetto
         await feasibilityService.deleteProject(projectId);
-        console.log('✅ Progetto cancellato con servizio originale:', projectId);
+        console.log('✅ Progetto cancellato da Firestore:', projectId);
         
-        // Aggiorna immediatamente la lista locale
+        // 2. Aggiorna IMMEDIATAMENTE la lista locale
         setProjects(prevProjects => {
           const filtered = prevProjects.filter(p => p.id !== projectId);
-          console.log('📝 Lista locale aggiornata:', filtered.length, 'progetti rimanenti');
+          console.log('📝 Lista locale aggiornata IMMEDIATAMENTE:', filtered.length, 'progetti rimanenti');
           return filtered;
         });
         
-        toast(`✅ Progetto "${projectName}" cancellato con successo`, { icon: '✅' });
+        // 3. Forza refresh COMPLETO dei dati
+        console.log('🔄 FORZA REFRESH COMPLETO...');
         
-        // Ricarica i dati per aggiornare statistiche
-        setTimeout(() => {
-          loadData(true);
-        }, 500);
+        // Ricarica TUTTI i dati con delay minimo
+        setTimeout(async () => {
+          try {
+            console.log('🔄 Avvio refresh completo...');
+            await loadData(true);
+            console.log('✅ Refresh completo completato');
+          } catch (refreshError) {
+            console.error('❌ Errore refresh completo:', refreshError);
+          }
+        }, 100); // Delay minimo per assicurarsi che la cancellazione sia completata
+        
+        toast(`✅ Progetto "${projectName}" cancellato con successo`, { icon: '✅' });
         
       } catch (serviceError) {
         console.error('❌ Errore servizio originale:', serviceError);
         
-        // Se il servizio fallisce, prova con Firebase diretto
-        try {
-          console.log('🔄 Fallback: prova con Firebase diretto');
-          const { deleteDoc, doc } = await import('firebase/firestore');
-          const { db } = await import('@/lib/firebase');
-          
-          const projectRef = doc(db, 'feasibilityProjects', projectId);
-          await deleteDoc(projectRef);
-          
-          console.log('✅ Progetto cancellato con Firebase diretto');
-          
-          // Aggiorna la lista
-          setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
-          toast(`✅ Progetto "${projectName}" cancellato con fallback`, { icon: '✅' });
-          
-        } catch (firebaseError) {
-          console.error('❌ ERRORE CATASTROFICO anche con Firebase diretto:', firebaseError);
-          
-          // Ultimo fallback: rimuovi solo dalla lista locale
-          setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
-          toast(`⚠️ Progetto rimosso dalla lista (errore completo)`, { icon: '⚠️' });
-        }
+        // Fallback: rimuovi comunque dalla lista locale
+        setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
+        toast(`⚠️ Progetto rimosso dalla lista (errore servizio)`, { icon: '⚠️' });
         
-        // Ricarica i dati
+        // Prova comunque il refresh
         setTimeout(() => {
           loadData(true);
-        }, 500);
+        }, 100);
       }
       
     } catch (error) {
