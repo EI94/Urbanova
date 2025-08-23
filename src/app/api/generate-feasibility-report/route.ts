@@ -15,7 +15,7 @@ const pdfService = new PDFGeneratorService();
 
 export async function POST(request: NextRequest) {
   try {
-    const { analysisId } = await request.json();
+    const { analysisId, notes } = await request.json();
 
     // Simula recupero dati dell'analisi (in produzione verrebbe dal database)
     const analysis = {
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Genera analisi AI con OpenAI
-    const aiAnalysis = await generateAIAnalysis(analysis);
+    const aiAnalysis = await generateAIAnalysis(analysis, notes);
 
     // Genera PDF avanzato con il servizio
     const pdfBuffer = await pdfService.generateFeasibilityReport(analysis, aiAnalysis);
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function generateAIAnalysis(analysis: any) {
+async function generateAIAnalysis(analysis: any, notes?: string) {
   try {
     // Se OpenAI non è disponibile, usa analisi predefinita
     if (!openai) {
@@ -78,7 +78,9 @@ async function generateAIAnalysis(analysis: any) {
           "Tempistiche di vendita variabili",
           "Costi di gestione e manutenzione"
         ],
-        recommendation: "L'investimento mostra potenziale con un ROI attraente, ma richiede attenta valutazione dei rischi di mercato.",
+        recommendation: notes && notes.trim() 
+          ? `L'investimento mostra potenziale con un ROI attraente, ma richiede attenta valutazione dei rischi di mercato. Considerazioni aggiuntive: ${notes}`
+          : "L'investimento mostra potenziale con un ROI attraente, ma richiede attenta valutazione dei rischi di mercato.",
         strategies: [
           "Monitorare le tendenze del mercato immobiliare locale",
           "Ottimizzare i tempi di vendita in base alla domanda",
@@ -104,8 +106,10 @@ async function generateAIAnalysis(analysis: any) {
     - Periodo di recupero: ${analysis.paybackPeriod} anni
     - Livello di rischio: ${analysis.riskLevel}
     - Trend di mercato: ${analysis.marketTrend}
+    ${notes && notes.trim() ? `\nNote e considerazioni aggiuntive: ${notes}` : ''}
     
     Rispondi in italiano, in modo professionale ma comprensibile.
+    ${notes && notes.trim() ? 'Utilizza le note fornite per personalizzare l\'analisi e fornire raccomandazioni più specifiche e contestuali.' : ''}
     `;
 
     const completion = await openai.chat.completions.create({
@@ -141,7 +145,9 @@ async function generateAIAnalysis(analysis: any) {
         "Rischi di mercato immobiliare",
         "Tempistiche di vendita variabili"
       ],
-      recommendation: "L'investimento mostra potenziale ma richiede attenta valutazione",
+      recommendation: notes && notes.trim() 
+        ? `L'investimento mostra potenziale ma richiede attenta valutazione. Considerazioni aggiuntive: ${notes}`
+        : "L'investimento mostra potenziale ma richiede attenta valutazione",
       strategies: [
         "Monitorare il mercato e ottimizzare i tempi",
         "Considerare la diversificazione del portafoglio"

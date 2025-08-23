@@ -21,6 +21,7 @@ interface FeasibilityAnalysis {
   riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
   marketTrend: 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE';
   recommendations: string[];
+  notes?: string; // Note aggiuntive per l'analisi LLM
   createdAt: string;
 }
 
@@ -42,7 +43,10 @@ export default function FeasibilityReportGenerator({ analysis, onGenerateReport 
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ analysisId: analysis.id }),
+        body: JSON.stringify({ 
+          analysisId: analysis.id,
+          notes: analysis.notes // Includi le note per l'elaborazione LLM
+        }),
       });
 
       if (response.ok) {

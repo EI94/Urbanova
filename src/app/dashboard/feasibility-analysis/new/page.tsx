@@ -1185,6 +1185,45 @@ export default function NewFeasibilityProjectPage() {
                 </div>
               </div>
             </div>
+
+            {/* Campo Note per Analisi LLM */}
+            <div className="bg-white shadow-sm rounded-lg p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <SearchIcon className="h-5 w-5 mr-2 text-indigo-600" />
+                Note e Considerazioni per l'Analisi
+              </h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="label">
+                    <span className="label-text font-medium">Note Progetto</span>
+                    <span className="label-text-alt text-gray-500">Queste note verranno elaborate dall'AI per migliorare l'analisi</span>
+                  </label>
+                  <textarea
+                    value={project.notes || ''}
+                    onChange={(e) => handleInputChange('basic', 'notes', e.target.value)}
+                    className="textarea textarea-bordered w-full h-32"
+                    placeholder="Inserisci note, considerazioni, vincoli, opportunità o qualsiasi informazione rilevante per l'analisi di fattibilità. L'AI utilizzerà queste informazioni per generare un report più accurato e personalizzato..."
+                  />
+                </div>
+                
+                <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
+                  <div className="flex items-start">
+                    <SearchIcon className="h-4 w-4 text-indigo-600 mr-2 mt-1 flex-shrink-0" />
+                    <div className="text-sm text-indigo-800">
+                      <div className="font-medium mb-1">💡 Suggerimenti per le Note:</div>
+                      <ul className="space-y-1 text-xs">
+                        <li>• <strong>Vincoli urbanistici:</strong> Zona, limiti di altezza, destinazione d'uso</li>
+                        <li>• <strong>Opportunità di mercato:</strong> Trend della zona, domanda specifica</li>
+                        <li>• <strong>Rischi:</strong> Problemi noti, limitazioni tecniche</li>
+                        <li>• <strong>Strategie:</strong> Approccio commerciale, target di vendita</li>
+                        <li>• <strong>Timing:</strong> Tempistiche di mercato, stagionalità</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Risultati in Tempo Reale */}
@@ -1399,6 +1438,7 @@ export default function NewFeasibilityProjectPage() {
                       ? 'Progetto redditizio con profitto positivo'
                       : 'Progetto in perdita - valutare strategie di ottimizzazione'
                   ],
+                  notes: project.notes || '', // Note per l'analisi LLM
                   createdAt: new Date().toISOString()
                 }}
                                  onGenerateReport={() => {
