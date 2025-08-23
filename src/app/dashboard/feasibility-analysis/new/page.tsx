@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
 import { firebaseDebugService } from '@/lib/firebaseDebugService';
+import { projectManagerService } from '@/lib/projectManagerService';
 import FeasibilityReportGenerator from '@/components/ui/FeasibilityReportGenerator';
 import ProjectReminderModal from '@/components/ui/ProjectReminderModal';
 import { 
@@ -396,7 +397,7 @@ export default function NewFeasibilityProjectPage() {
 
     setAutoSaving(true);
     try {
-      console.log('💾 Salvataggio automatico in corso...');
+      console.log('🧠 Salvataggio intelligente in corso...');
       
       const finalProject = {
         ...project,
@@ -406,33 +407,28 @@ export default function NewFeasibilityProjectPage() {
         isTargetAchieved: calculatedResults.margin >= (project.targetMargin || 30)
       } as Omit<FeasibilityProject, 'id' | 'createdAt' | 'updatedAt'>;
 
-      let projectId: string;
-      try {
-        projectId = await feasibilityService.createProject(finalProject);
-        console.log('✅ Progetto salvato automaticamente:', projectId);
-      } catch (standardError) {
-        // Fallback con transazione
-        try {
-          projectId = await feasibilityService.createProjectWithTransaction(finalProject);
-          console.log('✅ Progetto salvato automaticamente con transazione:', projectId);
-        } catch (transactionError) {
-          // Fallback finale con batch
-          projectId = await feasibilityService.createProjectWithBatch(finalProject);
-          console.log('✅ Progetto salvato automaticamente con batch:', projectId);
-        }
+      // Usa il servizio intelligente che evita duplicati
+      const result = await projectManagerService.smartSaveProject(finalProject);
+      
+      if (result.success) {
+        setSavedProjectId(result.projectId);
+        setLastSaved(new Date());
+        
+        // Toast discreta per il salvataggio automatico
+        const message = result.isNew 
+          ? '💾 Nuovo progetto salvato automaticamente'
+          : '🔄 Progetto aggiornato automaticamente';
+          
+        toast.success(message, { 
+          duration: 2000,
+          position: 'bottom-right' 
+        });
+        
+        console.log('✅ Salvataggio intelligente completato:', result);
       }
       
-      setSavedProjectId(projectId);
-      setLastSaved(new Date());
-      
-      // Toast discreta per il salvataggio automatico
-      toast.success('💾 Progetto salvato automaticamente', { 
-        duration: 2000,
-        position: 'bottom-right' 
-      });
-      
     } catch (error: any) {
-      console.error('❌ Errore salvataggio automatico:', error);
+      console.error('❌ Errore salvataggio intelligente:', error);
       // Non mostrare errori per il salvataggio automatico per non disturbare l'utente
     } finally {
       setAutoSaving(false);

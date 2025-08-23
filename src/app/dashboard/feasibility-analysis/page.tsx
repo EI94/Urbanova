@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
+import { projectManagerService } from '@/lib/projectManagerService';
 import { 
   CalculatorIcon, 
   TrendingUpIcon, 
