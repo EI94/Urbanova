@@ -50,6 +50,7 @@ export default function NewFeasibilityProjectPage() {
   const [autoSaving, setAutoSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [autoSaveExecuted, setAutoSaveExecuted] = useState(false);
 
   const [project, setProject] = useState<Partial<FeasibilityProject>>({
     name: '',
@@ -147,15 +148,27 @@ export default function NewFeasibilityProjectPage() {
     recalculateAll();
   }, []);
 
-  // Auto-save con debounce di 3 secondi
+  // Reset del salvataggio automatico quando si crea un nuovo progetto
+  const resetAutoSave = () => {
+    setSavedProjectId(null);
+    setAutoSaveExecuted(false);
+    setLastSaved(null);
+    setAutoSaving(false);
+    if (autoSaveTimeout) {
+      clearTimeout(autoSaveTimeout);
+      setAutoSaveTimeout(null);
+    }
+  };
+
+  // Auto-save con debounce di 3 secondi - SOLO per cambiamenti essenziali
   useEffect(() => {
     // Cancella il timeout precedente se esiste
     if (autoSaveTimeout) {
       clearTimeout(autoSaveTimeout);
     }
 
-    // Solo se ci sono nome e indirizzo (campi obbligatori)
-    if (project.name && project.address && project.name.trim() && project.address.trim()) {
+    // Solo se ci sono nome e indirizzo (campi obbligatori) E non è già stato salvato automaticamente
+    if (project.name && project.address && project.name.trim() && project.address.trim() && !savedProjectId && !autoSaveExecuted) {
       const timeout = setTimeout(() => {
         autoSaveProject();
       }, 3000); // 3 secondi di debounce
@@ -169,7 +182,7 @@ export default function NewFeasibilityProjectPage() {
         clearTimeout(autoSaveTimeout);
       }
     };
-  }, [project, calculatedCosts, calculatedRevenues, calculatedResults]);
+  }, [project.name, project.address, savedProjectId]); // Solo dipendenze essenziali
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -392,6 +405,7 @@ export default function NewFeasibilityProjectPage() {
       
       setSavedProjectId(projectId);
       setLastSaved(new Date());
+      setAutoSaveExecuted(true); // Marca come già salvato automaticamente
       
       // Toast discreta per il salvataggio automatico
       toast.success('💾 Progetto salvato automaticamente', { 
