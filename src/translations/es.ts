@@ -61,7 +61,7 @@ export const es = {
   },
   navigationSections: {
     dashboard: 'Panel de Control',
-    intelligence: 'Inteligencia y Descubrimiento',
+    discovery: 'Discovery',
     planning: 'Planificación y Cumplimiento',
     projects: 'Proyectos',
     projectManagement: 'Gestión de Proyectos',

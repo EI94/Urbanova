@@ -61,7 +61,7 @@ export const en = {
   },
   navigationSections: {
     dashboard: 'Dashboard',
-    intelligence: 'Intelligence & Discovery',
+    discovery: 'Discovery',
     planning: 'Planning & Compliance',
     projects: 'Projects',
     projectManagement: 'Project Management',

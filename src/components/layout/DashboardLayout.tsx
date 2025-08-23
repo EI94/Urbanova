@@ -168,9 +168,8 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
     main: [
       { href: '/dashboard', icon: <DashboardIcon />, text: t('dashboard', 'navigation') },
     ],
-    intelligence: [
+    discovery: [
       { href: '/dashboard/market-intelligence', icon: <SearchIcon />, text: t('marketIntelligence', 'navigation') },
-      { href: '/dashboard/land-scraping', icon: <SearchIcon />, text: t('landScraping', 'navigation') },
       { href: '/dashboard/feasibility-analysis', icon: <CalculatorIcon />, text: t('feasibilityAnalysis', 'navigation') },
       { href: '/dashboard/design-center', icon: <PaletteIcon />, text: t('designCenter', 'navigation') },
     ],
@@ -285,9 +284,9 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
               ))}
             </NavSection>
 
-            {/* Sezione Intelligence & Discovery */}
-            <NavSection title={t('intelligenceDiscovery', 'navigationSections')} collapsed={sidebarCollapsed}>
-              {navigation.intelligence.map((item) => (
+            {/* Sezione Discovery */}
+            <NavSection title={t('discovery', 'navigationSections')} collapsed={sidebarCollapsed}>
+              {navigation.discovery.map((item) => (
                 <NavItem
                   key={item.href}
                   href={item.href}
