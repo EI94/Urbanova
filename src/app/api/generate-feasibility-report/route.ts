@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import { PDFGeneratorService } from '@/lib/pdfGeneratorService';
+import { urbanovaPDFService } from '@/lib/urbanovaPDFService';
+import { feasibilityService } from '@/lib/feasibilityService';
 
 // Inizializza OpenAI solo se la chiave è disponibile
 let openai: OpenAI | null = null;
@@ -10,46 +11,92 @@ if (process.env.OPENAI_API_KEY) {
   });
 }
 
-// Inizializza servizio PDF
-const pdfService = new PDFGeneratorService();
-
 export async function POST(request: NextRequest) {
   try {
     const { analysisId, notes } = await request.json();
 
-    // Simula recupero dati dell'analisi (in produzione verrebbe dal database)
-    const analysis = {
-      id: analysisId,
-      title: "Villa di Lusso a Roma",
-      location: "Roma, Lazio",
-      propertyType: "Villa Unifamiliare",
-      totalInvestment: 850000,
-      expectedROI: 12.5,
-      paybackPeriod: 8.2,
-      netPresentValue: 125000,
-      internalRateOfReturn: 15.8,
-      riskLevel: "MEDIUM" as const,
-      marketTrend: "POSITIVE" as const,
-      recommendations: [
-        "L'investimento mostra un ROI attraente del 12.5% con un periodo di recupero ragionevole",
-        "La posizione centrale di Roma garantisce una forte domanda di mercato",
-        "Considerare la diversificazione del portafoglio per ridurre il rischio complessivo",
-        "Monitorare le tendenze del mercato immobiliare romano per ottimizzare i tempi di vendita"
-      ],
-      createdAt: new Date().toISOString()
-    };
+    console.log('🔄 Generazione report in stile Urbanova per progetto:', analysisId);
 
-    // Genera analisi AI con OpenAI
-    const aiAnalysis = await generateAIAnalysis(analysis, notes);
+    // Recupera i dati reali del progetto dal database
+    let project;
+    try {
+      project = await feasibilityService.getProjectById(analysisId);
+      if (!project) {
+        throw new Error('Progetto non trovato');
+      }
+    } catch (error) {
+      console.error('❌ Errore recupero progetto:', error);
+      // Fallback con dati di esempio se il progetto non esiste
+      project = {
+        id: analysisId,
+        name: "Progetto di Esempio",
+        address: "Indirizzo non specificato",
+        status: "PIANIFICAZIONE",
+        propertyType: "Immobile residenziale",
+        totalArea: 0,
+        startDate: new Date(),
+        constructionStartDate: new Date(),
+        duration: 18,
+        targetMargin: 30,
+        costs: {
+          land: { purchasePrice: 0, purchaseTaxes: 0, intermediationFees: 0, subtotal: 0 },
+          construction: { excavation: 0, structures: 0, systems: 0, finishes: 0, subtotal: 0 },
+          externalWorks: 0,
+          concessionFees: 0,
+          design: 0,
+          bankCharges: 0,
+          exchange: 0,
+          insurance: 0,
+          total: 0
+        },
+        revenues: {
+          units: 0,
+          averageArea: 0,
+          pricePerSqm: 0,
+          revenuePerUnit: 0,
+          totalSales: 0,
+          otherRevenues: 0,
+          total: 0
+        },
+        results: {
+          profit: 0,
+          margin: 0,
+          roi: 0,
+          paybackPeriod: 0
+        },
+        isTargetAchieved: false,
+        notes: notes || '',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+    }
 
-    // Genera PDF avanzato con il servizio
-    const pdfBuffer = await pdfService.generateFeasibilityReport(analysis, aiAnalysis);
+    // Calcola tutti i valori del progetto
+    const calculatedCosts = feasibilityService.calculateCosts(project);
+    const calculatedRevenues = feasibilityService.calculateRevenues(project);
+    const calculatedResults = feasibilityService.calculateResults(project, calculatedCosts, calculatedRevenues);
+
+    console.log('✅ Dati progetto calcolati:', {
+      costs: calculatedCosts.total,
+      revenues: calculatedRevenues.total,
+      profit: calculatedResults.profit,
+      margin: calculatedResults.margin,
+      roi: calculatedResults.roi
+    });
+
+    // Genera PDF in stile Urbanova
+    const pdfBuffer = await urbanovaPDFService.generateUrbanovaStyleReport({
+      project,
+      calculatedCosts,
+      calculatedRevenues,
+      calculatedResults
+    });
 
     // Restituisci il PDF
     return new NextResponse(pdfBuffer, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="Studio-Fattibilita-${analysis.title.replace(/\s+/g, '-')}.pdf"`,
+        'Content-Disposition': `attachment; filename="Studio-Fattibilita-${project.name?.replace(/\s+/g, '-') || 'Progetto'}.pdf"`,
       },
     });
 
