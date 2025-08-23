@@ -97,23 +97,15 @@ export default function FeasibilityAnalysisPage() {
     try {
       console.log('🗑️ Avvio cancellazione progetto:', projectId);
       
-      // SOLUZIONE DI EMERGENZA: bypassa completamente il servizio e usa direttamente Firebase
-      console.log('🚨 SOLUZIONE DI EMERGENZA - Cancellazione diretta Firebase:', projectId);
+      // RIPRISTINO FUNZIONALITÀ ORIGINALE: usa il servizio semplice come prima
+      console.log('🔄 RIPRISTINO - Cancellazione con servizio originale:', projectId);
       
       try {
-        // Importa direttamente Firebase per bypassare il servizio
-        const { deleteDoc, doc } = await import('firebase/firestore');
-        const { db } = await import('@/lib/firebase');
+        // Usa il servizio originale che funzionava prima
+        await feasibilityService.deleteProject(projectId);
+        console.log('✅ Progetto cancellato con servizio originale:', projectId);
         
-        console.log('🔥 Firebase importato direttamente');
-        
-        // Cancella direttamente dal database
-        const projectRef = doc(db, 'feasibilityProjects', projectId);
-        await deleteDoc(projectRef);
-        
-        console.log('✅ Progetto cancellato direttamente da Firebase:', projectId);
-        
-        // Forza l'aggiornamento immediato della lista
+        // Aggiorna immediatamente la lista locale
         setProjects(prevProjects => {
           const filtered = prevProjects.filter(p => p.id !== projectId);
           console.log('📝 Lista locale aggiornata:', filtered.length, 'progetti rimanenti');
@@ -127,12 +119,31 @@ export default function FeasibilityAnalysisPage() {
           loadData(true);
         }, 500);
         
-      } catch (firebaseError) {
-        console.error('❌ ERRORE CATASTROFICO Firebase:', firebaseError);
+      } catch (serviceError) {
+        console.error('❌ Errore servizio originale:', serviceError);
         
-        // Fallback: rimuovi solo dalla lista locale
-        setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
-        toast(`⚠️ Progetto rimosso dalla lista (errore Firebase)`, { icon: '⚠️' });
+        // Se il servizio fallisce, prova con Firebase diretto
+        try {
+          console.log('🔄 Fallback: prova con Firebase diretto');
+          const { deleteDoc, doc } = await import('firebase/firestore');
+          const { db } = await import('@/lib/firebase');
+          
+          const projectRef = doc(db, 'feasibilityProjects', projectId);
+          await deleteDoc(projectRef);
+          
+          console.log('✅ Progetto cancellato con Firebase diretto');
+          
+          // Aggiorna la lista
+          setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
+          toast(`✅ Progetto "${projectName}" cancellato con fallback`, { icon: '✅' });
+          
+        } catch (firebaseError) {
+          console.error('❌ ERRORE CATASTROFICO anche con Firebase diretto:', firebaseError);
+          
+          // Ultimo fallback: rimuovi solo dalla lista locale
+          setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
+          toast(`⚠️ Progetto rimosso dalla lista (errore completo)`, { icon: '⚠️' });
+        }
         
         // Ricarica i dati
         setTimeout(() => {
@@ -250,6 +261,27 @@ export default function FeasibilityAnalysisPage() {
             >
               <CompareIcon className="h-4 w-4 mr-2" />
               {t('compare', 'feasibility')}
+            </button>
+            <button 
+              onClick={async () => {
+                try {
+                  console.log('🧪 Test connessione Firebase...');
+                  const { db } = await import('@/lib/firebase');
+                  const { collection, getDocs } = await import('firebase/firestore');
+                  
+                  const testCollection = collection(db, 'feasibilityProjects');
+                  const snapshot = await getDocs(testCollection);
+                  console.log('✅ Firebase OK - Progetti trovati:', snapshot.size);
+                  
+                  toast(`✅ Firebase OK - ${snapshot.size} progetti`, { icon: '✅' });
+                } catch (error) {
+                  console.error('❌ Test Firebase fallito:', error);
+                  toast(`❌ Firebase KO: ${error}`, { icon: '❌' });
+                }
+              }}
+              className="btn btn-warning"
+            >
+              🧪 Test Firebase
             </button>
           </div>
         </div>
