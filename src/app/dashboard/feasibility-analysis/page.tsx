@@ -63,15 +63,41 @@ export default function FeasibilityAnalysisPage() {
   };
 
   const handleDeleteProject = async (projectId: string) => {
-    if (!confirm(t('confirmDelete', 'feasibility'))) return;
+    // Conferma più dettagliata
+    const project = projects.find(p => p.id === projectId);
+    const projectName = project?.name || 'Progetto';
+    const projectAddress = project?.address || '';
+    
+    const confirmMessage = `Sei sicuro di voler cancellare il progetto "${projectName}"${projectAddress ? ` (${projectAddress})` : ''}?\n\nQuesta azione non può essere annullata.`;
+    
+    if (!confirm(confirmMessage)) return;
     
     try {
-      await feasibilityService.deleteProject(projectId);
-      toast(`✅ ${t('deleted', 'feasibility.toasts')}` as string, { icon: '✅' });
-      loadData();
+      console.log('🗑️ Avvio cancellazione progetto:', projectId);
+      
+      // Usa il servizio di cancellazione sicura
+      const result = await projectManagerService.safeDeleteProject(projectId);
+      
+      if (result.success) {
+        toast(`✅ Progetto "${projectName}" cancellato con successo`, { icon: '✅' });
+        console.log('✅ Progetto cancellato:', result);
+        
+        // Ricarica i dati
+        await loadData();
+      } else {
+        toast(`❌ Errore nella cancellazione: ${result.message}`, { icon: '❌' });
+        console.error('❌ Errore cancellazione:', result);
+      }
+      
     } catch (error) {
-      console.error('Errore eliminazione progetto:', error);
-      toast(`❌ ${t('deleteError', 'feasibility.toasts')}` as string, { icon: '❌' });
+      console.error('❌ Errore eliminazione progetto:', error);
+      
+      let errorMessage = 'Errore durante la cancellazione';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      toast(`❌ Errore: ${errorMessage}`, { icon: '❌' });
     }
   };
 

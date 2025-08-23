@@ -281,6 +281,149 @@ export class ProjectManagerService {
       throw error;
     }
   }
+
+  /**
+   * Cancella un progetto in modo sicuro
+   */
+  async safeDeleteProject(projectId: string, userId?: string): Promise<{
+    success: boolean;
+    message: string;
+    projectId: string;
+  }> {
+    try {
+      console.log('🗑️ Cancellazione sicura progetto:', projectId);
+
+      // Verifica che il progetto esista
+      const project = await feasibilityService.getProjectById(projectId);
+      if (!project) {
+        throw new Error('Progetto non trovato');
+      }
+
+      // Verifica che l'utente sia autorizzato (se userId è fornito)
+      if (userId && project.userId && project.userId !== userId) {
+        throw new Error('Non autorizzato a cancellare questo progetto');
+      }
+
+      // Cancella il progetto
+      await feasibilityService.deleteProject(projectId);
+      
+      console.log('✅ Progetto cancellato con successo:', projectId);
+      
+      return {
+        success: true,
+        message: 'Progetto cancellato con successo',
+        projectId
+      };
+
+    } catch (error) {
+      console.error('❌ Errore cancellazione progetto:', error);
+      
+      let errorMessage = 'Errore durante la cancellazione';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      return {
+        success: false,
+        message: errorMessage,
+        projectId
+      };
+    }
+  }
+
+  /**
+   * Cancella più progetti in batch
+   */
+  async deleteMultipleProjects(projectIds: string[], userId?: string): Promise<{
+    success: boolean;
+    deleted: string[];
+    failed: Array<{ id: string; error: string }>;
+    total: number;
+  }> {
+    try {
+      console.log('🗑️ Cancellazione multipla progetti:', projectIds.length);
+
+      const deleted: string[] = [];
+      const failed: Array<{ id: string; error: string }> = [];
+
+      for (const projectId of projectIds) {
+        try {
+          const result = await this.safeDeleteProject(projectId, userId);
+          if (result.success) {
+            deleted.push(projectId);
+          } else {
+            failed.push({ id: projectId, error: result.message });
+          }
+        } catch (error) {
+          failed.push({ 
+            id: projectId, 
+            error: error instanceof Error ? error.message : 'Errore sconosciuto' 
+          });
+        }
+      }
+
+      const result = {
+        success: failed.length === 0,
+        deleted,
+        failed,
+        total: projectIds.length
+      };
+
+      console.log('✅ Cancellazione multipla completata:', result);
+      return result;
+
+    } catch (error) {
+      console.error('❌ Errore cancellazione multipla:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Verifica se un progetto può essere cancellato
+   */
+  async canDeleteProject(projectId: string, userId?: string): Promise<{
+    canDelete: boolean;
+    reason?: string;
+    project?: FeasibilityProject;
+  }> {
+    try {
+      const project = await feasibilityService.getProjectById(projectId);
+      if (!project) {
+        return {
+          canDelete: false,
+          reason: 'Progetto non trovato'
+        };
+      }
+
+      // Verifica autorizzazioni
+      if (userId && project.userId && project.userId !== userId) {
+        return {
+          canDelete: false,
+          reason: 'Non autorizzato a cancellare questo progetto'
+        };
+      }
+
+      // Verifica se il progetto è in uno stato che permette la cancellazione
+      if (project.status === 'COMPLETATO') {
+        return {
+          canDelete: false,
+          reason: 'Non è possibile cancellare un progetto completato'
+        };
+      }
+
+      return {
+        canDelete: true,
+        project
+      };
+
+    } catch (error) {
+      console.error('❌ Errore verifica cancellazione progetto:', error);
+      return {
+        canDelete: false,
+        reason: 'Errore durante la verifica'
+      };
+    }
+  }
 }
 
 export const projectManagerService = new ProjectManagerService();
