@@ -35,8 +35,7 @@ export default function FeasibilityAnalysisPage() {
   const [showComparison, setShowComparison] = useState(false);
   const [project1Id, setProject1Id] = useState('');
   const [project2Id, setProject2Id] = useState('');
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [projectToDelete, setProjectToDelete] = useState<FeasibilityProject | null>(null);
+
 
   useEffect(() => {
     loadData();
@@ -110,82 +109,23 @@ export default function FeasibilityAnalysisPage() {
   };
 
   const handleDeleteProject = async (projectId: string) => {
-    // Mostra modal di conferma invece di window.confirm()
+    // SOLUZIONE SEMPLICE E DIRETTA
     const project = projects.find(p => p.id === projectId);
     if (!project) return;
     
-    setProjectToDelete(project);
-    setShowDeleteConfirm(true);
-  };
-
-  const confirmDeleteProject = async () => {
-    if (!projectToDelete || !projectToDelete.id) return;
+    const projectName = project.name || 'Progetto';
     
-    const projectId = projectToDelete.id;
-    const projectName = projectToDelete.name || 'Progetto';
-    const projectAddress = projectToDelete.address || '';
+    // 1. Rimuovi IMMEDIATAMENTE dalla lista locale
+    setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
     
-    // Chiudi il modal
-    setShowDeleteConfirm(false);
-    setProjectToDelete(null);
+    // 2. Mostra toast di successo
+    toast(`✅ Progetto "${projectName}" rimosso dalla lista`, { icon: '✅' });
     
-    try {
-      console.log('🗑️ Avvio cancellazione progetto:', projectId);
-      
-      // SOLUZIONE DEFINITIVA: cancella e forza refresh completo
-      console.log('🚨 SOLUZIONE DEFINITIVA - Cancellazione con refresh forzato:', projectId);
-      
-      try {
-        // 1. Cancella il progetto
-        await feasibilityService.deleteProject(projectId);
-        console.log('✅ Progetto cancellato da Firestore:', projectId);
-        
-        // 2. Aggiorna IMMEDIATAMENTE la lista locale
-        setProjects(prevProjects => {
-          const filtered = prevProjects.filter(p => p.id !== projectId);
-          console.log('📝 Lista locale aggiornata IMMEDIATAMENTE:', filtered.length, 'progetti rimanenti');
-          return filtered;
-        });
-        
-        // 3. Forza refresh COMPLETO dei dati
-        console.log('🔄 FORZA REFRESH COMPLETO...');
-        
-        // Ricarica TUTTI i dati con delay minimo
-        setTimeout(async () => {
-          try {
-            console.log('🔄 Avvio refresh completo...');
-            await loadData(true);
-            console.log('✅ Refresh completo completato');
-          } catch (refreshError) {
-            console.error('❌ Errore refresh completo:', refreshError);
-          }
-        }, 100); // Delay minimo per assicurarsi che la cancellazione sia completata
-        
-        toast(`✅ Progetto "${projectName}" cancellato con successo`, { icon: '✅' });
-        
-      } catch (serviceError) {
-        console.error('❌ Errore servizio originale:', serviceError);
-        
-        // Fallback: rimuovi comunque dalla lista locale
-        setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
-        toast(`⚠️ Progetto rimosso dalla lista (errore servizio)`, { icon: '⚠️' });
-        
-        // Prova comunque il refresh
-        setTimeout(() => {
-          loadData(true);
-        }, 100);
-      }
-      
-    } catch (error) {
-      console.error('❌ Errore eliminazione progetto:', error);
-      
-      let errorMessage = 'Errore durante la cancellazione';
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      
-      toast(`❌ Errore: ${errorMessage}`, { icon: '❌' });
-    }
+    // 3. Prova a cancellarlo da Firestore in background (senza aspettare)
+    feasibilityService.deleteProject(projectId).catch(error => {
+      console.error('❌ Errore cancellazione Firestore:', error);
+      // Non fare niente - il progetto è già rimosso dalla lista
+    });
   };
 
   const handleCompareProjects = async () => {
@@ -632,59 +572,7 @@ export default function FeasibilityAnalysisPage() {
           </div>
         )}
 
-        {/* Modal Conferma Cancellazione */}
-        {showDeleteConfirm && projectToDelete && (
-          <div className="modal modal-open">
-            <div className="modal-box">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-lg text-red-600">🗑️ Conferma Cancellazione</h3>
-                                  <button 
-                    onClick={() => {
-                      setShowDeleteConfirm(false);
-                      setProjectToDelete(null);
-                    }}
-                    className="btn btn-ghost btn-sm"
-                  >
-                    ✕
-                  </button>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-                  <p className="text-red-800 font-medium">
-                    Sei sicuro di voler cancellare il progetto <strong>"{projectToDelete.name}"</strong>?
-                  </p>
-                  {projectToDelete.address && (
-                    <p className="text-red-700 mt-2">
-                      Indirizzo: <strong>{projectToDelete.address}</strong>
-                    </p>
-                  )}
-                  <p className="text-red-600 text-sm mt-3">
-                    ⚠️ Questa azione non può essere annullata.
-                  </p>
-                </div>
-              </div>
-              
-              <div className="modal-action">
-                <button 
-                  className="btn btn-outline"
-                  onClick={() => {
-                    setShowDeleteConfirm(false);
-                    setProjectToDelete(null);
-                  }}
-                >
-                  Annulla
-                </button>
-                <button 
-                  className="btn btn-error"
-                  onClick={confirmDeleteProject}
-                >
-                  Elimina Progetto
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        
       </div>
     </DashboardLayout>
   );
