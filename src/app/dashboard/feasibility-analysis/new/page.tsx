@@ -39,7 +39,7 @@ export default function NewFeasibilityProjectPage() {
   });
   
   // Nuovo stato per gestire i costi di costruzione
-  const [constructionCostMode, setConstructionCostMode] = useState<'perSqm' | 'total'>('perSqm');
+  const [constructionCostMode, setConstructionCostMode] = useState<'perSqm' | 'total'>('total');
   const [constructionCostsPerSqm, setConstructionCostsPerSqm] = useState({
     excavation: 0,
     structures: 0,
