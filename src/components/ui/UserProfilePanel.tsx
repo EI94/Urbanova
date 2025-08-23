@@ -6,12 +6,11 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { firebaseUserProfileService, UserProfile, ProfileUpdate, PasswordChange } from '@/lib/firebaseUserProfileService';
 import { 
   UserIcon, 
-  XMarkIcon, 
-  CameraIcon,
+  XIcon, 
+  ImageIcon,
   TrashIcon,
   CheckIcon,
-  EyeIcon,
-  EyeSlashIcon
+  EyeIcon
 } from '@/components/icons';
 import { toast } from 'react-hot-toast';
 
@@ -227,7 +226,7 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
             onClick={onClose}
             className="p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
           >
-            <XMarkIcon className="h-5 w-5" />
+                            <XIcon className="h-5 w-5" />
           </button>
         </div>
 
@@ -293,7 +292,7 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                         onClick={() => fileInputRef.current?.click()}
                         className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 transition-colors"
                       >
-                        <CameraIcon className="h-4 w-4" />
+                        <ImageIcon className="h-4 w-4" />
                       </button>
                     </div>
                     
@@ -493,7 +492,7 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                             className="absolute inset-y-0 right-0 pr-3 flex items-center"
                           >
                             {showPassword ? (
-                              <EyeSlashIcon className="h-4 w-4 text-gray-400" />
+                              <span className="h-4 w-4 text-gray-400">🙈</span>
                             ) : (
                               <EyeIcon className="h-4 w-4 text-gray-400" />
                             )}
@@ -518,7 +517,7 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                             className="absolute inset-y-0 right-0 pr-3 flex items-center"
                           >
                             {showNewPassword ? (
-                              <EyeSlashIcon className="h-4 w-4 text-gray-400" />
+                              <span className="h-4 w-4 text-gray-400">🙈</span>
                             ) : (
                               <EyeIcon className="h-4 w-4 text-gray-400" />
                             )}
@@ -543,7 +542,7 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                             className="absolute inset-y-0 right-0 pr-3 flex items-center"
                           >
                             {showConfirmPassword ? (
-                              <EyeSlashIcon className="h-4 w-4 text-gray-400" />
+                              <span className="h-4 w-4 text-gray-400">🙈</span>
                             ) : (
                               <EyeIcon className="h-4 w-4 text-gray-400" />
                             )}
