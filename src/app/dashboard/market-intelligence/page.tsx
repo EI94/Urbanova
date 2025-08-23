@@ -21,13 +21,13 @@ import TeamCommentsVoting from '@/components/ui/TeamCommentsVoting';
 import AdvancedTeamManagement from '@/components/ui/AdvancedTeamManagement';
 import WorkflowManagement from '@/components/ui/WorkflowManagement';
 import RealtimeCollaboration from '@/components/ui/RealtimeCollaboration';
-import AdvancedAnalytics from '@/components/ui/AdvancedAnalytics';
-import KnowledgeManagement from '@/components/ui/KnowledgeManagement';
+
+
 import SecurityCompliance from '@/components/ui/SecurityCompliance';
-import MonitoringObservability from '@/components/ui/MonitoringObservability';
 
 
-import APIGatewayCenter from '@/components/ui/APIGatewayCenter';
+
+
 
 
 import { teamRoleManager, ROLE_PERMISSIONS } from '@/lib/teamRoleManager';
@@ -166,13 +166,13 @@ export default function LandScrapingPage() {
 
   // Stati per Realtime Collaboration
   const [showRealtimeCollaboration, setShowRealtimeCollaboration] = useState(false);
-  const [showAdvancedAnalytics, setShowAdvancedAnalytics] = useState(false);
-  const [showKnowledgeManagement, setShowKnowledgeManagement] = useState(false);
+
+
   const [showSecurityCompliance, setShowSecurityCompliance] = useState(false);
-  const [showMonitoringObservability, setShowMonitoringObservability] = useState(false);
 
 
-  const [showAPIGatewayCenter, setShowAPIGatewayCenter] = useState(false);
+
+
 
 
 
@@ -1025,39 +1025,19 @@ export default function LandScrapingPage() {
                   ⚡ Real-time Collaboration
                 </button>
                 
-                <button
-                  onClick={() => setShowAdvancedAnalytics(true)}
-                  className="px-3 py-2 text-sm bg-purple-50 text-purple-700 border border-purple-200 rounded hover:bg-purple-100 transition-colors"
-                >
-                  📊 Advanced Analytics
-                </button>
-                
-                <button
-                  onClick={() => setShowKnowledgeManagement(true)}
-                  className="px-3 py-2 text-sm bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 transition-colors"
-                >
-                  📚 Knowledge Base
-                </button>
-                
 
                 
-                <button
-                  onClick={() => setShowMonitoringObservability(true)}
-                  className="px-3 py-2 text-sm bg-indigo-50 text-indigo-700 border border-indigo-200 rounded hover:bg-indigo-100 transition-colors"
-                >
-                  📊 Monitoring & Observability
-                </button>
+
                 
 
                 
 
                 
-                <button
-                  onClick={() => setShowAPIGatewayCenter(true)}
-                  className="px-3 py-2 text-sm bg-teal-50 text-teal-700 border border-teal-200 rounded hover:bg-teal-100 transition-colors"
-                >
-                  🔗 API Gateway & Microservices
-                </button>
+
+                
+
+                
+
                 
 
             </div>
@@ -1602,25 +1582,9 @@ export default function LandScrapingPage() {
           currentUserAvatar="👨‍💻"
         />
 
-        {/* Advanced Analytics */}
-        <AdvancedAnalytics
-          isOpen={showAdvancedAnalytics}
-          onClose={() => setShowAdvancedAnalytics(false)}
-          currentUserId="current-user"
-          currentUserName="Utente Corrente"
-          currentUserRole={currentUserRole}
-          currentUserAvatar="👨‍💻"
-        />
 
-        {/* Knowledge Management */}
-        <KnowledgeManagement
-          isOpen={showKnowledgeManagement}
-          onClose={() => setShowKnowledgeManagement(false)}
-          currentUserId="current-user"
-          currentUserName="Utente Corrente"
-          currentUserRole={currentUserRole}
-          currentUserAvatar="👨‍💻"
-        />
+
+
 
         {/* Security & Compliance */}
         <SecurityCompliance
@@ -1632,29 +1596,13 @@ export default function LandScrapingPage() {
           currentUserAvatar="👨‍💻"
         />
 
-        {/* Monitoring & Observability */}
-        <MonitoringObservability
-          isOpen={showMonitoringObservability}
-          onClose={() => setShowMonitoringObservability(false)}
-          currentUserId="current-user"
-          currentUserName="Utente Corrente"
-          currentUserRole={currentUserRole}
-          currentUserAvatar="👨‍💻"
-        />
 
 
 
 
 
-        {/* API Gateway & Microservices Center */}
-        <APIGatewayCenter
-          isOpen={showAPIGatewayCenter}
-          onClose={() => setShowAPIGatewayCenter(false)}
-          currentUserId="current-user"
-          currentUserName="Utente Corrente"
-          currentUserRole={currentUserRole}
-          currentUserAvatar="👨‍💻"
-        />
+
+
 
 
 
