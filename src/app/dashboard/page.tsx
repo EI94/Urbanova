@@ -163,48 +163,48 @@ export default function DashboardPage() {
                 <span className="text-sm text-gray-600">{t('residential', 'dashboard')}</span>
                 <div className="flex items-center">
                   <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                    <div 
-                      className="bg-blue-600 h-2 rounded-full" 
-                      style={{ width: `${(stats.projectsByType.RESIDENZIALE / stats.totalProjects) * 100}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-sm font-medium">{stats.projectsByType.RESIDENZIALE}</span>
+                                      <div 
+                    className="bg-blue-600 h-2 rounded-full" 
+                    style={{ width: `${stats.totalProjects > 0 ? (stats.projectsByType.RESIDENZIALE / stats.totalProjects) * 100 : 0}%` }}
+                  ></div>
+                </div>
+                <span className="text-sm font-medium">{stats.projectsByType.RESIDENZIALE || 0}</span>
                 </div>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">{t('commercial', 'dashboard')}</span>
                 <div className="flex items-center">
                   <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                    <div 
-                      className="bg-green-600 h-2 rounded-full" 
-                      style={{ width: `${(stats.projectsByType.COMMERCIALE / stats.totalProjects) * 100}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-sm font-medium">{stats.projectsByType.COMMERCIALE}</span>
+                                      <div 
+                    className="bg-green-600 h-2 rounded-full" 
+                    style={{ width: `${stats.totalProjects > 0 ? (stats.projectsByType.COMMERCIALE / stats.totalProjects) * 100 : 0}%` }}
+                  ></div>
+                </div>
+                <span className="text-sm font-medium">{stats.projectsByType.COMMERCIALE || 0}</span>
                 </div>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">{t('mixed', 'dashboard')}</span>
                 <div className="flex items-center">
                   <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                    <div 
-                      className="bg-yellow-600 h-2 rounded-full" 
-                      style={{ width: `${(stats.projectsByType.MISTO / stats.totalProjects) * 100}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-sm font-medium">{stats.projectsByType.MISTO}</span>
+                                      <div 
+                    className="bg-yellow-600 h-2 rounded-full" 
+                    style={{ width: `${stats.totalProjects > 0 ? (stats.projectsByType.MISTO / stats.totalProjects) * 100 : 0}%` }}
+                  ></div>
+                </div>
+                <span className="text-sm font-medium">{stats.projectsByType.MISTO || 0}</span>
                 </div>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">{t('industrial', 'dashboard')}</span>
                 <div className="flex items-center">
                   <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                    <div 
-                      className="bg-purple-600 h-2 rounded-full" 
-                      style={{ width: `${(stats.projectsByType.INDUSTRIALE / stats.totalProjects) * 100}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-sm font-medium">{stats.projectsByType.INDUSTRIALE}</span>
+                                      <div 
+                    className="bg-purple-600 h-2 rounded-full" 
+                    style={{ width: `${stats.totalProjects > 0 ? (stats.projectsByType.INDUSTRIALE / stats.totalProjects) * 100 : 0}%` }}
+                  ></div>
+                </div>
+                <span className="text-sm font-medium">{stats.projectsByType.INDUSTRIALE || 0}</span>
                 </div>
               </div>
             </div>
@@ -219,28 +219,28 @@ export default function DashboardPage() {
                   <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
                   <span className="text-sm text-gray-600">{t('planning', 'dashboard')}</span>
                 </div>
-                <span className="text-sm font-medium">{stats.projectsByStatus.PIANIFICAZIONE}</span>
+                <span className="text-sm font-medium">{stats.projectsByStatus.PIANIFICAZIONE || 0}</span>
               </div>
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
                   <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
                   <span className="text-sm text-gray-600">{t('inProgress', 'dashboard')}</span>
                 </div>
-                <span className="text-sm font-medium">{stats.projectsByStatus.IN_CORSO}</span>
+                <span className="text-sm font-medium">{stats.projectsByStatus.IN_CORSO || 0}</span>
               </div>
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
                   <div className="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
                   <span className="text-sm text-gray-600">{t('onHold', 'dashboard')}</span>
                 </div>
-                <span className="text-sm font-medium">{stats.projectsByStatus.IN_ATTESA}</span>
+                <span className="text-sm font-medium">{stats.projectsByStatus.IN_ATTESA || 0}</span>
               </div>
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
                   <div className="w-3 h-3 bg-purple-500 rounded-full mr-2"></div>
                   <span className="text-sm text-gray-600">{t('completed', 'dashboard')}</span>
                 </div>
-                <span className="text-sm font-medium">{stats.projectsByStatus.COMPLETATO}</span>
+                <span className="text-sm font-medium">{stats.projectsByStatus.COMPLETATO || 0}</span>
               </div>
             </div>
           </div>
@@ -250,7 +250,7 @@ export default function DashboardPage() {
         <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('recentActivity', 'dashboard')}</h3>
           <div className="space-y-3">
-            {stats.recentActivity.slice(0, 5).map((activity) => (
+            {(stats.recentActivity || []).slice(0, 5).map((activity) => (
               <div key={activity.id} className="flex items-center p-3 bg-gray-50 rounded-lg">
                 <div className="flex-shrink-0">
                   {activity.type === 'PROJECT_CREATED' && (

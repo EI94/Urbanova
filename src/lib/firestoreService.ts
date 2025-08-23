@@ -315,9 +315,23 @@ export const testFirestoreConnection = async (): Promise<boolean> => {
 
 // Funzione per ottenere statistiche progetti
 export const getProjectStats = async (): Promise<{
-  total: number;
-  byStatus: Record<string, number>;
-  byType: Record<string, number>;
+  totalProjects: number;
+  activeProjects: number;
+  completedProjects: number;
+  totalBudget: number;
+  averageROI: number;
+  projectsByType: {
+    RESIDENZIALE: number;
+    COMMERCIALE: number;
+    MISTO: number;
+    INDUSTRIALE: number;
+  };
+  projectsByStatus: {
+    PIANIFICAZIONE: number;
+    IN_CORSO: number;
+    IN_ATTESA: number;
+    COMPLETATO: number;
+  };
 }> => {
   try {
     console.log('🔄 Caricamento statistiche progetti...');
@@ -327,26 +341,86 @@ export const getProjectStats = async (): Promise<{
     
     const projects = snapshot.docs.map(doc => doc.data()) as RealEstateProject[];
     
+    // Inizializza le statistiche con valori di default sicuri
     const stats = {
-      total: projects.length,
-      byStatus: {} as Record<string, number>,
-      byType: {} as Record<string, number>
+      totalProjects: projects.length,
+      activeProjects: 0,
+      completedProjects: 0,
+      totalBudget: 0,
+      averageROI: 0,
+      projectsByType: {
+        RESIDENZIALE: 0,
+        COMMERCIALE: 0,
+        MISTO: 0,
+        INDUSTRIALE: 0
+      },
+      projectsByStatus: {
+        PIANIFICAZIONE: 0,
+        IN_CORSO: 0,
+        IN_ATTESA: 0,
+        COMPLETATO: 0
+      }
     };
     
     projects.forEach(project => {
       // Conta per status
-      stats.byStatus[project.status] = (stats.byStatus[project.status] || 0) + 1;
+      if (project.status) {
+        const status = project.status as keyof typeof stats.projectsByStatus;
+        if (stats.projectsByStatus[status] !== undefined) {
+          stats.projectsByStatus[status]++;
+        }
+      }
       
       // Conta per tipo
       if (project.propertyType) {
-        stats.byType[project.propertyType] = (stats.byType[project.propertyType] || 0) + 1;
+        const type = project.propertyType.toUpperCase() as keyof typeof stats.projectsByType;
+        if (stats.projectsByType[type] !== undefined) {
+          stats.projectsByType[type]++;
+        }
+      }
+      
+      // Calcola budget totale
+      if (project.budget) {
+        stats.totalBudget += project.budget;
+      }
+      
+      // Conta progetti attivi e completati
+      if (project.status === 'IN_CORSO') {
+        stats.activeProjects++;
+      } else if (project.status === 'COMPLETATO') {
+        stats.completedProjects++;
       }
     });
+    
+    // Calcola ROI medio se ci sono progetti con ROI
+    const projectsWithROI = projects.filter(p => p.expectedROI);
+    if (projectsWithROI.length > 0) {
+      stats.averageROI = projectsWithROI.reduce((sum, p) => sum + (p.expectedROI || 0), 0) / projectsWithROI.length;
+    }
     
     console.log('✅ Statistiche progetti caricate:', stats);
     return stats;
   } catch (error) {
     console.error('❌ Errore nel caricamento statistiche progetti:', error);
-    return { total: 0, byStatus: {}, byType: {} };
+    // Restituisci statistiche di default sicure
+    return {
+      totalProjects: 0,
+      activeProjects: 0,
+      completedProjects: 0,
+      totalBudget: 0,
+      averageROI: 0,
+      projectsByType: {
+        RESIDENZIALE: 0,
+        COMMERCIALE: 0,
+        MISTO: 0,
+        INDUSTRIALE: 0
+      },
+      projectsByStatus: {
+        PIANIFICAZIONE: 0,
+        IN_CORSO: 0,
+        IN_ATTESA: 0,
+        COMPLETATO: 0
+      }
+    };
   }
 }; 
