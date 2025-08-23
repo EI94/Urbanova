@@ -350,6 +350,15 @@ export class FeasibilityService {
     try {
       console.log('🔄 Calcolo costi progetto...');
       
+      // Determina se i costi sono per metro quadro o totali
+      const isPerSqm = project.costs?.construction?.excavation !== undefined && 
+                      (project.costs.construction.excavation > 0 || 
+                       project.costs.construction.structures > 0 || 
+                       project.costs.construction.systems > 0 || 
+                       project.costs.construction.finishes > 0);
+      
+      const totalArea = project.totalArea || 0;
+      
       const costs = {
         land: {
           purchasePrice: project.costs?.land?.purchasePrice || 0,
@@ -375,12 +384,31 @@ export class FeasibilityService {
       
       // Calcola subtotali
       costs.land.subtotal = costs.land.purchasePrice + costs.land.purchaseTaxes + costs.land.intermediationFees;
+      
+      // Se i costi sono per metro quadro, moltiplica per la superficie totale
+      if (isPerSqm && totalArea > 0) {
+        costs.construction.excavation = costs.construction.excavation * totalArea;
+        costs.construction.structures = costs.construction.structures * totalArea;
+        costs.construction.systems = costs.construction.systems * totalArea;
+        costs.construction.finishes = costs.construction.finishes * totalArea;
+      }
+      
       costs.construction.subtotal = costs.construction.excavation + costs.construction.structures + costs.construction.systems + costs.construction.finishes;
       
       // Calcola totale
       costs.total = costs.land.subtotal + costs.construction.subtotal + costs.externalWorks + costs.concessionFees + costs.design + costs.bankCharges + costs.exchange + costs.insurance;
       
       console.log('✅ Costi calcolati:', costs);
+      console.log('🔍 Debug calcolo costruzione:', {
+        isPerSqm,
+        totalArea,
+        excavation: project.costs?.construction?.excavation,
+        structures: project.costs?.construction?.structures,
+        systems: project.costs?.construction?.systems,
+        finishes: project.costs?.construction?.finishes,
+        calculatedSubtotal: costs.construction.subtotal
+      });
+      
       return costs;
     } catch (error) {
       console.error('❌ Errore calcolo costi:', error);
