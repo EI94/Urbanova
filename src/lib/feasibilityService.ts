@@ -710,6 +710,48 @@ export class FeasibilityService {
     }
   }
 
+  // Ricalcola e aggiorna tutti i progetti esistenti con calcoli corretti
+  async recalculateAllProjects(): Promise<void> {
+    try {
+      console.log('🔄 Ricalcolo di tutti i progetti esistenti...');
+      
+      const projects = await this.getAllProjects();
+      let updatedCount = 0;
+      
+      for (const project of projects) {
+        try {
+          // Ricalcola costi, ricavi e risultati
+          const costs = this.calculateCosts(project);
+          const revenues = this.calculateRevenues(project);
+          const results = this.calculateResults(costs, revenues, project.targetMargin || 30);
+          
+          // Aggiorna il progetto con i calcoli corretti
+          const updatedProject = {
+            ...project,
+            costs,
+            revenues,
+            results,
+            updatedAt: new Date(),
+            isTargetAchieved: results.margin >= (project.targetMargin || 30)
+          };
+          
+          // Salva le modifiche
+          await this.updateProject(project.id!, updatedProject);
+          updatedCount++;
+          
+          console.log(`✅ Progetto ${project.name} aggiornato con calcoli corretti`);
+        } catch (error) {
+          console.error(`❌ Errore aggiornamento progetto ${project.name}:`, error);
+        }
+      }
+      
+      console.log(`✅ Ricalcolo completato: ${updatedCount}/${projects.length} progetti aggiornati`);
+    } catch (error) {
+      console.error('❌ Errore ricalcolo progetti:', error);
+      throw error;
+    }
+  }
+
   // Confronta due progetti
   async compareProjects(project1Id: string, project2Id: string, userId: string): Promise<any> {
     try {
