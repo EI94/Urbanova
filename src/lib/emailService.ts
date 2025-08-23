@@ -1,6 +1,13 @@
 // Servizio Email per Urbanova AI Land Scraping
 import { db } from './firebase';
 import { collection, addDoc, getDocs, updateDoc, doc, query, where, orderBy } from 'firebase/firestore';
+import { Resend } from 'resend';
+
+// Inizializza Resend solo se la chiave API è disponibile
+let resend: Resend | null = null;
+if (process.env.RESEND_API_KEY) {
+  resend = new Resend(process.env.RESEND_API_KEY);
+}
 
 export interface EmailConfig {
   id?: string;
@@ -26,6 +33,15 @@ export interface EmailNotification {
     averagePrice: number;
     bestOpportunities: any[];
   };
+}
+
+export interface EmailData {
+  to: string;
+  name?: string;
+  subject: string;
+  message: string;
+  reportTitle: string;
+  reportUrl: string;
 }
 
 export class EmailService {
@@ -163,7 +179,233 @@ export class EmailService {
       return [];
     }
   }
+
+  async sendReportSharingEmail(emailData: EmailData): Promise<boolean> {
+    try {
+      console.log('📧 Invio email condivisione report...', emailData);
+
+      // Se Resend non è disponibile, usa fallback
+      if (!resend) {
+        console.warn('⚠️ Resend non disponibile, usando fallback');
+        return this.sendFallbackEmail(emailData);
+      }
+
+      // Genera HTML email professionale
+      const htmlContent = this.generateEmailHTML(emailData);
+      const textContent = this.generateEmailText(emailData);
+
+      // Invia email tramite Resend
+      const { data, error } = await resend.emails.send({
+        from: 'Urbanova <noreply@urbanova.com>',
+        to: [emailData.to],
+        subject: emailData.subject,
+        html: htmlContent,
+        text: textContent,
+        replyTo: 'support@urbanova.com'
+      });
+
+      if (error) {
+        console.error('❌ Errore Resend:', error);
+        throw new Error(`Errore invio email: ${error.message}`);
+      }
+
+      console.log('✅ Email inviata con successo tramite Resend:', data);
+      return true;
+
+    } catch (error) {
+      console.error('❌ Errore invio email:', error);
+      
+      // Fallback se Resend fallisce
+      try {
+        return await this.sendFallbackEmail(emailData);
+      } catch (fallbackError) {
+        console.error('❌ Anche il fallback è fallito:', fallbackError);
+        return false;
+      }
+    }
+  }
+
+  private async sendFallbackEmail(emailData: EmailData): Promise<boolean> {
+    try {
+      console.log('🔄 Tentativo invio email tramite API fallback...');
+
+      // Usa l'API route esistente come fallback
+      const response = await fetch('/api/share-report-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(emailData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Email inviata tramite fallback:', result);
+      return true;
+
+    } catch (error) {
+      console.error('❌ Errore fallback email:', error);
+      return false;
+    }
+  }
+
+  private generateEmailHTML(emailData: EmailData): string {
+    return `
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${emailData.subject}</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            line-height: 1.6; 
+            color: #333; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background-color: #f8fafc;
+        }
+        .header { 
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); 
+            color: white; 
+            padding: 40px; 
+            text-align: center; 
+            border-radius: 16px 16px 0 0;
+            margin-bottom: 0;
+        }
+        .content { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 0 0 16px 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .report-card { 
+            background: #f1f5f9; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 12px; 
+            padding: 24px; 
+            margin: 24px 0;
+        }
+        .cta-button { 
+            display: inline-block; 
+            background: #3b82f6; 
+            color: white; 
+            padding: 16px 32px; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            margin: 24px 0;
+            text-align: center;
+        }
+        .footer { 
+            text-align: center; 
+            margin-top: 32px; 
+            color: #64748b; 
+            font-size: 14px;
+        }
+        .highlight { 
+            background: #dbeafe; 
+            padding: 2px 8px; 
+            border-radius: 4px;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 style="margin: 0; font-size: 32px; font-weight: 700;">🏗️ URBANOVA</h1>
+        <p style="margin: 10px 0 0 0; opacity: 0.9; font-size: 18px;">Piattaforma Smart City & Analisi Immobiliare</p>
+    </div>
+    
+    <div class="content">
+        <h2 style="color: #1e293b; margin-top: 0; font-size: 24px;">📊 Studio di Fattibilità Condiviso</h2>
+        
+        <p style="font-size: 16px; margin-bottom: 24px;">
+            Ciao <span class="highlight">${emailData.name || emailData.to}</span>!
+        </p>
+        
+        <p style="font-size: 16px; margin-bottom: 24px;">
+            Ti condivido lo studio di fattibilità <strong>"${emailData.reportTitle}"</strong> generato su Urbanova.
+        </p>
+        
+        <div class="report-card">
+            <h3 style="margin-top: 0; color: #1e293b;">📋 Contenuto del Report:</h3>
+            <ul style="margin: 16px 0; padding-left: 20px;">
+                <li>💰 <strong>Analisi finanziaria completa</strong> con ROI e payback</li>
+                <li>🎯 <strong>Valutazione rischi</strong> e opportunità di mercato</li>
+                <li>🤖 <strong>Analisi AI integrata</strong> con raccomandazioni</li>
+                <li>📈 <strong>Strategie ottimizzazione</strong> per massimizzare il profitto</li>
+            </ul>
+        </div>
+        
+        <div style="text-align: center;">
+            <a href="${emailData.reportUrl}" class="cta-button">
+                🔗 VISUALIZZA REPORT COMPLETO
+            </a>
+        </div>
+        
+        <p style="font-size: 14px; color: #64748b; margin-top: 24px;">
+            <strong>Nota:</strong> Il link ti porterà direttamente al report su Urbanova. 
+            Se hai domande o necessiti di chiarimenti, non esitare a contattarci.
+        </p>
+    </div>
+    
+    <div class="footer">
+        <p>Generato da <strong>Urbanova AI</strong> - Analisi di Fattibilità Intelligente</p>
+        <p>© 2024 Urbanova - Trasformiamo le città in smart cities</p>
+        <p style="margin-top: 16px;">
+            <a href="mailto:support@urbanova.com" style="color: #3b82f6;">📧 Supporto</a> | 
+            <a href="https://urbanova.com" style="color: #3b82f6;">🌐 Sito Web</a>
+        </p>
+    </div>
+</body>
+</html>
+    `.trim();
+  }
+
+  private generateEmailText(emailData: EmailData): string {
+    return `
+URBANOVA - Studio di Fattibilità Condiviso
+
+Ciao ${emailData.name || emailData.to}!
+
+Ti condivido lo studio di fattibilità "${emailData.reportTitle}" generato su Urbanova.
+
+Il report contiene:
+• Analisi finanziaria completa con ROI e payback
+• Valutazione rischi e opportunità di mercato  
+• Analisi AI integrata con raccomandazioni
+• Strategie ottimizzazione per massimizzare il profitto
+
+Visualizza il report completo: ${emailData.reportUrl}
+
+Cordiali saluti,
+Il tuo team Urbanova
+
+---
+Generato da Urbanova AI - Analisi di Fattibilità Intelligente
+© 2024 Urbanova - Trasformiamo le città in smart cities
+Supporto: support@urbanova.com
+    `.trim();
+  }
+
+  // Verifica se il servizio email è disponibile
+  isEmailServiceAvailable(): boolean {
+    return resend !== null;
+  }
+
+  // Ottieni informazioni sul servizio
+  getServiceInfo(): { available: boolean; provider: string } {
+    return {
+      available: resend !== null,
+      provider: resend ? 'Resend' : 'Fallback API'
+    };
+  }
 }
 
-// Istanza singleton
 export const emailService = new EmailService(); 

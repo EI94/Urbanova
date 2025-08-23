@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { emailService } from '@/lib/emailService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,31 +22,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Per ora simuliamo l'invio email
-    // In produzione si integrerà con Resend o altro servizio email
-    console.log('📧 Email da inviare:', {
+    // Prepara i dati per l'invio email
+    const emailData = {
       to,
       name,
       subject,
       message,
       reportTitle,
-      reportUrl,
-      timestamp: new Date().toISOString()
-    });
+      reportUrl
+    };
 
-    // Simula delay di invio
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Invia email tramite il servizio
+    const success = await emailService.sendReportSharingEmail(emailData);
 
-    // Simula successo
-    return NextResponse.json({
-      success: true,
-      message: 'Email inviata con successo',
-      data: {
-        to,
-        subject,
-        timestamp: new Date().toISOString()
-      }
-    });
+    if (success) {
+      console.log('✅ Email inviata con successo a:', to);
+      return NextResponse.json({
+        success: true,
+        message: 'Email inviata con successo',
+        data: {
+          to,
+          subject,
+          timestamp: new Date().toISOString(),
+          provider: emailService.getServiceInfo().provider
+        }
+      });
+    } else {
+      throw new Error('Impossibile inviare l\'email');
+    }
 
   } catch (error) {
     console.error('Errore invio email:', error);

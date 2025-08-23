@@ -30,6 +30,8 @@ export default function NewFeasibilityProjectPage() {
   const [showReportGenerator, setShowReportGenerator] = useState(false);
   const [savedProjectId, setSavedProjectId] = useState<string | null>(null);
   const [showReminderModal, setShowReminderModal] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editProjectId, setEditProjectId] = useState<string | null>(null);
   const [insuranceFlags, setInsuranceFlags] = useState({
     constructionInsurance: false,
     financingInsurance: false
@@ -180,6 +182,34 @@ export default function NewFeasibilityProjectPage() {
         clearTimeout(autoSaveTimeout);
       }
     };
+  }, []);
+
+  // Gestisce la modalità edit
+  useEffect(() => {
+    const checkEditMode = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const editId = urlParams.get('edit');
+      
+      if (editId) {
+        setIsEditMode(true);
+        setEditProjectId(editId);
+        
+        try {
+          // Carica il progetto esistente
+          const existingProject = await feasibilityService.getProjectById(editId);
+          if (existingProject) {
+            setProject(existingProject);
+            setSavedProjectId(editId);
+            toast.success('✅ Progetto caricato per la modifica');
+          }
+        } catch (error) {
+          console.error('❌ Errore caricamento progetto per edit:', error);
+          toast.error('❌ Errore nel caricamento del progetto');
+        }
+      }
+    };
+
+    checkEditMode();
   }, []);
 
   // Funzione per pulire input numerico
