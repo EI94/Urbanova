@@ -29,6 +29,7 @@ export default function FeasibilityAnalysisPage() {
   const [ranking, setRanking] = useState<FeasibilityProject[]>([]);
   const [statistics, setStatistics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<FeasibilityProject | null>(null);
   const [showComparison, setShowComparison] = useState(false);
   const [project1Id, setProject1Id] = useState('');
@@ -40,6 +41,7 @@ export default function FeasibilityAnalysisPage() {
 
   const loadData = async () => {
     setLoading(true);
+    setError(null);
     try {
       const [allProjects, projectsRanking, stats] = await Promise.all([
         feasibilityService.getAllProjects(),
@@ -47,12 +49,13 @@ export default function FeasibilityAnalysisPage() {
         feasibilityService.getStatistics()
       ]);
       
-      setProjects(allProjects);
-      setRanking(projectsRanking);
-      setStatistics(stats);
+      setProjects(allProjects || []);
+      setRanking(projectsRanking || []);
+      setStatistics(stats || {});
     } catch (error) {
       console.error('Errore caricamento dati:', error);
-      toast(`❌ ${t('loadError', 'feasibility.toasts')}` as string, { icon: '❌' });
+      setError('Errore nel caricamento dei dati. Riprova più tardi.');
+      toast(`❌ Errore nel caricamento dei dati`, { icon: '❌' });
     } finally {
       setLoading(false);
     }
@@ -89,10 +92,20 @@ export default function FeasibilityAnalysisPage() {
     }
   };
 
-  const formatCurrency = (value: number) => fmtCurrency(value);
+  const formatCurrency = (value: number) => {
+    try {
+      return fmtCurrency(value || 0);
+    } catch (error) {
+      return `€${(value || 0).toLocaleString()}`;
+    }
+  };
 
   const formatPercentage = (value: number) => {
-    return `${value.toFixed(1)}%`;
+    try {
+      return `${(value || 0).toFixed(1)}%`;
+    } catch (error) {
+      return '0.0%';
+    }
   };
 
   const getMarginColor = (margin: number, targetMargin: number) => {
@@ -116,6 +129,22 @@ export default function FeasibilityAnalysisPage() {
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
           <div className="loading loading-spinner loading-lg"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="flex flex-col items-center justify-center h-64 space-y-4">
+          <div className="text-red-600 text-xl">❌ {error}</div>
+          <button 
+            onClick={loadData}
+            className="btn btn-primary"
+          >
+            🔄 Riprova
+          </button>
         </div>
       </DashboardLayout>
     );
@@ -314,42 +343,42 @@ export default function FeasibilityAnalysisPage() {
                         <div>
                           <div className="font-medium">{project.name}</div>
                           <div className="text-sm text-gray-500">
-                            {project.createdAt.toLocaleDateString()}
+                            {project?.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'N/A'}
                           </div>
                         </div>
                       </td>
-                      <td>{project.address}</td>
+                      <td>{project?.address || 'N/A'}</td>
                       <td>
-                        <span className={`badge ${getStatusColor(project.status)}`}>
-                          {project.status}
+                        <span className={`badge ${getStatusColor(project?.status || 'PIANIFICAZIONE')}`}>
+                          {project?.status || 'PIANIFICAZIONE'}
                         </span>
                       </td>
-                      <td>{formatCurrency(project.costs.land.purchasePrice)}</td>
+                      <td>{formatCurrency(project?.costs?.land?.purchasePrice || 0)}</td>
                       <td>
-                        <span className={`font-bold ${getMarginColor(project.results.margin, project.targetMargin)}`}>
-                          {formatPercentage(project.results.margin)}
+                        <span className={`font-bold ${getMarginColor(project?.results?.margin || 0, project?.targetMargin || 0)}`}>
+                          {formatPercentage(project?.results?.margin || 0)}
                         </span>
                       </td>
                       <td>
                         <span className="text-sm text-gray-500">
-                          {formatPercentage(project.targetMargin)}
+                          {formatPercentage(project?.targetMargin || 0)}
                         </span>
                       </td>
-                      <td>{formatCurrency(project.results.profit)}</td>
+                      <td>{formatCurrency(project?.results?.profit || 0)}</td>
                       <td>
                         <div className="flex items-center space-x-2">
-                          <Link href={`/dashboard/feasibility-analysis/${project.id}`}>
+                          <Link href={`/dashboard/feasibility-analysis/${project?.id || 'unknown'}`}>
                             <button className="btn btn-ghost btn-sm">
                               <EyeIcon className="h-4 w-4" />
                             </button>
                           </Link>
-                          <Link href={`/dashboard/feasibility-analysis/${project.id}/edit`}>
+                          <Link href={`/dashboard/feasibility-analysis/${project?.id || 'unknown'}/edit`}>
                             <button className="btn btn-ghost btn-sm">
                               <EditIcon className="h-4 w-4" />
                             </button>
                           </Link>
                           <button 
-                            onClick={() => handleDeleteProject(project.id!)}
+                            onClick={() => project?.id && handleDeleteProject(project.id)}
                             className="btn btn-ghost btn-sm text-red-600"
                           >
                             <TrashIcon className="h-4 w-4" />
