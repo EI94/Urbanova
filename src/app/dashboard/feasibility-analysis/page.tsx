@@ -289,6 +289,51 @@ export default function FeasibilityAnalysisPage() {
           >
             🔍 Debug Cancellazione
           </button>
+          
+          <button 
+            onClick={async () => {
+              if (projects.length === 0) {
+                toast('❌ Nessun progetto da pulire', { icon: '❌' });
+                return;
+              }
+              
+              // Conferma con l'utente
+              if (!confirm(`⚠️ ATTENZIONE: Stai per ELIMINARE TUTTI i ${projects.length} progetti dal database!\n\nQuesta azione non può essere annullata.\n\nSei sicuro di voler continuare?`)) {
+                return;
+              }
+              
+              console.log('🧹 PULIZIA COMPLETA DATABASE - Inizio...');
+              toast('🧹 Pulizia database in corso...', { icon: '🔄' });
+              
+              try {
+                const response = await fetch('/api/cleanup-all-projects', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ force: true })
+                });
+                
+                const result = await response.json();
+                console.log('🧹 RISULTATO PULIZIA:', result);
+                
+                if (result.success) {
+                  toast(`✅ Database pulito! ${result.projectsDeleted} progetti eliminati`, { icon: '✅' });
+                  // Pulisci la lista locale
+                  setProjects([]);
+                  setRanking([]);
+                  setStatistics({});
+                } else {
+                  toast(`❌ Errore pulizia: ${result.error}`, { icon: '❌' });
+                  console.error('🧹 ERRORE PULIZIA:', result);
+                }
+              } catch (error) {
+                console.error('❌ Errore pulizia:', error);
+                toast(`❌ Errore pulizia: ${error}`, { icon: '❌' });
+              }
+            }}
+            className="btn btn-warning"
+          >
+            🧹 Pulisci Database
+          </button>
           </div>
         </div>
 
