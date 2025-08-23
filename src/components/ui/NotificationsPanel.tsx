@@ -106,42 +106,48 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'project': return <CheckCircleIcon className="h-4 w-4 text-blue-500" />;
-      case 'permit': return <span className="text-orange-500">⚠️</span>;
-      case 'task': return <CheckIcon className="h-4 w-4 text-green-500" />;
-      case 'system': return <span className="text-gray-500">ℹ️</span>;
-      case 'marketing': return <CheckCircleIcon className="h-4 w-4 text-purple-500" />;
+      case 'PROJECT': return <CheckCircleIcon className="h-4 w-4 text-blue-500" />;
+      case 'TASK': return <CheckIcon className="h-4 w-4 text-green-500" />;
+      case 'SYSTEM': return <span className="text-gray-500">ℹ️</span>;
+      case 'ALERT': return <span className="text-orange-500">⚠️</span>;
+      case 'SUCCESS': return <CheckCircleIcon className="h-4 w-4 text-green-500" />;
+      case 'WARNING': return <span className="text-orange-500">⚠️</span>;
+      case 'ERROR': return <span className="text-red-500">❌</span>;
+      case 'MESSAGE': return <span className="text-blue-500">💬</span>;
       default: return <span className="text-gray-500">ℹ️</span>;
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'critical': return 'border-red-500 bg-red-50';
-      case 'high': return 'border-orange-500 bg-orange-50';
-      case 'medium': return 'border-yellow-500 bg-yellow-50';
-      case 'low': return 'border-green-500 bg-green-50';
+      case 'URGENT': return 'border-red-500 bg-red-50';
+      case 'HIGH': return 'border-orange-500 bg-orange-50';
+      case 'MEDIUM': return 'border-yellow-500 bg-yellow-50';
+      case 'LOW': return 'border-green-500 bg-green-50';
       default: return 'border-gray-500 bg-gray-50';
     }
   };
 
   const getPriorityText = (priority: string) => {
     switch (priority) {
-      case 'critical': return t('priorities.critical', 'notifications');
-      case 'high': return t('priorities.high', 'notifications');
-      case 'medium': return t('priorities.medium', 'notifications');
-      case 'low': return t('priorities.low', 'notifications');
+      case 'URGENT': return t('priorities.urgent', 'notifications');
+      case 'HIGH': return t('priorities.high', 'notifications');
+      case 'MEDIUM': return t('priorities.medium', 'notifications');
+      case 'LOW': return t('priorities.low', 'notifications');
       default: return priority;
     }
   };
 
   const getTypeText = (type: string) => {
     switch (type) {
-      case 'project': return t('types.project', 'notifications');
-      case 'permit': return t('types.permit', 'notifications');
-      case 'task': return t('types.task', 'notifications');
-      case 'system': return t('types.system', 'notifications');
-      case 'marketing': return t('types.marketing', 'notifications');
+      case 'PROJECT': return t('types.project', 'notifications');
+      case 'TASK': return t('types.task', 'notifications');
+      case 'SYSTEM': return t('types.system', 'notifications');
+      case 'ALERT': return t('types.alert', 'notifications');
+      case 'SUCCESS': return t('types.success', 'notifications');
+      case 'WARNING': return t('types.warning', 'notifications');
+      case 'ERROR': return t('types.error', 'notifications');
+      case 'MESSAGE': return t('types.message', 'notifications');
       default: return type;
     }
   };
@@ -298,7 +304,7 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
                         </button>
                       ) : (
                         <button
-                          onClick={() => firebaseNotificationService.markAsRead(notification.id)}
+                          onClick={() => handleMarkAsRead(notification.id)}
                           className="text-xs text-gray-600 hover:text-gray-700 hover:bg-gray-100 px-2 py-1 rounded transition-colors"
                         >
                           {t('markAsUnread', 'notifications')}
