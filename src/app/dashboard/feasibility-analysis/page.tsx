@@ -75,19 +75,14 @@ export default function FeasibilityAnalysisPage() {
     try {
       console.log('🗑️ Avvio cancellazione progetto:', projectId);
       
-      // Usa il servizio di cancellazione sicura
-      const result = await projectManagerService.safeDeleteProject(projectId);
+      // SOLUZIONE DIRETTA: bypassa il ProjectManagerService e usa direttamente feasibilityService
+      await feasibilityService.deleteProject(projectId);
       
-      if (result.success) {
-        toast(`✅ Progetto "${projectName}" cancellato con successo`, { icon: '✅' });
-        console.log('✅ Progetto cancellato:', result);
-        
-        // Ricarica i dati
-        await loadData();
-      } else {
-        toast(`❌ Errore nella cancellazione: ${result.message}`, { icon: '❌' });
-        console.error('❌ Errore cancellazione:', result);
-      }
+      toast(`✅ Progetto "${projectName}" cancellato con successo`, { icon: '✅' });
+      console.log('✅ Progetto cancellato direttamente:', projectId);
+      
+      // Ricarica i dati
+      await loadData();
       
     } catch (error) {
       console.error('❌ Errore eliminazione progetto:', error);
