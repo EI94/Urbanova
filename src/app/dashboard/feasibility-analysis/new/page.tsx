@@ -778,7 +778,7 @@ export default function NewFeasibilityProjectPage() {
                     <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                          <CheckIcon className="h-4 w-4 text-blue-600 mr-2" />
+                          <span className="h-4 w-4 text-blue-600 mr-2">✅</span>
                           <span className="text-sm text-blue-800">
                             Calcolo automatico: {project.totalArea} mq × costo per mq = totale
                           </span>
@@ -1021,7 +1021,7 @@ export default function NewFeasibilityProjectPage() {
                 {/* Strategia di Finanziamento */}
                 <div>
                   <h3 className="font-medium text-gray-900 mb-3 flex items-center">
-                    <BankIcon className="h-4 w-4 mr-2 text-blue-600" />
+                    <span className="h-4 w-4 mr-2 text-blue-600">🏦</span>
                     Strategia di Finanziamento
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
