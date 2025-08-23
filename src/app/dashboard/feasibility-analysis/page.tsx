@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
 import { 
+  CalculatorIcon, 
   TrendingUpIcon, 
   EuroIcon, 
   BuildingIcon,
@@ -33,7 +34,6 @@ export default function FeasibilityAnalysisPage() {
   const [showComparison, setShowComparison] = useState(false);
   const [project1Id, setProject1Id] = useState('');
   const [project2Id, setProject2Id] = useState('');
-
 
   useEffect(() => {
     loadData();
@@ -73,8 +73,6 @@ export default function FeasibilityAnalysisPage() {
       toast(`❌ ${t('deleteError', 'feasibility.toasts')}` as string, { icon: '❌' });
     }
   };
-
-
 
   const handleCompareProjects = async () => {
     if (!project1Id || !project2Id) {
@@ -162,7 +160,6 @@ export default function FeasibilityAnalysisPage() {
             <p className="text-gray-600 mt-1">{t('subtitle', 'feasibility')}</p>
           </div>
           <div className="flex space-x-3">
-
             <Link href="/dashboard/feasibility-analysis/new">
               <button className="btn btn-primary">
                 <PlusIcon className="h-4 w-4 mr-2" />
@@ -228,7 +225,7 @@ export default function FeasibilityAnalysisPage() {
           
           {ranking.length === 0 ? (
             <div className="text-center py-12">
-              <BuildingIcon className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+              <CalculatorIcon className="h-16 w-16 mx-auto text-gray-400 mb-4" />
               <h3 className="text-lg font-medium text-gray-700 mb-2">{t('emptyRankingTitle', 'feasibility')}</h3>
               <p className="text-gray-500 mb-4">{t('emptyRankingSubtitle', 'feasibility')}</p>
               <div className="flex justify-center">
@@ -295,7 +292,7 @@ export default function FeasibilityAnalysisPage() {
                             </Link>
                           </li>
                           <li>
-                            <Link href={`/dashboard/feasibility-analysis/${project.id}`}>
+                            <Link href={`/dashboard/feasibility-analysis/${project.id}/edit`}>
                               <EditIcon className="h-4 w-4" />
                               Modifica
                             </Link>
