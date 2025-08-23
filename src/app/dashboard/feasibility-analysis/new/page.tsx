@@ -1424,10 +1424,10 @@ export default function NewFeasibilityProjectPage() {
                     if (savedProjectId) {
                       router.push(`/dashboard/feasibility-analysis/${savedProjectId}`);
                     } else {
-                      toast.error('Salva prima il progetto per visualizzarlo');
+                      toast.error('Compila nome e indirizzo per abilitare la visualizzazione');
                     }
                   }}
-                  disabled={!savedProjectId}
+                  disabled={!project.name || !project.address}
                   className="btn btn-secondary w-full"
                 >
                   👁️ Visualizza Progetto
@@ -1441,10 +1441,10 @@ export default function NewFeasibilityProjectPage() {
                       navigator.clipboard.writeText(url);
                       toast.success('Link copiato negli appunti! 📋');
                     } else {
-                      toast.error('Salva prima il progetto per condividerlo');
+                      toast.error('Compila nome e indirizzo per abilitare la condivisione');
                     }
                   }}
-                  disabled={!savedProjectId}
+                  disabled={!project.name || !project.address}
                   className="btn btn-outline w-full"
                 >
                   🔗 Condividi Link
@@ -1455,7 +1455,7 @@ export default function NewFeasibilityProjectPage() {
                 {savedProjectId ? (
                   <span className="text-green-600">✅ Progetto salvato e pronto per la condivisione</span>
                 ) : (
-                  <span className="text-orange-600">⚠️ Salva il progetto per abilitare tutte le funzionalità</span>
+                  <span className="text-blue-600">💾 Salvataggio automatico attivo - Compila nome e indirizzo per iniziare</span>
                 )}
               </div>
             </div>
