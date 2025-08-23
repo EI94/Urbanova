@@ -292,7 +292,7 @@ export default function NewFeasibilityProjectPage() {
 
   const recalculateAll = () => {
     try {
-      const costs = feasibilityService.calculateCosts(project);
+      const costs = feasibilityService.calculateCosts(project, constructionCostMode);
       
       // Calcola assicurazioni se i flag sono attivi
       let insuranceCost = 0;

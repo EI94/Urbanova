@@ -325,7 +325,7 @@ export class FeasibilityService {
   }
 
   // Calcola i costi del progetto
-  calculateCosts(project: Partial<FeasibilityProject>): {
+  calculateCosts(project: Partial<FeasibilityProject>, constructionCostMode: 'perSqm' | 'total' = 'total'): {
     land: {
       purchasePrice: number;
       purchaseTaxes: number;
@@ -351,9 +351,7 @@ export class FeasibilityService {
       console.log('🔄 Calcolo costi progetto...');
       
       // Determina se i costi sono per metro quadro o totali
-      // NOTA: Questa logica è stata semplificata per evitare calcoli errati
-      // I costi vengono sempre trattati come totali, non come per metro quadro
-      const isPerSqm = false; // Forza sempre il trattamento come totali
+      const isPerSqm = constructionCostMode === 'perSqm';
       
       const totalArea = project.totalArea || 0;
       
