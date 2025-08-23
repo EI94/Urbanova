@@ -152,8 +152,6 @@ export default function LandScrapingPage() {
 
   // Stati per collaborazione team
   const [showTeamCollaboration, setShowTeamCollaboration] = useState(false);
-  const [showCollaborativeSearch, setShowCollaborativeSearch] = useState(false);
-  const [showTeamComments, setShowTeamComments] = useState(false);
 
   const [showAdvancedTeamManagement, setShowAdvancedTeamManagement] = useState(false);
   const [showWorkflowManagement, setShowWorkflowManagement] = useState(false);
@@ -162,13 +160,9 @@ export default function LandScrapingPage() {
   const [currentUserRole, setCurrentUserRole] = useState<TeamRole>('PROJECT_MANAGER');
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [teamPermissions, setTeamPermissions] = useState<Permission[]>([]);
-  const [selectedLandForComments, setSelectedLandForComments] = useState<{id: string, title: string} | null>(null);
 
   // Stati per Realtime Collaboration
   const [showRealtimeCollaboration, setShowRealtimeCollaboration] = useState(false);
-
-
-  const [showSecurityCompliance, setShowSecurityCompliance] = useState(false);
 
 
 
@@ -484,21 +478,7 @@ export default function LandScrapingPage() {
             toast('Ricerca programmata eliminata!', { icon: '✅' });
   };
 
-  // Funzioni per collaborazione team
-  const handleAddTeamComment = (landId: string, comment: string) => {
-    toast('💬 Commento team aggiunto con successo!', { icon: '💬' });
-    // TODO: Implementare salvataggio commento team
-  };
 
-  const handleTeamVote = (landId: string, vote: 'like' | 'dislike') => {
-    toast(`👍 Voto ${vote === 'like' ? 'positivo' : 'negativo'} registrato!`, { icon: '👍' });
-    // TODO: Implementare salvataggio voto team
-  };
-
-  const handleTeamReply = (commentId: string, reply: string) => {
-    toast('💬 Risposta team inviata!', { icon: '💬' });
-    // TODO: Implementare salvataggio risposta team
-  };
 
 
 
@@ -552,21 +532,7 @@ export default function LandScrapingPage() {
     toast('Permessi aggiornati', { icon: '🔐' });
   };
 
-  const handleCreateCollaborativeSession = (session: any) => {
-    toast('👥 Sessione collaborativa creata!', { icon: '👥' });
-    setShowCollaborativeSearch(false);
-    // TODO: Implementare creazione sessione collaborativa
-  };
 
-  const handleJoinCollaborativeSession = (sessionId: string) => {
-    toast(`🤝 Unito alla sessione ${sessionId}!`, { icon: '🤝' });
-    // TODO: Implementare unione sessione collaborativa
-  };
-
-  const handleShareCollaborativeSession = (sessionId: string) => {
-    toast('📤 Sessione condivisa con il team!', { icon: '📤' });
-    // TODO: Implementare condivisione sessione collaborativa
-  };
 
   const saveFavorites = (newFavorites: Set<string>) => {
     if (typeof window !== 'undefined') {
@@ -995,12 +961,7 @@ export default function LandScrapingPage() {
                 👥 Team
               </button>
               
-              <button
-                onClick={() => setShowCollaborativeSearch(true)}
-                className="px-3 py-2 text-sm bg-green-50 text-green-700 border border-green-200 rounded hover:bg-green-100 transition-colors"
-              >
-                👥 Sessioni
-              </button>
+
               
 
 
@@ -1018,28 +979,12 @@ export default function LandScrapingPage() {
                 🔄 Workflow & Approvazioni
               </button>
 
-                              <button
-                  onClick={() => setShowRealtimeCollaboration(true)}
-                  className="px-3 py-2 text-sm bg-green-50 text-green-700 border border-green-200 rounded hover:bg-green-100 transition-colors"
-                >
-                  ⚡ Real-time Collaboration
-                </button>
-                
-
-                
-
-                
-
-                
-
-                
-
-                
-
-                
-
-                
-
+                                            <button
+                onClick={() => setShowRealtimeCollaboration(true)}
+                className="px-3 py-2 text-sm bg-green-50 text-green-700 border border-green-200 rounded hover:bg-green-100 transition-colors"
+              >
+                ⚡ Real-time Collaboration
+              </button>
             </div>
             
             {/* Indicatore stato connessione e ruolo */}
@@ -1526,31 +1471,13 @@ export default function LandScrapingPage() {
         <TeamCollaborationPanel
           isOpen={showTeamCollaboration}
           onClose={() => setShowTeamCollaboration(false)}
-          currentSearchId={searchResults?.id}
-          onAddComment={handleAddTeamComment}
-          onVote={handleTeamVote}
-          
+          currentSearchId="current-search"
+          onAddComment={() => {}}
+          onVote={() => {}}
+          onAddToSharedFavorites={() => {}}
         />
 
-        <CollaborativeSearchSession
-          isOpen={showCollaborativeSearch}
-          onClose={() => setShowCollaborativeSearch(false)}
-          currentSearchCriteria={searchCriteria}
-          onCreateSession={handleCreateCollaborativeSession}
-          onJoinSession={handleJoinCollaborativeSession}
-          onShareSession={handleShareCollaborativeSession}
-        />
 
-        <TeamCommentsVoting
-          isOpen={showTeamComments}
-          onClose={() => setShowTeamComments(false)}
-          landId={selectedLandForComments?.id || ''}
-          landTitle={selectedLandForComments?.title || ''}
-          onAddComment={handleAddTeamComment}
-          onVote={handleTeamVote}
-          onReply={handleTeamReply}
-          
-        />
 
 
 
@@ -1586,15 +1513,7 @@ export default function LandScrapingPage() {
 
 
 
-        {/* Security & Compliance */}
-        <SecurityCompliance
-          isOpen={showSecurityCompliance}
-          onClose={() => setShowSecurityCompliance(false)}
-          currentUserId="current-user"
-          currentUserName="Utente Corrente"
-          currentUserRole={currentUserRole}
-          currentUserAvatar="👨‍💻"
-        />
+
 
 
 
