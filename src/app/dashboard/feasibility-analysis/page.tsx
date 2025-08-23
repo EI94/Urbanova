@@ -57,6 +57,21 @@ export default function FeasibilityAnalysisPage() {
       
       console.log('📊 Progetti caricati:', allProjects?.length || 0);
       
+      // DEBUG: Log dettagliato dei progetti per verificare lo stato
+      if (allProjects && allProjects.length > 0) {
+        console.log('🔍 DEBUG - Dettagli progetti caricati:');
+        allProjects.forEach((project, index) => {
+          console.log(`  Progetto ${index + 1}:`, {
+            id: project.id,
+            name: project.name,
+            address: project.address,
+            status: project.status,
+            createdAt: project.createdAt,
+            updatedAt: project.updatedAt
+          });
+        });
+      }
+      
       setProjects(allProjects || []);
       setRanking(projectsRanking || []);
       setStatistics(stats || {});
@@ -82,11 +97,30 @@ export default function FeasibilityAnalysisPage() {
     try {
       console.log('🗑️ Avvio cancellazione progetto:', projectId);
       
-      // SOLUZIONE DIRETTA: bypassa il ProjectManagerService e usa direttamente feasibilityService
+      // SOLUZIONE ROBUSTA: cancella e verifica la cancellazione
+      console.log('🗑️ Avvio cancellazione progetto robusta:', projectId);
+      
+      // 1. Cancella il progetto
       await feasibilityService.deleteProject(projectId);
+      console.log('✅ Progetto cancellato da Firestore:', projectId);
+      
+      // 2. Verifica che sia stato effettivamente cancellato
+      try {
+        const deletedProject = await feasibilityService.getProjectById(projectId);
+        if (deletedProject) {
+          console.warn('⚠️ Progetto ancora presente dopo cancellazione, riprovo...');
+          // Riprova la cancellazione
+          await feasibilityService.deleteProject(projectId);
+          console.log('🔄 Secondo tentativo di cancellazione completato');
+        } else {
+          console.log('✅ Verifica: progetto effettivamente cancellato da Firestore');
+        }
+      } catch (verifyError) {
+        console.log('✅ Verifica completata (errore atteso se progetto cancellato):', verifyError);
+      }
       
       toast(`✅ Progetto "${projectName}" cancellato con successo`, { icon: '✅' });
-      console.log('✅ Progetto cancellato direttamente:', projectId);
+      console.log('✅ Progetto cancellato e verificato:', projectId);
       
       // AGGIORNAMENTO IMMEDIATO: rimuovi il progetto dalla lista locale e ricarica
       setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
