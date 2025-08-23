@@ -381,13 +381,10 @@ export class FeasibilityService {
       // Calcola subtotali
       costs.land.subtotal = costs.land.purchasePrice + costs.land.purchaseTaxes + costs.land.intermediationFees;
       
-      // Se i costi sono per metro quadro, moltiplica per la superficie totale
-      if (isPerSqm && totalArea > 0) {
-        costs.construction.excavation = costs.construction.excavation * totalArea;
-        costs.construction.structures = costs.construction.structures * totalArea;
-        costs.construction.systems = costs.construction.systems * totalArea;
-        costs.construction.finishes = costs.construction.finishes * totalArea;
-      }
+      // NOTA: Quando isPerSqm = true, i costi sono già per metro quadro
+      // e l'UI si occupa di moltiplicarli per la superficie totale
+      // Il servizio deve solo sommare i costi per metro quadro
+      // NON moltiplicare per la superficie (questo lo fa l'UI)
       
       costs.construction.subtotal = costs.construction.excavation + costs.construction.structures + costs.construction.systems + costs.construction.finishes;
       
