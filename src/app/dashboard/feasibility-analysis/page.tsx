@@ -97,36 +97,48 @@ export default function FeasibilityAnalysisPage() {
     try {
       console.log('🗑️ Avvio cancellazione progetto:', projectId);
       
-      // SOLUZIONE ROBUSTA: cancella e verifica la cancellazione
-      console.log('🗑️ Avvio cancellazione progetto robusta:', projectId);
+      // SOLUZIONE DI EMERGENZA: bypassa completamente il servizio e usa direttamente Firebase
+      console.log('🚨 SOLUZIONE DI EMERGENZA - Cancellazione diretta Firebase:', projectId);
       
-      // 1. Cancella il progetto
-      await feasibilityService.deleteProject(projectId);
-      console.log('✅ Progetto cancellato da Firestore:', projectId);
-      
-      // 2. Verifica che sia stato effettivamente cancellato
       try {
-        const deletedProject = await feasibilityService.getProjectById(projectId);
-        if (deletedProject) {
-          console.warn('⚠️ Progetto ancora presente dopo cancellazione, riprovo...');
-          // Riprova la cancellazione
-          await feasibilityService.deleteProject(projectId);
-          console.log('🔄 Secondo tentativo di cancellazione completato');
-        } else {
-          console.log('✅ Verifica: progetto effettivamente cancellato da Firestore');
-        }
-      } catch (verifyError) {
-        console.log('✅ Verifica completata (errore atteso se progetto cancellato):', verifyError);
+        // Importa direttamente Firebase per bypassare il servizio
+        const { deleteDoc, doc } = await import('firebase/firestore');
+        const { db } = await import('@/lib/firebase');
+        
+        console.log('🔥 Firebase importato direttamente');
+        
+        // Cancella direttamente dal database
+        const projectRef = doc(db, 'feasibilityProjects', projectId);
+        await deleteDoc(projectRef);
+        
+        console.log('✅ Progetto cancellato direttamente da Firebase:', projectId);
+        
+        // Forza l'aggiornamento immediato della lista
+        setProjects(prevProjects => {
+          const filtered = prevProjects.filter(p => p.id !== projectId);
+          console.log('📝 Lista locale aggiornata:', filtered.length, 'progetti rimanenti');
+          return filtered;
+        });
+        
+        toast(`✅ Progetto "${projectName}" cancellato con successo`, { icon: '✅' });
+        
+        // Ricarica i dati per aggiornare statistiche
+        setTimeout(() => {
+          loadData(true);
+        }, 500);
+        
+      } catch (firebaseError) {
+        console.error('❌ ERRORE CATASTROFICO Firebase:', firebaseError);
+        
+        // Fallback: rimuovi solo dalla lista locale
+        setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
+        toast(`⚠️ Progetto rimosso dalla lista (errore Firebase)`, { icon: '⚠️' });
+        
+        // Ricarica i dati
+        setTimeout(() => {
+          loadData(true);
+        }, 500);
       }
-      
-      toast(`✅ Progetto "${projectName}" cancellato con successo`, { icon: '✅' });
-      console.log('✅ Progetto cancellato e verificato:', projectId);
-      
-      // AGGIORNAMENTO IMMEDIATO: rimuovi il progetto dalla lista locale e ricarica
-      setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
-      
-      // Ricarica anche i dati completi per aggiornare statistiche e ranking
-      await loadData(true);
       
     } catch (error) {
       console.error('❌ Errore eliminazione progetto:', error);
