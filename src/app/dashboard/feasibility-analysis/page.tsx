@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
 import { 
-  CalculatorIcon, 
   TrendingUpIcon, 
   EuroIcon, 
   BuildingIcon,
@@ -34,7 +33,7 @@ export default function FeasibilityAnalysisPage() {
   const [showComparison, setShowComparison] = useState(false);
   const [project1Id, setProject1Id] = useState('');
   const [project2Id, setProject2Id] = useState('');
-  const [recalculating, setRecalculating] = useState(false);
+
 
   useEffect(() => {
     loadData();
@@ -75,39 +74,7 @@ export default function FeasibilityAnalysisPage() {
     }
   };
 
-  const handleRecalculateAll = async () => {
-    if (!confirm('Sei sicuro di voler ricalcolare tutti i progetti? Questo aggiornerà tutti i calcoli con i valori corretti.')) {
-      return;
-    }
 
-    setRecalculating(true);
-    try {
-      console.log('🔄 Ricalcolo di tutti i progetti...');
-      
-      const response = await fetch('/api/feasibility-recalculate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        toast.success('✅ Tutti i progetti sono stati ricalcolati con successo!');
-        console.log('✅ Ricalcolo completato:', result);
-        
-        // Ricarica i dati per mostrare i valori corretti
-        await loadData();
-      } else {
-        throw new Error('Errore durante il ricalcolo');
-      }
-    } catch (error) {
-      console.error('❌ Errore ricalcolo progetti:', error);
-      toast.error('❌ Errore durante il ricalcolo dei progetti');
-    } finally {
-      setRecalculating(false);
-    }
-  };
 
   const handleCompareProjects = async () => {
     if (!project1Id || !project2Id) {
@@ -195,23 +162,7 @@ export default function FeasibilityAnalysisPage() {
             <p className="text-gray-600 mt-1">{t('subtitle', 'feasibility')}</p>
           </div>
           <div className="flex space-x-3">
-            <button 
-              onClick={handleRecalculateAll}
-              disabled={recalculating}
-              className="btn btn-warning"
-            >
-              {recalculating ? (
-                <>
-                  <div className="loading loading-spinner loading-sm"></div>
-                  Ricalcolo...
-                </>
-              ) : (
-                <>
-                  <CalculatorIcon className="h-4 w-4 mr-2" />
-                  Ricalcola Tutti
-                </>
-              )}
-            </button>
+
             <Link href="/dashboard/feasibility-analysis/new">
               <button className="btn btn-primary">
                 <PlusIcon className="h-4 w-4 mr-2" />
@@ -277,7 +228,7 @@ export default function FeasibilityAnalysisPage() {
           
           {ranking.length === 0 ? (
             <div className="text-center py-12">
-              <CalculatorIcon className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+              <BuildingIcon className="h-16 w-16 mx-auto text-gray-400 mb-4" />
               <h3 className="text-lg font-medium text-gray-700 mb-2">{t('emptyRankingTitle', 'feasibility')}</h3>
               <p className="text-gray-500 mb-4">{t('emptyRankingSubtitle', 'feasibility')}</p>
               <div className="flex justify-center">
