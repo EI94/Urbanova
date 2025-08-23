@@ -83,9 +83,9 @@ export default function NewFeasibilityProjectPage() {
       total: 0
     },
     revenues: {
-      units: 2,
-      averageArea: 144,
-      pricePerSqm: 1700,
+      units: 0,
+      averageArea: 0,
+      pricePerSqm: 0,
       revenuePerUnit: 0,
       totalSales: 0,
       otherRevenues: 0,
@@ -126,9 +126,9 @@ export default function NewFeasibilityProjectPage() {
   });
   
   const [calculatedRevenues, setCalculatedRevenues] = useState({
-    units: 2,
-    averageArea: 144,
-    pricePerSqm: 1700,
+    units: 0,
+    averageArea: 0,
+    pricePerSqm: 0,
     revenuePerUnit: 0,
     totalSales: 0,
     otherRevenues: 0,
@@ -142,10 +142,10 @@ export default function NewFeasibilityProjectPage() {
     paybackPeriod: 0
   });
 
-  // Inizializza i calcoli al primo render
-  useEffect(() => {
-    recalculateAll();
-  }, []);
+  // Non inizializzare i calcoli per nuovi progetti - l'utente deve inserire i dati prima
+  // useEffect(() => {
+  //   recalculateAll();
+  // }, []);
 
   // Auto-save con debounce di 3 secondi
   useEffect(() => {
@@ -1201,10 +1201,10 @@ export default function NewFeasibilityProjectPage() {
                   </label>
                   <input
                     type="number"
-                    value={project.revenues?.units || 2}
+                    value={project.revenues?.units || ''}
                     onChange={(e) => handleInputChange('revenues', 'units', parseInt(e.target.value))}
                     className="input input-bordered w-full"
-                    placeholder="2"
+                    placeholder="Inserisci numero unità"
                   />
                 </div>
                 
@@ -1214,7 +1214,7 @@ export default function NewFeasibilityProjectPage() {
                   </label>
                   <input
                     type="number"
-                    value={project.revenues?.averageArea || 144}
+                    value={project.revenues?.averageArea || ''}
                     onChange={(e) => handleInputChange('revenues', 'averageArea', parseInt(e.target.value))}
                     className="input input-bordered w-full"
                     placeholder="144"
