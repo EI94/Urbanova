@@ -18,30 +18,19 @@ export class RealEmailService {
   private isConfigured: boolean = false;
 
   constructor() {
-    // Inizializza Resend solo se l'API key è configurata
-    const apiKey = process.env.RESEND_API_KEY || process.env.NEXT_PUBLIC_RESEND_API_KEY;
-    console.log('🔧 [RealEmailService] Verifica configurazione Resend...');
+    // INIZIALIZZA RESEND CON LA CHIAVE API REALE CHE FUNZIONA
+    const apiKey = 're_jpHbTT42_AtqjMBMxrp2u773kKofMZw9k';
+    console.log('🔧 [RealEmailService] Configurazione Resend con chiave API reale...');
     console.log('🔑 [RealEmailService] API Key presente:', !!apiKey);
     console.log('🔑 [RealEmailService] API Key lunghezza:', apiKey ? apiKey.length : 0);
     console.log('🔑 [RealEmailService] API Key inizia con:', apiKey ? apiKey.substring(0, 10) + '...' : 'N/A');
-    console.log('🔑 [RealEmailService] API Key valore completo:', apiKey);
-    console.log('🔑 [RealEmailService] RESEND_API_KEY diretto:', process.env.RESEND_API_KEY);
-    console.log('🔑 [RealEmailService] NEXT_PUBLIC_RESEND_API_KEY:', process.env.NEXT_PUBLIC_RESEND_API_KEY);
     
-    if (apiKey && apiKey !== 'undefined' && apiKey !== '' && apiKey !== 'your-resend-api-key') {
-      try {
-        this.resend = new Resend(apiKey);
-        this.isConfigured = true;
-        console.log('✅ [RealEmailService] Resend configurato correttamente');
-      } catch (error) {
-        console.warn('⚠️ [RealEmailService] Errore configurazione Resend:', error);
-        this.isConfigured = false;
-        this.resend = null;
-      }
-    } else {
-      console.log('ℹ️ [RealEmailService] RESEND_API_KEY non configurata - modalità simulazione attiva');
-      console.log('ℹ️ [RealEmailService] Valore API Key:', apiKey);
-      console.log('ℹ️ [RealEmailService] Controlla le variabili ambiente su Vercel');
+    try {
+      this.resend = new Resend(apiKey);
+      this.isConfigured = true;
+      console.log('✅ [RealEmailService] Resend configurato correttamente con chiave API reale!');
+    } catch (error) {
+      console.warn('⚠️ [RealEmailService] Errore configurazione Resend:', error);
       this.isConfigured = false;
       this.resend = null;
     }
