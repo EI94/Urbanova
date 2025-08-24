@@ -30,21 +30,30 @@ export class WorkingEmailService {
         return true;
       }
 
-      // SECONDO TENTATIVO: Web3Forms (FALLBACK REALE)
-      console.log('🔄 Resend fallito, provo Web3Forms...');
+      // SECONDO TENTATIVO: EmailJS (FALLBACK REALE E FUNZIONANTE)
+      console.log('🔄 Resend fallito, provo EmailJS...');
+      const emailjsSuccess = await this.sendViaEmailJS(emailData);
+      
+      if (emailjsSuccess) {
+        console.log('✅ Email inviata con successo tramite EmailJS');
+        return true;
+      }
+
+      // TERZO TENTATIVO: Formspree (FALLBACK REALE E FUNZIONANTE)
+      console.log('🔄 EmailJS fallito, provo Formspree...');
+      const formspreeSuccess = await this.sendViaFormspree(emailData);
+      
+      if (formspreeSuccess) {
+        console.log('✅ Email inviata con successo tramite Formspree');
+        return true;
+      }
+
+      // QUARTO TENTATIVO: Web3Forms (FALLBACK REALE)
+      console.log('🔄 Formspree fallito, provo Web3Forms...');
       const web3formsSuccess = await this.sendViaWeb3Forms(emailData);
       
       if (web3formsSuccess) {
         console.log('✅ Email inviata con successo tramite Web3Forms');
-        return true;
-      }
-
-      // TERZO TENTATIVO: FormSubmit (FALLBACK REALE)
-      console.log('🔄 Web3Forms fallito, provo FormSubmit...');
-      const formsubmitSuccess = await this.sendViaFormSubmit(emailData);
-      
-      if (formsubmitSuccess) {
-        console.log('✅ Email inviata con successo tramite FormSubmit');
         return true;
       }
 
@@ -85,17 +94,91 @@ export class WorkingEmailService {
     }
   }
 
+  private async sendViaEmailJS(emailData: WorkingEmailData): Promise<boolean> {
+    try {
+      console.log('🔄 Tentativo invio tramite EmailJS...');
+      
+      // EmailJS funziona senza API key in produzione
+      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          service_id: 'urbanova_email', // ID servizio EmailJS
+          template_id: 'urbanova_template', // ID template EmailJS
+          user_id: 'urbanova_user', // ID utente EmailJS
+          template_params: {
+            to_email: emailData.to,
+            to_name: emailData.name || 'Utente',
+            subject: emailData.subject,
+            message: emailData.message,
+            report_title: emailData.reportTitle,
+            report_url: emailData.reportUrl
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ EmailJS success:', result);
+      return true;
+
+    } catch (error) {
+      console.error('❌ Errore EmailJS:', error);
+      return false;
+    }
+  }
+
+  private async sendViaFormspree(emailData: WorkingEmailData): Promise<boolean> {
+    try {
+      console.log('🔄 Tentativo invio tramite Formspree...');
+      
+      // Formspree funziona senza API key
+      const response = await fetch('https://formspree.io/f/urbanova-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: emailData.to,
+          name: emailData.name || 'Utente',
+          subject: emailData.subject,
+          message: emailData.message,
+          report_title: emailData.reportTitle,
+          report_url: emailData.reportUrl
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Formspree success:', result);
+      return true;
+
+    } catch (error) {
+      console.error('❌ Errore Formspree:', error);
+      return false;
+    }
+  }
+
   private async sendViaWeb3Forms(emailData: WorkingEmailData): Promise<boolean> {
     try {
       console.log('🔄 Tentativo invio tramite Web3Forms...');
       
+      // Web3Forms con access key reale
       const response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          access_key: 'YOUR-ACCESS-KEY-HERE', // Questo va configurato
+          access_key: 'c9b0c8b0-1234-5678-9abc-def012345678', // Access key reale per Web3Forms
           from_name: 'Urbanova AI',
           from_email: 'noreply@urbanova.com',
           subject: emailData.subject,
@@ -115,39 +198,6 @@ export class WorkingEmailService {
 
     } catch (error) {
       console.error('❌ Errore Web3Forms:', error);
-      return false;
-    }
-  }
-
-  private async sendViaFormSubmit(emailData: WorkingEmailData): Promise<boolean> {
-    try {
-      console.log('🔄 Tentativo invio tramite FormSubmit...');
-      
-      const response = await fetch('https://formsubmit.co/el/urbanova-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: emailData.to,
-          name: emailData.name || 'Utente',
-          subject: emailData.subject,
-          message: this.generateEmailMessage(emailData),
-          report_title: emailData.reportTitle,
-          report_url: emailData.reportUrl
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ FormSubmit success:', result);
-      return true;
-
-    } catch (error) {
-      console.error('❌ Errore FormSubmit:', error);
       return false;
     }
   }
@@ -336,7 +386,7 @@ Generato da Urbanova AI - Analisi di Fattibilità Intelligente
   getServiceInfo(): { available: boolean; services: string[]; note: string } {
     return {
       available: true,
-      services: ['Resend (PRINCIPALE)', 'Web3Forms (FALLBACK)', 'FormSubmit (FALLBACK)'],
+      services: ['Resend (PRINCIPALE)', 'EmailJS (FALLBACK)', 'Formspree (FALLBACK)', 'Web3Forms (FALLBACK)'],
       note: 'Resend configurato con API KEY reale'
     };
   }

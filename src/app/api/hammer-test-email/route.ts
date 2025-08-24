@@ -53,7 +53,8 @@ export async function POST(request: NextRequest) {
           successCount,
           failureCount,
           results,
-          note: `Controlla la casella email ${to} per verificare quante email sono arrivate`
+          note: `Controlla la casella email ${to} per verificare quante email sono arrivate`,
+          services: workingEmailService.getServiceInfo().services
         }
       });
 
@@ -78,7 +79,8 @@ export async function POST(request: NextRequest) {
           data: {
             to,
             timestamp: new Date().toISOString(),
-            note: `Controlla la casella email ${to} per verificare se è arrivata`
+            note: `Controlla la casella email ${to} per verificare se è arrivata`,
+            services: workingEmailService.getServiceInfo().services
           }
         });
       } else {
