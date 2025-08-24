@@ -27,7 +27,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function FeasibilityAnalysisPage() {
   const { t, formatCurrency: fmtCurrency } = useLanguage();
-  const { user } = useAuth();
+  const { currentUser: user, loading: authLoading } = useAuth();
   const [projects, setProjects] = useState<FeasibilityProject[]>([]);
   const [ranking, setRanking] = useState<FeasibilityProject[]>([]);
   const [statistics, setStatistics] = useState<any>(null);
@@ -38,15 +38,32 @@ export default function FeasibilityAnalysisPage() {
   const [project1Id, setProject1Id] = useState('');
   const [project2Id, setProject2Id] = useState('');
 
+  // DEBUG: Log completo dello stato di autenticazione
+  useEffect(() => {
+    console.log('🔍 DEBUG AUTH - Stato completo:', {
+      user: user ? { uid: user.uid, email: user.email, displayName: user.displayName } : null,
+      authLoading,
+      loading,
+      error
+    });
+  }, [user, authLoading, loading, error]);
 
   useEffect(() => {
-    loadData();
-  }, []);
+    // Aspetta che l'autenticazione sia pronta
+    if (!authLoading) {
+      loadData();
+    }
+  }, [authLoading, user]);
 
   const loadData = async (forceRefresh = false) => {
+    if (authLoading) {
+      console.log('⏳ Autenticazione in corso - Attendo...');
+      return;
+    }
+    
     if (!user) {
       console.log('❌ Utente non autenticato - Caricamento bloccato');
-      setError('Utente non autenticato');
+      setError('Utente non autenticato. Effettua il login per continuare.');
       setLoading(false);
       return;
     }
@@ -55,6 +72,7 @@ export default function FeasibilityAnalysisPage() {
     setError(null);
     try {
       console.log('🔄 Caricamento dati progetti...', forceRefresh ? '(FORCE REFRESH)' : '');
+      console.log('👤 Utente autenticato:', user.uid);
       
       // Forza il refresh dei dati se richiesto
       const timestamp = forceRefresh ? Date.now() : 0;
@@ -239,6 +257,19 @@ export default function FeasibilityAnalysisPage() {
       default: return 'bg-gray-100 text-gray-800';
     }
   };
+
+  if (authLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="loading loading-spinner loading-lg mb-4"></div>
+            <p className="text-gray-600">Verifica autenticazione...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   if (loading) {
     return (
