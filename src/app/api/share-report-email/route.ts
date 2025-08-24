@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { simpleWorkingEmailService } from '@/lib/simpleWorkingEmailService';
+import { realResendEmailService } from '@/lib/realResendEmailService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,30 +32,34 @@ export async function POST(request: NextRequest) {
       reportUrl
     };
 
-    // Invia email tramite il servizio semplice e funzionante
-    const success = await simpleWorkingEmailService.sendEmail(emailData);
+    // Invia email tramite il servizio Resend REALE
+    const success = await realResendEmailService.sendEmail(emailData);
 
     if (success) {
-      console.log('✅ Email inviata con successo a:', to);
+      console.log('✅ Email inviata con successo con Resend REALE a:', to);
       return NextResponse.json({
         success: true,
-        message: 'Email inviata con successo',
+        message: 'Email inviata con successo tramite Resend',
         data: {
           to,
           subject,
           timestamp: new Date().toISOString(),
-          provider: 'Simple Working Email Service',
-          services: simpleWorkingEmailService.getServiceInfo().services
+          provider: 'Resend (REALE)',
+          serviceStatus: realResendEmailService.getServiceStatus()
         }
       });
     } else {
-      throw new Error('Impossibile inviare l\'email');
+      throw new Error('Impossibile inviare l\'email tramite Resend');
     }
 
   } catch (error) {
-    console.error('Errore invio email:', error);
+    console.error('❌ Errore critico invio email Resend:', error);
     return NextResponse.json(
-      { error: 'Errore interno del server' },
+      { 
+        error: 'Errore interno del server',
+        details: error instanceof Error ? error.message : 'Errore sconosciuto',
+        timestamp: new Date().toISOString()
+      },
       { status: 500 }
     );
   }
