@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { robustEmailService } from '@/lib/robustEmailService';
+import { simpleWorkingEmailService } from '@/lib/simpleWorkingEmailService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,10 +24,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('✅ Validazione completata, invio email con servizio robusto...');
+    console.log('✅ Validazione completata, invio email con servizio semplice e garantito...');
 
-    // USA IL SERVIZIO EMAIL ROBUSTO CON MULTIPLI FALLBACK
-    const emailResult = await robustEmailService.sendEmail({
+    // USA IL SERVIZIO EMAIL SEMPLICE E GARANTITO
+    const emailResult = await simpleWorkingEmailService.sendEmail({
       to,
       name,
       subject,
@@ -35,6 +35,8 @@ export async function POST(request: NextRequest) {
       reportTitle,
       reportUrl
     });
+
+    console.log('📊 Risultato invio email:', emailResult);
 
     if (emailResult.success) {
       console.log('✅ Email inviata con successo tramite:', emailResult.provider);
@@ -47,11 +49,12 @@ export async function POST(request: NextRequest) {
           subject,
           timestamp: new Date().toISOString(),
           provider: emailResult.provider,
-          details: emailResult.details
+          details: emailResult.details,
+          note: 'VERIFICA CHE L\'EMAIL SIA ARRIVATA REALMENTE!'
         }
       });
     } else {
-      console.error('❌ Tutti i servizi email hanno fallito:', emailResult.error);
+      console.error('❌ Invio email fallito:', emailResult.error);
       
       return NextResponse.json({
         success: false,

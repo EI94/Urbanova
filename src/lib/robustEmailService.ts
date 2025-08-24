@@ -180,6 +180,8 @@ export class RobustEmailService {
         };
       }
 
+      console.log('📧 Nodemailer: Credenziali Gmail configurate, utente:', process.env.GMAIL_USER);
+
       // NODEMAILER NATIVO E SEMPLICE - INVIO DIRETTO VIA GMAIL SMTP
       const mailOptions = {
         from: process.env.GMAIL_USER,
@@ -190,18 +192,47 @@ export class RobustEmailService {
       };
 
       console.log('📧 Nodemailer: Invio email tramite Gmail SMTP...');
+      console.log('📧 Nodemailer: Opzioni email:', { from: mailOptions.from, to: mailOptions.to, subject: mailOptions.subject });
+      
       const info = await this.nodemailerTransporter.sendMail(mailOptions);
 
       console.log('✅ Nodemailer: Email inviata realmente, messageId:', info.messageId);
-      return {
-        success: true,
-        message: 'Email inviata con successo tramite Nodemailer Gmail',
-        provider: 'Nodemailer Gmail',
-        details: {
-          messageId: info.messageId,
-          response: info.response
-        }
-      };
+      console.log('📧 Nodemailer: Dettagli invio:', {
+        messageId: info.messageId,
+        response: info.response,
+        accepted: info.accepted,
+        rejected: info.rejected
+      });
+
+      // VERIFICA SE L'EMAIL È STATA REALMENTE ACCETTATA
+      if (info.accepted && info.accepted.length > 0) {
+        console.log('✅ Nodemailer: Email accettata da Gmail SMTP');
+        return {
+          success: true,
+          message: 'Email inviata con successo tramite Nodemailer Gmail',
+          provider: 'Nodemailer Gmail',
+          details: {
+            messageId: info.messageId,
+            response: info.response,
+            accepted: info.accepted,
+            rejected: info.rejected
+          }
+        };
+      } else {
+        console.error('❌ Nodemailer: Email non accettata da Gmail SMTP');
+        return {
+          success: false,
+          message: 'Email non accettata da Gmail SMTP',
+          provider: 'Nodemailer Gmail',
+          error: 'Email rifiutata dal server SMTP',
+          details: {
+            messageId: info.messageId,
+            response: info.response,
+            accepted: info.accepted,
+            rejected: info.rejected
+          }
+        };
+      }
 
     } catch (error) {
       console.error('❌ Nodemailer fallito:', error);
@@ -240,16 +271,46 @@ export class RobustEmailService {
       const responseText = await response.text();
       console.log('📧 FormsFree: Contenuto risposta:', responseText);
 
-      console.log('✅ FormsFree: Email inviata tramite endpoint, risposta:', response.status);
-      return {
-        success: true,
-        message: 'Email inviata con successo tramite FormsFree',
-        provider: 'FormsFree',
-        details: {
-          status: response.status,
-          responseText: responseText
-        }
-      };
+      // VERIFICA SE LA RISPOSTA CONTIENE ERRORI NASCOSTI
+      if (responseText.includes('error') || responseText.includes('Error') || responseText.includes('failed')) {
+        console.error('❌ FormsFree: Risposta contiene errori:', responseText);
+        return {
+          success: false,
+          message: 'FormsFree ha restituito errori nella risposta',
+          provider: 'FormsFree',
+          error: 'Risposta contiene errori',
+          details: {
+            status: response.status,
+            responseText: responseText
+          }
+        };
+      }
+
+      // VERIFICA SE L'EMAIL È STATA REALMENTE INVIATA
+      if (responseText.includes('success') || responseText.includes('Success') || response.status === 200) {
+        console.log('✅ FormsFree: Email inviata tramite endpoint, risposta:', response.status);
+        return {
+          success: true,
+          message: 'Email inviata con successo tramite FormsFree',
+          provider: 'FormsFree',
+          details: {
+            status: response.status,
+            responseText: responseText
+          }
+        };
+      } else {
+        console.error('❌ FormsFree: Risposta non chiara, possibile fallimento');
+        return {
+          success: false,
+          message: 'FormsFree: risposta non chiara, possibile fallimento',
+          provider: 'FormsFree',
+          error: 'Risposta ambigua',
+          details: {
+            status: response.status,
+            responseText: responseText
+          }
+        };
+      }
 
     } catch (error) {
       console.error('❌ FormsFree fallito:', error);

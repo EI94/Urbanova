@@ -1,208 +1,197 @@
+import nodemailer from 'nodemailer';
+
 export interface SimpleEmailData {
   to: string;
   name?: string;
   subject: string;
   message: string;
-  reportTitle: string;
-  reportUrl: string;
+  reportTitle?: string;
+  reportUrl?: string;
+}
+
+export interface SimpleEmailResult {
+  success: boolean;
+  message: string;
+  provider: string;
+  error?: string;
+  details?: any;
 }
 
 export class SimpleWorkingEmailService {
-  async sendEmail(emailData: SimpleEmailData): Promise<boolean> {
-    try {
-      console.log('📧 Invio email semplice e funzionante...', emailData);
+  private transporter: nodemailer.Transporter;
 
-      // PRIMO TENTATIVO: Formspree semplice (funziona sempre)
-      console.log('🔄 Tentativo Formspree semplice...');
-      const formspreeSuccess = await this.sendViaFormspreeSimple(emailData);
-      
-      if (formspreeSuccess) {
-        console.log('✅ Email inviata con successo tramite Formspree semplice');
-        return true;
+  constructor() {
+    // CONFIGURAZIONE SEMPLICE E GARANTITA
+    this.transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER || 'urbanova.test@gmail.com',
+        pass: process.env.GMAIL_APP_PASSWORD || 'test-password'
       }
-
-      // SECONDO TENTATIVO: Web3Forms semplice (funziona sempre)
-      console.log('🔄 Formspree fallito, provo Web3Forms semplice...');
-      const web3formsSuccess = await this.sendViaWeb3FormsSimple(emailData);
-      
-      if (web3formsSuccess) {
-        console.log('✅ Email inviata con successo tramite Web3Forms semplice');
-        return true;
-      }
-
-      // TERZO TENTATIVO: EmailJS semplice (funziona sempre)
-      console.log('🔄 Web3Forms fallito, provo EmailJS semplice...');
-      const emailjsSuccess = await this.sendViaEmailJSSimple(emailData);
-      
-      if (emailjsSuccess) {
-        console.log('✅ Email inviata con successo tramite EmailJS semplice');
-        return true;
-      }
-
-      // TUTTI I SERVIZI SONO FALLITI - ERRORE REALE
-      console.error('❌ TUTTI I SERVIZI EMAIL SEMPLICI SONO FALLITI');
-      throw new Error('Impossibile inviare email: tutti i servizi sono falliti');
-
-    } catch (error) {
-      console.error('❌ Errore critico invio email:', error);
-      return false;
-    }
+    });
   }
 
-  private async sendViaFormspreeSimple(emailData: SimpleEmailData): Promise<boolean> {
+  async sendEmail(data: SimpleEmailData): Promise<SimpleEmailResult> {
     try {
-      console.log('🔄 Tentativo Formspree semplice...');
+      console.log('📧 SIMPLE WORKING EMAIL SERVICE - Invio email garantito...');
+      console.log('📧 Dati email:', { to: data.to, subject: data.subject });
+
+      // VERIFICA CREDENZIALI
+      if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+        console.error('❌ Credenziali Gmail mancanti!');
+        return {
+          success: false,
+          message: 'Credenziali Gmail non configurate',
+          provider: 'Simple Working Email',
+          error: 'GMAIL_USER e GMAIL_APP_PASSWORD mancanti'
+        };
+      }
+
+      // PREPARA EMAIL SEMPLICE
+      const mailOptions = {
+        from: `"Urbanova" <${process.env.GMAIL_USER}>`,
+        to: data.to,
+        subject: data.subject,
+        text: this.generateSimpleText(data),
+        html: this.generateSimpleHTML(data)
+      };
+
+      console.log('📧 Invio email tramite Gmail SMTP...');
       
-      // Formspree con endpoint generico che funziona sempre
-      const response = await fetch('https://formspree.io/f/xpzgwqjz', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: emailData.to,
-          name: emailData.name || 'Utente',
-          subject: emailData.subject,
-          message: this.generateSimpleMessage(emailData),
-          report_title: emailData.reportTitle,
-          report_url: emailData.reportUrl
-        }),
+      // INVIA EMAIL
+      const info = await this.transporter.sendMail(mailOptions);
+
+      console.log('📧 Risposta Gmail SMTP:', {
+        messageId: info.messageId,
+        response: info.response,
+        accepted: info.accepted,
+        rejected: info.rejected
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Formspree semplice success:', result);
-      return true;
-
-    } catch (error) {
-      console.error('❌ Errore Formspree semplice:', error);
-      return false;
-    }
-  }
-
-  private async sendViaWeb3FormsSimple(emailData: SimpleEmailData): Promise<boolean> {
-    try {
-      console.log('🔄 Tentativo Web3Forms semplice...');
-      
-      // Web3Forms con access key generica che funziona sempre
-      const response = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          access_key: 'c9b0c8b0-1234-5678-9abc-def012345678', // Access key generica
-          from_name: 'Urbanova AI',
-          from_email: 'noreply@urbanova.com',
-          subject: emailData.subject,
-          message: this.generateSimpleMessage(emailData),
-          to: emailData.to,
-          reply_to: emailData.to
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Web3Forms semplice success:', result);
-      return true;
-
-    } catch (error) {
-      console.error('❌ Errore Web3Forms semplice:', error);
-      return false;
-    }
-  }
-
-  private async sendViaEmailJSSimple(emailData: SimpleEmailData): Promise<boolean> {
-    try {
-      console.log('🔄 Tentativo EmailJS semplice...');
-      
-      // EmailJS con configurazione generica che funziona sempre
-      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          service_id: 'service_urbanova', // ID servizio generico
-          template_id: 'template_urbanova', // ID template generico
-          user_id: 'user_urbanova', // ID utente generico
-          template_params: {
-            to_email: emailData.to,
-            to_name: emailData.name || 'Utente',
-            subject: emailData.subject,
-            message: this.generateSimpleMessage(emailData),
-            report_title: emailData.reportTitle,
-            report_url: emailData.reportUrl
+      // VERIFICA ACCETTAZIONE
+      if (info.accepted && info.accepted.length > 0) {
+        console.log('✅ Email accettata da Gmail SMTP!');
+        return {
+          success: true,
+          message: 'Email inviata con successo tramite Gmail SMTP',
+          provider: 'Simple Working Email (Gmail)',
+          details: {
+            messageId: info.messageId,
+            response: info.response,
+            accepted: info.accepted
           }
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        };
+      } else {
+        console.error('❌ Email non accettata da Gmail SMTP');
+        return {
+          success: false,
+          message: 'Email non accettata dal server SMTP',
+          provider: 'Simple Working Email (Gmail)',
+          error: 'Email rifiutata',
+          details: {
+            messageId: info.messageId,
+            response: info.response,
+            accepted: info.accepted,
+            rejected: info.rejected
+          }
+        };
       }
 
-      const result = await response.json();
-      console.log('✅ EmailJS semplice success:', result);
-      return true;
-
     } catch (error) {
-      console.error('❌ Errore EmailJS semplice:', error);
-      return false;
+      console.error('❌ Errore invio email:', error);
+      return {
+        success: false,
+        message: 'Errore durante l\'invio email',
+        provider: 'Simple Working Email (Gmail)',
+        error: error instanceof Error ? error.message : 'Errore sconosciuto',
+        details: error
+      };
     }
   }
 
-  private generateSimpleMessage(emailData: SimpleEmailData): string {
+  private generateSimpleText(data: SimpleEmailData): string {
     return `
-URBANOVA - Studio di Fattibilità Condiviso
+URBANOVA - Studio di Fattibilità
 
-Ciao ${emailData.name || emailData.to}!
+Ciao ${data.name || data.to}!
 
-Ti condivido lo studio di fattibilità "${emailData.reportTitle}" generato su Urbanova.
+Ti condivido lo studio di fattibilità generato su Urbanova.
 
-Il report contiene:
-• Analisi finanziaria completa con ROI e payback
-• Valutazione rischi e opportunità di mercato  
-• Analisi AI integrata con raccomandazioni
-• Strategie ottimizzazione per massimizzare il profitto
+${data.message}
 
-Visualizza il report completo: ${emailData.reportUrl}
+Report: ${data.reportTitle || 'Studio di Fattibilità'}
+Link: ${data.reportUrl || 'https://urbanova.life'}
 
 Cordiali saluti,
 Il tuo team Urbanova
 
----
-Generato da Urbanova AI - Analisi di Fattibilità Intelligente
-© 2024 Urbanova - Trasformiamo le città in smart cities
-Supporto: support@urbanova.com
+🏗️ Urbanova AI - Analisi di Fattibilità Intelligente
+© 2024 Urbanova
     `.trim();
   }
 
-  // Metodo per testare il servizio
-  async testEmail(): Promise<boolean> {
-    const testData: SimpleEmailData = {
-      to: 'test@example.com',
-      subject: '🧪 TEST Email Service Semplice - Urbanova',
-      message: 'Questo è un test del servizio email semplice Urbanova. Se ricevi questa email, il servizio funziona!',
-      reportTitle: 'Test Report - Urbanova',
-      reportUrl: 'https://urbanova.com/test'
-    };
-
-    return this.sendEmail(testData);
+  private generateSimpleHTML(data: SimpleEmailData): string {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>${data.subject}</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .header { background: #3b82f6; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; }
+          .footer { text-align: center; color: #666; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>🏗️ URBANOVA</h1>
+          <p>Studio di Fattibilità Condiviso</p>
+        </div>
+        
+        <div class="content">
+          <h2>Ciao ${data.name || data.to}! 👋</h2>
+          
+          <p>Ti condivido lo <strong>studio di fattibilità</strong> generato su Urbanova.</p>
+          
+          <p>${data.message}</p>
+          
+          <h3>📊 Report: ${data.reportTitle || 'Studio di Fattibilità'}</h3>
+          <p><a href="${data.reportUrl || 'https://urbanova.life'}">Visualizza Report Completo</a></p>
+        </div>
+        
+        <div class="footer">
+          <p><strong>Cordiali saluti,</strong><br>Il tuo team Urbanova</p>
+          <p>🏗️ <strong>Urbanova AI</strong> - Analisi di Fattibilità Intelligente</p>
+        </div>
+      </body>
+      </html>
+    `;
   }
 
-  // Metodo per ottenere informazioni sui servizi
-  getServiceInfo(): { available: boolean; services: string[]; note: string } {
-    return {
-      available: true,
-      services: ['Formspree Semplice', 'Web3Forms Semplice', 'EmailJS Semplice'],
-      note: 'Servizi email semplici e funzionanti senza configurazioni complesse'
-    };
+  // TEST SEMPLICE E DIRETTO
+  async testService(): Promise<boolean> {
+    try {
+      console.log('🧪 Test servizio email semplice...');
+      
+      const testData: SimpleEmailData = {
+        to: 'test@example.com',
+        name: 'Test User',
+        subject: 'Test Simple Email Service',
+        message: 'Questo è un test del servizio email semplice.',
+        reportTitle: 'Test Report',
+        reportUrl: 'https://example.com'
+      };
+
+      const result = await this.sendEmail(testData);
+      console.log('📊 Test risultato:', result);
+      
+      return result.success;
+    } catch (error) {
+      console.error('❌ Test fallito:', error);
+      return false;
+    }
   }
 }
 
