@@ -109,23 +109,54 @@ export default function FeasibilityAnalysisPage() {
   };
 
   const handleDeleteProject = async (projectId: string) => {
-    // SOLUZIONE SEMPLICE E DIRETTA
-    const project = projects.find(p => p.id === projectId);
-    if (!project) return;
-    
-    const projectName = project.name || 'Progetto';
-    
-    // 1. Rimuovi IMMEDIATAMENTE dalla lista locale
-    setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
-    
-    // 2. Mostra toast di successo
-    toast(`✅ Progetto "${projectName}" rimosso dalla lista`, { icon: '✅' });
-    
-    // 3. Prova a cancellarlo da Firestore in background (senza aspettare)
-    feasibilityService.deleteProject(projectId).catch(error => {
-      console.error('❌ Errore cancellazione Firestore:', error);
-      // Non fare niente - il progetto è già rimosso dalla lista
-    });
+    if (!projectId) {
+      toast('❌ ID progetto non valido', { icon: '❌' });
+      return;
+    }
+
+    try {
+      console.log('🗑️ ELIMINAZIONE DIRETTA - Inizio...', projectId);
+      
+      // 1. ELIMINAZIONE DIRETTA DA FIRESTORE
+      const { db } = await import('@/lib/firebase');
+      const { doc, deleteDoc } = await import('firebase/firestore');
+      
+      const projectRef = doc(db, 'feasibilityProjects', projectId);
+      await deleteDoc(projectRef);
+      
+      // 2. AGGIORNA IMMEDIATAMENTE TUTTE LE LISTE
+      setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
+      setRanking(prevRanking => prevRanking.filter(p => p.id !== projectId));
+      
+      // 3. RICALCOLA STATISTICHE
+      const remainingProjects = projects.filter(p => p.id !== projectId);
+      if (remainingProjects.length > 0) {
+        const totalProjects = remainingProjects.length;
+        const avgMargin = remainingProjects.reduce((sum, p) => sum + (p.results?.margin || 0), 0) / totalProjects;
+        const totalInvestment = remainingProjects.reduce((sum, p) => sum + (p.costs?.land?.purchasePrice || 0), 0);
+        const onTarget = remainingProjects.filter(p => (p.results?.margin || 0) >= (p.targetMargin || 0)).length;
+        
+        setStatistics({
+          totalProjects,
+          averageMargin: avgMargin,
+          totalInvestment,
+          onTarget
+        });
+      } else {
+        setStatistics({
+          totalProjects: 0,
+          averageMargin: 0,
+          totalInvestment: 0,
+          onTarget: 0
+        });
+      }
+      
+      toast('✅ Progetto eliminato definitivamente!', { icon: '✅' });
+      
+    } catch (error) {
+      console.error('❌ Errore eliminazione diretta:', error);
+      toast(`❌ Errore eliminazione: ${error}`, { icon: '❌' });
+    }
   };
 
   const handleCompareProjects = async () => {
@@ -227,118 +258,8 @@ export default function FeasibilityAnalysisPage() {
               <CompareIcon className="h-4 w-4 mr-2" />
               {t('compare', 'feasibility')}
             </button>
-                      <button 
-            onClick={async () => {
-              try {
-                console.log('🧪 Test connessione Firebase...');
-                const { db } = await import('@/lib/firebase');
-                const { collection, getDocs } = await import('firebase/firestore');
-                
-                const testCollection = collection(db, 'feasibilityProjects');
-                const snapshot = await getDocs(testCollection);
-                console.log('✅ Firebase OK - Progetti trovati:', snapshot.size);
-                
-                toast(`✅ Firebase OK - ${snapshot.size} progetti`, { icon: '✅' });
-              } catch (error) {
-                console.error('❌ Test Firebase fallito:', error);
-                toast(`❌ Firebase KO: ${error}`, { icon: '❌' });
-              }
-            }}
-            className="btn btn-warning"
-          >
-            🧪 Test Firebase
-          </button>
           
-          <button 
-            onClick={async () => {
-              if (projects.length === 0) {
-                toast('❌ Nessun progetto da testare', { icon: '❌' });
-                return;
-              }
-              
-              const testProject = projects[0];
-              console.log('🔍 DEBUG CANCELLAZIONE - Test progetto:', testProject.id);
-              
-              try {
-                const response = await fetch('/api/debug-project-deletion', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ 
-                    projectId: testProject.id, 
-                    action: 'debug' 
-                  })
-                });
-                
-                const result = await response.json();
-                console.log('🔍 RISULTATO DEBUG COMPLETO:', result);
-                
-                if (result.success) {
-                  toast(`✅ Debug OK - Progetto ${testProject.name} cancellato`, { icon: '✅' });
-                  // Ricarica i dati
-                  loadData(true);
-                } else {
-                  toast(`❌ Debug KO: ${result.error}`, { icon: '❌' });
-                  console.error('🔍 DEBUG ERROR:', result.debug);
-                }
-              } catch (error) {
-                console.error('❌ Errore debug:', error);
-                toast(`❌ Errore debug: ${error}`, { icon: '❌' });
-              }
-            }}
-            className="btn btn-error"
-          >
-            🔍 Debug Cancellazione
-          </button>
           
-          <button 
-            onClick={async () => {
-              if (projects.length === 0) {
-                toast('❌ Nessun progetto da pulire', { icon: '❌' });
-                return;
-              }
-              
-              // Conferma con l'utente
-              if (!confirm(`⚠️ ATTENZIONE: Stai per ELIMINARE TUTTI i ${projects.length} progetti dal database!\n\nQuesta azione non può essere annullata.\n\nSei sicuro di voler continuare?`)) {
-                return;
-              }
-              
-              console.log('🧹 PULIZIA COMPLETA DATABASE - Inizio...');
-              toast('🧹 Pulizia database in corso...', { icon: '🔄' });
-              
-              try {
-                const response = await fetch('/api/cleanup-all-projects', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ force: true })
-                });
-                
-                const result = await response.json();
-                console.log('🧹 RISULTATO PULIZIA:', result);
-                
-                if (result.success) {
-                  toast(`✅ Database pulito! ${result.projectsDeleted} progetti eliminati`, { icon: '✅' });
-                  // Pulisci TUTTE le liste locali
-                  setProjects([]);
-                  setRanking([]);
-                  setStatistics({});
-                  
-                  // Forza refresh completo per sincronizzare tutto
-                  setTimeout(() => {
-                    loadData(true);
-                  }, 500);
-                } else {
-                  toast(`❌ Errore pulizia: ${result.error}`, { icon: '❌' });
-                  console.error('🧹 ERRORE PULIZIA:', result);
-                }
-              } catch (error) {
-                console.error('❌ Errore pulizia:', error);
-                toast(`❌ Errore pulizia: ${error}`, { icon: '❌' });
-              }
-            }}
-            className="btn btn-warning"
-          >
-            🧹 Pulisci Database
-          </button>
           </div>
         </div>
 
