@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { realResendEmailService } from '@/lib/realResendEmailService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,11 +31,28 @@ export async function POST(request: NextRequest) {
       reportUrl
     };
 
-    // Invia email tramite il servizio Resend REALE
-    const success = await realResendEmailService.sendEmail(emailData);
+    // Invia email tramite il servizio email-working
+    const response = await fetch(`${request.nextUrl.origin}/api/email-working`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        to: emailData.to,
+        subject: emailData.subject,
+        message: `Studio di Fattibilità: ${emailData.reportTitle}\n\n${emailData.message}\n\nVisualizza report: ${emailData.reportUrl}`
+      })
+    });
 
-    if (success) {
-      console.log('✅ Email inviata con successo con Resend REALE a:', to);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Errore servizio email: ${errorData.error || 'Errore sconosciuto'}`);
+    }
+
+    const result = await response.json();
+
+    if (result.success) {
+      console.log('✅ Email inviata con successo tramite email-working a:', to);
       return NextResponse.json({
         success: true,
         message: 'Email inviata con successo tramite Resend',
@@ -44,18 +60,19 @@ export async function POST(request: NextRequest) {
           to,
           subject,
           timestamp: new Date().toISOString(),
-          provider: 'Resend (REALE)',
-          serviceStatus: realResendEmailService.getServiceStatus()
+          provider: 'Resend (NUOVA API KEY)',
+          messageId: result.data?.messageId
         }
       });
     } else {
-      throw new Error('Impossibile inviare l\'email tramite Resend');
+      throw new Error('Impossibile inviare l\'email tramite email-working');
     }
 
   } catch (error) {
-    console.error('❌ Errore critico invio email Resend:', error);
+    console.error('❌ Errore critico invio email:', error);
     return NextResponse.json(
       { 
+        success: false,
         error: 'Errore interno del server',
         details: error instanceof Error ? error.message : 'Errore sconosciuto',
         timestamp: new Date().toISOString()

@@ -13,9 +13,9 @@ export class RealResendEmailService {
   private resend: Resend;
 
   constructor() {
-    // INIZIALIZZA RESEND CON L'API KEY REALE FORNITA DALL'UTENTE
-    this.resend = new Resend('re_Kew2Zmby_CFtRMNe5UtsJECJwxu6QpmRE');
-    console.log('✅ Resend inizializzato con API key reale');
+    // INIZIALIZZA RESEND CON LA NUOVA API KEY REALE FORNITA DALL'UTENTE
+    this.resend = new Resend('re_jpHbTT42_AtqjMBMxrp2u773kKofMZw9k');
+    console.log('✅ Resend inizializzato con NUOVA API key reale');
   }
 
   async sendEmail(emailData: RealEmailData): Promise<boolean> {
@@ -97,7 +97,6 @@ export class RealResendEmailService {
           .header p {
             margin: 10px 0 0 0;
             opacity: 0.9;
-            font-size: 16px;
           }
           .content {
             background: white;
@@ -233,8 +232,8 @@ Supporto: support@urbanova.com
     return {
       available: true,
       provider: 'Resend (REALE)',
-      apiKey: 're_Kew2Zmby_CFtRMNe5UtsJECJwxu6QpmRE',
-      note: 'Servizio email Resend funzionante con API key reale'
+      apiKey: 're_jpHbTT42_AtqjMBMxrp2u773kKofMZw9k',
+      note: 'Servizio email Resend funzionante con NUOVA API key reale'
     };
   }
 }
