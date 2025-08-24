@@ -171,7 +171,8 @@ export class RealScreenshotService {
     }
   }
 
-  private createPerfectPDFWithJsPDF(options: RealScreenshotOptions): Buffer {
+  // Metodo pubblico per creare PDF perfetto con jsPDF
+  async createPerfectPDFWithJsPDF(options: RealScreenshotOptions): Promise<Buffer> {
     try {
       console.log('🔄 Creazione PDF perfetto con jsPDF...');
       

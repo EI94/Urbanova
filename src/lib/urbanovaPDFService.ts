@@ -11,10 +11,10 @@ export interface UrbanovaPDFOptions {
 export class UrbanovaPDFService {
   async generateUrbanovaStyleReport(options: UrbanovaPDFOptions): Promise<Buffer> {
     try {
-      console.log('🎨 Generazione PDF PERFETTO tramite SCREENSHOT REALI...');
+      console.log('🎨 Generazione PDF PERFETTO con jsPDF DIRETTO...');
       
-      // USA IL SISTEMA SCREENSHOT REALI CON PUPPETEER
-      return await realScreenshotService.generatePDFFromRealScreenshot(options);
+      // USA DIRETTAMENTE JSPDF PERFETTO (Puppeteer fallisce in produzione)
+      return await realScreenshotService.createPerfectPDFWithJsPDF(options);
       
     } catch (error) {
       console.error('❌ Errore generazione PDF:', error);
