@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
 import { robustProjectDeletionService } from '@/lib/robustProjectDeletionService';
-import { projectManagerService } from '@/lib/projectManagerService';
+
 import { 
   CalculatorIcon, 
   TrendingUpIcon, 
@@ -38,6 +38,7 @@ export default function FeasibilityAnalysisPage() {
   const [showComparison, setShowComparison] = useState(false);
   const [project1Id, setProject1Id] = useState('');
   const [project2Id, setProject2Id] = useState('');
+  const [deletionInProgress, setDeletionInProgress] = useState<Set<string>>(new Set());
 
 
 
@@ -115,9 +116,18 @@ export default function FeasibilityAnalysisPage() {
       return;
     }
 
+    // BLOCCAGGIO ELIMINAZIONI SIMULTANEE
+    if (deletionInProgress.has(projectId)) {
+      toast('⏳ Eliminazione già in corso per questo progetto', { icon: '⏳' });
+      return;
+    }
+
     if (!confirm('Sei sicuro di voler eliminare questo progetto? L\'operazione non può essere annullata.')) {
       return;
     }
+
+    // BLOCCA ELIMINAZIONE
+    setDeletionInProgress(prev => new Set(prev).add(projectId));
 
     try {
       toast('🗑️ Eliminazione progetto in corso...', { icon: '⏳' });
@@ -171,6 +181,13 @@ export default function FeasibilityAnalysisPage() {
       setTimeout(() => {
         loadData(true);
       }, 2000);
+    } finally {
+      // RIMUOVI BLOCCAGGIO
+      setDeletionInProgress(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(projectId);
+        return newSet;
+      });
     }
   };
 
@@ -492,9 +509,13 @@ export default function FeasibilityAnalysisPage() {
                             </Link>
                           </li>
                           <li>
-                            <button onClick={() => handleDeleteProject(project.id!)}>
+                            <button 
+                              onClick={() => handleDeleteProject(project.id!)}
+                              disabled={deletionInProgress.has(project.id!)}
+                              className={deletionInProgress.has(project.id!) ? 'opacity-50 cursor-not-allowed' : ''}
+                            >
                               <TrashIcon className="h-4 w-4" />
-                              Elimina
+                              {deletionInProgress.has(project.id!) ? 'Eliminazione...' : 'Elimina'}
                             </button>
                           </li>
                         </ul>
@@ -573,9 +594,11 @@ export default function FeasibilityAnalysisPage() {
                           </Link>
                           <button 
                             onClick={() => project?.id && handleDeleteProject(project.id)}
-                            className="btn btn-ghost btn-sm text-red-600"
+                            disabled={project?.id ? deletionInProgress.has(project.id) : false}
+                            className={`btn btn-ghost btn-sm ${project?.id && deletionInProgress.has(project.id) ? 'text-gray-400 cursor-not-allowed' : 'text-red-600'}`}
                           >
                             <TrashIcon className="h-4 w-4" />
+                            {project?.id && deletionInProgress.has(project.id) ? '⏳' : ''}
                           </button>
                         </div>
                       </td>

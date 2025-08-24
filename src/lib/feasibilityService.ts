@@ -288,19 +288,20 @@ export class FeasibilityService {
     }
   }
 
-  // Elimina progetto
+  // Elimina progetto (DEPRECATO - usa robustProjectDeletionService)
   async deleteProject(id: string): Promise<void> {
     try {
-      console.log(`🔄 Eliminazione progetto fattibilità: ${id}`);
+      console.log(`⚠️ DEPRECATO: deleteProject chiamato direttamente - usa robustProjectDeletionService`);
       
-      if (!id) {
-        throw new Error('ID progetto non fornito');
+      // Reindirizza al servizio robusto
+      const { robustProjectDeletionService } = await import('./robustProjectDeletionService');
+      const result = await robustProjectDeletionService.robustDeleteProject(id);
+      
+      if (!result.success || !result.backendVerified) {
+        throw new Error(`Eliminazione fallita: ${result.message}`);
       }
       
-      const projectRef = doc(db, this.COLLECTION, id);
-      await deleteDoc(projectRef);
-      
-      console.log(`✅ Progetto fattibilità ${id} eliminato`);
+      console.log(`✅ Progetto fattibilità ${id} eliminato tramite servizio robusto`);
     } catch (error) {
       console.error(`❌ Errore eliminazione progetto ${id}:`, error);
       throw new Error(`Impossibile eliminare il progetto: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`);

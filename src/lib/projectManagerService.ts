@@ -228,9 +228,16 @@ export class ProjectManagerService {
 
           for (const duplicate of duplicates) {
             try {
-              await feasibilityService.deleteProject(duplicate.id);
-              duplicatesRemoved++;
-              console.log(`🗑️ Rimosso progetto duplicato: ${duplicate.id}`);
+              // Importa il servizio robusto per eliminazione
+              const { robustProjectDeletionService } = await import('./robustProjectDeletionService');
+              const result = await robustProjectDeletionService.robustDeleteProject(duplicate.id);
+              
+              if (result.success && result.backendVerified) {
+                duplicatesRemoved++;
+                console.log(`🗑️ Rimosso progetto duplicato: ${duplicate.id}`);
+              } else {
+                console.error(`❌ Eliminazione progetto duplicato fallita: ${duplicate.id} - ${result.message}`);
+              }
             } catch (error) {
               console.error(`❌ Errore rimozione progetto duplicato ${duplicate.id}:`, error);
             }
@@ -332,8 +339,13 @@ export class ProjectManagerService {
         throw new Error('Non autorizzato a cancellare questo progetto');
       }
 
-      // Cancella il progetto
-      await feasibilityService.deleteProject(projectId);
+      // Importa il servizio robusto per eliminazione
+      const { robustProjectDeletionService } = await import('./robustProjectDeletionService');
+      const result = await robustProjectDeletionService.robustDeleteProject(projectId);
+      
+      if (!result.success || !result.backendVerified) {
+        throw new Error(`Eliminazione fallita: ${result.message}`);
+      }
       
       console.log('✅ Progetto cancellato con successo:', projectId);
       

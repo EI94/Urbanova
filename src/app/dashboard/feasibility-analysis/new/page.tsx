@@ -152,29 +152,29 @@ export default function NewFeasibilityProjectPage() {
   //   recalculateAll();
   // }, []);
 
-  // Auto-save con debounce di 3 secondi
-  useEffect(() => {
-    // Cancella il timeout precedente se esiste
-    if (autoSaveTimeout) {
-      clearTimeout(autoSaveTimeout);
-    }
+  // AUTOSAVE DISABILITATO PER EVITARE CONFLITTI CON ELIMINAZIONE
+  // useEffect(() => {
+  //   // Cancella il timeout precedente se esiste
+  //   if (autoSaveTimeout) {
+  //     clearTimeout(autoSaveTimeout);
+  //   }
 
-    // Solo se ci sono nome e indirizzo (campi obbligatori)
-    if (project.name && project.address && project.name.trim() && project.address.trim()) {
-      const timeout = setTimeout(() => {
-        autoSaveProject();
-      }, 3000); // 3 secondi di debounce
+  //   // Solo se ci sono nome e indirizzo (campi obbligatori)
+  //   if (project.name && project.address && project.name.trim() && project.address.trim()) {
+  //     const timeout = setTimeout(() => {
+  //       autoSaveProject();
+  //     }, 3000); // 3 secondi di debounce
 
-      setAutoSaveTimeout(timeout);
-    }
+  //     setAutoSaveTimeout(timeout);
+  //   }
 
-    // Cleanup function
-    return () => {
-      if (autoSaveTimeout) {
-        clearTimeout(autoSaveTimeout);
-      }
-    };
-  }, [project, calculatedCosts, calculatedRevenues, calculatedResults]);
+  //   // Cleanup function
+  //   return () => {
+  //     if (autoSaveTimeout) {
+  //       clearTimeout(autoSaveTimeout);
+  //     }
+  //   };
+  // }, [project, calculatedCosts, calculatedRevenues, calculatedResults]);
 
   // Cleanup timeout on unmount
   useEffect(() => {

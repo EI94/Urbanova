@@ -139,15 +139,20 @@ export const updateProject = async (id: string, updates: Partial<NewProjectData>
   }
 };
 
-// Funzione per eliminare un progetto
+// Funzione per eliminare un progetto (DEPRECATO - usa robustProjectDeletionService)
 export const deleteProject = async (id: string): Promise<void> => {
   try {
-    console.log(`🔄 Eliminazione progetto ${id}`);
+    console.log(`⚠️ DEPRECATO: deleteProject chiamato direttamente - usa robustProjectDeletionService`);
     
-    const projectRef = doc(db, COLLECTIONS.PROJECTS, id);
-    await deleteDoc(projectRef);
+    // Reindirizza al servizio robusto
+    const { robustProjectDeletionService } = await import('./robustProjectDeletionService');
+    const result = await robustProjectDeletionService.robustDeleteProject(id);
     
-    console.log(`✅ Progetto ${id} eliminato con successo`);
+    if (!result.success || !result.backendVerified) {
+      throw new Error(`Eliminazione fallita: ${result.message}`);
+    }
+    
+    console.log(`✅ Progetto ${id} eliminato tramite servizio robusto`);
   } catch (error) {
     console.error(`❌ Errore nell'eliminazione del progetto ${id}:`, error);
     throw new Error(`Impossibile eliminare il progetto: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`);
