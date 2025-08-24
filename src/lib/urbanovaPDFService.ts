@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import { screenshotPDFService } from './screenshotPDFService';
+import { realScreenshotService } from './realScreenshotService';
 
 export interface UrbanovaPDFOptions {
   project: any;
@@ -11,10 +11,10 @@ export interface UrbanovaPDFOptions {
 export class UrbanovaPDFService {
   async generateUrbanovaStyleReport(options: UrbanovaPDFOptions): Promise<Buffer> {
     try {
-      console.log('🎨 Generazione PDF PERFETTO tramite sistema screenshot...');
+      console.log('🎨 Generazione PDF PERFETTO tramite SCREENSHOT REALI...');
       
-      // USA IL NUOVO SISTEMA SCREENSHOT CHE CREA PDF PERFETTI
-      return await screenshotPDFService.generatePDFFromScreenshot(options);
+      // USA IL SISTEMA SCREENSHOT REALI CON PUPPETEER
+      return await realScreenshotService.generatePDFFromRealScreenshot(options);
       
     } catch (error) {
       console.error('❌ Errore generazione PDF:', error);
