@@ -25,9 +25,19 @@ export class RealScreenshotService {
     } catch (error) {
       console.error('❌ Errore screenshot reale:', error);
       
-      // Fallback: crea PDF perfetto con jsPDF
-      console.log('🔄 Fallback: creo PDF perfetto con jsPDF...');
-      return this.createPerfectPDFWithJsPDF(options);
+      // NON USARE FALLBACK JSPDF - FORZA PUPPETEER
+      console.log('🚨 ERRORE CRITICO: Puppeteer non funziona!');
+      console.log('🚨 Questo è un problema di produzione che deve essere risolto!');
+      
+      // Riprova Puppeteer con configurazioni alternative
+      try {
+        console.log('🔄 RITENTATIVO PUPPETEER con configurazioni alternative...');
+        const screenshot = await this.takeScreenshotAlternative(htmlContent);
+        return this.convertScreenshotToPDF(screenshot, options);
+      } catch (retryError) {
+        console.error('❌ Anche il ritentativo è fallito:', retryError);
+        throw new Error('Puppeteer non funziona in produzione. Contatta il supporto tecnico.');
+      }
     }
   }
 
@@ -37,7 +47,16 @@ export class RealScreenshotService {
       
       const browser = await puppeteer.launch({
         headless: 'new',
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: [
+          '--no-sandbox', 
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--single-process',
+          '--disable-gpu'
+        ]
       });
       
       const page = await browser.newPage();
@@ -53,7 +72,7 @@ export class RealScreenshotService {
       await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
       
       // Aspetta che tutto sia renderizzato
-      await page.waitForTimeout(1000);
+      await page.waitForTimeout(2000);
       
       // Fai screenshot
       const screenshot = await page.screenshot({
@@ -69,6 +88,53 @@ export class RealScreenshotService {
       
     } catch (error) {
       console.error('❌ Errore screenshot Puppeteer:', error);
+      throw error;
+    }
+  }
+
+  private async takeScreenshotAlternative(htmlContent: string): Promise<Buffer> {
+    try {
+      console.log('🔄 RITENTATIVO Puppeteer con configurazioni alternative...');
+      
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-web-security',
+          '--allow-running-insecure-content'
+        ]
+      });
+      
+      const page = await browser.newPage();
+      
+      // Imposta viewport più piccolo
+      await page.setViewport({
+        width: 800,
+        height: 1200,
+        deviceScaleFactor: 1
+      });
+      
+      // Carica HTML
+      await page.setContent(htmlContent, { waitUntil: 'domcontentloaded' });
+      
+      // Aspetta meno tempo
+      await page.waitForTimeout(1000);
+      
+      // Fai screenshot
+      const screenshot = await page.screenshot({
+        type: 'png',
+        fullPage: true
+      });
+      
+      await browser.close();
+      
+      console.log('✅ Screenshot alternativo completato');
+      return screenshot as Buffer;
+      
+    } catch (error) {
+      console.error('❌ Errore anche screenshot alternativo:', error);
       throw error;
     }
   }
