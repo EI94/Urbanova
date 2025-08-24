@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
+import { robustProjectDeletionService } from '@/lib/robustProjectDeletionService';
 import { projectManagerService } from '@/lib/projectManagerService';
 import { 
   CalculatorIcon, 
@@ -114,41 +115,62 @@ export default function FeasibilityAnalysisPage() {
       return;
     }
 
+    if (!confirm('Sei sicuro di voler eliminare questo progetto? L\'operazione non può essere annullata.')) {
+      return;
+    }
+
     try {
-      // 1. ELIMINAZIONE TRAMITE SERVIZIO FIRESTORE
-      await feasibilityService.deleteProject(projectId);
+      toast('🗑️ Eliminazione progetto in corso...', { icon: '⏳' });
       
-      // 2. AGGIORNA IMMEDIATAMENTE TUTTE LE LISTE
-      setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
-      setRanking(prevRanking => prevRanking.filter(p => p.id !== projectId));
+      // 1. ELIMINAZIONE ROBUSTA E SINCRONIZZATA
+      const deletionResult = await robustProjectDeletionService.robustDeleteProject(projectId);
       
-      // 3. RICALCOLA STATISTICHE
-      const remainingProjects = projects.filter(p => p.id !== projectId);
-      if (remainingProjects.length > 0) {
-        const totalProjects = remainingProjects.length;
-        const avgMargin = remainingProjects.reduce((sum, p) => sum + (p.results?.margin || 0), 0) / totalProjects;
-        const totalInvestment = remainingProjects.reduce((sum, p) => sum + (p.costs?.land?.purchasePrice || 0), 0);
-        const onTarget = remainingProjects.filter(p => (p.results?.margin || 0) >= (p.targetMargin || 0)).length;
+      if (deletionResult.success && deletionResult.backendVerified) {
+        // 2. AGGIORNA IMMEDIATAMENTE TUTTE LE LISTE
+        setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
+        setRanking(prevRanking => prevRanking.filter(p => p.id !== projectId));
         
-        setStatistics({
-          totalProjects,
-          averageMargin: avgMargin,
-          totalInvestment,
-          onTarget
-        });
+        // 3. RICALCOLA STATISTICHE
+        const remainingProjects = projects.filter(p => p.id !== projectId);
+        if (remainingProjects.length > 0) {
+          const totalProjects = remainingProjects.length;
+          const avgMargin = remainingProjects.reduce((sum, p) => sum + (p.results?.margin || 0), 0) / totalProjects;
+          const totalInvestment = remainingProjects.reduce((sum, p) => sum + (p.costs?.land?.purchasePrice || 0), 0);
+          const onTarget = remainingProjects.filter(p => (p.results?.margin || 0) >= (p.targetMargin || 0)).length;
+          
+          setStatistics({
+            totalProjects,
+            averageMargin: avgMargin,
+            totalInvestment,
+            onTarget
+          });
+        } else {
+          setStatistics({
+            totalProjects: 0,
+            averageMargin: 0,
+            totalInvestment: 0,
+            onTarget: 0
+          });
+        }
+        
+        toast(`✅ ${deletionResult.message}`, { icon: '✅' });
+        
+        // 4. FORZA REFRESH COMPLETO DOPO 1 SECONDO
+        setTimeout(() => {
+          loadData(true);
+        }, 1000);
+        
       } else {
-        setStatistics({
-          totalProjects: 0,
-          averageMargin: 0,
-          totalInvestment: 0,
-          onTarget: 0
-        });
+        throw new Error(`Eliminazione fallita: ${deletionResult.message}`);
       }
-      
-      toast('✅ Progetto eliminato definitivamente!', { icon: '✅' });
       
     } catch (error) {
       toast(`❌ Errore eliminazione: ${error}`, { icon: '❌' });
+      
+      // 5. FORZA REFRESH PER VERIFICARE STATO REALE
+      setTimeout(() => {
+        loadData(true);
+      }, 2000);
     }
   };
 
@@ -264,8 +286,87 @@ export default function FeasibilityAnalysisPage() {
               {t('compare', 'feasibility')}
             </button>
             
-
-          
+            <button 
+              onClick={async () => {
+                if (!user) {
+                  toast('❌ Utente non autenticato', { icon: '❌' });
+                  return;
+                }
+                
+                if (!confirm('⚠️ ATTENZIONE: Questa operazione eliminerà TUTTI i progetti dal database. Sei sicuro di voler continuare?')) {
+                  return;
+                }
+                
+                try {
+                  toast('🧹 Pulizia completa database in corso...', { icon: '⏳' });
+                  
+                  const result = await robustProjectDeletionService.completeDatabaseCleanup();
+                  
+                  if (result.success) {
+                    toast(`✅ ${result.message}`, { icon: '✅' });
+                    
+                    // Pulisci tutte le liste locali
+                    setProjects([]);
+                    setRanking([]);
+                    setStatistics({
+                      totalProjects: 0,
+                      averageMargin: 0,
+                      totalInvestment: 0,
+                      onTarget: 0
+                    });
+                    
+                    // Forza refresh completo
+                    setTimeout(() => {
+                      loadData(true);
+                    }, 1000);
+                    
+                  } else {
+                    throw new Error(result.message);
+                  }
+                  
+                } catch (error) {
+                  toast(`❌ Errore pulizia database: ${error}`, { icon: '❌' });
+                }
+              }}
+              className="btn btn-error"
+            >
+              🧹 Pulizia Completa Database
+            </button>
+            
+            <button 
+              onClick={async () => {
+                if (!user) {
+                  toast('❌ Utente non autenticato', { icon: '❌' });
+                  return;
+                }
+                
+                try {
+                  toast('🧪 Test servizio eliminazione robusta...', { icon: '⏳' });
+                  
+                  const response = await fetch('/api/test-robust-deletion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'status' })
+                  });
+                  
+                  const result = await response.json();
+                  
+                  if (result.success) {
+                    toast(`✅ Servizio attivo: ${result.status.name} v${result.status.version}`, { icon: '✅' });
+                    console.log('🧪 Test servizio eliminazione robusta:', result);
+                  } else {
+                    throw new Error(result.error);
+                  }
+                  
+                } catch (error) {
+                  toast(`❌ Test servizio fallito: ${error}`, { icon: '❌' });
+                  console.error('❌ Test servizio eliminazione robusta fallito:', error);
+                }
+              }}
+              className="btn btn-warning"
+            >
+              🧪 Test Servizio Eliminazione
+            </button>
           </div>
         </div>
 

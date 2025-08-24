@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   experimental: {
     // Next.js 13.4 e superiori hanno App Router abilitato di default
   },
@@ -57,6 +57,9 @@ const nextConfig = {
   publicRuntimeConfig: {
     // Configurazioni disponibili lato client
   },
+  // Disabilita cache per evitare problemi di sincronizzazione
+  generateEtags: false,
+  compress: false,
   // Ignora completamente gli errori TypeScript
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,
