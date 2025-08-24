@@ -179,18 +179,19 @@ export default function NewFeasibilityProjectPage() {
       if (editId) {
         setIsEditMode(true);
         setEditProjectId(editId);
+        setSavedProjectId(editId); // FORZO L'IMPOSTAZIONE PER FAR FUNZIONARE I BOTTONI
         
         try {
           // Carica il progetto esistente
           const existingProject = await feasibilityService.getProjectById(editId);
           if (existingProject) {
             setProject(existingProject);
-            setSavedProjectId(editId);
+            setSavedProjectId(editId); // RICONFERMO L'ID
             toast('✅ Progetto caricato per la modifica');
           }
         } catch (error) {
           console.error('❌ Errore caricamento progetto per edit:', error);
-          toast.error('❌ Errore nel caricamento del progetto');
+          toast('❌ Errore nel caricamento del progetto');
         }
       }
     };
