@@ -545,12 +545,21 @@ export default function NewFeasibilityProjectPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <Link href="/dashboard/feasibility-analysis">
-              <button className="btn btn-ghost btn-sm">
+            <div className="flex space-x-2">
+              <button 
+                onClick={() => router.back()}
+                className="btn btn-ghost btn-sm hover:bg-gray-100 transition-colors"
+              >
                 <ArrowLeftIcon className="h-4 w-4 mr-2" />
                 Indietro
               </button>
-            </Link>
+              <button 
+                onClick={() => router.push('/dashboard/feasibility-analysis')}
+                className="btn btn-outline btn-sm hover:bg-blue-50 transition-colors"
+              >
+                📋 Lista Progetti
+              </button>
+            </div>
             <div>
               <div className="flex items-center space-x-3">
                 <h1 className="text-3xl font-bold text-gray-900">🏗️ Nuovo Progetto di Fattibilità</h1>
@@ -573,8 +582,20 @@ export default function NewFeasibilityProjectPage() {
             </div>
           </div>
           <div className="flex space-x-2">
-
-
+            <button 
+              onClick={async () => {
+                try {
+                  await autoSaveProject();
+                  toast.success('✅ Progetto salvato!');
+                  router.push('/dashboard/feasibility-analysis');
+                } catch (error) {
+                  toast.error('❌ Errore nel salvataggio');
+                }
+              }}
+              className="btn btn-primary btn-sm"
+            >
+              💾 Salva e Esci
+            </button>
             <button 
               onClick={() => setShowReportGenerator(true)}
               disabled={!project.name || !project.address}
