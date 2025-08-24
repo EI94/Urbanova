@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { simpleEmailService } from '@/lib/simpleEmailService';
+import { workingEmailService } from '@/lib/workingEmailService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,8 +32,8 @@ export async function POST(request: NextRequest) {
       reportUrl
     };
 
-    // Invia email tramite il servizio semplice
-    const success = await simpleEmailService.sendEmail(emailData);
+    // Invia email tramite il servizio funzionante
+    const success = await workingEmailService.sendEmail(emailData);
 
     if (success) {
       console.log('✅ Email inviata con successo a:', to);
@@ -44,7 +44,8 @@ export async function POST(request: NextRequest) {
           to,
           subject,
           timestamp: new Date().toISOString(),
-          provider: 'Simple Email Service'
+          provider: 'Working Email Service',
+          services: workingEmailService.getServiceInfo().services
         }
       });
     } else {
