@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
+// COMMENTO PER FORZARE DEPLOY VERCEL - Endpoint test maniacale Resend
+
 export async function POST(request: NextRequest) {
   try {
     const { to } = await request.json();
