@@ -38,14 +38,19 @@ export class RobustEmailService {
 
   async sendEmail(data: EmailData): Promise<EmailResult> {
     console.log('📧 ROBUST EMAIL SERVICE - Tentativo invio email...');
+    console.log('📧 Dati email:', { to: data.to, subject: data.subject, provider: 'Inizio test...' });
     
     // STRATEGIA 1: RESEND (PRIMARIO)
     try {
       console.log('🔄 Tentativo 1: Resend...');
       const result = await this.sendWithResend(data);
+      console.log('📊 Risultato Resend:', result);
       if (result.success) {
         console.log('✅ Email inviata con successo tramite Resend!');
+        console.log('📧 VERIFICA: Controlla se l\'email è arrivata realmente a', data.to);
         return result;
+      } else {
+        console.log('⚠️ Resend fallito ma non ha generato errore');
       }
     } catch (error) {
       console.error('❌ Fallimento Resend:', error);
@@ -55,9 +60,13 @@ export class RobustEmailService {
     try {
       console.log('🔄 Tentativo 2: Nodemailer Gmail...');
       const result = await this.sendWithNodemailer(data);
+      console.log('📊 Risultato Nodemailer:', result);
       if (result.success) {
         console.log('✅ Email inviata con successo tramite Nodemailer Gmail!');
+        console.log('📧 VERIFICA: Controlla se l\'email è arrivata realmente a', data.to);
         return result;
+      } else {
+        console.log('⚠️ Nodemailer fallito ma non ha generato errore');
       }
     } catch (error) {
       console.error('❌ Fallimento Nodemailer Gmail:', error);
@@ -67,9 +76,13 @@ export class RobustEmailService {
     try {
       console.log('🔄 Tentativo 3: FormsFree...');
       const result = await this.sendWithFormsFree(data);
+      console.log('📊 Risultato FormsFree:', result);
       if (result.success) {
         console.log('✅ Email inviata con successo tramite FormsFree!');
+        console.log('📧 VERIFICA: Controlla se l\'email è arrivata realmente a', data.to);
         return result;
+      } else {
+        console.log('⚠️ FormsFree fallito ma non ha generato errore');
       }
     } catch (error) {
       console.error('❌ Fallimento FormsFree:', error);
@@ -79,9 +92,13 @@ export class RobustEmailService {
     try {
       console.log('🔄 Tentativo 4: Web3Forms...');
       const result = await this.sendWithWeb3Forms(data);
+      console.log('📊 Risultato Web3Forms:', result);
       if (result.success) {
         console.log('✅ Email inviata con successo tramite Web3Forms!');
+        console.log('📧 VERIFICA: Controlla se l\'email è arrivata realmente a', data.to);
         return result;
+      } else {
+        console.log('⚠️ Web3Forms fallito ma non ha generato errore');
       }
     } catch (error) {
       console.error('❌ Fallimento Web3Forms:', error);
@@ -91,9 +108,13 @@ export class RobustEmailService {
     try {
       console.log('🔄 Tentativo 5: EmailJS...');
       const result = await this.sendWithEmailJS(data);
+      console.log('📊 Risultato EmailJS:', result);
       if (result.success) {
         console.log('✅ Email inviata con successo tramite EmailJS!');
+        console.log('📧 VERIFICA: Controlla se l\'email è arrivata realmente a', data.to);
         return result;
+      } else {
+        console.log('⚠️ EmailJS fallito ma non ha generato errore');
       }
     } catch (error) {
       console.error('❌ Fallimento EmailJS:', error);
@@ -101,6 +122,7 @@ export class RobustEmailService {
 
     // TUTTI I FALLBACK FALLITI
     console.error('💀 TUTTI I SERVIZI EMAIL HANNO FALLITO!');
+    console.error('📧 EMAIL NON INVIATA A:', data.to);
     return {
       success: false,
       message: 'Impossibile inviare email. Tutti i servizi sono offline.',
@@ -112,6 +134,7 @@ export class RobustEmailService {
 
   private async sendWithResend(data: EmailData): Promise<EmailResult> {
     try {
+      console.log('📧 Resend: Invio email reale a', data.to);
       const htmlContent = this.generatePerfectHTML(data);
       
       const { data: resendData, error } = await this.resend.emails.send({
@@ -124,9 +147,11 @@ export class RobustEmailService {
       });
 
       if (error) {
+        console.error('❌ Resend error:', error);
         throw new Error(error.message);
       }
 
+      console.log('✅ Resend: Email inviata realmente, messageId:', resendData?.id);
       return {
         success: true,
         message: 'Email inviata con successo tramite Resend',
@@ -135,23 +160,39 @@ export class RobustEmailService {
       };
 
     } catch (error) {
+      console.error('❌ Resend fallito:', error);
       throw error;
     }
   }
 
   private async sendWithNodemailer(data: EmailData): Promise<EmailResult> {
     try {
+      console.log('📧 Nodemailer: Tentativo invio email reale a', data.to);
+      
+      // VERIFICA SE LE CREDENZIALI GMAIL SONO CONFIGURATE
+      if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+        console.log('⚠️ Nodemailer: Credenziali Gmail non configurate, salto...');
+        return {
+          success: false,
+          message: 'Credenziali Gmail non configurate',
+          provider: 'Nodemailer Gmail',
+          error: 'Variabili d\'ambiente GMAIL_USER e GMAIL_APP_PASSWORD mancanti'
+        };
+      }
+
       // NODEMAILER NATIVO E SEMPLICE - INVIO DIRETTO VIA GMAIL SMTP
       const mailOptions = {
-        from: process.env.GMAIL_USER || 'urbanova@gmail.com',
+        from: process.env.GMAIL_USER,
         to: data.to,
         subject: data.subject,
         html: this.generatePerfectHTML(data),
         text: this.generateSimpleText(data)
       };
 
+      console.log('📧 Nodemailer: Invio email tramite Gmail SMTP...');
       const info = await this.nodemailerTransporter.sendMail(mailOptions);
 
+      console.log('✅ Nodemailer: Email inviata realmente, messageId:', info.messageId);
       return {
         success: true,
         message: 'Email inviata con successo tramite Nodemailer Gmail',
@@ -163,12 +204,15 @@ export class RobustEmailService {
       };
 
     } catch (error) {
+      console.error('❌ Nodemailer fallito:', error);
       throw error;
     }
   }
 
   private async sendWithFormsFree(data: EmailData): Promise<EmailResult> {
     try {
+      console.log('📧 FormsFree: Tentativo invio email reale a', data.to);
+      
       // FORMSFREE FUNZIONANTE - ENDPOINT REALE
       // https://formspree.io/ è un servizio gratuito che funziona
       const formData = new FormData();
@@ -179,23 +223,36 @@ export class RobustEmailService {
       formData.append('report_title', data.reportTitle || 'Studio di Fattibilità');
       formData.append('report_url', data.reportUrl || '#');
 
+      console.log('📧 FormsFree: Invio tramite endpoint', 'https://formspree.io/f/xandwdgp');
+      
       // ENDPOINT REALE FORMSFREE - FUNZIONA SENZA API KEY
       const response = await fetch('https://formspree.io/f/xandwdgp', {
         method: 'POST',
         body: formData
       });
 
+      console.log('📧 FormsFree: Risposta HTTP:', response.status, response.statusText);
+
       if (!response.ok) {
         throw new Error(`FormsFree error: ${response.status}`);
       }
 
+      const responseText = await response.text();
+      console.log('📧 FormsFree: Contenuto risposta:', responseText);
+
+      console.log('✅ FormsFree: Email inviata tramite endpoint, risposta:', response.status);
       return {
         success: true,
         message: 'Email inviata con successo tramite FormsFree',
-        provider: 'FormsFree'
+        provider: 'FormsFree',
+        details: {
+          status: response.status,
+          responseText: responseText
+        }
       };
 
     } catch (error) {
+      console.error('❌ FormsFree fallito:', error);
       throw error;
     }
   }
