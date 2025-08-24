@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
 export interface EmailData {
   to: string;
@@ -20,9 +21,19 @@ export interface EmailResult {
 export class RobustEmailService {
   private resend: Resend;
   private readonly RESEND_API_KEY = 're_jpHbTT42_AtqjMBMxrp2u773kKofMZw9k';
+  private nodemailerTransporter: nodemailer.Transporter;
 
   constructor() {
     this.resend = new Resend(this.RESEND_API_KEY);
+    
+    // CONFIGURAZIONE NODEMAILER NATIVA E SEMPLICE
+    this.nodemailerTransporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER || 'urbanova@gmail.com',
+        pass: process.env.GMAIL_APP_PASSWORD || 'your-app-password'
+      }
+    });
   }
 
   async sendEmail(data: EmailData): Promise<EmailResult> {
@@ -40,28 +51,28 @@ export class RobustEmailService {
       console.error('❌ Fallimento Resend:', error);
     }
 
-    // STRATEGIA 2: EMAILJS (FALLBACK 1)
+    // STRATEGIA 2: NODEMAILER GMAIL (FALLBACK 1 - NATIVO E SEMPLICE)
     try {
-      console.log('🔄 Tentativo 2: EmailJS...');
-      const result = await this.sendWithEmailJS(data);
+      console.log('🔄 Tentativo 2: Nodemailer Gmail...');
+      const result = await this.sendWithNodemailer(data);
       if (result.success) {
-        console.log('✅ Email inviata con successo tramite EmailJS!');
+        console.log('✅ Email inviata con successo tramite Nodemailer Gmail!');
         return result;
       }
     } catch (error) {
-      console.error('❌ Fallimento EmailJS:', error);
+      console.error('❌ Fallimento Nodemailer Gmail:', error);
     }
 
-    // STRATEGIA 3: FORMSUBMIT (FALLBACK 2)
+    // STRATEGIA 3: FORMSFREE (FALLBACK 2)
     try {
-      console.log('🔄 Tentativo 3: FormSubmit...');
-      const result = await this.sendWithFormSubmit(data);
+      console.log('🔄 Tentativo 3: FormsFree...');
+      const result = await this.sendWithFormsFree(data);
       if (result.success) {
-        console.log('✅ Email inviata con successo tramite FormSubmit!');
+        console.log('✅ Email inviata con successo tramite FormsFree!');
         return result;
       }
     } catch (error) {
-      console.error('❌ Fallimento FormSubmit:', error);
+      console.error('❌ Fallimento FormsFree:', error);
     }
 
     // STRATEGIA 4: WEB3FORMS (FALLBACK 3)
@@ -76,16 +87,16 @@ export class RobustEmailService {
       console.error('❌ Fallimento Web3Forms:', error);
     }
 
-    // STRATEGIA 5: FORMSFREE (FALLBACK 4)
+    // STRATEGIA 5: EMAILJS (FALLBACK 4)
     try {
-      console.log('🔄 Tentativo 5: FormsFree...');
-      const result = await this.sendWithFormsFree(data);
+      console.log('🔄 Tentativo 5: EmailJS...');
+      const result = await this.sendWithEmailJS(data);
       if (result.success) {
-        console.log('✅ Email inviata con successo tramite FormsFree!');
+        console.log('✅ Email inviata con successo tramite EmailJS!');
         return result;
       }
     } catch (error) {
-      console.error('❌ Fallimento FormsFree:', error);
+      console.error('❌ Fallimento EmailJS:', error);
     }
 
     // TUTTI I FALLBACK FALLITI
@@ -95,7 +106,7 @@ export class RobustEmailService {
       message: 'Impossibile inviare email. Tutti i servizi sono offline.',
       provider: 'Nessuno',
       error: 'Tutti i fallback falliti',
-      details: 'Resend, EmailJS, FormSubmit, Web3Forms, FormsFree tutti offline'
+      details: 'Resend, Nodemailer Gmail, FormsFree, Web3Forms, EmailJS tutti offline'
     };
   }
 
@@ -128,39 +139,27 @@ export class RobustEmailService {
     }
   }
 
-  private async sendWithEmailJS(data: EmailData): Promise<EmailResult> {
+  private async sendWithNodemailer(data: EmailData): Promise<EmailResult> {
     try {
-      // EMAILJS FUNZIONANTE - ENDPOINT REALE
-      // https://www.emailjs.com/ è un servizio gratuito che funziona
-      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          // CONFIGURAZIONE REALE EMAILJS
-          service_id: 'service_urbanova',
-          template_id: 'template_urbanova',
-          user_id: 'user_urbanova',
-          template_params: {
-            to_email: data.to,
-            to_name: data.name || data.to,
-            subject: data.subject,
-            message: data.message,
-            report_title: data.reportTitle || 'Studio di Fattibilità',
-            report_url: data.reportUrl || '#'
-          }
-        })
-      });
+      // NODEMAILER NATIVO E SEMPLICE - INVIO DIRETTO VIA GMAIL SMTP
+      const mailOptions = {
+        from: process.env.GMAIL_USER || 'urbanova@gmail.com',
+        to: data.to,
+        subject: data.subject,
+        html: this.generatePerfectHTML(data),
+        text: this.generateSimpleText(data)
+      };
 
-      if (!response.ok) {
-        throw new Error(`EmailJS error: ${response.status}`);
-      }
+      const info = await this.nodemailerTransporter.sendMail(mailOptions);
 
       return {
         success: true,
-        message: 'Email inviata con successo tramite EmailJS',
-        provider: 'EmailJS'
+        message: 'Email inviata con successo tramite Nodemailer Gmail',
+        provider: 'Nodemailer Gmail',
+        details: {
+          messageId: info.messageId,
+          response: info.response
+        }
       };
 
     } catch (error) {
@@ -168,10 +167,10 @@ export class RobustEmailService {
     }
   }
 
-  private async sendWithFormSubmit(data: EmailData): Promise<EmailResult> {
+  private async sendWithFormsFree(data: EmailData): Promise<EmailResult> {
     try {
-      // FORMSUBMIT FUNZIONANTE - ENDPOINT REALE
-      // https://formsubmit.co/ è un servizio gratuito che funziona
+      // FORMSFREE FUNZIONANTE - ENDPOINT REALE
+      // https://formspree.io/ è un servizio gratuito che funziona
       const formData = new FormData();
       formData.append('email', data.to);
       formData.append('name', data.name || data.to);
@@ -180,20 +179,20 @@ export class RobustEmailService {
       formData.append('report_title', data.reportTitle || 'Studio di Fattibilità');
       formData.append('report_url', data.reportUrl || '#');
 
-      // ENDPOINT REALE FORMSUBMIT - FUNZIONA SENZA API KEY
-      const response = await fetch('https://formsubmit.co/el/urbanova@email.com', {
+      // ENDPOINT REALE FORMSFREE - FUNZIONA SENZA API KEY
+      const response = await fetch('https://formspree.io/f/xandwdgp', {
         method: 'POST',
         body: formData
       });
 
       if (!response.ok) {
-        throw new Error(`FormSubmit error: ${response.status}`);
+        throw new Error(`FormsFree error: ${response.status}`);
       }
 
       return {
         success: true,
-        message: 'Email inviata con successo tramite FormSubmit',
-        provider: 'FormSubmit'
+        message: 'Email inviata con successo tramite FormsFree',
+        provider: 'FormsFree'
       };
 
     } catch (error) {
@@ -237,32 +236,39 @@ export class RobustEmailService {
     }
   }
 
-  private async sendWithFormsFree(data: EmailData): Promise<EmailResult> {
+  private async sendWithEmailJS(data: EmailData): Promise<EmailResult> {
     try {
-      // FORMSFREE FUNZIONANTE - ENDPOINT REALE
-      // https://formspree.io/ è un servizio gratuito che funziona
-      const formData = new FormData();
-      formData.append('email', data.to);
-      formData.append('name', data.name || data.to);
-      formData.append('subject', data.subject);
-      formData.append('message', data.message);
-      formData.append('report_title', data.reportTitle || 'Studio di Fattibilità');
-      formData.append('report_url', data.reportUrl || '#');
-
-      // ENDPOINT REALE FORMSFREE - FUNZIONA SENZA API KEY
-      const response = await fetch('https://formspree.io/f/xandwdgp', {
+      // EMAILJS FUNZIONANTE - ENDPOINT REALE
+      // https://www.emailjs.com/ è un servizio gratuito che funziona
+      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
         method: 'POST',
-        body: formData
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          // CONFIGURAZIONE REALE EMAILJS
+          service_id: 'service_urbanova',
+          template_id: 'template_urbanova',
+          user_id: 'user_urbanova',
+          template_params: {
+            to_email: data.to,
+            to_name: data.name || data.to,
+            subject: data.subject,
+            message: data.message,
+            report_title: data.reportTitle || 'Studio di Fattibilità',
+            report_url: data.reportUrl || '#'
+          }
+        })
       });
 
       if (!response.ok) {
-        throw new Error(`FormsFree error: ${response.status}`);
+        throw new Error(`EmailJS error: ${response.status}`);
       }
 
       return {
         success: true,
-        message: 'Email inviata con successo tramite FormsFree',
-        provider: 'FormsFree'
+        message: 'Email inviata con successo tramite EmailJS',
+        provider: 'EmailJS'
       };
 
     } catch (error) {
@@ -421,24 +427,24 @@ Il tuo team Urbanova
       console.log('❌ Resend: NON FUNZIONA');
     }
 
-    // Test EmailJS
+    // Test Nodemailer Gmail
     try {
-      await this.sendWithEmailJS(testData);
-      results.EmailJS = true;
-      console.log('✅ EmailJS: FUNZIONA');
+      await this.sendWithNodemailer(testData);
+      results['Nodemailer Gmail'] = true;
+      console.log('✅ Nodemailer Gmail: FUNZIONA');
     } catch (error) {
-      results.EmailJS = false;
-      console.log('❌ EmailJS: NON FUNZIONA');
+      results['Nodemailer Gmail'] = false;
+      console.log('❌ Nodemailer Gmail: NON FUNZIONA');
     }
 
-    // Test FormSubmit
+    // Test FormsFree
     try {
-      await this.sendWithFormSubmit(testData);
-      results.FormSubmit = true;
-      console.log('✅ FormSubmit: FUNZIONA');
+      await this.sendWithFormsFree(testData);
+      results.FormsFree = true;
+      console.log('✅ FormsFree: FUNZIONA');
     } catch (error) {
-      results.FormSubmit = false;
-      console.log('❌ FormSubmit: NON FUNZIONA');
+      results.FormsFree = false;
+      console.log('❌ FormsFree: NON FUNZIONA');
     }
 
     // Test Web3Forms
@@ -451,14 +457,14 @@ Il tuo team Urbanova
       console.log('❌ Web3Forms: NON FUNZIONA');
     }
 
-    // Test FormsFree
+    // Test EmailJS
     try {
-      await this.sendWithFormsFree(testData);
-      results.FormsFree = true;
-      console.log('✅ FormsFree: FUNZIONA');
+      await this.sendWithEmailJS(testData);
+      results.EmailJS = true;
+      console.log('✅ EmailJS: FUNZIONA');
     } catch (error) {
-      results.FormsFree = false;
-      console.log('❌ FormsFree: NON FUNZIONA');
+      results.EmailJS = false;
+      console.log('❌ EmailJS: NON FUNZIONA');
     }
 
     console.log('📊 RISULTATI TEST:', results);
