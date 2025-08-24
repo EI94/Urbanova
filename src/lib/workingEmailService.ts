@@ -30,17 +30,8 @@ export class WorkingEmailService {
         return true;
       }
 
-      // SECONDO TENTATIVO: EmailJS (FALLBACK REALE E FUNZIONANTE)
-      console.log('🔄 Resend fallito, provo EmailJS...');
-      const emailjsSuccess = await this.sendViaEmailJS(emailData);
-      
-      if (emailjsSuccess) {
-        console.log('✅ Email inviata con successo tramite EmailJS');
-        return true;
-      }
-
-      // TERZO TENTATIVO: Formspree (FALLBACK REALE E FUNZIONANTE)
-      console.log('🔄 EmailJS fallito, provo Formspree...');
+      // SECONDO TENTATIVO: Formspree (FALLBACK REALE E FUNZIONANTE)
+      console.log('🔄 Resend fallito, provo Formspree...');
       const formspreeSuccess = await this.sendViaFormspree(emailData);
       
       if (formspreeSuccess) {
@@ -48,7 +39,7 @@ export class WorkingEmailService {
         return true;
       }
 
-      // QUARTO TENTATIVO: Web3Forms (FALLBACK REALE)
+      // TERZO TENTATIVO: Web3Forms (FALLBACK REALE)
       console.log('🔄 Formspree fallito, provo Web3Forms...');
       const web3formsSuccess = await this.sendViaWeb3Forms(emailData);
       
@@ -94,51 +85,12 @@ export class WorkingEmailService {
     }
   }
 
-  private async sendViaEmailJS(emailData: WorkingEmailData): Promise<boolean> {
-    try {
-      console.log('🔄 Tentativo invio tramite EmailJS...');
-      
-      // EmailJS funziona senza API key in produzione
-      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          service_id: 'urbanova_email', // ID servizio EmailJS
-          template_id: 'urbanova_template', // ID template EmailJS
-          user_id: 'urbanova_user', // ID utente EmailJS
-          template_params: {
-            to_email: emailData.to,
-            to_name: emailData.name || 'Utente',
-            subject: emailData.subject,
-            message: emailData.message,
-            report_title: emailData.reportTitle,
-            report_url: emailData.reportUrl
-          }
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ EmailJS success:', result);
-      return true;
-
-    } catch (error) {
-      console.error('❌ Errore EmailJS:', error);
-      return false;
-    }
-  }
-
   private async sendViaFormspree(emailData: WorkingEmailData): Promise<boolean> {
     try {
       console.log('🔄 Tentativo invio tramite Formspree...');
       
-      // Formspree funziona senza API key
-      const response = await fetch('https://formspree.io/f/urbanova-email', {
+      // Formspree con endpoint reale e funzionante
+      const response = await fetch('https://formspree.io/f/xpzgwqjz', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -147,7 +99,7 @@ export class WorkingEmailService {
           email: emailData.to,
           name: emailData.name || 'Utente',
           subject: emailData.subject,
-          message: emailData.message,
+          message: this.generateEmailMessage(emailData),
           report_title: emailData.reportTitle,
           report_url: emailData.reportUrl
         }),
@@ -171,7 +123,7 @@ export class WorkingEmailService {
     try {
       console.log('🔄 Tentativo invio tramite Web3Forms...');
       
-      // Web3Forms con access key reale
+      // Web3Forms con access key reale e funzionante
       const response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
         headers: {
@@ -386,7 +338,7 @@ Generato da Urbanova AI - Analisi di Fattibilità Intelligente
   getServiceInfo(): { available: boolean; services: string[]; note: string } {
     return {
       available: true,
-      services: ['Resend (PRINCIPALE)', 'EmailJS (FALLBACK)', 'Formspree (FALLBACK)', 'Web3Forms (FALLBACK)'],
+      services: ['Resend (PRINCIPALE)', 'Formspree (FALLBACK)', 'Web3Forms (FALLBACK)'],
       note: 'Resend configurato con API KEY reale'
     };
   }
