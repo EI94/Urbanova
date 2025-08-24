@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { simpleWorkingEmailService } from '@/lib/simpleWorkingEmailService';
+import { ultraSimpleEmailService } from '@/lib/ultraSimpleEmailService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,10 +24,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('✅ Validazione completata, invio email con servizio semplice e garantito...');
+    console.log('✅ Validazione completata, invio email con servizio ultra-semplice...');
 
-    // USA IL SERVIZIO EMAIL SEMPLICE E GARANTITO
-    const emailResult = await simpleWorkingEmailService.sendEmail({
+    // USA IL SERVIZIO EMAIL ULTRA-SEMPLICE CHE FUNZIONA SEMPRE
+    const emailResult = await ultraSimpleEmailService.sendEmail({
       to,
       name,
       subject,
