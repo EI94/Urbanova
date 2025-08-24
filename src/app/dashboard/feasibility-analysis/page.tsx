@@ -38,15 +38,7 @@ export default function FeasibilityAnalysisPage() {
   const [project1Id, setProject1Id] = useState('');
   const [project2Id, setProject2Id] = useState('');
 
-  // DEBUG: Log completo dello stato di autenticazione
-  useEffect(() => {
-    console.log('🔍 DEBUG AUTH - Stato completo:', {
-      user: user ? { uid: user.uid, email: user.email, displayName: user.displayName } : null,
-      authLoading,
-      loading,
-      error
-    });
-  }, [user, authLoading, loading, error]);
+
 
   useEffect(() => {
     // Aspetta che l'autenticazione sia pronta
@@ -57,12 +49,10 @@ export default function FeasibilityAnalysisPage() {
 
   const loadData = async (forceRefresh = false) => {
     if (authLoading) {
-      console.log('⏳ Autenticazione in corso - Attendo...');
       return;
     }
     
     if (!user) {
-      console.log('❌ Utente non autenticato - Caricamento bloccato');
       setError('Utente non autenticato. Effettua il login per continuare.');
       setLoading(false);
       return;
@@ -71,14 +61,10 @@ export default function FeasibilityAnalysisPage() {
     setLoading(true);
     setError(null);
     try {
-      console.log('🔄 Caricamento dati progetti...', forceRefresh ? '(FORCE REFRESH)' : '');
-      console.log('👤 Utente autenticato:', user.uid);
-      
       // Forza il refresh dei dati se richiesto
       const timestamp = forceRefresh ? Date.now() : 0;
       
       if (forceRefresh) {
-        console.log('🔥 FORCE REFRESH ATTIVATO - Bypassa cache...');
         
         // Forza refresh completo bypassando cache
         const [allProjects, projectsRanking, stats] = await Promise.all([
@@ -86,25 +72,6 @@ export default function FeasibilityAnalysisPage() {
           feasibilityService.getProjectsRanking(),
           feasibilityService.getStatistics()
         ]);
-        
-        console.log('📊 Progetti caricati (FORCE REFRESH):', allProjects?.length || 0);
-        
-        // DEBUG: Log dettagliato dei progetti per verificare lo stato
-        if (allProjects && allProjects.length > 0) {
-          console.log('🔍 DEBUG - Dettagli progetti caricati (FORCE REFRESH):');
-          allProjects.forEach((project, index) => {
-            console.log(`  Progetto ${index + 1}:`, {
-              id: project.id,
-              name: project.name,
-              address: project.address,
-              status: project.status,
-              createdAt: project.createdAt,
-              updatedAt: project.updatedAt
-            });
-          });
-        } else {
-          console.log('🔍 DEBUG - Nessun progetto trovato (FORCE REFRESH)');
-        }
         
         // Forza aggiornamento stato
         setProjects([]); // Pulisci prima
@@ -121,25 +88,6 @@ export default function FeasibilityAnalysisPage() {
           feasibilityService.getProjectsRanking(),
           feasibilityService.getStatistics()
         ]);
-        
-        console.log('📊 Progetti caricati (normale):', allProjects?.length || 0);
-        
-        // DEBUG: Log dettagliato dei progetti per verificare lo stato
-        if (allProjects && allProjects.length > 0) {
-          console.log('🔍 DEBUG - Dettagli progetti caricati (normale):');
-          allProjects.forEach((project, index) => {
-            console.log(`  Progetto ${index + 1}:`, {
-              id: project.id,
-              name: project.name,
-              address: project.address,
-              status: project.status,
-              createdAt: project.createdAt,
-              updatedAt: project.updatedAt
-            });
-          });
-        } else {
-          console.log('🔍 DEBUG - Nessun progetto trovato (normale)');
-        }
         
         setProjects(allProjects || []);
         setRanking(projectsRanking || []);
@@ -167,9 +115,6 @@ export default function FeasibilityAnalysisPage() {
     }
 
     try {
-      console.log('🗑️ ELIMINAZIONE SERVIZIO - Inizio...', projectId);
-      console.log('👤 Utente autenticato:', user.uid);
-      
       // 1. ELIMINAZIONE TRAMITE SERVIZIO FIRESTORE
       await feasibilityService.deleteProject(projectId);
       
@@ -203,7 +148,6 @@ export default function FeasibilityAnalysisPage() {
       toast('✅ Progetto eliminato definitivamente!', { icon: '✅' });
       
     } catch (error) {
-      console.error('❌ Errore eliminazione servizio:', error);
       toast(`❌ Errore eliminazione: ${error}`, { icon: '❌' });
     }
   };
@@ -221,7 +165,6 @@ export default function FeasibilityAnalysisPage() {
       setProject1Id('');
       setProject2Id('');
     } catch (error) {
-      console.error('Errore confronto progetti:', error);
       toast(`❌ ${t('compareError', 'feasibility.toasts')}` as string, { icon: '❌' });
     }
   };
@@ -321,53 +264,7 @@ export default function FeasibilityAnalysisPage() {
               {t('compare', 'feasibility')}
             </button>
             
-            <button 
-              onClick={async () => {
-                if (!user) {
-                  toast('❌ Utente non autenticato', { icon: '❌' });
-                  return;
-                }
-                
-                try {
-                  console.log('🧪 TEST FIRESTORE RULES...');
-                  console.log('👤 Utente autenticato:', user.uid);
-                  const { db } = await import('@/lib/firebase');
-                  const { collection, getDocs, doc, deleteDoc } = await import('firebase/firestore');
-                  
-                  // Test 1: Lettura
-                  const testCollection = collection(db, 'feasibilityProjects');
-                  const snapshot = await getDocs(testCollection);
-                  console.log('✅ LETTURA OK - Progetti trovati:', snapshot.size);
-                  
-                  // Test 2: Eliminazione (se ci sono progetti)
-                  if (snapshot.size > 0) {
-                    const testProject = snapshot.docs[0];
-                    console.log('🧪 Test eliminazione progetto:', testProject.id);
-                    
-                    try {
-                      await deleteDoc(testProject.ref);
-                      console.log('✅ ELIMINAZIONE TEST OK - Progetto eliminato');
-                      
-                      // Ripristina il progetto per non perderlo
-                      const { addDoc } = await import('firebase/firestore');
-                      await addDoc(testCollection, testProject.data());
-                      console.log('✅ RIPRISTINO OK - Progetto ripristinato');
-                      
-                    } catch (deleteError) {
-                      console.log('❌ ELIMINAZIONE TEST KO:', deleteError);
-                    }
-                  }
-                  
-                  toast('🧪 Test Firestore completato - Controlla console', { icon: '🧪' });
-                } catch (error) {
-                  console.error('❌ Test Firestore fallito:', error);
-                  toast(`❌ Test KO: ${error}`, { icon: '❌' });
-                }
-              }}
-              className="btn btn-warning"
-            >
-              🧪 Test Firestore
-            </button>
+
           
           </div>
         </div>

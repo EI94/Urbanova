@@ -1,12 +1,9 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // PERMESSI SICURI PER PRODUZIONE
+    // PERMESSI COMPLETI PER UTENTI AUTENTICATI
     match /feasibilityProjects/{projectId} {
-      allow read, write: if request.auth != null;
-      allow delete: if request.auth != null && 
-        (resource.data.createdBy == request.auth.uid || 
-         request.auth.token.admin == true);
+      allow read, write, delete: if request.auth != null;
     }
     
     // Regole per test (solo per utenti autenticati)
@@ -14,9 +11,9 @@ service cloud.firestore {
       allow read, write: if request.auth != null;
     }
     
-    // Regole per utenti
+    // Regole per utenti (accesso completo per utenti autenticati)
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if request.auth != null;
     }
     
     // Regole per progetti
