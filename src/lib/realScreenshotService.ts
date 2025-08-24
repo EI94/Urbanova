@@ -1,5 +1,5 @@
-import puppeteer from 'puppeteer';
 import jsPDF from 'jspdf';
+import playwright from 'playwright-core';
 
 export interface RealScreenshotOptions {
   project: any;
@@ -11,67 +11,53 @@ export interface RealScreenshotOptions {
 export class RealScreenshotService {
   async generatePDFFromRealScreenshot(options: RealScreenshotOptions): Promise<Buffer> {
     try {
-      console.log('📸 Generazione PDF tramite SCREENSHOT REALE della pagina web...');
+      console.log('📸 Generazione PDF con SCREENSHOT REALE della schermata Vedi Progetto...');
       
-      // Genera HTML perfetto della pagina "Vedi Progetto"
-      const htmlContent = this.generatePerfectHTML(options);
+      // GENERA SCREENSHOT REALE DELLA SCHERMATA VEDI PROGETTO
+      const screenshot = await this.takeRealScreenshot(options);
       
-      // Fai screenshot reale con Puppeteer
-      const screenshot = await this.takeScreenshot(htmlContent);
-      
-      // Converti screenshot in PDF
-      return this.convertScreenshotToPDF(screenshot, options);
+      // INSERISCI SCREENSHOT NEL PDF
+      return this.createPDFWithScreenshot(screenshot, options);
       
     } catch (error) {
       console.error('❌ Errore screenshot reale:', error);
-      
-      // FALLBACK PERFETTO: crea PDF perfetto con jsPDF
-      console.log('🔄 Fallback: creo PDF PERFETTO con jsPDF...');
-      console.log('🎯 Questo PDF sarà IDENTICO alla schermata Vedi Progetto!');
-      
-      try {
-        return this.createPerfectPDFWithJsPDF(options);
-      } catch (fallbackError) {
-        console.error('❌ Anche il fallback jsPDF è fallito:', fallbackError);
-        throw new Error('Impossibile generare PDF. Contatta il supporto tecnico.');
-      }
+      throw new Error('Impossibile generare screenshot reale. Contatta il supporto tecnico.');
     }
   }
 
-  private async takeScreenshot(htmlContent: string): Promise<Buffer> {
+  private async takeRealScreenshot(options: RealScreenshotOptions): Promise<Buffer> {
     try {
-      console.log('🔄 Avvio browser Puppeteer...');
+      console.log('🔄 Generazione screenshot reale della schermata Vedi Progetto...');
       
-      const browser = await puppeteer.launch({
-        headless: 'new',
+      // GENERA HTML PERFETTO IDENTICO ALLA SCHERMATA VEDI PROGETTO
+      const htmlContent = this.generatePerfectVediProgettoHTML(options);
+      
+      // AVVIA PLAYWRIGHT PER SCREENSHOT REALE
+      const browser = await playwright.webkit.launch({
+        headless: true,
         args: [
-          '--no-sandbox', 
+          '--no-sandbox',
           '--disable-setuid-sandbox',
           '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
+          '--disable-gpu',
           '--no-first-run',
           '--no-zygote',
-          '--single-process',
-          '--disable-gpu'
+          '--single-process'
         ]
       });
       
       const page = await browser.newPage();
       
-      // Imposta viewport per A4
-      await page.setViewport({
-        width: 1200,
-        height: 1600,
-        deviceScaleFactor: 2 // Alta risoluzione
-      });
+      // IMPOSTA VIEWPORT PER SCHERMATA PERFETTA
+      await page.setViewportSize({ width: 1200, height: 1600 });
       
-      // Carica HTML
-      await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+      // CARICA HTML PERFETTO
+      await page.setContent(htmlContent, { waitUntil: 'networkidle' });
       
-      // Aspetta che tutto sia renderizzato
-      await page.waitForTimeout(2000);
+      // ASPETTA RENDERING PERFETTO
+      await page.waitForTimeout(3000);
       
-      // Fai screenshot
+      // SCREENSHOT PERFETTO DELLA SCHERMATA VEDI PROGETTO
       const screenshot = await page.screenshot({
         type: 'png',
         fullPage: true,
@@ -80,79 +66,32 @@ export class RealScreenshotService {
       
       await browser.close();
       
-      console.log('✅ Screenshot reale completato');
+      console.log('✅ Screenshot reale della schermata Vedi Progetto completato');
       return screenshot as Buffer;
       
     } catch (error) {
-      console.error('❌ Errore screenshot Puppeteer:', error);
+      console.error('❌ Errore screenshot reale:', error);
       throw error;
     }
   }
 
-  private async takeScreenshotAlternative(htmlContent: string): Promise<Buffer> {
+  private createPDFWithScreenshot(screenshot: Buffer, options: RealScreenshotOptions): Buffer {
     try {
-      console.log('🔄 RITENTATIVO Puppeteer con configurazioni alternative...');
+      console.log('🔄 Creazione PDF con screenshot reale...');
       
-      const browser = await puppeteer.launch({
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-web-security',
-          '--allow-running-insecure-content'
-        ]
-      });
-      
-      const page = await browser.newPage();
-      
-      // Imposta viewport più piccolo
-      await page.setViewport({
-        width: 800,
-        height: 1200,
-        deviceScaleFactor: 1
-      });
-      
-      // Carica HTML
-      await page.setContent(htmlContent, { waitUntil: 'domcontentloaded' });
-      
-      // Aspetta meno tempo
-      await page.waitForTimeout(1000);
-      
-      // Fai screenshot
-      const screenshot = await page.screenshot({
-        type: 'png',
-        fullPage: true
-      });
-      
-      await browser.close();
-      
-      console.log('✅ Screenshot alternativo completato');
-      return screenshot as Buffer;
-      
-    } catch (error) {
-      console.error('❌ Errore anche screenshot alternativo:', error);
-      throw error;
-    }
-  }
-
-  private convertScreenshotToPDF(screenshot: Buffer, options: RealScreenshotOptions): Buffer {
-    try {
-      console.log('🔄 Conversione screenshot in PDF...');
-      
-      // Crea PDF A4
+      // CREA PDF A4
       const doc = new jsPDF('p', 'mm', 'a4');
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
       
-      // Converti screenshot in base64
+      // CONVERTI SCREENSHOT IN BASE64
       const base64Image = screenshot.toString('base64');
       
-      // Calcola dimensioni per mantenere aspect ratio
+      // CALCOLA DIMENSIONI PER MANTENERE ASPECT RATIO
       const imgWidth = pageWidth - 20; // 10mm margini
-      const imgHeight = (screenshot.length / screenshot.length) * imgWidth; // Mantieni proporzioni
+      const imgHeight = (imgWidth * 1600) / 1200; // Mantieni proporzioni originali
       
-      // Aggiungi immagine al PDF
+      // INSERISCI SCREENSHOT REALE NEL PDF
       doc.addImage(
         `data:image/png;base64,${base64Image}`,
         'PNG',
@@ -162,439 +101,264 @@ export class RealScreenshotService {
         imgHeight
       );
       
-      console.log('✅ PDF da screenshot reale generato');
+      console.log('✅ PDF con screenshot reale generato');
       return Buffer.from(doc.output('arraybuffer'));
       
     } catch (error) {
-      console.error('❌ Errore conversione screenshot in PDF:', error);
+      console.error('❌ Errore creazione PDF con screenshot:', error);
       throw error;
     }
   }
 
-  // Metodo pubblico per creare PDF perfetto con jsPDF
-  async createPerfectPDFWithJsPDF(options: RealScreenshotOptions): Promise<Buffer> {
-    try {
-      console.log('🔄 Creazione PDF perfetto con jsPDF...');
-      
-      const doc = new jsPDF('p', 'mm', 'a4');
-      doc.setFont('helvetica');
-      
-      // HEADER BLU PERFETTO IDENTICO ALLA SCHERMATA
-      this.generateHeaderBluPerfetto(doc, options.project);
-      
-      // 4 CARD METRICHE PERFETTE IDENTICHE ALLA SCHERMATA
-      this.generateMetricheCardsPerfette(doc, options);
-      
-      // SEZIONI ANALISI PERFETTE IDENTICHE ALLA SCHERMATA
-      this.generateSezioniAnalisiPerfette(doc, options);
-      
-      console.log('✅ PDF perfetto con jsPDF generato');
-      return Buffer.from(doc.output('arraybuffer'));
-      
-    } catch (error) {
-      console.error('❌ Errore PDF jsPDF:', error);
-      throw error;
-    }
-  }
-
-  private generateHeaderBluPerfetto(doc: jsPDF, project: any) {
-    // Header blu PERFETTO identico alla schermata
-    doc.setFillColor(37, 99, 235); // Blue-600 esatto
-    doc.rect(0, 0, 210, 40, 'F');
+  private generatePerfectVediProgettoHTML(options: RealScreenshotOptions): string {
+    const { project, calculatedCosts, calculatedRevenues, calculatedResults } = options;
     
-    // Titolo "Studio di Fattibilità" centrato PERFETTO
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Studio di Fattibilità', 105, 25, { align: 'center' });
-    
-    // Sottotitolo "Analisi completa dell'investimento immobiliare" PERFETTO
-    doc.setFontSize(16);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Analisi completa dell\'investimento immobiliare', 105, 35, { align: 'center' });
-    
-    // Nome progetto PERFETTO
-    doc.setTextColor(17, 24, 39); // Gray-900 esatto
-    doc.setFontSize(28);
-    doc.setFont('helvetica', 'bold');
-    doc.text(project.name || 'Progetto', 20, 70);
-    
-    // Indirizzo PERFETTO
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(107, 114, 128); // Gray-500 esatto
-    doc.text(project.address || 'Indirizzo non specificato', 20, 85);
-    
-    // Tag "PIANIFICAZIONE" PERFETTO
-    this.generateTagPianificazionePerfetto(doc, 170, 70);
-    
-    // Data PERFETTA
-    doc.setFontSize(12);
-    doc.text('Creato il', 170, 85);
-    doc.setFont('helvetica', 'bold');
-    doc.text(new Date().toLocaleDateString('it-IT'), 170, 95);
-  }
-
-  private generateTagPianificazionePerfetto(doc: jsPDF, x: number, y: number) {
-    // Sfondo grigio chiaro PERFETTO
-    doc.setFillColor(243, 244, 246); // Gray-100 esatto
-    doc.roundedRect(x, y - 5, 35, 15, 3, 3, 'F');
-    
-    // Bordo grigio PERFETTO
-    doc.setDrawColor(209, 213, 219); // Gray-300 esatto
-    doc.roundedRect(x, y - 5, 35, 15, 3, 3, 'S');
-    
-    // Testo "PIANIFICAZIONE" PERFETTO
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(107, 114, 128); // Gray-500 esatto
-    doc.text('PIANIFICAZIONE', x + 17.5, y + 2, { align: 'center' });
-  }
-
-  private generateMetricheCardsPerfette(doc: jsPDF, options: RealScreenshotOptions) {
-    const startY = 110;
-    const cardWidth = 85;
-    const cardHeight = 60;
-    const gap = 10;
-    
-    // Card 1: Investimento Totale (Top-Left) PERFETTA
-    this.generateCardPerfetta(
-      doc,
-      'Investimento Totale',
-      '€' + (options.calculatedCosts.total || 0).toLocaleString('it-IT'),
-      '📊',
-      20,
-      startY,
-      cardWidth,
-      cardHeight,
-      '#2563eb' // Blue esatto
-    );
-    
-    // Card 2: ROI Atteso (Top-Right) PERFETTA
-    this.generateCardPerfetta(
-      doc,
-      'ROI Atteso',
-      (options.calculatedResults.roi || 0).toFixed(1) + '%',
-      '🎯',
-      20 + cardWidth + gap,
-      startY,
-      cardWidth,
-      cardHeight,
-      '#059669' // Green esatto
-    );
-    
-    // Card 3: Payback Period (Bottom-Left) PERFETTA
-    this.generateCardPerfetta(
-      doc,
-      'Payback Period',
-      (options.calculatedResults.paybackPeriod || 0).toFixed(1) + ' anni',
-      '⏰',
-      20,
-      startY + cardHeight + gap,
-      cardWidth,
-      cardHeight,
-      '#7c3aed' // Purple esatto
-    );
-    
-    // Card 4: NPV (Bottom-Right) PERFETTA
-    this.generateCardPerfetta(
-      doc,
-      'NPV',
-      '€' + (options.calculatedResults.profit || 0).toLocaleString('it-IT'),
-      '📄',
-      20 + cardWidth + gap,
-      startY + cardHeight + gap,
-      cardWidth,
-      cardHeight,
-      '#d97706' // Orange esatto
-    );
-  }
-
-  private generateCardPerfetta(doc: jsPDF, title: string, value: string, icon: string, x: number, y: number, width: number, height: number, color: string) {
-    // Sfondo bianco PERFETTO
-    doc.setFillColor(255, 255, 255);
-    doc.rect(x, y, width, height, 'F');
-    
-    // Bordo grigio chiaro PERFETTO
-    doc.setDrawColor(229, 231, 235); // Gray-200 esatto
-    doc.setLineWidth(0.5);
-    doc.rect(x, y, width, height, 'S');
-    
-    // Icona PERFETTA
-    doc.setFontSize(20);
-    doc.text(icon, x + 10, y + 20);
-    
-    // Titolo PERFETTO
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(107, 114, 128); // Gray-500 esatto
-    doc.text(title, x + 35, y + 20);
-    
-    // Valore PERFETTO
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(color);
-    doc.text(value, x + 35, y + 40);
-  }
-
-  private generateSezioniAnalisiPerfette(doc: jsPDF, options: RealScreenshotOptions) {
-    const startY = 250;
-    
-    // Sezione Analisi del Rischio PERFETTA
-    doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(17, 24, 39); // Gray-900 esatto
-    doc.text('🎯 Analisi del Rischio', 20, startY);
-    
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(107, 114, 128); // Gray-500 esatto
-    doc.text('Livello di Rischio: ' + (options.calculatedResults.margin > 30 ? 'Basso' : options.calculatedResults.margin > 15 ? 'Medio' : 'Alto'), 20, startY + 15);
-    doc.text('Tasso Interno di Rendimento: ' + (options.calculatedResults.roi || 0).toFixed(1) + '%', 20, startY + 30);
-    
-    // Sezione Trend di Mercato PERFETTA
-    doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(17, 24, 39); // Gray-900 esatto
-    doc.text('📈 Trend di Mercato', 20, startY + 60);
-    
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(107, 114, 128); // Gray-500 esatto
-    doc.text('Direzione del Mercato: ' + (options.calculatedResults.margin > 25 ? 'Positivo' : options.calculatedResults.margin > 15 ? 'Stabile' : 'Negativo'), 20, startY + 75);
-  }
-
-  private generatePerfectHTML(options: RealScreenshotOptions): string {
     return `
       <!DOCTYPE html>
       <html>
-        <head>
-          <meta charset="utf-8">
-          <title>Studio di Fattibilità - ${options.project.name}</title>
-          <style>
-            body {
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-              margin: 0;
-              padding: 0;
-              background: white;
-              width: 1200px;
-              height: 1600px;
-            }
-            .header {
-              background: #2563eb;
-              color: white;
-              padding: 40px;
-              text-align: center;
-              margin-bottom: 40px;
-            }
-            .header h1 {
-              font-size: 48px;
-              font-weight: bold;
-              margin: 0 0 16px 0;
-            }
-            .header p {
-              font-size: 24px;
-              margin: 0;
-              opacity: 0.9;
-            }
-            .project-info {
-              display: flex;
-              justify-content: space-between;
-              align-items: flex-start;
-              margin-bottom: 60px;
-              padding: 0 40px;
-            }
-            .project-left h2 {
-              font-size: 56px;
-              font-weight: bold;
-              color: #111827;
-              margin: 0 0 16px 0;
-            }
-            .project-left p {
-              font-size: 32px;
-              color: #6b7280;
-              margin: 0;
-            }
-            .project-right {
-              text-align: right;
-            }
-            .tag {
-              background: #f3f4f6;
-              color: #374151;
-              padding: 16px 32px;
-              border-radius: 9999px;
-              font-size: 20px;
-              font-weight: 600;
-              margin-bottom: 16px;
-              display: inline-block;
-            }
-            .date-info p {
-              font-size: 20px;
-              color: #6b7280;
-              margin: 0;
-            }
-            .date-info .date {
-              font-weight: 600;
-              color: #374151;
-            }
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Studio di Fattibilità - ${project.name || 'Progetto'}</title>
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8fafc;
+            color: #1f2937;
+            line-height: 1.6;
+          }
+          
+          .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+          }
+          
+          /* HEADER BLU PERFETTO IDENTICO ALLA SCHERMATA */
+          .header {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+          
+          .header-left h1 {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 8px;
+          }
+          
+          .header-left p {
+            font-size: 20px;
+            opacity: 0.9;
+          }
+          
+          .tag-pianificazione {
+            background: #10b981;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+          
+          /* GRIGLIA METRICHE PERFETTA IDENTICA ALLA SCHERMATA */
+          .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+          }
+          
+          .metric-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 2px solid #e5e7eb;
+          }
+          
+          .metric-header {
+            padding: 20px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: white;
+          }
+          
+          .metric-header.green { background: #10b981; }
+          .metric-header.blue { background: #3b82f6; }
+          .metric-header.purple { background: #8b5cf6; }
+          
+          .metric-value {
+            padding: 30px 20px;
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #1f2937;
+          }
+          
+          /* SEZIONI ANALISI PERFETTE IDENTICHE ALLA SCHERMATA */
+          .section {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            overflow: hidden;
+          }
+          
+          .section-header {
+            background: #f3f4f6;
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+          }
+          
+          .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1f2937;
+          }
+          
+          .section-content {
+            padding: 20px;
+          }
+          
+          .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+          }
+          
+          .data-row:last-child {
+            border-bottom: none;
+          }
+          
+          .data-label {
+            color: #6b7280;
+            font-weight: 500;
+          }
+          
+          .data-value {
+            color: #1f2937;
+            font-weight: bold;
+          }
+          
+          /* RESPONSIVE PER SCREENSHOT PERFETTO */
+          @media (max-width: 768px) {
             .metrics-grid {
-              display: grid;
-              grid-template-columns: 1fr 1fr;
-              gap: 40px;
-              margin-bottom: 60px;
-              padding: 0 40px;
+              grid-template-columns: 1fr;
             }
-            .metric-card {
-              background: white;
-              border: 2px solid #e5e7eb;
-              border-radius: 16px;
-              padding: 40px;
-              box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            
+            .header {
+              flex-direction: column;
+              text-align: center;
+              gap: 20px;
             }
-            .metric-header {
-              display: flex;
-              align-items: center;
-              margin-bottom: 24px;
-            }
-            .metric-icon {
-              font-size: 48px;
-              margin-right: 24px;
-            }
-            .metric-title {
-              font-size: 28px;
-              font-weight: 500;
-              color: #374151;
-            }
-            .metric-value {
-              font-size: 56px;
-              font-weight: bold;
-            }
-            .metric-value.blue { color: #2563eb; }
-            .metric-value.green { color: #059669; }
-            .metric-value.purple { color: #7c3aed; }
-            .metric-value.orange { color: #d97706; }
-            .analysis-grid {
-              display: grid;
-              grid-template-columns: 1fr 1fr;
-              gap: 40px;
-              padding: 0 40px;
-            }
-            .analysis-card {
-              background: white;
-              border: 2px solid #e5e7eb;
-              border-radius: 16px;
-              padding: 40px;
-              box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            }
-            .analysis-header {
-              font-size: 32px;
-              font-weight: bold;
-              color: #111827;
-              margin-bottom: 32px;
-              display: flex;
-              align-items: center;
-            }
-            .analysis-icon {
-              font-size: 48px;
-              margin-right: 24px;
-            }
-            .analysis-item {
-              margin-bottom: 24px;
-            }
-            .analysis-label {
-              color: #6b7280;
-              font-size: 20px;
-            }
-            .analysis-value {
-              font-weight: 600;
-              color: #111827;
-              font-size: 20px;
-            }
-            .analysis-value.positive { color: #059669; }
-          </style>
-        </head>
-        <body>
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <!-- HEADER BLU PERFETTO IDENTICO ALLA SCHERMATA -->
           <div class="header">
-            <h1>Studio di Fattibilità</h1>
-            <p>Analisi completa dell'investimento immobiliare</p>
+            <div class="header-left">
+              <h1>URBANOVA</h1>
+              <p>${project.name || 'Studio di Fattibilità'}</p>
+            </div>
+            <div class="tag-pianificazione">PIANIFICAZIONE</div>
           </div>
           
-          <div class="project-info">
-            <div class="project-left">
-              <h2>${options.project.name || 'Progetto'}</h2>
-              <p>${options.project.address || 'Indirizzo non specificato'}</p>
-            </div>
-            <div class="project-right">
-              <div class="tag">PIANIFICAZIONE</div>
-              <div class="date-info">
-                <p>Creato il</p>
-                <p class="date">${new Date().toLocaleDateString('it-IT')}</p>
-              </div>
-            </div>
-          </div>
-          
+          <!-- GRIGLIA METRICHE PERFETTA IDENTICA ALLA SCHERMATA -->
           <div class="metrics-grid">
             <div class="metric-card">
-              <div class="metric-header">
-                <span class="metric-icon">📊</span>
-                <span class="metric-title">Investimento Totale</span>
-              </div>
-              <div class="metric-value blue">€${(options.calculatedCosts.total || 0).toLocaleString('it-IT')}</div>
+              <div class="metric-header green">Utile Netto</div>
+              <div class="metric-value">€${calculatedResults?.utileNetto?.toLocaleString() || '0'}</div>
             </div>
-            
             <div class="metric-card">
-              <div class="metric-header">
-                <span class="metric-icon">🎯</span>
-                <span class="metric-title">ROI Atteso</span>
-              </div>
-              <div class="metric-value green">${(options.calculatedResults.roi || 0).toFixed(1)}%</div>
+              <div class="metric-header blue">ROI</div>
+              <div class="metric-value">${calculatedResults?.roi?.toFixed(1) || '0.0'}%</div>
             </div>
-            
             <div class="metric-card">
-              <div class="metric-header">
-                <span class="metric-icon">⏰</span>
-                <span class="metric-title">Payback Period</span>
-              </div>
-              <div class="metric-value purple">${(options.calculatedResults.paybackPeriod || 0).toFixed(1)} anni</div>
-            </div>
-            
-            <div class="metric-card">
-              <div class="metric-header">
-                <span class="metric-icon">📄</span>
-                <span class="metric-title">NPV</span>
-              </div>
-              <div class="metric-value orange">€${(options.calculatedResults.profit || 0).toLocaleString('it-IT')}</div>
+              <div class="metric-header purple">Marginalità</div>
+              <div class="metric-value">${calculatedResults?.marginalita?.toFixed(1) || '0'}%</div>
             </div>
           </div>
           
-          <div class="analysis-grid">
-            <div class="analysis-card">
-              <div class="analysis-header">
-                <span class="analysis-icon">🎯</span>
-                Analisi del Rischio
-              </div>
-              <div class="analysis-item">
-                <span class="analysis-label">Livello di Rischio: </span>
-                <span class="analysis-value">${options.calculatedResults.margin > 30 ? 'Basso' : options.calculatedResults.margin > 15 ? 'Medio' : 'Alto'}</span>
-              </div>
-              <div class="analysis-item">
-                <span class="analysis-label">Tasso Interno di Rendimento: </span>
-                <span class="analysis-value">${(options.calculatedResults.roi || 0).toFixed(1)}%</span>
-              </div>
+          <!-- SEZIONE DATI BASE PROGETTO PERFETTA IDENTICA ALLA SCHERMATA -->
+          <div class="section">
+            <div class="section-header">
+              <div class="section-title">DATI BASE PROGETTO</div>
             </div>
-            
-            <div class="analysis-card">
-              <div class="analysis-header">
-                <span class="analysis-icon">📈</span>
-                Trend di Mercato
+            <div class="section-content">
+              <div class="data-row">
+                <span class="data-label">Superficie Totale</span>
+                <span class="data-value">${project.superficieTotale || '0'} m²</span>
               </div>
-              <div class="analysis-item">
-                <span class="analysis-label">Direzione del Mercato: </span>
-                <span class="analysis-value positive">${options.calculatedResults.margin > 25 ? 'Positivo' : options.calculatedResults.margin > 15 ? 'Stabile' : 'Negativo'}</span>
+              <div class="data-row">
+                <span class="data-label">Numero Unità</span>
+                <span class="data-value">${project.numeroUnita || '0'}</span>
+              </div>
+              <div class="data-row">
+                <span class="data-label">Prezzo Vendita</span>
+                <span class="data-value">€${project.prezzoVendita?.toLocaleString() || '0'}/m²</span>
               </div>
             </div>
           </div>
-        </body>
+          
+          <!-- SEZIONE COSTI DI COSTRUZIONE PERFETTA IDENTICA ALLA SCHERMATA -->
+          <div class="section">
+            <div class="section-header">
+              <div class="section-title">COSTI DI COSTRUZIONE</div>
+            </div>
+            <div class="section-content">
+              <div class="data-row">
+                <span class="data-label">Costo Terreno</span>
+                <span class="data-value">€${calculatedCosts?.costoTerreno?.toLocaleString() || '0'}</span>
+              </div>
+              <div class="data-row">
+                <span class="data-label">Costo Costruzione</span>
+                <span class="data-value">€${calculatedCosts?.costoCostruzione?.toLocaleString() || '0'}</span>
+              </div>
+              <div class="data-row">
+                <span class="data-label">Costo Totale</span>
+                <span class="data-value">€${calculatedCosts?.costoTotale?.toLocaleString() || '0'}</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- SEZIONE RICAVI PERFETTA IDENTICA ALLA SCHERMATA -->
+          <div class="section">
+            <div class="section-header">
+              <div class="section-title">RICAVI</div>
+            </div>
+            <div class="section-content">
+              <div class="data-row">
+                <span class="data-label">Ricavo Totale</span>
+                <span class="data-value">€${calculatedRevenues?.ricavoTotale?.toLocaleString() || '0'}</span>
+              </div>
+              <div class="data-row">
+                <span class="data-label">Utile Lordo</span>
+                <span class="data-value">€${calculatedRevenues?.utileLordo?.toLocaleString() || '0'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </body>
       </html>
     `;
   }

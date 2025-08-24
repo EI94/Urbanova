@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import { vercelScreenshotService } from './vercelScreenshotService';
+import { realScreenshotService } from './realScreenshotService';
 
 export interface UrbanovaPDFOptions {
   project: any;
@@ -11,10 +11,10 @@ export interface UrbanovaPDFOptions {
 export class UrbanovaPDFService {
   async generateUrbanovaStyleReport(options: UrbanovaPDFOptions): Promise<Buffer> {
     try {
-      console.log('🎨 Generazione PDF PERFETTO con ALTERNATIVE a Puppeteer per Vercel...');
+      console.log('🎨 Generazione PDF PERFETTO con SCREENSHOT REALE della schermata Vedi Progetto...');
       
-      // USA IL NUOVO SERVIZIO CON ALTERNATIVE A PUPPETEER
-      return await vercelScreenshotService.generatePDFFromScreenshot(options);
+      // USA IL SERVIZIO DI SCREENSHOT REALI
+      return await realScreenshotService.generatePDFFromRealScreenshot(options);
       
     } catch (error) {
       console.error('❌ Errore generazione PDF:', error);
