@@ -19,18 +19,10 @@ export class VercelScreenshotService {
         const screenshot = await this.takeScreenshotWithPlaywright(options);
         return this.convertScreenshotToPDF(screenshot, options);
       } catch (playwrightError) {
-        console.log('❌ Playwright fallito, provo HTML-PDF...');
+        console.log('❌ Playwright fallito, uso jsPDF perfetto...');
       }
 
-      // SECONDO TENTATIVO: HTML-PDF (alternativa semplice)
-      try {
-        console.log('🔄 Tentativo HTML-PDF...');
-        return await this.generatePDFWithHTMLPDF(options);
-      } catch (htmlpdfError) {
-        console.log('❌ HTML-PDF fallito, uso jsPDF perfetto...');
-      }
-
-      // TERZO TENTATIVO: jsPDF perfetto (fallback garantito)
+      // SECONDO TENTATIVO: jsPDF perfetto (fallback garantito)
       console.log('🔄 Fallback: jsPDF perfetto...');
       return this.createPerfectPDFWithJsPDF(options);
       
@@ -44,10 +36,8 @@ export class VercelScreenshotService {
     try {
       console.log('🔄 Avvio Playwright per screenshot...');
       
-      // Genera HTML perfetto
       const htmlContent = this.generatePerfectHTML(options);
       
-      // Playwright con configurazioni per Vercel
       const browser = await playwright.webkit.launch({
         headless: true,
         args: [
@@ -63,16 +53,12 @@ export class VercelScreenshotService {
       
       const page = await browser.newPage();
       
-      // Imposta viewport per A4
       await page.setViewportSize({ width: 1200, height: 1600 });
       
-      // Carica HTML
       await page.setContent(htmlContent, { waitUntil: 'networkidle' });
       
-      // Aspetta rendering
       await page.waitForTimeout(2000);
       
-      // Screenshot
       const screenshot = await page.screenshot({
         type: 'png',
         fullPage: true
@@ -89,47 +75,15 @@ export class VercelScreenshotService {
     }
   }
 
-  private async generatePDFWithHTMLPDF(options: VercelScreenshotOptions): Promise<Buffer> {
-    try {
-      console.log('🔄 Generazione PDF con HTML-PDF...');
-      
-      // Genera HTML perfetto
-      const htmlContent = this.generatePerfectHTML(options);
-      
-      // HTML-PDF è più semplice e funziona su Vercel
-      const htmlPdf = require('html-pdf-node');
-      
-      const file = { content: htmlContent };
-      const options_pdf = { 
-        format: 'A4',
-        margin: { top: '10mm', right: '10mm', bottom: '10mm', left: '10mm' }
-      };
-      
-      const pdfBuffer = await htmlPdf.generatePdf(file, options_pdf);
-      
-      console.log('✅ PDF HTML-PDF generato');
-      return pdfBuffer;
-      
-    } catch (error) {
-      console.error('❌ Errore HTML-PDF:', error);
-      throw error;
-    }
-  }
-
-  private createPerfectPDFWithJsPDF(options: VercelScreenshotOptions): Buffer {
+  public createPerfectPDFWithJsPDF(options: VercelScreenshotOptions): Buffer {
     try {
       console.log('🔄 Creazione PDF perfetto con jsPDF...');
       
       const doc = new jsPDF('p', 'mm', 'a4');
       doc.setFont('helvetica');
       
-      // HEADER BLU PERFETTO IDENTICO ALLA SCHERMATA
       this.generateHeaderBluPerfetto(doc, options.project);
-      
-      // 4 CARD METRICHE PERFETTE IDENTICHE ALLA SCHERMATA
       this.generateMetricheCardsPerfette(doc, options);
-      
-      // SEZIONI ANALISI PERFETTE IDENTICHE ALLA SCHERMATA
       this.generateSezioniAnalisiPerfette(doc, options);
       
       console.log('✅ PDF perfetto con jsPDF generato');
@@ -145,24 +99,20 @@ export class VercelScreenshotService {
     try {
       console.log('🔄 Conversione screenshot in PDF...');
       
-      // Crea PDF A4
       const doc = new jsPDF('p', 'mm', 'a4');
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
       
-      // Converti screenshot in base64
       const base64Image = screenshot.toString('base64');
       
-      // Calcola dimensioni per mantenere aspect ratio
-      const imgWidth = pageWidth - 20; // 10mm margini
-      const imgHeight = (screenshot.length / screenshot.length) * imgWidth; // Mantieni proporzioni
+      const imgWidth = pageWidth - 20;
+      const imgHeight = (screenshot.length / screenshot.length) * imgWidth;
       
-      // Aggiungi immagine al PDF
       doc.addImage(
         `data:image/png;base64,${base64Image}`,
         'PNG',
-        10, // x
-        10, // y
+        10,
+        10,
         imgWidth,
         imgHeight
       );
@@ -177,336 +127,312 @@ export class VercelScreenshotService {
   }
 
   private generateHeaderBluPerfetto(doc: jsPDF, project: any) {
-    // Header blu PERFETTO identico alla schermata
-    doc.setFillColor(37, 99, 235); // Blue-600 esatto
+    // Header blu perfetto
+    doc.setFillColor(59, 130, 246);
     doc.rect(0, 0, 210, 40, 'F');
     
-    // Titolo "Studio di Fattibilità" centrato PERFETTO
+    // Logo Urbanova
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(24);
     doc.setFont('helvetica', 'bold');
-    doc.text('Studio di Fattibilità', 105, 25, { align: 'center' });
+    doc.text('URBANOVA', 20, 25);
     
-    // Sottotitolo "Analisi completa dell'investimento immobiliare" PERFETTO
+    // Nome progetto
     doc.setFontSize(16);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Analisi completa dell\'investimento immobiliare', 105, 35, { align: 'center' });
+    doc.text(project.name || 'Studio di Fattibilità', 20, 35);
     
-    // Nome progetto PERFETTO
-    doc.setTextColor(17, 24, 39); // Gray-900 esatto
-    doc.setFontSize(28);
-    doc.setFont('helvetica', 'bold');
-    doc.text(project.name || 'Progetto', 20, 70);
-    
-    // Indirizzo PERFETTO
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(107, 114, 128); // Gray-500 esatto
-    doc.text(project.address || 'Indirizzo non specificato', 20, 85);
-    
-    // Tag "PIANIFICAZIONE" PERFETTO
-    this.generateTagPianificazionePerfetto(doc, 170, 70);
-    
-    // Data PERFETTA
-    doc.setFontSize(12);
-    doc.text('Creato il', 170, 85);
-    doc.setFont('helvetica', 'bold');
-    doc.text(new Date().toLocaleDateString('it-IT'), 170, 95);
+    // Tag pianificazione
+    this.generateTagPianificazionePerfetto(doc, 150, 25);
   }
 
   private generateTagPianificazionePerfetto(doc: jsPDF, x: number, y: number) {
-    // Sfondo grigio chiaro PERFETTO
-    doc.setFillColor(243, 244, 246); // Gray-100 esatto
-    doc.roundedRect(x, y - 5, 35, 15, 3, 3, 'F');
-    
-    // Bordo grigio PERFETTO
-    doc.setDrawColor(209, 213, 219); // Gray-300 esatto
-    doc.roundedRect(x, y - 5, 35, 15, 3, 3, 'S');
-    
-    // Testo "PIANIFICAZIONE" PERFETTO
+    doc.setFillColor(34, 197, 94);
+    doc.rect(x, y - 5, 50, 20, 'F');
+    doc.setTextColor(255, 255, 255);
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(107, 114, 128); // Gray-500 esatto
-    doc.text('PIANIFICAZIONE', x + 17.5, y + 2, { align: 'center' });
+    doc.text('PIANIFICAZIONE', x + 5, y + 5);
   }
 
   private generateMetricheCardsPerfette(doc: jsPDF, options: VercelScreenshotOptions) {
-    const startY = 110;
-    const cardWidth = 85;
-    const cardHeight = 60;
-    const gap = 10;
+    const { calculatedResults } = options;
     
-    // Card 1: Investimento Totale (Top-Left) PERFETTA
+    // Card Utile Netto
     this.generateCardPerfetta(
-      doc,
-      'Investimento Totale',
-      '€' + (options.calculatedCosts.total || 0).toLocaleString('it-IT'),
-      '📊',
-      20,
-      startY,
-      cardWidth,
-      cardHeight,
-      '#2563eb' // Blue esatto
+      doc, 
+      'Utile Netto', 
+      `€${calculatedResults?.utileNetto?.toLocaleString() || '0'}`, 
+      '💰', 
+      20, 
+      60, 
+      50, 
+      30, 
+      '#10B981'
     );
     
-    // Card 2: ROI Atteso (Top-Right) PERFETTA
+    // Card ROI
     this.generateCardPerfetta(
-      doc,
-      'ROI Atteso',
-      (options.calculatedResults.roi || 0).toFixed(1) + '%',
-      '🎯',
-      20 + cardWidth + gap,
-      startY,
-      cardWidth,
-      cardHeight,
-      '#16a34a' // Green esatto
+      doc, 
+      'ROI', 
+      `${calculatedResults?.roi?.toFixed(1) || '0'}%`, 
+      '📈', 
+      80, 
+      60, 
+      50, 
+      30, 
+      '#3B82F6'
     );
     
-    // Card 3: Payback Period (Bottom-Left) PERFETTA
+    // Card Marginalità
     this.generateCardPerfetta(
-      doc,
-      'Payback Period',
-      (options.calculatedResults.paybackPeriod || 0).toFixed(1) + ' anni',
-      '⏰',
-      20,
-      startY + cardHeight + gap,
-      cardWidth,
-      cardHeight,
-      '#9333ea' // Purple esatto
-    );
-    
-    // Card 4: NPV (Bottom-Right) PERFETTA
-    this.generateCardPerfetta(
-      doc,
-      'NPV',
-      '€' + (options.calculatedResults.profit || 0).toLocaleString('it-IT'),
-      '📄',
-      20 + cardWidth + gap,
-      startY + cardHeight + gap,
-      cardWidth,
-      cardHeight,
-      '#ea580c' // Orange esatto
+      doc, 
+      'Marginalità', 
+      `${calculatedResults?.marginalita?.toFixed(1) || '0'}%`, 
+      '🎯', 
+      140, 
+      60, 
+      50, 
+      30, 
+      '#8B5CF6'
     );
   }
 
   private generateCardPerfetta(doc: jsPDF, title: string, value: string, icon: string, x: number, y: number, width: number, height: number, color: string) {
-    // Sfondo bianco PERFETTO
-    doc.setFillColor(255, 255, 255);
-    doc.roundedRect(x, y, width, height, 3, 3, 'F');
+    // Bordo card
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.5);
+    doc.rect(x, y, width, height);
     
-    // Bordo grigio chiaro PERFETTO
-    doc.setDrawColor(229, 231, 235); // Gray-200 esatto
-    doc.roundedRect(x, y, width, height, 3, 3, 'S');
+    // Sfondo colorato
+    doc.setFillColor(color);
+    doc.rect(x, y, width, 15, 'F');
     
-    // Icona PERFETTA
-    doc.setFontSize(16);
-    doc.text(icon, x + 10, y + 15);
+    // Titolo
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text(title, x + 5, y + 10);
     
-    // Titolo PERFETTO
+    // Valore
+    doc.setTextColor(0, 0, 0);
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(17, 24, 39); // Gray-900 esatto
-    doc.text(title, x + 25, y + 15);
+    doc.text(value, x + 5, y + 25);
     
-    // Valore PERFETTO
-    doc.setFontSize(20);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(color);
-    doc.text(value, x + width/2, y + 40, { align: 'center' });
+    // Icona
+    doc.setFontSize(16);
+    doc.text(icon, x + width - 15, y + 10);
   }
 
   private generateSezioniAnalisiPerfette(doc: jsPDF, options: VercelScreenshotOptions) {
-    const startY = 250;
+    const { project, calculatedCosts, calculatedRevenues } = options;
     
-    // Analisi del Rischio PERFETTA
-    doc.setFontSize(16);
+    let yPosition = 110;
+    
+    // Sezione Dati Base
+    doc.setFillColor(243, 244, 246);
+    doc.rect(20, yPosition, 170, 20, 'F');
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(17, 24, 39); // Gray-900 esatto
-    doc.text('Analisi del Rischio', 20, startY);
+    doc.text('DATI BASE PROGETTO', 25, yPosition + 12);
     
-    doc.setFontSize(12);
+    yPosition += 30;
+    doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.setTextColor(107, 114, 128); // Gray-500 esatto
-    doc.text('Livello di Rischio: ' + (options.calculatedResults.margin > 30 ? 'Basso' : options.calculatedResults.margin > 15 ? 'Medio' : 'Alto'), 20, startY + 15);
-    doc.text('Tasso Interno di Rendimento: ' + (options.calculatedResults.roi || 0).toFixed(1) + '%', 20, startY + 30);
+    doc.text(`Superficie Totale: ${project.superficieTotale || '0'} m²`, 25, yPosition);
+    doc.text(`Numero Unità: ${project.numeroUnita || '0'}`, 25, yPosition + 8);
+    doc.text(`Prezzo Vendita: €${project.prezzoVendita?.toLocaleString() || '0'}/m²`, 25, yPosition + 16);
     
-    // Trend di Mercato PERFETTO
-    doc.setFontSize(16);
+    yPosition += 40;
+    
+    // Sezione Costi
+    doc.setFillColor(243, 244, 246);
+    doc.rect(20, yPosition, 170, 20, 'F');
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(17, 24, 39); // Gray-900 esatto
-    doc.text('Trend di Mercato', 120, startY);
+    doc.text('COSTI DI COSTRUZIONE', 25, yPosition + 12);
     
-    doc.setFontSize(12);
+    yPosition += 30;
+    doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.setTextColor(107, 114, 128); // Gray-500 esatto
-    doc.text('Direzione del Mercato: ' + (options.calculatedResults.margin > 25 ? 'Positivo' : options.calculatedResults.margin > 15 ? 'Stabile' : 'Negativo'), 120, startY + 15);
+    doc.text(`Costo Terreno: €${calculatedCosts?.costoTerreno?.toLocaleString() || '0'}`, 25, yPosition);
+    doc.text(`Costo Costruzione: €${calculatedCosts?.costoCostruzione?.toLocaleString() || '0'}`, 25, yPosition + 8);
+    doc.text(`Costo Totale: €${calculatedCosts?.costoTotale?.toLocaleString() || '0'}`, 25, yPosition + 16);
+    
+    yPosition += 40;
+    
+    // Sezione Ricavi
+    doc.setFillColor(243, 244, 246);
+    doc.rect(20, yPosition, 170, 20, 'F');
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('RICAVI', 25, yPosition + 12);
+    
+    yPosition += 30;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Ricavo Totale: €${calculatedRevenues?.ricavoTotale?.toLocaleString() || '0'}`, 25, yPosition);
+    doc.text(`Utile Lordo: €${calculatedRevenues?.utileLordo?.toLocaleString() || '0'}`, 25, yPosition + 8);
   }
 
   private generatePerfectHTML(options: VercelScreenshotOptions): string {
+    const { project, calculatedCosts, calculatedRevenues, calculatedResults } = options;
+    
     return `
       <!DOCTYPE html>
       <html>
-        <head>
-          <meta charset="utf-8">
-          <title>Studio di Fattibilità - ${options.project.name}</title>
-          <style>
-            body {
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-              margin: 0;
-              padding: 0;
-              background: white;
-              width: 1200px;
-              height: 1600px;
-            }
-            .header {
-              background: #2563eb;
-              color: white;
-              padding: 40px;
-              text-align: center;
-              margin-bottom: 40px;
-            }
-            .header h1 {
-              font-size: 48px;
-              font-weight: bold;
-              margin: 0 0 16px 0;
-            }
-            .header p {
-              font-size: 24px;
-              margin: 0;
-              opacity: 0.9;
-            }
-            .project-info {
-              display: flex;
-              justify-content: space-between;
-              align-items: flex-start;
-              margin-bottom: 60px;
-              padding: 0 40px;
-            }
-            .project-left h2 {
-              font-size: 56px;
-              font-weight: bold;
-              color: #111827;
-              margin: 0 0 16px 0;
-            }
-            .project-left p {
-              font-size: 32px;
-              color: #6b7280;
-              margin: 0;
-            }
-            .project-right {
-              text-align: right;
-            }
-            .tag {
-              background: #f3f4f6;
-              color: #374151;
-              padding: 16px 32px;
-              border-radius: 9999px;
-              font-size: 20px;
-              font-weight: 600;
-              margin-bottom: 16px;
-              display: inline-block;
-            }
-            .date-info p {
-              font-size: 20px;
-              color: #6b7280;
-              margin: 0;
-            }
-            .date-info .date {
-              font-weight: 600;
-              color: #374151;
-            }
-            .metrics-grid {
-              display: grid;
-              grid-template-columns: 1fr 1fr;
-              gap: 40px;
-              margin-bottom: 60px;
-              padding: 0 40px;
-            }
-            .metric-card {
-              background: white;
-              border: 2px solid #e5e7eb;
-              border-radius: 16px;
-              padding: 40px;
-              box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            }
-            .metric-header {
-              display: flex;
-              align-items: center;
-              margin-bottom: 24px;
-            }
-            .metric-icon {
-              font-size: 32px;
-              margin-right: 16px;
-            }
-            .metric-title {
-              font-size: 24px;
-              font-weight: 600;
-              color: #374151;
-            }
-            .metric-value {
-              font-size: 48px;
-              font-weight: bold;
-              color: #2563eb;
-            }
-            .metric-value.roi { color: #16a34a; }
-            .metric-value.payback { color: #9333ea; }
-            .metric-value.npv { color: #ea580c; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>Studio di Fattibilità</h1>
-            <p>Analisi completa dell'investimento immobiliare</p>
+      <head>
+        <title>Studio di Fattibilità - ${project.name}</title>
+        <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8fafc;
+          }
+          .header {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+          }
+          .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+          }
+          .metric-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border: 2px solid #e5e7eb;
+          }
+          .metric-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 10px 0;
+          }
+          .metric-title {
+            color: #6b7280;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+          .section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+          }
+          .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+          }
+          .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+          }
+          .data-label {
+            color: #6b7280;
+            font-weight: 500;
+          }
+          .data-value {
+            color: #1f2937;
+            font-weight: bold;
+          }
+          .tag {
+            background: #10b981;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1 style="margin: 0; font-size: 36px;">URBANOVA</h1>
+          <p style="margin: 10px 0 0 0; font-size: 18px; opacity: 0.9;">${project.name || 'Studio di Fattibilità'}</p>
+          <span class="tag" style="margin-top: 15px; display: inline-block;">PIANIFICAZIONE</span>
+        </div>
+        
+        <div class="metrics-grid">
+          <div class="metric-card" style="border-color: #10b981;">
+            <div class="metric-value" style="color: #10b981;">€${calculatedResults?.utileNetto?.toLocaleString() || '0'}</div>
+            <div class="metric-title">Utile Netto</div>
           </div>
-          
-          <div class="project-info">
-            <div class="project-left">
-              <h2>${options.project.name || 'Progetto'}</h2>
-              <p>${options.project.address || 'Indirizzo non specificato'}</p>
-            </div>
-            <div class="project-right">
-              <div class="tag">PIANIFICAZIONE</div>
-              <div class="date-info">
-                <p>Creato il</p>
-                <p class="date">${new Date().toLocaleDateString('it-IT')}</p>
-              </div>
-            </div>
+          <div class="metric-card" style="border-color: #3b82f6;">
+            <div class="metric-value" style="color: #3b82f6;">${calculatedResults?.roi?.toFixed(1) || '0'}%</div>
+            <div class="metric-title">ROI</div>
           </div>
-          
-          <div class="metrics-grid">
-            <div class="metric-card">
-              <div class="metric-header">
-                <span class="metric-icon">📊</span>
-                <span class="metric-title">Investimento Totale</span>
-              </div>
-              <div class="metric-value">€${(options.calculatedCosts.total || 0).toLocaleString('it-IT')}</div>
-            </div>
-            
-            <div class="metric-card">
-              <div class="metric-header">
-                <span class="metric-icon">🎯</span>
-                <span class="metric-title">ROI Atteso</span>
-              </div>
-              <div class="metric-value roi">${(options.calculatedResults.roi || 0).toFixed(1)}%</div>
-            </div>
-            
-            <div class="metric-card">
-              <div class="metric-header">
-                <span class="metric-icon">⏰</span>
-                <span class="metric-title">Payback Period</span>
-              </div>
-              <div class="metric-value payback">${(options.calculatedResults.paybackPeriod || 0).toFixed(1)} anni</div>
-            </div>
-            
-            <div class="metric-card">
-              <div class="metric-header">
-                <span class="metric-icon">📄</span>
-                <span class="metric-title">NPV</span>
-              </div>
-              <div class="metric-value npv">€${(options.calculatedResults.profit || 0).toLocaleString('it-IT')}</div>
-            </div>
+          <div class="metric-card" style="border-color: #8b5cf6;">
+            <div class="metric-value" style="color: #8b5cf6;">${calculatedResults?.marginalita?.toFixed(1) || '0'}%</div>
+            <div class="metric-title">Marginalità</div>
           </div>
-        </body>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">DATI BASE PROGETTO</div>
+          <div class="data-row">
+            <span class="data-label">Superficie Totale</span>
+            <span class="data-value">${project.superficieTotale || '0'} m²</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Numero Unità</span>
+            <span class="data-value">${project.numeroUnita || '0'}</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Prezzo Vendita</span>
+            <span class="data-value">€${project.prezzoVendita?.toLocaleString() || '0'}/m²</span>
+          </div>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">COSTI DI COSTRUZIONE</div>
+          <div class="data-row">
+            <span class="data-label">Costo Terreno</span>
+            <span class="data-value">€${calculatedCosts?.costoTerreno?.toLocaleString() || '0'}</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Costo Costruzione</span>
+            <span class="data-value">€${calculatedCosts?.costoCostruzione?.toLocaleString() || '0'}</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Costo Totale</span>
+            <span class="data-value">€${calculatedCosts?.costoTotale?.toLocaleString() || '0'}</span>
+          </div>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">RICAVI</div>
+          <div class="data-row">
+            <span class="data-label">Ricavo Totale</span>
+            <span class="data-value">€${calculatedRevenues?.ricavoTotale?.toLocaleString() || '0'}</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Utile Lordo</span>
+            <span class="data-value">€${calculatedRevenues?.utileLordo?.toLocaleString() || '0'}</span>
+          </div>
+        </div>
+      </body>
       </html>
     `;
   }
