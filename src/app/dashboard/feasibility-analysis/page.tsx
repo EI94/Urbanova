@@ -23,9 +23,11 @@ import {
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function FeasibilityAnalysisPage() {
   const { t, formatCurrency: fmtCurrency } = useLanguage();
+  const { user } = useAuth();
   const [projects, setProjects] = useState<FeasibilityProject[]>([]);
   const [ranking, setRanking] = useState<FeasibilityProject[]>([]);
   const [statistics, setStatistics] = useState<any>(null);
@@ -42,6 +44,13 @@ export default function FeasibilityAnalysisPage() {
   }, []);
 
   const loadData = async (forceRefresh = false) => {
+    if (!user) {
+      console.log('❌ Utente non autenticato - Caricamento bloccato');
+      setError('Utente non autenticato');
+      setLoading(false);
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     try {
@@ -75,6 +84,8 @@ export default function FeasibilityAnalysisPage() {
               updatedAt: project.updatedAt
             });
           });
+        } else {
+          console.log('🔍 DEBUG - Nessun progetto trovato (FORCE REFRESH)');
         }
         
         // Forza aggiornamento stato
@@ -94,6 +105,24 @@ export default function FeasibilityAnalysisPage() {
         ]);
         
         console.log('📊 Progetti caricati (normale):', allProjects?.length || 0);
+        
+        // DEBUG: Log dettagliato dei progetti per verificare lo stato
+        if (allProjects && allProjects.length > 0) {
+          console.log('🔍 DEBUG - Dettagli progetti caricati (normale):');
+          allProjects.forEach((project, index) => {
+            console.log(`  Progetto ${index + 1}:`, {
+              id: project.id,
+              name: project.name,
+              address: project.address,
+              status: project.status,
+              createdAt: project.createdAt,
+              updatedAt: project.updatedAt
+            });
+          });
+        } else {
+          console.log('🔍 DEBUG - Nessun progetto trovato (normale)');
+        }
+        
         setProjects(allProjects || []);
         setRanking(projectsRanking || []);
         setStatistics(stats || {});
@@ -114,15 +143,17 @@ export default function FeasibilityAnalysisPage() {
       return;
     }
 
+    if (!user) {
+      toast('❌ Utente non autenticato', { icon: '❌' });
+      return;
+    }
+
     try {
-      console.log('🗑️ ELIMINAZIONE DIRETTA - Inizio...', projectId);
+      console.log('🗑️ ELIMINAZIONE SERVIZIO - Inizio...', projectId);
+      console.log('👤 Utente autenticato:', user.uid);
       
-      // 1. ELIMINAZIONE DIRETTA DA FIRESTORE
-      const { db } = await import('@/lib/firebase');
-      const { doc, deleteDoc } = await import('firebase/firestore');
-      
-      const projectRef = doc(db, 'feasibilityProjects', projectId);
-      await deleteDoc(projectRef);
+      // 1. ELIMINAZIONE TRAMITE SERVIZIO FIRESTORE
+      await feasibilityService.deleteProject(projectId);
       
       // 2. AGGIORNA IMMEDIATAMENTE TUTTE LE LISTE
       setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
@@ -154,7 +185,7 @@ export default function FeasibilityAnalysisPage() {
       toast('✅ Progetto eliminato definitivamente!', { icon: '✅' });
       
     } catch (error) {
-      console.error('❌ Errore eliminazione diretta:', error);
+      console.error('❌ Errore eliminazione servizio:', error);
       toast(`❌ Errore eliminazione: ${error}`, { icon: '❌' });
     }
   };
@@ -258,7 +289,54 @@ export default function FeasibilityAnalysisPage() {
               <CompareIcon className="h-4 w-4 mr-2" />
               {t('compare', 'feasibility')}
             </button>
-          
+            
+            <button 
+              onClick={async () => {
+                if (!user) {
+                  toast('❌ Utente non autenticato', { icon: '❌' });
+                  return;
+                }
+                
+                try {
+                  console.log('🧪 TEST FIRESTORE RULES...');
+                  console.log('👤 Utente autenticato:', user.uid);
+                  const { db } = await import('@/lib/firebase');
+                  const { collection, getDocs, doc, deleteDoc } = await import('firebase/firestore');
+                  
+                  // Test 1: Lettura
+                  const testCollection = collection(db, 'feasibilityProjects');
+                  const snapshot = await getDocs(testCollection);
+                  console.log('✅ LETTURA OK - Progetti trovati:', snapshot.size);
+                  
+                  // Test 2: Eliminazione (se ci sono progetti)
+                  if (snapshot.size > 0) {
+                    const testProject = snapshot.docs[0];
+                    console.log('🧪 Test eliminazione progetto:', testProject.id);
+                    
+                    try {
+                      await deleteDoc(testProject.ref);
+                      console.log('✅ ELIMINAZIONE TEST OK - Progetto eliminato');
+                      
+                      // Ripristina il progetto per non perderlo
+                      const { addDoc } = await import('firebase/firestore');
+                      await addDoc(testCollection, testProject.data());
+                      console.log('✅ RIPRISTINO OK - Progetto ripristinato');
+                      
+                    } catch (deleteError) {
+                      console.log('❌ ELIMINAZIONE TEST KO:', deleteError);
+                    }
+                  }
+                  
+                  toast('🧪 Test Firestore completato - Controlla console', { icon: '🧪' });
+                } catch (error) {
+                  console.error('❌ Test Firestore fallito:', error);
+                  toast(`❌ Test KO: ${error}`, { icon: '❌' });
+                }
+              }}
+              className="btn btn-warning"
+            >
+              🧪 Test Firestore
+            </button>
           
           </div>
         </div>
