@@ -147,34 +147,19 @@ export default function NewFeasibilityProjectPage() {
     paybackPeriod: 0
   });
 
-  // Non inizializzare i calcoli per nuovi progetti - l'utente deve inserire i dati prima
-  // useEffect(() => {
-  //   recalculateAll();
-  // }, []);
-
-  // AUTOSAVE DISABILITATO PER EVITARE CONFLITTI CON ELIMINAZIONE
-  // useEffect(() => {
-  //   // Cancella il timeout precedente se esiste
-  //   if (autoSaveTimeout) {
-  //     clearTimeout(autoSaveTimeout);
-  //   }
-
-  //   // Solo se ci sono nome e indirizzo (campi obbligatori)
-  //   if (project.name && project.address && project.name.trim() && project.address.trim()) {
-  //     const timeout = setTimeout(() => {
-  //       autoSaveProject();
-  //     }, 3000); // 3 secondi di debounce
-
-  //     setAutoSaveTimeout(timeout);
-  //   }
-
-  //   // Cleanup function
-  //   return () => {
-  //     if (autoSaveTimeout) {
-  //       clearTimeout(autoSaveTimeout);
-  //     }
-  //   };
-  // }, [project, calculatedCosts, calculatedRevenues, calculatedResults]);
+  // Ricalcola automaticamente quando cambiano i dati del progetto
+  useEffect(() => {
+    if (project && Object.keys(project).length > 0) {
+      recalculateAll();
+    }
+    
+    // Cleanup function
+    return () => {
+      if (autoSaveTimeout) {
+        clearTimeout(autoSaveTimeout);
+      }
+    };
+  }, [project, calculatedCosts, calculatedRevenues, calculatedResults]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -201,7 +186,7 @@ export default function NewFeasibilityProjectPage() {
           if (existingProject) {
             setProject(existingProject);
             setSavedProjectId(editId);
-            toast.success('✅ Progetto caricato per la modifica');
+            toast('✅ Progetto caricato per la modifica');
           }
         } catch (error) {
           console.error('❌ Errore caricamento progetto per edit:', error);
