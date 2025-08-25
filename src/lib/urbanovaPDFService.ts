@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import { vercelWorkingScreenshotService } from './vercelWorkingScreenshotService';
+import { webScreenshotPDFService } from './webScreenshotPDFService';
 
 export interface UrbanovaPDFOptions {
   project: any;
@@ -11,10 +11,10 @@ export interface UrbanovaPDFOptions {
 export class UrbanovaPDFService {
   async generateUrbanovaStyleReport(options: UrbanovaPDFOptions): Promise<Buffer> {
     try {
-      console.log('🎨 Generazione PDF PERFETTO con SCREENSHOT ALTERNATIVO per Vercel...');
+      console.log('🎨 Generazione PDF PERFETTO con SCREENSHOT PAGINA WEB...');
       
-      // USA IL SERVIZIO DI SCREENSHOT ALTERNATIVO CHE FUNZIONA SU VERCEL
-      return await vercelWorkingScreenshotService.generatePDFFromScreenshot(options);
+      // USA IL SERVIZIO SCREENSHOT DELLA PAGINA WEB PERFETTA
+      return await webScreenshotPDFService.generatePDFFromWebPage(options);
       
     } catch (error) {
       console.error('❌ Errore generazione PDF:', error);

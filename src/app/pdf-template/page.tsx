@@ -1,13 +1,12 @@
 'use client';
 
 import React from 'react';
-import { FeasibilityProject } from '@/types/land';
 
 interface PDFTemplateProps {
-  project: FeasibilityProject;
-  calculatedCosts: any;
-  calculatedRevenues: any;
-  calculatedResults: any;
+  project?: any;
+  calculatedCosts?: any;
+  calculatedRevenues?: any;
+  calculatedResults?: any;
 }
 
 export default function PDFTemplate({ 
@@ -17,124 +16,205 @@ export default function PDFTemplate({
   calculatedResults 
 }: PDFTemplateProps) {
   return (
-    <div className="min-h-screen bg-white p-8" style={{ width: '210mm', height: '297mm' }}>
-      {/* Header Blu PERFETTO */}
-      <div className="bg-blue-600 text-white p-6 rounded-t-lg mb-6">
-        <h1 className="text-3xl font-bold text-center mb-2">
-          Studio di Fattibilità
-        </h1>
-        <p className="text-lg text-center">
-          Analisi completa dell'investimento immobiliare
-        </p>
+    <div className="min-h-screen bg-white" style={{ fontFamily: 'Arial, sans-serif' }}>
+      {/* HEADER URBANOVA */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-8 text-center">
+        <h1 className="text-4xl font-bold mb-2">🏗️ URBANOVA</h1>
+        <p className="text-xl">Studio di Fattibilità</p>
       </div>
 
-      {/* Informazioni Progetto */}
-      <div className="flex justify-between items-start mb-8">
-        <div>
-          <h2 className="text-4xl font-bold text-gray-900 mb-2">
-            {project.name || 'Progetto'}
+      {/* CONTENUTO PRINCIPALE */}
+      <div className="max-w-4xl mx-auto p-8">
+        
+        {/* DATI BASE PROGETTO */}
+        <div className="bg-gray-50 rounded-lg p-6 mb-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+            <span className="mr-2">📋</span>
+            Dati Base Progetto
           </h2>
-          <p className="text-xl text-gray-500">
-            {project.address || 'Indirizzo non specificato'}
-          </p>
-        </div>
-        <div className="text-right">
-          <div className="bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm font-semibold mb-2">
-            PIANIFICAZIONE
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {project?.name && (
+              <div className="bg-white p-4 rounded border">
+                <span className="font-semibold text-gray-700">Nome Progetto:</span>
+                <span className="ml-2 text-gray-900">{project.name}</span>
+              </div>
+            )}
+            
+            {project?.location && (
+              <div className="bg-white p-4 rounded border">
+                <span className="font-semibold text-gray-700">Località:</span>
+                <span className="ml-2 text-gray-900">{project.location}</span>
+              </div>
+            )}
+            
+            {project?.totalArea && (
+              <div className="bg-white p-4 rounded border">
+                <span className="font-semibold text-gray-700">Superficie Totale:</span>
+                <span className="ml-2 text-gray-900">{project.totalArea} m²</span>
+              </div>
+            )}
+            
+            {project?.units && (
+              <div className="bg-white p-4 rounded border">
+                <span className="font-semibold text-gray-700">Numero Unità:</span>
+                <span className="ml-2 text-gray-900">{project.units}</span>
+              </div>
+            )}
+            
+            {project?.salePrice && (
+              <div className="bg-white p-4 rounded border">
+                <span className="font-semibold text-gray-700">Prezzo Vendita:</span>
+                <span className="ml-2 text-gray-900">€{project.salePrice.toLocaleString('it-IT')}</span>
+              </div>
+            )}
           </div>
-          <p className="text-sm text-gray-500">Creato il</p>
-          <p className="text-sm font-semibold text-gray-700">
-            {new Date().toLocaleDateString('it-IT')}
-          </p>
+        </div>
+
+        {/* COSTI DI COSTRUZIONE */}
+        {calculatedCosts && (
+          <div className="bg-blue-50 rounded-lg p-6 mb-8">
+            <h2 className="text-2xl font-bold text-blue-800 mb-4 flex items-center">
+              <span className="mr-2">💰</span>
+              Costi di Costruzione
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {calculatedCosts.totalConstructionCost && (
+                <div className="bg-white p-4 rounded border border-blue-200">
+                  <span className="font-semibold text-blue-700">Costo Totale Costruzione:</span>
+                  <span className="ml-2 text-blue-900 font-bold">€{calculatedCosts.totalConstructionCost.toLocaleString('it-IT')}</span>
+                </div>
+              )}
+              
+              {calculatedCosts.costPerSquareMeter && (
+                <div className="bg-white p-4 rounded border border-blue-200">
+                  <span className="font-semibold text-blue-700">Costo per m²:</span>
+                  <span className="ml-2 text-blue-900 font-bold">€{calculatedCosts.costPerSquareMeter.toLocaleString('it-IT')}</span>
+                </div>
+              )}
+              
+              {calculatedCosts.finishingCosts && (
+                <div className="bg-white p-4 rounded border border-blue-200">
+                  <span className="font-semibold text-blue-700">Costi di Finitura:</span>
+                  <span className="ml-2 text-blue-900 font-bold">€{calculatedCosts.finishingCosts.toLocaleString('it-IT')}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* RICAVI */}
+        {calculatedRevenues && (
+          <div className="bg-green-50 rounded-lg p-6 mb-8">
+            <h2 className="text-2xl font-bold text-green-800 mb-4 flex items-center">
+              <span className="mr-2">💵</span>
+              Ricavi
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {calculatedRevenues.totalRevenue && (
+                <div className="bg-white p-4 rounded border border-green-200">
+                  <span className="font-semibold text-green-700">Ricavo Totale:</span>
+                  <span className="ml-2 text-green-900 font-bold">€{calculatedRevenues.totalRevenue.toLocaleString('it-IT')}</span>
+                </div>
+              )}
+              
+              {calculatedRevenues.revenuePerSquareMeter && (
+                <div className="bg-white p-4 rounded border border-green-200">
+                  <span className="font-semibold text-green-700">Ricavo per m²:</span>
+                  <span className="ml-2 text-green-900 font-bold">€{calculatedRevenues.revenuePerSquareMeter.toLocaleString('it-IT')}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* RISULTATI FINALI */}
+        {calculatedResults && (
+          <div className="bg-purple-50 rounded-lg p-6 mb-8">
+            <h2 className="text-2xl font-bold text-purple-800 mb-4 flex items-center">
+              <span className="mr-2">📊</span>
+              Risultati Finali
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {calculatedResults.totalInvestment && (
+                <div className="bg-white p-4 rounded border border-purple-200">
+                  <span className="font-semibold text-purple-700">Investimento Totale:</span>
+                  <span className="ml-2 text-purple-900 font-bold">€{calculatedResults.totalInvestment.toLocaleString('it-IT')}</span>
+                </div>
+              )}
+              
+              {calculatedResults.totalProfit && (
+                <div className="bg-white p-4 rounded border border-purple-200">
+                  <span className="font-semibold text-purple-700">Profitto Totale:</span>
+                  <span className="ml-2 text-purple-900 font-bold">€{calculatedResults.totalProfit.toLocaleString('it-IT')}</span>
+                </div>
+              )}
+              
+              {calculatedResults.profitMargin && (
+                <div className="bg-white p-4 rounded border border-purple-200">
+                  <span className="font-semibold text-purple-700">Margine di Profitto:</span>
+                  <span className="ml-2 text-purple-900 font-bold">{calculatedResults.profitMargin.toFixed(2)}%</span>
+                </div>
+              )}
+              
+              {calculatedResults.roi && (
+                <div className="bg-white p-4 rounded border border-purple-200">
+                  <span className="font-semibold text-purple-700">ROI:</span>
+                  <span className="ml-2 text-purple-900 font-bold">{calculatedResults.roi.toFixed(2)}%</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* GRAFICO VISUALE */}
+        <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-6 mb-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+            <span className="mr-2">📈</span>
+            Riepilogo Visivo
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="bg-blue-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-2">
+                <span className="text-2xl">💰</span>
+              </div>
+              <p className="font-semibold text-gray-700">Costi</p>
+              {calculatedCosts?.totalConstructionCost && (
+                <p className="text-blue-600 font-bold">€{calculatedCosts.totalConstructionCost.toLocaleString('it-IT')}</p>
+              )}
+            </div>
+            
+            <div className="text-center">
+              <div className="bg-green-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-2">
+                <span className="text-2xl">💵</span>
+              </div>
+              <p className="font-semibold text-gray-700">Ricavi</p>
+              {calculatedRevenues?.totalRevenue && (
+                <p className="text-green-600 font-bold">€{calculatedRevenues.totalRevenue.toLocaleString('it-IT')}</p>
+              )}
+            </div>
+            
+            <div className="text-center">
+              <div className="bg-purple-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-2">
+                <span className="text-2xl">📊</span>
+              </div>
+              <p className="font-semibold text-gray-700">Profitto</p>
+              {calculatedResults?.totalProfit && (
+                <p className="text-purple-600 font-bold">€{calculatedResults.totalProfit.toLocaleString('it-IT')}</p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* 4 Card Metriche PERFETTE */}
-      <div className="grid grid-cols-2 gap-6 mb-8">
-        {/* Investimento Totale */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center mb-3">
-            <span className="text-2xl mr-3">📊</span>
-            <h3 className="text-lg font-medium text-gray-700">Investimento Totale</h3>
-          </div>
-          <p className="text-3xl font-bold text-blue-600">
-            €{(calculatedCosts.total || 0).toLocaleString('it-IT')}
-          </p>
-        </div>
-
-        {/* ROI Atteso */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center mb-3">
-            <span className="text-2xl mr-3">🎯</span>
-            <h3 className="text-lg font-medium text-gray-700">ROI Atteso</h3>
-          </div>
-          <p className="text-3xl font-bold text-green-600">
-            {(calculatedResults.roi || 0).toFixed(1)}%
-          </p>
-        </div>
-
-        {/* Payback Period */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center mb-3">
-            <span className="text-2xl mr-3">⏰</span>
-            <h3 className="text-lg font-medium text-gray-700">Payback Period</h3>
-          </div>
-          <p className="text-3xl font-bold text-purple-600">
-            {(calculatedResults.paybackPeriod || 0).toFixed(1)} anni
-          </p>
-        </div>
-
-        {/* NPV */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center mb-3">
-            <span className="text-2xl mr-3">📄</span>
-            <h3 className="text-lg font-medium text-gray-700">NPV</h3>
-          </div>
-          <p className="text-3xl font-bold text-orange-600">
-            €{(calculatedResults.profit || 0).toLocaleString('it-IT')}
-          </p>
-        </div>
-      </div>
-
-      {/* Sezioni Analisi PERFETTE */}
-      <div className="grid grid-cols-2 gap-6">
-        {/* Analisi del Rischio */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-          <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-            <span className="text-2xl mr-3">🎯</span>
-            Analisi del Rischio
-          </h3>
-          <div className="space-y-3">
-            <div>
-              <span className="text-gray-600">Livello di Rischio: </span>
-              <span className="font-semibold text-gray-900">
-                {calculatedResults.margin > 30 ? 'Basso' : calculatedResults.margin > 15 ? 'Medio' : 'Alto'}
-              </span>
-            </div>
-            <div>
-              <span className="text-gray-600">Tasso Interno di Rendimento: </span>
-              <span className="font-semibold text-gray-900">
-                {(calculatedResults.roi || 0).toFixed(1)}%
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Trend di Mercato */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-          <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-            <span className="text-2xl mr-3">📈</span>
-            Trend di Mercato
-          </h3>
-          <div className="space-y-3">
-            <div>
-              <span className="text-gray-600">Direzione del Mercato: </span>
-              <span className="font-semibold text-green-600">
-                {calculatedResults.margin > 25 ? 'Positivo' : calculatedResults.margin > 15 ? 'Stabile' : 'Negativo'}
-              </span>
-            </div>
-          </div>
-        </div>
+      {/* FOOTER */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 text-center">
+        <p className="text-lg font-semibold mb-2">🏗️ Urbanova AI - Analisi di Fattibilità Intelligente</p>
+        <p className="text-sm">© 2024 Urbanova. Tutti i diritti riservati.</p>
       </div>
     </div>
   );
