@@ -37,6 +37,48 @@ import {
   MapIcon
 } from '@/components/icons';
 
+// Componente NavItem spostato fuori per evitare re-render infiniti
+const NavItem = ({ href, icon, text, isActive, collapsed }: { 
+  href: string; 
+  icon: React.ReactNode; 
+  text: string; 
+  isActive: boolean; 
+  collapsed: boolean;
+}) => (
+  <Link
+    href={href}
+    className={`
+      flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors
+      ${isActive
+        ? 'bg-blue-700 text-white'
+        : 'text-blue-100 hover:bg-blue-700/50 hover:text-white'
+      }
+      ${collapsed ? 'justify-center' : ''}
+    `}
+  >
+    <span className={`${collapsed ? 'mx-auto' : 'mr-3'}`}>
+      {icon}
+    </span>
+    {!collapsed && <span>{text}</span>}
+  </Link>
+);
+
+// Componente NavSection spostato fuori per evitare re-render infiniti
+const NavSection = ({ title, children, collapsed }: {
+  title: string;
+  children: React.ReactNode;
+  collapsed: boolean;
+}) => (
+  <div className="space-y-1">
+    {!collapsed && (
+      <h3 className="px-3 py-2 text-xs font-semibold text-blue-300 uppercase tracking-wider">
+        {title}
+      </h3>
+    )}
+    {children}
+  </div>
+);
+
 interface DashboardLayoutProps {
   children: React.ReactNode;
   title?: string;
@@ -44,7 +86,7 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children, title = 'Dashboard' }: DashboardLayoutProps) {
   const { t } = useLanguage();
-  const { currentUser, logout } = useAuth();
+  const auth = useAuth();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -53,13 +95,13 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [notificationStats, setNotificationStats] = useState<NotificationStats | null>(null);
 
-  const userId = currentUser?.uid || 'demo-user';
+  const userId = auth.user?.uid || 'demo-user';
 
   useEffect(() => {
-    if (currentUser) {
+    if (auth.user) {
       loadUserData();
     }
-  }, [currentUser]);
+  }, [auth.user]);
 
   useEffect(() => {
     // Sottoscrizione agli eventi per aggiornamenti in tempo reale
@@ -120,49 +162,11 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await auth.logout();
     } catch (error) {
       console.error('Error during logout:', error);
     }
   };
-
-  const NavSection = ({ title, children, collapsed = false }: { title: string; children: React.ReactNode; collapsed?: boolean }) => (
-    <div className="mb-1.5">
-      {!collapsed && (
-        <p className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-blue-300/80 font-medium">
-          {title}
-        </p>
-      )}
-      <div className="space-y-0.5">
-        {children}
-      </div>
-    </div>
-  );
-
-  const NavItem = ({ href, icon, text, isActive, collapsed }: { 
-    href: string; 
-    icon: React.ReactNode; 
-    text: string; 
-    isActive: boolean; 
-    collapsed: boolean;
-  }) => (
-    <Link
-      href={href}
-      className={`
-        flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors
-        ${isActive
-          ? 'bg-blue-700 text-white'
-          : 'text-blue-100 hover:bg-blue-700/50 hover:text-white'
-        }
-        ${collapsed ? 'justify-center' : ''}
-      `}
-    >
-      <span className={`${collapsed ? 'mx-auto' : 'mr-3'}`}>
-        {icon}
-      </span>
-      {!collapsed && <span>{text}</span>}
-    </Link>
-  );
 
   const navigation = {
     main: [
@@ -407,8 +411,8 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
                   </div>
                 </div>
                 <div className="ml-2.5 overflow-hidden">
-                  <p className="text-xs font-medium truncate">{currentUser?.displayName || t('user', 'common')}</p>
-                  <p className="text-[11px] text-blue-300/80 truncate">{currentUser?.email}</p>
+                  <p className="text-xs font-medium truncate">{auth.user?.displayName || t('user', 'common')}</p>
+                  <p className="text-[11px] text-blue-300/80 truncate">{auth.user?.email}</p>
                 </div>
               </div>
             )}
@@ -505,7 +509,7 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
                   </div>
                   <div className="text-left">
                     <p className="text-xs font-medium text-slate-800">
-                      {userProfile?.displayName || currentUser?.displayName || t('user', 'common')}
+                      {userProfile?.displayName || auth.user?.displayName || t('user', 'common')}
                     </p>
                     <p className="text-xs text-slate-500">
                       {userProfile?.role || 'Utente'}
