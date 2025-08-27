@@ -4,17 +4,17 @@ import { useState, useEffect } from 'react';
 import { 
   BrainIcon, 
   TrendingUpIcon, 
-  InfoIcon,
+  LightBulbIcon,
   CheckCircleIcon,
   AlertIcon,
   InfoIcon,
   SparklesIcon,
-  CheckCircleIcon,
+  TargetIcon,
   ClockIcon,
   EuroIcon,
   ChartBarIcon,
   RocketIcon,
-  ShieldIcon,
+  ShieldCheckIcon,
   StarIcon
 } from '@/components/icons';
 import { 
