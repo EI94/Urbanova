@@ -22,7 +22,8 @@ import {
 } from '@/components/icons';
 import { Badge } from './Badge';
 import Button from './Button';
-import { TeamRole, TeamMember, Permission, teamRoleManager, ROLE_PERMISSIONS } from '@/lib/teamRoleManager';
+import { TeamRole, TeamMember, Permission } from '@/types/team';
+import { advancedTeamManagementService, TeamManagementStats, TeamAnalytics } from '@/lib/advancedTeamManagementService';
 
 interface AdvancedTeamManagementProps {
   isOpen: boolean;
@@ -47,109 +48,16 @@ export default function AdvancedTeamManagement({
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [showInviteForm, setShowInviteForm] = useState(false);
 
-  // Mock data per membri team
-  const [teamMembers] = useState<TeamMember[]>([
-    {
-      id: '1',
-      userId: 'user-1',
-      name: 'Marco Rossi',
-      email: 'marco.rossi@urbanova.com',
-      avatar: '👨‍💼',
-      role: 'PROJECT_MANAGER',
-      permissions: ROLE_PERMISSIONS.find(r => r.role === 'PROJECT_MANAGER')?.permissions || [],
-      isOnline: true,
-      lastSeen: new Date(),
-      currentActivity: 'Gestione progetto Roma Centro',
-      joinDate: new Date('2024-01-01'),
-      isActive: true,
-      performance: {
-        commentsCount: 45,
-        votesCount: 23,
-        favoritesCount: 12,
-        sessionsCreated: 8,
-        sessionsJoined: 15,
-        lastActivity: new Date()
-      }
-    },
-    {
-      id: '2',
-      userId: 'user-2',
-      name: 'Laura Bianchi',
-      email: 'laura.bianchi@urbanova.com',
-      avatar: '👩‍💼',
-      role: 'FINANCIAL_ANALYST',
-      permissions: ROLE_PERMISSIONS.find(r => r.role === 'FINANCIAL_ANALYST')?.permissions || [],
-      isOnline: true,
-      lastSeen: new Date(),
-      currentActivity: 'Analisi ROI progetto Milano',
-      joinDate: new Date('2024-01-15'),
-      isActive: true,
-      performance: {
-        commentsCount: 38,
-        votesCount: 19,
-        favoritesCount: 8,
-        sessionsCreated: 5,
-        sessionsJoined: 12,
-        lastActivity: new Date()
-      }
-    },
-    {
-      id: '3',
-      userId: 'user-3',
-      name: 'Giuseppe Verdi',
-      email: 'giuseppe.verdi@urbanova.com',
-      avatar: '👨‍💼',
-      role: 'ARCHITECT',
-      permissions: ROLE_PERMISSIONS.find(r => r.role === 'ARCHITECT')?.permissions || [],
-      isOnline: false,
-      lastSeen: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      currentActivity: 'Review progetto architettonico',
-      joinDate: new Date('2024-02-01'),
-      isActive: true,
-      performance: {
-        commentsCount: 29,
-        votesCount: 15,
-        favoritesCount: 6,
-        sessionsCreated: 3,
-        sessionsJoined: 8,
-        lastActivity: new Date(Date.now() - 2 * 60 * 60 * 1000)
-      }
-    },
-    {
-      id: '4',
-      userId: 'user-4',
-      name: 'Anna Neri',
-      email: 'anna.neri@urbanova.com',
-      avatar: '👩‍💼',
-      role: 'DEVELOPER',
-      permissions: ROLE_PERMISSIONS.find(r => r.role === 'DEVELOPER')?.permissions || [],
-      isOnline: true,
-      lastSeen: new Date(),
-      currentActivity: 'Ottimizzazione performance sistema',
-      joinDate: new Date('2024-02-15'),
-      isActive: true,
-      performance: {
-        commentsCount: 12,
-        votesCount: 8,
-        favoritesCount: 3,
-        sessionsCreated: 1,
-        sessionsJoined: 6,
-        lastActivity: new Date()
-      }
-    }
-  ]);
+  // Dati reali del team
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [teamStats, setTeamStats] = useState<TeamManagementStats | null>(null);
+  const [teamAnalytics, setTeamAnalytics] = useState<TeamAnalytics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [invitations, setInvitations] = useState<any[]>([]);
 
-  const [invitations] = useState([
-    {
-      id: 'inv-1',
-      email: 'mario.rossi@urbanova.com',
-      invitedBy: 'Marco Rossi',
-      invitedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-      role: 'TEAM_MEMBER',
-      status: 'pending',
-      expiresAt: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000)
-    }
-  ]);
+  // Team ID corrente (in produzione verrebbe dall'AuthContext)
+  const currentTeamId = 'urbanova-main-team';
 
   const getRoleIcon = (role: TeamRole) => {
     switch (role) {
@@ -174,8 +82,16 @@ export default function AdvancedTeamManagement({
   };
 
   const getRoleDescription = (role: TeamRole) => {
-    const roleConfig = ROLE_PERMISSIONS.find(r => r.role === role);
-    return roleConfig ? roleConfig.description : 'Ruolo non definito';
+    const roleDescriptions: Record<TeamRole, string> = {
+      'OWNER': 'Proprietario del team con accesso completo',
+      'ADMIN': 'Amministratore con gestione completa del team',
+      'PROJECT_MANAGER': 'Gestisce progetti e coordina il team',
+      'FINANCIAL_ANALYST': 'Analizza dati finanziari e ROI',
+      'ARCHITECT': 'Progetta soluzioni architetturali',
+      'DEVELOPER': 'Sviluppa e mantiene il codice',
+      'TEAM_MEMBER': 'Membro standard del team'
+    };
+    return roleDescriptions[role] || 'Ruolo non definito';
   };
 
   const handleInviteMember = () => {
@@ -195,6 +111,52 @@ export default function AdvancedTeamManagement({
     onUpdateMemberRole(memberId, newRole);
     setEditingMember(null);
   };
+
+  // Caricamento dati reali del team
+  useEffect(() => {
+    const loadTeamData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const [members, stats, analytics] = await Promise.all([
+          advancedTeamManagementService.getTeamMembers(currentTeamId),
+          advancedTeamManagementService.getTeamStats(currentTeamId),
+          advancedTeamManagementService.getTeamAnalytics(currentTeamId, 30)
+        ]);
+        
+        setTeamMembers(members);
+        setTeamStats(stats);
+        setTeamAnalytics(analytics);
+        
+        console.log('✅ [TeamManagement] Dati team caricati:', { members: members.length, stats, analytics });
+      } catch (error) {
+        console.error('❌ [TeamManagement] Errore caricamento dati team:', error);
+        setError('Impossibile caricare i dati del team. Riprova più tardi.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (isOpen) {
+      loadTeamData();
+    }
+  }, [isOpen, currentTeamId]);
+
+  // Sottoscrizione ai cambiamenti del team in tempo reale
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const unsubscribe = advancedTeamManagementService.subscribeToTeamChanges(
+      currentTeamId,
+      (members) => {
+        setTeamMembers(members);
+        console.log('🔄 [TeamManagement] Team aggiornato in tempo reale:', members.length);
+      }
+    );
+
+    return unsubscribe;
+  }, [isOpen, currentTeamId]);
 
   if (!isOpen) return null;
 
@@ -228,7 +190,7 @@ export default function AdvancedTeamManagement({
           <nav className="flex space-x-1 p-4">
             {[
               { id: 'members', name: 'Membri Team', icon: '👥', count: teamMembers.length },
-              { id: 'roles', name: 'Ruoli & Permessi', icon: '🛡️', count: ROLE_PERMISSIONS.length },
+              { id: 'roles', name: 'Ruoli & Permessi', icon: '🛡️', count: 7 },
               { id: 'invitations', name: 'Inviti', icon: '📧', count: invitations.length },
               { id: 'analytics', name: 'Analytics', icon: '📊' },
               { id: 'settings', name: 'Impostazioni', icon: '⚙️' }
@@ -256,8 +218,40 @@ export default function AdvancedTeamManagement({
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
-          {/* Members Tab */}
-          {activeTab === 'members' && (
+          {/* Loading State */}
+          {loading && (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Caricamento dati team...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && !loading && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <div className="w-5 h-5 bg-red-400 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs">!</span>
+                  </div>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">Errore nel caricamento</h3>
+                  <div className="mt-2 text-sm text-red-700">
+                    <p>{error}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Content quando non in loading e senza errori */}
+          {!loading && !error && (
+            <>
+              {/* Members Tab */}
+              {activeTab === 'members' && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">Membri del Team</h3>
@@ -288,9 +282,17 @@ export default function AdvancedTeamManagement({
                       onChange={(e) => setInviteRole(e.target.value as TeamRole)}
                       className="px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
-                      {ROLE_PERMISSIONS.map((role) => (
+                      {[
+                        { role: 'OWNER', name: 'Proprietario' },
+                        { role: 'ADMIN', name: 'Amministratore' },
+                        { role: 'PROJECT_MANAGER', name: 'Project Manager' },
+                        { role: 'FINANCIAL_ANALYST', name: 'Analista Finanziario' },
+                        { role: 'ARCHITECT', name: 'Architetto' },
+                        { role: 'DEVELOPER', name: 'Sviluppatore' },
+                        { role: 'TEAM_MEMBER', name: 'Membro Team' }
+                      ].map((role) => (
                         <option key={role.role} value={role.role}>
-                          {getRoleIcon(role.role)} {role.role.replace('_', ' ')}
+                          {getRoleIcon(role.role as TeamRole)} {role.name}
                         </option>
                       ))}
                     </select>
@@ -562,19 +564,21 @@ export default function AdvancedTeamManagement({
               <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <h4 className="font-medium text-gray-900 mb-4">Performance per Ruolo</h4>
                 <div className="space-y-4">
-                  {ROLE_PERMISSIONS.map((roleConfig) => {
-                    const roleMembers = teamMembers.filter(m => m.role === roleConfig.role);
+                  {[
+                    'OWNER', 'ADMIN', 'PROJECT_MANAGER', 'FINANCIAL_ANALYST', 'ARCHITECT', 'DEVELOPER', 'TEAM_MEMBER'
+                  ].map((role) => {
+                    const roleMembers = teamMembers.filter(m => m.role === role as TeamRole);
                     if (roleMembers.length === 0) return null;
                     
                     const avgComments = Math.round(
-                      roleMembers.reduce((sum, m) => sum + m.performance.commentsCount, 0) / roleMembers.length
+                      roleMembers.reduce((sum, m) => sum + (m.performance?.commentsCount || 0), 0) / roleMembers.length
                     );
                     
                     return (
-                      <div key={roleConfig.role} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div key={role} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div className="flex items-center gap-3">
-                          <span className="text-xl">{getRoleIcon(roleConfig.role)}</span>
-                          <span className="font-medium">{roleConfig.role.replace('_', ' ')}</span>
+                          <span className="text-xl">{getRoleIcon(role as TeamRole)}</span>
+                          <span className="font-medium">{role.replace('_', ' ')}</span>
                           <Badge variant="outline">{roleMembers.length} membri</Badge>
                         </div>
                         <div className="text-right">
@@ -652,6 +656,8 @@ export default function AdvancedTeamManagement({
                 </div>
               </div>
             </div>
+          )}
+            </>
           )}
         </div>
       </div>

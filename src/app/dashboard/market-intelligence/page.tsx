@@ -18,9 +18,7 @@ import TeamCollaborationPanel from '@/components/ui/TeamCollaborationPanel';
 import CollaborativeSearchSession from '@/components/ui/CollaborativeSearchSession';
 import TeamCommentsVoting from '@/components/ui/TeamCommentsVoting';
 
-import AdvancedTeamManagement from '@/components/ui/AdvancedTeamManagement';
-import WorkflowManagement from '@/components/ui/WorkflowManagement';
-import RealtimeCollaboration from '@/components/ui/RealtimeCollaboration';
+// Gestione Team spostata nelle Impostazioni
 
 
 import SecurityCompliance from '@/components/ui/SecurityCompliance';
@@ -30,8 +28,7 @@ import SecurityCompliance from '@/components/ui/SecurityCompliance';
 
 
 
-import { teamRoleManager, ROLE_PERMISSIONS } from '@/lib/teamRoleManager';
-import { TeamRole, TeamMember, Permission } from '@/types/team';
+// Gestione Team spostata nelle Impostazioni
 
 import { 
   SearchIcon, 
@@ -153,16 +150,7 @@ export default function LandScrapingPage() {
   // Stati per collaborazione team
   const [showTeamCollaboration, setShowTeamCollaboration] = useState(false);
 
-  const [showAdvancedTeamManagement, setShowAdvancedTeamManagement] = useState(false);
-  const [showWorkflowManagement, setShowWorkflowManagement] = useState(false);
-  
-  // Stati per gestione avanzata team
-  const [currentUserRole, setCurrentUserRole] = useState<TeamRole>('PROJECT_MANAGER');
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [teamPermissions, setTeamPermissions] = useState<Permission[]>([]);
-
-  // Stati per Realtime Collaboration
-  const [showRealtimeCollaboration, setShowRealtimeCollaboration] = useState(false);
+  // Gestione Team spostata nelle Impostazioni
 
 
 
@@ -224,34 +212,7 @@ export default function LandScrapingPage() {
     }
   }, [filters, searchResults]);
 
-  // Inizializza team con utente corrente
-  useEffect(() => {
-    const currentUser: TeamMember = {
-      id: 'current-user',
-      userId: 'current-user',
-      name: 'Utente Corrente',
-      email: 'utente@urbanova.com',
-      avatar: '👨‍💻',
-      role: currentUserRole,
-      permissions: ROLE_PERMISSIONS.find(r => r.role === currentUserRole)?.permissions || [],
-      isOnline: true,
-      lastSeen: new Date(),
-      currentActivity: 'Gestione team',
-      joinDate: new Date(),
-      isActive: true,
-      performance: {
-        commentsCount: 0,
-        votesCount: 0,
-        favoritesCount: 0,
-        sessionsCreated: 0,
-        sessionsJoined: 0,
-        lastActivity: new Date()
-      }
-    };
-    
-    setTeamMembers([currentUser]);
-    setTeamPermissions(currentUser.permissions);
-  }, [currentUserRole]);
+  // Gestione Team spostata nelle Impostazioni
 
   const initializeServices = async () => {
     try {
@@ -482,55 +443,7 @@ export default function LandScrapingPage() {
 
 
 
-  // Funzioni per gestione avanzata team
-  const handleInviteTeamMember = (email: string, role: TeamRole) => {
-    const newMember: TeamMember = {
-      id: Date.now().toString(),
-      userId: `user-${Date.now()}`,
-      name: email.split('@')[0],
-      email,
-      avatar: '👤',
-      role,
-      permissions: ROLE_PERMISSIONS.find(r => r.role === role)?.permissions || [],
-      isOnline: false,
-      lastSeen: new Date(),
-      currentActivity: 'Invitato',
-      joinDate: new Date(),
-      isActive: true,
-      performance: {
-        commentsCount: 0,
-        votesCount: 0,
-        favoritesCount: 0,
-        sessionsCreated: 0,
-        sessionsJoined: 0,
-        lastActivity: new Date()
-      }
-    };
-    
-    setTeamMembers(prev => [...prev, newMember]);
-    toast(`Membro invitato con ruolo ${role}`, { icon: '👥' });
-  };
-
-  const handleUpdateMemberRole = (memberId: string, newRole: TeamRole) => {
-    setTeamMembers(prev => prev.map(member => 
-      member.id === memberId 
-        ? { ...member, role: newRole, permissions: ROLE_PERMISSIONS.find(r => r.role === newRole)?.permissions || [] }
-        : member
-    ));
-    toast('Ruolo aggiornato', { icon: '🔄' });
-  };
-
-  const handleRemoveTeamMember = (memberId: string) => {
-    setTeamMembers(prev => prev.filter(member => member.id !== memberId));
-    toast('Membro rimosso dal team', { icon: '👋' });
-  };
-
-  const handleUpdateMemberPermissions = (memberId: string, permissions: Permission[]) => {
-    setTeamMembers(prev => prev.map(member => 
-      member.id === memberId ? { ...member, permissions } : member
-    ));
-    toast('Permessi aggiornati', { icon: '🔐' });
-  };
+  // Gestione Team spostata nelle Impostazioni
 
 
 
@@ -965,26 +878,7 @@ export default function LandScrapingPage() {
               
 
 
-              <button
-                onClick={() => setShowAdvancedTeamManagement(true)}
-                className="px-3 py-2 text-sm bg-purple-50 text-purple-700 border border-purple-200 rounded hover:bg-purple-100 transition-colors"
-              >
-                🛡️ Gestione Avanzata
-              </button>
-
-              <button
-                onClick={() => setShowWorkflowManagement(true)}
-                className="px-3 py-2 text-sm bg-indigo-50 text-indigo-700 border border-indigo-200 rounded hover:bg-indigo-100 transition-colors"
-              >
-                🔄 Workflow & Approvazioni
-              </button>
-
-                                            <button
-                onClick={() => setShowRealtimeCollaboration(true)}
-                className="px-3 py-2 text-sm bg-green-50 text-green-700 border border-green-200 rounded hover:bg-green-100 transition-colors"
-              >
-                ⚡ Real-time Collaboration
-              </button>
+              {/* Gestione Avanzata Team spostata nelle Impostazioni */}
             </div>
             
             {/* Indicatore stato connessione e ruolo */}
@@ -996,17 +890,7 @@ export default function LandScrapingPage() {
                 </span>
               </div>
               
-              {/* Indicatore ruolo corrente */}
-              <div className="flex items-center gap-2 px-3 py-1 bg-purple-100 text-purple-700 rounded-full">
-                <span className="text-xs">👑</span>
-                <span className="text-xs font-medium">
-                  {currentUserRole === 'PROJECT_MANAGER' && 'Project Manager'}
-                  {currentUserRole === 'FINANCIAL_ANALYST' && 'Analista Finanziario'}
-                  {currentUserRole === 'ARCHITECT' && 'Architetto'}
-                  {currentUserRole === 'DEVELOPER' && 'Sviluppatore'}
-                  {currentUserRole === 'TEAM_MEMBER' && 'Membro Team'}
-                </span>
-              </div>
+              {/* Gestione Team spostata nelle Impostazioni */}
             </div>
             
             {servicesStatus ? (
@@ -1481,33 +1365,7 @@ export default function LandScrapingPage() {
 
 
 
-        {/* Gestione Avanzata Team */}
-        <AdvancedTeamManagement
-          isOpen={showAdvancedTeamManagement}
-          onClose={() => setShowAdvancedTeamManagement(false)}
-          onInviteMember={handleInviteTeamMember}
-          onUpdateMemberRole={handleUpdateMemberRole}
-          onRemoveMember={handleRemoveTeamMember}
-          onUpdatePermissions={handleUpdateMemberPermissions}
-        />
-
-        {/* Workflow Management & Approvals */}
-        <WorkflowManagement
-          isOpen={showWorkflowManagement}
-          onClose={() => setShowWorkflowManagement(false)}
-          currentUserId="current-user"
-          currentUserRole={currentUserRole}
-        />
-
-        {/* Real-time Collaboration */}
-        <RealtimeCollaboration
-          isOpen={showRealtimeCollaboration}
-          onClose={() => setShowRealtimeCollaboration(false)}
-          currentUserId="current-user"
-          currentUserName="Utente Corrente"
-          currentUserRole={currentUserRole}
-          currentUserAvatar="👨‍💻"
-        />
+        {/* Gestione Avanzata Team spostata nelle Impostazioni */}
 
 
 

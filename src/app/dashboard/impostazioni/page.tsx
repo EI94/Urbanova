@@ -1,64 +1,603 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { SettingsIcon, UserIcon, ShieldIcon } from '@/components/icons';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
+import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
+import { UserProfile } from '@/types/userProfile';
+import { NotificationStats } from '@/types/notifications';
+import { toast } from 'react-hot-toast';
+
+// Componenti UI
+import LanguageSelector from '@/components/ui/LanguageSelector';
+import NotificationsPanel from '@/components/ui/NotificationsPanel';
+import UserProfilePanel from '@/components/ui/UserProfilePanel';
+
+// Componenti Gestione Team
+import AdvancedTeamManagement from '@/components/ui/AdvancedTeamManagement';
+import WorkflowManagement from '@/components/ui/WorkflowManagement';
+import RealtimeCollaboration from '@/components/ui/RealtimeCollaboration';
+import SecurityCompliance from '@/components/ui/SecurityCompliance';
+import MonitoringObservability from '@/components/ui/MonitoringObservability';
+import AIMLCenter from '@/components/ui/AIMLCenter';
+import Web3Center from '@/components/ui/Web3Center';
+import APIGatewayCenter from '@/components/ui/APIGatewayCenter';
+import DevOpsCenter from '@/components/ui/DevOpsCenter';
+import SecurityCenter from '@/components/ui/SecurityCenter';
+
+// Import icone
+import { 
+  SettingsIcon,
+  UsersIcon,
+  ShieldIcon,
+  BellIcon,
+  UserIcon,
+  LanguageIcon,
+  SecurityIcon,
+  DatabaseIcon,
+  CloudIcon,
+  CodeIcon,
+  LockIcon,
+  ChartIcon,
+  CogIcon,
+  KeyIcon,
+  GlobeIcon
+} from '@/components/icons';
+
+interface SettingsSection {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  component?: React.ReactNode;
+  isActive: boolean;
+}
 
 export default function ImpostazioniPage() {
   const { t } = useLanguage();
+  const { currentUser } = useAuth();
+  const [activeSection, setActiveSection] = useState<string>('profile');
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [notificationStats, setNotificationStats] = useState<NotificationStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Stati per i modali
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showUserProfile, setShowUserProfile] = useState(false);
+  const [showAdvancedTeamManagement, setShowAdvancedTeamManagement] = useState(false);
+  const [showWorkflowManagement, setShowWorkflowManagement] = useState(false);
+  const [showRealtimeCollaboration, setShowRealtimeCollaboration] = useState(false);
+  const [showSecurityCompliance, setShowSecurityCompliance] = useState(false);
+  const [showMonitoringObservability, setShowMonitoringObservability] = useState(false);
+  const [showAIMLCenter, setShowAIMLCenter] = useState(false);
+  const [showWeb3Center, setShowWeb3Center] = useState(false);
+  const [showAPIGatewayCenter, setShowAPIGatewayCenter] = useState(false);
+  const [showDevOpsCenter, setShowDevOpsCenter] = useState(false);
+  const [showSecurityCenter, setShowSecurityCenter] = useState(false);
+
+  // Sezioni impostazioni
+  const settingsSections: SettingsSection[] = [
+    {
+      id: 'profile',
+      title: 'Profilo Utente',
+      description: 'Gestisci i tuoi dati personali e preferenze',
+      icon: <UserIcon className="h-5 w-5" />,
+      isActive: true
+    },
+    {
+      id: 'team',
+      title: 'Gestione Team Avanzata',
+      description: 'Gestisci ruoli, permessi e performance del team',
+      icon: <UsersIcon className="h-5 w-5" />,
+      isActive: true
+    },
+    {
+      id: 'security',
+      title: 'Sicurezza & Compliance',
+      description: 'Configura sicurezza, privacy e conformità',
+      icon: <ShieldIcon className="h-5 w-5" />,
+      isActive: true
+    },
+    {
+      id: 'notifications',
+      title: 'Notifiche & Comunicazioni',
+      description: 'Gestisci notifiche e preferenze comunicazioni',
+      icon: <BellIcon className="h-5 w-5" />,
+      isActive: true
+    },
+    {
+      id: 'language',
+      title: 'Lingua & Localizzazione',
+      description: 'Configura lingua e impostazioni regionali',
+      icon: <LanguageIcon className="h-5 w-5" />,
+      isActive: true
+    },
+    {
+      id: 'workflow',
+      title: 'Workflow & Approvazioni',
+      description: 'Gestisci processi e flussi di approvazione',
+      icon: <CogIcon className="h-5 w-5" />,
+      isActive: true
+    },
+    {
+      id: 'collaboration',
+      title: 'Collaborazione Real-time',
+      description: 'Strumenti di collaborazione avanzati',
+      icon: <UsersIcon className="h-5 w-5" />,
+      isActive: true
+    },
+    {
+      id: 'monitoring',
+      title: 'Monitoring & Observability',
+      description: 'Monitoraggio sistema e metriche performance',
+      icon: <ChartIcon className="h-5 w-5" />,
+      isActive: true
+    },
+    {
+      id: 'ai-ml',
+      title: 'AI & Machine Learning',
+      description: 'Configurazione modelli AI e ML',
+      icon: <CodeIcon className="h-5 w-5" />,
+      isActive: true
+    },
+    {
+      id: 'web3',
+      title: 'Web3 & Blockchain',
+      description: 'Integrazioni blockchain e Web3',
+      icon: <GlobeIcon className="h-5 w-5" />,
+      isActive: true
+    },
+    {
+      id: 'api-gateway',
+      title: 'API Gateway & Microservices',
+      description: 'Gestione API e architettura microservizi',
+      icon: <KeyIcon className="h-5 w-5" />,
+      isActive: true
+    },
+    {
+      id: 'devops',
+      title: 'DevOps & CI/CD',
+      description: 'Pipeline CI/CD e automazione deployment',
+      icon: <CloudIcon className="h-5 w-5" />,
+      isActive: true
+    }
+  ];
+
+  useEffect(() => {
+    if (currentUser) {
+      loadUserData();
+    }
+  }, [currentUser]);
+
+  const loadUserData = async () => {
+    try {
+      setLoading(true);
+      const [profile, stats] = await Promise.all([
+        firebaseUserProfileService.getUserProfile(currentUser?.uid || ''),
+        firebaseNotificationService.getNotificationStats(currentUser?.uid || ''),
+      ]);
+      
+      setUserProfile(profile);
+      setNotificationStats(stats);
+    } catch (error) {
+      console.error('Error loading user data:', error);
+      toast('Errore nel caricamento dati utente', { icon: '❌' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSectionChange = (sectionId: string) => {
+    setActiveSection(sectionId);
+  };
+
+  const renderSectionContent = () => {
+    switch (activeSection) {
+      case 'profile':
+        return (
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Informazioni Personali</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Nome</label>
+                  <input
+                    type="text"
+                    value={userProfile?.firstName || ''}
+                    onChange={(e) => setUserProfile(prev => prev ? { ...prev, firstName: e.target.value } : null)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Inserisci il tuo nome"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Cognome</label>
+                  <input
+                    type="text"
+                    value={userProfile?.lastName || ''}
+                    onChange={(e) => setUserProfile(prev => prev ? { ...prev, lastName: e.target.value } : null)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Inserisci il tuo cognome"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                  <input
+                    type="email"
+                    value={userProfile?.email || currentUser?.email || ''}
+                    disabled
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Ruolo</label>
+                  <input
+                    type="text"
+                    value={userProfile?.role || 'Utente'}
+                    disabled
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
+                  />
+                </div>
+              </div>
+              <div className="mt-6">
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                  Salva Modifiche
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'team':
+        return (
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Gestione Team Avanzata</h3>
+                  <p className="text-sm text-gray-600">Gestisci ruoli, permessi e performance del team</p>
+                </div>
+                <button
+                  onClick={() => setShowAdvancedTeamManagement(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  Gestisci Team
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <div className="flex items-center mb-2">
+                    <UsersIcon className="h-5 w-5 text-blue-600 mr-2" />
+                    <span className="font-medium text-blue-900">Membri Team</span>
+                  </div>
+                  <p className="text-2xl font-bold text-blue-900">4</p>
+                  <p className="text-sm text-blue-700">Attivi</p>
+                </div>
+                
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <div className="flex items-center mb-2">
+                    <ShieldIcon className="h-5 w-5 text-green-600 mr-2" />
+                    <span className="font-medium text-green-900">Ruoli</span>
+                  </div>
+                  <p className="text-2xl font-bold text-green-900">5</p>
+                  <p className="text-sm text-green-700">Configurati</p>
+                </div>
+                
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <div className="flex items-center mb-2">
+                    <ChartIcon className="h-5 w-5 text-purple-600 mr-2" />
+                    <span className="font-medium text-purple-900">Performance</span>
+                  </div>
+                  <p className="text-2xl font-bold text-purple-900">92%</p>
+                  <p className="text-sm text-purple-700">Media Team</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'security':
+        return (
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Sicurezza & Compliance</h3>
+                  <p className="text-sm text-gray-600">Configura sicurezza, privacy e conformità</p>
+                </div>
+                <button
+                  onClick={() => setShowSecurityCompliance(true)}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                >
+                  Configura Sicurezza
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center">
+                    <LockIcon className="h-5 w-5 text-green-600 mr-3" />
+                    <span className="font-medium">Autenticazione a Due Fattori</span>
+                  </div>
+                  <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Attiva</span>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center">
+                    <ShieldIcon className="h-5 w-5 text-blue-600 mr-3" />
+                    <span className="font-medium">Crittografia Dati</span>
+                  </div>
+                  <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">AES-256</span>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center">
+                    <SecurityIcon className="h-5 w-5 text-yellow-600 mr-3" />
+                    <span className="font-medium">Audit Log</span>
+                  </div>
+                  <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Attivo</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'notifications':
+        return (
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Notifiche & Comunicazioni</h3>
+                  <p className="text-sm text-gray-600">Gestisci notifiche e preferenze comunicazioni</p>
+                </div>
+                <button
+                  onClick={() => setShowNotifications(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  Configura Notifiche
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-3">Notifiche Push</h4>
+                  <div className="space-y-2">
+                    <label className="flex items-center">
+                      <input type="checkbox" className="mr-2" defaultChecked />
+                      <span className="text-sm">Progetti</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="checkbox" className="mr-2" defaultChecked />
+                      <span className="text-sm">Permessi</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="checkbox" className="mr-2" />
+                      <span className="text-sm">Marketing</span>
+                    </label>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-3">Notifiche Email</h4>
+                  <div className="space-y-2">
+                    <label className="flex items-center">
+                      <input type="checkbox" className="mr-2" defaultChecked />
+                      <span className="text-sm">Report Settimanali</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="checkbox" className="mr-2" defaultChecked />
+                      <span className="text-sm">Aggiornamenti Progetti</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="checkbox" className="mr-2" />
+                      <span className="text-sm">Newsletter</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'language':
+        return (
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Lingua & Localizzazione</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Lingua Principale</label>
+                  <LanguageSelector variant="full" />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Fuso Orario</label>
+                  <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="Europe/Rome">Europe/Rome (UTC+1)</option>
+                    <option value="Europe/London">Europe/London (UTC+0)</option>
+                    <option value="America/New_York">America/New_York (UTC-5)</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Formato Data</label>
+                  <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                    <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                    <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return (
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Sezione in Sviluppo</h3>
+            <p className="text-gray-600">Questa sezione è in fase di sviluppo e sarà disponibile prossimamente.</p>
+          </div>
+        );
+    }
+  };
+
+  if (loading) {
+    return (
+      <DashboardLayout title="Impostazioni">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Caricamento impostazioni...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">⚙️ {t('title', 'settings')}</h1>
-          <p className="text-gray-600 mt-1">{t('subtitle', 'settings')}</p>
+    <DashboardLayout title="Impostazioni">
+      <div className="flex gap-6">
+        {/* Sidebar Impostazioni */}
+        <div className="w-64 flex-shrink-0">
+          <div className="bg-white rounded-lg shadow-sm border p-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Impostazioni</h3>
+            <nav className="space-y-1">
+              {settingsSections.map((section) => (
+                <button
+                  key={section.id}
+                  onClick={() => handleSectionChange(section.id)}
+                  className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeSection === section.id
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  }`}
+                >
+                  <div className="flex items-center">
+                    {section.icon}
+                    <span className="ml-3">{section.title}</span>
+                  </div>
+                </button>
+              ))}
+            </nav>
+          </div>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Profilo Utente */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center mb-4">
-              <UserIcon className="h-6 w-6 text-blue-600 mr-2" />
-              <h3 className="text-lg font-semibold text-gray-900">{t('profile.title', 'settings')}</h3>
-            </div>
-            <p className="text-gray-600 mb-4">{t('profile.subtitle', 'settings')}</p>
-            <div className="text-sm text-gray-500">
-              <div>• {t('profile.personalData', 'settings')}</div>
-              <div>• {t('profile.languagePreferences', 'settings')}</div>
-              <div>• {t('profile.timezone', 'settings')}</div>
-            </div>
-          </div>
 
-          {/* Sicurezza */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center mb-4">
-              <ShieldIcon className="h-6 w-6 text-green-600 mr-2" />
-              <h3 className="text-lg font-semibold text-gray-900">{t('security.title', 'settings')}</h3>
-            </div>
-            <p className="text-gray-600 mb-4">{t('security.subtitle', 'settings')}</p>
-            <div className="text-sm text-gray-500">
-              <div>• {t('security.password', 'settings')}</div>
-              <div>• {t('security.twoFactorAuth', 'settings')}</div>
-              <div>• {t('security.privacy', 'settings')}</div>
-            </div>
-          </div>
-
-          {/* Sistema */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center mb-4">
-              <SettingsIcon className="h-6 w-6 text-orange-600 mr-2" />
-              <h3 className="text-lg font-semibold text-gray-900">{t('system.title', 'settings')}</h3>
-            </div>
-            <p className="text-gray-600 mb-4">{t('system.subtitle', 'settings')}</p>
-            <div className="text-sm text-gray-500">
-              <div>• {t('system.apiKeys', 'settings')}</div>
-              <div>• {t('system.integrations', 'settings')}</div>
-              <div>• {t('system.backup', 'settings')}</div>
-            </div>
-          </div>
+        {/* Contenuto Principale */}
+        <div className="flex-1">
+          {renderSectionContent()}
         </div>
       </div>
+
+      {/* Modali */}
+      <NotificationsPanel 
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
+      />
+
+      <UserProfilePanel 
+        isOpen={showUserProfile}
+        onClose={() => setShowUserProfile(false)}
+      />
+
+      <AdvancedTeamManagement
+        isOpen={showAdvancedTeamManagement}
+        onClose={() => setShowAdvancedTeamManagement(false)}
+        onInviteMember={(email, role) => {
+          toast(`Membro invitato con ruolo ${role}`, { icon: '👥' });
+        }}
+        onUpdateMemberRole={(memberId, newRole) => {
+          toast('Ruolo aggiornato', { icon: '🔄' });
+        }}
+        onRemoveMember={(memberId) => {
+          toast('Membro rimosso dal team', { icon: '👋' });
+        }}
+        onUpdatePermissions={(memberId, permissions) => {
+          toast('Permessi aggiornati', { icon: '🔐' });
+        }}
+      />
+
+      <WorkflowManagement
+        isOpen={showWorkflowManagement}
+        onClose={() => setShowWorkflowManagement(false)}
+        currentUserId={currentUser?.uid || ''}
+        currentUserRole="PROJECT_MANAGER"
+      />
+
+      <RealtimeCollaboration
+        isOpen={showRealtimeCollaboration}
+        onClose={() => setShowRealtimeCollaboration(false)}
+        currentUserId={currentUser?.uid || ''}
+        currentUserName={userProfile?.displayName || 'Utente'}
+        currentUserRole="PROJECT_MANAGER"
+        currentUserAvatar="👨‍💻"
+      />
+
+      <SecurityCompliance
+        isOpen={showSecurityCompliance}
+        onClose={() => setShowSecurityCompliance(false)}
+        currentUserId={currentUser?.uid || ''}
+        currentUserName={userProfile?.displayName || 'Utente'}
+        currentUserRole="PROJECT_MANAGER"
+        currentUserAvatar="👨‍💻"
+      />
+
+      <MonitoringObservability
+        isOpen={showMonitoringObservability}
+        onClose={() => setShowMonitoringObservability(false)}
+        currentUserId={currentUser?.uid || ''}
+        currentUserName={userProfile?.displayName || 'Utente'}
+        currentUserRole="PROJECT_MANAGER"
+        currentUserAvatar="👨‍💻"
+      />
+
+      <AIMLCenter
+        isOpen={showAIMLCenter}
+        onClose={() => setShowAIMLCenter(false)}
+        currentUserId={currentUser?.uid || ''}
+        currentUserName={userProfile?.displayName || 'Utente'}
+        currentUserRole="PROJECT_MANAGER"
+        currentUserAvatar="👨‍💻"
+      />
+
+      <Web3Center
+        isOpen={showWeb3Center}
+        onClose={() => setShowWeb3Center(false)}
+        currentUserId={currentUser?.uid || ''}
+        currentUserName={userProfile?.displayName || 'Utente'}
+        currentUserRole="PROJECT_MANAGER"
+        currentUserAvatar="👨‍💻"
+      />
+
+      <APIGatewayCenter
+        isOpen={showAPIGatewayCenter}
+        onClose={() => setShowAPIGatewayCenter(false)}
+        currentUserId={currentUser?.uid || ''}
+        currentUserName={userProfile?.displayName || 'Utente'}
+        currentUserRole="PROJECT_MANAGER"
+        currentUserAvatar="👨‍💻"
+      />
+
+      <DevOpsCenter
+        isOpen={showDevOpsCenter}
+        onClose={() => setShowDevOpsCenter(false)}
+        currentUserId={currentUser?.uid || ''}
+        currentUserName={userProfile?.displayName || 'Utente'}
+        currentUserRole="PROJECT_MANAGER"
+        currentUserAvatar="👨‍💻"
+      />
+
+      <SecurityCenter
+        isOpen={showSecurityCenter}
+        onClose={() => setShowSecurityCenter(false)}
+        currentUserId={currentUser?.uid || ''}
+        currentUserName={userProfile?.displayName || 'Utente'}
+        currentUserRole="PROJECT_MANAGER"
+        currentUserAvatar="👨‍💻"
+      />
     </DashboardLayout>
   );
 }

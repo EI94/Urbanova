@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
-import { robustProjectDeletionService } from '@/lib/robustProjectDeletionService';
+
 
 import { 
   CalculatorIcon, 
@@ -36,8 +36,9 @@ export default function FeasibilityAnalysisPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<FeasibilityProject | null>(null);
   const [showComparison, setShowComparison] = useState(false);
-  const [project1Id, setProject1Id] = useState('');
-  const [project2Id, setProject2Id] = useState('');
+  const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
+  const [comparisonData, setComparisonData] = useState<any>(null);
+  const [comparisonMode, setComparisonMode] = useState<'basic' | 'advanced' | 'financial'>('basic');
   const [deletionInProgress, setDeletionInProgress] = useState<Set<string>>(new Set());
 
 
@@ -132,10 +133,10 @@ export default function FeasibilityAnalysisPage() {
     try {
       toast('🗑️ Eliminazione progetto in corso...', { icon: '⏳' });
       
-      // 1. ELIMINAZIONE ROBUSTA E SINCRONIZZATA
-      const deletionResult = await robustProjectDeletionService.robustDeleteProject(projectId);
+      // 1. ELIMINAZIONE PROGETTO
+      const deletionResult = await feasibilityService.deleteProject(projectId);
       
-      if (deletionResult.success && deletionResult.backendVerified) {
+      if (deletionResult) {
         // 2. AGGIORNA IMMEDIATAMENTE TUTTE LE LISTE
         setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
         setRanking(prevRanking => prevRanking.filter(p => p.id !== projectId));
@@ -192,20 +193,123 @@ export default function FeasibilityAnalysisPage() {
   };
 
   const handleCompareProjects = async () => {
-    if (!project1Id || !project2Id) {
-      toast(t('selectTwo', 'feasibility.toasts'), { icon: '⚠️' });
+    if (selectedProjects.length < 2) {
+      toast('⚠️ Seleziona almeno 2 progetti da confrontare', { icon: '⚠️' });
       return;
     }
 
     try {
-      const comparison = await feasibilityService.compareProjects(project1Id, project2Id, 'user123');
-      toast(`✅ ${t('compareCreated', 'feasibility.toasts')}`, { icon: '✅' });
-      setShowComparison(false);
-      setProject1Id('');
-      setProject2Id('');
+      // Genera confronto intelligente
+      const projectsToCompare = projects.filter(p => selectedProjects.includes(p.id));
+      const comparison = generateSmartComparison(projectsToCompare);
+      
+      setComparisonData(comparison);
+      toast('✅ Confronto generato con successo!', { icon: '✅' });
+      
     } catch (error) {
-      toast(`❌ ${t('compareError', 'feasibility.toasts')}` as string, { icon: '❌' });
+      toast(`❌ Errore generazione confronto: ${error}`, { icon: '❌' });
     }
+  };
+
+  const generateSmartComparison = (projects: FeasibilityProject[]) => {
+    if (projects.length < 2) return null;
+
+    const comparison = {
+      summary: {
+        totalProjects: projects.length,
+        totalInvestment: projects.reduce((sum, p) => sum + (p.costs?.land?.purchasePrice || 0), 0),
+        averageMargin: projects.reduce((sum, p) => sum + (p.results?.margin || 0), 0) / projects.length,
+        bestPerformer: projects.reduce((best, current) => 
+          (current.results?.margin || 0) > (best.results?.margin || 0) ? current : best
+        ),
+        worstPerformer: projects.reduce((worst, current) => 
+          (current.results?.margin || 0) < (worst.results?.margin || 0) ? current : worst
+        )
+      },
+      detailed: projects.map(project => ({
+        id: project.id,
+        name: project.name,
+        location: project.location,
+        investment: project.costs?.land?.purchasePrice || 0,
+        revenue: project.results?.revenue || 0,
+        profit: project.results?.profit || 0,
+        margin: project.results?.margin || 0,
+        roi: project.results?.roi || 0,
+        status: project.status,
+        risk: calculateProjectRisk(project),
+        potential: calculateProjectPotential(project)
+      })),
+      insights: generateInsights(projects)
+    };
+
+    return comparison;
+  };
+
+  const calculateProjectRisk = (project: FeasibilityProject) => {
+    const margin = project.results?.margin || 0;
+    const roi = project.results?.roi || 0;
+    const investment = project.costs?.land?.purchasePrice || 0;
+    
+    let riskScore = 0;
+    
+    if (margin < 20) riskScore += 3;
+    else if (margin < 30) riskScore += 2;
+    else if (margin < 40) riskScore += 1;
+    
+    if (roi < 15) riskScore += 2;
+    else if (roi < 25) riskScore += 1;
+    
+    if (investment > 1000000) riskScore += 1;
+    
+    if (riskScore <= 2) return 'Basso';
+    if (riskScore <= 4) return 'Medio';
+    return 'Alto';
+  };
+
+  const calculateProjectPotential = (project: FeasibilityProject) => {
+    const margin = project.results?.margin || 0;
+    const roi = project.results?.roi || 0;
+    const location = project.location || '';
+    
+    let potentialScore = 0;
+    
+    if (margin > 40) potentialScore += 3;
+    else if (margin > 30) potentialScore += 2;
+    else if (margin > 20) potentialScore += 1;
+    
+    if (roi > 25) potentialScore += 3;
+    else if (roi > 20) potentialScore += 2;
+    else if (roi > 15) potentialScore += 1;
+    
+    if (location.includes('Roma') || location.includes('Milano')) potentialScore += 2;
+    else if (location.includes('Torino') || location.includes('Napoli')) potentialScore += 1;
+    
+    if (potentialScore >= 6) return 'Eccellente';
+    if (potentialScore >= 4) return 'Buono';
+    if (potentialScore >= 2) return 'Discreto';
+    return 'Limitato';
+  };
+
+  const generateInsights = (projects: FeasibilityProject[]) => {
+    const insights = [];
+    
+    // Analisi ROI
+    const avgRoi = projects.reduce((sum, p) => sum + (p.results?.roi || 0), 0) / projects.length;
+    if (avgRoi > 25) insights.push('🎯 ROI medio eccellente - Portfolio molto profittevole');
+    else if (avgRoi > 20) insights.push('📈 ROI medio buono - Portfolio solido');
+    else insights.push('⚠️ ROI medio basso - Necessario ottimizzazione');
+    
+    // Analisi diversificazione
+    const locations = [...new Set(projects.map(p => p.location))];
+    if (locations.length > 2) insights.push('🌍 Buona diversificazione geografica');
+    else insights.push('📍 Concentrazione geografica - Considera diversificazione');
+    
+    // Analisi margini
+    const highMarginProjects = projects.filter(p => (p.results?.margin || 0) > 35);
+    if (highMarginProjects.length > projects.length / 2) insights.push('💎 Portfolio con margini elevati');
+    else insights.push('📊 Portfolio con margini variabili');
+    
+    return insights;
   };
 
   const formatCurrency = (value: number) => {
@@ -303,87 +407,7 @@ export default function FeasibilityAnalysisPage() {
               {t('compare', 'feasibility')}
             </button>
             
-            <button 
-              onClick={async () => {
-                if (!user) {
-                  toast('❌ Utente non autenticato', { icon: '❌' });
-                  return;
-                }
-                
-                if (!confirm('⚠️ ATTENZIONE: Questa operazione eliminerà TUTTI i progetti dal database. Sei sicuro di voler continuare?')) {
-                  return;
-                }
-                
-                try {
-                  toast('🧹 Pulizia completa database in corso...', { icon: '⏳' });
-                  
-                  const result = await robustProjectDeletionService.completeDatabaseCleanup();
-                  
-                  if (result.success) {
-                    toast(`✅ ${result.message}`, { icon: '✅' });
-                    
-                    // Pulisci tutte le liste locali
-                    setProjects([]);
-                    setRanking([]);
-                    setStatistics({
-                      totalProjects: 0,
-                      averageMargin: 0,
-                      totalInvestment: 0,
-                      onTarget: 0
-                    });
-                    
-                    // Forza refresh completo
-                    setTimeout(() => {
-                      loadData(true);
-                    }, 1000);
-                    
-                  } else {
-                    throw new Error(result.message);
-                  }
-                  
-                } catch (error) {
-                  toast(`❌ Errore pulizia database: ${error}`, { icon: '❌' });
-                }
-              }}
-              className="btn btn-error"
-            >
-              🧹 Pulizia Completa Database
-            </button>
-            
-            <button 
-              onClick={async () => {
-                if (!user) {
-                  toast('❌ Utente non autenticato', { icon: '❌' });
-                  return;
-                }
-                
-                try {
-                  toast('🧪 Test servizio eliminazione robusta...', { icon: '⏳' });
-                  
-                  const response = await fetch('/api/test-robust-deletion', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'status' })
-                  });
-                  
-                  const result = await response.json();
-                  
-                  if (result.success) {
-                    toast(`✅ Servizio attivo: ${result.status.name} v${result.status.version}`, { icon: '✅' });
-                    console.log('🧪 Test servizio eliminazione robusta:', result);
-                  } else {
-                    throw new Error(result.error);
-                  }
-                  
-                } catch (error) {
-                  toast(`❌ Test servizio fallito: ${error}`, { icon: '❌' });
-                  console.error('❌ Test servizio eliminazione robusta fallito:', error);
-                }
-              }}
-              className="btn btn-warning"
-            >
-              🧪 Test Servizio Eliminazione
-            </button>
+
           </div>
         </div>
 
@@ -610,63 +634,170 @@ export default function FeasibilityAnalysisPage() {
           )}
         </div>
 
-        {/* Modal Confronto */}
+        {/* Modal Confronto Intelligente */}
         {showComparison && (
           <div className="modal modal-open">
-            <div className="modal-box">
-              <h3 className="font-bold text-lg mb-4">🔍 {t('compareProjects', 'feasibility.modal')}</h3>
+            <div className="modal-box max-w-4xl">
+              <h3 className="font-bold text-xl mb-6">🔍 Confronto Intelligente Progetti</h3>
               
-              <div className="space-y-4">
-                <div>
-                  <label className="label">
-                    <span className="label-text">{t('firstProject', 'feasibility.modal')}</span>
-                  </label>
-                  <select 
-                    className="select select-bordered w-full"
-                    value={project1Id}
-                    onChange={(e) => setProject1Id(e.target.value)}
-                  >
-                    <option value="">{t('selectProject', 'feasibility.modal')}</option>
-                    {projects.map((project) => (
-                      <option key={project.id} value={project.id}>
-                        {project.name} ({formatPercentage(project.results.margin)})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="label">
-                    <span className="label-text">{t('secondProject', 'feasibility.modal')}</span>
-                  </label>
-                  <select 
-                    className="select select-bordered w-full"
-                    value={project2Id}
-                    onChange={(e) => setProject2Id(e.target.value)}
-                  >
-                    <option value="">{t('selectProject', 'feasibility.modal')}</option>
-                    {projects.map((project) => (
-                      <option key={project.id} value={project.id}>
-                        {project.name} ({formatPercentage(project.results.margin)})
-                      </option>
-                    ))}
-                  </select>
+              {/* Selezione Progetti */}
+              <div className="mb-6">
+                <label className="label">
+                  <span className="label-text font-medium">Seleziona progetti da confrontare (minimo 2):</span>
+                </label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
+                  {projects.map((project) => (
+                    <label key={project.id} className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="checkbox checkbox-primary"
+                        checked={selectedProjects.includes(project.id || '')}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedProjects(prev => [...prev, project.id || '']);
+                          } else {
+                            setSelectedProjects(prev => prev.filter(id => id !== project.id));
+                          }
+                        }}
+                      />
+                      <span className="text-sm">
+                        {project.name} ({formatPercentage(project.results?.margin || 0)})
+                      </span>
+                    </label>
+                  ))}
                 </div>
               </div>
-              
+
+              {/* Modalità Confronto */}
+              <div className="mb-6">
+                <label className="label">
+                  <span className="label-text font-medium">Modalità confronto:</span>
+                </label>
+                <div className="flex space-x-2">
+                  <button
+                    className={`btn btn-sm ${comparisonMode === 'basic' ? 'btn-primary' : 'btn-outline'}`}
+                    onClick={() => setComparisonMode('basic')}
+                  >
+                    📊 Base
+                  </button>
+                  <button
+                    className={`btn btn-sm ${comparisonMode === 'advanced' ? 'btn-primary' : 'btn-outline'}`}
+                    onClick={() => setComparisonMode('advanced')}
+                  >
+                    🎯 Avanzato
+                  </button>
+                  <button
+                    className={`btn btn-sm ${comparisonMode === 'financial' ? 'btn-primary' : 'btn-outline'}`}
+                    onClick={() => setComparisonMode('financial')}
+                  >
+                    💰 Finanziario
+                  </button>
+                </div>
+              </div>
+
+              {/* Risultati Confronto */}
+              {comparisonData && (
+                <div className="mb-6 space-y-4">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-2">📈 Riepilogo Confronto</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <span className="text-blue-600 font-medium">Progetti:</span>
+                        <p className="text-blue-800">{comparisonData.summary.totalProjects}</p>
+                      </div>
+                      <div>
+                        <span className="text-blue-600 font-medium">Investimento Totale:</span>
+                        <p className="text-blue-800">{formatCurrency(comparisonData.summary.totalInvestment)}</p>
+                      </div>
+                      <div>
+                        <span className="text-blue-600 font-medium">Margine Medio:</span>
+                        <p className="text-blue-800">{formatPercentage(comparisonData.summary.averageMargin)}</p>
+                      </div>
+                      <div>
+                        <span className="text-blue-600 font-medium">Miglior Performer:</span>
+                        <p className="text-blue-800">{comparisonData.summary.bestPerformer?.name}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tabella Dettagliata */}
+                  <div className="overflow-x-auto">
+                    <table className="table table-zebra w-full">
+                      <thead>
+                        <tr>
+                          <th>Progetto</th>
+                          <th>Investimento</th>
+                          <th>Margine</th>
+                          <th>ROI</th>
+                          <th>Rischio</th>
+                          <th>Potenziale</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {comparisonData.detailed.map((project) => (
+                          <tr key={project.id}>
+                            <td className="font-medium">{project.name}</td>
+                            <td>{formatCurrency(project.investment)}</td>
+                            <td className={getMarginColor(project.margin, 30)}>
+                              {formatPercentage(project.margin)}
+                            </td>
+                            <td>{formatPercentage(project.roi)}</td>
+                            <td>
+                              <span className={`badge ${
+                                project.risk === 'Basso' ? 'badge-success' :
+                                project.risk === 'Medio' ? 'badge-warning' : 'badge-error'
+                              }`}>
+                                {project.risk}
+                              </span>
+                            </td>
+                            <td>
+                              <span className={`badge ${
+                                project.potential === 'Eccellente' ? 'badge-success' :
+                                project.potential === 'Buono' ? 'badge-primary' :
+                                project.potential === 'Discreto' ? 'badge-warning' : 'badge-error'
+                              }`}>
+                                {project.potential}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Insights Intelligenti */}
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-2">💡 Insights Intelligenti</h4>
+                    <ul className="space-y-2">
+                      {comparisonData.insights.map((insight, index) => (
+                        <li key={index} className="text-green-800 text-sm flex items-start">
+                          <span className="mr-2">•</span>
+                          {insight}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* Azioni */}
               <div className="modal-action">
                 <button 
-                  className="btn"
-                  onClick={() => setShowComparison(false)}
+                  className="btn btn-outline"
+                  onClick={() => {
+                    setShowComparison(false);
+                    setSelectedProjects([]);
+                    setComparisonData(null);
+                  }}
                 >
-                  {t('cancel', 'common')}
+                  Chiudi
                 </button>
                 <button 
                   className="btn btn-primary"
                   onClick={handleCompareProjects}
-                  disabled={!project1Id || !project2Id}
+                  disabled={selectedProjects.length < 2}
                 >
-                  {t('compare', 'feasibility')}
+                  🔍 Genera Confronto
                 </button>
               </div>
             </div>

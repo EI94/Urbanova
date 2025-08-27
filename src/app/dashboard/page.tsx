@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { getProjectStats } from '@/lib/firestoreService';
+import { dashboardService, DashboardStats } from '@/lib/dashboardService';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { 
   BuildingIcon, 
@@ -13,55 +13,56 @@ import {
   AlertIcon,
   CheckCircleIcon,
   ClockIcon,
-  UsersIcon
+  UsersIcon,
+  PlusIcon,
+  SearchIcon,
+  ChartIcon
 } from '@/components/icons';
-
-interface ProjectStats {
-  totalProjects: number;
-  activeProjects: number;
-  completedProjects: number;
-  totalBudget: number;
-  averageROI: number;
-  projectsByType: {
-    RESIDENZIALE: number;
-    COMMERCIALE: number;
-    MISTO: number;
-    INDUSTRIALE: number;
-  };
-  projectsByStatus: {
-    PIANIFICAZIONE: number;
-    IN_CORSO: number;
-    IN_ATTESA: number;
-    COMPLETATO: number;
-  };
-  recentActivity: Array<{
-    id: string;
-    type: 'PROJECT_CREATED' | 'PROJECT_UPDATED' | 'MILESTONE_COMPLETED' | 'ALERT';
-    message: string;
-    timestamp: Date;
-    projectId?: string;
-  }>;
-}
 
 export default function DashboardPage() {
   const { t } = useLanguage();
-  const [stats, setStats] = useState<ProjectStats | null>(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadStats = async () => {
+    const initializeDashboard = async () => {
       try {
-        const projectStats = await getProjectStats();
-        setStats(projectStats);
+        setLoading(true);
+        setError(null);
+        
+        // Inizializza i dati della dashboard se necessario
+        await dashboardService.initializeDashboardData();
+        
+        // Carica le statistiche iniziali
+        const initialStats = await dashboardService.getDashboardStats();
+        setStats(initialStats);
+        
+        console.log('✅ [Dashboard] Statistiche iniziali caricate:', initialStats);
       } catch (error) {
-        console.error('Errore nel caricamento delle statistiche:', error);
+        console.error('❌ [Dashboard] Errore inizializzazione:', error);
+        setError('Impossibile caricare le statistiche della dashboard');
       } finally {
         setLoading(false);
       }
     };
 
-    loadStats();
+    initializeDashboard();
   }, []);
+
+  // Sottoscrizione agli aggiornamenti in tempo reale
+  useEffect(() => {
+    if (!stats) return;
+
+    console.log('🔄 [Dashboard] Sottoscrizione aggiornamenti real-time...');
+    
+    const unsubscribe = dashboardService.subscribeToDashboardUpdates((newStats) => {
+      console.log('🔄 [Dashboard] Aggiornamento real-time ricevuto:', newStats);
+      setStats(newStats);
+    });
+
+    return unsubscribe;
+  }, [stats]);
 
   if (loading) {
     return (
@@ -74,12 +75,44 @@ export default function DashboardPage() {
     );
   }
 
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <div className="w-5 h-5 bg-red-400 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs">!</span>
+              </div>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">Errore nel caricamento</h3>
+              <div className="mt-2 text-sm text-red-700">
+                <p>{error}</p>
+              </div>
+              <div className="mt-4">
+                <button
+                  onClick={() => window.location.reload()}
+                  className="px-3 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors"
+                >
+                  Riprova
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   if (!stats) {
     return (
       <DashboardLayout>
-        <div className="alert alert-error">
-          <AlertIcon />
-          <span>{t('errorLoadingStats', 'dashboard')}</span>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Caricamento dashboard...</p>
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -163,48 +196,48 @@ export default function DashboardPage() {
                 <span className="text-sm text-gray-600">{t('residential', 'dashboard')}</span>
                 <div className="flex items-center">
                   <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                                      <div 
-                    className="bg-blue-600 h-2 rounded-full" 
-                    style={{ width: `${stats.totalProjects > 0 ? (stats.projectsByType.RESIDENZIALE / stats.totalProjects) * 100 : 0}%` }}
-                  ></div>
-                </div>
-                <span className="text-sm font-medium">{stats.projectsByType.RESIDENZIALE || 0}</span>
-                </div>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">{t('commercial', 'dashboard')}</span>
-                <div className="flex items-center">
-                  <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                                      <div 
-                    className="bg-green-600 h-2 rounded-full" 
-                    style={{ width: `${stats.totalProjects > 0 ? (stats.projectsByType.COMMERCIALE / stats.totalProjects) * 100 : 0}%` }}
-                  ></div>
-                </div>
-                <span className="text-sm font-medium">{stats.projectsByType.COMMERCIALE || 0}</span>
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full" 
+                      style={{ width: `${stats.totalProjects > 0 ? (stats.projectsByType.RESIDENTIAL / stats.totalProjects) * 100 : 0}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm font-medium">{stats.projectsByType.RESIDENTIAL || 0}</span>
                 </div>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">{t('mixed', 'dashboard')}</span>
+                <span className="text-sm text-gray-600">Commerciale</span>
                 <div className="flex items-center">
                   <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                                      <div 
-                    className="bg-yellow-600 h-2 rounded-full" 
-                    style={{ width: `${stats.totalProjects > 0 ? (stats.projectsByType.MISTO / stats.totalProjects) * 100 : 0}%` }}
-                  ></div>
-                </div>
-                <span className="text-sm font-medium">{stats.projectsByType.MISTO || 0}</span>
+                    <div 
+                      className="bg-green-600 h-2 rounded-full" 
+                      style={{ width: `${stats.totalProjects > 0 ? (stats.projectsByType.COMMERCIAL / stats.totalProjects) * 100 : 0}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm font-medium">{stats.projectsByType.COMMERCIAL || 0}</span>
                 </div>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">{t('industrial', 'dashboard')}</span>
+                <span className="text-sm text-gray-600">Misto</span>
                 <div className="flex items-center">
                   <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                                      <div 
-                    className="bg-purple-600 h-2 rounded-full" 
-                    style={{ width: `${stats.totalProjects > 0 ? (stats.projectsByType.INDUSTRIALE / stats.totalProjects) * 100 : 0}%` }}
-                  ></div>
+                    <div 
+                      className="bg-yellow-600 h-2 rounded-full" 
+                      style={{ width: `${stats.totalProjects > 0 ? (stats.projectsByType.MIXED / stats.totalProjects) * 100 : 0}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm font-medium">{stats.projectsByType.MIXED || 0}</span>
                 </div>
-                <span className="text-sm font-medium">{stats.projectsByType.INDUSTRIALE || 0}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Industriale</span>
+                <div className="flex items-center">
+                  <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
+                    <div 
+                      className="bg-purple-600 h-2 rounded-full" 
+                      style={{ width: `${stats.totalProjects > 0 ? (stats.projectsByType.INDUSTRIAL / stats.totalProjects) * 100 : 0}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm font-medium">{stats.projectsByType.INDUSTRIAL || 0}</span>
                 </div>
               </div>
             </div>
@@ -217,30 +250,30 @@ export default function DashboardPage() {
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
                   <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-                  <span className="text-sm text-gray-600">{t('planning', 'dashboard')}</span>
+                  <span className="text-sm text-gray-600">Pianificazione</span>
                 </div>
-                <span className="text-sm font-medium">{stats.projectsByStatus.PIANIFICAZIONE || 0}</span>
+                <span className="text-sm font-medium">{stats.projectsByStatus.PLANNING || 0}</span>
               </div>
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
                   <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                  <span className="text-sm text-gray-600">{t('inProgress', 'dashboard')}</span>
+                  <span className="text-sm text-gray-600">In Corso</span>
                 </div>
-                <span className="text-sm font-medium">{stats.projectsByStatus.IN_CORSO || 0}</span>
+                <span className="text-sm font-medium">{stats.projectsByStatus.IN_PROGRESS || 0}</span>
               </div>
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
-                  <span className="text-sm text-gray-600">{t('onHold', 'dashboard')}</span>
+                  <div className="w-3 h-2 bg-yellow-500 rounded-full mr-2"></div>
+                  <span className="text-sm text-gray-600">In Attesa</span>
                 </div>
-                <span className="text-sm font-medium">{stats.projectsByStatus.IN_ATTESA || 0}</span>
+                <span className="text-sm font-medium">{stats.projectsByStatus.PENDING || 0}</span>
               </div>
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
                   <div className="w-3 h-3 bg-purple-500 rounded-full mr-2"></div>
-                  <span className="text-sm text-gray-600">{t('completed', 'dashboard')}</span>
+                  <span className="text-sm text-gray-600">Completato</span>
                 </div>
-                <span className="text-sm font-medium">{stats.projectsByStatus.COMPLETATO || 0}</span>
+                <span className="text-sm font-medium">{stats.projectsByStatus.COMPLETED || 0}</span>
               </div>
             </div>
           </div>
@@ -253,29 +286,29 @@ export default function DashboardPage() {
             {(stats.recentActivity || []).slice(0, 5).map((activity) => (
               <div key={activity.id} className="flex items-center p-3 bg-gray-50 rounded-lg">
                 <div className="flex-shrink-0">
-                  {activity.type === 'PROJECT_CREATED' && (
+                  {activity.type === 'project_created' && (
                     <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                       <BuildingIcon className="h-4 w-4 text-green-600" />
                     </div>
                   )}
-                  {activity.type === 'PROJECT_UPDATED' && (
+                  {activity.type === 'project_updated' && (
                     <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                       <CheckCircleIcon className="h-4 w-4 text-blue-600" />
                     </div>
                   )}
-                  {activity.type === 'MILESTONE_COMPLETED' && (
+                  {activity.type === 'milestone_reached' && (
                     <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
                       <CalendarIcon className="h-4 w-4 text-purple-600" />
                     </div>
                   )}
-                  {activity.type === 'ALERT' && (
-                    <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                      <AlertIcon className="h-4 w-4 text-red-600" />
+                  {activity.type === 'analysis_completed' && (
+                    <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                      <ChartIcon className="h-4 w-4 text-orange-600" />
                     </div>
                   )}
                 </div>
                 <div className="ml-3 flex-1">
-                  <p className="text-sm text-gray-900">{activity.message}</p>
+                  <p className="text-sm text-gray-900">{activity.description}</p>
                   <p className="text-xs text-gray-500">
                     {activity.timestamp.toLocaleString()}
                   </p>
