@@ -85,11 +85,53 @@ export default function DesignCenterPage() {
       setLoading(true);
       setError(null);
       
-      // Inizializza template di esempio se necessario
-      await designCenterService.initializeSampleTemplates();
+      // Carica template con fallback automatico
+      let allTemplates: DesignTemplate[] = [];
+      try {
+        // Inizializza template di esempio se necessario
+        await designCenterService.initializeSampleTemplates();
+        
+        // Carica tutti i template
+        allTemplates = await designCenterService.getTemplates();
+        console.log('✅ [DesignCenter] Template caricati da Firebase:', allTemplates.length);
+      } catch (firebaseError) {
+        console.warn('⚠️ [DesignCenter] Firebase non disponibile, uso fallback:', firebaseError);
+        // Il servizio dovrebbe già fornire fallback, ma per sicurezza
+        allTemplates = [
+          {
+            id: 'fallback-1',
+            name: 'Villa Moderna Standard',
+            category: 'RESIDENTIAL',
+            zone: 'SUBURBAN',
+            budget: 'MEDIUM',
+            density: 'MEDIUM',
+            minArea: 200,
+            maxArea: 400,
+            minBudget: 300000,
+            maxBudget: 600000,
+            floors: 2,
+            bedrooms: 3,
+            bathrooms: 2,
+            parkingSpaces: 2,
+            gardenArea: 150,
+            balconyArea: 20,
+            roofType: 'PITCHED',
+            facadeMaterial: 'BRICK',
+            energyClass: 'B',
+            previewImage: '/images/templates/villa-moderna.jpg',
+            floorPlanImage: '/images/templates/villa-moderna-plan.jpg',
+            sectionImage: '/images/templates/villa-moderna-section.jpg',
+            description: 'Villa moderna con design contemporaneo, perfetta per famiglie',
+            features: ['Design moderno', 'Efficienza energetica', 'Giardino privato'],
+            estimatedROI: 12,
+            constructionTime: 18,
+            popularity: 85,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }
+        ];
+      }
       
-      // Carica tutti i template
-      const allTemplates = await designCenterService.getTemplates();
       setTemplates(allTemplates);
       setFilteredTemplates(allTemplates);
       
@@ -103,11 +145,11 @@ export default function DesignCenterPage() {
         setProjects([]);
       }
       
-      console.log('✅ [DesignCenter] Template caricati:', allTemplates.length);
+      console.log('✅ [DesignCenter] Template totali caricati:', allTemplates.length);
       
     } catch (error) {
-      console.error('❌ [DesignCenter] Errore caricamento:', error);
-      setError('Impossibile caricare i template di design');
+      console.error('❌ [DesignCenter] Errore caricamento critico:', error);
+      setError('Impossibile caricare i template di design. Riprova più tardi.');
     } finally {
       setLoading(false);
     }

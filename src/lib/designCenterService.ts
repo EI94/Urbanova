@@ -15,6 +15,41 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 
+// Fallback data per quando Firebase non è disponibile
+const FALLBACK_TEMPLATES = [
+  {
+    id: 'fallback-1',
+    name: 'Villa Moderna Standard',
+    category: 'RESIDENTIAL' as const,
+    zone: 'SUBURBAN' as const,
+    budget: 'MEDIUM' as const,
+    density: 'MEDIUM' as const,
+    minArea: 200,
+    maxArea: 400,
+    minBudget: 300000,
+    maxBudget: 600000,
+    floors: 2,
+    bedrooms: 3,
+    bathrooms: 2,
+    parkingSpaces: 2,
+    gardenArea: 150,
+    balconyArea: 20,
+    roofType: 'PITCHED' as const,
+    facadeMaterial: 'BRICK' as const,
+    energyClass: 'B' as const,
+    previewImage: '/images/templates/villa-moderna.jpg',
+    floorPlanImage: '/images/templates/villa-moderna-plan.jpg',
+    sectionImage: '/images/templates/villa-moderna-section.jpg',
+    description: 'Villa moderna con design contemporaneo, perfetta per famiglie',
+    features: ['Design moderno', 'Efficienza energetica', 'Giardino privato'],
+    estimatedROI: 12,
+    constructionTime: 18,
+    popularity: 85,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }
+];
+
 export interface DesignTemplate {
   id: string;
   name: string;
@@ -299,8 +334,8 @@ class DesignCenterService {
       console.log(`✅ [DesignCenter] Trovati ${templates.length} template`);
       return templates;
     } catch (error) {
-      console.error('❌ [DesignCenter] Errore recupero template:', error);
-      return [];
+      console.warn('⚠️ [DesignCenter] Firebase non disponibile, uso fallback:', error);
+      return FALLBACK_TEMPLATES;
     }
   }
 
@@ -362,7 +397,7 @@ class DesignCenterService {
       console.log('🎨 [DesignCenter] Creazione progetto design:', projectData.projectId);
       
       const projectRef = doc(collection(db, this.PROJECTS_COLLECTION));
-      await projectRef.set({
+      await setDoc(projectRef, {
         ...projectData,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -848,7 +883,7 @@ class DesignCenterService {
           balconyArea: 20,
           roofType: 'FLAT',
           facadeMaterial: 'GLASS',
-          energyClass: 'A+',
+          energyClass: 'A',
           previewImage: '/images/templates/appartamento-milano.jpg',
           floorPlanImage: '/images/templates/appartamento-milano-plan.jpg',
           sectionImage: '/images/templates/appartamento-milano-section.jpg',
@@ -891,7 +926,7 @@ class DesignCenterService {
       // Salva i template
       for (const template of sampleTemplates) {
         const templateRef = doc(collection(db, this.TEMPLATES_COLLECTION));
-        await templateRef.set({
+        await setDoc(templateRef, {
           ...template,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
@@ -901,7 +936,8 @@ class DesignCenterService {
       console.log('✅ [DesignCenter] Template di esempio inizializzati:', sampleTemplates.length);
       
     } catch (error) {
-      console.error('❌ [DesignCenter] Errore inizializzazione template:', error);
+      console.warn('⚠️ [DesignCenter] Firebase non disponibile, skip inizializzazione:', error);
+      // Non bloccare l'app se Firebase non è disponibile
     }
   }
 }
