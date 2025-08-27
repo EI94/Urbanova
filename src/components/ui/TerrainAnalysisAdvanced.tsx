@@ -4,13 +4,13 @@ import { useState, useEffect } from 'react';
 import { 
   MapPinIcon, 
   TrendingUpIcon, 
-  ShieldCheckIcon,
+  ShieldIcon,
   AlertIcon,
   CheckCircleIcon,
   InfoIcon,
   GlobeIcon,
   BuildingIcon,
-  UsersIcon,
+  UserIcon,
   ChartBarIcon,
   ClockIcon,
   StarIcon
@@ -199,7 +199,7 @@ export default function TerrainAnalysisAdvanced({ location, onAnalysisComplete }
                 : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <ShieldCheckIcon className="h-4 w-4 inline mr-2" />
+                            <ShieldIcon className="h-4 w-4 inline mr-2" />
             Normative
           </button>
           
@@ -223,7 +223,7 @@ export default function TerrainAnalysisAdvanced({ location, onAnalysisComplete }
                 : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <UsersIcon className="h-4 w-4 inline mr-2" />
+                            <UserIcon className="h-4 w-4 inline mr-2" />
             Demografia
           </button>
         </div>
@@ -279,7 +279,7 @@ export default function TerrainAnalysisAdvanced({ location, onAnalysisComplete }
                     <p className="text-2xl font-bold text-orange-900">{analysis.geospatialData.seismicZone}</p>
                   </div>
                   <div className="p-3 bg-orange-200 rounded-lg">
-                    <ShieldCheckIcon className="h-6 w-6 text-orange-700" />
+                    <ShieldIcon className="h-6 w-6 text-orange-700" />
                   </div>
                 </div>
               </div>

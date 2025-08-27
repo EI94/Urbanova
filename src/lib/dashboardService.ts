@@ -194,13 +194,13 @@ class DashboardService {
   /**
    * Ottiene le attività recenti della dashboard
    */
-  async getRecentActivities(limit: number = 10): Promise<DashboardActivity[]> {
+  async getRecentActivities(limitCount: number = 10): Promise<DashboardActivity[]> {
     try {
       const activitiesRef = collection(db, this.ACTIVITIES_COLLECTION);
       const q = query(
         activitiesRef,
         orderBy('timestamp', 'desc'),
-        limit(limit)
+        limit(limitCount)
       );
       
       const snapshot = await getDocs(q);

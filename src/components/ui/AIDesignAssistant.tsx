@@ -4,17 +4,17 @@ import { useState, useEffect } from 'react';
 import { 
   BrainIcon, 
   TrendingUpIcon, 
-  LightBulbIcon,
+  InfoIcon,
   CheckCircleIcon,
   AlertIcon,
   InfoIcon,
   SparklesIcon,
-  TargetIcon,
+  CheckCircleIcon,
   ClockIcon,
   EuroIcon,
   ChartBarIcon,
   RocketIcon,
-  ShieldCheckIcon,
+  ShieldIcon,
   StarIcon
 } from '@/components/icons';
 import { 
@@ -255,10 +255,10 @@ export default function AIDesignAssistant({
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'ROI': return <TrendingUpIcon className="h-4 w-4" />;
-      case 'SUSTAINABILITY': return <LeafIcon className="h-4 w-4" />;
-      case 'EFFICIENCY': return <LightBulbIcon className="h-4 w-4" />;
+              case 'SUSTAINABILITY': return <InfoIcon className="h-4 w-4" />;
+      case 'EFFICIENCY': return <InfoIcon className="h-4 w-4" />;
       case 'AESTHETICS': return <StarIcon className="h-4 w-4" />;
-      case 'FUNCTIONALITY': return <TargetIcon className="h-4 w-4" />;
+      case 'FUNCTIONALITY': return <CheckCircleIcon className="h-4 w-4" />;
       default: return <InfoIcon className="h-4 w-4" />;
     }
   };
@@ -308,7 +308,7 @@ export default function AIDesignAssistant({
                 : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <LightBulbIcon className="h-4 w-4 inline mr-2" />
+                            <InfoIcon className="h-4 w-4 inline mr-2" />
             Suggerimenti AI
           </button>
           
@@ -320,7 +320,7 @@ export default function AIDesignAssistant({
                 : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <TargetIcon className="h-4 w-4 inline mr-2" />
+                            <CheckCircleIcon className="h-4 w-4 inline mr-2" />
             Ottimizzazione ROI
           </button>
           
@@ -659,7 +659,7 @@ export default function AIDesignAssistant({
                   {/* Opportunities */}
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <h4 className="font-semibold text-blue-800 mb-3 flex items-center">
-                      <LightBulbIcon className="h-4 w-4 mr-2" />
+                      <InfoIcon className="h-4 w-4 mr-2" />
                       Opportunità
                     </h4>
                     <ul className="space-y-2">
@@ -738,7 +738,7 @@ export default function AIDesignAssistant({
                       <ul className="space-y-1 text-sm text-gray-600">
                         {marketAnalysis.competitorAnalysis.opportunities.map((opportunity, index) => (
                           <li key={index} className="flex items-start">
-                            <LightBulbIcon className="h-3 w-3 text-blue-500 mr-2 mt-0.5 flex-shrink-0" />
+                            <InfoIcon className="h-3 w-3 text-blue-500 mr-2 mt-0.5 flex-shrink-0" />
                             {opportunity}
                           </li>
                         ))}

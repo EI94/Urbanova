@@ -9,11 +9,11 @@ import {
   MapPinIcon,
   BuildingIcon,
   StarIcon,
-  TargetIcon,
-  LightBulbIcon,
-  ShieldCheckIcon,
+  CheckCircleIcon,
+  InfoIcon,
+  ShieldIcon,
   CalendarIcon,
-  UsersIcon
+  UserIcon
 } from '@/components/icons';
 import { DesignTemplate, ProjectDesign } from '@/lib/designCenterService';
 
@@ -271,7 +271,7 @@ export default function DesignAnalyticsDashboard({ templates, projects }: Design
                 <p className="text-2xl font-bold text-orange-900">{metrics.successRate.toFixed(1)}%</p>
               </div>
               <div className="p-3 bg-orange-200 rounded-lg">
-                <TargetIcon className="h-6 w-6 text-orange-700" />
+                <CheckCircleIcon className="h-6 w-6 text-orange-700" />
               </div>
             </div>
           </div>
@@ -322,7 +322,7 @@ export default function DesignAnalyticsDashboard({ templates, projects }: Design
         {/* Top Performing Projects */}
         <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <TargetIcon className="h-5 w-5 mr-2 text-blue-600" />
+                            <CheckCircleIcon className="h-5 w-5 mr-2 text-blue-600" />
             Top 5 Progetti per ROI
           </h3>
           
@@ -410,7 +410,7 @@ export default function DesignAnalyticsDashboard({ templates, projects }: Design
       {/* Project Status Overview */}
       <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <UsersIcon className="h-5 w-5 mr-2 text-blue-600" />
+                          <UserIcon className="h-5 w-5 mr-2 text-blue-600" />
           Panoramica Status Progetti
         </h3>
         
