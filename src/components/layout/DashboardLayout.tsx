@@ -185,7 +185,7 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
     progetti: [
       { href: '/dashboard/progetti', icon: <BuildingIcon />, text: t('projects', 'navigation') },
       { href: '/dashboard/progetti/nuovo', icon: <NewProjectIcon />, text: t('newProject', 'navigation') },
-      { href: '/dashboard/mappa', icon: <MapIcon />, text: t('projectMap', 'navigation') },
+      { href: '/dashboard/mappa-progetti', icon: <MapIcon />, text: t('projectMap', 'navigation') },
     ],
     gestioneProgetti: [
       { href: '/dashboard/project-management', icon: <ProjectIcon />, text: t('projectManagement', 'navigation') },
