@@ -855,11 +855,10 @@ export default function LandScrapingPage() {
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              {/* <BrainIcon className="h-8 w-8 text-blue-600" /> */}
-              {t('title', 'aiLandScraping')}
+              Market Intelligence
             </h1>
             <p className="text-gray-600 mt-2">
-              {t('subtitle', 'aiLandScraping')}
+              Scopri automaticamente le migliori opportunità di terreni e ricevi notifiche email
             </p>
           </div>
           

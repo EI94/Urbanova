@@ -423,9 +423,9 @@ export default function DesignCenterPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">🎨 Design Center</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Design Center</h1>
             <p className="text-gray-600 mt-1">
-              Template architettonici intelligenti per trasformare i tuoi progetti in realtà
+              Trasformiamo i tuoi progetti in realtà
             </p>
           </div>
           
