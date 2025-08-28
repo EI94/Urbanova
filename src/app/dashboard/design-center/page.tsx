@@ -267,6 +267,60 @@ export default function DesignCenterPage() {
     setShowTemplateModal(false);
   };
 
+  // NUOVA FUNZIONALITÀ: Avvia personalizzazione template
+  const startTemplateCustomization = (template: DesignTemplate) => {
+    console.log('🚀 [DesignCenter] Avvio personalizzazione template:', template.name);
+    setSelectedTemplate(template);
+    setShowTemplateModal(false);
+    
+    // Reindirizza al Template Customizer
+    window.location.href = `/dashboard/design-center/customize?templateId=${template.id}`;
+  };
+
+  // NUOVA FUNZIONALITÀ: Crea progetto da template
+  const createProjectFromTemplate = async (template: DesignTemplate) => {
+    try {
+      console.log('🏗️ [DesignCenter] Creazione progetto da template:', template.name);
+      
+      // Crea nuovo progetto nel database
+      const newProject = {
+        id: `project-${Date.now()}`,
+        name: `${template.name} - Progetto`,
+        templateId: template.id,
+        template: template,
+        status: 'PLANNING',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        userId: 'current-user-id', // TODO: Integrare con AuthContext
+        location: 'Milano, Italia', // TODO: Integrare con geolocalizzazione
+        budget: template.maxBudget,
+        timeline: template.constructionTime,
+        customizations: {},
+        progress: 0
+      };
+
+      // Salva nel database (TODO: Implementare con Firebase)
+      console.log('💾 [DesignCenter] Progetto creato:', newProject);
+      
+      // Mostra conferma
+      alert(`✅ Progetto "${newProject.name}" creato con successo!`);
+      
+      // Reindirizza alla dashboard progetti
+      window.location.href = '/dashboard/progetti';
+      
+    } catch (error) {
+      console.error('❌ [DesignCenter] Errore creazione progetto:', error);
+      alert('❌ Errore durante la creazione del progetto. Riprova.');
+    }
+  };
+
+  // NUOVA FUNZIONALITÀ: Anteprima rapida template
+  const previewTemplate = (template: DesignTemplate) => {
+    console.log('👁️ [DesignCenter] Anteprima template:', template.name);
+    setSelectedTemplate(template);
+    setShowTemplateModal(true);
+  };
+
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'RESIDENTIAL': return '🏠';
@@ -773,19 +827,27 @@ export default function DesignCenterPage() {
                     {/* Actions */}
                     <div className="flex items-center justify-between">
                       <button
-                        onClick={() => openTemplateModal(template)}
+                        onClick={() => previewTemplate(template)}
                         className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors mr-2"
                       >
                         <EyeIcon className="h-4 w-4 mr-2 inline" />
-                        Visualizza
+                        Anteprima
                       </button>
                       
-                      <button className="p-2 text-gray-400 hover:text-red-500 transition-colors">
-                        <HeartIcon className="h-4 w-4" />
+                      <button 
+                        onClick={() => startTemplateCustomization(template)}
+                        className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors mr-2"
+                      >
+                        <PlusIcon className="h-4 w-4 mr-2 inline" />
+                        Personalizza
                       </button>
                       
-                      <button className="p-2 text-gray-400 hover:text-blue-500 transition-colors">
-                        <ShareIcon className="h-4 w-4" />
+                      <button 
+                        onClick={() => createProjectFromTemplate(template)}
+                        className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                      >
+                        <PlusIcon className="h-4 w-4 mr-2 inline" />
+                        Crea Progetto
                       </button>
                     </div>
                   </div>
@@ -922,9 +984,20 @@ export default function DesignCenterPage() {
                 
                 {/* Actions */}
                 <div className="flex space-x-3 mt-6">
-                  <button className="flex-1 bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                  <button 
+                    onClick={() => startTemplateCustomization(selectedTemplate)}
+                    className="flex-1 bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
                     <PlusIcon className="h-4 w-4 mr-2 inline" />
-                    Usa questo Template
+                    Personalizza questo Template
+                  </button>
+                  
+                  <button 
+                    onClick={() => createProjectFromTemplate(selectedTemplate)}
+                    className="px-4 py-3 text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    <PlusIcon className="h-4 w-4 mr-2 inline" />
+                    Crea Progetto
                   </button>
                   
                   <button className="px-4 py-3 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
