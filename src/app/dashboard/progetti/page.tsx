@@ -1,137 +1,90 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { BuildingIcon, LocationIcon, PlusIcon } from '@/components/icons';
-import Link from 'next/link';
-import { getProjects, RealEstateProject } from '@/lib/firestoreService';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { designProjectService, DesignProject } from '@/lib/designProjectService';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'react-hot-toast';
+import { 
+  BuildingIcon, 
+  TrendingUpIcon, 
+  ClockIcon, 
+  EyeIcon,
+  EditIcon,
+  TrashIcon,
+  PlusIcon
+} from '@/components/icons';
 
-// Componente Card Progetto
-interface ProjectCardProps {
-  project: RealEstateProject;
-}
+export default function ProjectsPage() {
+  const { user } = useAuth();
+  const [projects, setProjects] = useState<DesignProject[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-const ProjectCard = ({ project }: ProjectCardProps) => {
-  const { t, formatCurrency: fmtCurrency } = useLanguage();
-  
-  const getStatusColor = () => {
-    switch (project.status) {
-      case 'COMPLETATO':
-        return 'bg-success text-white';
-      case 'IN_CORSO':
-        return 'bg-info text-white';
-      case 'PIANIFICAZIONE':
-        return 'bg-warning text-white';
-      case 'IN_ATTESA':
-        return 'bg-neutral text-white';
-      default:
-        return 'bg-base-300 text-neutral-800';
+  useEffect(() => {
+    loadProjects();
+  }, [user]);
+
+  const loadProjects = async () => {
+    if (!user?.uid) {
+      setError('Utente non autenticato');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const userProjects = await designProjectService.getUserProjects(user.uid);
+      setProjects(userProjects);
+      
+      console.log('✅ [Progetti] Progetti caricati:', userProjects.length);
+      
+    } catch (error) {
+      console.error('❌ [Progetti] Errore caricamento progetti:', error);
+      setError('Impossibile caricare i progetti');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Calcolo del progresso per la barra
-  const getProgress = () => {
-    if (project.status === 'COMPLETATO') return 100;
-    if (project.status === 'PIANIFICAZIONE') return 10;
-    if (project.status === 'IN_ATTESA') return 30;
-    if (project.status === 'IN_CORSO') return 65;
-    return 0;
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'PLANNING': return 'bg-blue-100 text-blue-800';
+      case 'IN_PROGRESS': return 'bg-yellow-100 text-yellow-800';
+      case 'COMPLETED': return 'bg-green-100 text-green-800';
+      case 'ON_HOLD': return 'bg-gray-100 text-gray-800';
+      case 'CANCELLED': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
-  const formatBudget = (budget?: number) => {
-    if (!budget) return 'N/D';
-    return fmtCurrency(budget);
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'LOW': return 'bg-gray-100 text-gray-800';
+      case 'MEDIUM': return 'bg-blue-100 text-blue-800';
+      case 'HIGH': return 'bg-orange-100 text-orange-800';
+      case 'URGENT': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
-  const progress = getProgress();
-
-  return (
-    <div className="card bg-base-100 shadow-smooth-md hover:shadow-smooth-lg transition-shadow duration-300">
-      <div className="card-body p-5">
-        <div className="flex justify-between items-start">
-          <h3 className="card-title text-lg font-semibold text-neutral-900">{project.name}</h3>
-          <div className={`badge ${getStatusColor()} py-1 px-2`}>
-            {project.status.replace('_', ' ')}
-          </div>
-        </div>
-        <p className="mt-2 text-neutral-600 line-clamp-2">{project.description}</p>
-        
-        {project.propertyType && (
-          <div className="mt-3 flex items-center">
-            <BuildingIcon className="h-4 w-4 text-blue-500 mr-1" />
-            <span className="text-sm text-neutral-700">{project.propertyType}</span>
-            {project.units && (
-              <span className="ml-2 text-sm text-neutral-500">{project.units} {t('units', 'projects')}</span>
-            )}
-          </div>
-        )}
-        
-        {progress > 0 && (
-          <div className="mt-4">
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-xs font-medium text-neutral-700">{t('progress', 'projects')}</span>
-              <span className="text-xs font-medium text-neutral-700">{progress}%</span>
-            </div>
-            <div className="w-full bg-base-200 rounded-full h-2">
-              <div 
-                className="bg-primary h-2 rounded-full" 
-                style={{ width: `${progress}%` }}
-              ></div>
-            </div>
-          </div>
-        )}
-        
-        <div className="flex items-center mt-4 text-sm text-neutral-500">
-          <LocationIcon className="h-4 w-4 mr-1" />
-          <span>{project.location}</span>
-        </div>
-        
-        {project.budget && (
-          <div className="mt-1 text-sm text-neutral-700">
-            <span className="font-medium">{t('budget', 'projects')}: </span>
-            <span>{formatBudget(project.budget)}</span>
-          </div>
-        )}
-        
-        <div className="card-actions justify-end mt-4">
-          <Link href={`/dashboard/progetti/${project.id}`} className="btn btn-sm btn-outline">
-            {t('details', 'projects')}
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default function ProgettiPage() {
-  const { t } = useLanguage();
-  const [projects, setProjects] = useState<RealEstateProject[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const loadProjects = async () => {
-      try {
-        const projectsData = await getProjects();
-        setProjects(projectsData);
-      } catch (err) {
-        console.error('Errore nel caricamento dei progetti:', err);
-        setError(t('errorLoadingProjects', 'projects'));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProjects();
-  }, [t]);
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('it-IT', {
+      style: 'currency',
+      currency: 'EUR'
+    }).format(amount);
+  };
 
   if (loading) {
     return (
-      <DashboardLayout>
+      <DashboardLayout title="Progetti">
         <div className="flex items-center justify-center h-64">
-          <div className="loading loading-spinner loading-lg"></div>
-          <span className="ml-4 text-lg">{t('loadingProjects', 'projects')}</span>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Caricamento progetti...</p>
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -139,58 +92,96 @@ export default function ProgettiPage() {
 
   if (error) {
     return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="text-red-500 text-6xl mb-4">⚠️</div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('errorTitle', 'projects')}</h2>
-            <p className="text-gray-600">{error}</p>
-          </div>
+      <DashboardLayout title="Progetti">
+        <div className="flex flex-col items-center justify-center h-64 space-y-4">
+          <div className="text-red-600 text-xl">❌ {error}</div>
+          <button 
+            onClick={loadProjects}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            🔄 Riprova
+          </button>
         </div>
       </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout title="Progetti">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">🏗️ {t('title', 'projects')}</h1>
-            <p className="text-gray-600 mt-1">{t('subtitle', 'projects')}</p>
+            <h1 className="text-3xl font-bold text-gray-900">Progetti</h1>
+            <p className="text-gray-600 mt-1">
+              Gestisci tutti i tuoi progetti immobiliari
+            </p>
           </div>
-          <Link href="/dashboard/progetti/nuovo">
-            <button className="btn btn-primary">
-              <PlusIcon className="h-4 w-4 mr-2" />
-              {t('newProject', 'projects')}
+          <div className="flex space-x-3">
+            <button 
+              onClick={() => window.location.href = '/dashboard/design-center'}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <PlusIcon className="h-4 w-4 mr-2 inline" />
+              Nuovo Progetto
             </button>
-          </Link>
+          </div>
         </div>
 
         {/* Statistiche */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="text-2xl font-bold text-blue-600">{projects.length}</div>
-            <div className="text-sm text-gray-600">{t('totalProjects', 'projects')}</div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="text-2xl font-bold text-green-600">
-              {projects.filter(p => p.status === 'COMPLETATO').length}
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <BuildingIcon className="h-5 w-5 text-blue-600" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-600">Progetti Totali</p>
+                <p className="text-2xl font-bold text-gray-900">{projects.length}</p>
+              </div>
             </div>
-            <div className="text-sm text-gray-600">{t('completedProjects', 'projects')}</div>
           </div>
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="text-2xl font-bold text-yellow-600">
-              {projects.filter(p => p.status === 'IN_CORSO').length}
+          
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <TrendingUpIcon className="h-5 w-5 text-green-600" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-600">In Corso</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {projects.filter(p => p.status === 'IN_PROGRESS').length}
+                </p>
+              </div>
             </div>
-            <div className="text-sm text-gray-600">{t('inProgressProjects', 'projects')}</div>
           </div>
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="text-2xl font-bold text-purple-600">
-              {projects.filter(p => p.status === 'PIANIFICAZIONE').length}
+          
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-yellow-100 rounded-lg">
+                <ClockIcon className="h-5 w-5 text-yellow-600" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-600">In Pianificazione</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {projects.filter(p => p.status === 'PLANNING').length}
+                </p>
+              </div>
             </div>
-            <div className="text-sm text-gray-600">{t('planningProjects', 'projects')}</div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <BuildingIcon className="h-5 w-5 text-purple-600" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-600">Budget Totale</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {formatCurrency(projects.reduce((total, p) => total + p.budget.estimated, 0))}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -198,20 +189,110 @@ export default function ProgettiPage() {
         {projects.length === 0 ? (
           <div className="text-center py-12">
             <BuildingIcon className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-700 mb-2">{t('noProjects', 'projects')}</h3>
-            <p className="text-gray-500 mb-4">{t('createFirstProject', 'projects')}</p>
-            <Link href="/dashboard/progetti/nuovo">
-              <button className="btn btn-primary">
-                <PlusIcon className="h-4 w-4 mr-2" />
-                {t('newProject', 'projects')}
-              </button>
-            </Link>
+            <h3 className="text-lg font-medium text-gray-700 mb-2">Nessun progetto trovato</h3>
+            <p className="text-gray-500 mb-4">Crea il tuo primo progetto dal Design Center</p>
+            <button 
+              onClick={() => window.location.href = '/dashboard/design-center'}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <PlusIcon className="h-4 w-4 mr-2 inline" />
+              Crea Primo Progetto
+            </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
-            ))}
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900">I Tuoi Progetti</h3>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Progetto
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Stato
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Priorità
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Budget
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Progresso
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Azioni
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {projects.map((project) => (
+                    <tr key={project.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-10 w-10">
+                            <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                              <BuildingIcon className="h-5 w-5 text-blue-600" />
+                            </div>
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">
+                              {project.name}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {project.location}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(project.status)}`}>
+                          {project.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(project.priority)}`}>
+                          {project.priority}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {formatCurrency(project.budget.estimated)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-blue-600 h-2 rounded-full" 
+                              style={{ width: `${project.progress}%` }}
+                            ></div>
+                          </div>
+                          <span className="ml-2 text-sm text-gray-600">
+                            {project.progress}%
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex items-center space-x-2">
+                          <button className="text-blue-600 hover:text-blue-900">
+                            <EyeIcon className="h-4 w-4" />
+                          </button>
+                          <button className="text-gray-600 hover:text-gray-900">
+                            <EditIcon className="h-4 w-4" />
+                          </button>
+                          <button className="text-red-600 hover:text-red-900">
+                            <TrashIcon className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>

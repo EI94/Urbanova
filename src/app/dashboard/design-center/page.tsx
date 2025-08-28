@@ -2,28 +2,31 @@
 
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { designCenterService, DesignTemplate, ProjectDesign } from '@/lib/designCenterService';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { designCenterService, DesignTemplate } from '@/lib/designCenterService';
+import { designProjectService, CreateProjectData } from '@/lib/designProjectService';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
+
 import { 
   BuildingIcon, 
-  SearchIcon, 
-  FilterIcon,
-  MapPinIcon,
-  EuroIcon,
-  RulerIcon,
-  ClockIcon,
-  TrendingUpIcon,
-  EyeIcon,
+  TrendingUpIcon, 
+  ClockIcon, 
   HeartIcon,
+  SearchIcon,
+  FilterIcon,
+  ChartBarIcon,
+  MapIcon,
+  EyeIcon,
+  PlusIcon,
+  MapPinIcon,
+  RulerIcon,
+  HeartIcon as HeartIcon2,
   ShareIcon,
   DownloadIcon,
-  PlusIcon,
-  CheckCircleIcon,
   AlertIcon,
-  InfoIcon,
-  ChartBarIcon
+  InfoIcon
 } from '@/components/icons';
 import DesignAnalyticsDashboard from '@/components/ui/DesignAnalyticsDashboard';
 
@@ -70,7 +73,7 @@ export default function DesignCenterPage() {
   const [locationPermission, setLocationPermission] = useState<'GRANTED' | 'DENIED' | 'PENDING'>('PENDING');
   
   // Stati per analytics
-  const [projects, setProjects] = useState<ProjectDesign[]>([]);
+  const [projects, setProjects] = useState<any[]>([]); // Changed to any[] as ProjectDesign type is removed
   const [showAnalytics, setShowAnalytics] = useState(false);
 
   useEffect(() => {
@@ -137,7 +140,7 @@ export default function DesignCenterPage() {
       
       // Carica progetti esistenti per analytics
       try {
-        const allProjects = await designCenterService.getAllProjectDesigns();
+        const allProjects = await designProjectService.getUserProjects(user?.uid || 'demo-user');
         setProjects(allProjects);
         console.log('✅ [DesignCenter] Progetti caricati per analytics:', allProjects.length);
       } catch (error) {
@@ -283,7 +286,7 @@ export default function DesignCenterPage() {
       console.log('🏗️ [DesignCenter] Creazione progetto da template:', template.name);
       
       // Crea nuovo progetto nel database
-      const newProject = {
+      const newProject: CreateProjectData = {
         id: `project-${Date.now()}`,
         name: `${template.name} - Progetto`,
         templateId: template.id,
@@ -291,8 +294,8 @@ export default function DesignCenterPage() {
         status: 'PLANNING',
         createdAt: new Date(),
         updatedAt: new Date(),
-        userId: 'current-user-id', // TODO: Integrare con AuthContext
-        location: 'Milano, Italia', // TODO: Integrare con geolocalizzazione
+        userId: user?.id || 'current-user-id', // Integrare con AuthContext
+        location: userLocation || 'Milano, Italia', // Integrare con geolocalizzazione
         budget: template.maxBudget,
         timeline: template.constructionTime,
         customizations: {},
@@ -300,17 +303,18 @@ export default function DesignCenterPage() {
       };
 
       // Salva nel database (TODO: Implementare con Firebase)
+      await designProjectService.createProjectDesign(newProject);
       console.log('💾 [DesignCenter] Progetto creato:', newProject);
       
       // Mostra conferma
-      alert(`✅ Progetto "${newProject.name}" creato con successo!`);
+      toast.success(`✅ Progetto "${newProject.name}" creato con successo!`);
       
       // Reindirizza alla dashboard progetti
-      window.location.href = '/dashboard/progetti';
+      router.push('/dashboard/progetti');
       
     } catch (error) {
       console.error('❌ [DesignCenter] Errore creazione progetto:', error);
-      alert('❌ Errore durante la creazione del progetto. Riprova.');
+      toast.error('❌ Errore durante la creazione del progetto. Riprova.');
     }
   };
 
