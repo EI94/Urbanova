@@ -26,6 +26,7 @@ import {
   CheckCircleIcon,
   AlertTriangleIcon
 } from '@/components/icons';
+import AdvancedMapView from '@/components/ui/AdvancedMapView';
 
 export default function MappaProgettiPage() {
   const { user } = useAuth();
@@ -125,6 +126,22 @@ export default function MappaProgettiPage() {
         console.log('✅ [MappaProgetti] Intelligence territoriale inizializzata');
       } catch (error) {
         console.warn('⚠️ [MappaProgetti] Errore inizializzazione intelligence:', error);
+      }
+      
+      // Inizializza mappe avanzate con AI
+      try {
+        await fetch('/api/map/advanced', { 
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            zone: 'Appio',
+            city: 'Roma',
+            action: 'create_map_data'
+          })
+        });
+        console.log('✅ [MappaProgetti] Mappe avanzate inizializzate');
+      } catch (error) {
+        console.warn('⚠️ [MappaProgetti] Errore inizializzazione mappe avanzate:', error);
       }
       
       // Carica posizioni progetto
@@ -576,50 +593,15 @@ export default function MappaProgettiPage() {
           </div>
         </div>
 
-        {/* Mappa Interattiva */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Mappa Interattiva</h3>
-            <p className="text-sm text-gray-600 mt-1">
-              Visualizza {filteredLocations.length} progetti su mappa
-            </p>
-          </div>
-          
-          {/* Container Mappa */}
-          <div 
-            ref={mapContainerRef}
-            className="h-96 bg-gray-100 relative overflow-hidden"
-          >
-            {/* Simulazione Mappa Interattiva */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-              <div className="text-center">
-                <MapIcon className="h-16 w-16 mx-auto text-blue-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-700 mb-2">Mappa Interattiva</h3>
-                <p className="text-gray-500 mb-4">
-                  {filteredLocations.length} progetti visualizzati
-                </p>
-                
-                {/* Simulazione Marker */}
-                <div className="flex justify-center space-x-4">
-                  {filteredLocations.slice(0, 3).map((location, index) => (
-                    <div
-                      key={location.id}
-                      onClick={() => handleLocationClick(location)}
-                      className="cursor-pointer transform hover:scale-110 transition-transform"
-                    >
-                      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                        {index + 1}
-                      </div>
-                      <p className="text-xs text-gray-600 mt-1 w-16 truncate">
-                        {location.projectName}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Mappa Avanzata con AI */}
+        <AdvancedMapView
+          projectLocations={filteredLocations}
+          onLocationSelect={handleLocationClick}
+          onZoneAnalysis={(zone) => {
+            console.log('Analisi zona avanzata richiesta:', zone);
+            toast.success(`Analisi AI zona ${zone} in corso...`);
+          }}
+        />
 
         {/* Lista Progetti */}
         <div className="bg-white rounded-lg shadow overflow-hidden">

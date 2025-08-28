@@ -10,7 +10,12 @@ export interface EmailNotification {
     totalFound: number;
     averagePrice: number;
     bestOpportunities: any[];
+    marketTrends?: string;
+    recommendations?: string[];
   };
+  analysis?: any[];
+  marketTrends?: string;
+  aiRecommendations?: string[];
 }
 
 export class RealEmailService {
@@ -98,11 +103,14 @@ export class RealEmailService {
         sentAt: new Date(),
         status: emailId === 'error' ? 'error' : emailId === 'simulated' ? 'simulated' : 'sent',
         emailId: emailId || 'unknown',
-        summary: notification.summary
+        summary: notification.summary,
+        analysisCount: notification.analysis?.length || 0,
+        hasMarketTrends: !!notification.marketTrends,
+        hasAIRecommendations: !!notification.aiRecommendations
       };
 
       // TODO: Salva in Firestore per tracking completo
-      console.log(`💾 [RealEmailService] Log email salvato:`, logEntry);
+      console.log(`💾 [RealEmailService] Log email avanzato salvato:`, logEntry);
     } catch (error) {
       console.error('❌ Errore salvataggio log email:', error);
     }

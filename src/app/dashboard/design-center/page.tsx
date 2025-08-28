@@ -8,6 +8,16 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { 
+  MessageCircle, 
+  GitBranch as GitBranchIcon, 
+  Workflow,
+  Users,
+  GitCommit,
+  GitCompare,
+  CheckSquare,
+  Clock
+} from 'lucide-react';
 
 import { 
   BuildingIcon, 
@@ -22,13 +32,22 @@ import {
   PlusIcon,
   MapPinIcon,
   RulerIcon,
-  HeartIcon as HeartIcon2,
   ShareIcon,
   DownloadIcon,
   AlertIcon,
-  InfoIcon
+  InfoIcon,
+  BrainIcon,
+  ZapIcon,
+  TargetIcon,
+  LightbulbIcon,
+  SparklesIcon
 } from '@/components/icons';
 import DesignAnalyticsDashboard from '@/components/ui/DesignAnalyticsDashboard';
+import AIDesignAssistant from '@/components/ui/AIDesignAssistant';
+import TerrainAnalysisAdvanced from '@/components/ui/TerrainAnalysisAdvanced';
+import RealTimeCollaboration from '@/components/ui/RealtimeCollaboration';
+import IntelligentVersioning from '@/components/ui/IntelligentVersioning';
+import ApprovalWorkflow from '@/components/ui/ApprovalWorkflow';
 
 interface DesignFilters {
   category: string;
@@ -44,6 +63,7 @@ interface DesignFilters {
 export default function DesignCenterPage() {
   const { t } = useLanguage();
   const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   
   // Stati principali
   const [templates, setTemplates] = useState<DesignTemplate[]>([]);
@@ -73,8 +93,22 @@ export default function DesignCenterPage() {
   const [locationPermission, setLocationPermission] = useState<'GRANTED' | 'DENIED' | 'PENDING'>('PENDING');
   
   // Stati per analytics
-  const [projects, setProjects] = useState<any[]>([]); // Changed to any[] as ProjectDesign type is removed
+  const [projects, setProjects] = useState<any[]>([]);
   const [showAnalytics, setShowAnalytics] = useState(false);
+
+  // Stati per Fase 3 - AI Avanzata
+  const [showAI, setShowAI] = useState(false);
+  const [showTerrainAnalysis, setShowTerrainAnalysis] = useState(false);
+  const [aiInsights, setAiInsights] = useState<any[]>([]);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [selectedZone, setSelectedZone] = useState<string>('');
+  const [aiOptimization, setAiOptimization] = useState<any>(null);
+
+  // Stati per Fase 4 - Collaborazione Avanzata
+  const [activePhase4Tab, setActivePhase4Tab] = useState<'collaboration' | 'versioning' | 'workflow'>('collaboration');
+  const [showCollaboration, setShowCollaboration] = useState(false);
+  const [showVersioning, setShowVersioning] = useState(false);
+  const [showWorkflow, setShowWorkflow] = useState(false);
 
   useEffect(() => {
     if (!authLoading) {
@@ -98,324 +132,472 @@ export default function DesignCenterPage() {
         allTemplates = await designCenterService.getTemplates();
         console.log('✅ [DesignCenter] Template caricati da Firebase:', allTemplates.length);
       } catch (firebaseError) {
-        console.warn('⚠️ [DesignCenter] Firebase non disponibile, uso fallback:', firebaseError);
-        // Il servizio dovrebbe già fornire fallback, ma per sicurezza
-        allTemplates = [
-          {
-            id: 'fallback-1',
-            name: 'Villa Moderna Standard',
-            category: 'RESIDENTIAL',
-            zone: 'SUBURBAN',
-            budget: 'MEDIUM',
-            density: 'MEDIUM',
-            minArea: 200,
-            maxArea: 400,
-            minBudget: 300000,
-            maxBudget: 600000,
-            floors: 2,
-            bedrooms: 3,
-            bathrooms: 2,
-            parkingSpaces: 2,
-            gardenArea: 150,
-            balconyArea: 20,
-            roofType: 'PITCHED',
-            facadeMaterial: 'BRICK',
-            energyClass: 'B',
-            previewImage: '/images/templates/villa-moderna.jpg',
-            floorPlanImage: '/images/templates/villa-moderna-plan.jpg',
-            sectionImage: '/images/templates/villa-moderna-section.jpg',
-            description: 'Villa moderna con design contemporaneo, perfetta per famiglie',
-            features: ['Design moderno', 'Efficienza energetica', 'Giardino privato'],
-            estimatedROI: 12,
-            constructionTime: 18,
-            popularity: 85,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          }
-        ];
+        console.warn('⚠️ [DesignCenter] Errore Firebase, uso fallback:', firebaseError);
+        // Fallback ai template locali
+        allTemplates = await designCenterService.getTemplates();
       }
       
       setTemplates(allTemplates);
       setFilteredTemplates(allTemplates);
       
-      // Carica progetti esistenti per analytics
-      try {
-        const allProjects = await designProjectService.getUserProjects(user?.uid || 'demo-user');
-        setProjects(allProjects);
-        console.log('✅ [DesignCenter] Progetti caricati per analytics:', allProjects.length);
-      } catch (error) {
-        console.warn('⚠️ [DesignCenter] Impossibile caricare progetti per analytics:', error);
-        setProjects([]);
+      // Carica progetti dell'utente
+      if (user?.uid) {
+        try {
+          const userProjects = await designProjectService.getUserProjects(user.uid);
+          setProjects(userProjects);
+        } catch (error) {
+          console.warn('⚠️ [DesignCenter] Errore caricamento progetti:', error);
+        }
       }
       
-      console.log('✅ [DesignCenter] Template totali caricati:', allTemplates.length);
+      // Inizializza AI insights
+      await initializeAIInsights();
       
     } catch (error) {
-      console.error('❌ [DesignCenter] Errore caricamento critico:', error);
-      setError('Impossibile caricare i template di design. Riprova più tardi.');
+      console.error('❌ [DesignCenter] Errore caricamento:', error);
+      setError('Errore durante il caricamento del Design Center');
     } finally {
       setLoading(false);
     }
   };
 
+  const initializeAIInsights = async () => {
+    try {
+      setAiLoading(true);
+      
+      // Simula chiamata AI per insights iniziali
+      const insights = await generateAIInsights();
+      setAiInsights(insights);
+      
+      // Inizializza ottimizzazione AI
+      if (userLocation) {
+        const optimization = await generateAIOptimization();
+        setAiOptimization(optimization);
+      }
+      
+    } catch (error) {
+      console.warn('⚠️ [DesignCenter] Errore inizializzazione AI:', error);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const generateAIInsights = async (): Promise<any[]> => {
+    // Simula generazione insights AI reali
+    return [
+      {
+        id: 'insight-1',
+        type: 'market_trend',
+        title: 'Trend di Mercato: Zona Appio',
+        description: 'La zona Appio mostra un trend positivo per progetti residenziali di media densità',
+        confidence: 0.87,
+        impact: 'HIGH',
+        recommendations: [
+          'Considera progetti con 3-4 piani',
+          'Focus su efficienza energetica classe A',
+          'Integra spazi verdi comuni'
+        ],
+        data: {
+          marketGrowth: '+12.5%',
+          demandIndex: 'HIGH',
+          competitionLevel: 'MEDIUM'
+        }
+      },
+      {
+        id: 'insight-2',
+        type: 'design_optimization',
+        title: 'Ottimizzazione Design: ROI +18%',
+        description: 'Analisi AI suggerisce modifiche al layout per massimizzare il ROI',
+        confidence: 0.92,
+        impact: 'HIGH',
+        recommendations: [
+          'Riduci corridoi di 15%',
+          'Aumenta superficie commerciale',
+          'Ottimizza orientamento per sole'
+        ],
+        data: {
+          roiImprovement: '+18%',
+          spaceEfficiency: '+22%',
+          energySavings: '+15%'
+        }
+      },
+      {
+        id: 'insight-3',
+        type: 'regulatory_compliance',
+        title: 'Compliance Normativa: Aggiornamenti 2024',
+        description: 'Nuove normative richiedono adattamenti per progetti futuri',
+        confidence: 0.95,
+        impact: 'MEDIUM',
+        recommendations: [
+          'Aggiorna calcoli sismici',
+          'Implementa nuovi standard energetici',
+          'Considera requisiti anti-incendio'
+        ],
+        data: {
+          complianceScore: '95%',
+          riskLevel: 'LOW',
+          updateRequired: true
+        }
+      }
+    ];
+  };
+
+  const generateAIOptimization = async (): Promise<any> => {
+    // Simula ottimizzazione AI basata su posizione
+    return {
+      id: 'opt-1',
+      zone: 'Appio',
+      city: 'Roma',
+      coordinates: userLocation,
+      recommendations: [
+        {
+          category: 'layout',
+          priority: 'HIGH',
+          description: 'Orientamento ottimale per massimizzare luce naturale',
+          impact: '+15% comfort abitativo',
+          implementation: 'Rotazione edificio di 15° verso sud-est'
+        },
+        {
+          category: 'density',
+          priority: 'MEDIUM',
+          description: 'Densità ottimale per la zona: 0.8 FAR',
+          impact: '+22% efficienza spaziale',
+          implementation: 'Riduzione superficie per unità abitativa'
+        },
+        {
+          category: 'sustainability',
+          priority: 'HIGH',
+          description: 'Integrazione sistemi rinnovabili',
+          impact: '+25% efficienza energetica',
+          implementation: 'Pannelli solari + pompa di calore'
+        }
+      ],
+      constraints: {
+        maxHeight: '15m',
+        minDistance: '10m dal confine',
+        maxCoverage: '60% del lotto',
+        parkingRequired: '1 posto per unità'
+      },
+      opportunities: {
+        incentives: ['Bonus verde', 'Detrazione 50%'],
+        marketDemand: 'ALTA',
+        developmentPotential: 'ECCELLENTE'
+      }
+    };
+  };
+
+  const handleZoneSelection = async (zone: string) => {
+    setSelectedZone(zone);
+    setAiLoading(true);
+    
+    try {
+      // Genera insights specifici per la zona
+      const zoneInsights = await generateZoneSpecificInsights(zone);
+      setAiInsights(prev => [...prev, ...zoneInsights]);
+      
+      // Aggiorna ottimizzazione per la zona
+      const zoneOptimization = await generateZoneOptimization(zone);
+      setAiOptimization(zoneOptimization);
+      
+      toast(`Analisi AI completata per la zona ${zone}`, { icon: '✅' });
+    } catch (error) {
+      console.error('❌ [DesignCenter] Errore analisi zona:', error);
+      toast('Errore durante l\'analisi AI della zona', { icon: '❌' });
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const generateZoneSpecificInsights = async (zone: string): Promise<any[]> => {
+    // Simula insights specifici per zona
+    const zoneData = {
+      'Appio': {
+        demographics: { avgAge: 35, familySize: 2.8, income: 'MEDIUM-HIGH' },
+        infrastructure: { transport: 'EXCELLENT', schools: 'GOOD', healthcare: 'GOOD' },
+        market: { pricePerSqm: 3200, demand: 'HIGH', supply: 'LOW' }
+      },
+      'Centro': {
+        demographics: { avgAge: 42, familySize: 2.1, income: 'HIGH' },
+        infrastructure: { transport: 'EXCELLENT', schools: 'EXCELLENT', healthcare: 'EXCELLENT' },
+        market: { pricePerSqm: 5800, demand: 'VERY_HIGH', supply: 'VERY_LOW' }
+      }
+    };
+    
+    const data = zoneData[zone as keyof typeof zoneData] || zoneData['Appio'];
+    
+    return [
+      {
+        id: `zone-${zone}-1`,
+        type: 'zone_analysis',
+        title: `Analisi Zona: ${zone}`,
+        description: `Analisi dettagliata delle caratteristiche della zona ${zone}`,
+        confidence: 0.89,
+        impact: 'HIGH',
+        data: data,
+        recommendations: [
+          `Target demografico: ${data.demographics.avgAge} anni, reddito ${data.demographics.income}`,
+          `Prezzo di mercato: €${data.market.pricePerSqm}/m²`,
+          `Domanda: ${data.market.demand}, Offerta: ${data.market.supply}`
+        ]
+      }
+    ];
+  };
+
+  const generateZoneOptimization = async (zone: string): Promise<any> => {
+    // Simula ottimizzazione specifica per zona
+    return {
+      id: `zone-opt-${zone}`,
+      zone: zone,
+      city: 'Roma',
+      coordinates: userLocation,
+      recommendations: [
+        {
+          category: 'market_strategy',
+          priority: 'HIGH',
+          description: `Strategia di mercato ottimale per ${zone}`,
+          impact: '+25% profittabilità',
+          implementation: 'Pricing dinamico basato su domanda'
+        },
+        {
+          category: 'design_adaptation',
+          priority: 'MEDIUM',
+          description: 'Adattamento design per target demografico',
+          impact: '+18% appeal di mercato',
+          implementation: 'Spazi flessibili e servizi premium'
+        }
+      ],
+      constraints: {
+        maxHeight: '18m',
+        minDistance: '12m dal confine',
+        maxCoverage: '65% del lotto',
+        parkingRequired: '1.2 posti per unità'
+      },
+      opportunities: {
+        incentives: ['Bonus verde', 'Detrazione 50%', 'Credito d\'imposta'],
+        marketDemand: 'MOLTO ALTA',
+        developmentPotential: 'ECCELLENTE'
+      }
+    };
+  };
+
   const requestLocationPermission = async () => {
     try {
       if ('geolocation' in navigator) {
-        const permission = await navigator.permissions.query({ name: 'geolocation' });
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 300000
+          });
+        });
         
-        if (permission.state === 'granted') {
-          setLocationPermission('GRANTED');
-          getCurrentLocation();
-        } else if (permission.state === 'prompt') {
-          setLocationPermission('PENDING');
-        } else {
-          setLocationPermission('DENIED');
-        }
+        setUserLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        });
+        setLocationPermission('GRANTED');
+        
+        // Genera ottimizzazione AI per la posizione
+        const optimization = await generateAIOptimization();
+        setAiOptimization(optimization);
+        
+      } else {
+        setLocationPermission('DENIED');
       }
     } catch (error) {
-      console.log('📍 [DesignCenter] Geolocalizzazione non supportata');
+      console.warn('⚠️ [DesignCenter] Errore geolocalizzazione:', error);
+      setLocationPermission('DENIED');
     }
   };
 
-  const getCurrentLocation = () => {
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setUserLocation({ lat: latitude, lng: longitude });
-          setLocationPermission('GRANTED');
-          console.log('📍 [DesignCenter] Posizione ottenuta:', { lat: latitude, lng: longitude });
-        },
-        (error) => {
-          console.error('❌ [DesignCenter] Errore geolocalizzazione:', error);
-          setLocationPermission('DENIED');
-        }
-      );
-    }
-  };
-
-  // Applica filtri e ricerca
-  useEffect(() => {
-    let filtered = [...templates];
+  const applyFilters = () => {
+    let filtered = templates;
     
-    // Filtra per query di ricerca
-    if (searchQuery) {
-      filtered = filtered.filter(template => 
-        template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        template.features.some(feature => 
-          feature.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      );
-    }
-    
-    // Filtra per categoria
     if (filters.category) {
-      filtered = filtered.filter(template => template.category === filters.category);
+      filtered = filtered.filter(t => t.category === filters.category);
     }
     
-    // Filtra per zona
     if (filters.zone) {
-      filtered = filtered.filter(template => template.zone === filters.zone);
+      filtered = filtered.filter(t => t.zone === filters.zone);
     }
     
-    // Filtra per budget
-    if (filters.budget) {
-      filtered = filtered.filter(template => template.budget === filters.budget);
-    }
+          if (filters.budget) {
+        filtered = filtered.filter(t => {
+          const budget = parseInt(filters.budget);
+          return t.minBudget >= budget * 0.8 && t.maxBudget <= budget * 1.2;
+        });
+      }
     
-    // Filtra per densità
     if (filters.density) {
-      filtered = filtered.filter(template => template.density === filters.density);
+      filtered = filtered.filter(t => t.density === filters.density);
     }
     
-    // Filtra per area
-    filtered = filtered.filter(template => 
-      template.maxArea >= filters.minArea && template.minArea <= filters.maxArea
-    );
-    
-    // Filtra per budget
-    filtered = filtered.filter(template => 
-      template.maxBudget >= filters.minBudget && template.minBudget <= filters.maxBudget
-    );
+    if (searchQuery) {
+      filtered = filtered.filter(t => 
+        t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        t.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        t.zone.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
     
     setFilteredTemplates(filtered);
-  }, [templates, searchQuery, filters]);
-
-  const handleFilterChange = (key: keyof DesignFilters, value: string | number) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  const resetFilters = () => {
-    setFilters({
-      category: '',
-      zone: '',
-      budget: '',
-      density: '',
-      minArea: 0,
-      maxArea: 1000,
-      minBudget: 0,
-      maxBudget: 5000000
-    });
-    setSearchQuery('');
-  };
-
-  const openTemplateModal = (template: DesignTemplate) => {
+  const startTemplateCustomization = (template: DesignTemplate) => {
     setSelectedTemplate(template);
     setShowTemplateModal(true);
   };
 
-  const closeTemplateModal = () => {
-    setSelectedTemplate(null);
-    setShowTemplateModal(false);
-  };
-
-  // NUOVA FUNZIONALITÀ: Avvia personalizzazione template
-  const startTemplateCustomization = (template: DesignTemplate) => {
-    console.log('🚀 [DesignCenter] Avvio personalizzazione template:', template.name);
-    setSelectedTemplate(template);
-    setShowTemplateModal(false);
-    
-    // Reindirizza al Template Customizer
-    window.location.href = `/dashboard/design-center/customize?templateId=${template.id}`;
-  };
-
-  // NUOVA FUNZIONALITÀ: Crea progetto da template
   const createProjectFromTemplate = async (template: DesignTemplate) => {
+    if (!user?.uid) {
+      toast('Devi essere autenticato per creare un progetto', { icon: '❌' });
+      return;
+    }
+
     try {
-      console.log('🏗️ [DesignCenter] Creazione progetto da template:', template.name);
-      
-      // Crea nuovo progetto nel database
-      const newProject: CreateProjectData = {
-        id: `project-${Date.now()}`,
+      const projectData: CreateProjectData = {
         name: `${template.name} - Progetto`,
+        description: `Progetto basato su template: ${template.name}`,
         templateId: template.id,
         template: template,
-        status: 'PLANNING',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        userId: user?.id || 'current-user-id', // Integrare con AuthContext
-        location: userLocation || 'Milano, Italia', // Integrare con geolocalizzazione
-        budget: template.maxBudget,
-        timeline: template.constructionTime,
-        customizations: {},
-        progress: 0
+        userId: user.uid,
+        location: userLocation ? `${userLocation.lat}, ${userLocation.lng}` : 'Posizione non specificata',
+        category: template.category,
+        zone: template.zone,
+        coordinates: userLocation || undefined,
+        budget: {
+          estimated: template.minBudget,
+          currency: 'EUR'
+        },
+        timeline: {
+          estimated: template.constructionTime
+        },
+        customizations: {
+          area: template.minArea,
+          bedrooms: 3,
+          bathrooms: 2,
+          floors: 2,
+          parkingSpaces: 2,
+          gardenArea: 100,
+          balconyArea: 20,
+          customFeatures: [],
+          notes: `Template: ${template.name}`
+        },
+        tags: [template.category, template.zone],
+        priority: 'MEDIUM'
       };
 
-      // Salva nel database (TODO: Implementare con Firebase)
-      await designProjectService.createProjectDesign(newProject);
-      console.log('💾 [DesignCenter] Progetto creato:', newProject);
+      const projectId = await designProjectService.createProject(projectData);
       
-      // Mostra conferma
-      toast.success(`✅ Progetto "${newProject.name}" creato con successo!`);
+      toast('Progetto creato con successo!', { icon: '✅' });
+      setShowTemplateModal(false);
       
-      // Reindirizza alla dashboard progetti
+      // Reindirizza alla pagina progetti
       router.push('/dashboard/progetti');
       
     } catch (error) {
       console.error('❌ [DesignCenter] Errore creazione progetto:', error);
-      toast.error('❌ Errore durante la creazione del progetto. Riprova.');
+      toast('Errore durante la creazione del progetto', { icon: '❌' });
     }
   };
 
-  // NUOVA FUNZIONALITÀ: Anteprima rapida template
   const previewTemplate = (template: DesignTemplate) => {
-    console.log('👁️ [DesignCenter] Anteprima template:', template.name);
     setSelectedTemplate(template);
     setShowTemplateModal(true);
   };
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'RESIDENTIAL': return '🏠';
-      case 'COMMERCIAL': return '🏢';
-      case 'MIXED': return '🏗️';
-      case 'INDUSTRIAL': return '🏭';
-      default: return '🏠';
+  const handleAIOptimization = async () => {
+    if (!selectedTemplate || !userLocation) {
+      toast('Seleziona un template e attiva la geolocalizzazione', { icon: '❌' });
+      return;
+    }
+
+    setAiLoading(true);
+    try {
+      // Genera ottimizzazione AI per il template selezionato
+      const optimization = await generateTemplateOptimization(selectedTemplate);
+      setAiOptimization(optimization);
+      
+      toast('Ottimizzazione AI completata!', { icon: '✅' });
+    } catch (error) {
+      console.error('❌ [DesignCenter] Errore ottimizzazione AI:', error);
+      toast('Errore durante l\'ottimizzazione AI', { icon: '❌' });
+    } finally {
+      setAiLoading(false);
     }
   };
 
-  const getZoneIcon = (zone: string) => {
-    switch (zone) {
-      case 'URBAN': return '🏙️';
-      case 'SUBURBAN': return '🏘️';
-      case 'RURAL': return '🌾';
-      case 'COASTAL': return '🏖️';
-      default: return '🏘️';
-    }
+  const generateTemplateOptimization = async (template: DesignTemplate): Promise<any> => {
+    // Simula ottimizzazione AI per template specifico
+    return {
+      id: `template-opt-${template.id}`,
+      templateId: template.id,
+      templateName: template.name,
+      zone: template.zone,
+      coordinates: userLocation,
+      recommendations: [
+        {
+          category: 'structural',
+          priority: 'HIGH',
+          description: 'Ottimizzazione struttura per zona sismica',
+          impact: '+20% sicurezza strutturale',
+          implementation: 'Rinforzo pilastri e travi'
+        },
+        {
+          category: 'energy',
+          priority: 'HIGH',
+          description: 'Miglioramento efficienza energetica',
+          impact: '+25% classe energetica',
+          implementation: 'Isolamento termico avanzato'
+        },
+        {
+          category: 'layout',
+          priority: 'MEDIUM',
+          description: 'Ottimizzazione distribuzione spazi',
+          impact: '+15% funzionalità',
+          implementation: 'Ridisegno piante per flusso ottimale'
+        }
+      ],
+      constraints: {
+        maxHeight: '15m',
+        minDistance: '10m dal confine',
+        maxCoverage: '60% del lotto',
+        parkingRequired: '1 posto per unità'
+      },
+      opportunities: {
+        incentives: ['Bonus verde', 'Detrazione 50%'],
+        marketDemand: 'ALTA',
+        developmentPotential: 'ECCELLENTE'
+      },
+      estimatedImprovements: {
+        roi: '+18%',
+        energyEfficiency: '+25%',
+        marketValue: '+22%',
+        constructionTime: '-15%'
+      }
+    };
   };
 
-  const getBudgetColor = (budget: string) => {
-    switch (budget) {
-      case 'ECONOMIC': return 'text-green-600 bg-green-100';
-      case 'MEDIUM': return 'text-blue-600 bg-blue-100';
-      case 'PREMIUM': return 'text-purple-600 bg-purple-100';
-      case 'LUXURY': return 'text-gold-600 bg-gold-100';
-      default: return 'text-gray-600 bg-gray-100';
-    }
-  };
-
-  const getBudgetLabel = (budget: string) => {
-    switch (budget) {
-      case 'ECONOMIC': return 'Economico';
-      case 'MEDIUM': return 'Medio';
-      case 'PREMIUM': return 'Premium';
-      case 'LUXURY': return 'Lusso';
-      default: return budget;
-    }
-  };
+  useEffect(() => {
+    applyFilters();
+  }, [filters, searchQuery, templates]);
 
   if (authLoading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Verifica autenticazione...</p>
-          </div>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
         </div>
       </DashboardLayout>
     );
   }
 
-  if (loading) {
+  if (!user) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Caricamento Design Center...</p>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  if (error) {
-    return (
-      <DashboardLayout>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <div className="w-5 h-5 bg-red-400 rounded-full flex items-center justify-center">
-                <span className="text-white text-xs">!</span>
-              </div>
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">Errore nel caricamento</h3>
-              <div className="mt-2 text-sm text-red-700">
-                <p>{error}</p>
-              </div>
-              <div className="mt-4">
-                <button
-                  onClick={loadDesignCenter}
-                  className="px-3 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors"
-                >
-                  Riprova
-                </button>
-              </div>
-            </div>
-          </div>
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Accesso Richiesto</h2>
+          <p className="text-gray-600">Devi effettuare l'accesso per utilizzare il Design Center</p>
         </div>
       </DashboardLayout>
     );
@@ -423,600 +605,576 @@ export default function DesignCenterPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Design Center</h1>
-            <p className="text-gray-600 mt-1">
-              Trasformiamo i tuoi progetti in realtà
-            </p>
-          </div>
-          
-          {/* Analytics e Geolocalizzazione */}
-          <div className="flex items-center space-x-3">
+      <div className="space-y-8">
+        {/* Header con titolo aggiornato */}
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Design Center</h1>
+          <p className="text-xl text-gray-600">Trasformiamo i tuoi progetti in realtà</p>
+        </div>
+
+        {/* Controlli principali */}
+        <div className="flex flex-wrap items-center justify-between gap-4 bg-white rounded-lg shadow p-6">
+          <div className="flex items-center space-x-4">
             <button
-              onClick={() => setShowAnalytics(!showAnalytics)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                showAnalytics
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              onClick={() => setShowAI(!showAI)}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
+                showAI 
+                  ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg' 
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
               }`}
             >
-              <ChartBarIcon className="h-4 w-4 inline mr-2" />
-              {showAnalytics ? 'Nascondi Analytics' : 'Mostra Analytics'}
+              <BrainIcon className="h-5 w-5" />
+              <span>AI Assistant</span>
             </button>
             
-            {/* Geolocalizzazione */}
-            {locationPermission === 'GRANTED' && userLocation && (
-              <div className="flex items-center text-green-600 bg-green-50 px-3 py-2 rounded-lg">
-                <MapPinIcon className="h-4 w-4 mr-2" />
-                <span className="text-sm font-medium">Posizione attiva</span>
-              </div>
-            )}
+            <button
+              onClick={() => setShowTerrainAnalysis(!showTerrainAnalysis)}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
+                showTerrainAnalysis 
+                  ? 'bg-gradient-to-r from-green-600 to-teal-600 text-white shadow-lg' 
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+              }`}
+            >
+              <MapIcon className="h-5 w-5" />
+              <span>Analisi Terreno</span>
+            </button>
             
-            {locationPermission === 'PENDING' && (
-              <button
-                onClick={getCurrentLocation}
-                className="flex items-center text-blue-600 bg-blue-50 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors"
-              >
-                <MapPinIcon className="h-4 w-4 mr-2" />
-                <span className="text-sm font-medium">Attiva posizione</span>
-              </button>
-            )}
+            <button
+              onClick={() => setShowAnalytics(!showAnalytics)}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
+                showAnalytics 
+                  ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg' 
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+              }`}
+            >
+              <ChartBarIcon className="h-5 w-5" />
+              <span>Analytics</span>
+            </button>
+
+            <button
+              onClick={() => setShowCollaboration(!showCollaboration)}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
+                showCollaboration 
+                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' 
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+              }`}
+            >
+              <MessageCircle className="h-5 w-5" />
+              <span>Collaborazione</span>
+            </button>
+
+            <button
+              onClick={() => setShowVersioning(!showVersioning)}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
+                showVersioning 
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg' 
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+              }`}
+            >
+              <GitBranchIcon className="h-5 w-5" />
+              <span>Versioning</span>
+            </button>
+
+            <button
+              onClick={() => setShowWorkflow(!showWorkflow)}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
+                showWorkflow 
+                  ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-lg' 
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+              }`}
+            >
+              <Workflow className="h-5 w-5" />
+              <span>Workflow</span>
+            </button>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-all"
+            >
+              <FilterIcon className="h-5 w-5" />
+              <span>Filtri</span>
+            </button>
             
-            {locationPermission === 'DENIED' && (
-              <div className="flex items-center text-gray-500 bg-gray-50 px-3 py-2 rounded-lg">
-                <MapPinIcon className="h-4 w-4 mr-2" />
-                <span className="text-sm">Posizione disabilitata</span>
-              </div>
-            )}
+            <div className="relative">
+              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Cerca template..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Analytics Dashboard */}
-        {showAnalytics && (
-          <DesignAnalyticsDashboard 
-            templates={templates}
-            projects={projects}
-          />
+        {/* AI Assistant - Fase 3 */}
+        {showAI && (
+          <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg shadow-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center space-x-3">
+                <BrainIcon className="h-8 w-8 text-purple-600" />
+                <span>AI Design Assistant</span>
+                <SparklesIcon className="h-6 w-6 text-yellow-500 animate-pulse" />
+              </h2>
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm text-gray-600">AI Attiva</span>
+              </div>
+            </div>
+
+            <AIDesignAssistant
+              insights={aiInsights}
+              optimization={aiOptimization}
+              onZoneSelect={handleZoneSelection}
+              onOptimize={handleAIOptimization}
+              loading={aiLoading}
+              selectedZone={selectedZone}
+            />
+          </div>
         )}
 
-        {/* Statistiche rapide */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <BuildingIcon className="h-5 w-5 text-blue-600" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Template Totali</p>
-                <p className="text-2xl font-bold text-gray-900">{templates.length}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <TrendingUpIcon className="h-5 w-5 text-green-600" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">ROI Medio</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {templates.length > 0 
-                    ? (templates.reduce((sum, t) => sum + t.estimatedROI, 0) / templates.length).toFixed(1)
-                    : '0.0'
-                  }%
-                </p>
+        {/* Analisi Terreno Avanzata - Fase 3 */}
+        {showTerrainAnalysis && (
+          <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-lg shadow-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center space-x-3">
+                <MapIcon className="h-8 w-8 text-green-600" />
+                <span>Analisi Terreno Avanzata</span>
+                <TargetIcon className="h-6 w-6 text-blue-500" />
+              </h2>
+              <div className="flex items-center space-x-2">
+                <MapPinIcon className="h-4 w-4 text-gray-600" />
+                <span className="text-sm text-gray-600">
+                  {userLocation ? 'Posizione rilevata' : 'Posizione non disponibile'}
+                </span>
               </div>
             </div>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
-            <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <ClockIcon className="h-5 w-5 text-purple-600" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Tempo Medio</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {templates.length > 0 
-                    ? (templates.reduce((sum, t) => sum + t.constructionTime, 0) / templates.length).toFixed(0)
-                    : '0'
-                  } mesi
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
-            <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <HeartIcon className="h-5 w-5 text-yellow-600" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Popolarità</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {templates.length > 0 
-                    ? (templates.reduce((sum, t) => sum + t.popularity, 0) / templates.length).toFixed(0)
-                    : '0'
-                  }/100
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Barra di ricerca e filtri */}
-        <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* Ricerca */}
-            <div className="flex-1">
-              <div className="relative">
-                <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Cerca template per nome, caratteristiche, stile..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-            
-            {/* Filtri rapidi */}
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center px-4 py-3 rounded-lg border transition-colors ${
-                  showFilters 
-                    ? 'bg-blue-600 text-white border-blue-600' 
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                <FilterIcon className="h-4 w-4 mr-2" />
-                Filtri
-              </button>
-              
-              <button
-                onClick={resetFilters}
-                className="px-4 py-3 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Reset
-              </button>
-            </div>
+            <TerrainAnalysisAdvanced
+              userLocation={userLocation}
+              onLocationUpdate={setUserLocation}
+              onZoneAnalysis={handleZoneSelection}
+            />
           </div>
-          
-          {/* Filtri espansi */}
-          {showFilters && (
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Categoria */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Categoria</label>
-                  <select
-                    value={filters.category}
-                    onChange={(e) => handleFilterChange('category', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Tutte le categorie</option>
-                    <option value="RESIDENTIAL">Residenziale</option>
-                    <option value="COMMERCIAL">Commerciale</option>
-                    <option value="MIXED">Misto</option>
-                    <option value="INDUSTRIAL">Industriale</option>
-                  </select>
-                </div>
-                
-                {/* Zona */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Zona</label>
-                  <select
-                    value={filters.zone}
-                    onChange={(e) => handleFilterChange('zone', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Tutte le zone</option>
-                    <option value="URBAN">Urbana</option>
-                    <option value="SUBURBAN">Suburbana</option>
-                    <option value="RURAL">Rurale</option>
-                    <option value="COASTAL">Costiera</option>
-                  </select>
-                </div>
-                
-                {/* Budget */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Budget</label>
-                  <select
-                    value={filters.budget}
-                    onChange={(e) => handleFilterChange('budget', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Tutti i budget</option>
-                    <option value="ECONOMIC">Economico</option>
-                    <option value="MEDIUM">Medio</option>
-                    <option value="PREMIUM">Premium</option>
-                    <option value="LUXURY">Lusso</option>
-                  </select>
-                </div>
-                
-                {/* Densità */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Densità</label>
-                  <select
-                    value={filters.density}
-                    onChange={(e) => handleFilterChange('density', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Tutte le densità</option>
-                    <option value="LOW">Bassa</option>
-                    <option value="MEDIUM">Media</option>
-                    <option value="HIGH">Alta</option>
-                  </select>
-                </div>
-              </div>
-              
-              {/* Range filtri */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                {/* Area */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Area (m²)</label>
-                  <div className="flex space-x-2">
-                    <input
-                      type="number"
-                      placeholder="Min"
-                      value={filters.minArea}
-                      onChange={(e) => handleFilterChange('minArea', Number(e.target.value))}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                    <span className="text-gray-500 self-center">-</span>
-                    <input
-                      type="number"
-                      placeholder="Max"
-                      value={filters.maxArea}
-                      onChange={(e) => handleFilterChange('maxArea', Number(e.target.value))}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-                
-                {/* Budget */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Budget (€)</label>
-                  <div className="flex space-x-2">
-                    <input
-                      type="number"
-                      placeholder="Min"
-                      value={filters.minBudget}
-                      onChange={(e) => handleFilterChange('minBudget', Number(e.target.value))}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                    <span className="text-gray-500 self-center">-</span>
-                    <input
-                      type="number"
-                      placeholder="Max"
-                      value={filters.maxBudget}
-                      onChange={(e) => handleFilterChange('maxBudget', Number(e.target.value))}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        )}
 
-        {/* Risultati */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Template Disponibili ({filteredTemplates.length})
-            </h2>
-            
-            {filteredTemplates.length > 0 && (
-              <div className="text-sm text-gray-500">
-                {filteredTemplates.length === templates.length 
-                  ? 'Mostrando tutti i template'
-                  : `Filtrati da ${templates.length} template totali`
-                }
+        {/* Analytics Dashboard - Fase 3 */}
+        {showAnalytics && (
+          <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg shadow-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center space-x-3">
+                <ChartBarIcon className="h-8 w-8 text-orange-600" />
+                <span>Analytics Avanzati</span>
+                <TrendingUpIcon className="h-6 w-6 text-red-500" />
+              </h2>
+              <div className="flex items-center space-x-2">
+                <ClockIcon className="h-4 w-4 text-gray-600" />
+                <span className="text-sm text-gray-600">Tempo reale</span>
               </div>
-            )}
-          </div>
-          
-          {filteredTemplates.length === 0 ? (
-            <div className="bg-white rounded-lg shadow p-12 border border-gray-200 text-center">
-              <BuildingIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Nessun template trovato</h3>
-              <p className="text-gray-500 mb-4">
-                Prova a modificare i filtri o la ricerca per trovare template che corrispondano ai tuoi criteri.
-              </p>
-              <button
-                onClick={resetFilters}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Reset Filtri
-              </button>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredTemplates.map((template) => (
-                <div
-                  key={template.id}
-                  className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+
+            <DesignAnalyticsDashboard
+              projects={projects}
+              templates={templates}
+              aiInsights={aiInsights}
+              optimization={aiOptimization}
+            />
+          </div>
+        )}
+
+        {/* Collaborazione in Tempo Reale - Fase 4 */}
+        {showCollaboration && (
+          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg shadow-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center space-x-3">
+                <MessageCircle className="h-8 w-8 text-indigo-600" />
+                <span>Collaborazione in Tempo Reale</span>
+                <Users className="h-6 w-6 text-purple-500" />
+              </h2>
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm text-gray-600">Live</span>
+              </div>
+            </div>
+
+            <RealTimeCollaboration 
+              designId={selectedTemplate?.id || 'default'}
+              onCommentAdd={(comment) => {
+                console.log('Nuovo commento:', comment);
+                toast('Commento aggiunto con successo', { icon: '✅' });
+              }}
+              onVersionChange={(version) => {
+                console.log('Versione cambiata:', version);
+                toast('Versione aggiornata', { icon: '✅' });
+              }}
+              onWorkflowUpdate={(workflow) => {
+                console.log('Workflow aggiornato:', workflow);
+                toast('Workflow aggiornato', { icon: '✅' });
+              }}
+            />
+          </div>
+        )}
+
+        {/* Versioning Intelligente - Fase 4 */}
+        {showVersioning && (
+          <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg shadow-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center space-x-3">
+                <GitBranchIcon className="h-8 w-8 text-emerald-600" />
+                <span>Versioning Intelligente</span>
+                <GitCommit className="h-6 w-6 text-teal-500" />
+              </h2>
+              <div className="flex items-center space-x-2">
+                <GitCompare className="h-4 w-4 text-gray-600" />
+                <span className="text-sm text-gray-600">Controllo versioni</span>
+              </div>
+            </div>
+
+            <IntelligentVersioning 
+              designId={selectedTemplate?.id || 'default'}
+              onVersionCreate={(version) => {
+                console.log('Nuova versione:', version);
+                toast('Versione creata con successo', { icon: '✅' });
+              }}
+              onVersionSelect={(version) => {
+                console.log('Versione selezionata:', version);
+                setSelectedTemplate(prev => prev ? { ...prev, version: version.versionNumber } : null);
+              }}
+              onVersionCompare={(version1, version2) => {
+                console.log('Confronto versioni:', version1, version2);
+                toast('Confronto versioni completato', { icon: '✅' });
+              }}
+            />
+          </div>
+        )}
+
+        {/* Workflow di Approvazione - Fase 4 */}
+        {showWorkflow && (
+          <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg shadow-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center space-x-3">
+                <Workflow className="h-8 w-8 text-amber-600" />
+                <span>Workflow di Approvazione</span>
+                <CheckSquare className="h-6 w-6 text-orange-500" />
+              </h2>
+              <div className="flex items-center space-x-2">
+                <Clock className="h-4 w-4 text-gray-600" />
+                <span className="text-sm text-gray-600">Gestione processi</span>
+              </div>
+            </div>
+
+            <ApprovalWorkflow 
+              designId={selectedTemplate?.id || 'default'}
+              onWorkflowCreate={(workflow) => {
+                console.log('Nuovo workflow:', workflow);
+                toast('Workflow creato con successo', { icon: '✅' });
+              }}
+              onWorkflowUpdate={(workflow) => {
+                console.log('Workflow aggiornato:', workflow);
+                toast('Workflow aggiornato', { icon: '✅' });
+              }}
+              onWorkflowComplete={(workflow) => {
+                console.log('Workflow completato:', workflow);
+                toast('Workflow completato con successo', { icon: '✅' });
+              }}
+            />
+          </div>
+        )}
+
+
+
+        {/* Filtri avanzati */}
+        {showFilters && (
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Filtri Avanzati</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Categoria</label>
+                <select
+                  value={filters.category}
+                  onChange={(e) => setFilters({...filters, category: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 >
-                  {/* Preview Image */}
-                  <div className="relative h-48 bg-gradient-to-br from-blue-50 to-purple-50">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <BuildingIcon className="h-16 w-16 text-gray-300" />
-                    </div>
-                    
-                    {/* Badge popolarità */}
-                    <div className="absolute top-3 right-3">
-                      <div className="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                        {template.popularity}/100
-                      </div>
-                    </div>
-                    
-                    {/* Badge ROI */}
-                    <div className="absolute top-3 left-3">
-                      <div className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                        {template.estimatedROI}% ROI
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Content */}
-                  <div className="p-6">
-                    {/* Header */}
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                          {template.name}
-                        </h3>
-                        <p className="text-sm text-gray-600 line-clamp-2">
-                          {template.description}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    {/* Caratteristiche principali */}
-                    <div className="grid grid-cols-2 gap-3 mb-4">
-                      <div className="flex items-center text-sm text-gray-600">
-                        <span className="mr-2">{getCategoryIcon(template.category)}</span>
-                        <span className="capitalize">{template.category.toLowerCase()}</span>
-                      </div>
-                      
-                      <div className="flex items-center text-sm text-gray-600">
-                        <span className="mr-2">{getZoneIcon(template.zone)}</span>
-                        <span className="capitalize">{template.zone.toLowerCase()}</span>
-                      </div>
-                      
-                      <div className="flex items-center text-sm text-gray-600">
-                        <RulerIcon className="h-4 w-4 mr-2" />
-                        <span>{template.minArea}-{template.maxArea} m²</span>
-                      </div>
-                      
-                      <div className="flex items-center text-sm text-gray-600">
-                        <ClockIcon className="h-4 w-4 mr-2" />
-                        <span>{template.constructionTime} mesi</span>
-                      </div>
-                    </div>
-                    
-                    {/* Budget */}
-                    <div className="mb-4">
-                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getBudgetColor(template.budget)}`}>
-                        {getBudgetLabel(template.budget)}
-                      </span>
-                    </div>
-                    
-                    {/* Features */}
-                    <div className="mb-4">
-                      <div className="flex flex-wrap gap-1">
-                        {template.features.slice(0, 3).map((feature, index) => (
-                          <span
-                            key={index}
-                            className="inline-block px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
-                          >
-                            {feature}
-                          </span>
-                        ))}
-                        {template.features.length > 3 && (
-                          <span className="inline-block px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-                            +{template.features.length - 3} altre
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* Actions */}
-                    <div className="flex items-center justify-between">
-                      <button
-                        onClick={() => previewTemplate(template)}
-                        className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors mr-2"
-                      >
-                        <EyeIcon className="h-4 w-4 mr-2 inline" />
-                        Anteprima
-                      </button>
-                      
-                      <button 
-                        onClick={() => startTemplateCustomization(template)}
-                        className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors mr-2"
-                      >
-                        <PlusIcon className="h-4 w-4 mr-2 inline" />
-                        Personalizza
-                      </button>
-                      
-                      <button 
-                        onClick={() => createProjectFromTemplate(template)}
-                        className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
-                      >
-                        <PlusIcon className="h-4 w-4 mr-2 inline" />
-                        Crea Progetto
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Modal Template Dettagliato */}
-      {showTemplateModal && selectedTemplate && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-4xl">
-            <div className="flex justify-between items-start mb-6">
-              <h3 className="text-2xl font-bold text-gray-900">
-                {selectedTemplate.name}
-              </h3>
-              <button
-                onClick={closeTemplateModal}
-                className="btn btn-sm btn-circle btn-ghost"
-              >
-                ✕
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left Column - Preview */}
+                  <option value="">Tutte le categorie</option>
+                  <option value="residential">Residenziale</option>
+                  <option value="commercial">Commerciale</option>
+                  <option value="mixed">Misto</option>
+                  <option value="industrial">Industriale</option>
+                </select>
+              </div>
+              
               <div>
-                <div className="bg-gradient-to-br from-blue-50 to-purple-50 h-64 rounded-lg flex items-center justify-center mb-4">
-                  <BuildingIcon className="h-24 w-24 text-gray-300" />
+                <label className="block text-sm font-medium text-gray-700 mb-2">Zona</label>
+                <select
+                  value={filters.zone}
+                  onChange={(e) => setFilters({...filters, zone: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="">Tutte le zone</option>
+                  <option value="Appio">Appio</option>
+                  <option value="Centro">Centro</option>
+                  <option value="Eur">Eur</option>
+                  <option value="Ostiense">Ostiense</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Budget</label>
+                <select
+                  value={filters.budget}
+                  onChange={(e) => setFilters({...filters, budget: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="">Tutti i budget</option>
+                  <option value="1000000">Fino a 1M €</option>
+                  <option value="2500000">Fino a 2.5M €</option>
+                  <option value="5000000">Fino a 5M €</option>
+                  <option value="10000000">Oltre 5M €</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Densità</label>
+                <select
+                  value={filters.density}
+                  onChange={(e) => setFilters({...filters, density: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="">Tutte le densità</option>
+                  <option value="low">Bassa</option>
+                  <option value="medium">Media</option>
+                  <option value="high">Alta</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Template Grid */}
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <AlertIcon className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Errore di caricamento</h3>
+            <p className="text-gray-600">{error}</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredTemplates.map((template) => (
+              <div
+                key={template.id}
+                className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all transform hover:-translate-y-1"
+              >
+                <div className="h-48 bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center">
+                  <BuildingIcon className="h-20 w-20 text-blue-600" />
                 </div>
                 
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-600">Categoria:</span>
-                    <span className="text-sm text-gray-900 capitalize">
-                      {selectedTemplate.category.toLowerCase()}
-                    </span>
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="text-lg font-semibold text-gray-900">{template.name}</h3>
+                    <button
+                      onClick={() => previewTemplate(template)}
+                      className="text-blue-600 hover:text-blue-800 transition-colors"
+                    >
+                      <EyeIcon className="h-5 w-5" />
+                    </button>
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-600">Zona:</span>
-                    <span className="text-sm text-gray-900 capitalize">
-                      {selectedTemplate.zone.toLowerCase()}
-                    </span>
+                  <p className="text-gray-600 text-sm mb-4">{template.description}</p>
+                  
+                  <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
+                    <div className="flex items-center space-x-2">
+                      <MapPinIcon className="h-4 w-4 text-gray-500" />
+                      <span className="text-gray-700">Zona: {template.zone}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RulerIcon className="h-4 w-4 text-gray-500" />
+                      <span className="text-gray-700">Area: {template.minArea}-{template.maxArea}m²</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <TrendingUpIcon className="h-4 w-4 text-gray-500" />
+                      <span className="text-gray-700">Densità: {template.density}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <ZapIcon className="h-4 w-4 text-gray-500" />
+                      <span className="text-gray-700">Classe Energetica: {template.energyClass}</span>
+                    </div>
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-600">Budget:</span>
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${getBudgetColor(selectedTemplate.budget)}`}>
-                      {getBudgetLabel(selectedTemplate.budget)}
-                    </span>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-sm text-gray-600">
+                      <span className="font-medium">Budget:</span> €{template.minBudget.toLocaleString()}-{template.maxBudget.toLocaleString()}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      <span className="font-medium">Durata:</span> {template.constructionTime} mesi
+                    </div>
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-600">Densità:</span>
-                    <span className="text-sm text-gray-900 capitalize">
-                      {selectedTemplate.density.toLowerCase()}
-                    </span>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => startTemplateCustomization(template)}
+                      className="flex-1 bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                    >
+                      <PlusIcon className="h-4 w-4" />
+                      <span>Usa questo Template</span>
+                    </button>
+                    
+                    <button
+                      onClick={() => previewTemplate(template)}
+                      className="px-3 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg transition-colors"
+                    >
+                      <EyeIcon className="h-4 w-4" />
+                    </button>
                   </div>
                 </div>
               </div>
-              
-              {/* Right Column - Details */}
-              <div>
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Caratteristiche Tecniche</h4>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div>
-                        <span className="text-gray-600">Area:</span>
-                        <span className="ml-2 font-medium">{selectedTemplate.minArea}-{selectedTemplate.maxArea} m²</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Piani:</span>
-                        <span className="ml-2 font-medium">{selectedTemplate.floors}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Camere:</span>
-                        <span className="ml-2 font-medium">{selectedTemplate.bedrooms}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Bagni:</span>
-                        <span className="ml-2 font-medium">{selectedTemplate.bathrooms}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Posti auto:</span>
-                        <span className="ml-2 font-medium">{selectedTemplate.parkingSpaces}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Giardino:</span>
-                        <span className="ml-2 font-medium">{selectedTemplate.gardenArea} m²</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Performance</h4>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div>
-                        <span className="text-gray-600">ROI stimato:</span>
-                        <span className="ml-2 font-medium text-green-600">{selectedTemplate.estimatedROI}%</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Tempo costruzione:</span>
-                        <span className="ml-2 font-medium">{selectedTemplate.constructionTime} mesi</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Classe energetica:</span>
-                        <span className="ml-2 font-medium">{selectedTemplate.energyClass}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Popolarità:</span>
-                        <span className="ml-2 font-medium">{selectedTemplate.popularity}/100</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Caratteristiche</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedTemplate.features.map((feature, index) => (
-                        <span
-                          key={index}
-                          className="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
-                        >
-                          {feature}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+            ))}
+          </div>
+        )}
+
+        {/* Modal Template */}
+        {showTemplateModal && selectedTemplate && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">{selectedTemplate.name}</h2>
+                  <button
+                    onClick={() => setShowTemplateModal(false)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <span className="sr-only">Chiudi</span>
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                 </div>
                 
-                {/* Actions */}
-                <div className="flex space-x-3 mt-6">
-                  <button 
-                    onClick={() => startTemplateCustomization(selectedTemplate)}
-                    className="flex-1 bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    <PlusIcon className="h-4 w-4 mr-2 inline" />
-                    Personalizza questo Template
-                  </button>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <div>
+                    <div className="h-64 bg-gradient-to-br from-blue-100 to-indigo-200 rounded-lg flex items-center justify-center mb-6">
+                      <BuildingIcon className="h-24 w-24 text-blue-600" />
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="font-semibold text-gray-900 mb-2">Descrizione</h3>
+                        <p className="text-gray-600">{selectedTemplate.description}</p>
+                      </div>
+                      
+                      <div>
+                        <h3 className="font-semibold text-gray-900 mb-2">Caratteristiche</h3>
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                          <div className="flex items-center space-x-2">
+                            <MapPinIcon className="h-4 w-4 text-gray-500" />
+                            <span className="text-gray-700">Zona: {selectedTemplate.zone}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RulerIcon className="h-4 w-4 text-gray-500" />
+                            <span className="text-gray-700">Area: {selectedTemplate.minArea}-{selectedTemplate.maxArea}m²</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <TrendingUpIcon className="h-4 w-4 text-gray-500" />
+                            <span className="text-gray-700">Densità: {selectedTemplate.density}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <ZapIcon className="h-4 w-4 text-gray-500" />
+                            <span className="text-gray-700">Classe Energetica: {selectedTemplate.energyClass}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h3 className="font-semibold text-gray-900 mb-2">Budget e Tempi</h3>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-gray-600">Budget stimato:</span>
+                            <div className="font-semibold text-gray-900">€{selectedTemplate.minBudget.toLocaleString()}-{selectedTemplate.maxBudget.toLocaleString()}</div>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Durata stimata:</span>
+                            <div className="font-semibold text-gray-900">{selectedTemplate.constructionTime} mesi</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   
-                  <button 
-                    onClick={() => createProjectFromTemplate(selectedTemplate)}
-                    className="px-4 py-3 text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
-                  >
-                    <PlusIcon className="h-4 w-4 mr-2 inline" />
-                    Crea Progetto
-                  </button>
-                  
-                  <button className="px-4 py-3 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                    <DownloadIcon className="h-4 w-4" />
-                  </button>
-                  
-                  <button className="px-4 py-3 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                    <ShareIcon className="h-4 w-4" />
-                  </button>
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-4">Azioni</h3>
+                      <div className="space-y-3">
+                        <button
+                          onClick={() => createProjectFromTemplate(selectedTemplate)}
+                          className="w-full bg-primary hover:bg-primary-dark text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                        >
+                          <PlusIcon className="h-5 w-5" />
+                          <span>Crea Progetto</span>
+                        </button>
+                        
+                        <button
+                          onClick={() => startTemplateCustomization(selectedTemplate)}
+                          className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                        >
+                          <LightbulbIcon className="h-5 w-5" />
+                          <span>Personalizza Template</span>
+                        </button>
+                        
+                        <button
+                          onClick={() => handleAIOptimization()}
+                          className="w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                        >
+                          <BrainIcon className="h-5 w-5" />
+                          <span>Ottimizzazione AI</span>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {aiOptimization && (
+                      <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-gray-900 mb-3 flex items-center space-x-2">
+                          <BrainIcon className="h-5 w-5 text-green-600" />
+                          <span>Ottimizzazioni AI</span>
+                        </h4>
+                        <div className="space-y-2 text-sm">
+                          {aiOptimization.recommendations?.slice(0, 3).map((rec: any, index: number) => (
+                            <div key={index} className="flex items-start space-x-2">
+                              <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                              <div>
+                                <div className="font-medium text-gray-800">{rec.description}</div>
+                                <div className="text-green-600">{rec.impact}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-3">Condividi</h3>
+                      <div className="flex space-x-2">
+                        <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded-lg transition-colors flex items-center justify-center space-x-2">
+                          <ShareIcon className="h-4 w-4" />
+                          <span>Condividi</span>
+                        </button>
+                        <button className="px-3 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg transition-colors">
+                          <DownloadIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </DashboardLayout>
   );
 } 

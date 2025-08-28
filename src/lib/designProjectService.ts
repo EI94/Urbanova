@@ -22,9 +22,11 @@ export interface DesignProject {
   description: string;
   templateId: string;
   template: DesignTemplate;
-  status: 'PLANNING' | 'IN_PROGRESS' | 'COMPLETED' | 'ON_HOLD' | 'CANCELLED';
+  status: 'PLANNING' | 'IN_PROGRESS' | 'COMPLETED' | 'ON_HOLD' | 'DRAFT' | 'IN_REVIEW' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
   userId: string;
   location: string;
+  category?: string;
+  zone?: string;
   coordinates?: {
     lat: number;
     lng: number;
@@ -67,6 +69,8 @@ export interface CreateProjectData {
   template: DesignTemplate;
   userId: string;
   location: string;
+  category?: string;
+  zone?: string;
   coordinates?: {
     lat: number;
     lng: number;

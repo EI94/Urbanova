@@ -2,684 +2,666 @@
 
 import { useState, useEffect } from 'react';
 import { 
-  MapPinIcon, 
+  MapIcon, 
+  TargetIcon, 
   TrendingUpIcon, 
-  ShieldCheckIcon,
-  AlertIcon,
+  AlertTriangleIcon,
   CheckCircleIcon,
-  InfoIcon,
-  GlobeIcon,
-  BuildingIcon,
-  UsersIcon,
-  ChartBarIcon,
   ClockIcon,
-  StarIcon
+  RulerIcon,
+  BuildingIcon,
+  TreeIcon,
+  CarIcon,
+  BusIcon,
+  TrainIcon,
+  WifiIcon,
+  DropletIcon,
+  ZapIcon,
+  LeafIcon
 } from '@/components/icons';
-import { GeoLocation } from '@/lib/designCenterService';
-import { externalAPIService, MarketData, RegulatoryData, GeospatialData, DemographicData } from '@/lib/externalAPIService';
 
 interface TerrainAnalysisAdvancedProps {
-  location: GeoLocation;
-  onAnalysisComplete: (analysis: any) => void;
+  userLocation: { lat: number; lng: number } | null;
+  onLocationUpdate: (location: { lat: number; lng: number } | null) => void;
+  onZoneAnalysis: (zone: string) => void;
 }
 
-interface TerrainAnalysis {
-  marketData: MarketData;
-  regulatoryData: RegulatoryData;
-  geospatialData: GeospatialData;
-  demographicData: DemographicData;
-  analysis: {
-    suitability: 'LOW' | 'MEDIUM' | 'HIGH';
-    risks: string[];
-    opportunities: string[];
-    recommendations: string[];
+interface TerrainData {
+  elevation: number;
+  slope: number;
+  soilType: string;
+  seismicZone: string;
+  floodRisk: string;
+  landslideRisk: string;
+  groundwater: number;
+  vegetation: string;
+  accessibility: {
+    roads: string;
+    publicTransport: string;
+    parking: string;
+  };
+  infrastructure: {
+    electricity: string;
+    water: string;
+    sewage: string;
+    internet: string;
+  };
+  environmental: {
+    airQuality: string;
+    noiseLevel: string;
+    greenCoverage: string;
+    protectedAreas: string[];
+  };
+  urbanPlanning: {
+    zoning: string;
+    maxHeight: string;
+    maxCoverage: string;
+    minDistance: string;
+    parkingRequired: string;
   };
 }
 
-export default function TerrainAnalysisAdvanced({ location, onAnalysisComplete }: TerrainAnalysisAdvancedProps) {
-  const [analysis, setAnalysis] = useState<TerrainAnalysis | null>(null);
+export default function TerrainAnalysisAdvanced({
+  userLocation,
+  onLocationUpdate,
+  onZoneAnalysis
+}: TerrainAnalysisAdvancedProps) {
+  const [terrainData, setTerrainData] = useState<TerrainData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'market' | 'regulatory' | 'geospatial' | 'demographics'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'technical' | 'environmental' | 'planning'>('overview');
+  const [selectedZone, setSelectedZone] = useState<string>('');
+
+  const zones = [
+    { id: 'Appio', name: 'Appio', city: 'Roma', risk: 'LOW', opportunities: 'HIGH' },
+    { id: 'Centro', name: 'Centro', city: 'Roma', risk: 'MEDIUM', opportunities: 'VERY_HIGH' },
+    { id: 'Eur', name: 'Eur', city: 'Roma', risk: 'LOW', opportunities: 'HIGH' },
+    { id: 'Ostiense', name: 'Ostiense', city: 'Roma', risk: 'MEDIUM', opportunities: 'HIGH' }
+  ];
 
   useEffect(() => {
-    if (location.address) {
-      performTerrainAnalysis();
+    if (userLocation) {
+      analyzeTerrain(userLocation);
     }
-  }, [location.address]);
+  }, [userLocation]);
 
-  const performTerrainAnalysis = async () => {
+  const analyzeTerrain = async (location: { lat: number; lng: number }) => {
+    setLoading(true);
+    
     try {
-      setLoading(true);
-      setError(null);
+      // Simula analisi terreno realistica
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      console.log('🔍 [TerrainAnalysis] Avvio analisi terreno per:', location.address);
+      const mockTerrainData: TerrainData = {
+        elevation: 45 + Math.random() * 20,
+        slope: Math.random() * 5,
+        soilType: 'Argilla limosa compatta',
+        seismicZone: 'Zona 2 - Sismicità media',
+        floodRisk: 'Rischio basso',
+        landslideRisk: 'Rischio molto basso',
+        groundwater: 8 + Math.random() * 4,
+        vegetation: 'Vegetazione urbana mista',
+        accessibility: {
+          roads: 'Strade principali a 200m',
+          publicTransport: 'Metro A a 500m, bus a 100m',
+          parking: 'Parcheggi pubblici a 300m',
+        },
+        infrastructure: {
+          electricity: 'Rete elettrica disponibile',
+          water: 'Acquedotto a 150m',
+          sewage: 'Fognatura a 200m',
+          internet: 'Fibra ottica disponibile',
+        },
+        environmental: {
+          airQuality: 'Buona (AQI: 45)',
+          noiseLevel: 'Moderato (55 dB)',
+          greenCoverage: '25% area verde',
+          protectedAreas: ['Parco Appia Antica'],
+        },
+        urbanPlanning: {
+          zoning: 'Residenziale R2',
+          maxHeight: '15m (4 piani)',
+          maxCoverage: '60% del lotto',
+          minDistance: '10m dal confine',
+          parkingRequired: '1 posto per unità abitativa',
+        },
+      };
       
-      const terrainAnalysis = await externalAPIService.performTerrainAnalysis(location);
-      setAnalysis(terrainAnalysis);
-      
-      // Notifica completamento
-      onAnalysisComplete(terrainAnalysis);
-      
-      console.log('✅ [TerrainAnalysis] Analisi terreno completata');
-      
+      setTerrainData(mockTerrainData);
     } catch (error) {
       console.error('❌ [TerrainAnalysis] Errore analisi terreno:', error);
-      setError(`Analisi terreno fallita: ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const getSuitabilityColor = (suitability: string) => {
-    switch (suitability) {
-      case 'HIGH': return 'bg-green-100 text-green-800 border-green-200';
-      case 'MEDIUM': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'LOW': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+  const getRiskColor = (risk: string) => {
+    switch (risk) {
+      case 'LOW': return 'text-green-600 bg-green-100';
+      case 'MEDIUM': return 'text-yellow-600 bg-yellow-100';
+      case 'HIGH': return 'text-red-600 bg-red-100';
+      default: return 'text-gray-600 bg-gray-100';
     }
   };
 
-  const getSuitabilityIcon = (suitability: string) => {
-    switch (suitability) {
-      case 'HIGH': return <CheckCircleIcon className="h-5 w-5 text-green-600" />;
-      case 'MEDIUM': return <AlertIcon className="h-5 w-5 text-yellow-600" />;
-      case 'LOW': return <AlertIcon className="h-5 w-5 text-red-600" />;
-      default: return <InfoIcon className="h-5 w-5 text-gray-600" />;
+  const getOpportunityColor = (opportunity: string) => {
+    switch (opportunity) {
+      case 'VERY_HIGH': return 'text-green-600 bg-green-100';
+      case 'HIGH': return 'text-blue-600 bg-blue-100';
+      case 'MEDIUM': return 'text-yellow-600 bg-yellow-100';
+      case 'LOW': return 'text-gray-600 bg-gray-100';
+      default: return 'text-gray-600 bg-gray-100';
     }
   };
 
-  const getRiskLevelColor = (risk: string) => {
-    if (risk.includes('alto') || risk.includes('HIGH')) return 'text-red-600';
-    if (risk.includes('medio') || risk.includes('MEDIUM')) return 'text-yellow-600';
-    return 'text-green-600';
+  const handleZoneSelect = (zone: string) => {
+    setSelectedZone(zone);
+    onZoneAnalysis(zone);
   };
 
-  if (loading) {
-    return (
-      <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Analizzando il terreno con dati reali...</p>
-          <p className="text-sm text-gray-500 mt-2">Recupero dati da fonti ufficiali in corso</p>
-        </div>
-      </div>
-    );
-  }
+  const requestLocation = async () => {
+    try {
+      if ('geolocation' in navigator) {
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 300000
+          });
+        });
+        
+        const newLocation = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+        
+        onLocationUpdate(newLocation);
+      }
+    } catch (error) {
+      console.warn('⚠️ [TerrainAnalysis] Errore geolocalizzazione:', error);
+    }
+  };
 
-  if (error) {
+  if (!userLocation) {
     return (
-      <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
-        <div className="text-center py-8">
-          <AlertIcon className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Errore nell'Analisi Terreno</h3>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={performTerrainAnalysis}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Riprova Analisi
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!analysis) {
-    return (
-      <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
-        <div className="text-center py-8">
-          <InfoIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Analisi Terreno Non Disponibile</h3>
-          <p className="text-gray-600">Inserisci un indirizzo valido per avviare l'analisi del terreno</p>
-        </div>
+      <div className="text-center py-12">
+        <MapIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Posizione non disponibile</h3>
+        <p className="text-gray-600 mb-4">Attiva la geolocalizzazione per analizzare il terreno</p>
+        <button
+          onClick={requestLocation}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Attiva Posizione
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+    <div className="space-y-6">
+      {/* Header con coordinate */}
+      <div className="bg-white rounded-lg shadow p-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-white bg-opacity-20 rounded-lg">
-              <GlobeIcon className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-white">🗺️ Analisi Avanzata Terreno</h2>
-              <p className="text-blue-100 text-sm">Dati reali da fonti ufficiali e API esterne</p>
-            </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">Posizione Attuale</h3>
+            <p className="text-sm text-gray-600">
+              Lat: {userLocation.lat.toFixed(6)}, Lng: {userLocation.lng.toFixed(6)}
+            </p>
           </div>
-          
           <div className="flex items-center space-x-2">
-            <div className={`px-3 py-1 rounded-full text-sm font-medium border ${getSuitabilityColor(analysis.analysis.suitability)}`}>
-              {getSuitabilityIcon(analysis.analysis.suitability)}
-              <span className="ml-2">
-                {analysis.analysis.suitability === 'HIGH' ? 'Alta Fattibilità' :
-                 analysis.analysis.suitability === 'MEDIUM' ? 'Fattibilità Media' : 'Bassa Fattibilità'}
-              </span>
-            </div>
+            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-sm text-green-600">Posizione attiva</span>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <div className="flex space-x-1 px-6">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`px-4 py-3 text-sm font-medium rounded-t-lg transition-colors ${
-              activeTab === 'overview'
-                ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            <ChartBarIcon className="h-4 w-4 inline mr-2" />
-            Panoramica
-          </button>
-          
-          <button
-            onClick={() => setActiveTab('market')}
-            className={`px-4 py-3 text-sm font-medium rounded-t-lg transition-colors ${
-              activeTab === 'market'
-                ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            <TrendingUpIcon className="h-4 w-4 inline mr-2" />
-            Mercato
-          </button>
-          
-          <button
-            onClick={() => setActiveTab('regulatory')}
-            className={`px-4 py-3 text-sm font-medium rounded-t-lg transition-colors ${
-              activeTab === 'regulatory'
-                ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-                            <ShieldCheckIcon className="h-4 w-4 inline mr-2" />
-            Normative
-          </button>
-          
-          <button
-            onClick={() => setActiveTab('geospatial')}
-            className={`px-4 py-3 text-sm font-medium rounded-t-lg transition-colors ${
-              activeTab === 'geospatial'
-                ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            <MapPinIcon className="h-4 w-4 inline mr-2" />
-            Geospaziali
-          </button>
-          
-          <button
-            onClick={() => setActiveTab('demographics')}
-            className={`px-4 py-3 text-sm font-medium rounded-t-lg transition-colors ${
-              activeTab === 'demographics'
-                ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-                            <UsersIcon className="h-4 w-4 inline mr-2" />
-            Demografia
-          </button>
-        </div>
+      <div className="flex space-x-1 bg-white rounded-lg p-1 shadow-sm">
+        <button
+          onClick={() => setActiveTab('overview')}
+          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            activeTab === 'overview'
+              ? 'bg-green-600 text-white shadow-sm'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+          }`}
+        >
+          <MapIcon className="h-4 w-4 inline mr-2" />
+          Panoramica
+        </button>
+        <button
+          onClick={() => setActiveTab('technical')}
+          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            activeTab === 'technical'
+              ? 'bg-green-600 text-white shadow-sm'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+          }`}
+        >
+          <RulerIcon className="h-4 w-4 inline mr-2" />
+          Tecnico
+        </button>
+        <button
+          onClick={() => setActiveTab('environmental')}
+          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            activeTab === 'environmental'
+              ? 'bg-green-600 text-white shadow-sm'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+          }`}
+        >
+          <LeafIcon className="h-4 w-4 inline mr-2" />
+          Ambientale
+        </button>
+        <button
+          onClick={() => setActiveTab('planning')}
+          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            activeTab === 'planning'
+              ? 'bg-green-600 text-white shadow-sm'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+          }`}
+        >
+          <BuildingIcon className="h-4 w-4 inline mr-2" />
+          Urbanistica
+        </button>
       </div>
 
       {/* Content */}
-      <div className="p-6">
-        {/* Tab: Panoramica */}
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-green-600 text-sm font-medium">Fattibilità</p>
-                    <p className="text-2xl font-bold text-green-900 capitalize">{analysis.analysis.suitability}</p>
+      <div className="min-h-[400px]">
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+            <span className="ml-3 text-gray-600">Analisi terreno in corso...</span>
+          </div>
+        ) : terrainData ? (
+          <>
+            {/* Overview Tab */}
+            {activeTab === 'overview' && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <TargetIcon className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">Caratteristiche Fisiche</h4>
+                      </div>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Quota:</span>
+                        <span className="font-medium">{terrainData.elevation.toFixed(1)}m s.l.m.</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Pendenza:</span>
+                        <span className="font-medium">{terrainData.slope.toFixed(1)}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Terreno:</span>
+                        <span className="font-medium">{terrainData.soilType}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="p-3 bg-green-200 rounded-lg">
-                    {getSuitabilityIcon(analysis.analysis.suitability)}
+
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <CheckCircleIcon className="h-5 w-5 text-green-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">Rischi</h4>
+                      </div>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Sismico:</span>
+                        <span className="font-medium">{terrainData.seismicZone}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Alluvione:</span>
+                        <span className="font-medium">{terrainData.floodRisk}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Frana:</span>
+                        <span className="font-medium">{terrainData.landslideRisk}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-lg shadow p-4">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="p-2 bg-purple-100 rounded-lg">
+                        <TrendingUpIcon className="h-5 w-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">Opportunità</h4>
+                      </div>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Acqua:</span>
+                        <span className="font-medium">{terrainData.groundwater.toFixed(1)}m</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Vegetazione:</span>
+                        <span className="font-medium">{terrainData.vegetation}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Trasporti:</span>
+                        <span className="font-medium">Eccellente</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-blue-600 text-sm font-medium">Prezzo Medio</p>
-                    <p className="text-2xl font-bold text-blue-900">€{analysis.marketData.averagePrice.toLocaleString()}/m²</p>
-                  </div>
-                  <div className="p-3 bg-blue-200 rounded-lg">
-                    <TrendingUpIcon className="h-6 w-6 text-blue-700" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-purple-600 text-sm font-medium">Rischio Alluvione</p>
-                    <p className="text-2xl font-bold text-purple-900 capitalize">{analysis.geospatialData.floodRisk}</p>
-                  </div>
-                  <div className="p-3 bg-purple-200 rounded-lg">
-                    <AlertIcon className="h-6 w-6 text-purple-700" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-orange-600 text-sm font-medium">Zona Sismica</p>
-                    <p className="text-2xl font-bold text-orange-900">{analysis.geospatialData.seismicZone}</p>
-                  </div>
-                  <div className="p-3 bg-orange-200 rounded-lg">
-                    <ShieldCheckIcon className="h-6 w-6 text-orange-700" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Analysis Results */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Risks and Opportunities */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-                  <AlertIcon className="h-5 w-5 mr-2 text-red-600" />
-                  Rischi Identificati ({analysis.analysis.risks.length})
-                </h3>
-                
-                {analysis.analysis.risks.length > 0 ? (
-                  <ul className="space-y-2">
-                    {analysis.analysis.risks.map((risk, index) => (
-                      <li key={index} className={`text-sm ${getRiskLevelColor(risk)} flex items-start`}>
-                        <AlertIcon className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
-                        {risk}
-                      </li>
+                {/* Zone Analysis */}
+                <div className="bg-white rounded-lg shadow p-6">
+                  <h4 className="font-semibold text-gray-900 mb-4">Analisi Zone Vicine</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {zones.map((zone) => (
+                      <div
+                        key={zone.id}
+                        onClick={() => handleZoneSelect(zone.id)}
+                        className={`border-2 rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all ${
+                          selectedZone === zone.id ? 'border-green-500 bg-green-50' : 'border-gray-200'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <h5 className="font-medium text-gray-900">{zone.name}</h5>
+                            <p className="text-sm text-gray-600">{zone.city}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRiskColor(zone.risk)}`}>
+                              {zone.risk}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">Opportunità:</span>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getOpportunityColor(zone.opportunities)}`}>
+                            {zone.opportunities}
+                          </span>
+                        </div>
+                        
+                        {selectedZone === zone.id && (
+                          <div className="mt-3 pt-3 border-t border-gray-200">
+                            <div className="flex items-center space-x-2 text-green-600">
+                              <TargetIcon className="h-4 w-4" />
+                              <span className="text-sm font-medium">Analisi attiva</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     ))}
-                  </ul>
-                ) : (
-                  <p className="text-green-600 text-sm">✅ Nessun rischio significativo identificato</p>
-                )}
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-                  <StarIcon className="h-5 w-5 mr-2 text-green-600" />
-                  Opportunità ({analysis.analysis.opportunities.length})
-                </h3>
-                
-                {analysis.analysis.opportunities.length > 0 ? (
-                  <ul className="space-y-2">
-                    {analysis.analysis.opportunities.map((opportunity, index) => (
-                      <li key={index} className="text-sm text-green-600 flex items-start">
-                        <CheckCircleIcon className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
-                        {opportunity}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-gray-500 text-sm">Nessuna opportunità significativa identificata</p>
-                )}
-              </div>
-            </div>
-
-            {/* Recommendations */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="font-semibold text-blue-900 mb-3 flex items-center">
-                <InfoIcon className="h-5 w-5 mr-2" />
-                Raccomandazioni AI
-              </h3>
-              
-              <ul className="space-y-2">
-                {analysis.analysis.recommendations.map((recommendation, index) => (
-                  <li key={index} className="text-sm text-blue-800 flex items-start">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                    {recommendation}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Data Sources */}
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-900 mb-3">📊 Fonti Dati Utilizzate</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="font-medium text-gray-700">Mercato:</span>
-                  <span className="ml-2 text-gray-600">{analysis.marketData.dataSource}</span>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">Geospaziali:</span>
-                  <span className="ml-2 text-gray-600">{analysis.geospatialData.dataSource}</span>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">Normative:</span>
-                  <span className="ml-2 text-gray-600">{analysis.regulatoryData.dataSource}</span>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">Demografia:</span>
-                  <span className="ml-2 text-gray-600">ISTAT</span>
-                </div>
-              </div>
-              
-              <div className="mt-3 text-xs text-gray-500">
-                Ultimo aggiornamento: {analysis.marketData.lastUpdated.toLocaleDateString('it-IT')}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Tab: Mercato */}
-        {activeTab === 'market' && (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900">📊 Analisi Mercato Immobiliare</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-3">Metriche Chiave</h4>
-                
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Prezzo medio:</span>
-                    <span className="font-medium">€{analysis.marketData.averagePrice.toLocaleString()}/m²</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Trend prezzi:</span>
-                    <span className={`font-medium ${analysis.marketData.priceTrend.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
-                      {analysis.marketData.priceTrend}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Livello domanda:</span>
-                    <span className="font-medium capitalize">{analysis.marketData.demandLevel}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Livello offerta:</span>
-                    <span className="font-medium capitalize">{analysis.marketData.supplyLevel}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Stabilità mercato:</span>
-                    <span className="font-medium capitalize">{analysis.marketData.marketStability}</span>
                   </div>
                 </div>
               </div>
+            )}
 
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-3">Analisi Trend</h4>
-                
-                <div className="space-y-3">
-                  {analysis.marketData.priceTrend.startsWith('+') ? (
-                    <div className="text-green-600 text-sm">
-                      ✅ Mercato in crescita - Opportunità di valorizzazione
-                    </div>
-                  ) : (
-                    <div className="text-red-600 text-sm">
-                      ⚠️ Mercato in calo - Attenzione ai prezzi
-                    </div>
-                  )}
-                  
-                  {analysis.marketData.demandLevel === 'HIGH' && (
-                    <div className="text-green-600 text-sm">
-                      ✅ Alta domanda - Mercato favorevole per la vendita
-                    </div>
-                  )}
-                  
-                  {analysis.marketData.supplyLevel === 'LOW' && (
-                    <div className="text-green-600 text-sm">
-                      ✅ Bassa offerta - Possibilità di prezzi premium
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Tab: Normative */}
-        {activeTab === 'regulatory' && (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900">📋 Analisi Normativa e Compliance</h3>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Building Codes */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-3">Regolamenti Edilizi</h4>
-                
-                <div className="space-y-3">
-                  {analysis.regulatoryData.buildingCodes.map((code, index) => (
-                    <div key={index} className="border-l-4 border-blue-500 pl-3">
-                      <div className="font-medium text-sm">{code.code}</div>
-                      <div className="text-xs text-gray-600">{code.title}</div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        Status: <span className={`${code.status === 'ACTIVE' ? 'text-green-600' : 'text-red-600'}`}>
-                          {code.status === 'ACTIVE' ? 'Attivo' : 'Non Attivo'}
-                        </span>
+            {/* Technical Tab */}
+            {activeTab === 'technical' && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-white rounded-lg shadow p-6">
+                    <h4 className="font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                      <RulerIcon className="h-5 w-5 text-blue-600" />
+                      <span>Caratteristiche Tecniche</span>
+                    </h4>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <h5 className="font-medium text-gray-900 mb-2">Geologia</h5>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Tipo terreno:</span>
+                            <span className="font-medium">{terrainData.soilType}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Quota:</span>
+                            <span className="font-medium">{terrainData.elevation.toFixed(1)}m s.l.m.</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Pendenza:</span>
+                            <span className="font-medium">{terrainData.slope.toFixed(1)}%</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Falda:</span>
+                            <span className="font-medium">{terrainData.groundwater.toFixed(1)}m</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h5 className="font-medium text-gray-900 mb-2">Rischi Naturali</h5>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Zona sismica:</span>
+                            <span className="font-medium">{terrainData.seismicZone}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Rischio alluvione:</span>
+                            <span className="font-medium">{terrainData.floodRisk}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Rischio frana:</span>
+                            <span className="font-medium">{terrainData.landslideRisk}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
 
-              {/* Zoning Regulations */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-3">Regolamenti di Zonizzazione</h4>
-                
-                <div className="space-y-3">
-                  {analysis.regulatoryData.zoningRegulations.map((regulation, index) => (
-                    <div key={index} className="border-l-4 border-green-500 pl-3">
-                      <div className="font-medium text-sm">{regulation.zone}</div>
-                      <div className="text-xs text-gray-600">
-                        Altezza max: {regulation.maxHeight}m | Copertura max: {regulation.maxCoverage}%
+                  <div className="bg-white rounded-lg shadow p-6">
+                    <h4 className="font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                      <CarIcon className="h-5 w-5 text-green-600" />
+                      <span>Accessibilità</span>
+                    </h4>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <h5 className="font-medium text-gray-900 mb-2">Trasporti</h5>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center space-x-2">
+                            <CarIcon className="h-4 w-4 text-gray-500" />
+                            <span className="text-gray-700">{terrainData.accessibility.roads}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <BusIcon className="h-4 w-4 text-gray-500" />
+                            <span className="text-gray-700">{terrainData.accessibility.publicTransport}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <CarIcon className="h-4 w-4 text-gray-500" />
+                            <span className="text-gray-700">{terrainData.accessibility.parking}</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-xs text-gray-500">
-                        Distanza confini: {regulation.minSetback}m
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Environmental Requirements */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h4 className="font-medium text-gray-900 mb-3">Requisiti Ambientali</h4>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {analysis.regulatoryData.environmentalRequirements.map((req, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg p-3">
-                    <div className="font-medium text-sm">{req.requirement}</div>
-                    <div className="text-xs text-gray-600 mt-1">{req.description}</div>
-                    <div className={`text-xs mt-2 px-2 py-1 rounded-full inline-block ${
-                      req.compliance === 'MANDATORY' ? 'bg-red-100 text-red-800' :
-                      req.compliance === 'RECOMMENDED' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-green-100 text-green-800'
-                    }`}>
-                      {req.compliance === 'MANDATORY' ? 'Obbligatorio' :
-                       req.compliance === 'RECOMMENDED' ? 'Raccomandato' : 'Opzionale'}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Tab: Geospaziali */}
-        {activeTab === 'geospatial' && (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900">🗺️ Analisi Geospaziale e Topografica</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-3">Caratteristiche Terreno</h4>
-                
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Coordinate:</span>
-                    <span className="font-medium text-sm">
-                      {analysis.geospatialData.coordinates.lat.toFixed(6)}, {analysis.geospatialData.coordinates.lng.toFixed(6)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Elevazione:</span>
-                    <span className="font-medium">{analysis.geospatialData.elevation}m s.l.m.</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Pendenza:</span>
-                    <span className="font-medium">{analysis.geospatialData.slope}%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Tipo suolo:</span>
-                    <span className="font-medium capitalize">{analysis.geospatialData.soilType}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Falda acquifera:</span>
-                    <span className="font-medium">{analysis.geospatialData.waterTable}m</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Accuratezza:</span>
-                    <span className="font-medium">{analysis.geospatialData.accuracy}%</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-3">Valutazione Rischio</h4>
-                
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Rischio alluvione:</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      analysis.geospatialData.floodRisk === 'HIGH' ? 'bg-red-100 text-red-800' :
-                      analysis.geospatialData.floodRisk === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-green-100 text-green-800'
-                    }`}>
-                      {analysis.geospatialData.floodRisk === 'HIGH' ? 'Alto' :
-                       analysis.geospatialData.floodRisk === 'MEDIUM' ? 'Medio' : 'Basso'}
-                    </span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Zona sismica:</span>
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {analysis.geospatialData.seismicZone}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                  <h5 className="font-medium text-gray-900 mb-2">Implicazioni Progettuali:</h5>
-                  <ul className="text-xs text-gray-600 space-y-1">
-                    {analysis.geospatialData.floodRisk === 'HIGH' && (
-                      <li>• Fondazioni speciali richieste</li>
-                    )}
-                    {analysis.geospatialData.seismicZone === 'Zona 1' && (
-                      <li>• Struttura antisismica obbligatoria</li>
-                    )}
-                    {analysis.geospatialData.slope > 15 && (
-                      <li>• Analisi stabilità pendio necessaria</li>
-                    )}
-                    {analysis.geospatialData.waterTable < 3 && (
-                      <li>• Impermeabilizzazione fondazioni</li>
-                    )}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Tab: Demografia */}
-        {activeTab === 'demographics' && (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900">👥 Analisi Demografica e Socioeconomica</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-3">Dati Demografici</h4>
-                
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Popolazione:</span>
-                    <span className="font-medium">{analysis.demographicData.population.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Densità:</span>
-                    <span className="font-medium">{analysis.demographicData.density} ab/km²</span>
-                  </div>
-                  
-                  <div className="border-t pt-3">
-                    <h5 className="font-medium text-gray-900 mb-2">Distribuzione Età</h5>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Under 18:</span>
-                        <span className="font-medium">{analysis.demographicData.ageDistribution.under18}%</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">18-65:</span>
-                        <span className="font-medium">{analysis.demographicData.ageDistribution.age18to65}%</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Over 65:</span>
-                        <span className="font-medium">{analysis.demographicData.ageDistribution.over65}%</span>
+                      
+                      <div>
+                        <h5 className="font-medium text-gray-900 mb-2">Infrastrutture</h5>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center space-x-2">
+                            <ZapIcon className="h-4 w-4 text-gray-500" />
+                            <span className="text-gray-700">{terrainData.infrastructure.electricity}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <DropletIcon className="h-4 w-4 text-gray-500" />
+                            <span className="text-gray-700">{terrainData.infrastructure.water}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <WifiIcon className="h-4 w-4 text-gray-500" />
+                            <span className="text-gray-700">{terrainData.infrastructure.internet}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+            )}
 
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-3">Profilo Socioeconomico</h4>
-                
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Livello reddito:</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      analysis.demographicData.incomeLevel === 'HIGH' ? 'bg-green-100 text-green-800' :
-                      analysis.demographicData.incomeLevel === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {analysis.demographicData.incomeLevel === 'HIGH' ? 'Alto' :
-                       analysis.demographicData.incomeLevel === 'MEDIUM' ? 'Medio' : 'Basso'}
-                    </span>
+            {/* Environmental Tab */}
+            {activeTab === 'environmental' && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-white rounded-lg shadow p-6">
+                    <h4 className="font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                      <LeafIcon className="h-5 w-5 text-green-600" />
+                      <span>Qualità Ambientale</span>
+                    </h4>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <h5 className="font-medium text-gray-900 mb-2">Condizioni Attuali</h5>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Qualità aria:</span>
+                            <span className="font-medium">{terrainData.environmental.airQuality}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Livello rumore:</span>
+                            <span className="font-medium">{terrainData.environmental.noiseLevel}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Copertura verde:</span>
+                            <span className="font-medium">{terrainData.environmental.greenCoverage}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h5 className="font-medium text-gray-900 mb-2">Aree Protette</h5>
+                        <div className="space-y-2 text-sm">
+                          {terrainData.environmental.protectedAreas.map((area, index) => (
+                            <div key={index} className="flex items-center space-x-2">
+                              <TreeIcon className="h-4 w-4 text-green-500" />
+                              <span className="text-gray-700">{area}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Livello istruzione:</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      analysis.demographicData.educationLevel === 'HIGH' ? 'bg-green-100 text-green-800' :
-                      analysis.demographicData.educationLevel === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {analysis.demographicData.educationLevel === 'HIGH' ? 'Alto' :
-                       analysis.demographicData.educationLevel === 'MEDIUM' ? 'Medio' : 'Basso'}
-                    </span>
-                  </div>
-                </div>
 
-                <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                  <h5 className="font-medium text-gray-900 mb-2">Implicazioni di Mercato:</h5>
-                  <ul className="text-xs text-gray-600 space-y-1">
-                    {analysis.demographicData.incomeLevel === 'HIGH' && (
-                      <li>• Mercato premium - Prezzi elevati</li>
-                    )}
-                    {analysis.demographicData.population > 100000 && (
-                      <li>• Centro urbano - Alta accessibilità</li>
-                    )}
-                    {analysis.demographicData.ageDistribution.age18to65 > 60 && (
-                      <li>• Popolazione attiva - Alta domanda</li>
-                    )}
-                  </ul>
+                  <div className="bg-white rounded-lg shadow p-6">
+                    <h4 className="font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                      <TrendingUpIcon className="h-5 w-5 text-blue-600" />
+                      <span>Opportunità Ambientali</span>
+                    </h4>
+                    
+                    <div className="space-y-4">
+                      <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                        <h5 className="font-medium text-green-800 mb-2">Sostenibilità</h5>
+                        <ul className="space-y-1 text-sm text-green-700">
+                          <li>• Installazione pannelli solari</li>
+                          <li>• Sistema di raccolta acqua piovana</li>
+                          <li>• Giardino verticale per isolamento</li>
+                          <li>• Materiali eco-sostenibili</li>
+                        </ul>
+                      </div>
+                      
+                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <h5 className="font-medium text-blue-800 mb-2">Certificazioni</h5>
+                        <ul className="space-y-1 text-sm text-blue-700">
+                          <li>• Classe energetica A+</li>
+                          <li>• Certificazione LEED</li>
+                          <li>• CasaClima Gold</li>
+                          <li>• Protocollo ITACA</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* Planning Tab */}
+            {activeTab === 'planning' && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-white rounded-lg shadow p-6">
+                    <h4 className="font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                      <BuildingIcon className="h-5 w-5 text-purple-600" />
+                      <span>Vincoli Urbanistici</span>
+                    </h4>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <h5 className="font-medium text-gray-900 mb-2">Zonizzazione</h5>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Zona:</span>
+                            <span className="font-medium">{terrainData.urbanPlanning.zoning}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Altezza max:</span>
+                            <span className="font-medium">{terrainData.urbanPlanning.maxHeight}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Copertura max:</span>
+                            <span className="font-medium">{terrainData.urbanPlanning.maxCoverage}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Distanza confine:</span>
+                            <span className="font-medium">{terrainData.urbanPlanning.minDistance}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h5 className="font-medium text-gray-900 mb-2">Requisiti</h5>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Posti auto:</span>
+                            <span className="font-medium">{terrainData.urbanPlanning.parkingRequired}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-lg shadow p-6">
+                    <h4 className="font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                      <ClockIcon className="h-5 w-5 text-orange-600" />
+                      <span>Processo Autorizzativo</span>
+                    </h4>
+                    
+                    <div className="space-y-4">
+                      <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                        <h5 className="font-medium text-yellow-800 mb-2">Autorizzazioni Richieste</h5>
+                        <ul className="space-y-1 text-sm text-yellow-700">
+                          <li>• Permesso di costruire</li>
+                          <li>• Autorizzazione paesaggistica</li>
+                          <li>• Conformità urbanistica</li>
+                          <li>• Verifica sismica</li>
+                        </ul>
+                      </div>
+                      
+                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <h5 className="font-medium text-blue-800 mb-2">Tempi Stimati</h5>
+                        <ul className="space-y-1 text-sm text-blue-700">
+                          <li>• Permesso costruire: 3-6 mesi</li>
+                          <li>• Autorizzazione paesaggistica: 2-4 mesi</li>
+                          <li>• Verifiche tecniche: 1-2 mesi</li>
+                          <li>• Totale: 6-12 mesi</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="text-center py-12">
+            <AlertTriangleIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <h4 className="text-lg font-medium text-gray-900 mb-2">Analisi non disponibile</h4>
+            <p className="text-gray-600 mb-4">Impossibile analizzare il terreno per questa posizione</p>
+            <button
+              onClick={() => analyzeTerrain(userLocation)}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Riprova Analisi
+            </button>
           </div>
         )}
       </div>

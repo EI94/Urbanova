@@ -140,6 +140,35 @@ declare module '@/components/icons' {
   export function GlobeIcon(props?: IconProps): JSX.Element;
   export function ChevronDownIcon(props?: IconProps): JSX.Element;
   export function TargetIcon(props?: IconProps): JSX.Element;
+  export function HeartIcon(props?: IconProps): JSX.Element;
+  export function MapPinIcon(props?: IconProps): JSX.Element;
+  export function RulerIcon(props?: IconProps): JSX.Element;
+  export function ShareIcon(props?: IconProps): JSX.Element;
+  export function DownloadIcon(props?: IconProps): JSX.Element;
+  export function AlertIcon(props?: IconProps): JSX.Element;
+  export function InfoIcon(props?: IconProps): JSX.Element;
+  export function BrainIcon(props?: IconProps): JSX.Element;
+  export function ZapIcon(props?: IconProps): JSX.Element;
+  export function LightbulbIcon(props?: IconProps): JSX.Element;
+  export function SparklesIcon(props?: IconProps): JSX.Element;
+  export function LanguageIcon(props?: IconProps): JSX.Element;
+  export function CogIcon(props?: IconProps): JSX.Element;
+  export function ChartIcon(props?: IconProps): JSX.Element;
+  export function CodeIcon(props?: IconProps): JSX.Element;
+  export function KeyIcon(props?: IconProps): JSX.Element;
+  export function CloudIcon(props?: IconProps): JSX.Element;
+  export function SecurityIcon(props?: IconProps): JSX.Element;
+  export function CalendarDaysIcon(props?: IconProps): JSX.Element;
+  export function XCircleIcon(props?: IconProps): JSX.Element;
+  export function UnlockIcon(props?: IconProps): JSX.Element;
+  export function PauseIcon(props?: IconProps): JSX.Element;
+  export function MessageCircleIcon(props?: IconProps): JSX.Element;
+  export function SortAscIcon(props?: IconProps): JSX.Element;
+  export function SortDescIcon(props?: IconProps): JSX.Element;
+  export function ThumbsUpIcon(props?: IconProps): JSX.Element;
+  export function ThumbsDownIcon(props?: IconProps): JSX.Element;
+  export function ReplyIcon(props?: IconProps): JSX.Element;
+  export function FlagIcon(props?: IconProps): JSX.Element;
 }
 
 // Dichiarazioni per servizi

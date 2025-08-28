@@ -6,12 +6,10 @@ import {
   TrendingUpIcon, 
   ClockIcon, 
   EuroIcon,
-  MapPinIcon,
+  MapIcon,
   BuildingIcon,
-  StarIcon,
   TargetIcon,
-  LightBulbIcon,
-  ShieldCheckIcon,
+  AlertIcon,
   CalendarIcon,
   UsersIcon
 } from '@/components/icons';
@@ -20,6 +18,8 @@ import { DesignTemplate, ProjectDesign } from '@/lib/designCenterService';
 interface DesignAnalyticsDashboardProps {
   templates: DesignTemplate[];
   projects: ProjectDesign[];
+  aiInsights?: any[];
+  optimization?: any;
 }
 
 interface AnalyticsMetrics {
@@ -188,7 +188,7 @@ export default function DesignAnalyticsDashboard({ templates, projects }: Design
     switch (category) {
       case 'residenziale': return <BuildingIcon className="h-4 w-4" />;
       case 'commerciale': return <TargetIcon className="h-4 w-4" />;
-      case 'industriale': return <LightBulbIcon className="h-4 w-4" />;
+              case 'industriale': return <LightbulbIcon className="h-4 w-4" />;
       case 'uffici': return <ShieldCheckIcon className="h-4 w-4" />;
       default: return <BuildingIcon className="h-4 w-4" />;
     }
