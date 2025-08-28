@@ -119,6 +119,14 @@ export default function MappaProgettiPage() {
       // Inizializza posizioni progetto di esempio se non esistono
       await projectMapService.initializeSampleProjectLocations();
       
+      // Inizializza intelligence territoriale
+      try {
+        await fetch('/api/map/intelligence/initialize', { method: 'POST' });
+        console.log('✅ [MappaProgetti] Intelligence territoriale inizializzata');
+      } catch (error) {
+        console.warn('⚠️ [MappaProgetti] Errore inizializzazione intelligence:', error);
+      }
+      
       // Carica posizioni progetto
       const locations = await projectMapService.getAllProjectLocations();
       setProjectLocations(locations);
