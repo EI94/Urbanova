@@ -49,23 +49,38 @@ export default function AdvancedLocationSelector({
   useEffect(() => {
     if (value && showMultiple) {
       // Se c'è un valore esistente, cerca di mapparlo alle località
-      const locationNames = value.split(',').map(name => name.trim());
-      const foundLocations: AdvancedLocation[] = [];
+      const locationNames = value.split(',').map(name => name.trim()).filter(Boolean);
       
-      locationNames.forEach(async (name) => {
-        try {
-          const results = await advancedLocationsService.searchLocations(name, 5);
-          if (results.length > 0) {
-            const exactMatch = results.find(loc => loc.name.toLowerCase() === name.toLowerCase());
-            if (exactMatch && !foundLocations.find(loc => loc.id === exactMatch.id)) {
-              foundLocations.push(exactMatch);
-              setSelectedLocations(prev => [...prev, exactMatch]);
+      if (locationNames.length > 0) {
+        const initializeLocations = async () => {
+          const foundLocations: AdvancedLocation[] = [];
+          
+          for (const name of locationNames) {
+            try {
+              const results = await advancedLocationsService.searchLocations(name, 5);
+              if (results.length > 0) {
+                const exactMatch = results.find(loc => loc.name.toLowerCase() === name.toLowerCase());
+                if (exactMatch && !foundLocations.find(loc => loc.id === exactMatch.id)) {
+                  foundLocations.push(exactMatch);
+                }
+              }
+            } catch (error) {
+              console.warn('Errore mappatura località esistente:', error);
             }
           }
-        } catch (error) {
-          console.warn('Errore mappatura località esistente:', error);
-        }
-      });
+          
+          // Sostituisci completamente le località selezionate invece di aggiungerle
+          setSelectedLocations(foundLocations);
+        };
+        
+        initializeLocations();
+      } else {
+        // Se non ci sono località, resetta lo stato
+        setSelectedLocations([]);
+      }
+    } else if (!value && showMultiple) {
+      // Se non c'è valore, resetta lo stato
+      setSelectedLocations([]);
     }
   }, [value, showMultiple]);
 
@@ -111,10 +126,17 @@ export default function AdvancedLocationSelector({
 
   const handleSuggestionClick = (location: AdvancedLocation) => {
     if (showMultiple) {
-      if (!selectedLocations.find(loc => loc.id === location.id)) {
+      // Controlla se la località è già selezionata (per ID e per nome)
+      const isAlreadySelected = selectedLocations.find(loc => 
+        loc.id === location.id || loc.name.toLowerCase() === location.name.toLowerCase()
+      );
+      
+      if (!isAlreadySelected) {
         const newSelectedLocations = [...selectedLocations, location];
         setSelectedLocations(newSelectedLocations);
         updateValue(newSelectedLocations);
+      } else {
+        console.log('Località già selezionata:', location.name);
       }
     } else {
       // Selezione singola
@@ -140,9 +162,25 @@ export default function AdvancedLocationSelector({
     } else if (locations.length === 1) {
       onChange(locations[0].name);
     } else {
-      // Per selezione multipla, mantieni tutte le località
-      const locationNames = locations.map(loc => loc.name);
-      onChange(locationNames.join(', '));
+      // Per selezione multipla, rimuovi duplicati e mantieni solo località uniche
+      const uniqueLocations = locations.filter((location, index, self) => 
+        index === self.findIndex(loc => 
+          loc.id === location.id || loc.name.toLowerCase() === location.name.toLowerCase()
+        )
+      );
+      
+      // Aggiorna lo stato con località uniche
+      if (uniqueLocations.length !== locations.length) {
+        setSelectedLocations(uniqueLocations);
+      }
+      
+      const locationNames = uniqueLocations.map(loc => loc.name);
+      const newValue = locationNames.join(', ');
+      
+      // Evita aggiornamenti inutili se il valore è identico
+      if (newValue !== value) {
+        onChange(newValue);
+      }
     }
   };
 
