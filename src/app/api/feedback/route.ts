@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
-
-// Usa la stessa chiave API che funziona in realEmailService.ts
-const resend = new Resend('re_jpHbTT42_AtqjMBMxrp2u773kKofMZw9k');
+import { realEmailService } from '@/lib/realEmailService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -78,99 +75,63 @@ export async function POST(request: NextRequest) {
     // Genera email professionale per Pierpaolo
     const emailHtml = generateFeedbackEmail(feedback, feedbackId, '');
     
-    // Invia email a Pierpaolo - PRIORITÀ ASSOLUTA
+    // Invia email a Pierpaolo usando realEmailService (stesso servizio delle email funzionanti)
     let emailSuccess = false;
-    if (resend) {
-      try {
-        // Tentativo 1: Invia a Gmail (potrebbe fallire senza dominio verificato)
-        // PER VERIFICARE IL DOMINIO: vai su resend.com/domains e verifica urbanova.ai
-        let gmailSuccess = false;
-        try {
-          console.log('📧 [Feedback] Tentativo 1: Invio a Gmail...');
-          const gmailResult = await resend.emails.send({
-            from: 'onboarding@resend.dev',
-            to: 'pierpaolo.laurito@gmail.com',
-            subject: `🚨 Nuovo Feedback: ${feedback.title} - ${feedback.type.toUpperCase()}`,
-            html: emailHtml,
-            replyTo: feedback.userEmail || 'noreply@urbanova.ai'
-          });
-          
-          if (gmailResult.data && !gmailResult.error) {
-            gmailSuccess = true;
-            console.log('✅ [Feedback] Email inviata a Gmail:', gmailResult.data.id);
-          } else {
-            console.warn('⚠️ [Feedback] Email a Gmail fallita:', gmailResult.error);
-          }
-        } catch (gmailError) {
-          console.warn('⚠️ [Feedback] Errore invio a Gmail:', gmailError);
+    try {
+      console.log('📧 [Feedback] Invio email usando realEmailService...');
+      
+      // Crea la notifica email nel formato richiesto da realEmailService
+      const emailNotification = {
+        to: 'pierpaolo.laurito@gmail.com',
+        subject: `🚨 Nuovo Feedback: ${feedback.title} - ${feedback.type.toUpperCase()}`,
+        htmlContent: emailHtml,
+        lands: [], // Non necessario per feedback
+        summary: {
+          totalFound: 0,
+          averagePrice: 0,
+          bestOpportunities: []
         }
-        
-        // Tentativo 2: Invia a email autorizzata per test (fallback garantito)
-        let testEmailSuccess = false;
-        try {
-          console.log('📧 [Feedback] Tentativo 2: Invio a email test...');
-          const testResult = await resend.emails.send({
-            from: 'onboarding@resend.dev',
-            to: 'pierpaolo.laurito@voltaenergy.xyz',
-            subject: `🚨 Nuovo Feedback: ${feedback.title} - ${feedback.type.toUpperCase()}`,
-            html: emailHtml,
-            replyTo: feedback.userEmail || 'noreply@urbanova.ai'
-          });
-          
-          if (testResult.data && !testResult.error) {
-            testEmailSuccess = true;
-            console.log('✅ [Feedback] Email inviata a test:', testResult.data.id);
-          } else {
-            console.warn('⚠️ [Feedback] Email test fallita:', testResult.error);
-          }
-        } catch (testError) {
-          console.warn('⚠️ [Feedback] Errore invio test:', testError);
-        }
-        
-        // Considera successo se almeno una email è stata inviata
-        emailSuccess = gmailSuccess || testEmailSuccess;
-        console.log('📧 [Feedback] Risultato finale email:', { gmailSuccess, testEmailSuccess, emailSuccess });
-        
-        // Log informativo per l'utente
-        if (!gmailSuccess && testEmailSuccess) {
-          console.log('ℹ️ [Feedback] NOTA: Email inviata solo a test. Per Gmail, verifica il dominio su resend.com/domains');
-        }
-
-        // Se l'utente ha fornito email, prova a inviare conferma
-        if (feedback.userEmail) {
-          console.log('📧 [Feedback] Tentativo invio email di conferma all\'utente...');
-          try {
-            const confirmationHtml = generateConfirmationEmail(feedback, feedbackId);
-            const confirmationResult = await resend.emails.send({
-              from: 'onboarding@resend.dev', // Dominio verificato di Resend
-              to: feedback.userEmail,
-              subject: '✅ Feedback ricevuto - Urbanova AI',
-              html: confirmationHtml
-            });
-            
-            console.log('📧 [Feedback] Email conferma inviata:', confirmationResult);
-          } catch (confirmationError) {
-            console.warn('⚠️ [Feedback] Email conferma non inviata (utente non autorizzato):', confirmationError);
-            // Non bloccare il processo se la conferma fallisce
-          }
-        }
-        
-        emailSuccess = true;
-        console.log('✅ [Feedback] Email principale inviata con successo');
-      } catch (emailError) {
-        console.error('❌ [Feedback] Errore critico invio email:', emailError);
-        // Se le email falliscono, è un problema critico
-        return NextResponse.json(
-          { error: 'Errore nell\'invio delle email di feedback' },
-          { status: 500 }
-        );
-      }
-    } else {
-      console.error('❌ [Feedback] Servizio email non configurato');
+      };
+      
+      // Invia email usando realEmailService (stesso servizio delle email funzionanti)
+      await realEmailService.sendEmail(emailNotification);
+      
+      emailSuccess = true;
+      console.log('✅ [Feedback] Email inviata con successo tramite realEmailService');
+      
+    } catch (emailError) {
+      console.error('❌ [Feedback] Errore invio email:', emailError);
+      // Se le email falliscono, è un problema critico
       return NextResponse.json(
-        { error: 'Servizio email non configurato' },
+        { error: 'Errore nell\'invio delle email di feedback' },
         { status: 500 }
       );
+    }
+
+    // Se l'utente ha fornito email, invia conferma usando realEmailService
+    if (feedback.userEmail) {
+      console.log('📧 [Feedback] Invio email di conferma all\'utente...');
+      try {
+        const confirmationHtml = generateConfirmationEmail(feedback, feedbackId);
+        
+        const confirmationNotification = {
+          to: feedback.userEmail,
+          subject: '✅ Feedback ricevuto - Urbanova AI',
+          htmlContent: confirmationHtml,
+          lands: [],
+          summary: {
+            totalFound: 0,
+            averagePrice: 0,
+            bestOpportunities: []
+          }
+        };
+        
+        await realEmailService.sendEmail(confirmationNotification);
+        console.log('📧 [Feedback] Email conferma inviata con successo');
+      } catch (confirmationError) {
+        console.warn('⚠️ [Feedback] Email conferma non inviata:', confirmationError);
+        // Non bloccare il processo se la conferma fallisce
+      }
     }
 
     // Tentativo di salvataggio su Firebase (opzionale, non blocca il processo)
@@ -326,12 +287,10 @@ function generateFeedbackEmail(feedback: any, feedbackId: string, attachmentUrl:
             </div>
             ` : ''}
             
-            ${feedback.userEmail ? `
             <div class="field">
-              <div class="field-label">📧 Email Utente</div>
-              <div class="field-value">${feedback.userEmail}</div>
+              <div class="field-label">👤 Email Utente</div>
+              <div class="field-value">${feedback.userEmail || 'Non fornita'}</div>
             </div>
-            ` : ''}
             
             <div class="field">
               <div class="field-label">🆔 ID Feedback</div>
@@ -346,25 +305,15 @@ function generateFeedbackEmail(feedback: any, feedbackId: string, attachmentUrl:
             ${feedback.userAgent ? `
             <div class="field">
               <div class="field-label">🌐 User Agent</div>
-              <div class="field-value" style="font-size: 12px; word-break: break-all;">${feedback.userAgent}</div>
+              <div class="field-value">${feedback.userAgent}</div>
             </div>
             ` : ''}
-          </div>
-          
-          <div style="background: #dbeafe; border: 1px solid #3b82f6; border-radius: 8px; padding: 15px; margin: 20px 0;">
-            <h3 style="margin: 0 0 10px 0; color: #1e40af;">📋 Azioni Raccomandate</h3>
-            <ul style="margin: 0; padding-left: 20px; color: #1e40af;">
-              <li>Analizza il feedback entro 24 ore</li>
-              <li>Assegna priorità e responsabilità</li>
-              <li>Aggiorna lo stato nella dashboard feedback</li>
-              <li>Comunica con l'utente se necessario</li>
-            </ul>
           </div>
         </div>
         
         <div class="footer">
-          <p>Questo feedback è stato inviato automaticamente dal sistema Urbanova AI</p>
-          <p>ID: ${feedbackId} | ${new Date().toISOString()}</p>
+          <p>Questo feedback è stato inviato automaticamente dal sistema Urbanova AI.</p>
+          <p>ID: ${feedbackId} | Timestamp: ${new Date().toISOString()}</p>
         </div>
       </div>
     </body>
@@ -387,6 +336,7 @@ function generateConfirmationEmail(feedback: any, feedbackId: string): string {
         .header { background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
         .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
         .success-card { background: white; border-radius: 8px; padding: 20px; margin: 20px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
+        .success-icon { font-size: 48px; margin-bottom: 20px; }
         .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px; }
       </style>
     </head>
@@ -399,29 +349,24 @@ function generateConfirmationEmail(feedback: any, feedbackId: string): string {
         
         <div class="content">
           <div class="success-card">
-            <div style="font-size: 64px; margin-bottom: 20px;">🎉</div>
-            <h2 style="margin: 0 0 15px 0; color: #059669;">Grazie per il tuo feedback!</h2>
+            <div class="success-icon">🎉</div>
+            <h2 style="margin: 0 0 20px 0; color: #1f2937;">Grazie per il tuo feedback!</h2>
             <p style="margin: 0 0 20px 0; color: #6b7280; font-size: 16px;">
-              Il tuo contributo è fondamentale per migliorare Urbanova AI. 
-              Il nostro team analizzerà il tuo feedback e ti terrà aggiornato sui progressi.
+              Abbiamo ricevuto il tuo feedback e lo esamineremo attentamente per migliorare Urbanova AI.
             </p>
-            
-            <div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 15px; margin: 20px 0;">
-              <h3 style="margin: 0 0 10px 0; color: #0c4a6e;">📋 Dettagli del Feedback</h3>
-              <p style="margin: 5px 0; color: #0c4a6e;"><strong>Tipo:</strong> ${feedback.type}</p>
-              <p style="margin: 5px 0; color: #0c4a6e;"><strong>Priorità:</strong> ${feedback.priority}</p>
-              <p style="margin: 5px 0; color: #0c4a6e;"><strong>ID:</strong> ${feedbackId}</p>
+            <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <p style="margin: 0; font-weight: bold; color: #374151;">${feedback.title}</p>
+              <p style="margin: 5px 0 0 0; color: #6b7280; font-size: 14px;">${feedback.description}</p>
             </div>
-            
             <p style="margin: 20px 0 0 0; color: #6b7280; font-size: 14px;">
-              Hai altre domande o suggerimenti? Non esitare a contattarci!
+              ID Feedback: <strong>${feedbackId}</strong>
             </p>
           </div>
         </div>
         
         <div class="footer">
           <p>Urbanova AI - Trasformiamo i tuoi progetti in realtà</p>
-          <p>ID Feedback: ${feedbackId}</p>
+          <p>Questo è un messaggio automatico, non rispondere a questa email.</p>
         </div>
       </div>
     </body>
