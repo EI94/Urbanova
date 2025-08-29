@@ -78,24 +78,13 @@ export default function LandScrapingPage() {
   const [searchCriteria, setSearchCriteria] = useState<LandSearchCriteria>({
     location: '',
     minPrice: 0,
-    maxPrice: 1000000,
-    minArea: 500,
-    maxArea: 10000,
+    maxPrice: 0, // 0 = nessun limite
+    minArea: 0,  // 0 = nessun limite
+    maxArea: 0,  // 0 = nessun limite
     propertyType: 'residenziale'
   });
 
-  // Stati per gestire i valori azzerati dall'utente
-  const [userClearedValues, setUserClearedValues] = useState<{
-    minPrice: boolean;
-    maxPrice: boolean;
-    minArea: boolean;
-    maxArea: boolean;
-  }>({
-    minPrice: false,
-    maxPrice: false,
-    minArea: false,
-    maxArea: false
-  });
+
   
   const [email, setEmail] = useState('');
   const [searchProgress, setSearchProgress] = useState<SearchProgress>({
@@ -121,8 +110,8 @@ export default function LandScrapingPage() {
   // Stati per filtri avanzati
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
-    priceRange: [0, 1000000],
-    areaRange: [500, 10000],
+    priceRange: [0, 0], // 0 = nessun limite
+    areaRange: [0, 0],  // 0 = nessun limite
     propertyTypes: ['residenziale'],
     hasPermits: false,
     minAIScore: 70,
@@ -826,8 +815,8 @@ export default function LandScrapingPage() {
     if (!filters) return 0;
     
     let count = 0;
-    if (filters.priceRange?.[0] > 0 || filters.priceRange?.[1] < 1000000) count++;
-    if (filters.areaRange?.[0] > 500 || filters.areaRange?.[1] < 10000) count++;
+            if (filters.priceRange?.[0] > 0 || filters.priceRange?.[1] > 0) count++;
+            if (filters.areaRange?.[0] > 0 || filters.areaRange?.[1] > 0) count++;
     if (filters.propertyTypes?.length !== 1 || filters.propertyTypes?.[0] !== 'residenziale') count++;
     if (filters.hasPermits) count++;
     if (filters.minAIScore > 70) count++;
@@ -837,8 +826,8 @@ export default function LandScrapingPage() {
 
   const resetFilters = () => {
     setFilters({
-      priceRange: [0, 1000000],
-      areaRange: [500, 10000],
+              priceRange: [0, 0], // 0 = nessun limite
+              areaRange: [0, 0], // 0 = nessun limite
       propertyTypes: ['residenziale'],
       hasPermits: false,
       minAIScore: 70,
@@ -985,45 +974,34 @@ export default function LandScrapingPage() {
                 type="number"
                 min="0"
                 step="1000"
-                value={userClearedValues.minPrice ? '' : (searchCriteria.minPrice || 0)}
+                value={searchCriteria.minPrice === 0 ? '' : searchCriteria.minPrice || ''}
                 onChange={(e) => {
-                  const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
-                  setUserClearedValues(prev => ({ ...prev, minPrice: false }));
+                  const inputValue = e.target.value;
+                  const value = inputValue === '' ? 0 : parseInt(inputValue) || 0;
+                  
                   setSearchCriteria(prev => {
                     const newMinPrice = value;
-                    const currentMaxPrice = prev.maxPrice || 1000000;
-                    // Se Prezzo Min supera Prezzo Max, aggiorna Prezzo Max
-                    const newMaxPrice = newMinPrice > currentMaxPrice ? newMinPrice + 100000 : currentMaxPrice;
-                    return {
-                      ...prev,
-                      minPrice: newMinPrice,
-                      maxPrice: newMaxPrice
-                    };
+                    const currentMaxPrice = prev.maxPrice || 0;
+                    
+                    // Se Prezzo Min supera Prezzo Max, aggiorna Prezzo Max automaticamente
+                    if (newMinPrice > currentMaxPrice) {
+                      const newMaxPrice = newMinPrice + 100000;
+                      return {
+                        ...prev,
+                        minPrice: newMinPrice,
+                        maxPrice: newMaxPrice
+                      };
+                    }
+                    
+                    return { ...prev, minPrice: newMinPrice };
                   });
-                }}
-                onBlur={(e) => {
-                  // Al blur, se il campo è vuoto e non è stato azzerato dall'utente, imposta il valore di default
-                  if (e.target.value === '' && !userClearedValues.minPrice) {
-                    setSearchCriteria(prev => ({ ...prev, minPrice: 0 }));
-                  }
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="0"
               />
-              {userClearedValues.minPrice && (
-                <p className="text-xs text-gray-500 mt-1">Lascia vuoto per nessun limite minimo di prezzo</p>
-              )}
-              {!userClearedValues.minPrice && (searchCriteria.minPrice || 0) > 0 && (
-                <button
-                  onClick={() => {
-                    setUserClearedValues(prev => ({ ...prev, minPrice: true }));
-                    setSearchCriteria(prev => ({ ...prev, minPrice: 0 }));
-                  }}
-                  className="text-xs text-blue-600 hover:text-blue-800 mt-1"
-                >
-                  🔄 Azzera prezzo minimo
-                </button>
-              )}
+              <p className="text-xs text-gray-500 mt-1">
+                Lascia vuoto o inserisci 0 per nessun limite minimo
+              </p>
             </div>
 
             {/* Prezzo Max */}
@@ -1036,14 +1014,16 @@ export default function LandScrapingPage() {
                 type="number"
                 min={(searchCriteria.minPrice || 0) + 1000}
                 step="1000"
-                value={userClearedValues.maxPrice ? '' : (searchCriteria.maxPrice || 1000000)}
+                value={searchCriteria.maxPrice === 0 ? '' : searchCriteria.maxPrice || ''}
                 onChange={(e) => {
-                  const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
-                  setUserClearedValues(prev => ({ ...prev, maxPrice: false }));
+                  const inputValue = e.target.value;
+                  const value = inputValue === '' ? 0 : parseInt(inputValue) || 0;
+                  
                   setSearchCriteria(prev => {
                     const newMaxPrice = value;
                     const currentMinPrice = prev.minPrice || 0;
-                    // Se Prezzo Max è minore di Prezzo Min, aggiorna Prezzo Min
+                    
+                    // Se Prezzo Max è minore di Prezzo Min, aggiorna Prezzo Min automaticamente
                     if (newMaxPrice > 0 && newMaxPrice <= currentMinPrice) {
                       const newMinPrice = Math.max(0, newMaxPrice - 100000);
                       return {
@@ -1052,38 +1032,22 @@ export default function LandScrapingPage() {
                         maxPrice: newMaxPrice
                       };
                     }
+                    
                     return { ...prev, maxPrice: newMaxPrice };
                   });
-                }}
-                onBlur={(e) => {
-                  // Al blur, se il campo è vuoto e non è stato azzerato dall'utente, imposta il valore di default
-                  if (e.target.value === '' && !userClearedValues.maxPrice) {
-                    setSearchCriteria(prev => ({ ...prev, maxPrice: 1000000 }));
-                  }
                 }}
                 className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                   (searchCriteria.maxPrice || 0) > 0 && (searchCriteria.maxPrice || 0) <= (searchCriteria.minPrice || 0)
                     ? 'border-red-500 bg-red-50'
-                    : 'border-gray-300'
+                    : 'border-transparent'
                 }`}
-                placeholder="1000000"
+                placeholder="Nessun limite"
               />
-              {userClearedValues.maxPrice && (
-                <p className="text-xs text-gray-500 mt-1">Lascia vuoto per nessun limite massimo di prezzo</p>
-              )}
-              {!userClearedValues.maxPrice && (searchCriteria.maxPrice || 0) > 0 && (
-                <button
-                  onClick={() => {
-                    setUserClearedValues(prev => ({ ...prev, maxPrice: true }));
-                    setSearchCriteria(prev => ({ ...prev, maxPrice: 1000000 }));
-                  }}
-                  className="text-xs text-blue-600 hover:text-blue-800 mt-1"
-                >
-                  🔄 Azzera prezzo massimo
-                </button>
-              )}
+              <p className="text-xs text-gray-500 mt-1">
+                Lascia vuoto o inserisci 0 per nessun limite massimo
+              </p>
               {(searchCriteria.maxPrice || 0) > 0 && (searchCriteria.maxPrice || 0) <= (searchCriteria.minPrice || 0) && (
-                <p className="text-xs text-red-500 mt-1">Prezzo Max deve essere maggiore di Prezzo Min</p>
+                <p className="text-xs text-red-500 mt-1">⚠️ Prezzo Max deve essere maggiore di Prezzo Min</p>
               )}
             </div>
 
@@ -1097,45 +1061,34 @@ export default function LandScrapingPage() {
                 type="number"
                 min="0"
                 step="1"
-                value={userClearedValues.minArea ? '' : (searchCriteria.minArea || 500)}
+                value={searchCriteria.minArea === 0 ? '' : searchCriteria.minArea || ''}
                 onChange={(e) => {
-                  const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
-                  setUserClearedValues(prev => ({ ...prev, minArea: false }));
+                  const inputValue = e.target.value;
+                  const value = inputValue === '' ? 0 : parseInt(inputValue) || 0;
+                  
                   setSearchCriteria(prev => {
                     const newMinArea = value;
-                    const currentMaxArea = prev.maxArea || 10000;
-                    // Se Area Min supera Area Max, aggiorna Area Max
-                    const newMaxArea = newMinArea > currentMaxArea ? newMinArea + 1000 : currentMaxArea;
-                    return {
-                      ...prev,
-                      minArea: newMinArea,
-                      maxArea: newMaxArea
-                    };
+                    const currentMaxArea = prev.maxArea || 0;
+                    
+                    // Se Area Min supera Area Max, aggiorna Area Max automaticamente
+                    if (newMinArea > currentMaxArea) {
+                      const newMaxArea = newMinArea + 1000;
+                      return {
+                        ...prev,
+                        minArea: newMinArea,
+                        maxArea: newMaxArea
+                      };
+                    }
+                    
+                    return { ...prev, minArea: newMinArea };
                   });
                 }}
-                onBlur={(e) => {
-                  // Al blur, se il campo è vuoto e non è stato azzerato dall'utente, imposta il valore di default
-                  if (e.target.value === '' && !userClearedValues.minArea) {
-                    setSearchCriteria(prev => ({ ...prev, minArea: 500 }));
-                  }
-                }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="0"
+                placeholder="500"
               />
-              {searchCriteria.minArea === 0 && (
-                <p className="text-xs text-gray-500 mt-1">Lascia vuoto per nessun limite minimo</p>
-              )}
-              {!userClearedValues.minArea && (searchCriteria.minArea || 0) > 0 && (
-                <button
-                  onClick={() => {
-                    setUserClearedValues(prev => ({ ...prev, minArea: true }));
-                    setSearchCriteria(prev => ({ ...prev, minArea: 0 }));
-                  }}
-                  className="text-xs text-blue-600 hover:text-blue-800 mt-1"
-                >
-                  🔄 Azzera area minima
-                </button>
-              )}
+              <p className="text-xs text-gray-500 mt-1">
+                Lascia vuoto o inserisci 0 per nessun limite minimo
+              </p>
             </div>
             
             {/* Area Max */}
@@ -1148,14 +1101,16 @@ export default function LandScrapingPage() {
                 type="number"
                 min={(searchCriteria.minArea || 0) + 1}
                 step="1"
-                value={userClearedValues.maxArea ? '' : (searchCriteria.maxArea || 10000)}
+                value={searchCriteria.maxArea === 0 ? '' : searchCriteria.maxArea || ''}
                 onChange={(e) => {
-                  const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
-                  setUserClearedValues(prev => ({ ...prev, maxArea: false }));
+                  const inputValue = e.target.value;
+                  const value = inputValue === '' ? 0 : parseInt(inputValue) || 0;
+                  
                   setSearchCriteria(prev => {
                     const newMaxArea = value;
-                    const currentMinArea = prev.minArea || 500;
-                    // Se Area Max è minore di Area Min, aggiorna Area Min
+                    const currentMinArea = prev.minArea || 0;
+                    
+                    // Se Area Max è minore di Area Min, aggiorna Area Min automaticamente
                     if (newMaxArea > 0 && newMaxArea <= currentMinArea) {
                       const newMinArea = Math.max(0, newMaxArea - 1000);
                       return {
@@ -1164,38 +1119,22 @@ export default function LandScrapingPage() {
                         maxArea: newMaxArea
                       };
                     }
+                    
                     return { ...prev, maxArea: newMaxArea };
                   });
-                }}
-                onBlur={(e) => {
-                  // Al blur, se il campo è vuoto e non è stato azzerato dall'utente, imposta il valore di default
-                  if (e.target.value === '' && !userClearedValues.maxArea) {
-                    setSearchCriteria(prev => ({ ...prev, maxArea: 10000 }));
-                  }
                 }}
                 className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                   (searchCriteria.maxArea || 0) > 0 && (searchCriteria.maxArea || 0) <= (searchCriteria.minArea || 0)
                     ? 'border-red-500 bg-red-50'
-                    : 'border-gray-300'
+                    : 'border-transparent'
                 }`}
-                placeholder="10000"
+                placeholder="Nessun limite"
               />
-              {searchCriteria.maxArea === 0 && (
-                <p className="text-xs text-gray-500 mt-1">Lascia vuoto per nessun limite massimo</p>
-              )}
-              {!userClearedValues.maxArea && (searchCriteria.maxArea || 0) > 0 && (
-                <button
-                  onClick={() => {
-                    setUserClearedValues(prev => ({ ...prev, maxArea: true }));
-                    setSearchCriteria(prev => ({ ...prev, maxArea: 0 }));
-                  }}
-                  className="text-xs text-blue-600 hover:text-blue-800 mt-1"
-                >
-                  🔄 Azzera area massima
-                </button>
-              )}
+              <p className="text-xs text-gray-500 mt-1">
+                Lascia vuoto o inserisci 0 per nessun limite massimo
+              </p>
               {(searchCriteria.maxArea || 0) > 0 && (searchCriteria.maxArea || 0) <= (searchCriteria.minArea || 0) && (
-                <p className="text-xs text-red-500 mt-1">Area Max deve essere maggiore di Area Min</p>
+                <p className="text-xs text-red-500 mt-1">⚠️ Area Max deve essere maggiore di Area Min</p>
               )}
             </div>
           </div>
