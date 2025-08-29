@@ -1039,7 +1039,7 @@ export default function LandScrapingPage() {
                 className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                   (searchCriteria.maxPrice || 0) > 0 && (searchCriteria.maxPrice || 0) <= (searchCriteria.minPrice || 0)
                     ? 'border-red-500 bg-red-50'
-                    : 'border-transparent'
+                    : 'border-gray-300'
                 }`}
                 placeholder="Nessun limite"
               />
@@ -1126,7 +1126,7 @@ export default function LandScrapingPage() {
                 className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                   (searchCriteria.maxArea || 0) > 0 && (searchCriteria.maxArea || 0) <= (searchCriteria.minArea || 0)
                     ? 'border-red-500 bg-red-50'
-                    : 'border-transparent'
+                    : 'border-gray-300'
                 }`}
                 placeholder="Nessun limite"
               />
