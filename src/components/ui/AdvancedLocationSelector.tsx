@@ -1,27 +1,35 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { advancedLocationService, LocationZone, LocationSearchResult } from '@/lib/advancedLocationService';
-import { SearchIcon, MapIcon, ChevronDownIcon, XIcon } from '@/components/icons';
+import { SearchIcon, MapIcon, XIcon, PlusIcon, TagIcon, GlobeIcon, MapPinIcon } from '@/components/icons';
+import { advancedLocationsService, AdvancedLocation } from '@/lib/advancedLocationsService';
 
 interface AdvancedLocationSelectorProps {
   value: string;
   onChange: (location: string) => void;
   placeholder?: string;
   className?: string;
+  showMultiple?: boolean;
 }
 
 export default function AdvancedLocationSelector({
   value,
   onChange,
-  placeholder = "Cerca localizzazione...",
-  className = ""
+  placeholder = "Cerca localizzazioni (es. Frascati, Roma, Milano...)",
+  className = "",
+  showMultiple = false
 }: AdvancedLocationSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(value);
-  const [suggestions, setSuggestions] = useState<LocationSearchResult[]>([]);
-  const [selectedZone, setSelectedZone] = useState<LocationZone | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<AdvancedLocation[]>([]);
+  const [selectedLocations, setSelectedLocations] = useState<AdvancedLocation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchStats, setSearchStats] = useState<{
+    total: number;
+    italian: number;
+    european: number;
+  }>({ total: 0, italian: 0, european: 0 });
+  
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -37,7 +45,7 @@ export default function AdvancedLocationSelector({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Ricerca suggerimenti
+  // Ricerca suggerimenti intelligente
   useEffect(() => {
     if (searchQuery.length < 2) {
       setSuggestions([]);
@@ -47,79 +55,116 @@ export default function AdvancedLocationSelector({
     setIsLoading(true);
     
     // Debounce per evitare troppe ricerche
-    const timeoutId = setTimeout(() => {
-      const results = advancedLocationService.searchLocations(searchQuery);
-      setSuggestions(results.slice(0, 10));
-      setIsLoading(false);
+    const timeoutId = setTimeout(async () => {
+      try {
+        const results = await advancedLocationsService.searchLocations(searchQuery, 30);
+        setSuggestions(results);
+        
+        // Statistiche di ricerca
+        const italian = results.filter(loc => loc.country === 'IT').length;
+        const european = results.filter(loc => loc.country === 'EU').length;
+        setSearchStats({
+          total: results.length,
+          italian,
+          european
+        });
+      } catch (error) {
+        console.error('Errore ricerca località:', error);
+        setSuggestions([]);
+      } finally {
+        setIsLoading(false);
+      }
     }, 300);
 
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
 
-  // Aggiorna searchQuery quando cambia value
-  useEffect(() => {
-    setSearchQuery(value);
-  }, [value]);
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setSearchQuery(newValue);
     setIsOpen(true);
-    
-    if (newValue === '') {
-      onChange('');
-      setSelectedZone(null);
+  };
+
+  const handleSuggestionClick = (location: AdvancedLocation) => {
+    if (showMultiple) {
+      if (!selectedLocations.find(loc => loc.id === location.id)) {
+        const newSelectedLocations = [...selectedLocations, location];
+        setSelectedLocations(newSelectedLocations);
+        updateValue(newSelectedLocations);
+      }
+    } else {
+      // Selezione singola
+      onChange(location.name);
+      setSearchQuery('');
+      setIsOpen(false);
     }
-  };
-
-  const handleSuggestionClick = (result: LocationSearchResult) => {
-    setSelectedZone(result.zone);
-    setSearchQuery(result.zone.name);
-    onChange(result.zone.name);
-    setIsOpen(false);
-  };
-
-  const handleClear = () => {
+    
     setSearchQuery('');
-    setSelectedZone(null);
-    onChange('');
     setIsOpen(false);
     inputRef.current?.focus();
   };
 
-  const getZoneIcon = (zone: LocationZone) => {
-    switch (zone.type) {
-      case 'quartiere':
-        return <MapIcon className="w-4 h-4 text-blue-500" />;
-      case 'comune':
-        return <MapIcon className="w-4 h-4 text-green-500" />;
-      case 'zona':
-        return <MapIcon className="w-4 h-4 text-purple-500" />;
-      default:
-        return <MapIcon className="w-4 h-4 text-gray-500" />;
+  const removeLocation = (locationId: string) => {
+    const newSelectedLocations = selectedLocations.filter(loc => loc.id !== locationId);
+    setSelectedLocations(newSelectedLocations);
+    updateValue(newSelectedLocations);
+  };
+
+  const updateValue = (locations: AdvancedLocation[]) => {
+    if (locations.length === 0) {
+      onChange('');
+    } else if (locations.length === 1) {
+      onChange(locations[0].name);
+    } else {
+      onChange(locations.map(loc => loc.name).join(', '));
     }
   };
 
-  const getZoneBadge = (zone: LocationZone) => {
-    switch (zone.type) {
-      case 'quartiere':
-        return <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">Quartiere</span>;
+  const getLocationIcon = (location: AdvancedLocation) => {
+    switch (location.type) {
+      case 'regione':
+        return <GlobeIcon className="h-4 w-4 text-blue-600" />;
+      case 'provincia':
+        return <MapIcon className="h-4 w-4 text-green-600" />;
       case 'comune':
-        return <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">Comune</span>;
-      case 'zona':
-        return <span className="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full">Zona</span>;
+        return <MapPinIcon className="h-4 w-4 text-red-600" />;
+      case 'quartiere':
+        return <TagIcon className="h-4 w-4 text-purple-600" />;
       default:
-        return <span className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full">Località</span>;
+        return <MapPinIcon className="h-4 w-4 text-gray-600" />;
     }
+  };
+
+  const getLocationBadge = (location: AdvancedLocation) => {
+    if (location.country === 'IT') {
+      return (
+        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          🇮🇹 {location.type}
+        </span>
+      );
+    } else {
+      return (
+        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          🇪🇺 {location.type}
+        </span>
+      );
+    }
+  };
+
+  const getLocationDetails = (location: AdvancedLocation) => {
+    const details = [];
+    if (location.region) details.push(location.region);
+    if (location.province) details.push(location.province);
+    return details.join(', ');
   };
 
   return (
     <div className={`relative ${className}`}>
+      {/* Input principale */}
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <SearchIcon className="h-5 w-5 text-gray-400" />
         </div>
-        
         <input
           ref={inputRef}
           type="text"
@@ -127,118 +172,97 @@ export default function AdvancedLocationSelector({
           onChange={handleInputChange}
           onFocus={() => setIsOpen(true)}
           placeholder={placeholder}
-          className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
         />
-        
-        {searchQuery && (
-          <button
-            onClick={handleClear}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center"
-          >
-            <XIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-          </button>
+        {isLoading && (
+          <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+          </div>
         )}
-        
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="absolute inset-y-0 right-8 pr-3 flex items-center"
-        >
-          <ChevronDownIcon className={`h-5 w-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-        </button>
       </div>
+
+      {/* Località selezionate (solo per selezione multipla) */}
+      {showMultiple && selectedLocations.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {selectedLocations.map((location) => (
+            <span
+              key={location.id}
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
+            >
+              {getLocationIcon(location)}
+              {location.name}
+              <button
+                onClick={() => removeLocation(location.id)}
+                className="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full text-blue-600 hover:bg-blue-200 hover:text-blue-800 focus:outline-none focus:bg-blue-200"
+              >
+                <XIcon className="h-3 w-3" />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* Dropdown suggerimenti */}
       {isOpen && (
         <div
           ref={dropdownRef}
-          className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
+          className="absolute z-50 w-full mt-1 bg-white shadow-lg max-h-96 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm"
         >
-          {isLoading ? (
-            <div className="px-4 py-2 text-sm text-gray-500">
-              <div className="flex items-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
-                Ricerca in corso...
+          {/* Statistiche ricerca */}
+          {searchStats.total > 0 && (
+            <div className="px-4 py-2 text-xs text-gray-500 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <span>📊 {searchStats.total} risultati trovati</span>
+                <div className="flex gap-2">
+                  <span className="text-green-600">🇮🇹 {searchStats.italian}</span>
+                  <span className="text-blue-600">🇪🇺 {searchStats.european}</span>
+                </div>
               </div>
-            </div>
-          ) : suggestions.length > 0 ? (
-            <div className="py-1">
-              {suggestions.map((result, index) => (
-                <button
-                  key={`${result.zone.id}-${index}`}
-                  onClick={() => handleSuggestionClick(result)}
-                  className="w-full px-4 py-2 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      {getZoneIcon(result.zone)}
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">
-                          {result.zone.name}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {result.zone.type === 'comune' && result.zone.parent ? 
-                            `${result.zone.parent.charAt(0).toUpperCase() + result.zone.parent.slice(1)}` : 
-                            'Località'
-                          }
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      {getZoneBadge(result.zone)}
-                      <div className="text-xs text-gray-400">
-                        {result.relevance}%
-                      </div>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          ) : searchQuery.length >= 2 ? (
-            <div className="px-4 py-2 text-sm text-gray-500">
-              Nessuna localizzazione trovata per "{searchQuery}"
-            </div>
-          ) : (
-            <div className="px-4 py-2 text-sm text-gray-500">
-              Inizia a digitare per cercare localizzazioni...
             </div>
           )}
-        </div>
-      )}
 
-      {/* Informazioni zona selezionata */}
-      {selectedZone && (
-        <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              {getZoneIcon(selectedZone)}
-              <div>
-                <div className="text-sm font-medium text-blue-900">
-                  {selectedZone.name}
-                </div>
-                <div className="text-xs text-blue-700">
-                  {selectedZone.type === 'comune' && selectedZone.parent ? 
-                    `Provincia di ${selectedZone.parent.charAt(0).toUpperCase() + selectedZone.parent.slice(1)}` : 
-                    'Zona selezionata'
-                  }
-                </div>
-              </div>
+          {/* Messaggio caricamento */}
+          {isLoading && (
+            <div className="px-4 py-2 text-sm text-gray-500">
+              🔍 Ricerca in corso...
             </div>
-            {getZoneBadge(selectedZone)}
-          </div>
-          
-          {selectedZone.searchTerms.length > 1 && (
-            <div className="mt-2">
-              <div className="text-xs text-blue-600 font-medium">Termini di ricerca:</div>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {selectedZone.searchTerms.slice(0, 3).map((term, index) => (
-                  <span
-                    key={index}
-                    className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded"
-                  >
-                    {term}
-                  </span>
-                ))}
+          )}
+
+          {/* Nessun risultato */}
+          {!isLoading && suggestions.length === 0 && searchQuery.length >= 2 && (
+            <div className="px-4 py-2 text-sm text-gray-500">
+              ❌ Nessuna località trovata per "{searchQuery}"
+            </div>
+          )}
+
+          {/* Suggerimenti */}
+          {suggestions.map((location) => (
+            <button
+              key={location.id}
+              onClick={() => handleSuggestionClick(location)}
+              className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {getLocationIcon(location)}
+                  <div>
+                    <div className="font-medium text-gray-900">{location.name}</div>
+                    {getLocationDetails(location) && (
+                      <div className="text-xs text-gray-500">{getLocationDetails(location)}</div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {getLocationBadge(location)}
+                </div>
               </div>
+            </button>
+          ))}
+
+          {/* Footer con informazioni */}
+          {suggestions.length > 0 && (
+            <div className="px-4 py-2 text-xs text-gray-400 border-t border-gray-200">
+              💡 Ricerca intelligente con {searchStats.total} località disponibili
             </div>
           )}
         </div>

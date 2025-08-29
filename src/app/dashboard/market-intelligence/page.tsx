@@ -11,7 +11,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import ProgressBar from '@/components/ui/ProgressBar';
 import LandCard from '@/components/ui/LandCard';
 import AdvancedFilters from '@/components/ui/AdvancedFilters';
-import MultiLocationSelector from '@/components/ui/MultiLocationSelector';
+import AdvancedLocationSelector from '@/components/ui/AdvancedLocationSelector';
 import PerformanceStats from '@/components/ui/PerformanceStats';
 import SearchSchedulerModal from '@/components/ui/SearchSchedulerModal';
 import TeamCollaborationPanel from '@/components/ui/TeamCollaborationPanel';
@@ -953,10 +953,10 @@ export default function LandScrapingPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 📍 Localizzazione Avanzata
               </label>
-              <MultiLocationSelector
+              <AdvancedLocationSelector
                 value={searchCriteria.location}
                 onChange={(location) => setSearchCriteria(prev => ({ ...prev, location }))}
-                placeholder="Cerca localizzazioni (es. Latina, Roma, Milano...)"
+                placeholder="Cerca localizzazioni (es. Frascati, Roma, Milano...)"
                 className="w-full"
               />
             </div>
