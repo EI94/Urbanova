@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, Bug, Lightbulb, Star, AlertCircle, CheckCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface FeedbackData {
   type: 'bug' | 'improvement' | 'feature' | 'other';
@@ -14,6 +15,10 @@ interface FeedbackData {
   userAgent: string;
   timestamp: Date;
   userEmail?: string;
+  userName?: string;
+  userLastName?: string;
+  userRole?: string;
+  userCompany?: string;
   attachments?: string[];
 }
 
@@ -22,6 +27,7 @@ interface FeedbackWidgetProps {
 }
 
 const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
+  const { currentUser } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [feedbackData, setFeedbackData] = useState<FeedbackData>({
@@ -33,12 +39,19 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
     screen: '',
     userAgent: typeof window !== 'undefined' ? navigator.userAgent : '',
     timestamp: new Date(),
-    userEmail: '',
+    userEmail: currentUser?.email || '',
     attachments: []
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  // Aggiorna l'email quando l'utente cambia
+  useEffect(() => {
+    if (currentUser?.email) {
+      setFeedbackData(prev => ({ ...prev, userEmail: currentUser.email }));
+    }
+  }, [currentUser]);
 
   const feedbackTypes = [
     {
@@ -124,28 +137,39 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
       return;
     }
 
+    // Verifica che l'utente sia autenticato
+    if (!currentUser?.email) {
+      toast('Devi essere autenticato per inviare feedback', { icon: '❌' });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      console.log('📝 [Feedback] Preparazione dati per invio:', feedbackData);
+      // Prepara i dati del feedback con informazioni complete dell'utente
+      const enhancedFeedbackData = {
+        ...feedbackData,
+        userEmail: currentUser.email,
+        userName: currentUser.displayName || currentUser.firstName || 'Utente',
+        userLastName: currentUser.lastName || '',
+        userRole: currentUser.role || 'USER',
+        userCompany: currentUser.company || '',
+        timestamp: new Date().toISOString()
+      };
+
+      console.log('📝 [Feedback] Preparazione dati per invio:', enhancedFeedbackData);
       
       const formData = new FormData();
-      const feedbackJson = JSON.stringify(feedbackData);
+      const feedbackJson = JSON.stringify(enhancedFeedbackData);
       formData.append('feedback', feedbackJson);
       
       console.log('📝 [Feedback] FormData preparato:', {
         feedback: feedbackJson,
         formDataEntries: Array.from(formData.entries())
       });
-      
-      // Temporaneamente disabilitato l'upload degli allegati
-      // if (selectedFile) {
-      //   formData.append('attachment', selectedFile);
-      // }
 
       const response = await fetch('/api/feedback', {
         method: 'POST',
         body: formData,
-        // Non impostare Content-Type manualmente, lascia che il browser lo imposti automaticamente per FormData
       });
 
       if (response.ok) {
@@ -161,7 +185,7 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
           screen: '',
           userAgent: typeof window !== 'undefined' ? navigator.userAgent : '',
           timestamp: new Date(),
-          userEmail: '',
+          userEmail: currentUser.email || '',
           attachments: []
         });
         setSelectedFile(null);
@@ -204,9 +228,19 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
     <>
       {/* Icona Feedback Globale */}
       <button
-        onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 z-50 p-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200 ${className}`}
-        title="Invia feedback o segnala un problema"
+        onClick={() => {
+          if (!currentUser?.email) {
+            toast('Devi essere autenticato per inviare feedback', { icon: '❌' });
+            return;
+          }
+          setIsOpen(true);
+        }}
+        className={`fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200 ${
+          currentUser?.email 
+            ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' 
+            : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+        } ${className}`}
+        title={currentUser?.email ? "Invia feedback o segnala un problema" : "Accedi per inviare feedback"}
       >
         <MessageSquare className="w-6 h-6" />
       </button>
@@ -214,6 +248,23 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
       {/* Modal Feedback */}
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+          {!currentUser?.email ? (
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center">
+              <div className="text-red-500 mb-4">
+                <MessageSquare className="w-16 h-16 mx-auto" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Accesso Richiesto</h3>
+              <p className="text-gray-600 mb-4">
+                Devi essere autenticato per inviare feedback. Accedi al tuo account e riprova.
+              </p>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Chiudi
+              </button>
+            </div>
+          ) : (
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
@@ -375,15 +426,29 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Email (opzionale)
+                        Dati Utente
                       </label>
-                      <input
-                        type="email"
-                        value={feedbackData.userEmail}
-                        onChange={(e) => handleInputChange('userEmail', e.target.value)}
-                        placeholder="Se vuoi essere aggiornato sullo stato del feedback"
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
+                      <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span className="text-blue-600 font-medium text-sm">
+                              {currentUser?.displayName?.charAt(0) || currentUser?.email?.charAt(0) || 'U'}
+                            </span>
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-medium text-gray-900">
+                              {currentUser?.displayName || currentUser?.firstName || 'Utente'}
+                              {currentUser?.lastName && ` ${currentUser.lastName}`}
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              {currentUser?.email || 'Email non disponibile'}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        I tuoi dati vengono presi automaticamente dal tuo profilo
+                      </p>
                     </div>
 
                     <div>
@@ -446,6 +511,8 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
               </div>
             </div>
           </div>
+        </div>
+          )}
         </div>
       )}
     </>

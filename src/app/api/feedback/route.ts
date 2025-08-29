@@ -59,10 +59,16 @@ export async function POST(request: NextRequest) {
     console.log('🔍 [Feedback] Feedback ricevuto:', feedback);
     
     // Validazione dati
-    if (!feedback.title || !feedback.description || !feedback.type || !feedback.priority) {
-      console.error('❌ [Feedback] Campi obbligatori mancanti:', { title: !!feedback.title, description: !!feedback.description, type: !!feedback.type, priority: !!feedback.priority });
+    if (!feedback.title || !feedback.description || !feedback.type || !feedback.priority || !feedback.userEmail) {
+      console.error('❌ [Feedback] Campi obbligatori mancanti:', { 
+        title: !!feedback.title, 
+        description: !!feedback.description, 
+        type: !!feedback.type, 
+        priority: !!feedback.priority,
+        userEmail: !!feedback.userEmail
+      });
       return NextResponse.json(
-        { error: 'Campi obbligatori mancanti' },
+        { error: 'Campi obbligatori mancanti. Assicurati di essere autenticato.' },
         { status: 400 }
       );
     }
@@ -116,7 +122,7 @@ export async function POST(request: NextRequest) {
         
         const confirmationNotification = {
           to: feedback.userEmail,
-          subject: '✅ Feedback ricevuto - Urbanova AI',
+          subject: `✅ Feedback ricevuto - Urbanova AI`,
           htmlContent: confirmationHtml,
           lands: [],
           summary: {
@@ -288,8 +294,14 @@ function generateFeedbackEmail(feedback: any, feedbackId: string, attachmentUrl:
             ` : ''}
             
             <div class="field">
-              <div class="field-label">👤 Email Utente</div>
-              <div class="field-value">${feedback.userEmail || 'Non fornita'}</div>
+              <div class="field-label">👤 Dati Utente</div>
+              <div class="field-value">
+                <strong>Nome:</strong> ${feedback.userName || 'Non fornito'}<br>
+                <strong>Cognome:</strong> ${feedback.userLastName || 'Non fornito'}<br>
+                <strong>Email:</strong> ${feedback.userEmail || 'Non fornita'}<br>
+                <strong>Ruolo:</strong> ${feedback.userRole || 'Non fornito'}<br>
+                <strong>Azienda:</strong> ${feedback.userCompany || 'Non fornita'}
+              </div>
             </div>
             
             <div class="field">
@@ -350,9 +362,9 @@ function generateConfirmationEmail(feedback: any, feedbackId: string): string {
         <div class="content">
           <div class="success-card">
             <div class="success-icon">🎉</div>
-            <h2 style="margin: 0 0 20px 0; color: #1f2937;">Grazie per il tuo feedback!</h2>
+            <h2 style="margin: 0 0 20px 0; color: #1f2937;">Grazie per il tuo feedback, ${feedback.userName || 'Utente'}!</h2>
             <p style="margin: 0 0 20px 0; color: #6b7280; font-size: 16px;">
-              Abbiamo ricevuto il tuo feedback e lo esamineremo attentamente per migliorare Urbanova AI.
+              Ciao ${feedback.userName || 'Utente'}! Abbiamo ricevuto il tuo feedback e lo esamineremo attentamente per migliorare Urbanova AI.
             </p>
             <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
               <p style="margin: 0; font-weight: bold; color: #374151;">${feedback.title}</p>
@@ -366,7 +378,7 @@ function generateConfirmationEmail(feedback: any, feedbackId: string): string {
         
         <div class="footer">
           <p>Urbanova AI - Trasformiamo i tuoi progetti in realtà</p>
-          <p>Questo è un messaggio automatico, non rispondere a questa email.</p>
+          <p>Grazie ancora, ${feedback.userName || 'Utente'}! Questo è un messaggio automatico, non rispondere a questa email.</p>
         </div>
       </div>
     </body>
