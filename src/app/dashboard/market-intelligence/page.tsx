@@ -1003,15 +1003,38 @@ export default function LandScrapingPage() {
               </label>
               <input
                 type="number"
-                value={searchCriteria.minArea || 500}
-                onChange={(e) => setSearchCriteria(prev => ({ 
-                  ...prev, 
-                  minArea: parseInt(e.target.value) || 500
-                }))}
+                min="0"
+                step="1"
+                value={searchCriteria.minArea === 0 ? '' : searchCriteria.minArea}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
+                  setSearchCriteria(prev => {
+                    const newMinArea = value;
+                    const currentMaxArea = prev.maxArea || 10000;
+                    // Se Area Min supera Area Max, aggiorna Area Max
+                    const newMaxArea = newMinArea > currentMaxArea ? newMinArea + 1000 : currentMaxArea;
+                    return {
+                      ...prev,
+                      minArea: newMinArea,
+                      maxArea: newMaxArea
+                    };
+                  });
+                }}
+                onBlur={(e) => {
+                  // Al blur, se il campo è vuoto, imposta il valore di default
+                  if (e.target.value === '') {
+                    setSearchCriteria(prev => ({ ...prev, minArea: 500 }));
+                  }
+                }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="0"
               />
+              {searchCriteria.minArea === 0 && (
+                <p className="text-xs text-gray-500 mt-1">Lascia vuoto per nessun limite minimo</p>
+              )}
             </div>
             
+            {/* Area Max */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <BuildingIcon className="inline h-4 w-4 mr-1" />
@@ -1019,13 +1042,45 @@ export default function LandScrapingPage() {
               </label>
               <input
                 type="number"
-                value={searchCriteria.maxArea || 10000}
-                onChange={(e) => setSearchCriteria(prev => ({ 
-                  ...prev, 
-                  maxArea: parseInt(e.target.value) || 10000
-                }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                min={(searchCriteria.minArea || 0) + 1}
+                step="1"
+                value={searchCriteria.maxArea === 0 ? '' : searchCriteria.maxArea}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0;
+                  setSearchCriteria(prev => {
+                    const newMaxArea = value;
+                    const currentMinArea = prev.minArea || 500;
+                    // Se Area Max è minore di Area Min, aggiorna Area Min
+                    if (newMaxArea > 0 && newMaxArea <= currentMinArea) {
+                      const newMinArea = Math.max(0, newMaxArea - 1000);
+                      return {
+                        ...prev,
+                        minArea: newMinArea,
+                        maxArea: newMaxArea
+                      };
+                    }
+                    return { ...prev, maxArea: newMaxArea };
+                  });
+                }}
+                onBlur={(e) => {
+                  // Al blur, se il campo è vuoto, imposta il valore di default
+                  if (e.target.value === '') {
+                    setSearchCriteria(prev => ({ ...prev, maxArea: 10000 }));
+                  }
+                }}
+                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  (searchCriteria.maxArea || 0) > 0 && (searchCriteria.maxArea || 0) <= (searchCriteria.minArea || 0)
+                    ? 'border-red-500 bg-red-50'
+                    : 'border-gray-300'
+                }`}
+                placeholder="10000"
               />
+              {searchCriteria.maxArea === 0 && (
+                <p className="text-xs text-gray-500 mt-1">Lascia vuoto per nessun limite massimo</p>
+              )}
+              {(searchCriteria.maxArea || 0) > 0 && (searchCriteria.maxArea || 0) <= (searchCriteria.minArea || 0) && (
+                <p className="text-xs text-red-500 mt-1">Area Max deve essere maggiore di Area Min</p>
+              )}
             </div>
           </div>
 
