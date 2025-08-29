@@ -36,6 +36,8 @@ import {
   ProjectIcon,
   MapIcon
 } from '@/components/icons';
+import FeedbackWidget from '@/components/ui/FeedbackWidget';
+import { MessageSquare } from 'lucide-react';
 
 // Componente NavItem spostato fuori per evitare re-render infiniti
 const NavItem = ({ href, icon, text, isActive, collapsed }: { 
@@ -210,6 +212,7 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
       { href: '/dashboard/clienti', icon: <ClientIcon />, text: t('clients', 'navigation') },
       { href: '/dashboard/documenti', icon: <DocumentIcon />, text: t('documents', 'navigation') },
       { href: '/dashboard/notifiche', icon: <BellIcon />, text: t('notifications', 'navigation') },
+      { href: '/dashboard/feedback', icon: <MessageSquare className="w-5 h-5" />, text: 'Feedback' },
       { href: '/dashboard/impostazioni', icon: <SettingsIcon />, text: t('settings', 'navigation') },
     ],
   };
@@ -556,6 +559,9 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
         isOpen={userProfileOpen}
         onClose={() => setUserProfileOpen(false)}
       />
+
+      {/* Feedback Widget Globale */}
+      <FeedbackWidget />
     </div>
   );
 } 
