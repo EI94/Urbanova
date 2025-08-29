@@ -82,17 +82,59 @@ export async function POST(request: NextRequest) {
     let emailSuccess = false;
     if (resend) {
       try {
-        console.log('📧 [Feedback] Invio email a Pierpaolo...');
-        console.log('📧 [Feedback] Tentativo invio email con Resend...');
-        const emailResult = await resend.emails.send({
-          from: 'onboarding@resend.dev', // Dominio verificato di Resend
-          to: 'pierpaolo.laurito@voltaenergy.xyz', // Email autorizzata per test
-          subject: `🚨 Nuovo Feedback: ${feedback.title} - ${feedback.type.toUpperCase()}`,
-          html: emailHtml,
-          replyTo: feedback.userEmail || 'noreply@urbanova.ai'
-        });
+        // Tentativo 1: Invia a Gmail (potrebbe fallire senza dominio verificato)
+        // PER VERIFICARE IL DOMINIO: vai su resend.com/domains e verifica urbanova.ai
+        let gmailSuccess = false;
+        try {
+          console.log('📧 [Feedback] Tentativo 1: Invio a Gmail...');
+          const gmailResult = await resend.emails.send({
+            from: 'onboarding@resend.dev',
+            to: 'pierpaolo.laurito@gmail.com',
+            subject: `🚨 Nuovo Feedback: ${feedback.title} - ${feedback.type.toUpperCase()}`,
+            html: emailHtml,
+            replyTo: feedback.userEmail || 'noreply@urbanova.ai'
+          });
+          
+          if (gmailResult.data && !gmailResult.error) {
+            gmailSuccess = true;
+            console.log('✅ [Feedback] Email inviata a Gmail:', gmailResult.data.id);
+          } else {
+            console.warn('⚠️ [Feedback] Email a Gmail fallita:', gmailResult.error);
+          }
+        } catch (gmailError) {
+          console.warn('⚠️ [Feedback] Errore invio a Gmail:', gmailError);
+        }
         
-        console.log('📧 [Feedback] Risultato invio email:', emailResult);
+        // Tentativo 2: Invia a email autorizzata per test (fallback garantito)
+        let testEmailSuccess = false;
+        try {
+          console.log('📧 [Feedback] Tentativo 2: Invio a email test...');
+          const testResult = await resend.emails.send({
+            from: 'onboarding@resend.dev',
+            to: 'pierpaolo.laurito@voltaenergy.xyz',
+            subject: `🚨 Nuovo Feedback: ${feedback.title} - ${feedback.type.toUpperCase()}`,
+            html: emailHtml,
+            replyTo: feedback.userEmail || 'noreply@urbanova.ai'
+          });
+          
+          if (testResult.data && !testResult.error) {
+            testEmailSuccess = true;
+            console.log('✅ [Feedback] Email inviata a test:', testResult.data.id);
+          } else {
+            console.warn('⚠️ [Feedback] Email test fallita:', testResult.error);
+          }
+        } catch (testError) {
+          console.warn('⚠️ [Feedback] Errore invio test:', testError);
+        }
+        
+        // Considera successo se almeno una email è stata inviata
+        emailSuccess = gmailSuccess || testEmailSuccess;
+        console.log('📧 [Feedback] Risultato finale email:', { gmailSuccess, testEmailSuccess, emailSuccess });
+        
+        // Log informativo per l'utente
+        if (!gmailSuccess && testEmailSuccess) {
+          console.log('ℹ️ [Feedback] NOTA: Email inviata solo a test. Per Gmail, verifica il dominio su resend.com/domains');
+        }
 
         // Se l'utente ha fornito email, prova a inviare conferma
         if (feedback.userEmail) {
