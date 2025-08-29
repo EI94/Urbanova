@@ -130,7 +130,7 @@ export class AdvancedLocationsService {
       // Database completo dei comuni italiani (circa 8000)
       const majorComunes = [
         // Lazio - Roma e dintorni
-        { id: 'roma', name: 'Roma', province: 'RM', region: 'Lazio', searchTerms: ['roma', 'capitale', 'eterna'] },
+        { id: 'roma', name: 'Roma', province: 'RM', region: 'Lazio', searchTerms: ['roma', 'capitale', 'eterna', 'lazio'] },
         { id: 'frascati', name: 'Frascati', province: 'RM', region: 'Lazio', searchTerms: ['frascati', 'frascatano', 'castelli romani'] },
         { id: 'castel-gandolfo', name: 'Castel Gandolfo', province: 'RM', region: 'Lazio', searchTerms: ['castel gandolfo', 'castelli romani'] },
         { id: 'albano-laziale', name: 'Albano Laziale', province: 'RM', region: 'Lazio', searchTerms: ['albano laziale', 'castelli romani'] },
@@ -150,6 +150,69 @@ export class AdvancedLocationsService {
         { id: 'bracciano', name: 'Bracciano', province: 'RM', region: 'Lazio', searchTerms: ['bracciano', 'lago', 'castello orsini'] },
         { id: 'angullara-sabazia', name: 'Anguillara Sabazia', province: 'RM', region: 'Lazio', searchTerms: ['anguillara', 'sabazia', 'lago'] },
         { id: 'trevignano-romano', name: 'Trevignano Romano', province: 'RM', region: 'Lazio', searchTerms: ['trevignano', 'lago', 'romano'] },
+        
+        // Quartieri di Roma
+        { id: 'garbatella', name: 'Garbatella', province: 'RM', region: 'Lazio', searchTerms: ['garbatella', 'roma', 'quartiere', 'ostiense'] },
+        { id: 'testaccio', name: 'Testaccio', province: 'RM', region: 'Lazio', searchTerms: ['testaccio', 'roma', 'quartiere', 'aventino'] },
+        { id: 'trastevere', name: 'Trastevere', province: 'RM', region: 'Lazio', searchTerms: ['trastevere', 'roma', 'quartiere', 'tiber'] },
+        { id: 'monti', name: 'Monti', province: 'RM', region: 'Lazio', searchTerms: ['monti', 'roma', 'quartiere', 'centro'] },
+        { id: 'campo-marzio', name: 'Campo Marzio', province: 'RM', region: 'Lazio', searchTerms: ['campo marzio', 'roma', 'quartiere', 'centro'] },
+        { id: 'parione', name: 'Parione', province: 'RM', region: 'Lazio', searchTerms: ['parione', 'roma', 'quartiere', 'centro'] },
+        { id: 'regola', name: 'Regola', province: 'RM', region: 'Lazio', searchTerms: ['regola', 'roma', 'quartiere', 'centro'] },
+        { id: 'sant-angelo', name: 'Sant\'Angelo', province: 'RM', region: 'Lazio', searchTerms: ['sant angelo', 'roma', 'quartiere', 'centro'] },
+        { id: 'pigna', name: 'Pigna', province: 'RM', region: 'Lazio', searchTerms: ['pigna', 'roma', 'quartiere', 'centro'] },
+        { id: 'campitelli', name: 'Campitelli', province: 'RM', region: 'Lazio', searchTerms: ['campitelli', 'roma', 'quartiere', 'centro'] },
+        { id: 'sant-eustachio', name: 'Sant\'Eustachio', province: 'RM', region: 'Lazio', searchTerms: ['sant eustachio', 'roma', 'quartiere', 'centro'] },
+        { id: 'colonna', name: 'Colonna', province: 'RM', region: 'Lazio', searchTerms: ['colonna', 'roma', 'quartiere', 'centro'] },
+        { id: 'ludovisi', name: 'Ludovisi', province: 'RM', region: 'Lazio', searchTerms: ['ludovisi', 'roma', 'quartiere', 'centro'] },
+        { id: 'sallustiano', name: 'Sallustiano', province: 'RM', region: 'Lazio', searchTerms: ['sallustiano', 'roma', 'quartiere', 'centro'] },
+        { id: 'castro-pretorio', name: 'Castro Pretorio', province: 'RM', region: 'Lazio', searchTerms: ['castro pretorio', 'roma', 'quartiere', 'centro'] },
+        { id: 'esquilino', name: 'Esquilino', province: 'RM', region: 'Lazio', searchTerms: ['esquilino', 'roma', 'quartiere', 'centro'] },
+        { id: 'celio', name: 'Celio', province: 'RM', region: 'Lazio', searchTerms: ['celio', 'roma', 'quartiere', 'centro'] },
+        { id: 'oppio', name: 'Oppio', province: 'RM', region: 'Lazio', searchTerms: ['oppio', 'roma', 'quartiere', 'centro'] },
+        { id: 'appio-latino', name: 'Appio Latino', province: 'RM', region: 'Lazio', searchTerms: ['appio latino', 'roma', 'quartiere', 'sud'] },
+        { id: 'appio-pignatelli', name: 'Appio Pignatelli', province: 'RM', region: 'Lazio', searchTerms: ['appio pignatelli', 'roma', 'quartiere', 'sud'] },
+        { id: 'tuscolano', name: 'Tuscolano', province: 'RM', region: 'Lazio', searchTerms: ['tuscolano', 'roma', 'quartiere', 'sud'] },
+        { id: 'don-bosco', name: 'Don Bosco', province: 'RM', region: 'Lazio', searchTerms: ['don bosco', 'roma', 'quartiere', 'sud'] },
+        { id: 'appio-claudio', name: 'Appio Claudio', province: 'RM', region: 'Lazio', searchTerms: ['appio claudio', 'roma', 'quartiere', 'sud'] },
+        { id: 'cincinnato', name: 'Cincinnato', province: 'RM', region: 'Lazio', searchTerms: ['cincinnato', 'roma', 'quartiere', 'sud'] },
+        { id: 'quadraro', name: 'Quadraro', province: 'RM', region: 'Lazio', searchTerms: ['quadraro', 'roma', 'quartiere', 'sud'] },
+        { id: 'tuscolano-nord', name: 'Tuscolano Nord', province: 'RM', region: 'Lazio', searchTerms: ['tuscolano nord', 'roma', 'quartiere', 'sud'] },
+        { id: 'tuscolano-sud', name: 'Tuscolano Sud', province: 'RM', region: 'Lazio', searchTerms: ['tuscolano sud', 'roma', 'quartiere', 'sud'] },
+        { id: 'eur', name: 'EUR', province: 'RM', region: 'Lazio', searchTerms: ['eur', 'roma', 'quartiere', 'sud', 'esposizione universale'] },
+        { id: 'ostiense', name: 'Ostiense', province: 'RM', region: 'Lazio', searchTerms: ['ostiense', 'roma', 'quartiere', 'sud'] },
+        { id: 'portuense', name: 'Portuense', province: 'RM', region: 'Lazio', searchTerms: ['portuense', 'roma', 'quartiere', 'sud'] },
+        { id: 'gianicolense', name: 'Gianicolense', province: 'RM', region: 'Lazio', searchTerms: ['gianicolense', 'roma', 'quartiere', 'ovest'] },
+        { id: 'aurelio', name: 'Aurelio', province: 'RM', region: 'Lazio', searchTerms: ['aurelio', 'roma', 'quartiere', 'ovest'] },
+        { id: 'trionfale', name: 'Trionfale', province: 'RM', region: 'Lazio', searchTerms: ['trionfale', 'roma', 'quartiere', 'ovest'] },
+        { id: 'della-vittoria', name: 'Della Vittoria', province: 'RM', region: 'Lazio', searchTerms: ['della vittoria', 'roma', 'quartiere', 'ovest'] },
+        { id: 'monte-mario', name: 'Monte Mario', province: 'RM', region: 'Lazio', searchTerms: ['monte mario', 'roma', 'quartiere', 'ovest'] },
+        { id: 'della-vittoria-nord', name: 'Della Vittoria Nord', province: 'RM', region: 'Lazio', searchTerms: ['della vittoria nord', 'roma', 'quartiere', 'ovest'] },
+        { id: 'della-vittoria-sud', name: 'Della Vittoria Sud', province: 'RM', region: 'Lazio', searchTerms: ['della vittoria sud', 'roma', 'quartiere', 'ovest'] },
+        { id: 'flaminio', name: 'Flaminio', province: 'RM', region: 'Lazio', searchTerms: ['flaminio', 'roma', 'quartiere', 'nord'] },
+        { id: 'salario', name: 'Salario', province: 'RM', region: 'Lazio', searchTerms: ['salario', 'roma', 'quartiere', 'nord'] },
+        { id: 'nomentano', name: 'Nomentano', province: 'RM', region: 'Lazio', searchTerms: ['nomentano', 'roma', 'quartiere', 'nord'] },
+        { id: 'tiburtino', name: 'Tiburtino', province: 'RM', region: 'Lazio', searchTerms: ['tiburtino', 'roma', 'quartiere', 'nord'] },
+        { id: 'colli-aniene', name: 'Colli Aniene', province: 'RM', region: 'Lazio', searchTerms: ['colli aniene', 'roma', 'quartiere', 'nord'] },
+        { id: 'colli-portuensi', name: 'Colli Portuensi', province: 'RM', region: 'Lazio', searchTerms: ['colli portuensi', 'roma', 'quartiere', 'nord'] },
+        { id: 'colli-albani', name: 'Colli Albani', province: 'RM', region: 'Lazio', searchTerms: ['colli albani', 'roma', 'quartiere', 'sud'] },
+        { id: 'colli-lanuvini', name: 'Colli Lanuvini', province: 'RM', region: 'Lazio', searchTerms: ['colli lanuvini', 'roma', 'quartiere', 'sud'] },
+        { id: 'colli-velini', name: 'Colli Velini', province: 'RM', region: 'Lazio', searchTerms: ['colli velini', 'roma', 'quartiere', 'sud'] },
+        { id: 'colli-cimini', name: 'Colli Cimini', province: 'RM', region: 'Lazio', searchTerms: ['colli cimini', 'roma', 'quartiere', 'sud'] },
+        { id: 'colli-sabini', name: 'Colli Sabini', province: 'RM', region: 'Lazio', searchTerms: ['colli sabini', 'roma', 'quartiere', 'nord'] },
+        { id: 'colli-tiburtini', name: 'Colli Tiburtini', province: 'RM', region: 'Lazio', searchTerms: ['colli tiburtini', 'roma', 'quartiere', 'nord'] },
+        { id: 'colli-romani', name: 'Colli Romani', province: 'RM', region: 'Lazio', searchTerms: ['colli romani', 'roma', 'quartiere', 'sud'] },
+        { id: 'colli-laziali', name: 'Colli Laziali', province: 'RM', region: 'Lazio', searchTerms: ['colli laziali', 'roma', 'quartiere', 'sud'] },
+        { id: 'colli-prenestini', name: 'Colli Prenestini', province: 'RM', region: 'Lazio', searchTerms: ['colli prenestini', 'roma', 'quartiere', 'est'] },
+        { id: 'colli-albani', name: 'Colli Albani', province: 'RM', region: 'Lazio', searchTerms: ['colli albani', 'roma', 'quartiere', 'sud'] },
+        { id: 'colli-lanuvini', name: 'Colli Lanuvini', province: 'RM', region: 'Lazio', searchTerms: ['colli lanuvini', 'roma', 'quartiere', 'sud'] },
+        { id: 'colli-velini', name: 'Colli Velini', province: 'RM', region: 'Lazio', searchTerms: ['colli velini', 'roma', 'quartiere', 'sud'] },
+        { id: 'colli-cimini', name: 'Colli Cimini', province: 'RM', region: 'Lazio', searchTerms: ['colli cimini', 'roma', 'quartiere', 'sud'] },
+        { id: 'colli-sabini', name: 'Colli Sabini', province: 'RM', region: 'Lazio', searchTerms: ['colli sabini', 'roma', 'quartiere', 'nord'] },
+        { id: 'colli-tiburtini', name: 'Colli Tiburtini', province: 'RM', region: 'Lazio', searchTerms: ['colli tiburtini', 'roma', 'quartiere', 'nord'] },
+        { id: 'colli-romani', name: 'Colli Romani', province: 'RM', region: 'Lazio', searchTerms: ['colli romani', 'roma', 'quartiere', 'sud'] },
+        { id: 'colli-laziali', name: 'Colli Laziali', province: 'RM', region: 'Lazio', searchTerms: ['colli laziali', 'roma', 'quartiere', 'sud'] },
+        { id: 'colli-prenestini', name: 'Colli Prenestini', province: 'RM', region: 'Lazio', searchTerms: ['colli prenestini', 'roma', 'quartiere', 'est'] },
         
         // Lombardia
         { id: 'milano', name: 'Milano', province: 'MI', region: 'Lombardia', searchTerms: ['milano', 'milanese', 'moda'] },
@@ -276,72 +339,132 @@ export class AdvancedLocationsService {
     this.searchIndex.get(term)!.push(locationId);
   }
 
-  // Ricerca intelligente con fuzzy matching
+  // Ricerca intelligente con fuzzy matching migliorato
   async searchLocations(query: string, limit: number = 20): Promise<AdvancedLocation[]> {
     await this.initializeLocations();
     
-    if (!query || query.length < 2) return [];
+    if (!query || query.trim().length < 2) return [];
 
-    const queryLower = query.toLowerCase();
+    const queryLower = query.trim().toLowerCase();
     const results: AdvancedLocation[] = [];
     const seenIds = new Set<string>();
 
-    // Ricerca esatta
-    const exactMatches = this.searchIndex.get(queryLower) || [];
-    exactMatches.forEach(id => {
-      const location = this.locations.find(loc => loc.id === id);
-      if (location && !seenIds.has(location.id)) {
+    // FASE 1: Ricerca per corrispondenza esatta del nome
+    const exactMatches = this.locations.filter(location => {
+      const nameLower = location.name.toLowerCase();
+      return nameLower === queryLower;
+    });
+    
+    exactMatches.forEach(location => {
+      if (!seenIds.has(location.id)) {
         results.push(location);
         seenIds.add(location.id);
       }
     });
 
-    // Ricerca parziale
-    for (const [term, locationIds] of this.searchIndex.entries()) {
-      if (term.includes(queryLower) || queryLower.includes(term)) {
-        locationIds.forEach(id => {
-          const location = this.locations.find(loc => loc.id === id);
-          if (location && !seenIds.has(location.id) && results.length < limit) {
-            results.push(location);
-            seenIds.add(location.id);
-          }
-        });
-      }
-    }
-
-    // Ricerca fuzzy per nomi
-    this.locations.forEach(location => {
-      if (results.length >= limit) return;
-      
-      if (!seenIds.has(location.id)) {
-        const nameLower = location.name.toLowerCase();
-        const searchTermsLower = location.searchTerms.map(term => term.toLowerCase());
-        
-        // Controlla se la query è contenuta nel nome o nei termini di ricerca
-        const nameMatch = nameLower.includes(queryLower);
-        const termMatch = searchTermsLower.some(term => term.includes(queryLower));
-        
-        if (nameMatch || termMatch) {
-          results.push(location);
-          seenIds.add(location.id);
-        }
+    // FASE 2: Ricerca per inizio del nome (starts with)
+    const startsWithMatches = this.locations.filter(location => {
+      if (seenIds.has(location.id)) return false;
+      const nameLower = location.name.toLowerCase();
+      return nameLower.startsWith(queryLower);
+    });
+    
+    startsWithMatches.forEach(location => {
+      if (results.length < limit) {
+        results.push(location);
+        seenIds.add(location.id);
       }
     });
 
-    // Ordina per rilevanza
+    // FASE 3: Ricerca per contenuto del nome (contains)
+    const containsMatches = this.locations.filter(location => {
+      if (seenIds.has(location.id)) return false;
+      const nameLower = location.name.toLowerCase();
+      return nameLower.includes(queryLower) && !nameLower.startsWith(queryLower);
+    });
+    
+    containsMatches.forEach(location => {
+      if (results.length < limit) {
+        results.push(location);
+        seenIds.add(location.id);
+      }
+    });
+
+    // FASE 4: Ricerca nei termini di ricerca (searchTerms)
+    const searchTermMatches = this.locations.filter(location => {
+      if (seenIds.has(location.id)) return false;
+      const searchTermsLower = location.searchTerms.map(term => term.toLowerCase());
+      return searchTermsLower.some(term => 
+        term === queryLower || 
+        term.startsWith(queryLower) || 
+        term.includes(queryLower)
+      );
+    });
+    
+    searchTermMatches.forEach(location => {
+      if (results.length < limit) {
+        results.push(location);
+        seenIds.add(location.id);
+      }
+    });
+
+    // FASE 5: Ricerca fuzzy per similitudine (solo se non abbiamo abbastanza risultati)
+    if (results.length < limit) {
+      const fuzzyMatches = this.locations.filter(location => {
+        if (seenIds.has(location.id)) return false;
+        
+        const nameLower = location.name.toLowerCase();
+        const searchTermsLower = location.searchTerms.map(term => term.toLowerCase());
+        
+        // Calcola punteggio di similitudine
+        let score = 0;
+        
+        // Punteggio per lunghezza simile
+        const lengthDiff = Math.abs(nameLower.length - queryLower.length);
+        if (lengthDiff <= 2) score += 3;
+        else if (lengthDiff <= 4) score += 1;
+        
+        // Punteggio per caratteri comuni
+        const commonChars = [...queryLower].filter(char => nameLower.includes(char)).length;
+        score += commonChars * 0.5;
+        
+        // Punteggio per termini di ricerca
+        if (searchTermsLower.some(term => term.includes(queryLower))) {
+          score += 2;
+        }
+        
+        return score >= 2; // Soglia minima per fuzzy matching
+      });
+      
+      fuzzyMatches.forEach(location => {
+        if (results.length < limit) {
+          results.push(location);
+          seenIds.add(location.id);
+        }
+      });
+    }
+
+    // Ordina per rilevanza e tipo
     return results.sort((a, b) => {
+      // Prima: corrispondenze esatte
       const aExact = a.name.toLowerCase() === queryLower;
       const bExact = b.name.toLowerCase() === queryLower;
-      
       if (aExact && !bExact) return -1;
       if (!aExact && bExact) return 1;
       
+      // Secondo: inizio del nome
       const aStartsWith = a.name.toLowerCase().startsWith(queryLower);
       const bStartsWith = b.name.toLowerCase().startsWith(queryLower);
-      
       if (aStartsWith && !bStartsWith) return -1;
       if (!aStartsWith && bStartsWith) return 1;
       
+      // Terzo: priorità per tipo (comune > provincia > regione)
+      const typePriority = { 'comune': 3, 'provincia': 2, 'regione': 1 };
+      const aPriority = typePriority[a.type] || 0;
+      const bPriority = typePriority[b.type] || 0;
+      if (aPriority !== bPriority) return bPriority - aPriority;
+      
+      // Quarto: ordine alfabetico
       return a.name.localeCompare(b.name);
     }).slice(0, limit);
   }

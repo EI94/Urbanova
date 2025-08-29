@@ -45,6 +45,30 @@ export default function AdvancedLocationSelector({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Inizializza le località selezionate dal valore esistente
+  useEffect(() => {
+    if (value && showMultiple) {
+      // Se c'è un valore esistente, cerca di mapparlo alle località
+      const locationNames = value.split(',').map(name => name.trim());
+      const foundLocations: AdvancedLocation[] = [];
+      
+      locationNames.forEach(async (name) => {
+        try {
+          const results = await advancedLocationsService.searchLocations(name, 5);
+          if (results.length > 0) {
+            const exactMatch = results.find(loc => loc.name.toLowerCase() === name.toLowerCase());
+            if (exactMatch && !foundLocations.find(loc => loc.id === exactMatch.id)) {
+              foundLocations.push(exactMatch);
+              setSelectedLocations(prev => [...prev, exactMatch]);
+            }
+          }
+        } catch (error) {
+          console.warn('Errore mappatura località esistente:', error);
+        }
+      });
+    }
+  }, [value, showMultiple]);
+
   // Ricerca suggerimenti intelligente
   useEffect(() => {
     if (searchQuery.length < 2) {
@@ -116,7 +140,9 @@ export default function AdvancedLocationSelector({
     } else if (locations.length === 1) {
       onChange(locations[0].name);
     } else {
-      onChange(locations.map(loc => loc.name).join(', '));
+      // Per selezione multipla, mantieni tutte le località
+      const locationNames = locations.map(loc => loc.name);
+      onChange(locationNames.join(', '));
     }
   };
 

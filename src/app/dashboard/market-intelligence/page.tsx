@@ -961,16 +961,17 @@ export default function LandScrapingPage() {
 
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Localizzazione Avanzata */}
+            {/* Localizzazione */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                📍 Localizzazione Avanzata
+                📍 Localizzazione
               </label>
               <AdvancedLocationSelector
                 value={searchCriteria.location}
                 onChange={(location) => setSearchCriteria(prev => ({ ...prev, location }))}
-                placeholder="Cerca localizzazioni (es. Frascati, Roma, Milano...)"
+                placeholder="Cerca localizzazioni (es. Garbatella, Pomezia, Roma...)"
                 className="w-full"
+                showMultiple={true}
               />
             </div>
 
