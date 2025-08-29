@@ -126,8 +126,16 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
 
     setIsSubmitting(true);
     try {
+      console.log('📝 [Feedback] Preparazione dati per invio:', feedbackData);
+      
       const formData = new FormData();
-      formData.append('feedback', JSON.stringify(feedbackData));
+      const feedbackJson = JSON.stringify(feedbackData);
+      formData.append('feedback', feedbackJson);
+      
+      console.log('📝 [Feedback] FormData preparato:', {
+        feedback: feedbackJson,
+        formDataEntries: Array.from(formData.entries())
+      });
       
       // Temporaneamente disabilitato l'upload degli allegati
       // if (selectedFile) {
@@ -136,7 +144,8 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
 
       const response = await fetch('/api/feedback', {
         method: 'POST',
-        body: formData
+        body: formData,
+        // Non impostare Content-Type manualmente, lascia che il browser lo imposti automaticamente per FormData
       });
 
       if (response.ok) {

@@ -7,9 +7,47 @@ const resend = new Resend('re_jpHbTT42_AtqjMBMxrp2u773kKofMZw9k');
 export async function POST(request: NextRequest) {
   try {
     console.log('🚀 [Feedback] Inizio elaborazione richiesta...');
+    console.log('📝 [Feedback] Headers ricevuti:', Object.fromEntries(request.headers.entries()));
     
-    const formData = await request.formData();
-    const feedbackJson = formData.get('feedback') as string;
+    const contentType = request.headers.get('content-type') || '';
+    console.log('📝 [Feedback] Content-Type:', contentType);
+    
+    let feedback: any;
+    let feedbackJson: string;
+    
+    // Gestisci diversi tipi di contenuto
+    if (contentType.includes('multipart/form-data')) {
+      try {
+        const formData = await request.formData();
+        console.log('✅ [Feedback] FormData parsato correttamente');
+        feedbackJson = formData.get('feedback') as string;
+        feedback = JSON.parse(feedbackJson);
+      } catch (formDataError) {
+        console.error('❌ [Feedback] Errore parsing FormData:', formDataError);
+        return NextResponse.json(
+          { error: 'Errore nel parsing dei dati FormData' },
+          { status: 400 }
+        );
+      }
+    } else if (contentType.includes('application/json')) {
+      try {
+        feedback = await request.json();
+        feedbackJson = JSON.stringify(feedback);
+        console.log('✅ [Feedback] JSON parsato correttamente');
+      } catch (jsonError) {
+        console.error('❌ [Feedback] Errore parsing JSON:', jsonError);
+        return NextResponse.json(
+          { error: 'Errore nel parsing dei dati JSON' },
+          { status: 400 }
+        );
+      }
+    } else {
+      console.error('❌ [Feedback] Content-Type non supportato:', contentType);
+      return NextResponse.json(
+        { error: 'Content-Type non supportato. Usa multipart/form-data o application/json.' },
+        { status: 400 }
+      );
+    }
     
     console.log('📝 [Feedback] Feedback JSON ricevuto:', feedbackJson);
 
@@ -21,8 +59,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const feedback = JSON.parse(feedbackJson);
-    console.log('🔍 [Feedback] Feedback parsato:', feedback);
+    console.log('🔍 [Feedback] Feedback ricevuto:', feedback);
     
     // Validazione dati
     if (!feedback.title || !feedback.description || !feedback.type || !feedback.priority) {
@@ -46,28 +83,38 @@ export async function POST(request: NextRequest) {
     if (resend) {
       try {
         console.log('📧 [Feedback] Invio email a Pierpaolo...');
-        await resend.emails.send({
-          from: 'Urbanova AI <feedback@urbanova.ai>',
-          to: 'pierpaolo.laurito@gmail.com',
+        console.log('📧 [Feedback] Tentativo invio email con Resend...');
+        const emailResult = await resend.emails.send({
+          from: 'onboarding@resend.dev', // Dominio verificato di Resend
+          to: 'pierpaolo.laurito@voltaenergy.xyz', // Email autorizzata per test
           subject: `🚨 Nuovo Feedback: ${feedback.title} - ${feedback.type.toUpperCase()}`,
           html: emailHtml,
           replyTo: feedback.userEmail || 'noreply@urbanova.ai'
         });
+        
+        console.log('📧 [Feedback] Risultato invio email:', emailResult);
 
-        // Se l'utente ha fornito email, invia conferma
+        // Se l'utente ha fornito email, prova a inviare conferma
         if (feedback.userEmail) {
-          console.log('📧 [Feedback] Invio email di conferma all\'utente...');
-          const confirmationHtml = generateConfirmationEmail(feedback, feedbackId);
-          await resend.emails.send({
-            from: 'Urbanova AI <feedback@urbanova.ai>',
-            to: feedback.userEmail,
-            subject: '✅ Feedback ricevuto - Urbanova AI',
-            html: confirmationHtml
-          });
+          console.log('📧 [Feedback] Tentativo invio email di conferma all\'utente...');
+          try {
+            const confirmationHtml = generateConfirmationEmail(feedback, feedbackId);
+            const confirmationResult = await resend.emails.send({
+              from: 'onboarding@resend.dev', // Dominio verificato di Resend
+              to: feedback.userEmail,
+              subject: '✅ Feedback ricevuto - Urbanova AI',
+              html: confirmationHtml
+            });
+            
+            console.log('📧 [Feedback] Email conferma inviata:', confirmationResult);
+          } catch (confirmationError) {
+            console.warn('⚠️ [Feedback] Email conferma non inviata (utente non autorizzato):', confirmationError);
+            // Non bloccare il processo se la conferma fallisce
+          }
         }
         
         emailSuccess = true;
-        console.log('✅ [Feedback] Email inviate con successo');
+        console.log('✅ [Feedback] Email principale inviata con successo');
       } catch (emailError) {
         console.error('❌ [Feedback] Errore critico invio email:', emailError);
         // Se le email falliscono, è un problema critico
