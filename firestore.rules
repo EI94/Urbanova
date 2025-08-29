@@ -1,14 +1,15 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Regole per la collezione feedback
+    // Regole per la collezione feedback - solo scrittura per raccogliere feedback
     match /feedback/{document} {
-      allow read, write: if true; // Permette lettura e scrittura a tutti per ora
+      allow create: if true; // Permette creazione feedback da chiunque
+      allow read, update, delete: if false; // Solo admin possono leggere/modificare
     }
     
-    // Regole esistenti per altre collezioni
+    // Regole per altre collezioni - solo utenti autenticati
     match /{document=**} {
-      allow read, write: if true; // Regola temporanea per sviluppo
+      allow read, write: if request.auth != null;
     }
   }
 }

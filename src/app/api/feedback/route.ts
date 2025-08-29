@@ -3,7 +3,8 @@ import { Resend } from 'resend';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+// Usa la stessa chiave API che funziona in realEmailService.ts
+const resend = new Resend('re_jpHbTT42_AtqjMBMxrp2u773kKofMZw9k');
 
 export async function POST(request: NextRequest) {
   try {

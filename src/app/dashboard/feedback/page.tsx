@@ -3,8 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, where } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { feedbackService, Feedback } from '@/lib/feedbackService';
 import { toast } from 'react-hot-toast';
 import { 
   Bug, 
@@ -55,23 +54,20 @@ const FeedbackDashboard: React.FC = () => {
   useEffect(() => {
     if (!user) return;
 
-    const feedbacksRef = collection(db, 'feedback');
-    const q = query(feedbacksRef, orderBy('createdAt', 'desc'));
+    const loadFeedbacks = async () => {
+      try {
+        setLoading(true);
+        const feedbacksData = await feedbackService.getAllFeedback();
+        setFeedbacks(feedbacksData);
+      } catch (error) {
+        console.error('Errore caricamento feedback:', error);
+        toast('Errore caricamento feedback', { icon: '❌' });
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const feedbacksData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Feedback[];
-      
-      setFeedbacks(feedbacksData);
-      setLoading(false);
-    }, (error) => {
-      console.error('Errore caricamento feedback:', error);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    loadFeedbacks();
   }, [user]);
 
   const filteredFeedbacks = feedbacks.filter(feedback => {
@@ -85,13 +81,12 @@ const FeedbackDashboard: React.FC = () => {
 
   const updateFeedbackStatus = async (feedbackId: string, status: Feedback['status']) => {
     try {
-      const feedbackRef = doc(db, 'feedback', feedbackId);
-      await updateDoc(feedbackRef, {
-        status,
-        updatedAt: new Date(),
-        ...(status === 'resolved' && { resolvedAt: new Date() })
-      });
+      await feedbackService.updateFeedbackStatus(feedbackId, status);
       toast('Stato feedback aggiornato', { icon: '✅' });
+      
+      // Ricarica i feedback per aggiornare l'UI
+      const feedbacksData = await feedbackService.getAllFeedback();
+      setFeedbacks(feedbacksData);
     } catch (error) {
       console.error('Errore aggiornamento stato:', error);
       toast('Errore aggiornamento stato', { icon: '❌' });
