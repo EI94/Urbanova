@@ -1,18 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
-import { db, storage } from '@/lib/firebase';
+import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🚀 [Feedback] Inizio elaborazione richiesta...');
+    
     const formData = await request.formData();
     const feedbackJson = formData.get('feedback') as string;
-    const attachment = formData.get('attachment') as File | null;
+    
+    console.log('📝 [Feedback] Feedback JSON ricevuto:', feedbackJson);
 
     if (!feedbackJson) {
+      console.error('❌ [Feedback] Dati feedback mancanti');
       return NextResponse.json(
         { error: 'Dati feedback mancanti' },
         { status: 400 }
@@ -20,45 +23,57 @@ export async function POST(request: NextRequest) {
     }
 
     const feedback = JSON.parse(feedbackJson);
+    console.log('🔍 [Feedback] Feedback parsato:', feedback);
     
     // Validazione dati
     if (!feedback.title || !feedback.description || !feedback.type || !feedback.priority) {
+      console.error('❌ [Feedback] Campi obbligatori mancanti:', { title: !!feedback.title, description: !!feedback.description, type: !!feedback.type, priority: !!feedback.priority });
       return NextResponse.json(
         { error: 'Campi obbligatori mancanti' },
         { status: 400 }
       );
     }
 
-    // Upload allegato se presente
-    let attachmentUrl = '';
-    if (attachment && attachment.size > 0) {
-      const fileName = `feedback-attachments/${Date.now()}-${attachment.name}`;
-      const storageRef = ref(storage, fileName);
-      await uploadBytes(storageRef, attachment);
-      attachmentUrl = await getDownloadURL(storageRef);
+    console.log('✅ [Feedback] Validazione completata, tentativo salvataggio su Firebase...');
+
+    // Genera un ID temporaneo per il feedback
+    const tempFeedbackId = `temp_${Date.now()}`;
+
+    // Salva feedback su Firebase (con gestione errori)
+    let feedbackId = tempFeedbackId;
+    let firebaseSuccess = false;
+    
+    try {
+      const feedbackData = {
+        ...feedback,
+        attachmentUrl: '',
+        createdAt: serverTimestamp(),
+        status: 'new',
+        assignedTo: null,
+        resolvedAt: null,
+        resolution: null,
+        tags: [feedback.type, feedback.priority, feedback.screen].filter(Boolean)
+      };
+
+      console.log('💾 [Feedback] Dati da salvare:', feedbackData);
+
+      const feedbackRef = await addDoc(collection(db, 'feedback'), feedbackData);
+      feedbackId = feedbackRef.id;
+      firebaseSuccess = true;
+      
+      console.log('✅ [Feedback] Feedback salvato su Firebase con ID:', feedbackId);
+    } catch (firebaseError) {
+      console.warn('⚠️ [Feedback] Errore Firebase, continuo con email:', firebaseError);
+      // Continua con l'invio email anche se Firebase fallisce
     }
 
-    // Salva feedback su Firebase
-    const feedbackData = {
-      ...feedback,
-      attachmentUrl,
-      createdAt: serverTimestamp(),
-      status: 'new',
-      assignedTo: null,
-      resolvedAt: null,
-      resolution: null,
-      tags: [feedback.type, feedback.priority, feedback.screen].filter(Boolean)
-    };
-
-    const feedbackRef = await addDoc(collection(db, 'feedback'), feedbackData);
-    const feedbackId = feedbackRef.id;
-
     // Genera email professionale per Pierpaolo
-    const emailHtml = generateFeedbackEmail(feedback, feedbackId, attachmentUrl);
+    const emailHtml = generateFeedbackEmail(feedback, feedbackId, '');
     
     // Invia email a Pierpaolo se Resend è disponibile
     if (resend) {
       try {
+        console.log('📧 [Feedback] Invio email a Pierpaolo...');
         await resend.emails.send({
           from: 'Urbanova AI <feedback@urbanova.ai>',
           to: 'pierpaolo.laurito@gmail.com',
@@ -69,6 +84,7 @@ export async function POST(request: NextRequest) {
 
         // Se l'utente ha fornito email, invia conferma
         if (feedback.userEmail) {
+          console.log('📧 [Feedback] Invio email di conferma all\'utente...');
           const confirmationHtml = generateConfirmationEmail(feedback, feedbackId);
           await resend.emails.send({
             from: 'Urbanova AI <feedback@urbanova.ai>',
@@ -77,25 +93,31 @@ export async function POST(request: NextRequest) {
             html: confirmationHtml
           });
         }
+        
+        console.log('✅ [Feedback] Email inviate con successo');
       } catch (emailError) {
-        console.warn('⚠️ [Feedback] Errore invio email, ma feedback salvato:', emailError);
+        console.warn('⚠️ [Feedback] Errore invio email:', emailError);
+        throw new Error(`Email non inviata: ${emailError instanceof Error ? emailError.message : 'Errore sconosciuto'}`);
       }
     } else {
       console.warn('⚠️ [Feedback] Resend non configurato, email non inviate');
+      throw new Error('Servizio email non configurato');
     }
 
-    console.log('✅ [Feedback] Feedback inviato con successo:', feedbackId);
+    console.log('✅ [Feedback] Feedback elaborato con successo:', feedbackId);
 
     return NextResponse.json({
       success: true,
       feedbackId,
-      message: 'Feedback inviato con successo'
+      firebaseSaved: firebaseSuccess,
+      message: firebaseSuccess ? 'Feedback inviato e salvato con successo' : 'Feedback inviato via email (salvataggio Firebase fallito)'
     });
 
   } catch (error) {
     console.error('❌ [Feedback] Errore invio feedback:', error);
+    console.error('❌ [Feedback] Stack trace:', error instanceof Error ? error.stack : 'N/A');
     return NextResponse.json(
-      { error: 'Errore interno del server' },
+      { error: 'Errore interno del server', details: error instanceof Error ? error.message : 'Errore sconosciuto' },
       { status: 500 }
     );
   }
@@ -149,9 +171,7 @@ function generateFeedbackEmail(feedback: any, feedbackId: string, attachmentUrl:
         .description { background-color: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; margin: 20px 0; }
         .description h3 { margin: 0 0 12px 0; color: #1f2937; font-size: 16px; }
         .description p { margin: 0; color: #4b5563; line-height: 1.6; }
-        .attachment { background-color: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 16px; margin: 20px 0; }
-        .attachment h3 { margin: 0 0 8px 0; color: #0c4a6e; font-size: 14px; }
-        .attachment a { color: #0ea5e9; text-decoration: none; font-weight: 500; }
+        .attachment { display: none; }
         .footer { background-color: #f8fafc; padding: 20px; text-align: center; color: #6b7280; font-size: 14px; }
         .action-buttons { text-align: center; margin: 30px 0; }
         .btn { display: inline-block; padding: 12px 24px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 500; margin: 0 8px; }
@@ -205,12 +225,7 @@ function generateFeedbackEmail(feedback: any, feedbackId: string, attachmentUrl:
               </div>
             ` : ''}
             
-            ${attachmentUrl ? `
-              <div class="attachment">
-                <h3>📎 Allegato Incluso</h3>
-                <a href="${attachmentUrl}" target="_blank">Visualizza Allegato</a>
-              </div>
-            ` : ''}
+
             
             <div class="meta-item">
               <div class="meta-label">Informazioni Tecniche</div>

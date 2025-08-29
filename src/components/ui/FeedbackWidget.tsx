@@ -129,9 +129,10 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
       const formData = new FormData();
       formData.append('feedback', JSON.stringify(feedbackData));
       
-      if (selectedFile) {
-        formData.append('attachment', selectedFile);
-      }
+      // Temporaneamente disabilitato l'upload degli allegati
+      // if (selectedFile) {
+      //   formData.append('attachment', selectedFile);
+      // }
 
       const response = await fetch('/api/feedback', {
         method: 'POST',

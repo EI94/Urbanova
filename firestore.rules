@@ -1,69 +1,14 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // PERMESSI COMPLETI PER UTENTI AUTENTICATI
-    match /feasibilityProjects/{projectId} {
-      allow read, write, delete: if request.auth != null;
+    // Regole per la collezione feedback
+    match /feedback/{document} {
+      allow read, write: if true; // Permette lettura e scrittura a tutti per ora
     }
     
-    // Regole per test (solo per utenti autenticati)
-    match /test/{docId} {
-      allow read, write: if request.auth != null;
-    }
-    
-    // Regole per utenti (accesso completo per utenti autenticati)
-    match /users/{userId} {
-      allow read, write: if request.auth != null;
-    }
-    
-    // Regole per progetti
-    match /projects/{projectId} {
-      allow read, write: if request.auth != null;
-    }
-    
-    // Regole per notifiche
-    match /notifications/{notificationId} {
-      allow read, write: if request.auth != null;
-    }
-    
-    // Regole per preferenze notifiche
-    match /notificationPreferences/{userId} {
-      allow read, write: if request.auth != null;
-    }
-    
-    // Regole per profili utente
-    match /userProfiles/{userId} {
-      allow read, write: if request.auth != null;
-    }
-    
-    // Regole per cronologia login
-    match /loginHistory/{logId} {
-      allow read, write: if request.auth != null;
-    }
-    
-    // Regole per documenti
-    match /documents/{documentId} {
-      allow read, write: if request.auth != null;
-    }
-    
-    // Regole per meeting
-    match /meetings/{meetingId} {
-      allow read, write: if request.auth != null;
-    }
-    
-    // Regole per task
-    match /tasks/{taskId} {
-      allow read, write: if request.auth != null;
-    }
-    
-    // Regole per confronti fattibilità
-    match /feasibilityComparisons/{comparisonId} {
-      allow read, write: if request.auth != null;
-    }
-    
-    // Regole per altre collezioni
+    // Regole esistenti per altre collezioni
     match /{document=**} {
-      allow read, write: if request.auth != null;
+      allow read, write: if true; // Regola temporanea per sviluppo
     }
   }
 }
