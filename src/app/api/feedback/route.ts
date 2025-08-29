@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
-import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 // Usa la stessa chiave API che funziona in realEmailService.ts
 const resend = new Resend('re_jpHbTT42_AtqjMBMxrp2u773kKofMZw9k');
@@ -35,43 +33,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('✅ [Feedback] Validazione completata, tentativo salvataggio su Firebase...');
+    console.log('✅ [Feedback] Validazione completata');
 
-    // Genera un ID temporaneo per il feedback
-    const tempFeedbackId = `temp_${Date.now()}`;
-
-    // Salva feedback su Firebase (con gestione errori)
-    let feedbackId = tempFeedbackId;
-    let firebaseSuccess = false;
-    
-    try {
-      const feedbackData = {
-        ...feedback,
-        attachmentUrl: '',
-        createdAt: serverTimestamp(),
-        status: 'new',
-        assignedTo: null,
-        resolvedAt: null,
-        resolution: null,
-        tags: [feedback.type, feedback.priority, feedback.screen].filter(Boolean)
-      };
-
-      console.log('💾 [Feedback] Dati da salvare:', feedbackData);
-
-      const feedbackRef = await addDoc(collection(db, 'feedback'), feedbackData);
-      feedbackId = feedbackRef.id;
-      firebaseSuccess = true;
-      
-      console.log('✅ [Feedback] Feedback salvato su Firebase con ID:', feedbackId);
-    } catch (firebaseError) {
-      console.warn('⚠️ [Feedback] Errore Firebase, continuo con email:', firebaseError);
-      // Continua con l'invio email anche se Firebase fallisce
-    }
+    // Genera un ID univoco per il feedback
+    const feedbackId = `feedback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Genera email professionale per Pierpaolo
     const emailHtml = generateFeedbackEmail(feedback, feedbackId, '');
     
-    // Invia email a Pierpaolo se Resend è disponibile
+    // Invia email a Pierpaolo - PRIORITÀ ASSOLUTA
+    let emailSuccess = false;
     if (resend) {
       try {
         console.log('📧 [Feedback] Invio email a Pierpaolo...');
@@ -95,48 +66,103 @@ export async function POST(request: NextRequest) {
           });
         }
         
+        emailSuccess = true;
         console.log('✅ [Feedback] Email inviate con successo');
       } catch (emailError) {
-        console.warn('⚠️ [Feedback] Errore invio email:', emailError);
-        throw new Error(`Email non inviata: ${emailError instanceof Error ? emailError.message : 'Errore sconosciuto'}`);
+        console.error('❌ [Feedback] Errore critico invio email:', emailError);
+        // Se le email falliscono, è un problema critico
+        return NextResponse.json(
+          { error: 'Errore nell\'invio delle email di feedback' },
+          { status: 500 }
+        );
       }
     } else {
-      console.warn('⚠️ [Feedback] Resend non configurato, email non inviate');
-      throw new Error('Servizio email non configurato');
+      console.error('❌ [Feedback] Servizio email non configurato');
+      return NextResponse.json(
+        { error: 'Servizio email non configurato' },
+        { status: 500 }
+      );
     }
 
-    console.log('✅ [Feedback] Feedback elaborato con successo:', feedbackId);
+    // Tentativo di salvataggio su Firebase (opzionale, non blocca il processo)
+    let firebaseSuccess = false;
+    try {
+      // Import dinamico per evitare errori di build
+      const { db } = await import('@/lib/firebase');
+      const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+      
+      const feedbackData = {
+        ...feedback,
+        id: feedbackId,
+        attachmentUrl: '',
+        createdAt: serverTimestamp(),
+        status: 'new',
+        assignedTo: null,
+        resolvedAt: null,
+        resolution: null,
+        tags: [feedback.type, feedback.priority, feedback.screen].filter(Boolean),
+        emailSent: emailSuccess,
+        emailSentAt: serverTimestamp()
+      };
 
+      console.log('💾 [Feedback] Tentativo salvataggio su Firebase...');
+      const feedbackRef = await addDoc(collection(db, 'feedback'), feedbackData);
+      firebaseSuccess = true;
+      console.log('✅ [Feedback] Feedback salvato su Firebase con ID:', feedbackRef.id);
+    } catch (firebaseError) {
+      console.warn('⚠️ [Feedback] Errore Firebase (non critico):', firebaseError);
+      
+      // Tentativo di salvataggio locale come fallback
+      try {
+        const { feedbackFallbackService } = await import('@/lib/feedbackFallbackService');
+        if (feedbackFallbackService.isAvailable()) {
+          await feedbackFallbackService.saveFeedbackLocally({
+            ...feedback,
+            tags: [feedback.type, feedback.priority, feedback.screen].filter(Boolean)
+          });
+          console.log('💾 [Feedback] Feedback salvato localmente come fallback');
+        }
+      } catch (fallbackError) {
+        console.warn('⚠️ [Feedback] Anche il fallback locale è fallito:', fallbackError);
+      }
+    }
+
+    // Log del successo
+    console.log('🎉 [Feedback] Processo completato:', {
+      emailSuccess,
+      firebaseSuccess,
+      feedbackId,
+      userEmail: feedback.userEmail || 'non fornita'
+    });
+
+    // Risposta di successo
     return NextResponse.json({
       success: true,
+      message: 'Feedback inviato con successo',
       feedbackId,
-      firebaseSaved: firebaseSuccess,
-      message: firebaseSuccess ? 'Feedback inviato e salvato con successo' : 'Feedback inviato via email (salvataggio Firebase fallito)'
+      emailSent: emailSuccess,
+      firebaseSaved: firebaseSuccess
     });
 
   } catch (error) {
-    console.error('❌ [Feedback] Errore invio feedback:', error);
-    console.error('❌ [Feedback] Stack trace:', error instanceof Error ? error.stack : 'N/A');
+    console.error('💥 [Feedback] Errore critico:', error);
     return NextResponse.json(
-      { error: 'Errore interno del server', details: error instanceof Error ? error.message : 'Errore sconosciuto' },
+      { 
+        error: 'Errore interno del server',
+        details: error instanceof Error ? error.message : 'Errore sconosciuto'
+      },
       { status: 500 }
     );
   }
 }
 
+// Genera email professionale per Pierpaolo
 function generateFeedbackEmail(feedback: any, feedbackId: string, attachmentUrl: string): string {
   const priorityColors = {
     low: '#10B981',
-    medium: '#F59E0B',
-    high: '#F97316',
-    critical: '#EF4444'
-  };
-
-  const typeIcons = {
-    bug: '🐛',
-    improvement: '💡',
-    feature: '⭐',
-    other: '📝'
+    medium: '#F59E0B', 
+    high: '#EF4444',
+    critical: '#DC2626'
   };
 
   const priorityLabels = {
@@ -144,6 +170,14 @@ function generateFeedbackEmail(feedback: any, feedbackId: string, attachmentUrl:
     medium: 'Media',
     high: 'Alta',
     critical: 'Critica'
+  };
+
+  const typeLabels = {
+    bug: 'Bug',
+    feature: 'Nuova Funzionalità',
+    improvement: 'Miglioramento',
+    question: 'Domanda',
+    other: 'Altro'
   };
 
   return `
@@ -154,109 +188,94 @@ function generateFeedbackEmail(feedback: any, feedbackId: string, attachmentUrl:
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Nuovo Feedback - Urbanova AI</title>
       <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
-        .container { max-width: 600px; margin: 0 auto; background-color: white; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
-        .header h1 { margin: 0; font-size: 28px; font-weight: 600; }
-        .header p { margin: 10px 0 0 0; opacity: 0.9; font-size: 16px; }
-        .content { padding: 30px; }
-        .feedback-card { background-color: #f8fafc; border-radius: 12px; padding: 24px; margin: 20px 0; border-left: 4px solid ${priorityColors[feedback.priority]}; }
-        .feedback-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-        .feedback-type { font-size: 24px; }
-        .feedback-title { font-size: 20px; font-weight: 600; color: #1f2937; margin: 0; }
-        .feedback-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
-        .meta-item { background-color: white; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb; }
-        .meta-label { font-size: 12px; text-transform: uppercase; color: #6b7280; font-weight: 600; margin-bottom: 4px; }
-        .meta-value { font-size: 14px; color: #1f2937; font-weight: 500; }
-        .priority-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; color: white; background-color: ${priorityColors[feedback.priority]}; }
-        .description { background-color: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; margin: 20px 0; }
-        .description h3 { margin: 0 0 12px 0; color: #1f2937; font-size: 16px; }
-        .description p { margin: 0; color: #4b5563; line-height: 1.6; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
+        .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+        .feedback-card { background: white; border-radius: 8px; padding: 20px; margin: 20px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .priority-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; color: white; font-weight: bold; font-size: 12px; }
+        .type-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; background: #3B82F6; color: white; font-weight: bold; font-size: 12px; }
+        .field { margin: 15px 0; }
+        .field-label { font-weight: bold; color: #374151; margin-bottom: 5px; }
+        .field-value { background: #f3f4f6; padding: 10px; border-radius: 5px; border-left: 4px solid #3B82F6; }
+        .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px; }
         .attachment { display: none; }
-        .footer { background-color: #f8fafc; padding: 20px; text-align: center; color: #6b7280; font-size: 14px; }
-        .action-buttons { text-align: center; margin: 30px 0; }
-        .btn { display: inline-block; padding: 12px 24px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 500; margin: 0 8px; }
-        .btn:hover { background-color: #2563eb; }
-        .btn-secondary { background-color: #6b7280; }
-        .btn-secondary:hover { background-color: #4b5563; }
       </style>
     </head>
     <body>
       <div class="container">
         <div class="header">
-          <h1>🚨 Nuovo Feedback Ricevuto</h1>
-          <p>Urbanova AI - Sistema di Feedback</p>
+          <h1 style="margin: 0; font-size: 28px;">🚨 Nuovo Feedback Ricevuto</h1>
+          <p style="margin: 10px 0 0 0; opacity: 0.9;">Urbanova AI - Sistema di Feedback</p>
         </div>
         
         <div class="content">
           <div class="feedback-card">
-            <div class="feedback-header">
-              <span class="feedback-type">${typeIcons[feedback.type]}</span>
-              <h2 class="feedback-title">${feedback.title}</h2>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+              <span class="type-badge">${typeLabels[feedback.type] || feedback.type}</span>
+              <span class="priority-badge" style="background-color: ${priorityColors[feedback.priority] || '#6b7280'}">${priorityLabels[feedback.priority] || feedback.priority}</span>
             </div>
             
-            <div class="feedback-meta">
-              <div class="meta-item">
-                <div class="meta-label">Tipo</div>
-                <div class="meta-value">${feedback.type.charAt(0).toUpperCase() + feedback.type.slice(1)}</div>
-              </div>
-              <div class="meta-item">
-                <div class="meta-label">Priorità</div>
-                <div class="meta-value"><span class="priority-badge">${priorityLabels[feedback.priority]}</span></div>
-              </div>
-              <div class="meta-item">
-                <div class="meta-label">Schermata</div>
-                <div class="meta-value">${feedback.screen || 'Non specificata'}</div>
-              </div>
-              <div class="meta-item">
-                <div class="meta-label">ID Feedback</div>
-                <div class="meta-value">#${feedbackId}</div>
-              </div>
+            <h2 style="margin: 0 0 20px 0; color: #1f2937;">${feedback.title}</h2>
+            
+            <div class="field">
+              <div class="field-label">📝 Descrizione</div>
+              <div class="field-value">${feedback.description}</div>
             </div>
             
-            <div class="description">
-              <h3>Descrizione Dettagliata</h3>
-              <p>${feedback.description.replace(/\n/g, '<br>')}</p>
+            ${feedback.screen ? `
+            <div class="field">
+              <div class="field-label">🖥️ Schermata</div>
+              <div class="field-value">${feedback.screen}</div>
             </div>
-            
-            ${feedback.userEmail ? `
-              <div class="meta-item">
-                <div class="meta-label">Email Utente</div>
-                <div class="meta-value">${feedback.userEmail}</div>
-              </div>
             ` : ''}
             
-
-            
-            <div class="meta-item">
-              <div class="meta-label">Informazioni Tecniche</div>
-              <div class="meta-value">
-                <strong>User Agent:</strong> ${feedback.userAgent}<br>
-                <strong>Timestamp:</strong> ${new Date(feedback.timestamp).toLocaleString('it-IT')}
-              </div>
+            ${feedback.category ? `
+            <div class="field">
+              <div class="field-label">🏷️ Categoria</div>
+              <div class="field-value">${feedback.category}</div>
             </div>
+            ` : ''}
+            
+            ${feedback.userEmail ? `
+            <div class="field">
+              <div class="field-label">📧 Email Utente</div>
+              <div class="field-value">${feedback.userEmail}</div>
+            </div>
+            ` : ''}
+            
+            <div class="field">
+              <div class="field-label">🆔 ID Feedback</div>
+              <div class="field-value">${feedbackId}</div>
+            </div>
+            
+            <div class="field">
+              <div class="field-label">⏰ Timestamp</div>
+              <div class="field-value">${new Date().toLocaleString('it-IT')}</div>
+            </div>
+            
+            ${feedback.userAgent ? `
+            <div class="field">
+              <div class="field-label">🌐 User Agent</div>
+              <div class="field-value" style="font-size: 12px; word-break: break-all;">${feedback.userAgent}</div>
+            </div>
+            ` : ''}
           </div>
           
-          <div class="action-buttons">
-            <a href="https://urbanova-ai.vercel.app/dashboard/feedback" class="btn">📊 Visualizza Dashboard</a>
-            <a href="mailto:${feedback.userEmail || 'noreply@urbanova.ai'}?subject=Re: Feedback #${feedbackId}" class="btn btn-secondary">✉️ Rispondi</a>
-          </div>
-          
-          <div style="background-color: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 16px; margin: 20px 0;">
-            <h3 style="margin: 0 0 8px 0; color: #92400e;">💡 Prossimi Passi Suggeriti</h3>
-            <ul style="margin: 0; color: #92400e; padding-left: 20px;">
-              <li>Analizza la priorità e l'impatto del feedback</li>
-              <li>Valuta la fattibilità tecnica dell'implementazione</li>
-              <li>Stima il tempo di sviluppo necessario</li>
-              <li>Pianifica la roadmap di implementazione</li>
-              <li>Aggiorna lo stato del feedback nella dashboard</li>
+          <div style="background: #dbeafe; border: 1px solid #3b82f6; border-radius: 8px; padding: 15px; margin: 20px 0;">
+            <h3 style="margin: 0 0 10px 0; color: #1e40af;">📋 Azioni Raccomandate</h3>
+            <ul style="margin: 0; padding-left: 20px; color: #1e40af;">
+              <li>Analizza il feedback entro 24 ore</li>
+              <li>Assegna priorità e responsabilità</li>
+              <li>Aggiorna lo stato nella dashboard feedback</li>
+              <li>Comunica con l'utente se necessario</li>
             </ul>
           </div>
         </div>
         
         <div class="footer">
-          <p>Questo feedback è stato inviato automaticamente dal sistema di feedback di Urbanova AI</p>
-          <p>Feedback ID: #${feedbackId} | ${new Date().toLocaleString('it-IT')}</p>
+          <p>Questo feedback è stato inviato automaticamente dal sistema Urbanova AI</p>
+          <p>ID: ${feedbackId} | ${new Date().toISOString()}</p>
         </div>
       </div>
     </body>
@@ -264,6 +283,7 @@ function generateFeedbackEmail(feedback: any, feedbackId: string, attachmentUrl:
   `;
 }
 
+// Genera email di conferma per l'utente
 function generateConfirmationEmail(feedback: any, feedbackId: string): string {
   return `
     <!DOCTYPE html>
@@ -273,81 +293,46 @@ function generateConfirmationEmail(feedback: any, feedbackId: string): string {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Feedback Ricevuto - Urbanova AI</title>
       <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
-        .container { max-width: 600px; margin: 0 auto; background-color: white; }
-        .header { background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; padding: 30px; text-align: center; }
-        .header h1 { margin: 0; font-size: 28px; font-weight: 600; }
-        .header p { margin: 10px 0 0 0; opacity: 0.9; font-size: 16px; }
-        .content { padding: 30px; text-align: center; }
-        .success-icon { font-size: 64px; margin: 20px 0; }
-        .message { background-color: #f0fdf4; border: 1px solid #22c55e; border-radius: 12px; padding: 24px; margin: 20px 0; }
-        .message h2 { margin: 0 0 16px 0; color: #166534; }
-        .message p { margin: 0; color: #166534; line-height: 1.6; }
-        .feedback-details { background-color: #f8fafc; border-radius: 12px; padding: 24px; margin: 20px 0; text-align: left; }
-        .feedback-details h3 { margin: 0 0 16px 0; color: #1f2937; }
-        .detail-row { display: flex; justify-content: space-between; margin: 8px 0; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
-        .detail-label { font-weight: 600; color: #6b7280; }
-        .detail-value { color: #1f2937; }
-        .footer { background-color: #f8fafc; padding: 20px; text-align: center; color: #6b7280; font-size: 14px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
+        .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+        .success-card { background: white; border-radius: 8px; padding: 20px; margin: 20px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
+        .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px; }
       </style>
     </head>
     <body>
       <div class="container">
         <div class="header">
-          <h1>✅ Feedback Ricevuto!</h1>
-          <p>Grazie per il tuo contributo a Urbanova AI</p>
+          <h1 style="margin: 0; font-size: 28px;">✅ Feedback Ricevuto!</h1>
+          <p style="margin: 10px 0 0 0; opacity: 0.9;">Grazie per il tuo contributo</p>
         </div>
         
         <div class="content">
-          <div class="success-icon">🎉</div>
-          
-          <div class="message">
-            <h2>Grazie di cuore per il tuo feedback!</h2>
-            <p>Il tuo contributo è fondamentale per migliorare Urbanova AI e renderla sempre più utile per tutti i nostri utenti.</p>
+          <div class="success-card">
+            <div style="font-size: 64px; margin-bottom: 20px;">🎉</div>
+            <h2 style="margin: 0 0 15px 0; color: #059669;">Grazie per il tuo feedback!</h2>
+            <p style="margin: 0 0 20px 0; color: #6b7280; font-size: 16px;">
+              Il tuo contributo è fondamentale per migliorare Urbanova AI. 
+              Il nostro team analizzerà il tuo feedback e ti terrà aggiornato sui progressi.
+            </p>
+            
+            <div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 15px; margin: 20px 0;">
+              <h3 style="margin: 0 0 10px 0; color: #0c4a6e;">📋 Dettagli del Feedback</h3>
+              <p style="margin: 5px 0; color: #0c4a6e;"><strong>Tipo:</strong> ${feedback.type}</p>
+              <p style="margin: 5px 0; color: #0c4a6e;"><strong>Priorità:</strong> ${feedback.priority}</p>
+              <p style="margin: 5px 0; color: #0c4a6e;"><strong>ID:</strong> ${feedbackId}</p>
+            </div>
+            
+            <p style="margin: 20px 0 0 0; color: #6b7280; font-size: 14px;">
+              Hai altre domande o suggerimenti? Non esitare a contattarci!
+            </p>
           </div>
-          
-          <div class="feedback-details">
-            <h3>📋 Dettagli del Feedback</h3>
-            <div class="detail-row">
-              <span class="detail-label">ID Feedback:</span>
-              <span class="detail-value">#${feedbackId}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Tipo:</span>
-              <span class="detail-value">${feedback.type.charAt(0).toUpperCase() + feedback.type.slice(1)}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Priorità:</span>
-              <span class="detail-value">${feedback.priority.charAt(0).toUpperCase() + feedback.priority.slice(1)}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Schermata:</span>
-              <span class="detail-value">${feedback.screen || 'Non specificata'}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Data:</span>
-              <span class="detail-value">${new Date(feedback.timestamp).toLocaleString('it-IT')}</span>
-            </div>
-          </div>
-          
-          <div style="background-color: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 16px; margin: 20px 0;">
-            <h3 style="margin: 0 0 12px 0; color: #92400e;">🔄 Cosa succede ora?</h3>
-            <ul style="margin: 0; color: #92400e; padding-left: 20px; text-align: left;">
-              <li>Il nostro team analizzerà il tuo feedback entro 24 ore</li>
-              <li>Valuteremo la priorità e la fattibilità dell'implementazione</li>
-              <li>Ti aggiorneremo sullo stato del feedback</li>
-              <li>Se hai fornito la tua email, riceverai notizie sui progressi</li>
-            </ul>
-          </div>
-          
-          <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
-            Hai altre idee o hai notato altri problemi? Non esitare a inviare altro feedback!
-          </p>
         </div>
         
         <div class="footer">
           <p>Urbanova AI - Trasformiamo i tuoi progetti in realtà</p>
-          <p>Feedback ID: #${feedbackId} | ${new Date().toLocaleString('it-IT')}</p>
+          <p>ID Feedback: ${feedbackId}</p>
         </div>
       </div>
     </body>
