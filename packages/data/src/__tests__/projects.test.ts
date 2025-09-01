@@ -343,7 +343,7 @@ describe('Projects Data Service', () => {
   });
 
   describe('createDealFromScraped', () => {
-    it('should create deal data from scraped data', () => {
+    it('should create deal data from scraped data', async () => {
       const userId = 'user-123';
       const scrapedData: Partial<Deal> = {
         id: 'deal-123',
@@ -368,7 +368,7 @@ describe('Projects Data Service', () => {
       expect((dealData as any).metadata.scrapedAt).toBeDefined();
     });
 
-    it('should handle missing scraped data with defaults', () => {
+    it('should handle missing scraped data with defaults', async () => {
       const userId = 'user-123';
       const scrapedData: Partial<Deal> = {
         id: 'deal-123',
@@ -395,7 +395,7 @@ describe('Projects Data Service', () => {
   });
 
   describe('createFeasibilityFromAnalysis', () => {
-    it('should create feasibility data from analysis', () => {
+    it('should create feasibility data from analysis', async () => {
       const dealId = 'deal-123';
       const projectId = 'project-123';
       const userId = 'user-123';
@@ -420,7 +420,7 @@ describe('Projects Data Service', () => {
       expect((feasibilityData as any).sensitivityAnalysis.pessimistic).toBe(12);
     });
 
-    it('should use default values when analysis is missing fields', () => {
+    it('should use default values when analysis is missing fields', async () => {
       const dealId = 'deal-123';
       const projectId = 'project-123';
       const userId = 'user-123';

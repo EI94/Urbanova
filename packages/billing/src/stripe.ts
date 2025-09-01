@@ -456,7 +456,7 @@ export async function getInvoices(customerId: string): Promise<StripeInvoice[]> 
       ...(invoice.invoice_pdf && { invoice_pdf: invoice.invoice_pdf }),
       created: invoice.created,
       ...(invoice.due_date && { due_date: invoice.due_date }),
-      ...(invoice.tax && { tax: invoice.tax }),
+      tax: invoice.tax || 0,
       total_tax_amounts: invoice.total_tax_amounts.map(taxAmount => ({
         amount: taxAmount.amount,
         inclusive: taxAmount.inclusive,
@@ -465,7 +465,7 @@ export async function getInvoices(customerId: string): Promise<StripeInvoice[]> 
           country: (taxAmount.tax_rate as any).country,
         },
       })),
-    }));
+    })) as StripeInvoice[];
   } catch (error) {
     console.error('Error retrieving invoices:', error);
     throw new Error(
