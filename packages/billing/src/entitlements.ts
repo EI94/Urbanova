@@ -168,8 +168,8 @@ export function getUpgradeRecommendation(billingState: BillingState): {
 
   return {
     recommended: suggestedPlan !== undefined,
-    reason,
-    suggestedPlan,
+    ...(reason && { reason }),
+    ...(suggestedPlan && { suggestedPlan }),
     currentUsage: highestUsage?.used || 0,
     currentLimit: highestUsage?.hard || 0,
   };

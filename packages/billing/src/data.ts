@@ -101,7 +101,7 @@ export async function getBillingState(workspaceId: string): Promise<BillingState
       nextBillingDate: new Date(data.nextBillingDate),
       trialEndsAt: data.trialEndsAt ? new Date(data.trialEndsAt) : undefined,
       stripeSubId: data.stripeSubId || 'temp-sub-id',
-    } as BillingState;
+    } as unknown as BillingState;
 
     return zBillingState.parse(billingState);
   } catch (error) {
@@ -151,7 +151,7 @@ export async function listBillingStates(): Promise<BillingState[]> {
         nextBillingDate: new Date(data.nextBillingDate),
         trialEndsAt: data.trialEndsAt ? new Date(data.trialEndsAt) : undefined,
         stripeSubId: data.stripeSubId || 'temp-sub-id',
-      } as BillingState;
+      } as unknown as BillingState;
 
       try {
         billingStates.push(zBillingState.parse(billingState));
@@ -206,7 +206,7 @@ export async function getUsageEvent(eventId: string): Promise<UsageEvent | null>
       ...data,
       timestamp: new Date(data.timestamp),
       action: (data.action || 'unknown') as any, // Cast to ToolAction with fallback
-    } as UsageEvent;
+    } as unknown as UsageEvent;
 
     return zUsageEvent.parse(usageEvent);
   } catch (error) {
@@ -243,7 +243,7 @@ export async function listUsageEventsByWorkspace(
         ...data,
         timestamp: new Date(data.timestamp),
         action: data.action as any, // Cast to ToolAction
-      } as UsageEvent;
+      } as unknown as UsageEvent;
 
       try {
         usageEvents.push(zUsageEvent.parse(usageEvent));
@@ -414,7 +414,7 @@ export async function getPendingUsageEvents(): Promise<UsageEvent[]> {
         ...data,
         timestamp: new Date(data.timestamp),
         action: data.action as any, // Cast to ToolAction
-      } as UsageEvent;
+      } as unknown as UsageEvent;
 
       try {
         events.push(zUsageEvent.parse(event));
