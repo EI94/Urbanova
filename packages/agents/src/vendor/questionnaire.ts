@@ -159,7 +159,7 @@ export class VendorQuestionnaireService {
   ): Promise<{ success: boolean; questionnaire?: VendorQuestionnaire }> {
     try {
       // Validazione risposte - bypass strict type checking for optional fields
-      const validatedAnswers = zVendorAnswers.parse(answers as any);
+      const validatedAnswers = zVendorAnswers.parse(answers as any) as VendorAnswers;
 
       // Recupera questionario
       const questionnaire = await this.getQuestionnaireByToken(token);

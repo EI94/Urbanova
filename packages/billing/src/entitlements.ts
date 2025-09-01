@@ -114,7 +114,7 @@ export function getUsageSummary(billingState: BillingState): Array<{
   for (const [toolAction, limit] of Object.entries(billingState.entitlements.actionsLimits)) {
     const used = billingState.usageMonth[toolAction] || 0;
     const percentage = Math.round((used / limit.hard) * 100);
-    const cost = calculateUsageCost(toolAction.split('.')[0], toolAction as ToolAction, used);
+    const cost = calculateUsageCost(toolAction.split('.')[0] || 'unknown', toolAction as ToolAction, used);
 
     summary.push({
       toolAction,
