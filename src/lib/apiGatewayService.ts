@@ -36,7 +36,7 @@ export class APIGatewayService {
   private requests: Map<string, APIRequest> = new Map();
   private alerts: Map<string, ServiceAlert> = new Map();
   private deployments: Map<string, ServiceDeployment> = new Map();
-  private config: APIGatewayConfig;
+  private config!: APIGatewayConfig;
 
   constructor() {
     this.initializeConfig();
@@ -1190,6 +1190,8 @@ export class APIGatewayService {
 
     for (let i = 0; i < count; i++) {
       const endpoint = endpoints[Math.floor(Math.random() * endpoints.length)];
+      if (!endpoint) continue;
+      
       const isError = Math.random() < 0.1; // 10% error rate
 
       const request: APIRequest = {
@@ -1215,8 +1217,8 @@ export class APIGatewayService {
         timestamp: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000),
         responseTime: Math.floor(Math.random() * 500) + 50,
         statusCode: isError
-          ? statusCodes[Math.floor(Math.random() * 3) + 6]
-          : statusCodes[Math.floor(Math.random() * 2)],
+          ? statusCodes[Math.floor(Math.random() * 3) + 6] || 500
+          : statusCodes[Math.floor(Math.random() * 2)] || 200,
         responseSize: Math.floor(Math.random() * 10000) + 1000,
         responseHeaders: {
           'Content-Type': 'application/json',
@@ -1226,7 +1228,7 @@ export class APIGatewayService {
           type: endpoint.authentication.type,
           successful: !isError || Math.random() > 0.5,
           userId: `user-${Math.floor(Math.random() * 1000)}`,
-          scopes: endpoint.authentication.scopes,
+          scopes: endpoint.authentication.scopes || undefined,
         },
         rateLimitInfo: {
           limit: endpoint.rateLimiting.limit,
@@ -1306,7 +1308,7 @@ export class APIGatewayService {
       if (Math.random() < 0.05) {
         // 5% chance
         const statuses: ServiceStatus[] = ['healthy', 'degraded', 'unhealthy'];
-        service.status = statuses[Math.floor(Math.random() * statuses.length)];
+        service.status = statuses[Math.floor(Math.random() * statuses.length)] || 'healthy';
       }
     });
   }
@@ -1314,7 +1316,10 @@ export class APIGatewayService {
   // Simula deployment
   private simulateDeployment() {
     const services = Array.from(this.microservices.values());
+    if (services.length === 0) return;
+    
     const service = services[Math.floor(Math.random() * services.length)];
+    if (!service) return;
 
     const deployment: ServiceDeployment = {
       id: `deploy-${Date.now()}`,
@@ -1604,7 +1609,7 @@ export class APIGatewayService {
       timeRange: timeRange || {
         start: new Date(Date.now() - 24 * 60 * 60 * 1000),
         end: new Date(),
-        granularity: 'hour',
+        granularity: 'hour' as const,
       },
       overview: {
         totalRequests,
@@ -1809,7 +1814,7 @@ export class APIGatewayService {
     if (values.length === 0) return 0;
     const sorted = values.sort((a, b) => a - b);
     const index = Math.ceil((percentile / 100) * sorted.length) - 1;
-    return sorted[Math.max(0, index)];
+    return sorted[Math.max(0, index)] || 0;
   }
 
   private groupRequestsByTime(requests: APIRequest[]) {
@@ -1842,10 +1847,13 @@ export class APIGatewayService {
       if (!endpointStats[request.endpointId]) {
         endpointStats[request.endpointId] = { requests: 0, totalTime: 0, errors: 0 };
       }
-      endpointStats[request.endpointId].requests++;
-      endpointStats[request.endpointId].totalTime += request.responseTime;
-      if (request.statusCode >= 400) {
-        endpointStats[request.endpointId].errors++;
+      const stats = endpointStats[request.endpointId];
+      if (stats) {
+        stats.requests++;
+        stats.totalTime += request.responseTime;
+        if (request.statusCode >= 400) {
+          stats.errors++;
+        }
       }
     });
 
@@ -1868,9 +1876,12 @@ export class APIGatewayService {
       if (!clientStats[request.clientIP]) {
         clientStats[request.clientIP] = { requests: 0, errors: 0, userAgent: request.userAgent };
       }
-      clientStats[request.clientIP].requests++;
-      if (request.statusCode >= 400) {
-        clientStats[request.clientIP].errors++;
+      const stats = clientStats[request.clientIP];
+      if (stats) {
+        stats.requests++;
+        if (request.statusCode >= 400) {
+          stats.errors++;
+        }
       }
     });
 
@@ -1914,9 +1925,12 @@ export class APIGatewayService {
       if (!endpointStats[request.endpointId]) {
         endpointStats[request.endpointId] = { totalTime: 0, requests: 0, times: [] };
       }
-      endpointStats[request.endpointId].totalTime += request.responseTime;
-      endpointStats[request.endpointId].requests++;
-      endpointStats[request.endpointId].times.push(request.responseTime);
+      const stats = endpointStats[request.endpointId];
+      if (stats) {
+        stats.totalTime += request.responseTime;
+        stats.requests++;
+        stats.times.push(request.responseTime);
+      }
     });
 
     return Object.entries(endpointStats)
@@ -1939,10 +1953,13 @@ export class APIGatewayService {
       if (!serviceStats[request.serviceId]) {
         serviceStats[request.serviceId] = { totalTime: 0, requests: 0, errors: 0 };
       }
-      serviceStats[request.serviceId].totalTime += request.responseTime;
-      serviceStats[request.serviceId].requests++;
-      if (request.statusCode >= 400) {
-        serviceStats[request.serviceId].errors++;
+      const stats = serviceStats[request.serviceId];
+      if (stats) {
+        stats.totalTime += request.responseTime;
+        stats.requests++;
+        if (request.statusCode >= 400) {
+          stats.errors++;
+        }
       }
     });
 
@@ -1982,9 +1999,12 @@ export class APIGatewayService {
       if (!serviceStats[request.serviceId]) {
         serviceStats[request.serviceId] = { total: 0, errors: 0 };
       }
-      serviceStats[request.serviceId].total++;
-      if (request.statusCode >= 400) {
-        serviceStats[request.serviceId].errors++;
+      const stats = serviceStats[request.serviceId];
+      if (stats) {
+        stats.total++;
+        if (request.statusCode >= 400) {
+          stats.errors++;
+        }
       }
     });
 
@@ -2045,12 +2065,15 @@ export class APIGatewayService {
       if (!ipStats[request.clientIP]) {
         ipStats[request.clientIP] = { requests: 0, errors: 0, rateLimitHits: 0 };
       }
-      ipStats[request.clientIP].requests++;
-      if (request.statusCode >= 400) {
-        ipStats[request.clientIP].errors++;
-      }
-      if (request.rateLimitInfo?.exceeded) {
-        ipStats[request.clientIP].rateLimitHits++;
+      const stats = ipStats[request.clientIP];
+      if (stats) {
+        stats.requests++;
+        if (request.statusCode >= 400) {
+          stats.errors++;
+        }
+        if (request.rateLimitInfo?.exceeded) {
+          stats.rateLimitHits++;
+        }
       }
     });
 
@@ -2074,10 +2097,13 @@ export class APIGatewayService {
         if (!endpointStats[request.endpointId]) {
           endpointStats[request.endpointId] = { hits: 0, misses: 0 };
         }
-        if (request.cacheInfo!.hit) {
-          endpointStats[request.endpointId].hits++;
-        } else {
-          endpointStats[request.endpointId].misses++;
+        const stats = endpointStats[request.endpointId];
+        if (stats && request.cacheInfo) {
+          if (request.cacheInfo.hit) {
+            stats.hits++;
+          } else {
+            stats.misses++;
+          }
         }
       });
 

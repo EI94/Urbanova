@@ -1252,6 +1252,8 @@ export class DevOpsService {
 
     for (let i = 0; i < count; i++) {
       const pipeline = pipelines[Math.floor(Math.random() * pipelines.length)];
+      if (!pipeline) continue;
+      
       const isSuccess = Math.random() < 0.85; // 85% success rate
       const status = isSuccess ? 'success' : statuses[Math.floor(Math.random() * statuses.length)];
 
@@ -1260,9 +1262,9 @@ export class DevOpsService {
         pipelineId: pipeline.id,
         pipelineName: pipeline.name,
         number: pipeline.stats.totalRuns + i + 1,
-        status,
+        status: status || 'success',
         trigger: {
-          type: triggers[Math.floor(Math.random() * triggers.length)],
+          type: triggers[Math.floor(Math.random() * triggers.length)] || 'manual',
           commit: {
             hash: Math.random().toString(36).substring(2, 12),
             message: 'Fix: Update API endpoint validation',
@@ -1281,19 +1283,19 @@ export class DevOpsService {
         stages: pipeline.stages.map(stage => ({
           id: stage.id,
           name: stage.name,
-          status: status,
+          status: status || 'success',
           startedAt: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000),
           duration: Math.floor(Math.random() * 600) + 60,
           jobs: stage.jobs.map(job => ({
             id: job.id,
             name: job.name,
-            status: status,
+            status: status || 'success',
             startedAt: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000),
             duration: Math.floor(Math.random() * 300) + 30,
             steps: job.steps.map(step => ({
               id: step.id,
               name: step.name,
-              status: status,
+              status: status || 'success',
               startedAt: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000),
               duration: Math.floor(Math.random() * 120) + 10,
               exitCode: status === 'success' ? 0 : 1,
@@ -1361,7 +1363,7 @@ export class DevOpsService {
           'degraded',
           'unhealthy',
         ];
-        env.health = healths[Math.floor(Math.random() * healths.length)];
+        env.health = healths[Math.floor(Math.random() * healths.length)] || 'unknown';
       }
     });
   }

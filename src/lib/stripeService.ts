@@ -74,7 +74,7 @@ export class StripeService {
         amount: request.amount,
         currency: request.currency,
         status: paymentIntent.status,
-        receipt_url: undefined, // Stripe non fornisce più charges.data
+        receipt_url: '', // Stripe non fornisce più charges.data
       };
     } catch (error) {
       console.error('❌ [StripeService] Errore creazione PaymentIntent:', error);
@@ -126,7 +126,7 @@ export class StripeService {
         amount: paymentIntent.amount / 100, // Converti da centesimi
         currency: paymentIntent.currency.toUpperCase(),
         status: paymentIntent.status,
-        receipt_url: paymentIntent.charges.data[0]?.receipt_url,
+        receipt_url: paymentIntent.charges?.data[0]?.receipt_url || '',
       };
     } catch (error) {
       console.error('❌ [StripeService] Errore recupero PaymentIntent:', error);

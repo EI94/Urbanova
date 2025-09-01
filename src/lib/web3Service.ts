@@ -1172,7 +1172,7 @@ export class Web3Service {
         proposal.userVote = {
           choice,
           votingPower,
-          reason: reason || undefined,
+          reason: reason || '',
           votedAt: new Date(),
         };
 
@@ -1203,6 +1203,8 @@ export class Web3Service {
           submittedAt: new Date(),
           confirmedAt: new Date(),
           isMevProtected: false,
+          usdValueAtTime: 0,
+          currentUsdValue: 0,
         };
 
         this.transactions.set(transaction.id, transaction);

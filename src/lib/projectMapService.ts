@@ -241,7 +241,7 @@ export class ProjectMapService {
         projectStatus: locationData.projectStatus || 'PLANNING',
         budget: {
           estimated: locationData.budget?.estimated || 0,
-          actual: locationData.budget?.actual || 0,
+          actual: 0, // Will be updated when actual costs are known
           currency: locationData.budget?.currency || 'EUR',
         },
         area: {

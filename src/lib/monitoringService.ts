@@ -867,7 +867,7 @@ export class MonitoringService {
     };
 
     const levelMessages = messages[level] || messages.info;
-    return levelMessages[Math.floor(Math.random() * levelMessages.length)];
+    return levelMessages[Math.floor(Math.random() * levelMessages.length)] || 'Log message generated';
   }
 
   // Avvia generazione dati in tempo reale

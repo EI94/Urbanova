@@ -412,6 +412,12 @@ export class SALService {
         to: vendorEmail,
         subject: `Nuovo SAL: ${sal.title}`,
         htmlContent: emailContent,
+        lands: [],
+        summary: {
+          totalFound: 0,
+          averagePrice: 0,
+          bestOpportunities: [],
+        },
       });
 
       console.log('📧 [SAL] Email inviata al vendor:', vendorEmail);
