@@ -359,13 +359,13 @@ describe('Projects Data Service', () => {
         updatedAt: new Date(),
       };
 
-      const dealData = createDealFromScraped(scrapedData, userId);
+      const dealData = await createDealFromScraped(scrapedData, userId);
 
-      expect(dealData.title).toBe('Deal deal-123');
-      expect(dealData.ownerId).toBe(userId);
-      expect(dealData.source).toBe('scraping');
-      expect(dealData.status).toBe('AVAILABLE');
-      expect(dealData.metadata.scrapedAt).toBeDefined();
+      expect((dealData as any).title).toBe('Deal deal-123');
+      expect((dealData as any).ownerId).toBe(userId);
+      expect((dealData as any).source).toBe('scraping');
+      expect((dealData as any).status).toBe('AVAILABLE');
+      expect((dealData as any).metadata.scrapedAt).toBeDefined();
     });
 
     it('should handle missing scraped data with defaults', () => {
@@ -384,13 +384,13 @@ describe('Projects Data Service', () => {
         updatedAt: new Date(),
       };
 
-      const dealData = createDealFromScraped(scrapedData, userId);
+      const dealData = await createDealFromScraped(scrapedData, userId);
 
-      expect(dealData.title).toBe('Deal deal-123');
-      expect(dealData.description).toBe('Deal identificato tramite scraping');
-      expect(dealData.size).toBe(1000);
-      expect(dealData.price).toBe(500000);
-      expect(dealData.category).toBe('RESIDENTIAL');
+      expect((dealData as any).title).toBe('Deal deal-123');
+      expect((dealData as any).description).toBe('Deal identificato tramite scraping');
+      expect((dealData as any).size).toBe(1000);
+      expect((dealData as any).price).toBe(500000);
+      expect((dealData as any).category).toBe('RESIDENTIAL');
     });
   });
 
@@ -409,15 +409,15 @@ describe('Projects Data Service', () => {
         variables: [{ name: 'Prezzo vendita', impact: 6, description: 'Variazione del 6%' }],
       };
 
-      const feasibilityData = createFeasibilityFromAnalysis(dealId, projectId, analysis, userId);
+      const feasibilityData = await createFeasibilityFromAnalysis(dealId, projectId, analysis, userId);
 
-      expect(feasibilityData.dealId).toBe(dealId);
-      expect(feasibilityData.projectId).toBe(projectId);
-      expect(feasibilityData.generatedBy).toBe(userId);
-      expect(feasibilityData.baseCase.roi).toBe(18);
-      expect(feasibilityData.baseCase.paybackYears).toBe(4.5);
-      expect(feasibilityData.sensitivityAnalysis.optimistic).toBe(25);
-      expect(feasibilityData.sensitivityAnalysis.pessimistic).toBe(12);
+      expect((feasibilityData as any).dealId).toBe(dealId);
+      expect((feasibilityData as any).projectId).toBe(projectId);
+      expect((feasibilityData as any).generatedBy).toBe(userId);
+      expect((feasibilityData as any).baseCase.roi).toBe(18);
+      expect((feasibilityData as any).baseCase.paybackYears).toBe(4.5);
+      expect((feasibilityData as any).sensitivityAnalysis.optimistic).toBe(25);
+      expect((feasibilityData as any).sensitivityAnalysis.pessimistic).toBe(12);
     });
 
     it('should use default values when analysis is missing fields', () => {
@@ -426,14 +426,14 @@ describe('Projects Data Service', () => {
       const userId = 'user-123';
       const analysis = {};
 
-      const feasibilityData = createFeasibilityFromAnalysis(dealId, projectId, analysis, userId);
+      const feasibilityData = await createFeasibilityFromAnalysis(dealId, projectId, analysis, userId);
 
-      expect(feasibilityData.baseCase.roi).toBe(15);
-      expect(feasibilityData.baseCase.paybackYears).toBe(5);
-      expect(feasibilityData.sensitivityAnalysis.optimistic).toBe(20);
-      expect(feasibilityData.sensitivityAnalysis.pessimistic).toBe(10);
-      expect(feasibilityData.assumptions).toContain('Prezzo di vendita standard');
-      expect(feasibilityData.recommendations).toContain("Procedere con l'analisi dettagliata");
+      expect((feasibilityData as any).baseCase.roi).toBe(15);
+      expect((feasibilityData as any).baseCase.paybackYears).toBe(5);
+      expect((feasibilityData as any).sensitivityAnalysis.optimistic).toBe(20);
+      expect((feasibilityData as any).sensitivityAnalysis.pessimistic).toBe(10);
+      expect((feasibilityData as any).assumptions).toContain('Prezzo di vendita standard');
+      expect((feasibilityData as any).recommendations).toContain("Procedere con l'analisi dettagliata");
     });
   });
 });
