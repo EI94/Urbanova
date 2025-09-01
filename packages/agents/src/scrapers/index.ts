@@ -133,8 +133,8 @@ export class RealLandScrapingAgentAdapter implements LandScrapingAgent {
       //   email: land.contactInfo?.email || 'info@agenzia.it',
       //   phone: land.contactInfo?.phone || '+39 02 1234567',
       // }, // Not available in Listing type
-      createdAt: land.dateScraped || new Date(),
-      updatedAt: new Date(),
+      // createdAt: land.dateScraped || new Date(), // Not available in Listing type
+      // updatedAt: new Date(), // Not available in Listing type
     };
   }
 

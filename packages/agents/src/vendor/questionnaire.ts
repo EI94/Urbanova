@@ -32,8 +32,7 @@ const getVendorQuestionnaireById = async (id: string) => ({
   status: 'pending' as const,
   createdAt: new Date(),
   expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-  metadata: { sentBy: 'temp', sentAt: new Date(), reminderCount: 0 },
-
+  metadata: { sentBy: 'temp', sentAt: new Date(), reminderCount: 0 }
 });
 const getVendorQuestionnaireByToken = async (token: string) => ({
   id: 'temp-id',
@@ -43,8 +42,7 @@ const getVendorQuestionnaireByToken = async (token: string) => ({
   status: 'pending' as const,
   createdAt: new Date(),
   expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-  metadata: { sentBy: 'temp', sentAt: new Date(), reminderCount: 0 },
-
+  metadata: { sentBy: 'temp', sentAt: new Date(), reminderCount: 0 }
 });
 const updateVendorQuestionnaire = async (id: string, updates: any) => ({
   id,
@@ -55,7 +53,6 @@ const updateVendorQuestionnaire = async (id: string, updates: any) => ({
   createdAt: new Date(),
   expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   metadata: { sentBy: 'temp', sentAt: new Date(), reminderCount: 0 },
-,
   ...updates
 });
 const listVendorQuestionnairesByProject = async (projectId: string) => [];
@@ -162,13 +159,13 @@ export class VendorQuestionnaireService {
   ): Promise<{ success: boolean; questionnaire?: VendorQuestionnaire }> {
     try {
       // Validazione risposte - ensure optional fields are properly handled
-      const sanitizedAnswers = {
+      const sanitizedAnswers: any = {
         ...answers,
         cdu: {
           ...answers.cdu,
-          cduDate: answers.cdu.cduDate || '',
-          cduValidity: answers.cdu.cduValidity || '',
-          cduNotes: answers.cdu.cduNotes || '',
+          ...(answers.cdu.cduDate && { cduDate: answers.cdu.cduDate }),
+          ...(answers.cdu.cduValidity && { cduValidity: answers.cdu.cduValidity }),
+          ...(answers.cdu.cduNotes && { cduNotes: answers.cdu.cduNotes }),
         }
       };
       const validatedAnswers = zVendorAnswers.parse(sanitizedAnswers);

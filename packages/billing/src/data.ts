@@ -22,6 +22,7 @@ const db = {
           timestamp: new Date().toISOString(),
           createdAt: new Date().toISOString(),
           stripeSubId: '',
+          action: 'unknown',
         })
       }),
       update: async (data: any) => console.log(`Updating ${name}/${id}:`, data),
@@ -99,6 +100,7 @@ export async function getBillingState(workspaceId: string): Promise<BillingState
       lastBillingDate: new Date(data.lastBillingDate),
       nextBillingDate: new Date(data.nextBillingDate),
       trialEndsAt: data.trialEndsAt ? new Date(data.trialEndsAt) : undefined,
+      stripeSubId: data.stripeSubId || '',
     };
 
     return zBillingState.parse(billingState);
@@ -148,6 +150,7 @@ export async function listBillingStates(): Promise<BillingState[]> {
         lastBillingDate: new Date(data.lastBillingDate),
         nextBillingDate: new Date(data.nextBillingDate),
         trialEndsAt: data.trialEndsAt ? new Date(data.trialEndsAt) : undefined,
+        stripeSubId: data.stripeSubId || '',
       };
 
       try {
@@ -202,7 +205,7 @@ export async function getUsageEvent(eventId: string): Promise<UsageEvent | null>
     const usageEvent = {
       ...data,
       timestamp: new Date(data.timestamp),
-      action: data.action as any, // Cast to ToolAction
+      action: data.action || 'unknown' as any, // Cast to ToolAction with fallback
     };
 
     return zUsageEvent.parse(usageEvent);
@@ -220,7 +223,7 @@ export async function listUsageEventsByWorkspace(
   endDate?: Date
 ): Promise<UsageEvent[]> {
   try {
-    let query = db.collection('usage_events').where('workspaceId', '==', workspaceId);
+    let query: any = db.collection('usage_events').where('workspaceId', '==', workspaceId);
 
     if (startDate) {
       query = query.where('timestamp', '>=', startDate.toISOString());
