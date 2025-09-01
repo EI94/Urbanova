@@ -61,9 +61,9 @@ export async function createCustomer(email: string, name?: string): Promise<Stri
       address: customer.address
         ? {
             line1: customer.address.line1 || '',
-            line2: customer.address.line2 || undefined,
+            ...(customer.address.line2 && { line2: customer.address.line2 }),
             city: customer.address.city || '',
-            state: customer.address.state || undefined,
+            ...(customer.address.state && { state: customer.address.state }),
             postal_code: customer.address.postal_code || '',
             country: customer.address.country || '',
           }
@@ -101,9 +101,9 @@ export async function getCustomer(customerId: string): Promise<StripeCustomer> {
       address: customer.address
         ? {
             line1: customer.address.line1 || '',
-            line2: customer.address.line2 || undefined,
+            ...(customer.address.line2 && { line2: customer.address.line2 }),
             city: customer.address.city || '',
-            state: customer.address.state || undefined,
+            ...(customer.address.state && { state: customer.address.state }),
             postal_code: customer.address.postal_code || '',
             country: customer.address.country || '',
           }
@@ -134,7 +134,7 @@ export async function updateCustomer(
       email: updates.email,
       name: updates.name,
       phone: updates.phone,
-      address: updates.address,
+      address: updates.address as any,
       tax_exempt: updates.tax_exempt,
     });
 
@@ -201,7 +201,7 @@ export async function createSubscription(
     return {
       id: subscription.id,
       customer: subscription.customer as string,
-      status: subscription.status,
+      status: subscription.status as any,
       current_period_start: subscription.current_period_start,
       current_period_end: subscription.current_period_end,
       trial_start: subscription.trial_start || undefined,
@@ -239,7 +239,7 @@ export async function getSubscription(subscriptionId: string): Promise<StripeSub
     return {
       id: subscription.id,
       customer: subscription.customer as string,
-      status: subscription.status,
+      status: subscription.status as any,
       current_period_start: subscription.current_period_start,
       current_period_end: subscription.current_period_end,
       trial_start: subscription.trial_start || undefined,
@@ -277,7 +277,7 @@ export async function cancelSubscription(subscriptionId: string): Promise<Stripe
     return {
       id: subscription.id,
       customer: subscription.customer as string,
-      status: subscription.status,
+      status: subscription.status as any,
       current_period_start: subscription.current_period_start,
       current_period_end: subscription.current_period_end,
       trial_start: subscription.trial_start || undefined,

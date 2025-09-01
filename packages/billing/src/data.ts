@@ -154,7 +154,7 @@ export async function listBillingStates(): Promise<BillingState[]> {
       } as unknown as BillingState;
 
       try {
-        billingStates.push(zBillingState.parse(billingState));
+        billingStates.push(zBillingState.parse(billingState as any) as BillingState);
       } catch (parseError) {
         console.warn(`Invalid billing state for workspace ${doc.id}:`, parseError);
       }
@@ -246,7 +246,7 @@ export async function listUsageEventsByWorkspace(
       } as unknown as UsageEvent;
 
       try {
-        usageEvents.push(zUsageEvent.parse(usageEvent));
+        usageEvents.push(zUsageEvent.parse(usageEvent as any) as UsageEvent);
       } catch (parseError) {
         console.warn(`Invalid usage event ${doc.id}:`, parseError);
       }
@@ -417,7 +417,7 @@ export async function getPendingUsageEvents(): Promise<UsageEvent[]> {
       } as unknown as UsageEvent;
 
       try {
-        events.push(zUsageEvent.parse(event));
+        events.push(zUsageEvent.parse(event as any) as UsageEvent);
       } catch (parseError) {
         console.warn(`Invalid usage event ${doc.id}:`, parseError);
       }
