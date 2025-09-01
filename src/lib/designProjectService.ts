@@ -132,8 +132,6 @@ export class DesignProjectService {
         },
         timeline: {
           ...projectData.timeline,
-          startDate: undefined,
-          endDate: undefined,
         },
         tags: projectData.tags || [],
         priority: projectData.priority || 'MEDIUM',

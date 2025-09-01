@@ -32,7 +32,7 @@ export class DevOpsService {
   private infrastructures: Map<string, Infrastructure> = new Map();
   private releases: Map<string, Release> = new Map();
   private incidents: Map<string, Incident> = new Map();
-  private configuration: DevOpsConfiguration;
+  private configuration!: DevOpsConfiguration;
 
   constructor() {
     this.initializeConfiguration();
@@ -1043,6 +1043,12 @@ export class DevOpsService {
               resources: {
                 cpu: '1',
                 memory: '2Gi',
+                storage: '10Gi',
+                network: '1Gbps',
+                gpu: '0',
+                database: '1',
+                cache: '1',
+                queue: '1',
               },
               variables: {
                 LOG_LEVEL: 'debug',
@@ -1077,6 +1083,12 @@ export class DevOpsService {
               resources: {
                 cpu: '2',
                 memory: '4Gi',
+                storage: '20Gi',
+                network: '2Gbps',
+                gpu: '0',
+                database: '2',
+                cache: '2',
+                queue: '2',
               },
             },
             approval: {
