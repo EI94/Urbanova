@@ -1,0 +1,115 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '18'
+  PNPM_VERSION: '8'
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript type check
+        run: pnpm typecheck
+        continue-on-error: false
+
+      - name: ESLint check
+        run: pnpm lint
+        continue-on-error: false
+
+      - name: Run tests
+        run: pnpm test -- --ci --coverage --watchAll=false
+        continue-on-error: false
+
+      - name: Build application
+        run: pnpm build
+        continue-on-error: false
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: build-artifacts
+          path: |
+            .next/
+            dist/
+            build/
+          retention-days: 7
+
+  firestore-validate:
+    name: Firestore Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: '8'
+          
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Install Firebase CLI
+        run: pnpm add -g firebase-tools
+        
+      - name: Validate Firestore rules
+        run: firebase firestore:rules:validate
+        
+      - name: Validate Firestore indexes
+        run: firebase firestore:indexes:validate
+        
+      - name: Run migration validation
+        run: pnpm run migrate:validate
+        
+      - name: Success
+        run: |
+          echo "🎉 Firestore validation completata con successo!"
+          echo "✅ Regole validate"
+          echo "✅ Indici validati"
+          echo "✅ Migrazione validata"
