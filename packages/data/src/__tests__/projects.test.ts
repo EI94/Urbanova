@@ -6,7 +6,31 @@ import {
   createDealFromScraped,
   createFeasibilityFromAnalysis,
 } from '../projects';
-import type { Deal, FeasibilityResult } from '@urbanova/types';
+// Define types locally since they're not exported from @urbanova/types
+type Deal = {
+  id: string;
+  projectId: string;
+  status: string;
+  type: string;
+  value: number;
+  currency: string;
+  parties: any[];
+  documents: any[];
+  milestones: any[];
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+type FeasibilityResult = {
+  id: string;
+  input: any;
+  analysis: any;
+  recommendations: any[];
+  riskAssessment: any;
+  roi: any;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 // Mock data
 const mockDeal: Deal = {
@@ -191,9 +215,9 @@ describe('Projects Data Service', () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.status).toBe('PLANNING');
-        expect(result.data.priority).toBe('MEDIUM');
-        expect(result.data.team).toEqual([]);
-        expect(result.data.tags).toEqual([]);
+        expect((result.data as any).priority).toBe('MEDIUM');
+        expect((result.data as any).team).toEqual([]);
+        expect((result.data as any).tags).toEqual([]);
       }
     });
   });
@@ -299,22 +323,22 @@ describe('Projects Data Service', () => {
       const userId = 'user-123';
       const projectData = createProjectFromDeal(mockDeal, mockFeasibility, userId);
 
-      expect(projectData.name).toContain('Progetto');
-      expect(projectData.category).toBe('RESIDENTIAL');
-      expect(projectData.ownerId).toBe(userId);
-      expect(projectData.team).toContain(userId);
-      expect(projectData.tags).toContain('deal-generated');
-      expect(projectData.metadata.dealId).toBe(mockDeal.id);
-      expect(projectData.metadata.feasibilityId).toBe(mockFeasibility.id);
+      expect((projectData as any).name).toContain('Progetto');
+      expect((projectData as any).category).toBe('RESIDENTIAL');
+      expect((projectData as any).ownerId).toBe(userId);
+      expect((projectData as any).team).toContain(userId);
+      expect((projectData as any).tags).toContain('deal-generated');
+      expect((projectData as any).metadata.dealId).toBe(mockDeal.id);
+      expect((projectData as any).metadata.feasibilityId).toBe(mockFeasibility.id);
     });
 
     it('should set default values correctly', () => {
       const userId = 'user-123';
       const projectData = createProjectFromDeal(mockDeal, mockFeasibility, userId);
 
-      expect(projectData.status).toBe('PLANNING');
-      expect(projectData.priority).toBe('MEDIUM');
-      expect(projectData.startDate).toBeInstanceOf(Date);
+      expect((projectData as any).status).toBe('PLANNING');
+      expect((projectData as any).priority).toBe('MEDIUM');
+      expect((projectData as any).startDate).toBeInstanceOf(Date);
     });
   });
 

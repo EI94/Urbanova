@@ -372,7 +372,7 @@ export async function createCustomerPortalSession(
       id: session.id,
       url: session.url || '',
       customer: session.customer || '',
-      return_url: session.return_url,
+      return_url: session.return_url || '',
     };
   } catch (error) {
     console.error('Error creating customer portal session:', error);
@@ -452,10 +452,10 @@ export async function getInvoices(customerId: string): Promise<StripeInvoice[]> 
       amount_due: invoice.amount_due,
       currency: invoice.currency,
       status: invoice.status as any,
-      hosted_invoice_url: invoice.hosted_invoice_url || undefined,
-      invoice_pdf: invoice.invoice_pdf || undefined,
+      ...(invoice.hosted_invoice_url && { hosted_invoice_url: invoice.hosted_invoice_url }),
+      ...(invoice.invoice_pdf && { invoice_pdf: invoice.invoice_pdf }),
       created: invoice.created,
-      due_date: invoice.due_date || undefined,
+      ...(invoice.due_date && { due_date: invoice.due_date }),
       tax: invoice.tax,
       total_tax_amounts: invoice.total_tax_amounts.map(taxAmount => ({
         amount: taxAmount.amount,
