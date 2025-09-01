@@ -129,7 +129,7 @@ export default function IntelligentVersioning({
       });
 
       setShowVersionForm(false);
-      toast.success(`Versione ${nextVersionNumber} creata con successo`);
+              toast(`Versione ${nextVersionNumber} creata con successo`, { icon: '✅' });
 
       if (onVersionCreate) {
         const newVersion = { ...versionData, id: versionId } as DesignVersion;
@@ -137,7 +137,7 @@ export default function IntelligentVersioning({
       }
     } catch (error) {
       console.error('Error creating version:', error);
-      toast.error('Errore nella creazione della versione');
+              toast('Errore nella creazione della versione', { icon: '❌' });
     } finally {
       setIsLoading(false);
     }
@@ -148,10 +148,10 @@ export default function IntelligentVersioning({
 
     try {
       await collaborationService.approveVersion(versionId, user.uid);
-      toast.success('Versione approvata');
+              toast('Versione approvata', { icon: '✅' });
     } catch (error) {
       console.error('Error approving version:', error);
-      toast.error("Errore nell'approvazione della versione");
+              toast("Errore nell'approvazione della versione", { icon: '❌' });
     }
   };
 
@@ -160,10 +160,10 @@ export default function IntelligentVersioning({
 
     try {
       await collaborationService.rejectVersion(versionId, rejectionReason);
-      toast.success('Versione rifiutata');
+              toast('Versione rifiutata', { icon: '✅' });
     } catch (error) {
       console.error('Error rejecting version:', error);
-      toast.error('Errore nel rifiuto della versione');
+              toast('Errore nel rifiuto della versione', { icon: '❌' });
     }
   };
 

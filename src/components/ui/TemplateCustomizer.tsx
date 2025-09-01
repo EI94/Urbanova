@@ -250,8 +250,9 @@ export default function TemplateCustomizer({
     setActiveTab('summary');
 
     // Mostra notifica di successo
-    toast.success(
-      `Ottimizzazioni AI applicate! ROI migliorato da ${optimization.originalROI}% a ${optimization.optimizedROI}%`
+    toast(
+      `Ottimizzazioni AI applicate! ROI migliorato da ${optimization.originalROI}% a ${optimization.optimizedROI}%`,
+      { icon: '✅' }
     );
   };
 
@@ -272,7 +273,7 @@ export default function TemplateCustomizer({
     }
 
     // Mostra notifica di successo
-    toast.success(`Analisi terreno completata! Fattibilità: ${analysis.analysis.suitability}`);
+    toast(`Analisi terreno completata! Fattibilità: ${analysis.analysis.suitability}`, { icon: '✅' });
   };
 
   const nextStep = () => {

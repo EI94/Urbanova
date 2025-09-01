@@ -77,14 +77,14 @@ export default function FeasibilityReportGenerator({
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
 
-        toast.success('Report generato con successo! 🎉');
+        toast('Report generato con successo! 🎉', { icon: '🎉' });
         onGenerateReport();
       } else {
         throw new Error('Errore nella generazione del report');
       }
     } catch (error) {
       console.error('Errore generazione report:', error);
-      toast.error('Errore nella generazione del report');
+              toast('Errore nella generazione del report', { icon: '❌' });
     } finally {
       setIsGenerating(false);
     }
@@ -332,7 +332,7 @@ export default function FeasibilityReportGenerator({
         reportTitle={analysis.title}
         reportUrl={`${window.location.origin}/dashboard/feasibility-analysis/${analysis.id}`}
         onShareSuccess={() => {
-          toast.success('Report condiviso con successo! 📧✨');
+          toast('Report condiviso con successo! 📧✨', { icon: '📧✨' });
         }}
       />
     </Card>
