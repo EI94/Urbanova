@@ -56,8 +56,8 @@ export async function createCustomer(email: string, name?: string): Promise<Stri
     return {
       id: customer.id,
       email: customer.email!,
-      name: customer.name || undefined,
-      phone: customer.phone || undefined,
+      ...(customer.name && { name: customer.name }),
+      ...(customer.phone && { phone: customer.phone }),
       address: customer.address
         ? {
             line1: customer.address.line1 || '',
@@ -76,7 +76,7 @@ export async function createCustomer(email: string, name?: string): Promise<Stri
           status: taxId.verification?.status as any || 'unverified',
         },
       })),
-    };
+    } as StripeCustomer;
   } catch (error) {
     console.error('Error creating Stripe customer:', error);
     throw new Error(
@@ -96,8 +96,8 @@ export async function getCustomer(customerId: string): Promise<StripeCustomer> {
     return {
       id: customer.id,
       email: customer.email!,
-      name: customer.name || undefined,
-      phone: customer.phone || undefined,
+      ...(customer.name && { name: customer.name }),
+      ...(customer.phone && { phone: customer.phone }),
       address: customer.address
         ? {
             line1: customer.address.line1 || '',
@@ -116,7 +116,7 @@ export async function getCustomer(customerId: string): Promise<StripeCustomer> {
           status: taxId.verification?.status as any || 'unverified',
         },
       })),
-    };
+    } as StripeCustomer;
   } catch (error) {
     console.error('Error retrieving Stripe customer:', error);
     throw new Error(
@@ -131,11 +131,11 @@ export async function updateCustomer(
 ): Promise<StripeCustomer> {
   try {
     const customer = await stripe.customers.update(customerId, {
-      email: updates.email,
-      name: updates.name,
-      phone: updates.phone,
-      address: updates.address as any,
-      tax_exempt: updates.tax_exempt,
+      ...(updates.email && { email: updates.email }),
+      ...(updates.name && { name: updates.name }),
+      ...(updates.phone && { phone: updates.phone }),
+      ...(updates.address && { address: updates.address as any }),
+      ...(updates.tax_exempt && { tax_exempt: updates.tax_exempt }),
     });
 
     return {
@@ -213,14 +213,14 @@ export async function createSubscription(
             id: item.price.id,
             unit_amount: item.price.unit_amount!,
             currency: item.price.currency,
-            recurring: item.price.recurring
-              ? {
-                  interval: item.price.recurring.interval,
-                  usage_type: item.price.recurring.usage_type,
-                }
-              : undefined,
+                      ...(item.price.recurring && {
+            recurring: {
+              interval: item.price.recurring.interval as any,
+              usage_type: item.price.recurring.usage_type as any,
+            }
+          }),
           },
-          quantity: item.quantity || undefined,
+          ...(item.quantity && { quantity: item.quantity }),
         })),
       },
     };
@@ -251,14 +251,14 @@ export async function getSubscription(subscriptionId: string): Promise<StripeSub
             id: item.price.id,
             unit_amount: item.price.unit_amount!,
             currency: item.price.currency,
-            recurring: item.price.recurring
-              ? {
-                  interval: item.price.recurring.interval,
-                  usage_type: item.price.recurring.usage_type,
-                }
-              : undefined,
+                      ...(item.price.recurring && {
+            recurring: {
+              interval: item.price.recurring.interval as any,
+              usage_type: item.price.recurring.usage_type as any,
+            }
+          }),
           },
-          quantity: item.quantity || undefined,
+          ...(item.quantity && { quantity: item.quantity }),
         })),
       },
     };
@@ -289,14 +289,14 @@ export async function cancelSubscription(subscriptionId: string): Promise<Stripe
             id: item.price.id,
             unit_amount: item.price.unit_amount!,
             currency: item.price.currency,
-            recurring: item.price.recurring
-              ? {
-                  interval: item.price.recurring.interval,
-                  usage_type: item.price.recurring.usage_type,
-                }
-              : undefined,
+                      ...(item.price.recurring && {
+            recurring: {
+              interval: item.price.recurring.interval as any,
+              usage_type: item.price.recurring.usage_type as any,
+            }
+          }),
           },
-          quantity: item.quantity || undefined,
+          ...(item.quantity && { quantity: item.quantity }),
         })),
       },
     };
