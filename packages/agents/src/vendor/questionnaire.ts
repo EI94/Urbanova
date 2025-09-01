@@ -170,7 +170,7 @@ export class VendorQuestionnaireService {
       // Aggiorna questionario
       const updatedQuestionnaire: VendorQuestionnaire = {
         ...questionnaire,
-        status: 'completed',
+        status: 'completed' as const,
         completedAt: new Date(),
         answers: validatedAnswers,
       };
@@ -199,7 +199,7 @@ export class VendorQuestionnaireService {
     if (questionnaire && questionnaire.status === 'pending') {
       await updateVendorQuestionnaire(questionnaire.id, {
         ...questionnaire,
-        status: 'expired',
+        status: 'expired' as const,
       });
     }
   }

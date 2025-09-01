@@ -23,6 +23,7 @@ const db = {
           createdAt: new Date().toISOString(),
         })
       }),
+      update: async (data: any) => console.log(`Updating ${name}/${id}:`, data),
     }),
     get: async () => ({ 
       forEach: (callback: any) => {
@@ -39,6 +40,12 @@ const db = {
       } 
     }),
     where: (field: string, op: string, value: any) => ({
+      get: async () => ({ forEach: (callback: any) => {} }),
+      orderBy: (field: string, direction: string) => ({
+        get: async () => ({ forEach: (callback: any) => {} })
+      })
+    }),
+    orderBy: (field: string, direction: string) => ({
       get: async () => ({ forEach: (callback: any) => {} })
     }),
   }),
@@ -293,7 +300,7 @@ export async function getMonthlyUsage(
     const usage: Record<string, number> = {};
 
     usageEvents.forEach(event => {
-      const key = `${event.toolId}.${event.action}`;
+      const key = `${event.toolId}.${event.action as string}`;
       usage[key] = (usage[key] || 0) + event.qty;
     });
 
@@ -356,6 +363,7 @@ export async function createDefaultBillingState(
     lastBillingDate: now,
     nextBillingDate: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000), // 30 days
     status: 'trialing',
+    stripeSubId: '', // Will be set when subscription is created
   };
 
   await persistBillingState(billingState);
@@ -387,7 +395,7 @@ export async function getPendingUsageEvents(): Promise<UsageEvent[]> {
 
     const events: UsageEvent[] = [];
 
-    snapshot.forEach(doc => {
+    snapshot.forEach((doc: any) => {
       const data = doc.data();
       const event = {
         ...data,

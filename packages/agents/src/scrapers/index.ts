@@ -126,7 +126,7 @@ export class RealLandScrapingAgentAdapter implements LandScrapingAgent {
       description: land.description,
       price: land.price,
       location: `${land.location}, Milano, Lombardia, Italia`,
-      features: land.features,
+      // features: land.features, // Not available in Listing type
       images: land.images || [],
       contactInfo: {
         name: land.contactInfo?.agent || 'Agenzia Immobiliare',

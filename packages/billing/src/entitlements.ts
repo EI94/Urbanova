@@ -49,7 +49,7 @@ export async function checkEntitlement(
 
     // Get current usage for this action
     const currentUsage = billingState.usageMonth[`${toolId}.${action}`] || 0;
-    const limit = billingState.entitlements.actionsLimits[`${toolId}.${action}`];
+    const limit = (billingState.entitlements.actionsLimits as any)[`${toolId}.${action}`];
 
     if (!limit) {
       // No limit defined for this action, allow it
@@ -158,10 +158,10 @@ export function getUpgradeRecommendation(billingState: BillingState): {
   let suggestedPlan: string | undefined;
   let reason: string | undefined;
 
-  if (currentPlan === 'starter' && highestUsage.percentage >= 90) {
+  if (currentPlan === 'starter' && highestUsage && highestUsage.percentage >= 90) {
     suggestedPlan = 'pro';
     reason = `Stai utilizzando il ${highestUsage.percentage}% del limite per ${highestUsage.toolAction}`;
-  } else if (currentPlan === 'pro' && highestUsage.percentage >= 90) {
+  } else if (currentPlan === 'pro' && highestUsage && highestUsage.percentage >= 90) {
     suggestedPlan = 'business';
     reason = `Stai utilizzando il ${highestUsage.percentage}% del limite per ${highestUsage.toolAction}`;
   }
@@ -170,8 +170,8 @@ export function getUpgradeRecommendation(billingState: BillingState): {
     recommended: suggestedPlan !== undefined,
     reason,
     suggestedPlan,
-    currentUsage: highestUsage.used,
-    currentLimit: highestUsage.hard,
+    currentUsage: highestUsage?.used || 0,
+    currentLimit: highestUsage?.hard || 0,
   };
 }
 
