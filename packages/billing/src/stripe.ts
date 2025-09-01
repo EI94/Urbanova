@@ -60,20 +60,20 @@ export async function createCustomer(email: string, name?: string): Promise<Stri
       phone: customer.phone || undefined,
       address: customer.address
         ? {
-            line1: customer.address.line1,
-            line2: customer.address.line2,
-            city: customer.address.city,
-            state: customer.address.state,
-            postal_code: customer.address.postal_code,
-            country: customer.address.country,
+            line1: customer.address.line1 || '',
+            line2: customer.address.line2 || undefined,
+            city: customer.address.city || '',
+            state: customer.address.state || undefined,
+            postal_code: customer.address.postal_code || '',
+            country: customer.address.country || '',
           }
         : undefined,
-      tax_exempt: customer.tax_exempt,
+      tax_exempt: customer.tax_exempt as any,
       tax_ids: customer.tax_ids?.data.map(taxId => ({
-        type: taxId.type,
+        type: taxId.type as any,
         value: taxId.value,
         verification: {
-          status: taxId.verification.status,
+          status: taxId.verification?.status as any || 'unverified',
         },
       })),
     };
@@ -100,20 +100,20 @@ export async function getCustomer(customerId: string): Promise<StripeCustomer> {
       phone: customer.phone || undefined,
       address: customer.address
         ? {
-            line1: customer.address.line1,
-            line2: customer.address.line2,
-            city: customer.address.city,
-            state: customer.address.state,
-            postal_code: customer.address.postal_code,
-            country: customer.address.country,
+            line1: customer.address.line1 || '',
+            line2: customer.address.line2 || undefined,
+            city: customer.address.city || '',
+            state: customer.address.state || undefined,
+            postal_code: customer.address.postal_code || '',
+            country: customer.address.country || '',
           }
         : undefined,
-      tax_exempt: customer.tax_exempt,
+      tax_exempt: customer.tax_exempt as any,
       tax_ids: customer.tax_ids?.data.map(taxId => ({
-        type: taxId.type,
+        type: taxId.type as any,
         value: taxId.value,
         verification: {
-          status: taxId.verification.status,
+          status: taxId.verification?.status as any || 'unverified',
         },
       })),
     };

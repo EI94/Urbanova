@@ -103,7 +103,7 @@ export async function getBillingState(workspaceId: string): Promise<BillingState
       stripeSubId: data.stripeSubId || 'temp-sub-id',
     } as unknown as BillingState;
 
-    return zBillingState.parse(billingState as any);
+    return zBillingState.parse(billingState as any) as BillingState;
   } catch (error) {
     console.error('Error retrieving billing state:', error);
     throw new Error(
@@ -208,7 +208,7 @@ export async function getUsageEvent(eventId: string): Promise<UsageEvent | null>
       action: (data.action || 'unknown') as any, // Cast to ToolAction with fallback
     } as unknown as UsageEvent;
 
-    return zUsageEvent.parse(usageEvent as any);
+    return zUsageEvent.parse(usageEvent as any) as UsageEvent;
   } catch (error) {
     console.error('Error retrieving usage event:', error);
     throw new Error(
