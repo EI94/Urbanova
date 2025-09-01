@@ -47,7 +47,7 @@ export async function createCustomer(email: string, name?: string): Promise<Stri
   try {
     const customer = await stripe.customers.create({
       email,
-      name,
+      ...(name && { name }),
       metadata: {
         source: 'urbanova_billing',
       },
