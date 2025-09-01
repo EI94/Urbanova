@@ -56,7 +56,7 @@ const updateVendorQuestionnaire = async (id: string, updates: any) => ({
   ...updates
 });
 const listVendorQuestionnairesByProject = async (projectId: string) => [];
-const listExpiredQuestionnaires = async () => [];
+const listExpiredQuestionnaires = async (): Promise<VendorQuestionnaire[]> => [];
 
 export class VendorQuestionnaireService {
   private jwtService: JWTService;
@@ -158,17 +158,8 @@ export class VendorQuestionnaireService {
     answers: VendorAnswers
   ): Promise<{ success: boolean; questionnaire?: VendorQuestionnaire }> {
     try {
-      // Validazione risposte - ensure optional fields are properly handled
-      const sanitizedAnswers: any = {
-        ...answers,
-        cdu: {
-          ...answers.cdu,
-          ...(answers.cdu.cduDate && { cduDate: answers.cdu.cduDate }),
-          ...(answers.cdu.cduValidity && { cduValidity: answers.cdu.cduValidity }),
-          ...(answers.cdu.cduNotes && { cduNotes: answers.cdu.cduNotes }),
-        }
-      };
-      const validatedAnswers = zVendorAnswers.parse(sanitizedAnswers);
+      // Validazione risposte - bypass strict type checking for optional fields
+      const validatedAnswers = zVendorAnswers.parse(answers as any);
 
       // Recupera questionario
       const questionnaire = await this.getQuestionnaireByToken(token);

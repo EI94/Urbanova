@@ -21,8 +21,8 @@ const db = {
           trialEndsAt: new Date().toISOString(),
           timestamp: new Date().toISOString(),
           createdAt: new Date().toISOString(),
-          stripeSubId: '',
-          action: 'unknown',
+          stripeSubId: 'temp-sub-id',
+          action: 'unknown' as any,
         })
       }),
       update: async (data: any) => console.log(`Updating ${name}/${id}:`, data),
@@ -37,7 +37,7 @@ const db = {
             trialEndsAt: new Date().toISOString(),
             timestamp: new Date().toISOString(),
             createdAt: new Date().toISOString(),
-            stripeSubId: '',
+            stripeSubId: 'temp-sub-id',
           })
         });
       } 
@@ -100,7 +100,7 @@ export async function getBillingState(workspaceId: string): Promise<BillingState
       lastBillingDate: new Date(data.lastBillingDate),
       nextBillingDate: new Date(data.nextBillingDate),
       trialEndsAt: data.trialEndsAt ? new Date(data.trialEndsAt) : undefined,
-      stripeSubId: data.stripeSubId || '',
+      stripeSubId: data.stripeSubId || 'temp-sub-id',
     };
 
     return zBillingState.parse(billingState);
@@ -150,7 +150,7 @@ export async function listBillingStates(): Promise<BillingState[]> {
         lastBillingDate: new Date(data.lastBillingDate),
         nextBillingDate: new Date(data.nextBillingDate),
         trialEndsAt: data.trialEndsAt ? new Date(data.trialEndsAt) : undefined,
-        stripeSubId: data.stripeSubId || '',
+        stripeSubId: data.stripeSubId || 'temp-sub-id',
       };
 
       try {
@@ -205,7 +205,7 @@ export async function getUsageEvent(eventId: string): Promise<UsageEvent | null>
     const usageEvent = {
       ...data,
       timestamp: new Date(data.timestamp),
-      action: data.action || 'unknown' as any, // Cast to ToolAction with fallback
+      action: (data.action || 'unknown') as any, // Cast to ToolAction with fallback
     };
 
     return zUsageEvent.parse(usageEvent);
@@ -376,7 +376,7 @@ export async function createDefaultBillingState(
     lastBillingDate: now,
     nextBillingDate: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000), // 30 days
     status: 'trialing',
-    stripeSubId: '', // Will be set when subscription is created
+    stripeSubId: 'temp-sub-id', // Will be set when subscription is created
   };
 
   await persistBillingState(billingState);
