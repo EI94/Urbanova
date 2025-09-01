@@ -1,7 +1,7 @@
 {
-  "name": "@urbanova/messaging",
+  "name": "@urbanova/storage",
   "version": "1.0.0",
-  "description": "Messaging and communication services",
+  "description": "Storage and file management types",
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {

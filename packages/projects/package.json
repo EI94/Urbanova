@@ -1,7 +1,7 @@
 {
-  "name": "@urbanova/messaging",
+  "name": "@urbanova/projects",
   "version": "1.0.0",
-  "description": "Messaging and communication services",
+  "description": "Project management types and services",
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {
@@ -10,7 +10,7 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@urbanova/types": "workspace:*"
+    "@urbanova/data": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

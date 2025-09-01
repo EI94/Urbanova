@@ -104,18 +104,39 @@ importers:
       '@urbanova/agents':
         specifier: file:packages/agents
         version: link:packages/agents
+      '@urbanova/compliance':
+        specifier: file:packages/compliance
+        version: file:packages/compliance
       '@urbanova/data':
         specifier: file:packages/data
         version: link:packages/data
       '@urbanova/infra':
         specifier: file:packages/infra
         version: link:packages/infra
+      '@urbanova/interactive':
+        specifier: file:packages/interactive
+        version: file:packages/interactive
+      '@urbanova/leads':
+        specifier: file:packages/leads
+        version: file:packages/leads
+      '@urbanova/messaging':
+        specifier: file:packages/messaging
+        version: file:packages/messaging
       '@urbanova/os':
         specifier: file:packages/os
         version: link:packages/os
       '@urbanova/pdf':
         specifier: file:packages/pdf
         version: link:packages/pdf
+      '@urbanova/projects':
+        specifier: file:packages/projects
+        version: file:packages/projects
+      '@urbanova/storage':
+        specifier: file:packages/storage
+        version: file:packages/storage
+      '@urbanova/tools':
+        specifier: file:packages/tools
+        version: link:packages/tools
       '@urbanova/types':
         specifier: file:packages/types
         version: link:packages/types
@@ -360,6 +381,19 @@ importers:
         specifier: ^5.0.0
         version: 5.8.2
 
+  packages/compliance:
+    dependencies:
+      '@urbanova/types':
+        specifier: workspace:*
+        version: link:../types
+    devDependencies:
+      jest:
+        specifier: ^29.0.0
+        version: 29.7.0(@types/node@22.18.0)
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.2
+
   packages/data:
     dependencies:
       '@urbanova/types':
@@ -394,6 +428,22 @@ importers:
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@20.19.11)
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.2
+
+  packages/interactive:
+    dependencies:
+      '@urbanova/types':
+        specifier: workspace:*
+        version: link:../types
+      zod:
+        specifier: ^3.22.0
+        version: 3.25.76
+    devDependencies:
+      jest:
+        specifier: ^29.0.0
+        version: 29.7.0(@types/node@22.18.0)
       typescript:
         specifier: ^5.0.0
         version: 5.8.2
@@ -460,6 +510,32 @@ importers:
     devDependencies:
       typescript:
         specifier: 5.8.2
+        version: 5.8.2
+
+  packages/projects:
+    dependencies:
+      '@urbanova/data':
+        specifier: workspace:*
+        version: link:../data
+    devDependencies:
+      jest:
+        specifier: ^29.0.0
+        version: 29.7.0(@types/node@22.18.0)
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.2
+
+  packages/storage:
+    dependencies:
+      '@urbanova/types':
+        specifier: workspace:*
+        version: link:../types
+    devDependencies:
+      jest:
+        specifier: ^29.0.0
+        version: 29.7.0(@types/node@22.18.0)
+      typescript:
+        specifier: ^5.0.0
         version: 5.8.2
 
   packages/toolos:
@@ -3393,6 +3469,24 @@ packages:
     resolution: {integrity: sha512-lrW200hZdbfRtztbygyaq/6jP6AKE8qQN2KvPcJ+x7wiD038YtnYtZ82IMNJ69GJibV7bwL3y9FgK+5w/pYt6g==}
     cpu: [x64]
     os: [win32]
+
+  '@urbanova/compliance@file:packages/compliance':
+    resolution: {directory: packages/compliance, type: directory}
+
+  '@urbanova/interactive@file:packages/interactive':
+    resolution: {directory: packages/interactive, type: directory}
+
+  '@urbanova/leads@file:packages/leads':
+    resolution: {directory: packages/leads, type: directory}
+
+  '@urbanova/messaging@file:packages/messaging':
+    resolution: {directory: packages/messaging, type: directory}
+
+  '@urbanova/projects@file:packages/projects':
+    resolution: {directory: packages/projects, type: directory}
+
+  '@urbanova/storage@file:packages/storage':
+    resolution: {directory: packages/storage, type: directory}
 
   abab@2.0.6:
     resolution: {integrity: sha512-j2afSsaIENvHZN2B8GOpF566vZ5WVk5opAiMTvWgaQT8DkbOqsTfvNAvHoRGU2zzP8cPoqys+xHTRDWW8L+/BA==}
@@ -10603,6 +10697,32 @@ snapshots:
 
   '@unrs/resolver-binding-win32-x64-msvc@1.11.1':
     optional: true
+
+  '@urbanova/compliance@file:packages/compliance':
+    dependencies:
+      '@urbanova/types': link:packages/types
+
+  '@urbanova/interactive@file:packages/interactive':
+    dependencies:
+      '@urbanova/types': link:packages/types
+      zod: 3.25.76
+
+  '@urbanova/leads@file:packages/leads':
+    dependencies:
+      '@urbanova/data': link:packages/data
+      '@urbanova/types': link:packages/types
+
+  '@urbanova/messaging@file:packages/messaging':
+    dependencies:
+      '@urbanova/types': link:packages/types
+
+  '@urbanova/projects@file:packages/projects':
+    dependencies:
+      '@urbanova/data': link:packages/data
+
+  '@urbanova/storage@file:packages/storage':
+    dependencies:
+      '@urbanova/types': link:packages/types
 
   abab@2.0.6: {}
 

@@ -81,6 +81,7 @@ declare module '@/components/layout/DashboardLayout' {
   import { ReactNode } from 'react';
   interface DashboardLayoutProps {
     children: ReactNode;
+    title?: string;
   }
   export default function DashboardLayout(props: DashboardLayoutProps): JSX.Element;
 }
@@ -169,6 +170,24 @@ declare module '@/components/icons' {
   export function ThumbsDownIcon(props?: IconProps): JSX.Element;
   export function ReplyIcon(props?: IconProps): JSX.Element;
   export function FlagIcon(props?: IconProps): JSX.Element;
+  export function BellIcon(props?: IconProps): JSX.Element;
+  export function UserIcon(props?: IconProps): JSX.Element;
+  export function ProjectIcon(props?: IconProps): JSX.Element;
+  export function RocketIcon(props?: IconProps): JSX.Element;
+  export function XIcon(props?: IconProps): JSX.Element;
+  export function UploadIcon(props?: IconProps): JSX.Element;
+  export function ShieldIcon(props?: IconProps): JSX.Element;
+  export function FolderIcon(props?: IconProps): JSX.Element;
+  export function VideoIcon(props?: IconProps): JSX.Element;
+  export function CheckIcon(props?: IconProps): JSX.Element;
+  export function RefreshIcon(props?: IconProps): JSX.Element;
+  export function ChevronUpIcon(props?: IconProps): JSX.Element;
+  export function ChevronDownIcon(props?: IconProps): JSX.Element;
+  export function TagIcon(props?: IconProps): JSX.Element;
+  export function CrownIcon(props?: IconProps): JSX.Element;
+  export function PlayIcon(props?: IconProps): JSX.Element;
+  export function StopIcon(props?: IconProps): JSX.Element;
+  export function LockIcon(props?: IconProps): JSX.Element;
 }
 
 // Dichiarazioni per servizi
@@ -202,6 +221,15 @@ declare module '@/contexts/AuthContext' {
 declare module 'react-hot-toast' {
   export function toast(message: string, options?: any): void;
   export function Toaster(props?: any): JSX.Element;
+  
+  // Extend toast with success, error, etc.
+  export const toast: {
+    (message: string, options?: any): void;
+    success: (message: string, options?: any) => void;
+    error: (message: string, options?: any) => void;
+    loading: (message: string, options?: any) => void;
+    dismiss: (toastId?: string) => void;
+  };
 }
 
 // Dichiarazioni per chart.js

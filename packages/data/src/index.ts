@@ -5,3 +5,4 @@ export * from './deals';
 export * from './comps';
 export * from './vendor';
 export * from './market';
+export * from './templates';

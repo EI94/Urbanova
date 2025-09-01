@@ -106,3 +106,28 @@ export class TemplateService {
     return `Template ${templateId} rendered with variables`;
   }
 }
+
+// Message service
+export class MessageService {
+  async sendMessage(message: Partial<Message>): Promise<Message> {
+    // Mock implementation
+    return {
+      id: `msg_${Date.now()}`,
+      conversationId: message.conversationId || '',
+      content: message.content || '',
+      sender: message.sender || 'agent',
+      timestamp: new Date(),
+      metadata: message.metadata
+    };
+  }
+
+  async getMessage(id: string): Promise<Message | null> {
+    // Mock implementation
+    return null;
+  }
+
+  async updateMessage(id: string, updates: Partial<Message>): Promise<Message | null> {
+    // Mock implementation
+    return null;
+  }
+}

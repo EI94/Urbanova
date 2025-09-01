@@ -1,11 +1,86 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { LeadService } from '@urbanova/leads';
-import { ConversationService } from '@urbanova/leads';
-import { MessageService } from '@urbanova/leads';
-import { ProjectService } from '@urbanova/projects';
-import { GCSService } from '@urbanova/storage';
-import { AuditService } from '@urbanova/compliance';
+// Mock services for now - these will be implemented properly later
+class LeadService {
+  async createLead(data: any): Promise<any> {
+    return {
+      id: `lead_${Date.now()}`,
+      source: data.source,
+      status: 'new',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      priority: 'medium',
+      slaStatus: 'on_track',
+      tags: [],
+      ...data
+    };
+  }
+}
+
+class ConversationService {
+  async createConversation(data: any): Promise<any> {
+    return {
+      id: `conv_${Date.now()}`,
+      leadId: data.leadId,
+      channel: data.channel || 'email',
+      lastMsgAt: new Date(),
+      unreadCount: 0,
+      status: 'active',
+      slaStatus: 'on_track',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...data
+    };
+  }
+
+  async updateSLAStatus(conversationId: string, status: string): Promise<void> {
+    console.log(`Updating SLA status for conversation ${conversationId}: ${status}`);
+  }
+}
+
+class MessageService {
+  async addMessage(data: any): Promise<any> {
+    return {
+      id: `msg_${Date.now()}`,
+      conversationId: data.conversationId,
+      content: data.content,
+      direction: data.direction || 'inbound',
+      status: 'sent',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...data
+    };
+  }
+
+  async createMessage(data: any): Promise<any> {
+    return this.addMessage(data);
+  }
+}
+
+class ProjectService {
+  async findProjectByListingId(listingId: string): Promise<string | null> {
+    console.log(`Finding project by listing ID: ${listingId}`);
+    return null;
+  }
+
+  async findProjectByCode(code: string): Promise<string | null> {
+    console.log(`Finding project by code: ${code}`);
+    return null;
+  }
+}
+
+class GCSService {
+  async uploadBuffer(bucket: string, filename: string, buffer: Buffer, metadata?: any): Promise<string> {
+    console.log(`Mock GCS upload: ${bucket}/${filename}`);
+    return `gs://${bucket}/${filename}`;
+  }
+}
+
+class AuditService {
+  async logEvent(event: any): Promise<void> {
+    console.log('Mock audit log:', event);
+  }
+}
 
 // Schema per il payload SendGrid Inbound Parse
 const SendGridInboundSchema = z.object({

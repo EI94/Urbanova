@@ -1,122 +1,42 @@
-// Messaging service interfaces and implementations
-
-export interface EmailMessage {
-  to: string;
-  from: string;
-  subject: string;
-  html: string;
-  text?: string;
-  attachments?: Array<{
-    filename: string;
-    content: Buffer | string;
-    contentType?: string;
-  }>;
+// Messaging services
+export interface MessagingService {
+  sendEmail(to: string, subject: string, body: string): Promise<void>;
+  sendSMS(to: string, message: string): Promise<void>;
+  sendWhatsApp(to: string, message: string): Promise<void>;
 }
 
-export interface SMSMessage {
-  to: string;
-  from: string;
-  body: string;
-  mediaUrl?: string;
-}
-
-export interface WhatsAppMessage {
-  to: string;
-  from: string;
-  body: string;
-  mediaUrl?: string;
-  template?: {
-    name: string;
-    parameters: string[];
-  };
-}
-
-export interface MessageResult {
-  success: boolean;
-  messageId?: string;
-  error?: string;
-  timestamp: Date;
-}
-
-// Email service
-export class EmailService {
-  async sendEmail(message: EmailMessage): Promise<MessageResult> {
+// SendGrid service
+export class SendGridService implements MessagingService {
+  async sendEmail(to: string, subject: string, body: string): Promise<void> {
     // Mock implementation
-    console.log('Sending email:', message.subject, 'to:', message.to);
-    return {
-      success: true,
-      messageId: `email_${Date.now()}`,
-      timestamp: new Date()
-    };
+    console.log(`SendGrid Email to ${to}: ${subject}`);
   }
 
-  async sendBulkEmails(messages: EmailMessage[]): Promise<MessageResult[]> {
-    // Mock implementation
-    return messages.map(message => ({
-      success: true,
-      messageId: `email_${Date.now()}`,
-      timestamp: new Date()
-    }));
+  async sendSMS(to: string, message: string): Promise<void> {
+    // Not supported by SendGrid
+    throw new Error('SMS not supported by SendGrid');
+  }
+
+  async sendWhatsApp(to: string, message: string): Promise<void> {
+    // Not supported by SendGrid
+    throw new Error('WhatsApp not supported by SendGrid');
   }
 }
 
-// SMS service
-export class SMSService {
-  async sendSMS(message: SMSMessage): Promise<MessageResult> {
+// Twilio service
+export class TwilioService implements MessagingService {
+  async sendEmail(to: string, subject: string, body: string): Promise<void> {
+    // Not supported by Twilio
+    throw new Error('Email not supported by Twilio');
+  }
+
+  async sendSMS(to: string, message: string): Promise<void> {
     // Mock implementation
-    console.log('Sending SMS to:', message.to);
-    return {
-      success: true,
-      messageId: `sms_${Date.now()}`,
-      timestamp: new Date()
-    };
+    console.log(`Twilio SMS to ${to}: ${message}`);
   }
-}
 
-// WhatsApp service
-export class WhatsAppService {
-  async sendMessage(message: WhatsAppMessage): Promise<MessageResult> {
+  async sendWhatsApp(to: string, message: string): Promise<void> {
     // Mock implementation
-    console.log('Sending WhatsApp message to:', message.to);
-    return {
-      success: true,
-      messageId: `whatsapp_${Date.now()}`,
-      timestamp: new Date()
-    };
-  }
-
-  async sendTemplate(template: WhatsAppMessage): Promise<MessageResult> {
-    // Mock implementation
-    console.log('Sending WhatsApp template:', template.template?.name);
-    return {
-      success: true,
-      messageId: `whatsapp_template_${Date.now()}`,
-      timestamp: new Date()
-    };
-  }
-}
-
-// Unified messaging service
-export class MessagingService {
-  private emailService: EmailService;
-  private smsService: SMSService;
-  private whatsappService: WhatsAppService;
-
-  constructor() {
-    this.emailService = new EmailService();
-    this.smsService = new SMSService();
-    this.whatsappService = new WhatsAppService();
-  }
-
-  async sendEmail(message: EmailMessage): Promise<MessageResult> {
-    return this.emailService.sendEmail(message);
-  }
-
-  async sendSMS(message: SMSMessage): Promise<MessageResult> {
-    return this.smsService.sendSMS(message);
-  }
-
-  async sendWhatsApp(message: WhatsAppMessage): Promise<MessageResult> {
-    return this.whatsappService.sendMessage(message);
+    console.log(`Twilio WhatsApp to ${to}: ${message}`);
   }
 }
