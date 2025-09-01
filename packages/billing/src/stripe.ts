@@ -76,7 +76,7 @@ export async function createCustomer(email: string, name?: string): Promise<Stri
           status: taxId.verification?.status as any || 'unverified',
         },
       })),
-    } as StripeCustomer;
+    } as unknown as StripeCustomer;
   } catch (error) {
     console.error('Error creating Stripe customer:', error);
     throw new Error(
@@ -116,7 +116,7 @@ export async function getCustomer(customerId: string): Promise<StripeCustomer> {
           status: taxId.verification?.status as any || 'unverified',
         },
       })),
-    } as StripeCustomer;
+    } as unknown as StripeCustomer;
   } catch (error) {
     console.error('Error retrieving Stripe customer:', error);
     throw new Error(

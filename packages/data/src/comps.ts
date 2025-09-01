@@ -130,7 +130,7 @@ class OMIService {
           mean: data.priceRange.mean,
           stdDev: data.priceRange.stdDev,
           confidence: data.confidence || 0.8,
-        },
+        } as PriceRange,
         lastUpdated: new Date(data.lastUpdated),
         confidence: data.confidence || 0.8,
         source: 'API' as const,
@@ -155,7 +155,7 @@ class OMIService {
       Napoli: { min: 1200, max: 3500, median: 2350 },
     };
 
-    const cityData = fallbackData[city] || fallbackData['Torino'];
+    const cityData = fallbackData[city] || fallbackData['Torino']!;
 
     return {
       zone,
@@ -166,7 +166,7 @@ class OMIService {
         mean: (cityData.min + cityData.max) / 2,
         stdDev: (cityData.max - cityData.min) / 4,
         confidence: 0.6, // Bassa confidenza per dati di fallback
-      },
+      } as PriceRange,
       lastUpdated: new Date(),
       confidence: 0.6,
       source: 'FALLBACK' as const,
@@ -359,10 +359,10 @@ class InternalCompsService {
     const upper = Math.ceil(index);
     const weight = index - lower;
 
-    if (upper >= sortedArray.length) return sortedArray[sortedArray.length - 1];
-    if (lower === upper) return sortedArray[lower];
+    if (upper >= sortedArray.length) return sortedArray[sortedArray.length - 1]!;
+    if (lower === upper) return sortedArray[lower]!;
 
-    return sortedArray[lower] * (1 - weight) + sortedArray[upper] * weight;
+    return sortedArray[lower]! * (1 - weight) + sortedArray[upper]! * weight;
   }
 }
 
@@ -477,7 +477,7 @@ export class CompsOMIFacade {
     const docRef = await db.collection('comps').add(compData);
 
     // Invalida cache
-    this.internalCompsService.cache.clear();
+    (this.internalCompsService as any).cache.clear();
 
     console.log(`✅ Comp saved to Firestore: ${docRef.id}`);
     return docRef.id;
@@ -498,7 +498,7 @@ export class CompsOMIFacade {
       });
 
     // Invalida cache
-    this.internalCompsService.cache.clear();
+    (this.internalCompsService as any).cache.clear();
 
     console.log(`✅ Comp updated in Firestore: ${compId}`);
   }
@@ -512,7 +512,7 @@ export class CompsOMIFacade {
     await db.collection('comps').doc(compId).delete();
 
     // Invalida cache
-    this.internalCompsService.cache.clear();
+    (this.internalCompsService as any).cache.clear();
 
     console.log(`✅ Comp deleted from Firestore: ${compId}`);
   }
@@ -524,4 +524,4 @@ export class CompsOMIFacade {
 
 export type { OMIData, InternalComp, PriceRange, CompsStats, DataProvenance };
 
-export { OMIService, InternalCompsService, CompsOMIFacade };
+export { OMIService, InternalCompsService };
