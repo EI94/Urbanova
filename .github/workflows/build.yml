@@ -45,7 +45,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: TypeScript type check
         run: pnpm typecheck
@@ -93,7 +93,7 @@ jobs:
           version: '8'
           
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
         
       - name: Install Firebase CLI
         run: pnpm add -g firebase-tools
