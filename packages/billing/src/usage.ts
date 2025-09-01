@@ -1,5 +1,5 @@
-import { UsageEvent, ToolAction, USAGE_METRICS, getPriceIdForMetric } from '@urbanova/types';
-import { reportUsage } from './stripe';
+import { UsageEvent, ToolAction, USAGE_METRICS } from '@urbanova/types';
+import { reportUsage, getPriceIdForMetric } from './stripe';
 import {
   persistUsageEvent,
   updateUsageEventStatus,
@@ -31,7 +31,7 @@ export async function emitUsageEvent(
       timestamp: new Date(),
       status: 'pending',
       retryCount: 0,
-      metadata,
+      ...(metadata && { metadata }),
     };
 
     // Persist to Firestore

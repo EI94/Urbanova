@@ -371,7 +371,7 @@ export async function createCustomerPortalSession(
     return {
       id: session.id,
       url: session.url || '',
-      customer: session.customer,
+      customer: session.customer || '',
       return_url: session.return_url,
     };
   } catch (error) {
@@ -392,7 +392,7 @@ export async function reportUsage(
   timestamp: Date
 ): Promise<void> {
   try {
-    await stripe.usageRecords.create(subscriptionItemId, {
+    await (stripe as any).usageRecords.create(subscriptionItemId, {
       quantity,
       timestamp: Math.floor(timestamp.getTime() / 1000),
       action: 'increment',
@@ -411,17 +411,17 @@ export async function getUsageRecords(
   endDate: Date
 ): Promise<Array<{ quantity: number; timestamp: number }>> {
   try {
-    const usageRecords = await stripe.usageRecords.list({
+    const usageRecords = await (stripe as any).usageRecords.list({
       subscription_item: subscriptionItemId,
       limit: 100,
     });
 
     return usageRecords.data
-      .filter(record => {
+      .filter((record: any) => {
         const recordDate = new Date(record.timestamp * 1000);
         return recordDate >= startDate && recordDate <= endDate;
       })
-      .map(record => ({
+      .map((record: any) => ({
         quantity: record.quantity,
         timestamp: record.timestamp,
       }));
@@ -451,7 +451,7 @@ export async function getInvoices(customerId: string): Promise<StripeInvoice[]> 
       amount_paid: invoice.amount_paid,
       amount_due: invoice.amount_due,
       currency: invoice.currency,
-      status: invoice.status,
+      status: invoice.status as any,
       hosted_invoice_url: invoice.hosted_invoice_url || undefined,
       invoice_pdf: invoice.invoice_pdf || undefined,
       created: invoice.created,
@@ -461,8 +461,8 @@ export async function getInvoices(customerId: string): Promise<StripeInvoice[]> 
         amount: taxAmount.amount,
         inclusive: taxAmount.inclusive,
         tax_rate: {
-          percentage: taxAmount.tax_rate.percentage,
-          country: taxAmount.tax_rate.country,
+          percentage: (taxAmount.tax_rate as any).percentage,
+          country: (taxAmount.tax_rate as any).country,
         },
       })),
     }));
