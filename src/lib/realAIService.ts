@@ -58,7 +58,7 @@ export class RealAIService {
         max_tokens: 1000,
       });
 
-      const analysis = this.parseAIResponse(completion.choices[0].message.content || '');
+      const analysis = this.parseAIResponse(completion.choices[0]?.message?.content || '');
 
       console.log(`✅ [RealAIService] Analisi completata per ${land.title}`);
       return analysis;
@@ -97,7 +97,7 @@ export class RealAIService {
         max_tokens: 500,
       });
 
-      return completion.choices[0].message.content || 'Analisi trend non disponibile';
+      return completion.choices[0]?.message?.content || 'Analisi trend non disponibile';
     } catch (error) {
       console.error('❌ Errore analisi trend:', error);
       return `Analisi trend di mercato per ${location}: Dati non disponibili al momento.`;
@@ -137,7 +137,7 @@ export class RealAIService {
         max_tokens: 800,
       });
 
-      return this.parseRecommendations(completion.choices[0].message.content || '');
+      return this.parseRecommendations(completion.choices[0]?.message?.content || '');
     } catch (error) {
       console.error('❌ Errore generazione raccomandazioni:', error);
       return ['Analisi raccomandazioni non disponibile al momento.'];
@@ -175,7 +175,7 @@ export class RealAIService {
         max_tokens: 10,
       });
 
-      const score = parseInt(completion.choices[0].message.content || '70');
+      const score = parseInt(completion.choices[0]?.message?.content || '70');
       return Math.max(0, Math.min(100, score));
     } catch (error) {
       console.error('❌ Errore calcolo AI Score:', error);
@@ -194,7 +194,7 @@ export class RealAIService {
     PREZZO/m²: €${land.pricePerSqm}
     ZONA: ${land.zoning}
     PERMESSI EDIFICABILITÀ: ${land.buildingRights}
-    INFRASTRUTTURE: ${land.infrastructure.join(', ')}
+    INFRASTRUTTURE: ${land.infrastructure?.join(', ') || 'Non specificate'}
     DESCRIZIONE: ${land.description}
     FONTE: ${land.source}
 
@@ -275,16 +275,16 @@ export class RealAIService {
     let score = 70;
 
     // Bonus per prezzo competitivo
-    if (land.pricePerSqm < 100) score += 15;
-    else if (land.pricePerSqm < 150) score += 10;
-    else if (land.pricePerSqm < 200) score += 5;
+    if (land.pricePerSqm && land.pricePerSqm < 100) score += 15;
+    else if (land.pricePerSqm && land.pricePerSqm < 150) score += 10;
+    else if (land.pricePerSqm && land.pricePerSqm < 200) score += 5;
 
     // Bonus per area ottimale
     if (land.area >= 1000 && land.area <= 3000) score += 10;
     else if (land.area >= 500 && land.area <= 5000) score += 5;
 
     // Bonus per infrastrutture
-    score += land.infrastructure.length * 3;
+    score += (land.infrastructure?.length || 0) * 3;
 
     // Bonus per building rights
     if (land.buildingRights === 'Sì') score += 15;

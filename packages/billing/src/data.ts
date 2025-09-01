@@ -10,9 +10,34 @@ const db = {
   collection: (name: string) => ({
     doc: (id: string) => ({
       set: async (data: any) => console.log(`Setting ${name}/${id}:`, data),
-      get: async () => ({ exists: false, data: () => null }),
+      get: async () => ({ 
+        exists: false, 
+        data: () => ({
+          lastBillingDate: new Date().toISOString(),
+          nextBillingDate: new Date().toISOString(),
+          trialEndsAt: new Date().toISOString(),
+          timestamp: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+        })
+      }),
     }),
-    get: async () => ({ forEach: (callback: any) => {} }),
+    get: async () => ({ 
+      forEach: (callback: any) => {
+        callback({
+          id: 'temp-id',
+          data: () => ({
+            lastBillingDate: new Date().toISOString(),
+            nextBillingDate: new Date().toISOString(),
+            trialEndsAt: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+          })
+        });
+      } 
+    }),
+    where: (field: string, op: string, value: any) => ({
+      get: async () => ({ forEach: (callback: any) => {} })
+    }),
   }),
 };
 
@@ -98,7 +123,7 @@ export async function listBillingStates(): Promise<BillingState[]> {
 
     const billingStates: BillingState[] = [];
 
-    snapshot.forEach(doc => {
+    snapshot.forEach((doc: any) => {
       const data = doc.data();
       const billingState = {
         ...data,
@@ -190,7 +215,7 @@ export async function listUsageEventsByWorkspace(
 
     const usageEvents: UsageEvent[] = [];
 
-    snapshot.forEach(doc => {
+    snapshot.forEach((doc: any) => {
       const data = doc.data();
       const usageEvent = {
         ...data,

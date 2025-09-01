@@ -55,6 +55,7 @@ export interface ProfileUpdate {
   phone?: string;
   company?: string;
   role?: string;
+  avatar?: string;
   timezone?: string;
   language?: string;
   dateFormat?: string;

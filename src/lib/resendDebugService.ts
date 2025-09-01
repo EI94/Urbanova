@@ -81,7 +81,7 @@ export class ResendDebugService {
             fromDomain: fromDomain,
             toEmail: data.to,
             errorType: error.name,
-            errorCode: error.statusCode,
+            errorCode: 'unknown',
           },
         };
       }
@@ -89,7 +89,7 @@ export class ResendDebugService {
       if (resendData) {
         console.log('✅ Resend ha accettato la richiesta:', resendData);
         console.log('📧 Message ID:', resendData.id);
-        console.log('📧 Stato:', resendData.status);
+        console.log('📧 Stato: accettato');
 
         return {
           success: true,
@@ -101,7 +101,7 @@ export class ResendDebugService {
             fromDomain: fromDomain,
             toEmail: data.to,
             messageId: resendData.id,
-            status: resendData.status,
+            status: 'accepted',
             warning: "VERIFICA SE L'EMAIL È ARRIVATA REALMENTE!",
           },
         };

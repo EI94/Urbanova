@@ -50,7 +50,7 @@ export class MonitoringService {
   private slis: Map<string, SLI> = new Map();
   private slos: Map<string, SLO> = new Map();
   private incidents: Map<string, Incident> = new Map();
-  private configuration: MonitoringConfiguration;
+  private configuration!: MonitoringConfiguration;
 
   constructor() {
     this.initializeConfiguration();
@@ -685,22 +685,22 @@ export class MonitoringService {
       const logEntry: LogEntry = {
         id: `log-${i}`,
         timestamp,
-        level,
-        message: this.generateLogMessage(level, service),
-        service,
-        instance: `${service}-${Math.floor(Math.random() * 3) + 1}`,
+        level: level || 'info',
+        message: this.generateLogMessage(level || 'info', service || 'unknown'),
+        service: service || 'unknown',
+        instance: `${service || 'unknown'}-${Math.floor(Math.random() * 3) + 1}`,
         environment: 'production',
         fields: {
           userId: level === 'error' ? undefined : `user-${Math.floor(Math.random() * 1000)}`,
           requestId: `req-${Math.random().toString(36).substr(2, 9)}`,
         },
-        labels: { service, environment: 'production' },
+        labels: { service: service || 'unknown', environment: 'production' },
         source: 'application',
         host: `host-${Math.floor(Math.random() * 5) + 1}`,
         parsed: true,
         parser: 'json',
-        searchable: `${level} ${service}`,
-        tags: [level, service],
+        searchable: `${level || 'info'} ${service || 'unknown'}`,
+        tags: [level || 'info', service || 'unknown'],
       };
 
       this.logs.push(logEntry);
@@ -824,6 +824,13 @@ export class MonitoringService {
   // Genera messaggio di log realistico
   private generateLogMessage(level: LogLevel, service: string): string {
     const messages = {
+      debug: [
+        'Debug information logged',
+        'Trace point reached',
+        'Variable value checked',
+        'Function entry point',
+        'Condition evaluation',
+      ],
       info: [
         'Request processed successfully',
         'User authentication completed',
@@ -966,7 +973,7 @@ export class MonitoringService {
             const latestValue = values[values.length - 1];
 
             if (widget.type === 'metric') {
-              widget.data = { value: latestValue.value };
+              widget.data = { value: latestValue?.value || 0 };
             } else if (widget.type === 'chart') {
               // Genera serie temporale per il grafico
               const timeRange = widget.config.timeRange || '6h';

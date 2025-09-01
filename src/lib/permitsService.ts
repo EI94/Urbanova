@@ -349,7 +349,7 @@ export class PermitsService {
           id: `doc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           ...doc,
           submittedAt: doc.status === 'SUBMITTED' ? new Date() : undefined,
-        })),
+        })) as Permit['documents'],
         complianceScore: 0,
         riskLevel: 'MEDIUM',
         progress: 0,

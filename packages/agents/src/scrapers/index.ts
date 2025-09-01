@@ -125,7 +125,6 @@ export class RealLandScrapingAgentAdapter implements LandScrapingAgent {
       title: land.title,
       description: land.description,
       price: land.price,
-      currency: 'EUR',
       location: `${land.location}, Milano, Lombardia, Italia`,
       features: land.features,
       images: land.images || [],

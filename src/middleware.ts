@@ -28,7 +28,6 @@ const rateLimitStore = new Map<string, { count: number; errors: number; resetTim
 function getClientIP(request: NextRequest): string {
   return request.headers.get('x-forwarded-for') || 
          request.headers.get('x-real-ip') || 
-         request.ip || 
          'unknown';
 }
 

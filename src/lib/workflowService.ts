@@ -170,8 +170,8 @@ export class WorkflowService {
       tags: [],
       attachments: [],
       notes: '',
-      lastNotificationSent: undefined,
-      nextReminderDate: undefined,
+      lastNotificationSent: new Date(),
+      nextReminderDate: new Date(),
     };
 
     this.workflows.set(workflowId, workflow);
@@ -251,8 +251,8 @@ export class WorkflowService {
       approverRole: 'TEAM_MEMBER', // TODO: ottenere ruolo reale
       action,
       status: action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : 'delegated',
-      comments,
-      requestedChanges,
+      comments: comments || '',
+      requestedChanges: requestedChanges || [],
       createdAt: new Date(),
       updatedAt: new Date(),
       priority: workflow.priority,
@@ -274,7 +274,7 @@ export class WorkflowService {
       step.status = 'in_progress';
     } else if (action === 'request_changes') {
       step.status = 'in_progress';
-      step.notes = comments;
+      step.notes = comments || '';
     }
 
     return workflow;

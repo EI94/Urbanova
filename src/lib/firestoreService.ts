@@ -38,6 +38,7 @@ export interface RealEstateProject {
   startDate?: Date;
   endDate?: Date;
   budget?: number;
+  expectedROI?: number;
   surface?: number;
   units?: number;
   energyClass?: string;

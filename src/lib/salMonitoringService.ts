@@ -55,13 +55,7 @@ export class SALMonitoringService {
    */
   private initializeMonitoring() {
     try {
-      monitoringService.initialize({
-        serviceName: this.SERVICE_NAME,
-        logLevel: 'info',
-        enableMetrics: true,
-        enableTracing: true,
-      });
-
+      // TODO: Implementare inizializzazione monitoring quando disponibile
       console.log('📊 [SAL Monitoring] Servizio inizializzato');
     } catch (error) {
       console.error('❌ [SAL Monitoring] Errore inizializzazione:', error);
@@ -94,12 +88,13 @@ export class SALMonitoringService {
       console.log(`📝 [SAL ${action.toUpperCase()}] ${salId} - ${userId} (${userRole})`);
 
       // Log strutturato
-      monitoringService.log(level, `SAL ${action}`, {
-        salId,
-        userId,
-        userRole,
-        ...details,
-      });
+      // TODO: Implementare logging strutturato quando disponibile
+      // monitoringService.log(level, `SAL ${action}`, {
+      //   salId,
+      //   userId,
+      //   userRole,
+      //   ...details,
+      // });
 
       // Salva audit log
       this.saveAuditLog({
@@ -213,7 +208,8 @@ export class SALMonitoringService {
       };
 
       // Log errore
-      monitoringService.log('error', `SAL Error: ${error.message}`, errorData);
+      // TODO: Implementare logging strutturato quando disponibile
+      // monitoringService.log('error', `SAL Error: ${error.message}`, errorData);
 
       // Salva errore per analisi
       this.saveErrorLog(errorData);
@@ -396,9 +392,9 @@ export class SALMonitoringService {
     };
   }
 
-  private async saveMetricsReport(timeRange: string, metrics: SALMetrics): Promise<void> {
-    // Implementazione futura
-  }
+  // private async saveMetricsReport(timeRange: string, metrics: SALMetrics): Promise<void> {
+  //   // Implementazione futura
+  // }
 
   private alertSlowPerformance(operation: string, duration: number, salId: string): void {
     console.warn(

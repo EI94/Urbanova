@@ -398,8 +398,10 @@ export class NotificationService {
       if (!existingSnapshot.empty) {
         // Update existing preference
         const existingDoc = existingSnapshot.docs[0];
-        await updateDoc(existingDoc.ref, preferenceData);
-        return existingDoc.id;
+        if (existingDoc) {
+          await updateDoc(existingDoc.ref, preferenceData);
+          return existingDoc.id;
+        }
       } else {
         // Create new preference
         const docRef = await addDoc(collection(db, 'notificationPreferences'), preferenceData);
@@ -519,7 +521,7 @@ export class NotificationService {
         lastUsed: serverTimestamp(),
         successRate: newSuccessRate,
         errorCount: newErrorCount,
-        successRate: newSuccessRatePercentage,
+        successRatePercentage: newSuccessRatePercentage,
       });
     } catch (error) {
       console.error('Error updating channel stats:', error);

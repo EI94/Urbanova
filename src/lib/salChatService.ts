@@ -108,7 +108,7 @@ export class SALChatService {
     // Esempio: "Crea SAL #3 per Progetto A €145k e invia a Rossi"
     const createMatch = text.match(/crea\s+sal\s+#?(\d+)\s+per\s+(.+?)\s+€?(\d+(?:\.\d+)?)k?/i);
 
-    if (createMatch) {
+    if (createMatch && createMatch[2] && createMatch[3]) {
       return {
         type: 'create',
         projectId: createMatch[2].trim(),
@@ -127,7 +127,7 @@ export class SALChatService {
     // Esempio: "Invia SAL #3 a rossi@email.com"
     const sendMatch = text.match(/invia\s+sal\s+#?(\d+)\s+a\s+([^\s]+)/i);
 
-    if (sendMatch) {
+    if (sendMatch && sendMatch[1] && sendMatch[2]) {
       return {
         type: 'send',
         salId: sendMatch[1],
@@ -145,7 +145,7 @@ export class SALChatService {
     // Esempio: "Firma SAL #3 come PM"
     const signMatch = text.match(/firma\s+sal\s+#?(\d+)\s+come\s+(pm|vendor)/i);
 
-    if (signMatch) {
+    if (signMatch && signMatch[1] && signMatch[2]) {
       return {
         type: 'sign',
         salId: signMatch[1],
@@ -163,7 +163,7 @@ export class SALChatService {
     // Esempio: "Paga SAL #3"
     const payMatch = text.match(/paga\s+sal\s+#?(\d+)/i);
 
-    if (payMatch) {
+    if (payMatch && payMatch[1]) {
       return {
         type: 'pay',
         salId: payMatch[1],

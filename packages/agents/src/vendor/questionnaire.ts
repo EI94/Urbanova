@@ -24,9 +24,37 @@ class JWTService {
 }
 // Data functions - defined locally until available in @urbanova/data
 const persistVendorQuestionnaire = async (data: any) => 'temp-questionnaire-id';
-const getVendorQuestionnaireById = async (id: string) => null;
-const getVendorQuestionnaireByToken = async (token: string) => null;
-const updateVendorQuestionnaire = async (id: string, updates: any) => null;
+const getVendorQuestionnaireById = async (id: string) => ({
+  id,
+  projectId: 'temp-project',
+  vendorContact: { name: 'temp', email: 'temp@email.com', phone: '', role: '', company: '' },
+  token: 'temp-token',
+  status: 'pending',
+  createdAt: new Date(),
+  expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  metadata: { sentBy: 'temp', sentAt: new Date(), reminderCount: 0 }
+});
+const getVendorQuestionnaireByToken = async (token: string) => ({
+  id: 'temp-id',
+  projectId: 'temp-project',
+  vendorContact: { name: 'temp', email: 'temp@email.com', phone: '', role: '', company: '' },
+  token,
+  status: 'pending',
+  createdAt: new Date(),
+  expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  metadata: { sentBy: 'temp', sentAt: new Date(), reminderCount: 0 }
+});
+const updateVendorQuestionnaire = async (id: string, updates: any) => ({
+  id,
+  projectId: 'temp-project',
+  vendorContact: { name: 'temp', email: 'temp@email.com', phone: '', role: '', company: '' },
+  token: 'temp-token',
+  status: 'pending',
+  createdAt: new Date(),
+  expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  metadata: { sentBy: 'temp', sentAt: new Date(), reminderCount: 0 },
+  ...updates
+});
 const listVendorQuestionnairesByProject = async (projectId: string) => [];
 const listExpiredQuestionnaires = async () => [];
 
@@ -68,9 +96,9 @@ export class VendorQuestionnaireService {
       projectId,
       vendorContact: {
         ...validatedContact,
-        phone: validatedContact.phone ?? undefined,
-        role: validatedContact.role ?? undefined,
-        company: validatedContact.company ?? undefined,
+        phone: validatedContact.phone ?? '',
+        role: validatedContact.role ?? '',
+        company: validatedContact.company ?? '',
       },
       token,
       status: 'pending',

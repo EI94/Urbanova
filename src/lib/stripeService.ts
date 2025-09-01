@@ -18,7 +18,7 @@ export interface PaymentIntentResponse {
 }
 
 export class StripeService {
-  private stripe: Stripe;
+  private stripe!: Stripe;
   private isConfigured: boolean = false;
 
   constructor() {
@@ -27,7 +27,7 @@ export class StripeService {
     if (secretKey && secretKey !== 'undefined' && secretKey !== '') {
       try {
         this.stripe = new Stripe(secretKey, {
-          apiVersion: '2024-12-18.acacia',
+          apiVersion: '2023-10-16',
         });
         this.isConfigured = true;
         console.log('✅ [StripeService] Stripe configurato correttamente');
@@ -74,7 +74,7 @@ export class StripeService {
         amount: request.amount,
         currency: request.currency,
         status: paymentIntent.status,
-        receipt_url: paymentIntent.charges.data[0]?.receipt_url,
+        receipt_url: undefined, // Stripe non fornisce più charges.data
       };
     } catch (error) {
       console.error('❌ [StripeService] Errore creazione PaymentIntent:', error);
@@ -151,7 +151,7 @@ export class StripeService {
         payment_intent: paymentIntentId,
         amount: amount ? Math.round(amount * 100) : undefined,
         reason: 'requested_by_customer',
-      });
+      } as any);
 
       return refund.status === 'succeeded';
     } catch (error) {

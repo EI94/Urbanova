@@ -131,10 +131,10 @@ export class LandScrapingAgent {
       price,
       pricePerSqm,
       area,
-      zoning,
+      zoning: zoning || 'Non specificato',
       buildingRights: Math.random() > 0.3 ? 'Sì' : 'Da verificare',
       infrastructure: infrastructures.slice(0, Math.floor(Math.random() * 4) + 2),
-      description: `Terreno edificabile di ${area}m² a ${location}. Zona ${zoning.toLowerCase()}. Prezzo competitivo di €${pricePerSqm}/m².`,
+      description: `Terreno edificabile di ${area}m² a ${location}. Zona ${zoning?.toLowerCase() || 'non specificata'}. Prezzo competitivo di €${pricePerSqm}/m².`,
       coordinates: [
         41.9028 + (Math.random() - 0.5) * 0.1, // Latitudine approssimativa Italia
         12.4964 + (Math.random() - 0.5) * 0.1, // Longitudine approssimativa Italia

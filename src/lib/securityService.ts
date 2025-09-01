@@ -19,7 +19,7 @@ export class SecurityService {
   private audits: Map<string, SecurityAudit> = new Map();
   private alerts: Map<string, SecurityAlert> = new Map();
   private identities: Map<string, IdentityAccess> = new Map();
-  private configuration: SecurityConfiguration;
+  private configuration!: SecurityConfiguration;
 
   constructor() {
     this.initializeConfiguration();

@@ -479,7 +479,7 @@ export class TerritorialIntelligenceService {
       if (zoneAnalysis.length > 0) {
         const analysis = zoneAnalysis[0];
 
-        if (analysis.metrics.projectDensity < 2) {
+        if (analysis && analysis.metrics.projectDensity < 2) {
           // Bassa densità progetti
           opportunities.push({
             id: `opp-${Date.now()}-3`,
@@ -507,7 +507,7 @@ export class TerritorialIntelligenceService {
             },
             evidence: {
               dataPoints: [
-                `Densità progetti: ${analysis.metrics.projectDensity}/km²`,
+                `Densità progetti: ${analysis?.metrics?.projectDensity || 0}/km²`,
                 'Bassa concorrenza',
               ],
               trends: ['Interesse crescente', 'Piani di sviluppo'],

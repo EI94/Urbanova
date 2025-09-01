@@ -52,7 +52,7 @@ export class Web3Service {
   private priceOracles: Map<string, PriceOracle> = new Map();
   private bridges: Map<string, CrossChainBridge> = new Map();
   private marketplaces: Map<string, NFTMarketplace> = new Map();
-  private config: Web3Config;
+  private config!: Web3Config;
 
   constructor() {
     this.initializeConfig();
@@ -934,7 +934,7 @@ export class Web3Service {
       const transaction: Transaction = {
         id: `tx-${Date.now()}-${i}`,
         hash: `0x${Math.random().toString(16).substr(2, 64)}`,
-        network,
+        network: network || 'ethereum',
         from: `0x${Math.random().toString(16).substr(2, 40)}`,
         to: `0x${Math.random().toString(16).substr(2, 40)}`,
         value: (Math.random() * 1000000000000000000).toString(),
@@ -959,7 +959,9 @@ export class Web3Service {
       // Mantieni solo le ultime 1000 transazioni
       if (this.transactions.size > 1000) {
         const oldestKey = this.transactions.keys().next().value;
-        this.transactions.delete(oldestKey);
+        if (oldestKey) {
+          this.transactions.delete(oldestKey);
+        }
       }
     }
   }
@@ -1170,7 +1172,7 @@ export class Web3Service {
         proposal.userVote = {
           choice,
           votingPower,
-          reason,
+          reason: reason || undefined,
           votedAt: new Date(),
         };
 

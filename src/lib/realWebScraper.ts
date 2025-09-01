@@ -38,7 +38,8 @@ export class RealWebScraper {
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15',
       'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     ];
-    return userAgents[Math.floor(Math.random() * userAgents.length)];
+    const index = Math.floor(Math.random() * userAgents.length);
+    return userAgents[index]!;
   }
 
   // Headers realistici per evitare blocchi
@@ -225,6 +226,7 @@ export class RealWebScraper {
                 priceText = text;
                 return false; // Break the loop
               }
+              return true; // Continue the loop
             });
             if (priceText) break;
           }
@@ -284,6 +286,7 @@ export class RealWebScraper {
                 areaText = text;
                 return false; // Break the loop
               }
+              return true; // Continue the loop
             });
             if (areaText) break;
           }

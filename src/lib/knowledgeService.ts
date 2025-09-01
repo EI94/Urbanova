@@ -1,5 +1,5 @@
 // Service per la gestione del Knowledge Management & Documentation
-import {
+import type {
   DocumentMetadata,
   DocumentVersion,
   DocumentCategory,
@@ -28,7 +28,7 @@ import {
 import { TeamRole } from '@/types/team';
 
 export class KnowledgeService {
-  private knowledgeBase: KnowledgeBase;
+  private knowledgeBase!: KnowledgeBase;
   private documents: Map<string, DocumentMetadata> = new Map();
   private categories: Map<string, DocumentCategory> = new Map();
   private templates: Map<string, DocumentTemplate> = new Map();
@@ -575,7 +575,13 @@ Buon lavoro con Urbanova! 🚀`,
         ],
         allowedUsers: [],
         language: 'it',
-        translations: {},
+        translations: {
+          it: '',
+          en: '',
+          es: '',
+          fr: '',
+          de: '',
+        },
         categoryId: 'best-practices',
         categoryPath: ['best-practices'],
         childrenIds: [],
@@ -704,7 +710,13 @@ Buon lavoro con Urbanova! 🚀`,
         ],
         allowedUsers: [],
         language: 'it',
-        translations: {},
+        translations: {
+          it: '',
+          en: '',
+          es: '',
+          fr: '',
+          de: '',
+        },
         categoryId: 'collaboration',
         categoryPath: ['collaboration'],
         childrenIds: [],
@@ -774,7 +786,13 @@ Buon lavoro con Urbanova! 🚀`,
       allowedRoles: options.allowedRoles || ['PROJECT_MANAGER', 'TEAM_MEMBER'],
       allowedUsers: [],
       language: options.language || 'it',
-      translations: {},
+              translations: {
+          it: '',
+          en: '',
+          es: '',
+          fr: '',
+          de: '',
+        },
       categoryId,
       categoryPath: this.getCategoryPath(categoryId),
       childrenIds: [],
@@ -1145,10 +1163,10 @@ Buon lavoro con Urbanova! 🚀`,
     const comment: DocumentComment = {
       id: `comment-${Date.now()}`,
       documentId,
-      parentId,
+      parentId: parentId ?? undefined,
       content,
       isResolved: false,
-      position,
+      position: position ?? undefined,
       authorId,
       authorName,
       authorAvatar,
@@ -1193,7 +1211,7 @@ Buon lavoro con Urbanova! 🚀`,
     const totalDownloads = documents.reduce((sum, doc) => sum + doc.downloadCount, 0);
 
     // Breakdown per tipo
-    const documentsByType = Object.values(DocumentType).map(type => {
+    const documentsByType = Object.values(DocumentType as Record<string, string>).map(type => {
       const count = documents.filter(doc => doc.type === type).length;
       return {
         type,
@@ -1203,7 +1221,7 @@ Buon lavoro con Urbanova! 🚀`,
     });
 
     // Breakdown per stato
-    const documentsByStatus = Object.values(DocumentStatus).map(status => {
+    const documentsByStatus = Object.values(DocumentStatus as Record<string, string>).map(status => {
       const count = documents.filter(doc => doc.status === status).length;
       return {
         status,
@@ -1213,7 +1231,7 @@ Buon lavoro con Urbanova! 🚀`,
     });
 
     // Breakdown per lingua
-    const documentsByLanguage = Object.values(ContentLanguage).map(language => {
+    const documentsByLanguage = Object.values(ContentLanguage as Record<string, string>).map(language => {
       const count = documents.filter(doc => doc.language === language).length;
       return {
         language,
@@ -1234,7 +1252,7 @@ Buon lavoro con Urbanova! 🚀`,
       }));
 
     // Top authors
-    const authorStats = Array.from(authors)
+    const topAuthors = Array.from(authors)
       .map(authorId => {
         const authorDocs = documents.filter(doc => doc.authorId === authorId);
         return {

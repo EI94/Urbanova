@@ -327,7 +327,7 @@ export class RealtimeService {
       userAvatar: participant.userAvatar,
       userRole: participant.userRole,
       content,
-      position,
+      position: position || undefined,
       timestamp: new Date(),
       replies: [],
       isResolved: false,
@@ -506,9 +506,13 @@ export class RealtimeService {
     userMessages.forEach((userMsgs, userId) => {
       if (userMsgs.length > 1) {
         for (let i = 1; i < userMsgs.length; i++) {
-          const responseTime =
-            userMsgs[i].timestamp.getTime() - userMsgs[i - 1].timestamp.getTime();
-          responseTimes.push(responseTime);
+          const currentMsg = userMsgs[i];
+          const previousMsg = userMsgs[i - 1];
+          if (currentMsg && previousMsg) {
+            const responseTime =
+              currentMsg.timestamp.getTime() - previousMsg.timestamp.getTime();
+            responseTimes.push(responseTime);
+          }
         }
       }
     });

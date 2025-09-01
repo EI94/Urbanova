@@ -230,6 +230,7 @@ export class ProjectMapService {
       const newLocation: ProjectLocation = {
         id: locationId,
         ...locationData,
+        zone: locationData.zone || 'Non specificata',
         coordinates: {
           ...coordinates!,
           firestoreGeoPoint: new GeoPoint(coordinates!.latitude, coordinates!.longitude),
@@ -388,8 +389,11 @@ export class ProjectMapService {
 
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
-        const cached = querySnapshot.docs[0].data();
-        return cached.result as GeocodingResult;
+        const doc = querySnapshot.docs[0];
+        if (doc) {
+          const cached = doc.data();
+          return cached.result as GeocodingResult;
+        }
       }
 
       return null;

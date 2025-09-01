@@ -411,7 +411,7 @@ export class SALService {
       await emailService.sendEmail({
         to: vendorEmail,
         subject: `Nuovo SAL: ${sal.title}`,
-        text: emailContent,
+        htmlContent: emailContent,
       });
 
       console.log('📧 [SAL] Email inviata al vendor:', vendorEmail);
