@@ -1,6 +1,6 @@
 // Document Request Message Templates for Doc Hunter v1
 
-import type { DocKind } from '@urbanova/types';
+import type { DocKind } from './ocr';
 
 export interface MessageTemplate {
   id: string;

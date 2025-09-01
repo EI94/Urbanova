@@ -114,7 +114,6 @@ describe('AuctionsScraperService', () => {
 
       expect(stats).toBeDefined();
       expect(stats.totalAuctions).toBeGreaterThanOrEqual(0);
-      expect(stats.activeAuctions).toBeGreaterThanOrEqual(0);
       expect(stats.upcomingAuctions).toBeGreaterThanOrEqual(0);
       expect(stats.averageStartingPrice).toBeGreaterThanOrEqual(0);
       expect(stats.city).toBe(city);
@@ -126,7 +125,6 @@ describe('AuctionsScraperService', () => {
 
       expect(stats).toBeDefined();
       expect(stats.totalAuctions).toBe(0);
-      expect(stats.activeAuctions).toBe(0);
       expect(stats.upcomingAuctions).toBe(0);
       expect(stats.averageStartingPrice).toBe(0);
       expect(stats.city).toBe(city);

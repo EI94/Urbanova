@@ -1,6 +1,30 @@
 // Scrapers facade for @urbanova/agents package
 
-import type { Deal, Listing } from '@urbanova/types';
+// Types - defined locally until available in @urbanova/types
+export interface Deal {
+  id: string;
+  projectId: string;
+  status: string;
+  type: string;
+  value: number;
+  currency: string;
+  parties: any[];
+  documents: any[];
+  milestones: any[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Listing {
+  id: string;
+  source: string;
+  externalId: string;
+  title: string;
+  description: string;
+  price: number;
+  location: string;
+  metadata: any;
+}
 import { realLandScrapingAgent } from '../../../../src/lib/realLandScrapingAgent';
 import type { ScrapedLand, LandSearchCriteria } from '../../../../src/types/land';
 
@@ -33,7 +57,9 @@ export class RealLandScrapingAgentAdapter implements LandScrapingAgent {
       // Convert first result to Deal
       if (result.lands.length > 0) {
         const firstLand = result.lands[0];
-        return this.convertScrapedLandToDeal(firstLand, link);
+        if (firstLand) {
+          return this.convertScrapedLandToDeal(firstLand, link);
+        }
       }
 
       // If no results, create a default deal
@@ -100,13 +126,7 @@ export class RealLandScrapingAgentAdapter implements LandScrapingAgent {
       description: land.description,
       price: land.price,
       currency: 'EUR',
-      location: {
-        address: land.location,
-        city: this.extractCity(land.location),
-        province: 'MI', // Default
-        region: 'Lombardia', // Default
-        country: 'Italia',
-      },
+      location: `${land.location}, Milano, Lombardia, Italia`,
       features: land.features,
       images: land.images || [],
       contactInfo: {

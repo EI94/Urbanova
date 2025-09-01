@@ -1,5 +1,5 @@
 // Re-export compliance types from @urbanova/types
-export * from '@urbanova/types/compliance';
+export * from '@urbanova/types';
 
 // Audit Service
 export class AuditService {

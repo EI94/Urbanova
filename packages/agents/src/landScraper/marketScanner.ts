@@ -47,7 +47,6 @@ export class MarketScannerService {
         totalReturned: finalDeals.length,
         scanDuration: duration,
         scanTimestamp: new Date(),
-        error: null,
       };
     } catch (error) {
       const duration = Math.max(1, Date.now() - startTime);

@@ -527,7 +527,7 @@ export class MarketIntelligenceService {
     if (values.length === 0) return 0;
     const sorted = values.sort((a, b) => a - b);
     const mid = Math.floor(sorted.length / 2);
-    return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+    return sorted.length % 2 === 0 ? ((sorted[mid - 1] ?? 0) + (sorted[mid] ?? 0)) / 2 : (sorted[mid] ?? 0);
   }
 
   private calculateMean(values: number[]): number {
@@ -544,7 +544,7 @@ export class MarketIntelligenceService {
   private calculateAbsorptionDays(compsData: any, horizonMonths: number): number {
     // Simula calcolo tempo di vendita
     const baseDays = 90; // 3 mesi base
-    const inventoryFactor = Math.max(1, (compsData.internal.count || 50) / 100);
+    const inventoryFactor = Math.max(1, ((compsData?.internal?.count ?? 50) / 100));
     return Math.round(baseDays * inventoryFactor);
   }
 
@@ -557,8 +557,8 @@ export class MarketIntelligenceService {
   private calculateDemandScore(compsData: any, omiData: any): number {
     // Simula punteggio domanda basato su vari fattori
     const baseScore = 50;
-    const omiFactor = omiData.confidence || 0.5;
-    const compsFactor = Math.min(1, (compsData.internal.count || 0) / 100);
+    const omiFactor = omiData?.confidence ?? 0.5;
+    const compsFactor = Math.min(1, ((compsData?.internal?.count ?? 0) / 100));
 
     return Math.min(100, Math.max(0, baseScore + omiFactor * 30 + compsFactor * 20));
   }

@@ -1,6 +1,30 @@
 // Document Validation Service for Doc Hunter v1
 
-import type { DocKind, ExtractedFields, DocumentEntity, ChecklistItem } from '@urbanova/types';
+import type { DocKind, ExtractedFields } from './ocr';
+
+// Document types - defined locally until available in @urbanova/types
+export interface DocumentEntity {
+  id: string;
+  extracted?: ExtractedFields;
+  status: string;
+  meta: {
+    kind: DocKind;
+    [key: string]: any;
+  };
+}
+
+export interface ChecklistItem {
+  id: string;
+  description: string;
+  completed: boolean;
+  required: boolean;
+  kind?: DocKind;
+  status?: string;
+  documentId?: string;
+  missingFields?: string[];
+  issues?: string[];
+  lastUpdate?: Date;
+}
 import { ocrService } from './ocr';
 import { getRequiredFieldsForKind } from './templates';
 
@@ -220,6 +244,10 @@ export class DocumentValidationService {
       const validation = await this.validateDocument(document, context);
 
       items.push({
+        id: document.id,
+        description: `Documento ${document.meta.kind}`,
+        completed: validation.status === 'VALIDATED',
+        required: true,
         kind: document.meta.kind,
         status: validation.status,
         documentId: document.id,

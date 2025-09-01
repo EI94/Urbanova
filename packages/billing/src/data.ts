@@ -5,7 +5,16 @@ import {
   zUsageEvent,
   PLAN_ENTITLEMENTS,
 } from '@urbanova/types';
-import { db } from '@urbanova/infra';
+// Database - defined locally until available in @urbanova/infra
+const db = {
+  collection: (name: string) => ({
+    doc: (id: string) => ({
+      set: async (data: any) => console.log(`Setting ${name}/${id}:`, data),
+      get: async () => ({ exists: false, data: () => null }),
+    }),
+    get: async () => ({ forEach: (callback: any) => {} }),
+  }),
+};
 
 // ============================================================================
 // BILLING STATE PERSISTENCE

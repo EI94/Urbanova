@@ -1,14 +1,60 @@
 // OCR Service for Doc Hunter v1 - Google Document AI with Tesseract fallback
 
-import type {
-  DocKind,
-  ExtractedFields,
-  CDUExtractedFields,
-  VisuraExtractedFields,
-  DURCExtractedFields,
-  PlanimetriaExtractedFields,
-  ProgettoExtractedFields,
-} from '@urbanova/types';
+// Document types - defined locally until available in @urbanova/types
+export type DocKind = 'CDU' | 'VISURA' | 'DURC' | 'PLANIMETRIA' | 'PROGETTO';
+
+export interface ExtractedFields {
+  [key: string]: any;
+}
+
+export interface CDUExtractedFields extends ExtractedFields {
+  particella?: string;
+  destinazioneUso?: string;
+  vincoli?: string[];
+  superficie?: number;
+  indiceUrbanistico?: number;
+  altezzaMax?: number;
+  destinazioneSpecifica?: string;
+}
+
+export interface VisuraExtractedFields extends ExtractedFields {
+  cciaa?: string;
+  oggettoSociale?: string;
+  sedeLegale?: string;
+  partitaIva?: string;
+  codiceFiscale?: string;
+  dataIscrizione?: Date;
+  stato?: string;
+}
+
+export interface DURCExtractedFields extends ExtractedFields {
+  ditta?: string;
+  validita?: Date;
+  numero?: string;
+  rilasciatoDa?: string;
+  dataRilascio?: Date;
+  categoria?: string;
+  classe?: string;
+}
+
+export interface PlanimetriaExtractedFields extends ExtractedFields {
+  scala?: string;
+  data?: Date;
+  tecnico?: string;
+  superficie?: number;
+  destinazione?: string;
+  livelli?: number;
+  vani?: number;
+}
+
+export interface ProgettoExtractedFields extends ExtractedFields {
+  titolo?: string;
+  architetto?: string;
+  data?: Date;
+  versione?: string;
+  approvato?: boolean;
+  note?: string;
+}
 
 export interface OCRExtractionResult {
   fields: ExtractedFields;
@@ -191,7 +237,8 @@ export class OCRService {
       case 'CDU':
         if (
           this.hasField(extracted, 'superficie') &&
-          (extracted as CDUExtractedFields).superficie <= 0
+          (extracted as CDUExtractedFields).superficie &&
+          (extracted as CDUExtractedFields).superficie! <= 0
         ) {
           issues.push('Superficie deve essere maggiore di zero');
         }
@@ -200,6 +247,7 @@ export class OCRService {
       case 'VISURA':
         if (
           this.hasField(extracted, 'stato') &&
+          (extracted as VisuraExtractedFields).stato &&
           (extracted as VisuraExtractedFields).stato !== 'ATTIVA'
         ) {
           issues.push('Azienda non attiva');
@@ -209,7 +257,8 @@ export class OCRService {
       case 'DURC':
         if (
           this.hasField(extracted, 'validita') &&
-          (extracted as DURCExtractedFields).validita < new Date()
+          (extracted as DURCExtractedFields).validita &&
+          (extracted as DURCExtractedFields).validita! < new Date()
         ) {
           issues.push('DURC scaduto');
         }
@@ -218,7 +267,8 @@ export class OCRService {
       case 'PLANIMETRIA':
         if (
           this.hasField(extracted, 'scala') &&
-          !(extracted as PlanimetriaExtractedFields).scala.includes(':')
+          (extracted as PlanimetriaExtractedFields).scala &&
+          !(extracted as PlanimetriaExtractedFields).scala!.includes(':')
         ) {
           issues.push('Formato scala non valido');
         }
@@ -227,6 +277,7 @@ export class OCRService {
       case 'PROGETTO':
         if (
           this.hasField(extracted, 'approvato') &&
+          (extracted as ProgettoExtractedFields).approvato !== undefined &&
           !(extracted as ProgettoExtractedFields).approvato
         ) {
           issues.push('Progetto non ancora approvato');
@@ -242,7 +293,7 @@ export class OCRService {
   }
 
   private hasField(extracted: ExtractedFields, field: string): boolean {
-    return field in extracted && extracted[field as keyof ExtractedFields] !== undefined;
+    return extracted && field in extracted && extracted[field as keyof ExtractedFields] !== undefined;
   }
 
   // Get confidence score for extracted fields

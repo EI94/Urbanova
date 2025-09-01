@@ -34,9 +34,9 @@ function parseTwilioFormData(rawBody: string): Record<string, string> {
   const params = new URLSearchParams(rawBody);
   const data: Record<string, string> = {};
   
-  for (const [key, value] of params.entries()) {
+  Array.from(params.entries()).forEach(([key, value]) => {
     data[key] = value;
-  }
+  });
   
   return data;
 }

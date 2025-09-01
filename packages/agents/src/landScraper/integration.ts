@@ -87,7 +87,7 @@ class SimplifiedRealLandScrapingAgent {
       emailSent: false,
       summary: {
         totalFound: mockLands.length,
-        averagePrice: mockLands[0].price,
+        averagePrice: mockLands[0]?.price ?? 0,
         bestOpportunities: mockLands,
         marketTrends: 'Stable market',
         recommendations: ['Good investment opportunity'],
@@ -115,11 +115,11 @@ export class LandScraperIntegrationService {
       source: scrapedLand.source,
       address: scrapedLand.location,
       city: this.extractCityFromLocation(scrapedLand.location),
-      lat: scrapedLand.coordinates?.[0] || undefined,
-      lng: scrapedLand.coordinates?.[1] || undefined,
+      lat: scrapedLand.coordinates?.[0] ?? undefined,
+      lng: scrapedLand.coordinates?.[1] ?? undefined,
       surface: scrapedLand.area,
       priceAsk: scrapedLand.price,
-      zoningHint: scrapedLand.zoning || scrapedLand.buildingRights || undefined,
+      zoningHint: (scrapedLand.zoning || scrapedLand.buildingRights) ?? undefined,
       policy: 'allowed', // Default policy for scraped data
       trust: this.calculateTrustFromScrapedData(scrapedLand),
       discoveredAt: scrapedLand.dateScraped || scrapedLand.timestamp || new Date(),
@@ -173,9 +173,9 @@ export class LandScraperIntegrationService {
       // Convert SearchFilter to LandSearchCriteria
       const criteria: LandSearchCriteria = {
         location: filter.city,
-        maxPrice: filter.budgetMax || undefined,
-        minArea: filter.surfaceMin || undefined,
-        propertyType: filter.zoning?.[0] || undefined,
+        maxPrice: filter.budgetMax ?? undefined,
+        minArea: filter.surfaceMin ?? undefined,
+        propertyType: filter.zoning?.[0] ?? undefined,
       };
 
       // Use real scraping agent

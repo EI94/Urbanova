@@ -122,10 +122,10 @@ export class HeatmapGeneratorService {
     geoJSON.features.forEach((feature: any) => {
       const coords = feature.geometry.coordinates[0];
       coords.forEach((coord: number[]) => {
-        minX = Math.min(minX, coord[0]);
-        minY = Math.min(minY, coord[1]);
-        maxX = Math.max(maxX, coord[0]);
-        maxY = Math.max(maxY, coord[1]);
+        minX = Math.min(minX, coord[0] ?? 0);
+        minY = Math.min(minY, coord[1] ?? 0);
+        maxX = Math.max(maxX, coord[0] ?? 0);
+        maxY = Math.max(maxY, coord[1] ?? 0);
       });
     });
 
@@ -363,28 +363,32 @@ export class HeatmapGeneratorService {
    * Genera tooltip per cella
    */
   generateTooltip(cell: HeatmapCell): string {
+    if (!cell.coordinates || !cell.kpis) {
+      return `<div class="heatmap-tooltip">Dati non disponibili</div>`;
+    }
+    
     return `<div class="heatmap-tooltip">
-      <h4>Zona ${cell.coordinates.lat.toFixed(4)}, ${cell.coordinates.lng.toFixed(4)}</h4>
+      <h4>Zona ${(cell.coordinates.lat ?? 0).toFixed(4)}, ${(cell.coordinates.lng ?? 0).toFixed(4)}</h4>
       <div class="tooltip-content">
         <div class="tooltip-item">
           <span class="label">Prezzo mediano:</span>
-          <span class="value">${cell.kpis.psqmMedian.toFixed(0)} €/m²</span>
+          <span class="value">${(cell.kpis.psqmMedian ?? 0).toFixed(0)} €/m²</span>
         </div>
         <div class="tooltip-item">
           <span class="label">Tempo vendita:</span>
-          <span class="value">${cell.kpis.absorptionDays} giorni</span>
+          <span class="value">${cell.kpis.absorptionDays ?? 0} giorni</span>
         </div>
         <div class="tooltip-item">
           <span class="label">Inventario:</span>
-          <span class="value">${cell.kpis.inventoryCount} immobili</span>
+          <span class="value">${cell.kpis.inventoryCount ?? 0} immobili</span>
         </div>
         <div class="tooltip-item">
           <span class="label">Domanda:</span>
-          <span class="value">${cell.kpis.demandScore.toFixed(0)}/100</span>
+          <span class="value">${(cell.kpis.demandScore ?? 0).toFixed(0)}/100</span>
         </div>
         <div class="tooltip-item">
           <span class="label">Qualità dati:</span>
-          <span class="value">${(cell.metadata.dataQuality * 100).toFixed(0)}%</span>
+          <span class="value">${((cell.metadata?.dataQuality ?? 0) * 100).toFixed(0)}%</span>
         </div>
       </div>
     </div>`;

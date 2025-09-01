@@ -1,43 +1,56 @@
-// Lead management types and services
-export interface Lead {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  source: string;
-  status: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost';
-  createdAt: Date;
-  updatedAt: Date;
-  metadata?: Record<string, any>;
-}
+// Import types from @urbanova/types
+import type {
+  Lead,
+  Conversation,
+  Message,
+  Template,
+  LeadSource,
+  LeadStatus,
+  ConversationChannel,
+  ConversationStatus,
+  MessageDirection,
+  MessageStatus,
+  MessageAttachment,
+  MessageSender,
+  TemplateCategory,
+  SLAConfig,
+  SLATracker,
+  AssignmentRule,
+  AuditEventType,
+  AuditLog,
+  SendGridInboundRequest,
+  WhatsAppReplyRequest,
+  EmailReplyRequest,
+  LeadCreationResponse,
+  ReplyResponse,
+} from '@urbanova/types';
 
-export interface Conversation {
-  id: string;
-  leadId: string;
-  messages: Message[];
-  status: 'active' | 'closed' | 'archived';
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface Message {
-  id: string;
-  conversationId: string;
-  content: string;
-  sender: 'lead' | 'agent' | 'system';
-  timestamp: Date;
-  metadata?: Record<string, any>;
-}
-
-export interface Template {
-  id: string;
-  name: string;
-  content: string;
-  type: 'email' | 'sms' | 'whatsapp';
-  variables: string[];
-  createdAt: Date;
-  updatedAt: Date;
-}
+// Re-export types
+export type {
+  Lead,
+  Conversation,
+  Message,
+  Template,
+  LeadSource,
+  LeadStatus,
+  ConversationChannel,
+  ConversationStatus,
+  MessageDirection,
+  MessageStatus,
+  MessageAttachment,
+  MessageSender,
+  TemplateCategory,
+  SLAConfig,
+  SLATracker,
+  AssignmentRule,
+  AuditEventType,
+  AuditLog,
+  SendGridInboundRequest,
+  WhatsAppReplyRequest,
+  EmailReplyRequest,
+  LeadCreationResponse,
+  ReplyResponse,
+};
 
 // Lead service
 export class LeadService {
@@ -45,14 +58,27 @@ export class LeadService {
     // Mock implementation
     return {
       id: `lead_${Date.now()}`,
-      name: leadData.name || '',
-      email: leadData.email || '',
-      phone: leadData.phone,
+      projectId: leadData.projectId,
       source: leadData.source || 'unknown',
-      status: 'new',
+      listingId: leadData.listingId,
+      portalLeadId: leadData.portalLeadId,
+      subject: leadData.subject,
+      name: leadData.name,
+      email: leadData.email,
+      phone: leadData.phone,
+      message: leadData.message,
+      rawData: leadData.rawData,
+      metadata: leadData.metadata,
       createdAt: new Date(),
       updatedAt: new Date(),
-      metadata: leadData.metadata
+      status: 'new',
+      priority: 'medium',
+      assignedUserId: leadData.assignedUserId,
+      slaStatus: 'on_track',
+      firstResponseAt: leadData.firstResponseAt,
+      lastContactAt: leadData.lastContactAt,
+      tags: leadData.tags || [],
+      notes: leadData.notes
     };
   }
 
@@ -74,10 +100,17 @@ export class ConversationService {
     return {
       id: `conv_${Date.now()}`,
       leadId,
-      messages: [],
+      projectId: undefined,
+      channel: 'email',
+      assigneeUserId: undefined,
+      lastMsgAt: new Date(),
+      unreadCount: 0,
       status: 'active',
+      slaStatus: 'on_track',
+      slaDeadline: undefined,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      metadata: undefined
     };
   }
 
@@ -85,11 +118,21 @@ export class ConversationService {
     // Mock implementation
     return {
       id: `msg_${Date.now()}`,
-      conversationId,
-      content: message.content || '',
-      sender: message.sender || 'agent',
-      timestamp: new Date(),
-      metadata: message.metadata
+      convId: conversationId,
+      direction: 'outbound',
+      channel: 'email',
+      text: message.text || '',
+      html: message.html,
+      attachments: [],
+      meta: message.meta,
+      createdAt: new Date(),
+      sender: message.sender,
+      status: 'sent',
+      externalId: message.externalId,
+      replyToMessageId: message.replyToMessageId,
+      templateId: message.templateId,
+      slaImpact: false,
+      auditLog: undefined
     };
   }
 }
@@ -113,11 +156,21 @@ export class MessageService {
     // Mock implementation
     return {
       id: `msg_${Date.now()}`,
-      conversationId: message.conversationId || '',
-      content: message.content || '',
-      sender: message.sender || 'agent',
-      timestamp: new Date(),
-      metadata: message.metadata
+      convId: message.convId || '',
+      direction: message.direction || 'outbound',
+      channel: message.channel || 'email',
+      text: message.text || '',
+      html: message.html,
+      attachments: message.attachments || [],
+      meta: message.meta,
+      createdAt: new Date(),
+      sender: message.sender,
+      status: message.status || 'sent',
+      externalId: message.externalId,
+      replyToMessageId: message.replyToMessageId,
+      templateId: message.templateId,
+      slaImpact: message.slaImpact || false,
+      auditLog: message.auditLog
     };
   }
 

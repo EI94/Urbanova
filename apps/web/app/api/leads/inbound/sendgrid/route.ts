@@ -58,14 +58,19 @@ class MessageService {
 }
 
 class ProjectService {
-  async findProjectByListingId(listingId: string): Promise<string | null> {
+  async findProjectByListingId(listingId: string): Promise<{ id: string } | null> {
     console.log(`Finding project by listing ID: ${listingId}`);
     return null;
   }
 
-  async findProjectByCode(code: string): Promise<string | null> {
+  async findProjectByCode(code: string): Promise<{ id: string } | null> {
     console.log(`Finding project by code: ${code}`);
     return null;
+  }
+
+  async getDefaultProject(source: string): Promise<{ id: string } | null> {
+    console.log(`Getting default project for source: ${source}`);
+    return { id: 'default_project_id' };
   }
 }
 
@@ -140,8 +145,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to parse email' }, { status: 400 });
     }
 
-    // 4. Gestione allegati su GCS
-    const attachments = await processAttachments(sendGridData, parsedLead.leadId);
+    // 4. Gestione allegati su GCS (usando ID temporaneo)
+    const tempLeadId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const attachments = await processAttachments(sendGridData, tempLeadId);
 
     // 5. Matching progetto
     const projectId = await matchProject(parsedLead);
@@ -215,7 +221,7 @@ export async function POST(request: NextRequest) {
       projectId,
       metadata: {
         source: parsedLead.source,
-        piiFields: ['name', 'email', 'phone'].filter(field => parsedLead[field]),
+        piiFields: ['name', 'email', 'phone'].filter(field => parsedLead[field as keyof typeof parsedLead]),
         consentStatus: 'explicit',
         retentionPeriod: 730,
       },
@@ -364,9 +370,10 @@ async function processAttachments(sendGridData: any, leadId: string) {
         // Upload su GCS
         const gcsPath = `leads/${leadId}/attachments/${filename}`;
         const gcsUrl = await gcsService.uploadBuffer(
-          Buffer.from(attachmentData, 'base64'),
+          'urbanova-materials', // bucket
           gcsPath,
-          contentType
+          Buffer.from(attachmentData, 'base64'),
+          { contentType }
         );
 
         attachments.push({
@@ -392,7 +399,7 @@ async function matchProject(parsedLead: any) {
   // 1. Prova matching per listingId
   if (parsedLead.listingId) {
     const projectByListing = await projectService.findProjectByListingId(parsedLead.listingId);
-    if (projectByListing) {
+    if (projectByListing && projectByListing.id) {
       return projectByListing.id;
     }
   }
@@ -403,7 +410,7 @@ async function matchProject(parsedLead: any) {
     if (projectMatch) {
       const projectCode = projectMatch[1];
       const projectByCode = await projectService.findProjectByCode(projectCode);
-      if (projectByCode) {
+      if (projectByCode && projectByCode.id) {
         return projectByCode.id;
       }
     }
@@ -411,7 +418,7 @@ async function matchProject(parsedLead: any) {
 
   // 3. Fallback: progetto default per la zona
   const defaultProject = await projectService.getDefaultProject(parsedLead.source);
-  return defaultProject?.id || 'default_project';
+  return (defaultProject && defaultProject.id) ? defaultProject.id : 'default_project';
 }
 
 function getChannelFromSource(source: string): string {

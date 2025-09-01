@@ -1,5 +1,5 @@
 // Re-export storage types from @urbanova/types
-export * from '@urbanova/types/storage';
+export * from '@urbanova/types';
 
 // GCS Service
 export class GCSService {
