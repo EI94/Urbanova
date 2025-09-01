@@ -66,7 +66,7 @@ export async function createCustomer(email: string, name?: string): Promise<Stri
             ...(customer.address.state && { state: customer.address.state }),
             postal_code: customer.address.postal_code || '',
             country: customer.address.country || '',
-          }
+          } as any
         : undefined,
       tax_exempt: customer.tax_exempt as any,
       tax_ids: customer.tax_ids?.data.map(taxId => ({
@@ -106,7 +106,7 @@ export async function getCustomer(customerId: string): Promise<StripeCustomer> {
             ...(customer.address.state && { state: customer.address.state }),
             postal_code: customer.address.postal_code || '',
             country: customer.address.country || '',
-          }
+          } as any
         : undefined,
       tax_exempt: customer.tax_exempt as any,
       tax_ids: customer.tax_ids?.data.map(taxId => ({
@@ -204,8 +204,8 @@ export async function createSubscription(
       status: subscription.status as any,
       current_period_start: subscription.current_period_start,
       current_period_end: subscription.current_period_end,
-      trial_start: subscription.trial_start || undefined,
-      trial_end: subscription.trial_end || undefined,
+      ...(subscription.trial_start && { trial_start: subscription.trial_start }),
+      ...(subscription.trial_end && { trial_end: subscription.trial_end }),
       items: {
         data: subscription.items.data.map(item => ({
           id: item.id,
@@ -242,8 +242,8 @@ export async function getSubscription(subscriptionId: string): Promise<StripeSub
       status: subscription.status as any,
       current_period_start: subscription.current_period_start,
       current_period_end: subscription.current_period_end,
-      trial_start: subscription.trial_start || undefined,
-      trial_end: subscription.trial_end || undefined,
+      ...(subscription.trial_start && { trial_start: subscription.trial_start }),
+      ...(subscription.trial_end && { trial_end: subscription.trial_end }),
       items: {
         data: subscription.items.data.map(item => ({
           id: item.id,
@@ -280,8 +280,8 @@ export async function cancelSubscription(subscriptionId: string): Promise<Stripe
       status: subscription.status as any,
       current_period_start: subscription.current_period_start,
       current_period_end: subscription.current_period_end,
-      trial_start: subscription.trial_start || undefined,
-      trial_end: subscription.trial_end || undefined,
+      ...(subscription.trial_start && { trial_start: subscription.trial_start }),
+      ...(subscription.trial_end && { trial_end: subscription.trial_end }),
       items: {
         data: subscription.items.data.map(item => ({
           id: item.id,
@@ -345,10 +345,10 @@ export async function createCheckoutSession(
       url: session.url!,
       customer: session.customer as string,
       subscription: session.subscription as string,
-      mode: session.mode,
+      mode: session.mode as any,
       success_url: session.success_url!,
       cancel_url: session.cancel_url!,
-      metadata: session.metadata,
+      metadata: session.metadata as any,
     };
   } catch (error) {
     console.error('Error creating checkout session:', error);
@@ -370,7 +370,7 @@ export async function createCustomerPortalSession(
 
     return {
       id: session.id,
-      url: session.url,
+      url: session.url || '',
       customer: session.customer,
       return_url: session.return_url,
     };
