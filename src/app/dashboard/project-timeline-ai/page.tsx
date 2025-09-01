@@ -160,14 +160,14 @@ export default function ProjectTimelineAIPage() {
   const createNewTask = async () => {
     try {
       if (!newTaskData.name || !newTaskData.assignedTo.id) {
-        toast.error('❌ Compila tutti i campi obbligatori');
+        toast('❌ Compila tutti i campi obbligatori', { icon: '❌' });
         return;
       }
 
       const taskId = await projectTimelineService.createTask(newTaskData);
       console.log('✅ [ProjectTimeline] Nuovo task creato:', taskId);
 
-      toast.success('✅ Task creato con successo!');
+      toast('✅ Task creato con successo!', { icon: '✅' });
       setShowNewTaskModal(false);
 
       // Reset form e ricarica dati
@@ -192,14 +192,14 @@ export default function ProjectTimelineAIPage() {
       await loadData();
     } catch (error) {
       console.error('❌ [ProjectTimeline] Errore creazione task:', error);
-      toast.error('❌ Errore durante la creazione del task');
+      toast('❌ Errore durante la creazione del task', { icon: '❌' });
     }
   };
 
   const createNewMilestone = async () => {
     try {
       if (!newTaskData.name || !newTaskData.projectId) {
-        toast.error('❌ Compila tutti i campi obbligatori');
+        toast('❌ Compila tutti i campi obbligatori', { icon: '❌' });
         return;
       }
 
@@ -218,13 +218,13 @@ export default function ProjectTimelineAIPage() {
       const milestoneId = await projectTimelineService.createMilestone(milestoneData);
       console.log('✅ [ProjectTimeline] Nuovo milestone creato:', milestoneId);
 
-      toast.success('✅ Milestone creato con successo!');
+      toast('✅ Milestone creato con successo!', { icon: '✅' });
       setShowNewMilestoneModal(false);
 
       await loadData();
     } catch (error) {
       console.error('❌ [ProjectTimeline] Errore creazione milestone:', error);
-      toast.error('❌ Errore durante la creazione del milestone');
+      toast('❌ Errore durante la creazione del milestone', { icon: '❌' });
     }
   };
 
@@ -237,7 +237,7 @@ export default function ProjectTimelineAIPage() {
       await loadData();
     } catch (error) {
       console.error('❌ [ProjectTimeline] Errore aggiornamento progresso:', error);
-      toast.error("❌ Errore durante l'aggiornamento del progresso");
+      toast("❌ Errore durante l'aggiornamento del progresso", { icon: '❌' });
     }
   };
 
