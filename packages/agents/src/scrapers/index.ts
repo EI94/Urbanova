@@ -128,11 +128,11 @@ export class RealLandScrapingAgentAdapter implements LandScrapingAgent {
       location: `${land.location}, Milano, Lombardia, Italia`,
       // features: land.features, // Not available in Listing type
       // images: land.images || [], // Not available in Listing type
-      contactInfo: {
-        name: land.contactInfo?.agent || 'Agenzia Immobiliare',
-        email: land.contactInfo?.email || 'info@agenzia.it',
-        phone: land.contactInfo?.phone || '+39 02 1234567',
-      },
+      // contactInfo: {
+      //   name: land.contactInfo?.agent || 'Agenzia Immobiliare',
+      //   email: land.contactInfo?.email || 'info@agenzia.it',
+      //   phone: land.contactInfo?.phone || '+39 02 1234567',
+      // }, // Not available in Listing type
       createdAt: land.dateScraped || new Date(),
       updatedAt: new Date(),
     };

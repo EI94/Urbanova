@@ -33,7 +33,7 @@ const getVendorQuestionnaireById = async (id: string) => ({
   createdAt: new Date(),
   expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   metadata: { sentBy: 'temp', sentAt: new Date(), reminderCount: 0 },
-  answers: undefined
+
 });
 const getVendorQuestionnaireByToken = async (token: string) => ({
   id: 'temp-id',
@@ -44,7 +44,7 @@ const getVendorQuestionnaireByToken = async (token: string) => ({
   createdAt: new Date(),
   expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   metadata: { sentBy: 'temp', sentAt: new Date(), reminderCount: 0 },
-  answers: undefined
+
 });
 const updateVendorQuestionnaire = async (id: string, updates: any) => ({
   id,
@@ -55,7 +55,7 @@ const updateVendorQuestionnaire = async (id: string, updates: any) => ({
   createdAt: new Date(),
   expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   metadata: { sentBy: 'temp', sentAt: new Date(), reminderCount: 0 },
-  answers: undefined,
+,
   ...updates
 });
 const listVendorQuestionnairesByProject = async (projectId: string) => [];
@@ -161,8 +161,17 @@ export class VendorQuestionnaireService {
     answers: VendorAnswers
   ): Promise<{ success: boolean; questionnaire?: VendorQuestionnaire }> {
     try {
-      // Validazione risposte
-      const validatedAnswers = zVendorAnswers.parse(answers);
+      // Validazione risposte - ensure optional fields are properly handled
+      const sanitizedAnswers = {
+        ...answers,
+        cdu: {
+          ...answers.cdu,
+          cduDate: answers.cdu.cduDate || '',
+          cduValidity: answers.cdu.cduValidity || '',
+          cduNotes: answers.cdu.cduNotes || '',
+        }
+      };
+      const validatedAnswers = zVendorAnswers.parse(sanitizedAnswers);
 
       // Recupera questionario
       const questionnaire = await this.getQuestionnaireByToken(token);

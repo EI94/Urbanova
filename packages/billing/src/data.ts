@@ -43,18 +43,18 @@ const db = {
     }),
     where: (field: string, op: string, value: any) => ({
       get: async () => ({ forEach: (callback: any) => {} }),
+      where: (field2: string, op2: string, value2: any) => ({
+        get: async () => ({ forEach: (callback: any) => {} }),
+        orderBy: (field: string, direction: string) => ({
+          get: async () => ({ forEach: (callback: any) => {} })
+        })
+      }),
       orderBy: (field: string, direction: string) => ({
         get: async () => ({ forEach: (callback: any) => {} })
       })
     }),
     orderBy: (field: string, direction: string) => ({
       get: async () => ({ forEach: (callback: any) => {} })
-    }),
-    where: (field: string, op: string, value: any) => ({
-      get: async () => ({ forEach: (callback: any) => {} }),
-      orderBy: (field: string, direction: string) => ({
-        get: async () => ({ forEach: (callback: any) => {} })
-      })
     }),
   }),
 };
