@@ -21,6 +21,7 @@ const db = {
           trialEndsAt: new Date().toISOString(),
           timestamp: new Date().toISOString(),
           createdAt: new Date().toISOString(),
+          stripeSubId: '',
         })
       }),
       update: async (data: any) => console.log(`Updating ${name}/${id}:`, data),
@@ -35,6 +36,7 @@ const db = {
             trialEndsAt: new Date().toISOString(),
             timestamp: new Date().toISOString(),
             createdAt: new Date().toISOString(),
+            stripeSubId: '',
           })
         });
       } 
@@ -47,6 +49,12 @@ const db = {
     }),
     orderBy: (field: string, direction: string) => ({
       get: async () => ({ forEach: (callback: any) => {} })
+    }),
+    where: (field: string, op: string, value: any) => ({
+      get: async () => ({ forEach: (callback: any) => {} }),
+      orderBy: (field: string, direction: string) => ({
+        get: async () => ({ forEach: (callback: any) => {} })
+      })
     }),
   }),
 };
@@ -194,6 +202,7 @@ export async function getUsageEvent(eventId: string): Promise<UsageEvent | null>
     const usageEvent = {
       ...data,
       timestamp: new Date(data.timestamp),
+      action: data.action as any, // Cast to ToolAction
     };
 
     return zUsageEvent.parse(usageEvent);
@@ -230,6 +239,7 @@ export async function listUsageEventsByWorkspace(
       const usageEvent = {
         ...data,
         timestamp: new Date(data.timestamp),
+        action: data.action as any, // Cast to ToolAction
       };
 
       try {
@@ -400,6 +410,7 @@ export async function getPendingUsageEvents(): Promise<UsageEvent[]> {
       const event = {
         ...data,
         timestamp: new Date(data.timestamp),
+        action: data.action as any, // Cast to ToolAction
       };
 
       try {

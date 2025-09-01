@@ -29,30 +29,33 @@ const getVendorQuestionnaireById = async (id: string) => ({
   projectId: 'temp-project',
   vendorContact: { name: 'temp', email: 'temp@email.com', phone: '', role: '', company: '' },
   token: 'temp-token',
-  status: 'pending',
+  status: 'pending' as const,
   createdAt: new Date(),
   expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-  metadata: { sentBy: 'temp', sentAt: new Date(), reminderCount: 0 }
+  metadata: { sentBy: 'temp', sentAt: new Date(), reminderCount: 0 },
+  answers: undefined
 });
 const getVendorQuestionnaireByToken = async (token: string) => ({
   id: 'temp-id',
   projectId: 'temp-project',
   vendorContact: { name: 'temp', email: 'temp@email.com', phone: '', role: '', company: '' },
   token,
-  status: 'pending',
+  status: 'pending' as const,
   createdAt: new Date(),
   expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-  metadata: { sentBy: 'temp', sentAt: new Date(), reminderCount: 0 }
+  metadata: { sentBy: 'temp', sentAt: new Date(), reminderCount: 0 },
+  answers: undefined
 });
 const updateVendorQuestionnaire = async (id: string, updates: any) => ({
   id,
   projectId: 'temp-project',
   vendorContact: { name: 'temp', email: 'temp@email.com', phone: '', role: '', company: '' },
   token: 'temp-token',
-  status: 'pending',
+  status: 'pending' as const,
   createdAt: new Date(),
   expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   metadata: { sentBy: 'temp', sentAt: new Date(), reminderCount: 0 },
+  answers: undefined,
   ...updates
 });
 const listVendorQuestionnairesByProject = async (projectId: string) => [];
@@ -101,7 +104,7 @@ export class VendorQuestionnaireService {
         company: validatedContact.company ?? '',
       },
       token,
-      status: 'pending',
+      status: 'pending' as const,
       createdAt: now,
       expiresAt,
       metadata: {
