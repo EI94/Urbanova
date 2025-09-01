@@ -1,34 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
-import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
-import { UserProfile } from '@/types/userProfile';
-import { NotificationStats } from '@/types/notifications';
 import { toast } from 'react-hot-toast';
 
-// Componenti UI
-import LanguageSelector from '@/components/ui/LanguageSelector';
-import NotificationsPanel from '@/components/ui/NotificationsPanel';
-import UserProfilePanel from '@/components/ui/UserProfilePanel';
-
-// Componenti Gestione Team
-import AdvancedTeamManagement from '@/components/ui/AdvancedTeamManagement';
-import WorkflowManagement from '@/components/ui/WorkflowManagement';
-import RealtimeCollaboration from '@/components/ui/RealtimeCollaboration';
-import SecurityCompliance from '@/components/ui/SecurityCompliance';
-import MonitoringObservability from '@/components/ui/MonitoringObservability';
-import AIMLCenter from '@/components/ui/AIMLCenter';
-import Web3Center from '@/components/ui/Web3Center';
-import APIGatewayCenter from '@/components/ui/APIGatewayCenter';
-import DevOpsCenter from '@/components/ui/DevOpsCenter';
-import SecurityCenter from '@/components/ui/SecurityCenter';
-
-// Import icone
-import { 
+import {
   SettingsIcon,
   UsersIcon,
   ShieldIcon,
@@ -43,8 +18,34 @@ import {
   ChartIcon,
   CogIcon,
   KeyIcon,
-  GlobeIcon
+  GlobeIcon,
 } from '@/components/icons';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+
+// Componenti UI
+import UserProfilePanel from '@/components/ui/UserProfilePanel';
+
+// Componenti Gestione Team
+import AdvancedTeamManagement from '@/components/ui/AdvancedTeamManagement';
+import WorkflowManagement from '@/components/ui/WorkflowManagement';
+import RealtimeCollaboration from '@/components/ui/RealtimeCollaboration';
+import SecurityCompliance from '@/components/ui/SecurityCompliance';
+import MonitoringObservability from '@/components/ui/MonitoringObservability';
+import AIMLCenter from '@/components/ui/AIMLCenter';
+import Web3Center from '@/components/ui/Web3Center';
+import APIGatewayCenter from '@/components/ui/APIGatewayCenter';
+import DevOpsCenter from '@/components/ui/DevOpsCenter';
+import LanguageSelector from '@/components/ui/LanguageSelector';
+import NotificationsPanel from '@/components/ui/NotificationsPanel';
+import SecurityCenter from '@/components/ui/SecurityCenter';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
+import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
+import { NotificationStats } from '@/types/notifications';
+import { UserProfile } from '@/types/userProfile';
+
+// Import icone
 
 interface SettingsSection {
   id: string;
@@ -84,85 +85,85 @@ export default function ImpostazioniPage() {
       title: 'Profilo Utente',
       description: 'Gestisci i tuoi dati personali e preferenze',
       icon: <UserIcon className="h-5 w-5" />,
-      isActive: true
+      isActive: true,
     },
     {
       id: 'team',
       title: 'Gestione Team Avanzata',
       description: 'Gestisci ruoli, permessi e performance del team',
       icon: <UsersIcon className="h-5 w-5" />,
-      isActive: true
+      isActive: true,
     },
     {
       id: 'security',
       title: 'Sicurezza & Compliance',
       description: 'Configura sicurezza, privacy e conformità',
       icon: <ShieldIcon className="h-5 w-5" />,
-      isActive: true
+      isActive: true,
     },
     {
       id: 'notifications',
       title: 'Notifiche & Comunicazioni',
       description: 'Gestisci notifiche e preferenze comunicazioni',
       icon: <BellIcon className="h-5 w-5" />,
-      isActive: true
+      isActive: true,
     },
     {
       id: 'language',
       title: 'Lingua & Localizzazione',
       description: 'Configura lingua e impostazioni regionali',
       icon: <LanguageIcon className="h-5 w-5" />,
-      isActive: true
+      isActive: true,
     },
     {
       id: 'workflow',
       title: 'Workflow & Approvazioni',
       description: 'Gestisci processi e flussi di approvazione',
       icon: <CogIcon className="h-5 w-5" />,
-      isActive: true
+      isActive: true,
     },
     {
       id: 'collaboration',
       title: 'Collaborazione Real-time',
       description: 'Strumenti di collaborazione avanzati',
       icon: <UsersIcon className="h-5 w-5" />,
-      isActive: true
+      isActive: true,
     },
     {
       id: 'monitoring',
       title: 'Monitoring & Observability',
       description: 'Monitoraggio sistema e metriche performance',
       icon: <ChartIcon className="h-5 w-5" />,
-      isActive: true
+      isActive: true,
     },
     {
       id: 'ai-ml',
       title: 'AI & Machine Learning',
       description: 'Configurazione modelli AI e ML',
       icon: <CodeIcon className="h-5 w-5" />,
-      isActive: true
+      isActive: true,
     },
     {
       id: 'web3',
       title: 'Web3 & Blockchain',
       description: 'Integrazioni blockchain e Web3',
       icon: <GlobeIcon className="h-5 w-5" />,
-      isActive: true
+      isActive: true,
     },
     {
       id: 'api-gateway',
       title: 'API Gateway & Microservices',
       description: 'Gestione API e architettura microservizi',
       icon: <KeyIcon className="h-5 w-5" />,
-      isActive: true
+      isActive: true,
     },
     {
       id: 'devops',
       title: 'DevOps & CI/CD',
       description: 'Pipeline CI/CD e automazione deployment',
       icon: <CloudIcon className="h-5 w-5" />,
-      isActive: true
-    }
+      isActive: true,
+    },
   ];
 
   useEffect(() => {
@@ -178,7 +179,7 @@ export default function ImpostazioniPage() {
         firebaseUserProfileService.getUserProfile(currentUser?.uid || ''),
         firebaseNotificationService.getNotificationStats(currentUser?.uid || ''),
       ]);
-      
+
       setUserProfile(profile);
       setNotificationStats(stats);
     } catch (error) {
@@ -206,7 +207,9 @@ export default function ImpostazioniPage() {
                   <input
                     type="text"
                     value={userProfile?.firstName || ''}
-                    onChange={(e) => setUserProfile(prev => prev ? { ...prev, firstName: e.target.value } : null)}
+                    onChange={e =>
+                      setUserProfile(prev => (prev ? { ...prev, firstName: e.target.value } : null))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Inserisci il tuo nome"
                   />
@@ -216,7 +219,9 @@ export default function ImpostazioniPage() {
                   <input
                     type="text"
                     value={userProfile?.lastName || ''}
-                    onChange={(e) => setUserProfile(prev => prev ? { ...prev, lastName: e.target.value } : null)}
+                    onChange={e =>
+                      setUserProfile(prev => (prev ? { ...prev, lastName: e.target.value } : null))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Inserisci il tuo cognome"
                   />
@@ -256,7 +261,9 @@ export default function ImpostazioniPage() {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Gestione Team Avanzata</h3>
-                  <p className="text-sm text-gray-600">Gestisci ruoli, permessi e performance del team</p>
+                  <p className="text-sm text-gray-600">
+                    Gestisci ruoli, permessi e performance del team
+                  </p>
                 </div>
                 <button
                   onClick={() => setShowAdvancedTeamManagement(true)}
@@ -265,7 +272,7 @@ export default function ImpostazioniPage() {
                   Gestisci Team
                 </button>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <div className="flex items-center mb-2">
@@ -275,7 +282,7 @@ export default function ImpostazioniPage() {
                   <p className="text-2xl font-bold text-blue-900">4</p>
                   <p className="text-sm text-blue-700">Attivi</p>
                 </div>
-                
+
                 <div className="bg-green-50 p-4 rounded-lg">
                   <div className="flex items-center mb-2">
                     <ShieldIcon className="h-5 w-5 text-green-600 mr-2" />
@@ -284,7 +291,7 @@ export default function ImpostazioniPage() {
                   <p className="text-2xl font-bold text-green-900">5</p>
                   <p className="text-sm text-green-700">Configurati</p>
                 </div>
-                
+
                 <div className="bg-purple-50 p-4 rounded-lg">
                   <div className="flex items-center mb-2">
                     <ChartIcon className="h-5 w-5 text-purple-600 mr-2" />
@@ -314,30 +321,36 @@ export default function ImpostazioniPage() {
                   Configura Sicurezza
                 </button>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center">
                     <LockIcon className="h-5 w-5 text-green-600 mr-3" />
                     <span className="font-medium">Autenticazione a Due Fattori</span>
                   </div>
-                  <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Attiva</span>
+                  <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                    Attiva
+                  </span>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center">
                     <ShieldIcon className="h-5 w-5 text-blue-600 mr-3" />
                     <span className="font-medium">Crittografia Dati</span>
                   </div>
-                  <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">AES-256</span>
+                  <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                    AES-256
+                  </span>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center">
                     <SecurityIcon className="h-5 w-5 text-yellow-600 mr-3" />
                     <span className="font-medium">Audit Log</span>
                   </div>
-                  <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Attivo</span>
+                  <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
+                    Attivo
+                  </span>
                 </div>
               </div>
             </div>
@@ -351,7 +364,9 @@ export default function ImpostazioniPage() {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Notifiche & Comunicazioni</h3>
-                  <p className="text-sm text-gray-600">Gestisci notifiche e preferenze comunicazioni</p>
+                  <p className="text-sm text-gray-600">
+                    Gestisci notifiche e preferenze comunicazioni
+                  </p>
                 </div>
                 <button
                   onClick={() => setShowNotifications(true)}
@@ -360,7 +375,7 @@ export default function ImpostazioniPage() {
                   Configura Notifiche
                 </button>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="font-medium text-gray-900 mb-3">Notifiche Push</h4>
@@ -379,7 +394,7 @@ export default function ImpostazioniPage() {
                     </label>
                   </div>
                 </div>
-                
+
                 <div>
                   <h4 className="font-medium text-gray-900 mb-3">Notifiche Email</h4>
                   <div className="space-y-2">
@@ -409,21 +424,27 @@ export default function ImpostazioniPage() {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Lingua & Localizzazione</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Lingua Principale</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Lingua Principale
+                  </label>
                   <LanguageSelector variant="full" />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Fuso Orario</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Fuso Orario
+                  </label>
                   <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <option value="Europe/Rome">Europe/Rome (UTC+1)</option>
                     <option value="Europe/London">Europe/London (UTC+0)</option>
                     <option value="America/New_York">America/New_York (UTC-5)</option>
                   </select>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Formato Data</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Formato Data
+                  </label>
                   <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <option value="DD/MM/YYYY">DD/MM/YYYY</option>
                     <option value="MM/DD/YYYY">MM/DD/YYYY</option>
@@ -439,7 +460,9 @@ export default function ImpostazioniPage() {
         return (
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Sezione in Sviluppo</h3>
-            <p className="text-gray-600">Questa sezione è in fase di sviluppo e sarà disponibile prossimamente.</p>
+            <p className="text-gray-600">
+              Questa sezione è in fase di sviluppo e sarà disponibile prossimamente.
+            </p>
           </div>
         );
     }
@@ -466,7 +489,7 @@ export default function ImpostazioniPage() {
           <div className="bg-white rounded-lg shadow-sm border p-4">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Impostazioni</h3>
             <nav className="space-y-1">
-              {settingsSections.map((section) => (
+              {settingsSections.map(section => (
                 <button
                   key={section.id}
                   onClick={() => handleSectionChange(section.id)}
@@ -487,21 +510,13 @@ export default function ImpostazioniPage() {
         </div>
 
         {/* Contenuto Principale */}
-        <div className="flex-1">
-          {renderSectionContent()}
-        </div>
+        <div className="flex-1">{renderSectionContent()}</div>
       </div>
 
       {/* Modali */}
-      <NotificationsPanel 
-        isOpen={showNotifications}
-        onClose={() => setShowNotifications(false)}
-      />
+      <NotificationsPanel isOpen={showNotifications} onClose={() => setShowNotifications(false)} />
 
-      <UserProfilePanel 
-        isOpen={showUserProfile}
-        onClose={() => setShowUserProfile(false)}
-      />
+      <UserProfilePanel isOpen={showUserProfile} onClose={() => setShowUserProfile(false)} />
 
       <AdvancedTeamManagement
         isOpen={showAdvancedTeamManagement}
@@ -512,7 +527,7 @@ export default function ImpostazioniPage() {
         onUpdateMemberRole={(memberId, newRole) => {
           toast('Ruolo aggiornato', { icon: '🔄' });
         }}
-        onRemoveMember={(memberId) => {
+        onRemoveMember={memberId => {
           toast('Membro rimosso dal team', { icon: '👋' });
         }}
         onUpdatePermissions={(memberId, permissions) => {

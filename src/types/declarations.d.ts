@@ -98,7 +98,7 @@ declare module '@/components/icons' {
   interface IconProps {
     className?: string;
   }
-  
+
   export function DashboardIcon(props?: IconProps): JSX.Element;
   export function ProjectsIcon(props?: IconProps): JSX.Element;
   export function SettingsIcon(props?: IconProps): JSX.Element;
@@ -241,4 +241,4 @@ declare module 'clsx' {
 
 declare module 'tailwind-merge' {
   export function twMerge(...inputs: any[]): string;
-} 
+}

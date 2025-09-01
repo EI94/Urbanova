@@ -1,19 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { designProjectService, DesignProject } from '@/lib/designProjectService';
-import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'react-hot-toast';
-import { 
-  BuildingIcon, 
-  TrendingUpIcon, 
-  ClockIcon, 
+
+import {
+  BuildingIcon,
+  TrendingUpIcon,
+  ClockIcon,
   EyeIcon,
   EditIcon,
   TrashIcon,
-  PlusIcon
+  PlusIcon,
 } from '@/components/icons';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { useAuth } from '@/contexts/AuthContext';
+import { designProjectService, DesignProject } from '@/lib/designProjectService';
 
 export default function ProjectsPage() {
   const { user } = useAuth();
@@ -35,12 +36,11 @@ export default function ProjectsPage() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const userProjects = await designProjectService.getUserProjects(user.uid);
       setProjects(userProjects);
-      
+
       console.log('✅ [Progetti] Progetti caricati:', userProjects.length);
-      
     } catch (error) {
       console.error('❌ [Progetti] Errore caricamento progetti:', error);
       setError('Impossibile caricare i progetti');
@@ -51,29 +51,40 @@ export default function ProjectsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PLANNING': return 'bg-blue-100 text-blue-800';
-      case 'IN_PROGRESS': return 'bg-yellow-100 text-yellow-800';
-      case 'COMPLETED': return 'bg-green-100 text-green-800';
-      case 'ON_HOLD': return 'bg-gray-100 text-gray-800';
-      case 'CANCELLED': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'PLANNING':
+        return 'bg-blue-100 text-blue-800';
+      case 'IN_PROGRESS':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'COMPLETED':
+        return 'bg-green-100 text-green-800';
+      case 'ON_HOLD':
+        return 'bg-gray-100 text-gray-800';
+      case 'CANCELLED':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'LOW': return 'bg-gray-100 text-gray-800';
-      case 'MEDIUM': return 'bg-blue-100 text-blue-800';
-      case 'HIGH': return 'bg-orange-100 text-orange-800';
-      case 'URGENT': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'LOW':
+        return 'bg-gray-100 text-gray-800';
+      case 'MEDIUM':
+        return 'bg-blue-100 text-blue-800';
+      case 'HIGH':
+        return 'bg-orange-100 text-orange-800';
+      case 'URGENT':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('it-IT', {
       style: 'currency',
-      currency: 'EUR'
+      currency: 'EUR',
     }).format(amount);
   };
 
@@ -95,7 +106,7 @@ export default function ProjectsPage() {
       <DashboardLayout title="Progetti">
         <div className="flex flex-col items-center justify-center h-64 space-y-4">
           <div className="text-red-600 text-xl">❌ {error}</div>
-          <button 
+          <button
             onClick={loadProjects}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
@@ -113,13 +124,11 @@ export default function ProjectsPage() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Progetti</h1>
-            <p className="text-gray-600 mt-1">
-              Gestisci tutti i tuoi progetti immobiliari
-            </p>
+            <p className="text-gray-600 mt-1">Gestisci tutti i tuoi progetti immobiliari</p>
           </div>
           <div className="flex space-x-3">
-            <button 
-              onClick={() => window.location.href = '/dashboard/design-center'}
+            <button
+              onClick={() => (window.location.href = '/dashboard/design-center')}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <PlusIcon className="h-4 w-4 mr-2 inline" />
@@ -141,7 +150,7 @@ export default function ProjectsPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-lg">
@@ -155,7 +164,7 @@ export default function ProjectsPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="p-2 bg-yellow-100 rounded-lg">
@@ -169,7 +178,7 @@ export default function ProjectsPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="p-2 bg-purple-100 rounded-lg">
@@ -191,8 +200,8 @@ export default function ProjectsPage() {
             <BuildingIcon className="h-16 w-16 mx-auto text-gray-400 mb-4" />
             <h3 className="text-lg font-medium text-gray-700 mb-2">Nessun progetto trovato</h3>
             <p className="text-gray-500 mb-4">Crea il tuo primo progetto dal Design Center</p>
-            <button 
-              onClick={() => window.location.href = '/dashboard/design-center'}
+            <button
+              onClick={() => (window.location.href = '/dashboard/design-center')}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <PlusIcon className="h-4 w-4 mr-2 inline" />
@@ -204,7 +213,7 @@ export default function ProjectsPage() {
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-medium text-gray-900">I Tuoi Progetti</h3>
             </div>
-            
+
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -230,7 +239,7 @@ export default function ProjectsPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {projects.map((project) => (
+                  {projects.map(project => (
                     <tr key={project.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
@@ -240,22 +249,22 @@ export default function ProjectsPage() {
                             </div>
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {project.name}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {project.location}
-                            </div>
+                            <div className="text-sm font-medium text-gray-900">{project.name}</div>
+                            <div className="text-sm text-gray-500">{project.location}</div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(project.status)}`}>
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(project.status)}`}
+                        >
                           {project.status}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(project.priority)}`}>
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(project.priority)}`}
+                        >
                           {project.priority}
                         </span>
                       </td>
@@ -265,14 +274,12 @@ export default function ProjectsPage() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div 
-                              className="bg-blue-600 h-2 rounded-full" 
+                            <div
+                              className="bg-blue-600 h-2 rounded-full"
                               style={{ width: `${project.progress}%` }}
                             ></div>
                           </div>
-                          <span className="ml-2 text-sm text-gray-600">
-                            {project.progress}%
-                          </span>
+                          <span className="ml-2 text-sm text-gray-600">{project.progress}%</span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -298,4 +305,4 @@ export default function ProjectsPage() {
       </div>
     </DashboardLayout>
   );
-} 
+}

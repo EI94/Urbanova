@@ -1,19 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { LandSearchCriteria } from '@/types/land';
-import { 
-  XIcon, 
-  CalendarIcon, 
-  ClockIcon, 
+
+import {
+  XIcon,
+  CalendarIcon,
+  ClockIcon,
   MailIcon,
   LocationIcon,
   EuroIcon,
   BuildingIcon,
   CheckIcon,
   SearchIcon,
-  RepeatIcon
+  RepeatIcon,
 } from '@/components/icons';
+import { LandSearchCriteria } from '@/types/land';
 
 interface SearchSchedulerModalProps {
   isOpen: boolean;
@@ -36,7 +37,7 @@ export default function SearchSchedulerModal({
   onScheduleSearch,
   onExecuteSearch,
   currentCriteria,
-  currentEmail
+  currentEmail,
 }: SearchSchedulerModalProps) {
   const [searchName, setSearchName] = useState('');
   const [email, setEmail] = useState(currentEmail);
@@ -80,7 +81,7 @@ export default function SearchSchedulerModal({
       criteria: currentCriteria,
       email,
       frequency,
-      time
+      time,
     });
 
     // Reset form
@@ -93,11 +94,16 @@ export default function SearchSchedulerModal({
 
   const getFrequencyLabel = (freq: string) => {
     switch (freq) {
-      case 'daily': return 'Giornaliera';
-      case 'weekly': return 'Settimanale';
-      case 'monthly': return 'Mensile';
-      case 'yearly': return 'Annuale';
-      default: return freq;
+      case 'daily':
+        return 'Giornaliera';
+      case 'weekly':
+        return 'Settimanale';
+      case 'monthly':
+        return 'Mensile';
+      case 'yearly':
+        return 'Annuale';
+      default:
+        return freq;
     }
   };
 
@@ -135,17 +141,18 @@ export default function SearchSchedulerModal({
                   {currentCriteria.location || 'Nessuna località selezionata'}
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <EuroIcon className="inline h-4 w-4 mr-1" />
                   Fascia di Prezzo
                 </label>
                 <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded border">
-                  €{currentCriteria.minPrice?.toLocaleString()} - €{currentCriteria.maxPrice?.toLocaleString()}
+                  €{currentCriteria.minPrice?.toLocaleString()} - €
+                  {currentCriteria.maxPrice?.toLocaleString()}
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <BuildingIcon className="inline h-4 w-4 mr-1" />
@@ -155,7 +162,7 @@ export default function SearchSchedulerModal({
                   {currentCriteria.minArea}m² - {currentCriteria.maxArea}m²
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <MailIcon className="inline h-4 w-4 mr-1" />
@@ -164,7 +171,7 @@ export default function SearchSchedulerModal({
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   placeholder="email@esempio.com"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
@@ -175,7 +182,7 @@ export default function SearchSchedulerModal({
           {/* Opzioni di Esecuzione */}
           <div className="mb-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Opzioni di Esecuzione</h3>
-            
+
             <div className="space-y-4">
               {/* Esecuzione Immediata */}
               <div className="border border-gray-200 rounded-lg p-4">
@@ -230,19 +237,19 @@ export default function SearchSchedulerModal({
                         <input
                           type="text"
                           value={searchName}
-                          onChange={(e) => setSearchName(e.target.value)}
+                          onChange={e => setSearchName(e.target.value)}
                           placeholder="es. Milano - Terreni Edificabili"
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                       </div>
-                      
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Frequenza
                         </label>
                         <select
                           value={frequency}
-                          onChange={(e) => setFrequency(e.target.value as any)}
+                          onChange={e => setFrequency(e.target.value as any)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
                           <option value="daily">Giornaliera</option>
@@ -251,7 +258,7 @@ export default function SearchSchedulerModal({
                           <option value="yearly">Annuale</option>
                         </select>
                       </div>
-                      
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           <ClockIcon className="inline h-4 w-4 mr-1" />
@@ -260,11 +267,11 @@ export default function SearchSchedulerModal({
                         <input
                           type="time"
                           value={time}
-                          onChange={(e) => setTime(e.target.value)}
+                          onChange={e => setTime(e.target.value)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                       </div>
-                      
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Prossima Esecuzione
@@ -275,7 +282,7 @@ export default function SearchSchedulerModal({
                             const [hours, minutes] = time.split(':');
                             const nextRun = new Date(now);
                             nextRun.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-                            
+
                             if (nextRun <= now) {
                               switch (frequency) {
                                 case 'daily':
@@ -292,20 +299,20 @@ export default function SearchSchedulerModal({
                                   break;
                               }
                             }
-                            
+
                             return nextRun.toLocaleDateString('it-IT', {
                               weekday: 'long',
                               year: 'numeric',
                               month: 'long',
                               day: 'numeric',
                               hour: '2-digit',
-                              minute: '2-digit'
+                              minute: '2-digit',
                             });
                           })()}
                         </div>
                       </div>
                     </div>
-                    
+
                     <button
                       onClick={handleScheduleSearch}
                       className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
@@ -322,4 +329,4 @@ export default function SearchSchedulerModal({
       </div>
     </div>
   );
-} 
+}

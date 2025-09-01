@@ -1,19 +1,20 @@
-import { 
-  collection, 
-  doc, 
-  setDoc, 
-  getDocs, 
-  getDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
-  orderBy, 
+import {
+  collection,
+  doc,
+  setDoc,
+  getDocs,
+  getDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
   limit,
   serverTimestamp,
   Timestamp,
-  addDoc
+  addDoc,
 } from 'firebase/firestore';
+
 import { db } from './firebase';
 
 export interface ProjectTask {
@@ -74,7 +75,17 @@ export interface ProjectMilestone {
   name: string;
   description: string;
   date: Date;
-  type: 'PROJECT_START' | 'DESIGN_COMPLETE' | 'PERMITS_APPROVED' | 'CONSTRUCTION_START' | 'FOUNDATION_COMPLETE' | 'STRUCTURE_COMPLETE' | 'MEP_COMPLETE' | 'INTERIOR_COMPLETE' | 'FINAL_INSPECTION' | 'PROJECT_COMPLETE';
+  type:
+    | 'PROJECT_START'
+    | 'DESIGN_COMPLETE'
+    | 'PERMITS_APPROVED'
+    | 'CONSTRUCTION_START'
+    | 'FOUNDATION_COMPLETE'
+    | 'STRUCTURE_COMPLETE'
+    | 'MEP_COMPLETE'
+    | 'INTERIOR_COMPLETE'
+    | 'FINAL_INSPECTION'
+    | 'PROJECT_COMPLETE';
   status: 'PENDING' | 'ACHIEVED' | 'DELAYED' | 'CANCELLED';
   importance: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   dependencies: string[]; // ID dei task che devono essere completati
@@ -214,9 +225,9 @@ export class ProjectTimelineService {
   async createTask(taskData: CreateTaskData): Promise<string> {
     try {
       console.log('🏗️ [ProjectTimelineService] Creazione nuovo task:', taskData.name);
-      
+
       const taskId = `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
+
       const newTask: ProjectTask = {
         id: taskId,
         ...taskData,
@@ -229,7 +240,7 @@ export class ProjectTimelineService {
         budget: {
           estimated: taskData.budget?.estimated || 0,
           actual: 0,
-          currency: taskData.budget?.currency || 'EUR'
+          currency: taskData.budget?.currency || 'EUR',
         },
         resources: [],
         documents: [],
@@ -238,19 +249,18 @@ export class ProjectTimelineService {
         createdAt: new Date(),
         updatedAt: new Date(),
         createdBy: 'current-user', // TODO: Integrare con AuthContext
-        lastModifiedBy: 'current-user'
+        lastModifiedBy: 'current-user',
       };
 
       const taskRef = doc(db, this.TASKS_COLLECTION, taskId);
       await setDoc(taskRef, {
         ...newTask,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
 
       console.log('✅ [ProjectTimelineService] Task creato con successo:', taskId);
       return taskId;
-
     } catch (error) {
       console.error('❌ [ProjectTimelineService] Errore creazione task:', error);
       throw new Error(`Impossibile creare il task: ${error}`);
@@ -263,9 +273,9 @@ export class ProjectTimelineService {
   async createMilestone(milestoneData: CreateMilestoneData): Promise<string> {
     try {
       console.log('🎯 [ProjectTimelineService] Creazione nuovo milestone:', milestoneData.name);
-      
+
       const milestoneId = `milestone-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
+
       const newMilestone: ProjectMilestone = {
         id: milestoneId,
         ...milestoneData,
@@ -273,19 +283,18 @@ export class ProjectTimelineService {
         dependencies: milestoneData.dependencies || [],
         notes: milestoneData.notes || [],
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       const milestoneRef = doc(db, this.MILESTONES_COLLECTION, milestoneId);
       await setDoc(milestoneRef, {
         ...newMilestone,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
 
       console.log('✅ [ProjectTimelineService] Milestone creato con successo:', milestoneId);
       return milestoneId;
-
     } catch (error) {
       console.error('❌ [ProjectTimelineService] Errore creazione milestone:', error);
       throw new Error(`Impossibile creare il milestone: ${error}`);
@@ -298,31 +307,26 @@ export class ProjectTimelineService {
   async getProjectTasks(projectId: string): Promise<ProjectTask[]> {
     try {
       console.log('📋 [ProjectTimelineService] Recupero task progetto:', projectId);
-      
+
       const tasksRef = collection(db, this.TASKS_COLLECTION);
-      const q = query(
-        tasksRef,
-        where('projectId', '==', projectId),
-        orderBy('startDate', 'asc')
-      );
+      const q = query(tasksRef, where('projectId', '==', projectId), orderBy('startDate', 'asc'));
 
       const querySnapshot = await getDocs(q);
       const tasks: ProjectTask[] = [];
 
-      querySnapshot.forEach((doc) => {
+      querySnapshot.forEach(doc => {
         const data = doc.data();
         tasks.push({
           ...data,
           startDate: data.startDate?.toDate() || new Date(),
           endDate: data.endDate?.toDate() || new Date(),
           createdAt: data.createdAt?.toDate() || new Date(),
-          updatedAt: data.updatedAt?.toDate() || new Date()
+          updatedAt: data.updatedAt?.toDate() || new Date(),
         } as ProjectTask);
       });
 
       console.log('✅ [ProjectTimelineService] Task recuperati:', tasks.length);
       return tasks;
-
     } catch (error) {
       console.error('❌ [ProjectTimelineService] Errore recupero task:', error);
       throw new Error(`Impossibile recuperare i task: ${error}`);
@@ -335,31 +339,26 @@ export class ProjectTimelineService {
   async getProjectMilestones(projectId: string): Promise<ProjectMilestone[]> {
     try {
       console.log('🎯 [ProjectTimelineService] Recupero milestone progetto:', projectId);
-      
+
       const milestonesRef = collection(db, this.MILESTONES_COLLECTION);
-      const q = query(
-        milestonesRef,
-        where('projectId', '==', projectId),
-        orderBy('date', 'asc')
-      );
+      const q = query(milestonesRef, where('projectId', '==', projectId), orderBy('date', 'asc'));
 
       const querySnapshot = await getDocs(q);
       const milestones: ProjectMilestone[] = [];
 
-      querySnapshot.forEach((doc) => {
+      querySnapshot.forEach(doc => {
         const data = doc.data();
         milestones.push({
           ...data,
           date: data.date?.toDate() || new Date(),
           achievedAt: data.achievedAt?.toDate(),
           createdAt: data.createdAt?.toDate() || new Date(),
-          updatedAt: data.updatedAt?.toDate() || new Date()
+          updatedAt: data.updatedAt?.toDate() || new Date(),
         } as ProjectMilestone);
       });
 
       console.log('✅ [ProjectTimelineService] Milestone recuperati:', milestones.length);
       return milestones;
-
     } catch (error) {
       console.error('❌ [ProjectTimelineService] Errore recupero milestone:', error);
       throw new Error(`Impossibile recuperare i milestone: ${error}`);
@@ -372,31 +371,26 @@ export class ProjectTimelineService {
   async getUserTasks(userId: string): Promise<ProjectTask[]> {
     try {
       console.log('📋 [ProjectTimelineService] Recupero task utente:', userId);
-      
+
       const tasksRef = collection(db, this.TASKS_COLLECTION);
-      const q = query(
-        tasksRef,
-        where('assignedTo.id', '==', userId),
-        orderBy('startDate', 'asc')
-      );
+      const q = query(tasksRef, where('assignedTo.id', '==', userId), orderBy('startDate', 'asc'));
 
       const querySnapshot = await getDocs(q);
       const tasks: ProjectTask[] = [];
 
-      querySnapshot.forEach((doc) => {
+      querySnapshot.forEach(doc => {
         const data = doc.data();
         tasks.push({
           ...data,
           startDate: data.startDate?.toDate() || new Date(),
           endDate: data.endDate?.toDate() || new Date(),
           createdAt: data.createdAt?.toDate() || new Date(),
-          updatedAt: data.updatedAt?.toDate() || new Date()
+          updatedAt: data.updatedAt?.toDate() || new Date(),
         } as ProjectTask);
       });
 
       console.log('✅ [ProjectTimelineService] Task utente recuperati:', tasks.length);
       return tasks;
-
     } catch (error) {
       console.error('❌ [ProjectTimelineService] Errore recupero task utente:', error);
       throw new Error(`Impossibile recuperare i task utente: ${error}`);
@@ -409,16 +403,15 @@ export class ProjectTimelineService {
   async updateTask(taskId: string, updates: Partial<ProjectTask>): Promise<void> {
     try {
       console.log('✏️ [ProjectTimelineService] Aggiornamento task:', taskId);
-      
+
       const taskRef = doc(db, this.TASKS_COLLECTION, taskId);
       await updateDoc(taskRef, {
         ...updates,
         updatedAt: serverTimestamp(),
-        lastModifiedBy: 'current-user' // TODO: Integrare con AuthContext
+        lastModifiedBy: 'current-user', // TODO: Integrare con AuthContext
       });
 
       console.log('✅ [ProjectTimelineService] Task aggiornato con successo');
-
     } catch (error) {
       console.error('❌ [ProjectTimelineService] Errore aggiornamento task:', error);
       throw new Error(`Impossibile aggiornare il task: ${error}`);
@@ -431,9 +424,9 @@ export class ProjectTimelineService {
   async changeTaskStatus(taskId: string, status: ProjectTask['status']): Promise<void> {
     try {
       console.log('🔄 [ProjectTimelineService] Cambio stato task:', taskId, status);
-      
+
       const updates: Partial<ProjectTask> = { status };
-      
+
       // Aggiorna progresso in base al nuovo stato
       if (status === 'COMPLETED') {
         updates.progress = 100;
@@ -443,9 +436,8 @@ export class ProjectTimelineService {
       }
 
       await this.updateTask(taskId, updates);
-      
-      console.log('✅ [ProjectTimelineService] Stato task aggiornato');
 
+      console.log('✅ [ProjectTimelineService] Stato task aggiornato');
     } catch (error) {
       console.error('❌ [ProjectTimelineService] Errore cambio stato task:', error);
       throw new Error(`Impossibile cambiare lo stato del task: ${error}`);
@@ -458,9 +450,9 @@ export class ProjectTimelineService {
   async updateTaskProgress(taskId: string, progress: number): Promise<void> {
     try {
       console.log('📊 [ProjectTimelineService] Aggiornamento progresso task:', taskId, progress);
-      
+
       const updates: Partial<ProjectTask> = { progress };
-      
+
       // Aggiorna stato se necessario
       if (progress === 100) {
         updates.status = 'COMPLETED';
@@ -469,9 +461,8 @@ export class ProjectTimelineService {
       }
 
       await this.updateTask(taskId, updates);
-      
-      console.log('✅ [ProjectTimelineService] Progresso task aggiornato');
 
+      console.log('✅ [ProjectTimelineService] Progresso task aggiornato');
     } catch (error) {
       console.error('❌ [ProjectTimelineService] Errore aggiornamento progresso task:', error);
       throw new Error(`Impossibile aggiornare il progresso del task: ${error}`);
@@ -483,8 +474,11 @@ export class ProjectTimelineService {
    */
   async initializeSampleTimeline(projectId: string, projectName: string): Promise<void> {
     try {
-      console.log('🏗️ [ProjectTimelineService] Inizializzazione timeline esempio per progetto:', projectName);
-      
+      console.log(
+        '🏗️ [ProjectTimelineService] Inizializzazione timeline esempio per progetto:',
+        projectName
+      );
+
       // Crea task di esempio
       const sampleTasks: CreateTaskData[] = [
         {
@@ -498,7 +492,7 @@ export class ProjectTimelineService {
             id: 'arch-1',
             name: 'Arch. Marco Rossi',
             role: 'Architetto Capo',
-            company: 'Studio Architettura Rossi'
+            company: 'Studio Architettura Rossi',
           },
           startDate: new Date(Date.now()),
           endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 giorni
@@ -506,20 +500,21 @@ export class ProjectTimelineService {
           milestone: true,
           criticalPath: true,
           budget: { estimated: 15000, currency: 'EUR' },
-          tags: ['design', 'architettura', 'preliminare']
+          tags: ['design', 'architettura', 'preliminare'],
         },
         {
           projectId,
           projectName,
           name: 'Richiesta Permesso di Costruire',
-          description: 'Preparazione e presentazione della documentazione per il permesso di costruire',
+          description:
+            'Preparazione e presentazione della documentazione per il permesso di costruire',
           category: 'PERMESSI',
           priority: 'CRITICAL',
           assignedTo: {
             id: 'ing-1',
             name: 'Ing. Laura Bianchi',
             role: 'Ingegnere Civile',
-            company: 'Studio Tecnico Bianchi'
+            company: 'Studio Tecnico Bianchi',
           },
           startDate: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000), // 25 giorni da oggi
           endDate: new Date(Date.now() + 85 * 24 * 60 * 60 * 1000), // 85 giorni da oggi
@@ -528,20 +523,20 @@ export class ProjectTimelineService {
           milestone: true,
           criticalPath: true,
           budget: { estimated: 8000, currency: 'EUR' },
-          tags: ['permessi', 'urbanistico', 'burocrazia']
+          tags: ['permessi', 'urbanistico', 'burocrazia'],
         },
         {
           projectId,
           projectName,
           name: 'Scavi e Fondazioni',
-          description: 'Esecuzione degli scavi e realizzazione delle fondazioni dell\'edificio',
+          description: "Esecuzione degli scavi e realizzazione delle fondazioni dell'edificio",
           category: 'COSTRUZIONE',
           priority: 'HIGH',
           assignedTo: {
             id: 'imp-1',
             name: 'Impresa Costruzioni SRL',
             role: 'Impresa Edile',
-            company: 'Impresa Costruzioni SRL'
+            company: 'Impresa Costruzioni SRL',
           },
           startDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 giorni da oggi
           endDate: new Date(Date.now() + 120 * 24 * 60 * 60 * 1000), // 120 giorni da oggi
@@ -550,20 +545,20 @@ export class ProjectTimelineService {
           milestone: false,
           criticalPath: true,
           budget: { estimated: 45000, currency: 'EUR' },
-          tags: ['fondazioni', 'scavi', 'strutture']
+          tags: ['fondazioni', 'scavi', 'strutture'],
         },
         {
           projectId,
           projectName,
           name: 'Struttura e Copertura',
-          description: 'Realizzazione della struttura portante e della copertura dell\'edificio',
+          description: "Realizzazione della struttura portante e della copertura dell'edificio",
           category: 'COSTRUZIONE',
           priority: 'HIGH',
           assignedTo: {
             id: 'imp-1',
             name: 'Impresa Costruzioni SRL',
             role: 'Impresa Edile',
-            company: 'Impresa Costruzioni SRL'
+            company: 'Impresa Costruzioni SRL',
           },
           startDate: new Date(Date.now() + 125 * 24 * 60 * 60 * 1000), // 125 giorni da oggi
           endDate: new Date(Date.now() + 185 * 24 * 60 * 60 * 1000), // 185 giorni da oggi
@@ -572,7 +567,7 @@ export class ProjectTimelineService {
           milestone: false,
           criticalPath: true,
           budget: { estimated: 120000, currency: 'EUR' },
-          tags: ['struttura', 'copertura', 'cemento armato']
+          tags: ['struttura', 'copertura', 'cemento armato'],
         },
         {
           projectId,
@@ -585,7 +580,7 @@ export class ProjectTimelineService {
             id: 'imp-2',
             name: 'Ditta Impianti Tech',
             role: 'Installatore Impianti',
-            company: 'Ditta Impianti Tech'
+            company: 'Ditta Impianti Tech',
           },
           startDate: new Date(Date.now() + 190 * 24 * 60 * 60 * 1000), // 190 giorni da oggi
           endDate: new Date(Date.now() + 240 * 24 * 60 * 60 * 1000), // 240 giorni da oggi
@@ -594,7 +589,7 @@ export class ProjectTimelineService {
           milestone: false,
           criticalPath: false,
           budget: { estimated: 35000, currency: 'EUR' },
-          tags: ['impianti', 'elettrico', 'idraulico', 'climatizzazione']
+          tags: ['impianti', 'elettrico', 'idraulico', 'climatizzazione'],
         },
         {
           projectId,
@@ -607,7 +602,7 @@ export class ProjectTimelineService {
             id: 'mark-1',
             name: 'Agenzia Marketing Solutions',
             role: 'Agenzia Marketing',
-            company: 'Agenzia Marketing Solutions'
+            company: 'Agenzia Marketing Solutions',
           },
           startDate: new Date(Date.now() + 200 * 24 * 60 * 60 * 1000), // 200 giorni da oggi
           endDate: new Date(Date.now() + 270 * 24 * 60 * 60 * 1000), // 270 giorni da oggi
@@ -616,8 +611,8 @@ export class ProjectTimelineService {
           milestone: false,
           criticalPath: false,
           budget: { estimated: 25000, currency: 'EUR' },
-          tags: ['marketing', 'vendite', 'promozione']
-        }
+          tags: ['marketing', 'vendite', 'promozione'],
+        },
       ];
 
       // Crea i task
@@ -634,7 +629,7 @@ export class ProjectTimelineService {
           description: 'Avvio ufficiale del progetto edilizio',
           date: new Date(Date.now()),
           type: 'PROJECT_START',
-          importance: 'CRITICAL'
+          importance: 'CRITICAL',
         },
         {
           projectId,
@@ -644,7 +639,7 @@ export class ProjectTimelineService {
           date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           type: 'DESIGN_COMPLETE',
           importance: 'HIGH',
-          dependencies: ['task-1']
+          dependencies: ['task-1'],
         },
         {
           projectId,
@@ -654,7 +649,7 @@ export class ProjectTimelineService {
           date: new Date(Date.now() + 85 * 24 * 60 * 60 * 1000),
           type: 'PERMITS_APPROVED',
           importance: 'CRITICAL',
-          dependencies: ['task-2']
+          dependencies: ['task-2'],
         },
         {
           projectId,
@@ -664,17 +659,17 @@ export class ProjectTimelineService {
           date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
           type: 'CONSTRUCTION_START',
           importance: 'HIGH',
-          dependencies: ['task-3']
+          dependencies: ['task-3'],
         },
         {
           projectId,
           projectName,
           name: 'Struttura Completata',
-          description: 'Completamento della struttura portante dell\'edificio',
+          description: "Completamento della struttura portante dell'edificio",
           date: new Date(Date.now() + 185 * 24 * 60 * 60 * 1000),
           type: 'STRUCTURE_COMPLETE',
           importance: 'HIGH',
-          dependencies: ['task-4']
+          dependencies: ['task-4'],
         },
         {
           projectId,
@@ -684,8 +679,8 @@ export class ProjectTimelineService {
           date: new Date(Date.now() + 270 * 24 * 60 * 60 * 1000),
           type: 'PROJECT_COMPLETE',
           importance: 'CRITICAL',
-          dependencies: ['task-5', 'task-6']
-        }
+          dependencies: ['task-5', 'task-6'],
+        },
       ];
 
       // Crea i milestone
@@ -693,8 +688,10 @@ export class ProjectTimelineService {
         await this.createMilestone(milestoneData);
       }
 
-      console.log('✅ [ProjectTimelineService] Timeline esempio inizializzata per progetto:', projectName);
-
+      console.log(
+        '✅ [ProjectTimelineService] Timeline esempio inizializzata per progetto:',
+        projectName
+      );
     } catch (error) {
       console.error('❌ [ProjectTimelineService] Errore inizializzazione timeline esempio:', error);
       throw new Error(`Impossibile inizializzare la timeline di esempio: ${error}`);
@@ -717,12 +714,12 @@ export class ProjectTimelineService {
   }> {
     try {
       console.log('📊 [ProjectTimelineService] Recupero statistiche timeline progetto:', projectId);
-      
+
       const [tasks, milestones] = await Promise.all([
         this.getProjectTasks(projectId),
-        this.getProjectMilestones(projectId)
+        this.getProjectMilestones(projectId),
       ]);
-      
+
       const stats = {
         totalTasks: tasks.length,
         completedTasks: tasks.filter(t => t.status === 'COMPLETED').length,
@@ -732,7 +729,7 @@ export class ProjectTimelineService {
         achievedMilestones: milestones.filter(m => m.status === 'ACHIEVED').length,
         overallProgress: 0,
         criticalPathProgress: 0,
-        estimatedCompletion: new Date()
+        estimatedCompletion: new Date(),
       };
 
       // Calcola progresso complessivo
@@ -753,13 +750,14 @@ export class ProjectTimelineService {
       // Stima completamento basata su task critici
       const remainingCriticalTasks = criticalTasks.filter(t => t.status !== 'COMPLETED');
       if (remainingCriticalTasks.length > 0) {
-        const maxEndDate = new Date(Math.max(...remainingCriticalTasks.map(t => t.endDate.getTime())));
+        const maxEndDate = new Date(
+          Math.max(...remainingCriticalTasks.map(t => t.endDate.getTime()))
+        );
         stats.estimatedCompletion = maxEndDate;
       }
 
       console.log('✅ [ProjectTimelineService] Statistiche timeline calcolate:', stats);
       return stats;
-
     } catch (error) {
       console.error('❌ [ProjectTimelineService] Errore calcolo statistiche timeline:', error);
       throw new Error(`Impossibile calcolare le statistiche della timeline: ${error}`);
@@ -786,10 +784,10 @@ export class ProjectTimelineService {
   }> {
     try {
       console.log('📊 [ProjectTimelineService] Generazione dati Gantt per progetto:', projectId);
-      
+
       const [tasks, milestones] = await Promise.all([
         this.getProjectTasks(projectId),
-        this.getProjectMilestones(projectId)
+        this.getProjectMilestones(projectId),
       ]);
 
       // Genera dipendenze
@@ -804,52 +802,79 @@ export class ProjectTimelineService {
       const phases = [
         {
           name: 'PROGETTAZIONE',
-          startDate: new Date(Math.min(...tasks.filter(t => t.category === 'PROGETTAZIONE').map(t => t.startDate.getTime()))),
-          endDate: new Date(Math.max(...tasks.filter(t => t.category === 'PROGETTAZIONE').map(t => t.endDate.getTime()))),
-          tasks: tasks.filter(t => t.category === 'PROGETTAZIONE').map(t => t.id)
+          startDate: new Date(
+            Math.min(
+              ...tasks.filter(t => t.category === 'PROGETTAZIONE').map(t => t.startDate.getTime())
+            )
+          ),
+          endDate: new Date(
+            Math.max(
+              ...tasks.filter(t => t.category === 'PROGETTAZIONE').map(t => t.endDate.getTime())
+            )
+          ),
+          tasks: tasks.filter(t => t.category === 'PROGETTAZIONE').map(t => t.id),
         },
         {
           name: 'PERMESSI',
-          startDate: new Date(Math.min(...tasks.filter(t => t.category === 'PERMESSI').map(t => t.startDate.getTime()))),
-          endDate: new Date(Math.max(...tasks.filter(t => t.category === 'PERMESSI').map(t => t.endDate.getTime()))),
-          tasks: tasks.filter(t => t.category === 'PERMESSI').map(t => t.id)
+          startDate: new Date(
+            Math.min(
+              ...tasks.filter(t => t.category === 'PERMESSI').map(t => t.startDate.getTime())
+            )
+          ),
+          endDate: new Date(
+            Math.max(...tasks.filter(t => t.category === 'PERMESSI').map(t => t.endDate.getTime()))
+          ),
+          tasks: tasks.filter(t => t.category === 'PERMESSI').map(t => t.id),
         },
         {
           name: 'COSTRUZIONE',
-          startDate: new Date(Math.min(...tasks.filter(t => t.category === 'COSTRUZIONE').map(t => t.startDate.getTime()))),
-          endDate: new Date(Math.max(...tasks.filter(t => t.category === 'COSTRUZIONE').map(t => t.endDate.getTime()))),
-          tasks: tasks.filter(t => t.category === 'COSTRUZIONE').map(t => t.id)
+          startDate: new Date(
+            Math.min(
+              ...tasks.filter(t => t.category === 'COSTRUZIONE').map(t => t.startDate.getTime())
+            )
+          ),
+          endDate: new Date(
+            Math.max(
+              ...tasks.filter(t => t.category === 'COSTRUZIONE').map(t => t.endDate.getTime())
+            )
+          ),
+          tasks: tasks.filter(t => t.category === 'COSTRUZIONE').map(t => t.id),
         },
         {
           name: 'MARKETING',
-          startDate: new Date(Math.min(...tasks.filter(t => t.category === 'MARKETING').map(t => t.startDate.getTime()))),
-          endDate: new Date(Math.max(...tasks.filter(t => t.category === 'MARKETING').map(t => t.endDate.getTime()))),
-          tasks: tasks.filter(t => t.category === 'MARKETING').map(t => t.id)
-        }
+          startDate: new Date(
+            Math.min(
+              ...tasks.filter(t => t.category === 'MARKETING').map(t => t.startDate.getTime())
+            )
+          ),
+          endDate: new Date(
+            Math.max(...tasks.filter(t => t.category === 'MARKETING').map(t => t.endDate.getTime()))
+          ),
+          tasks: tasks.filter(t => t.category === 'MARKETING').map(t => t.id),
+        },
       ].filter(phase => phase.tasks.length > 0);
 
       const timeline = {
         startDate: new Date(Math.min(...tasks.map(t => t.startDate.getTime()))),
         endDate: new Date(Math.max(...tasks.map(t => t.endDate.getTime()))),
-        phases
+        phases,
       };
 
       const ganttData = {
         tasks,
         milestones,
         dependencies,
-        timeline
+        timeline,
       };
 
       console.log('✅ [ProjectTimelineService] Dati Gantt generati:', {
         tasks: tasks.length,
         milestones: milestones.length,
         dependencies: dependencies.length,
-        phases: phases.length
+        phases: phases.length,
       });
 
       return ganttData;
-
     } catch (error) {
       console.error('❌ [ProjectTimelineService] Errore generazione dati Gantt:', error);
       throw new Error(`Impossibile generare i dati per il Gantt chart: ${error}`);

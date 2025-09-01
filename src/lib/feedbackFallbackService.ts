@@ -27,7 +27,12 @@ class FeedbackFallbackService {
   private retryDelay = 5000; // 5 secondi
 
   // Salva feedback localmente se Firebase non è disponibile
-  async saveFeedbackLocally(feedback: Omit<FeedbackData, 'id' | 'timestamp' | 'status' | 'emailSent' | 'emailSentAt' | 'firebaseSaved'>): Promise<string> {
+  async saveFeedbackLocally(
+    feedback: Omit<
+      FeedbackData,
+      'id' | 'timestamp' | 'status' | 'emailSent' | 'emailSentAt' | 'firebaseSaved'
+    >
+  ): Promise<string> {
     const feedbackData: FeedbackData = {
       ...feedback,
       id: `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -35,7 +40,7 @@ class FeedbackFallbackService {
       status: 'new',
       emailSent: false,
       emailSentAt: new Date(),
-      firebaseSaved: false
+      firebaseSaved: false,
     };
 
     try {
@@ -45,10 +50,10 @@ class FeedbackFallbackService {
       this.saveLocalQueue(queue);
 
       console.log('💾 [FeedbackFallback] Feedback salvato localmente:', feedbackData.id);
-      
+
       // Programma il tentativo di sincronizzazione
       this.scheduleSync();
-      
+
       return feedbackData.id;
     } catch (error) {
       console.error('❌ [FeedbackFallback] Errore salvataggio locale:', error);
@@ -60,7 +65,7 @@ class FeedbackFallbackService {
   private getLocalQueue(): FeedbackData[] {
     try {
       if (typeof window === 'undefined') return [];
-      
+
       const stored = localStorage.getItem(this.storageKey);
       return stored ? JSON.parse(stored) : [];
     } catch (error) {
@@ -73,7 +78,7 @@ class FeedbackFallbackService {
   private saveLocalQueue(queue: FeedbackData[]): void {
     try {
       if (typeof window === 'undefined') return;
-      
+
       localStorage.setItem(this.storageKey, JSON.stringify(queue));
     } catch (error) {
       console.warn('⚠️ [FeedbackFallback] Errore salvataggio coda locale:', error);
@@ -83,7 +88,7 @@ class FeedbackFallbackService {
   // Programma la sincronizzazione
   private scheduleSync(): void {
     if (typeof window === 'undefined') return;
-    
+
     // Usa setTimeout per evitare conflitti con altri processi
     setTimeout(() => {
       this.syncWithFirebase();
@@ -113,7 +118,7 @@ class FeedbackFallbackService {
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
             localId: item.id, // Mantieni riferimento all'ID locale
-            syncedAt: serverTimestamp()
+            syncedAt: serverTimestamp(),
           };
 
           // Rimuovi proprietà non Firebase
@@ -122,7 +127,7 @@ class FeedbackFallbackService {
 
           const docRef = await addDoc(collection(db, 'feedback'), firebaseData);
           syncedIds.push(item.id);
-          
+
           console.log(`✅ [FeedbackFallback] Feedback sincronizzato: ${item.id} -> ${docRef.id}`);
         } catch (error) {
           console.warn(`⚠️ [FeedbackFallback] Errore sincronizzazione ${item.id}:`, error);
@@ -134,21 +139,24 @@ class FeedbackFallbackService {
       if (syncedIds.length > 0) {
         const updatedQueue = queue.filter(item => !syncedIds.includes(item.id));
         this.saveLocalQueue(updatedQueue);
-        
-        console.log(`🎉 [FeedbackFallback] Sincronizzazione completata: ${syncedIds.length}/${queue.length} feedback sincronizzati`);
+
+        console.log(
+          `🎉 [FeedbackFallback] Sincronizzazione completata: ${syncedIds.length}/${queue.length} feedback sincronizzati`
+        );
       }
 
       // Se ci sono ancora elementi falliti, riprogramma
       if (failedItems.length > 0) {
-        console.log(`⏰ [FeedbackFallback] ${failedItems.length} feedback falliti, riprogrammo sincronizzazione...`);
+        console.log(
+          `⏰ [FeedbackFallback] ${failedItems.length} feedback falliti, riprogrammo sincronizzazione...`
+        );
         setTimeout(() => {
           this.syncWithFirebase();
         }, this.retryDelay * 2);
       }
-
     } catch (error) {
       console.warn('⚠️ [FeedbackFallback] Errore sincronizzazione generale:', error);
-      
+
       // Riprogramma il tentativo
       setTimeout(() => {
         this.syncWithFirebase();
@@ -175,7 +183,7 @@ class FeedbackFallbackService {
   clearLocalQueue(): void {
     try {
       if (typeof window === 'undefined') return;
-      
+
       localStorage.removeItem(this.storageKey);
       console.log('🗑️ [FeedbackFallback] Coda locale pulita');
     } catch (error) {

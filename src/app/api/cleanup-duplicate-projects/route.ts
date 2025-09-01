@@ -1,30 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { projectManagerService } from '@/lib/projectManagerService';
+
 import { auth } from '@/lib/firebase';
+import { projectManagerService } from '@/lib/projectManagerService';
 
 export async function POST(request: NextRequest) {
   try {
     // Verifica autenticazione
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Token di autenticazione richiesto' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Token di autenticazione richiesto' }, { status: 401 });
     }
 
     const token = authHeader.split('Bearer ')[1];
-    
+
     // Verifica il token Firebase
     let decodedToken;
     try {
       decodedToken = await auth.verifyIdToken(token);
     } catch (error) {
       console.error('❌ Token Firebase non valido:', error);
-      return NextResponse.json(
-        { error: 'Token non valido' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Token non valido' }, { status: 401 });
     }
 
     const userId = decodedToken.uid;
@@ -41,15 +36,14 @@ export async function POST(request: NextRequest) {
       message: 'Pulizia progetti duplicati completata',
       cleanup: result,
       integrity,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error('❌ Errore pulizia progetti duplicati:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Errore interno del server',
-        details: error instanceof Error ? error.message : 'Errore sconosciuto'
+        details: error instanceof Error ? error.message : 'Errore sconosciuto',
       },
       { status: 500 }
     );
@@ -61,24 +55,18 @@ export async function GET(request: NextRequest) {
     // Verifica autenticazione
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Token di autenticazione richiesto' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Token di autenticazione richiesto' }, { status: 401 });
     }
 
     const token = authHeader.split('Bearer ')[1];
-    
+
     // Verifica il token Firebase
     let decodedToken;
     try {
       decodedToken = await auth.verifyIdToken(token);
     } catch (error) {
       console.error('❌ Token Firebase non valido:', error);
-      return NextResponse.json(
-        { error: 'Token non valido' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Token non valido' }, { status: 401 });
     }
 
     const userId = decodedToken.uid;
@@ -91,15 +79,14 @@ export async function GET(request: NextRequest) {
       success: true,
       message: 'Verifica integrità progetti completata',
       integrity,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error('❌ Errore verifica integrità progetti:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Errore interno del server',
-        details: error instanceof Error ? error.message : 'Errore sconosciuto'
+        details: error instanceof Error ? error.message : 'Errore sconosciuto',
       },
       { status: 500 }
     );

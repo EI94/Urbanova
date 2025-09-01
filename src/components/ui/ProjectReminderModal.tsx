@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { reminderService, ProjectReminder } from '@/lib/reminderService';
-import { useAuth } from '@/contexts/AuthContext';
 import { format, addDays, startOfDay } from 'date-fns';
 import { it } from 'date-fns/locale';
+import React, { useState, useEffect } from 'react';
+
+import { useAuth } from '@/contexts/AuthContext';
+import { reminderService, ProjectReminder } from '@/lib/reminderService';
 
 interface ProjectReminderModalProps {
   isOpen: boolean;
@@ -17,7 +18,7 @@ export default function ProjectReminderModal({
   isOpen,
   onClose,
   projectId,
-  projectName
+  projectName,
 }: ProjectReminderModalProps) {
   const { currentUser: user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +39,7 @@ export default function ProjectReminderModal({
       // Carica le opzioni disponibili
       setAvailableDates(reminderService.getAvailableDates());
       setAvailableTimes(reminderService.getAvailableTimes());
-      
+
       // Reset form
       setReminderDate(addDays(startOfDay(new Date()), 1));
       setReminderTime('09:00');
@@ -50,7 +51,7 @@ export default function ProjectReminderModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user?.email) {
       setError('Utente non autenticato');
       return;
@@ -72,17 +73,16 @@ export default function ProjectReminderModal({
         userEmail: user.email,
         reminderDate,
         reminderTime,
-        note: note.trim()
+        note: note.trim(),
       });
 
       console.log('✅ Reminder creato:', reminder);
       setSuccess(true);
-      
+
       // Chiudi il modale dopo 2 secondi
       setTimeout(() => {
         onClose();
       }, 2000);
-
     } catch (error) {
       console.error('❌ Errore creazione reminder:', error);
       setError('Impossibile creare il reminder. Riprova più tardi.');
@@ -107,10 +107,7 @@ export default function ProjectReminderModal({
               <h2 className="text-xl font-bold">⏰ Crea Reminder</h2>
               <p className="text-blue-100 mt-1">Programma un promemoria per il progetto</p>
             </div>
-            <button
-              onClick={onClose}
-              className="text-white hover:text-blue-200 transition-colors"
-            >
+            <button onClick={onClose} className="text-white hover:text-blue-200 transition-colors">
               ✕
             </button>
           </div>
@@ -121,9 +118,7 @@ export default function ProjectReminderModal({
           {success ? (
             <div className="text-center py-8">
               <div className="text-6xl mb-4">✅</div>
-              <h3 className="text-xl font-semibold text-green-600 mb-2">
-                Reminder Creato!
-              </h3>
+              <h3 className="text-xl font-semibold text-green-600 mb-2">Reminder Creato!</h3>
               <p className="text-gray-600">
                 Riceverai una mail il {formatDate(reminderDate)} alle {reminderTime}
               </p>
@@ -143,11 +138,11 @@ export default function ProjectReminderModal({
                 </label>
                 <select
                   value={reminderDate.toISOString().split('T')[0]}
-                  onChange={(e) => setReminderDate(new Date(e.target.value))}
+                  onChange={e => setReminderDate(new Date(e.target.value))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 >
-                  {availableDates.map((date) => (
+                  {availableDates.map(date => (
                     <option key={date.toISOString()} value={date.toISOString().split('T')[0]}>
                       {formatDate(date)}
                     </option>
@@ -162,11 +157,11 @@ export default function ProjectReminderModal({
                 </label>
                 <select
                   value={reminderTime}
-                  onChange={(e) => setReminderTime(e.target.value)}
+                  onChange={e => setReminderTime(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 >
-                  {availableTimes.map((time) => (
+                  {availableTimes.map(time => (
                     <option key={time} value={time}>
                       {time}
                     </option>
@@ -181,15 +176,13 @@ export default function ProjectReminderModal({
                 </label>
                 <textarea
                   value={note}
-                  onChange={(e) => setNote(e.target.value)}
+                  onChange={e => setNote(e.target.value)}
                   placeholder="Es: Chiamare il venditore per discutere i prezzi, Rivedere l'analisi con il team, Contattare il consulente..."
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                   rows={4}
                   required
                 />
-                <p className="text-sm text-gray-500 mt-1">
-                  Descrivi cosa vuoi ricordarti di fare
-                </p>
+                <p className="text-sm text-gray-500 mt-1">Descrivi cosa vuoi ricordarti di fare</p>
               </div>
 
               {/* Preview */}
@@ -202,7 +195,8 @@ export default function ProjectReminderModal({
                   <strong>Cosa:</strong> {note || 'Nota non inserita'}
                 </p>
                 <p className="text-yellow-700 text-sm">
-                  <strong>Riceverai:</strong> Una mail con il reminder, il report del progetto e il link diretto
+                  <strong>Riceverai:</strong> Una mail con il reminder, il report del progetto e il
+                  link diretto
                 </p>
               </div>
 

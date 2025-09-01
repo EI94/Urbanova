@@ -1,20 +1,21 @@
-import { 
-  collection, 
-  doc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
-  orderBy, 
+import {
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
   onSnapshot,
   serverTimestamp,
   Timestamp,
   getDoc,
   getDocs,
   limit,
-  writeBatch
+  writeBatch,
 } from 'firebase/firestore';
+
 import { db } from '@/lib/firebase';
 
 // ===== INTERFACES =====
@@ -106,7 +107,15 @@ export interface NotificationRule {
 
 export interface NotificationCondition {
   field: string;
-  operator: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'greater_than' | 'less_than' | 'in' | 'not_in';
+  operator:
+    | 'equals'
+    | 'not_equals'
+    | 'contains'
+    | 'not_contains'
+    | 'greater_than'
+    | 'less_than'
+    | 'in'
+    | 'not_in';
   value: any;
   logicalOperator?: 'and' | 'or';
 }
@@ -140,15 +149,17 @@ export class NotificationService {
   }
 
   // ===== NOTIFICATION MANAGEMENT =====
-  async createNotification(notification: Omit<Notification, 'id' | 'createdAt' | 'updatedAt' | 'status'>): Promise<string> {
+  async createNotification(
+    notification: Omit<Notification, 'id' | 'createdAt' | 'updatedAt' | 'status'>
+  ): Promise<string> {
     try {
       const notificationData = {
         ...notification,
         status: 'unread',
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       };
-      
+
       const docRef = await addDoc(collection(db, 'notifications'), notificationData);
       return docRef.id;
     } catch (error) {
@@ -162,7 +173,7 @@ export class NotificationService {
       const notificationRef = doc(db, 'notifications', notificationId);
       await updateDoc(notificationRef, {
         ...updates,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
     } catch (error) {
       console.error('Error updating notification:', error);
@@ -185,7 +196,7 @@ export class NotificationService {
       await updateDoc(notificationRef, {
         status: 'read',
         readAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -200,18 +211,18 @@ export class NotificationService {
         where('userId', '==', userId),
         where('status', '==', 'unread')
       );
-      
+
       const snapshot = await getDocs(q);
       const batch = writeBatch(db);
-      
-      snapshot.docs.forEach((doc) => {
+
+      snapshot.docs.forEach(doc => {
         batch.update(doc.ref, {
           status: 'read',
           readAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
+          updatedAt: serverTimestamp(),
         });
       });
-      
+
       await batch.commit();
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
@@ -225,7 +236,7 @@ export class NotificationService {
       await updateDoc(notificationRef, {
         status: 'archived',
         archivedAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
     } catch (error) {
       console.error('Error archiving notification:', error);
@@ -233,56 +244,56 @@ export class NotificationService {
     }
   }
 
-  async getNotifications(userId: string, options?: {
-    status?: Notification['status'];
-    category?: Notification['category'];
-    type?: Notification['type'];
-    priority?: Notification['priority'];
-    limit?: number;
-    unreadOnly?: boolean;
-  }): Promise<Notification[]> {
+  async getNotifications(
+    userId: string,
+    options?: {
+      status?: Notification['status'];
+      category?: Notification['category'];
+      type?: Notification['type'];
+      priority?: Notification['priority'];
+      limit?: number;
+      unreadOnly?: boolean;
+    }
+  ): Promise<Notification[]> {
     try {
-      let q = query(
-        collection(db, 'notifications'),
-        where('userId', '==', userId)
-      );
+      let q = query(collection(db, 'notifications'), where('userId', '==', userId));
 
       if (options?.status) {
         q = query(q, where('status', '==', options.status));
       }
-      
+
       if (options?.category) {
         q = query(q, where('category', '==', options.category));
       }
-      
+
       if (options?.type) {
         q = query(q, where('type', '==', options.type));
       }
-      
+
       if (options?.priority) {
         q = query(q, where('priority', '==', options.priority));
       }
 
       q = query(q, orderBy('createdAt', 'desc'));
-      
+
       if (options?.limit) {
         q = query(q, limit(options.limit));
       }
 
       const snapshot = await getDocs(q);
       const notifications: Notification[] = [];
-      
-      snapshot.forEach((doc) => {
+
+      snapshot.forEach(doc => {
         const notification = { id: doc.id, ...doc.data() } as Notification;
-        
+
         // Filter by unread if requested
         if (options?.unreadOnly && notification.status !== 'unread') {
           return;
         }
-        
+
         notifications.push(notification);
       });
-      
+
       return notifications;
     } catch (error) {
       console.error('Error getting notifications:', error);
@@ -290,16 +301,19 @@ export class NotificationService {
     }
   }
 
-  getNotificationsRealtime(userId: string, callback: (notifications: Notification[]) => void): () => void {
+  getNotificationsRealtime(
+    userId: string,
+    callback: (notifications: Notification[]) => void
+  ): () => void {
     const q = query(
       collection(db, 'notifications'),
       where('userId', '==', userId),
       orderBy('createdAt', 'desc')
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(q, snapshot => {
       const notifications: Notification[] = [];
-      snapshot.forEach((doc) => {
+      snapshot.forEach(doc => {
         notifications.push({ id: doc.id, ...doc.data() } as Notification);
       });
       callback(notifications);
@@ -309,14 +323,16 @@ export class NotificationService {
   }
 
   // ===== NOTIFICATION TEMPLATES =====
-  async createTemplate(template: Omit<NotificationTemplate, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+  async createTemplate(
+    template: Omit<NotificationTemplate, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<string> {
     try {
       const templateData = {
         ...template,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       };
-      
+
       const docRef = await addDoc(collection(db, 'notificationTemplates'), templateData);
       return docRef.id;
     } catch (error) {
@@ -330,7 +346,7 @@ export class NotificationService {
       const templateRef = doc(db, 'notificationTemplates', templateId);
       await updateDoc(templateRef, {
         ...updates,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
     } catch (error) {
       console.error('Error updating template:', error);
@@ -345,10 +361,10 @@ export class NotificationService {
         where('isActive', '==', true),
         orderBy('name')
       );
-      
+
       const snapshot = await getDocs(q);
       const templates: NotificationTemplate[] = [];
-      snapshot.forEach((doc) => {
+      snapshot.forEach(doc => {
         templates.push({ id: doc.id, ...doc.data() } as NotificationTemplate);
       });
       return templates;
@@ -359,13 +375,15 @@ export class NotificationService {
   }
 
   // ===== NOTIFICATION PREFERENCES =====
-  async updatePreference(preference: Omit<NotificationPreference, 'id' | 'lastUpdated'>): Promise<string> {
+  async updatePreference(
+    preference: Omit<NotificationPreference, 'id' | 'lastUpdated'>
+  ): Promise<string> {
     try {
       const preferenceData = {
         ...preference,
-        lastUpdated: serverTimestamp()
+        lastUpdated: serverTimestamp(),
       };
-      
+
       // Check if preference already exists
       const existingQ = query(
         collection(db, 'notificationPreferences'),
@@ -374,9 +392,9 @@ export class NotificationService {
         where('type', '==', preference.type),
         where('priority', '==', preference.priority)
       );
-      
+
       const existingSnapshot = await getDocs(existingQ);
-      
+
       if (!existingSnapshot.empty) {
         // Update existing preference
         const existingDoc = existingSnapshot.docs[0];
@@ -395,14 +413,11 @@ export class NotificationService {
 
   async getPreferences(userId: string): Promise<NotificationPreference[]> {
     try {
-      const q = query(
-        collection(db, 'notificationPreferences'),
-        where('userId', '==', userId)
-      );
-      
+      const q = query(collection(db, 'notificationPreferences'), where('userId', '==', userId));
+
       const snapshot = await getDocs(q);
       const preferences: NotificationPreference[] = [];
-      snapshot.forEach((doc) => {
+      snapshot.forEach(doc => {
         preferences.push({ id: doc.id, ...doc.data() } as NotificationPreference);
       });
       return preferences;
@@ -413,14 +428,16 @@ export class NotificationService {
   }
 
   // ===== NOTIFICATION RULES =====
-  async createRule(rule: Omit<NotificationRule, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+  async createRule(
+    rule: Omit<NotificationRule, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<string> {
     try {
       const ruleData = {
         ...rule,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       };
-      
+
       const docRef = await addDoc(collection(db, 'notificationRules'), ruleData);
       return docRef.id;
     } catch (error) {
@@ -434,7 +451,7 @@ export class NotificationService {
       const ruleRef = doc(db, 'notificationRules', ruleId);
       await updateDoc(ruleRef, {
         ...updates,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
     } catch (error) {
       console.error('Error updating rule:', error);
@@ -449,10 +466,10 @@ export class NotificationService {
         where('isActive', '==', true),
         orderBy('priority', 'desc')
       );
-      
+
       const snapshot = await getDocs(q);
       const rules: NotificationRule[] = [];
-      snapshot.forEach((doc) => {
+      snapshot.forEach(doc => {
         rules.push({ id: doc.id, ...doc.data() } as NotificationRule);
       });
       return rules;
@@ -463,15 +480,17 @@ export class NotificationService {
   }
 
   // ===== NOTIFICATION CHANNELS =====
-  async createChannel(channel: Omit<NotificationChannel, 'id' | 'lastUsed' | 'successRate' | 'errorCount'>): Promise<string> {
+  async createChannel(
+    channel: Omit<NotificationChannel, 'id' | 'lastUsed' | 'successRate' | 'errorCount'>
+  ): Promise<string> {
     try {
       const channelData = {
         ...channel,
         lastUsed: serverTimestamp(),
         successRate: 100,
-        errorCount: 0
+        errorCount: 0,
       };
-      
+
       const docRef = await addDoc(collection(db, 'notificationChannels'), channelData);
       return docRef.id;
     } catch (error) {
@@ -484,22 +503,23 @@ export class NotificationService {
     try {
       const channelRef = doc(db, 'notificationChannels', channelId);
       const channelDoc = await getDoc(channelRef);
-      
+
       if (!channelDoc.exists()) {
         throw new Error('Channel not found');
       }
-      
+
       const channel = channelDoc.data() as NotificationChannel;
       const totalAttempts = channel.successRate + channel.errorCount;
       const newSuccessRate = success ? channel.successRate + 1 : channel.successRate;
       const newErrorCount = success ? channel.errorCount : channel.errorCount + 1;
-      const newSuccessRatePercentage = totalAttempts > 0 ? (newSuccessRate / (totalAttempts + 1)) * 100 : 100;
-      
+      const newSuccessRatePercentage =
+        totalAttempts > 0 ? (newSuccessRate / (totalAttempts + 1)) * 100 : 100;
+
       await updateDoc(channelRef, {
         lastUsed: serverTimestamp(),
         successRate: newSuccessRate,
         errorCount: newErrorCount,
-        successRate: newSuccessRatePercentage
+        successRate: newSuccessRatePercentage,
       });
     } catch (error) {
       console.error('Error updating channel stats:', error);
@@ -515,7 +535,7 @@ export class NotificationService {
         where('userId', '==', userId),
         where('status', '==', 'unread')
       );
-      
+
       const snapshot = await getDocs(q);
       return snapshot.size;
     } catch (error) {
@@ -535,7 +555,7 @@ export class NotificationService {
   }> {
     try {
       const notifications = await this.getNotifications(userId);
-      
+
       const stats = {
         total: notifications.length,
         unread: 0,
@@ -543,23 +563,25 @@ export class NotificationService {
         archived: 0,
         byCategory: {} as Record<string, number>,
         byType: {} as Record<string, number>,
-        byPriority: {} as Record<string, number>
+        byPriority: {} as Record<string, number>,
       };
-      
+
       notifications.forEach(notification => {
         // Count by status
         stats[notification.status]++;
-        
+
         // Count by category
-        stats.byCategory[notification.category] = (stats.byCategory[notification.category] || 0) + 1;
-        
+        stats.byCategory[notification.category] =
+          (stats.byCategory[notification.category] || 0) + 1;
+
         // Count by type
         stats.byType[notification.type] = (stats.byType[notification.type] || 0) + 1;
-        
+
         // Count by priority
-        stats.byPriority[notification.priority] = (stats.byPriority[notification.priority] || 0) + 1;
+        stats.byPriority[notification.priority] =
+          (stats.byPriority[notification.priority] || 0) + 1;
       });
-      
+
       return stats;
     } catch (error) {
       console.error('Error getting notification stats:', error);
@@ -570,7 +592,7 @@ export class NotificationService {
         archived: 0,
         byCategory: {},
         byType: {},
-        byPriority: {}
+        byPriority: {},
       };
     }
   }
@@ -578,11 +600,12 @@ export class NotificationService {
   async searchNotifications(userId: string, searchTerm: string): Promise<Notification[]> {
     try {
       const notifications = await this.getNotifications(userId);
-      
-      return notifications.filter(notification => 
-        notification.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        notification.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        notification.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+
+      return notifications.filter(
+        notification =>
+          notification.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          notification.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          notification.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     } catch (error) {
       console.error('Error searching notifications:', error);
@@ -593,18 +616,15 @@ export class NotificationService {
   async cleanupExpiredNotifications(): Promise<number> {
     try {
       const now = Timestamp.now();
-      const q = query(
-        collection(db, 'notifications'),
-        where('expiresAt', '<', now)
-      );
-      
+      const q = query(collection(db, 'notifications'), where('expiresAt', '<', now));
+
       const snapshot = await getDocs(q);
       const batch = writeBatch(db);
-      
-      snapshot.docs.forEach((doc) => {
+
+      snapshot.docs.forEach(doc => {
         batch.delete(doc.ref);
       });
-      
+
       await batch.commit();
       return snapshot.size;
     } catch (error) {

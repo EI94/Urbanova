@@ -37,7 +37,7 @@ export class CacheService {
       location: criteria.location || '',
       priceRange: criteria.priceRange || [0, 1000000],
       areaRange: criteria.areaRange || [500, 10000],
-      hash: this.hashString(JSON.stringify(criteria))
+      hash: this.hashString(JSON.stringify(criteria)),
     };
     return JSON.stringify(key);
   }
@@ -46,7 +46,7 @@ export class CacheService {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32bit integer
     }
     return hash.toString();
@@ -75,7 +75,7 @@ export class CacheService {
     const entry: CacheEntry = {
       data,
       timestamp: Date.now(),
-      ttl: ttl || this.DEFAULT_TTL
+      ttl: ttl || this.DEFAULT_TTL,
     };
 
     // Gestione dimensione cache
@@ -143,7 +143,7 @@ export class CacheService {
   getStats(): { size: number; hitRate: number } {
     return {
       size: this.cache.size,
-      hitRate: 0.85 // Placeholder - implementare tracking reale
+      hitRate: 0.85, // Placeholder - implementare tracking reale
     };
   }
 
@@ -153,4 +153,4 @@ export class CacheService {
   }
 }
 
-export const cacheService = CacheService.getInstance(); 
+export const cacheService = CacheService.getInstance();

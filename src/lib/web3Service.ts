@@ -1,4 +1,5 @@
 // Service per la gestione di Advanced Blockchain & Web3 Integration
+import { TeamRole } from '@/types/team';
 import {
   Wallet,
   TokenBalance,
@@ -36,9 +37,8 @@ import {
   AuctionStatus,
   LiquidityPoolStatus,
   OracleStatus,
-  CrossChainStatus
+  CrossChainStatus,
 } from '@/types/web3';
-import { TeamRole } from '@/types/team';
 
 export class Web3Service {
   private wallets: Map<string, Wallet> = new Map();
@@ -75,7 +75,7 @@ export class Web3Service {
           rpcUrl: 'https://eth-mainnet.alchemyapi.io/v2/demo',
           blockExplorerUrl: 'https://etherscan.io',
           nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-          isTestnet: false
+          isTestnet: false,
         },
         {
           chainId: 137,
@@ -83,7 +83,7 @@ export class Web3Service {
           rpcUrl: 'https://polygon-rpc.com',
           blockExplorerUrl: 'https://polygonscan.com',
           nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 },
-          isTestnet: false
+          isTestnet: false,
         },
         {
           chainId: 56,
@@ -91,7 +91,7 @@ export class Web3Service {
           rpcUrl: 'https://bsc-dataseed.binance.org',
           blockExplorerUrl: 'https://bscscan.com',
           nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
-          isTestnet: false
+          isTestnet: false,
         },
         {
           chainId: 42161,
@@ -99,8 +99,8 @@ export class Web3Service {
           rpcUrl: 'https://arb1.arbitrum.io/rpc',
           blockExplorerUrl: 'https://arbiscan.io',
           nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-          isTestnet: false
-        }
+          isTestnet: false,
+        },
       ],
       defaultNetwork: 'ethereum',
       defaultSlippage: 0.5,
@@ -111,26 +111,26 @@ export class Web3Service {
         enableGovernance: true,
         enableCrossChain: true,
         enableAnalytics: true,
-        enableSecurity: true
+        enableSecurity: true,
       },
       apiKeys: {
         alchemy: 'demo-key',
         infura: 'demo-key',
-        moralis: 'demo-key'
+        moralis: 'demo-key',
       },
       security: {
         requireConfirmation: true,
         maxTransactionValue: 10000,
         enableMevProtection: true,
-        autoRevokeApprovals: false
+        autoRevokeApprovals: false,
       },
       ui: {
         theme: 'light',
         currency: 'USD',
         showTestnets: false,
         showSmallBalances: true,
-        groupByProtocol: true
-      }
+        groupByProtocol: true,
+      },
     };
   }
 
@@ -144,7 +144,7 @@ export class Web3Service {
         network: 'ethereum',
         nativeBalance: '2500000000000000000', // 2.5 ETH
         formattedBalance: '2.5',
-        usdValue: 4250.00,
+        usdValue: 4250.0,
         tokenBalances: [
           {
             contractAddress: '0xA0b86a33E6Fa4B1c7a7e7c1E2b3D4C5F6789ABCD',
@@ -153,14 +153,14 @@ export class Web3Service {
             decimals: 6,
             balance: '5000000000', // 5,000 USDC
             formattedBalance: '5,000.00',
-            usdValue: 5000.00,
+            usdValue: 5000.0,
             standard: 'ERC20',
             network: 'ethereum',
-            pricePerToken: 1.00,
+            pricePerToken: 1.0,
             priceChange24h: 0.02,
             marketCap: 32000000000,
             isStaked: false,
-            allowances: []
+            allowances: [],
           },
           {
             contractAddress: '0xB1C2D3E4F5A6B7C8D9E0F1A2B3C4D5E6F7A8B9C0',
@@ -169,10 +169,10 @@ export class Web3Service {
             decimals: 18,
             balance: '1500000000000000000', // 1.5 WETH
             formattedBalance: '1.5',
-            usdValue: 2550.00,
+            usdValue: 2550.0,
             standard: 'ERC20',
             network: 'ethereum',
-            pricePerToken: 1700.00,
+            pricePerToken: 1700.0,
             priceChange24h: 2.5,
             marketCap: 204000000000,
             isStaked: true,
@@ -182,10 +182,10 @@ export class Web3Service {
               {
                 spender: '0xUniswapV3Router',
                 amount: '1000000000000000000000',
-                spenderName: 'Uniswap V3'
-              }
-            ]
-          }
+                spenderName: 'Uniswap V3',
+              },
+            ],
+          },
         ],
         nfts: [
           {
@@ -199,7 +199,7 @@ export class Web3Service {
               { traitType: 'Property Type', value: 'Apartment' },
               { traitType: 'Size', value: 120, displayType: 'number' },
               { traitType: 'Bedrooms', value: 3, displayType: 'number' },
-              { traitType: 'Floor', value: 8, displayType: 'number' }
+              { traitType: 'Floor', value: 8, displayType: 'number' },
             ],
             collectionName: 'Urbanova Properties',
             collectionSlug: 'urbanova-properties',
@@ -232,26 +232,26 @@ export class Web3Service {
               rentalIncome: {
                 monthlyRent: 3200,
                 occupancyRate: 95,
-                leaseEndDate: new Date('2024-12-31')
+                leaseEndDate: new Date('2024-12-31'),
               },
               documents: [
                 {
                   type: 'deed',
                   ipfsHash: 'QmXyZ123abc456def789ghi012jkl345mno678pqr901stu234vwx567yza890',
-                  uploadedAt: new Date('2024-01-10')
+                  uploadedAt: new Date('2024-01-10'),
                 },
                 {
                   type: 'inspection',
                   ipfsHash: 'QmAbc789def012ghi345jkl678mno901pqr234stu567vwx890yza123bcd456',
-                  uploadedAt: new Date('2024-01-12')
-                }
-              ]
+                  uploadedAt: new Date('2024-01-12'),
+                },
+              ],
             },
             isStaked: false,
             mintedAt: new Date('2024-01-01'),
             acquiredAt: new Date('2024-01-01'),
-            lastTransferAt: new Date('2024-01-01')
-          }
+            lastTransferAt: new Date('2024-01-01'),
+          },
         ],
         isConnected: true,
         isActive: true,
@@ -262,8 +262,8 @@ export class Web3Service {
           defaultNetwork: 'ethereum',
           gasSettings: 'standard',
           slippageTolerance: 0.5,
-          autoApprove: false
-        }
+          autoApprove: false,
+        },
       },
       {
         id: 'defi-wallet',
@@ -272,7 +272,7 @@ export class Web3Service {
         network: 'polygon',
         nativeBalance: '1500000000000000000000', // 1,500 MATIC
         formattedBalance: '1,500.0',
-        usdValue: 1350.00,
+        usdValue: 1350.0,
         tokenBalances: [
           {
             contractAddress: '0xPolygonUSDC',
@@ -281,16 +281,16 @@ export class Web3Service {
             decimals: 6,
             balance: '10000000000', // 10,000 USDC
             formattedBalance: '10,000.00',
-            usdValue: 10000.00,
+            usdValue: 10000.0,
             standard: 'ERC20',
             network: 'polygon',
-            pricePerToken: 1.00,
+            pricePerToken: 1.0,
             priceChange24h: 0.01,
             isStaked: true,
             stakedAmount: '5000000000', // 5,000 USDC
             rewards: '125000000', // 125 USDC
-            allowances: []
-          }
+            allowances: [],
+          },
         ],
         nfts: [],
         isConnected: true,
@@ -299,7 +299,7 @@ export class Web3Service {
         signers: [
           '0x123ABC456DEF789GHI012JKL345MNO678PQR901ST',
           '0x456DEF789GHI012JKL345MNO678PQR901ST234UV',
-          '0x789GHI012JKL345MNO678PQR901ST234UV567WX'
+          '0x789GHI012JKL345MNO678PQR901ST234UV567WX',
         ],
         connectedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
         lastActivityAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
@@ -307,9 +307,9 @@ export class Web3Service {
           defaultNetwork: 'polygon',
           gasSettings: 'fast',
           slippageTolerance: 1.0,
-          autoApprove: true
-        }
-      }
+          autoApprove: true,
+        },
+      },
     ];
 
     wallets.forEach(wallet => {
@@ -342,30 +342,26 @@ export class Web3Service {
             inputs: [
               { name: 'to', type: 'address', description: 'Recipient address' },
               { name: 'tokenId', type: 'uint256', description: 'Token ID' },
-              { name: 'uri', type: 'string', description: 'Token URI' }
+              { name: 'uri', type: 'string', description: 'Token URI' },
             ],
             outputs: [],
             stateMutability: 'nonpayable',
             visibility: 'public',
             callCount: 156,
             gasUsage: { min: 85000, max: 120000, average: 95000 },
-            description: 'Mint new property NFT'
+            description: 'Mint new property NFT',
           },
           {
             name: 'tokenURI',
             signature: 'tokenURI(uint256)',
-            inputs: [
-              { name: 'tokenId', type: 'uint256', description: 'Token ID' }
-            ],
-            outputs: [
-              { name: '', type: 'string', description: 'Token URI' }
-            ],
+            inputs: [{ name: 'tokenId', type: 'uint256', description: 'Token ID' }],
+            outputs: [{ name: '', type: 'string', description: 'Token URI' }],
             stateMutability: 'view',
             visibility: 'public',
             callCount: 2340,
             gasUsage: { min: 2500, max: 3500, average: 3000 },
-            description: 'Get token metadata URI'
-          }
+            description: 'Get token metadata URI',
+          },
         ],
         events: [
           {
@@ -374,12 +370,12 @@ export class Web3Service {
             inputs: [
               { name: 'from', type: 'address', indexed: true },
               { name: 'to', type: 'address', indexed: true },
-              { name: 'tokenId', type: 'uint256', indexed: true }
+              { name: 'tokenId', type: 'uint256', indexed: true },
             ],
             emissionCount: 234,
             lastEmittedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-            description: 'Emitted when token is transferred'
-          }
+            description: 'Emitted when token is transferred',
+          },
         ],
         totalTransactions: 456,
         uniqueUsers: 123,
@@ -393,10 +389,10 @@ export class Web3Service {
               {
                 severity: 'low',
                 description: 'Missing event emission in setter function',
-                status: 'fixed'
-              }
-            ]
-          }
+                status: 'fixed',
+              },
+            ],
+          },
         ],
         isGovernanceEnabled: true,
         governanceToken: '0xUrbanToken123456789ABCDEF',
@@ -404,7 +400,7 @@ export class Web3Service {
         category: 'NFT',
         createdAt: new Date('2023-12-01'),
         updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-        lastInteractionAt: new Date(Date.now() - 2 * 60 * 60 * 1000)
+        lastInteractionAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
       },
       {
         id: 'urbanova-defi-vault',
@@ -424,29 +420,25 @@ export class Web3Service {
           {
             name: 'deposit',
             signature: 'deposit(uint256)',
-            inputs: [
-              { name: 'amount', type: 'uint256', description: 'Amount to deposit' }
-            ],
+            inputs: [{ name: 'amount', type: 'uint256', description: 'Amount to deposit' }],
             outputs: [],
             stateMutability: 'nonpayable',
             visibility: 'public',
             callCount: 89,
             gasUsage: { min: 65000, max: 85000, average: 75000 },
-            description: 'Deposit tokens into vault'
+            description: 'Deposit tokens into vault',
           },
           {
             name: 'withdraw',
             signature: 'withdraw(uint256)',
-            inputs: [
-              { name: 'shares', type: 'uint256', description: 'Shares to withdraw' }
-            ],
+            inputs: [{ name: 'shares', type: 'uint256', description: 'Shares to withdraw' }],
             outputs: [],
             stateMutability: 'nonpayable',
             visibility: 'public',
             callCount: 34,
             gasUsage: { min: 70000, max: 90000, average: 80000 },
-            description: 'Withdraw tokens from vault'
-          }
+            description: 'Withdraw tokens from vault',
+          },
         ],
         events: [
           {
@@ -455,12 +447,12 @@ export class Web3Service {
             inputs: [
               { name: 'user', type: 'address', indexed: true },
               { name: 'amount', type: 'uint256', indexed: false },
-              { name: 'shares', type: 'uint256', indexed: false }
+              { name: 'shares', type: 'uint256', indexed: false },
             ],
             emissionCount: 89,
             lastEmittedAt: new Date(Date.now() - 45 * 60 * 1000),
-            description: 'Emitted when user deposits'
-          }
+            description: 'Emitted when user deposits',
+          },
         ],
         totalTransactions: 156,
         uniqueUsers: 67,
@@ -471,8 +463,8 @@ export class Web3Service {
         category: 'DeFi',
         createdAt: new Date('2024-01-10'),
         updatedAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
-        lastInteractionAt: new Date(Date.now() - 45 * 60 * 1000)
-      }
+        lastInteractionAt: new Date(Date.now() - 45 * 60 * 1000),
+      },
     ];
 
     contracts.forEach(contract => {
@@ -499,7 +491,7 @@ export class Web3Service {
           offers: true,
           bundles: true,
           fractionalOwnership: true,
-          crossChain: false
+          crossChain: false,
         },
         stats: {
           volume24h: 25000,
@@ -507,8 +499,8 @@ export class Web3Service {
           volume30d: 450000,
           floorPrice: 1.5,
           averagePrice: 2.8,
-          uniqueTraders: 234
-        }
+          uniqueTraders: 234,
+        },
       },
       {
         id: 'opensea-integration',
@@ -526,7 +518,7 @@ export class Web3Service {
           offers: true,
           bundles: true,
           fractionalOwnership: false,
-          crossChain: true
+          crossChain: true,
         },
         stats: {
           volume24h: 15000000,
@@ -534,9 +526,9 @@ export class Web3Service {
           volume30d: 350000000,
           floorPrice: 0.01,
           averagePrice: 0.25,
-          uniqueTraders: 750000
-        }
-      }
+          uniqueTraders: 750000,
+        },
+      },
     ];
 
     marketplaces.forEach(marketplace => {
@@ -554,7 +546,7 @@ export class Web3Service {
         destinationNetwork: 'polygon',
         contractAddresses: {
           source: '0xPolygonBridgeEthereum123456789ABCDEF',
-          destination: '0xPolygonBridgePolygon123456789ABCDEF'
+          destination: '0xPolygonBridgePolygon123456789ABCDEF',
         },
         supportedAssets: [
           {
@@ -562,28 +554,24 @@ export class Web3Service {
             destinationToken: '0xWETH',
             minAmount: '0.01',
             maxAmount: '1000',
-            fee: 0.1
+            fee: 0.1,
           },
           {
             sourceToken: '0xUSDC',
             destinationToken: '0xUSDC_Polygon',
             minAmount: '10',
             maxAmount: '100000',
-            fee: 0.05
-          }
+            fee: 0.05,
+          },
         ],
         securityModel: 'validator_set',
-        validators: [
-          '0xValidator1',
-          '0xValidator2',
-          '0xValidator3'
-        ],
+        validators: ['0xValidator1', '0xValidator2', '0xValidator3'],
         averageBridgeTime: 7,
         successRate: 99.2,
         totalVolume: 2500000000,
         isActive: true,
-        maintenanceMode: false
-      }
+        maintenanceMode: false,
+      },
     ];
 
     bridges.forEach(bridge => {
@@ -605,8 +593,8 @@ export class Web3Service {
             quote: 'USD',
             price: '1700.50',
             lastUpdated: new Date(Date.now() - 5 * 60 * 1000),
-            confidence: 99.8
-          }
+            confidence: 99.8,
+          },
         ],
         status: 'active',
         updateFrequency: 300,
@@ -617,12 +605,8 @@ export class Web3Service {
         isDecentralized: true,
         nodeCount: 21,
         totalQueries: 2500000,
-        subscribedContracts: [
-          '0xContract1',
-          '0xContract2',
-          '0xContract3'
-        ]
-      }
+        subscribedContracts: ['0xContract1', '0xContract2', '0xContract3'],
+      },
     ];
 
     oracles.forEach(oracle => {
@@ -656,14 +640,14 @@ export class Web3Service {
           parameters: {
             to: '0x742d35Cc6639C0532fEb5A7b8F0D2C7f3c5C4B2E',
             tokenId: '1',
-            uri: 'https://urbanova.com/api/metadata/1'
-          }
+            uri: 'https://urbanova.com/api/metadata/1',
+          },
         },
         usdValueAtTime: 0,
         currentUsdValue: 0,
         submittedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
         confirmedAt: new Date(Date.now() - 2 * 60 * 60 * 1000 + 180000),
-        isMevProtected: true
+        isMevProtected: true,
       },
       {
         id: 'tx-002',
@@ -683,15 +667,15 @@ export class Web3Service {
         decodedInput: {
           methodName: 'deposit',
           parameters: {
-            amount: '5000000000'
-          }
+            amount: '5000000000',
+          },
         },
         usdValueAtTime: 5000,
         currentUsdValue: 5000,
         submittedAt: new Date(Date.now() - 45 * 60 * 1000),
         confirmedAt: new Date(Date.now() - 43 * 60 * 1000),
-        isMevProtected: false
-      }
+        isMevProtected: false,
+      },
     ];
 
     transactions.forEach(tx => {
@@ -713,8 +697,8 @@ export class Web3Service {
             token: 'AAVE',
             amount: '125000000000000000',
             usdValue: 12.5,
-            apr: 3.2
-          }
+            apr: 3.2,
+          },
         ],
         apy: 4.8,
         totalEarned: 125,
@@ -729,14 +713,14 @@ export class Web3Service {
             {
               asset: 'USDC',
               amount: '5000000000',
-              apy: 4.8
-            }
+              apy: 4.8,
+            },
           ],
           borrowedAssets: [],
           borrowLimit: 0,
           borrowLimitUsed: 0,
-          liquidationThreshold: 0
-        }
+          liquidationThreshold: 0,
+        },
       },
       {
         id: 'pos-002',
@@ -751,8 +735,8 @@ export class Web3Service {
             token: 'UNI',
             amount: '50000000000000000',
             usdValue: 25,
-            apr: 8.5
-          }
+            apr: 8.5,
+          },
         ],
         apy: 12.3,
         totalEarned: 85,
@@ -776,10 +760,10 @@ export class Web3Service {
           feesEarned: {
             token0: '5000000000000000',
             token1: '8500000',
-            usdValue: 17.5
-          }
-        }
-      }
+            usdValue: 17.5,
+          },
+        },
+      },
     ];
 
     defiPositions.forEach(pos => {
@@ -791,7 +775,8 @@ export class Web3Service {
       {
         id: 'prop-001',
         title: 'Increase Urbanova Vault APY to 8%',
-        description: 'Proposal to increase the annual percentage yield of the Urbanova DeFi Vault from 5% to 8% to attract more liquidity providers',
+        description:
+          'Proposal to increase the annual percentage yield of the Urbanova DeFi Vault from 5% to 8% to attract more liquidity providers',
         proposer: '0x742d35Cc6639C0532fEb5A7b8F0D2C7f3c5C4B2E',
         votingPower: '100000000000000000000',
         votesFor: '750000000000000000000',
@@ -807,14 +792,14 @@ export class Web3Service {
             target: '0xUrbanaVault456789ABCDEF012345',
             signature: 'setAPY(uint256)',
             calldata: '0x800',
-            value: '0'
-          }
+            value: '0',
+          },
         ],
         userVote: {
           choice: 'for',
           votingPower: '50000000000000000000',
           reason: 'This will help attract more capital to the platform',
-          votedAt: new Date(Date.now() - 24 * 60 * 60 * 1000)
+          votedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
         },
         category: 'Parameter Change',
         tags: ['DeFi', 'APY', 'Vault'],
@@ -822,9 +807,9 @@ export class Web3Service {
         estimatedImpact: {
           financial: 2500000,
           risk: 'medium',
-          affectedUsers: 156
-        }
-      }
+          affectedUsers: 156,
+        },
+      },
     ];
 
     proposals.forEach(prop => {
@@ -853,13 +838,13 @@ export class Web3Service {
             amount: '4200000000000000000',
             currency: 'ETH',
             expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-            status: 'active'
-          }
+            status: 'active',
+          },
         ],
         listedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        nftMetadata: {} as NFTHolding // Simplified for demo
-      }
+        nftMetadata: {} as NFTHolding, // Simplified for demo
+      },
     ];
 
     listings.forEach(listing => {
@@ -885,7 +870,7 @@ export class Web3Service {
         multipliers: [
           { duration: 30, multiplier: 1.2 },
           { duration: 90, multiplier: 1.5 },
-          { duration: 180, multiplier: 2.0 }
+          { duration: 180, multiplier: 2.0 },
         ],
         status: 'active',
         startDate: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
@@ -894,9 +879,9 @@ export class Web3Service {
           stakedAmount: '500000000000000000000',
           pendingRewards: '12500000000000000000',
           lockEndDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
-          multiplier: 1.2
-        }
-      }
+          multiplier: 1.2,
+        },
+      },
     ];
 
     yieldFarms.forEach(farm => {
@@ -928,7 +913,7 @@ export class Web3Service {
       wallet.tokenBalances.forEach(token => {
         // Simula variazioni di prezzo ±5%
         const change = (Math.random() - 0.5) * 0.1;
-        token.pricePerToken *= (1 + change);
+        token.pricePerToken *= 1 + change;
         token.priceChange24h = change * 100;
         token.usdValue = parseFloat(token.formattedBalance.replace(',', '')) * token.pricePerToken;
       });
@@ -945,7 +930,7 @@ export class Web3Service {
     for (let i = 0; i < count; i++) {
       const networks: BlockchainNetwork[] = ['ethereum', 'polygon', 'binance_smart_chain'];
       const network = networks[Math.floor(Math.random() * networks.length)];
-      
+
       const transaction: Transaction = {
         id: `tx-${Date.now()}-${i}`,
         hash: `0x${Math.random().toString(16).substr(2, 64)}`,
@@ -958,13 +943,15 @@ export class Web3Service {
         gasPrice: (20000000000 + Math.random() * 50000000000).toString(),
         status: Math.random() > 0.05 ? 'confirmed' : 'failed',
         confirmations: Math.floor(Math.random() * 50),
-        type: ['transfer', 'contract_interaction', 'nft_transfer', 'defi_swap'][Math.floor(Math.random() * 4)] as any,
+        type: ['transfer', 'contract_interaction', 'nft_transfer', 'defi_swap'][
+          Math.floor(Math.random() * 4)
+        ] as any,
         description: 'Simulated transaction',
         usdValueAtTime: Math.random() * 10000,
         currentUsdValue: Math.random() * 10000,
         submittedAt: new Date(Date.now() - Math.random() * 60 * 60 * 1000),
         confirmedAt: new Date(Date.now() - Math.random() * 30 * 60 * 1000),
-        isMevProtected: Math.random() > 0.5
+        isMevProtected: Math.random() > 0.5,
       };
 
       this.transactions.set(transaction.id, transaction);
@@ -982,7 +969,7 @@ export class Web3Service {
     this.defiPositions.forEach(position => {
       // Simula crescita rewards
       position.rewards.forEach(reward => {
-        const growth = (reward.apr / 365 / 24) * parseFloat(position.amount) / 1000000; // Daily growth
+        const growth = ((reward.apr / 365 / 24) * parseFloat(position.amount)) / 1000000; // Daily growth
         reward.usdValue += growth;
         position.totalEarnedUsd += growth;
       });
@@ -997,7 +984,7 @@ export class Web3Service {
 
   // Connetti wallet
   connectWallet(walletType: WalletType, network: BlockchainNetwork): Promise<Wallet> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       setTimeout(() => {
         const wallet: Wallet = {
           id: `wallet-${Date.now()}`,
@@ -1018,8 +1005,8 @@ export class Web3Service {
             defaultNetwork: network,
             gasSettings: 'standard',
             slippageTolerance: 0.5,
-            autoApprove: false
-          }
+            autoApprove: false,
+          },
         };
 
         this.wallets.set(wallet.id, wallet);
@@ -1067,10 +1054,10 @@ export class Web3Service {
           confirmations: 0,
           type: 'transfer',
           description: 'User transaction',
-          usdValueAtTime: parseFloat(value) / 1000000000000000000 * 1700,
-          currentUsdValue: parseFloat(value) / 1000000000000000000 * 1700,
+          usdValueAtTime: (parseFloat(value) / 1000000000000000000) * 1700,
+          currentUsdValue: (parseFloat(value) / 1000000000000000000) * 1700,
           submittedAt: new Date(),
-          isMevProtected: false
+          isMevProtected: false,
         };
 
         this.transactions.set(transaction.id, transaction);
@@ -1097,7 +1084,7 @@ export class Web3Service {
     amount: string,
     slippage: number = 0.5
   ): Promise<Transaction> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       setTimeout(() => {
         const transaction: Transaction = {
           id: `swap-${Date.now()}`,
@@ -1117,13 +1104,13 @@ export class Web3Service {
             parameters: {
               amountIn: amount,
               amountOutMin: (parseFloat(amount) * (1 - slippage / 100)).toString(),
-              path: [fromToken, toToken]
-            }
+              path: [fromToken, toToken],
+            },
           },
           usdValueAtTime: parseFloat(amount) * Math.random() * 2000,
           currentUsdValue: parseFloat(amount) * Math.random() * 2000,
           submittedAt: new Date(),
-          isMevProtected: true
+          isMevProtected: true,
         };
 
         this.transactions.set(transaction.id, transaction);
@@ -1142,12 +1129,8 @@ export class Web3Service {
   }
 
   // Stake token
-  stakeTokens(
-    poolId: string,
-    amount: string,
-    lockPeriod?: number
-  ): Promise<Transaction> {
-    return new Promise((resolve) => {
+  stakeTokens(poolId: string, amount: string, lockPeriod?: number): Promise<Transaction> {
+    return new Promise(resolve => {
       setTimeout(() => {
         const transaction: Transaction = {
           id: `stake-${Date.now()}`,
@@ -1165,7 +1148,7 @@ export class Web3Service {
           usdValueAtTime: parseFloat(amount) * Math.random() * 1000,
           currentUsdValue: parseFloat(amount) * Math.random() * 1000,
           submittedAt: new Date(),
-          isMevProtected: false
+          isMevProtected: false,
         };
 
         this.transactions.set(transaction.id, transaction);
@@ -1181,14 +1164,14 @@ export class Web3Service {
     votingPower: string,
     reason?: string
   ): Promise<Transaction> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const proposal = this.governanceProposals.get(proposalId);
       if (proposal) {
         proposal.userVote = {
           choice,
           votingPower,
           reason,
-          votedAt: new Date()
+          votedAt: new Date(),
         };
 
         // Aggiorna conteggi voti
@@ -1217,7 +1200,7 @@ export class Web3Service {
           description: `Vote ${choice} on proposal ${proposalId}`,
           submittedAt: new Date(),
           confirmedAt: new Date(),
-          isMevProtected: false
+          isMevProtected: false,
         };
 
         this.transactions.set(transaction.id, transaction);
@@ -1233,7 +1216,7 @@ export class Web3Service {
     amount: string,
     destinationAddress: string
   ): Promise<CrossChainTransaction> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       setTimeout(() => {
         const crossChainTx: CrossChainTransaction = {
           id: `bridge-${Date.now()}`,
@@ -1251,23 +1234,26 @@ export class Web3Service {
           bridgeFee: (parseFloat(amount) * 0.001).toString(),
           gasFees: {
             source: '0.005',
-            destination: '0.001'
+            destination: '0.001',
           },
           confirmations: {
             required: 12,
-            current: 0
-          }
+            current: 0,
+          },
         };
 
         this.crossChainTransactions.set(crossChainTx.id, crossChainTx);
 
         // Simula completamento bridge
-        setTimeout(() => {
-          crossChainTx.status = 'completed';
-          crossChainTx.destinationTxHash = `0x${Math.random().toString(16).substr(2, 64)}`;
-          crossChainTx.completedAt = new Date();
-          crossChainTx.confirmations.current = 12;
-        }, 7 * 60 * 1000);
+        setTimeout(
+          () => {
+            crossChainTx.status = 'completed';
+            crossChainTx.destinationTxHash = `0x${Math.random().toString(16).substr(2, 64)}`;
+            crossChainTx.completedAt = new Date();
+            crossChainTx.confirmations.current = 12;
+          },
+          7 * 60 * 1000
+        );
 
         resolve(crossChainTx);
       }, 2000);
@@ -1282,8 +1268,10 @@ export class Web3Service {
 
     const totalPortfolioValue = wallets.reduce((sum, wallet) => sum + wallet.usdValue, 0);
     const totalDeFiValue = defiPositions.reduce((sum, pos) => sum + pos.usdValue, 0);
-    const totalNFTValue = wallets.reduce((sum, wallet) => 
-      sum + wallet.nfts.reduce((nftSum, nft) => nftSum + (nft.estimatedValue || 0), 0), 0
+    const totalNFTValue = wallets.reduce(
+      (sum, wallet) =>
+        sum + wallet.nfts.reduce((nftSum, nft) => nftSum + (nft.estimatedValue || 0), 0),
+      0
     );
 
     return {
@@ -1295,51 +1283,54 @@ export class Web3Service {
           { asset: 'ETH', value: totalPortfolioValue * 0.4, percentage: 40, change24h: 2.1 },
           { asset: 'USDC', value: totalPortfolioValue * 0.3, percentage: 30, change24h: 0.1 },
           { asset: 'DeFi', value: totalDeFiValue, percentage: 20, change24h: 4.8 },
-          { asset: 'NFTs', value: totalNFTValue, percentage: 10, change24h: -1.2 }
+          { asset: 'NFTs', value: totalNFTValue, percentage: 10, change24h: -1.2 },
         ],
         networkAllocation: [
           { network: 'ethereum', value: totalPortfolioValue * 0.7, percentage: 70 },
           { network: 'polygon', value: totalPortfolioValue * 0.25, percentage: 25 },
-          { network: 'arbitrum', value: totalPortfolioValue * 0.05, percentage: 5 }
-        ]
+          { network: 'arbitrum', value: totalPortfolioValue * 0.05, percentage: 5 },
+        ],
       },
       defi: {
         totalDeposited: totalDeFiValue,
         totalBorrowed: 0,
         netWorth: totalDeFiValue,
         totalYieldEarned: defiPositions.reduce((sum, pos) => sum + pos.totalEarnedUsd, 0),
-        averageApy: defiPositions.reduce((sum, pos) => sum + pos.apy, 0) / Math.max(defiPositions.length, 1),
+        averageApy:
+          defiPositions.reduce((sum, pos) => sum + pos.apy, 0) / Math.max(defiPositions.length, 1),
         protocolBreakdown: [
           { protocol: 'aave', value: 5000, apy: 4.8, risk: 'low' },
-          { protocol: 'uniswap', value: 3400, apy: 12.3, risk: 'medium' }
+          { protocol: 'uniswap', value: 3400, apy: 12.3, risk: 'medium' },
         ],
         healthFactor: 2.5,
-        liquidationRisk: 'low'
+        liquidationRisk: 'low',
       },
       nft: {
         totalValue: totalNFTValue,
         totalCount: wallets.reduce((sum, wallet) => sum + wallet.nfts.length, 0),
         floorValueSum: totalNFTValue * 0.8,
         collectionBreakdown: [
-          { collection: 'Urbanova Properties', count: 1, floorPrice: 2.5, totalValue: 3.8 }
+          { collection: 'Urbanova Properties', count: 1, floorPrice: 2.5, totalValue: 3.8 },
         ],
-        categoryBreakdown: [
-          { category: 'real_estate', count: 1, value: 3.8 }
-        ]
+        categoryBreakdown: [{ category: 'real_estate', count: 1, value: 3.8 }],
       },
       transactions: {
         totalCount: transactions.length,
-        totalGasSpent: transactions.reduce((sum, tx) => sum + (tx.gasUsed || 0) * parseFloat(tx.gasPrice || '0') / 1000000000000000000, 0),
+        totalGasSpent: transactions.reduce(
+          (sum, tx) =>
+            sum + ((tx.gasUsed || 0) * parseFloat(tx.gasPrice || '0')) / 1000000000000000000,
+          0
+        ),
         totalVolume: transactions.reduce((sum, tx) => sum + tx.usdValueAtTime, 0),
         activityBreakdown: [
           { type: 'transfer', count: 45, volume: 25000 },
           { type: 'defi_swap', count: 23, volume: 15000 },
-          { type: 'nft_transfer', count: 12, volume: 8000 }
+          { type: 'nft_transfer', count: 12, volume: 8000 },
         ],
         networkUsage: [
           { network: 'ethereum', transactionCount: 156, gasSpent: 0.45 },
-          { network: 'polygon', transactionCount: 89, gasSpent: 0.12 }
-        ]
+          { network: 'polygon', transactionCount: 89, gasSpent: 0.12 },
+        ],
       },
       performance: {
         totalReturn: 2500,
@@ -1352,8 +1343,8 @@ export class Web3Service {
           '30d': 12.8,
           '90d': 18.5,
           '1y': 45.2,
-          'all_time': 67.8
-        }
+          all_time: 67.8,
+        },
       },
       risk: {
         portfolioRisk: 'medium',
@@ -1361,19 +1352,27 @@ export class Web3Service {
         liquidityRisk: 0.2,
         smartContractRisk: 0.3,
         riskFactors: [
-          { factor: 'High ETH concentration', impact: 'medium', description: '40% of portfolio in ETH' },
-          { factor: 'DeFi smart contract risk', impact: 'low', description: 'Audited protocols only' }
-        ]
+          {
+            factor: 'High ETH concentration',
+            impact: 'medium',
+            description: '40% of portfolio in ETH',
+          },
+          {
+            factor: 'DeFi smart contract risk',
+            impact: 'low',
+            description: 'Audited protocols only',
+          },
+        ],
       },
       generatedAt: new Date(),
-      dataAsOf: new Date()
+      dataAsOf: new Date(),
     };
   }
 
   // Genera security analysis
   generateWeb3Security(): Web3Security {
     const wallets = Array.from(this.wallets.values());
-    
+
     return {
       walletSecurity: {
         isHardwareWallet: false,
@@ -1386,22 +1385,22 @@ export class Web3Service {
             token: 'WETH',
             amount: '1000000000000000000000',
             risk: 'low',
-            lastUsed: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+            lastUsed: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
           },
           {
             spender: '0xSuspiciousContract',
             token: 'USDC',
             amount: 'unlimited',
             risk: 'high',
-            lastUsed: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-          }
+            lastUsed: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+          },
         ],
         securityScore: 75,
         recommendations: [
           'Consider using a hardware wallet',
           'Revoke unused token approvals',
-          'Enable multi-signature for large transactions'
-        ]
+          'Enable multi-signature for large transactions',
+        ],
       },
       contractSecurity: {
         interactedContracts: [
@@ -1411,18 +1410,18 @@ export class Web3Service {
             isVerified: true,
             auditStatus: 'audited',
             riskScore: 15,
-            lastInteraction: new Date(Date.now() - 2 * 60 * 60 * 1000)
+            lastInteraction: new Date(Date.now() - 2 * 60 * 60 * 1000),
           },
           {
             address: '0xUnverifiedContract',
             isVerified: false,
             auditStatus: 'unaudited',
             riskScore: 85,
-            lastInteraction: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000)
-          }
+            lastInteraction: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+          },
         ],
         highRiskContracts: ['0xUnverifiedContract'],
-        unverifiedContracts: ['0xUnverifiedContract']
+        unverifiedContracts: ['0xUnverifiedContract'],
       },
       transactionSecurity: {
         suspiciousTransactions: [
@@ -1430,12 +1429,12 @@ export class Web3Service {
             hash: '0xsuspicious123',
             risk: 'medium',
             reason: 'Unusual gas price pattern',
-            timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
-          }
+            timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+          },
         ],
         mevExposure: 15.6,
         frontRunningInstances: 3,
-        sandwichAttacks: 1
+        sandwichAttacks: 1,
       },
       securityAlerts: [
         {
@@ -1444,7 +1443,7 @@ export class Web3Service {
           severity: 'high',
           message: 'Unlimited USDC approval to suspicious contract detected',
           actionRequired: true,
-          createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000)
+          createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
         },
         {
           id: 'alert-002',
@@ -1453,9 +1452,9 @@ export class Web3Service {
           message: 'Interaction with unverified contract',
           actionRequired: false,
           createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
-          resolvedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)
-        }
-      ]
+          resolvedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+        },
+      ],
     };
   }
 
@@ -1470,14 +1469,20 @@ export class Web3Service {
         totalWallets: wallets.length,
         activeWallets: wallets.filter(w => w.isConnected).length,
         networksUsed: new Set(wallets.map(w => w.network)).size,
-        walletBreakdown: wallets.reduce((acc, wallet) => {
-          acc[wallet.type] = (acc[wallet.type] || 0) + 1;
-          return acc;
-        }, {} as Record<WalletType, number>),
-        networkBreakdown: wallets.reduce((acc, wallet) => {
-          acc[wallet.network] = (acc[wallet.network] || 0) + 1;
-          return acc;
-        }, {} as Record<BlockchainNetwork, number>)
+        walletBreakdown: wallets.reduce(
+          (acc, wallet) => {
+            acc[wallet.type] = (acc[wallet.type] || 0) + 1;
+            return acc;
+          },
+          {} as Record<WalletType, number>
+        ),
+        networkBreakdown: wallets.reduce(
+          (acc, wallet) => {
+            acc[wallet.network] = (acc[wallet.network] || 0) + 1;
+            return acc;
+          },
+          {} as Record<BlockchainNetwork, number>
+        ),
       },
       transactions: {
         total: transactions.length,
@@ -1485,26 +1490,36 @@ export class Web3Service {
         failed: transactions.filter(tx => tx.status === 'failed').length,
         pending: transactions.filter(tx => tx.status === 'pending').length,
         totalVolume: transactions.reduce((sum, tx) => sum + tx.usdValueAtTime, 0),
-        averageValue: transactions.reduce((sum, tx) => sum + tx.usdValueAtTime, 0) / Math.max(transactions.length, 1),
+        averageValue:
+          transactions.reduce((sum, tx) => sum + tx.usdValueAtTime, 0) /
+          Math.max(transactions.length, 1),
         totalGasUsed: transactions.reduce((sum, tx) => sum + (tx.gasUsed || 0), 0),
-        totalGasCost: transactions.reduce((sum, tx) => sum + (tx.gasUsed || 0) * parseFloat(tx.gasPrice || '0') / 1000000000000000000, 0),
-        averageGasPrice: transactions.reduce((sum, tx) => sum + parseFloat(tx.gasPrice || '0'), 0) / Math.max(transactions.length, 1) / 1000000000
+        totalGasCost: transactions.reduce(
+          (sum, tx) =>
+            sum + ((tx.gasUsed || 0) * parseFloat(tx.gasPrice || '0')) / 1000000000000000000,
+          0
+        ),
+        averageGasPrice:
+          transactions.reduce((sum, tx) => sum + parseFloat(tx.gasPrice || '0'), 0) /
+          Math.max(transactions.length, 1) /
+          1000000000,
       },
       defi: {
         totalValueLocked: defiPositions.reduce((sum, pos) => sum + pos.usdValue, 0),
         activePositions: defiPositions.length,
         totalYieldEarned: defiPositions.reduce((sum, pos) => sum + pos.totalEarnedUsd, 0),
-        averageApy: defiPositions.reduce((sum, pos) => sum + pos.apy, 0) / Math.max(defiPositions.length, 1),
+        averageApy:
+          defiPositions.reduce((sum, pos) => sum + pos.apy, 0) / Math.max(defiPositions.length, 1),
         protocolUsage: {
-          'aave': { users: 156, tvl: 5000000, volume: 250000 },
-          'uniswap': { users: 234, tvl: 15000000, volume: 1250000 },
-          'compound': { users: 89, tvl: 3000000, volume: 180000 },
-          'curve': { users: 67, tvl: 2500000, volume: 125000 },
-          'yearn': { users: 45, tvl: 1800000, volume: 95000 },
-          'maker_dao': { users: 123, tvl: 8000000, volume: 450000 },
-          'sushiswap': { users: 98, tvl: 4500000, volume: 320000 },
-          'pancakeswap': { users: 76, tvl: 2200000, volume: 165000 }
-        }
+          aave: { users: 156, tvl: 5000000, volume: 250000 },
+          uniswap: { users: 234, tvl: 15000000, volume: 1250000 },
+          compound: { users: 89, tvl: 3000000, volume: 180000 },
+          curve: { users: 67, tvl: 2500000, volume: 125000 },
+          yearn: { users: 45, tvl: 1800000, volume: 95000 },
+          maker_dao: { users: 123, tvl: 8000000, volume: 450000 },
+          sushiswap: { users: 98, tvl: 4500000, volume: 320000 },
+          pancakeswap: { users: 76, tvl: 2200000, volume: 165000 },
+        },
       },
       nft: {
         totalMinted: 1,
@@ -1512,14 +1527,14 @@ export class Web3Service {
         totalVolume: 0,
         averagePrice: 3.8,
         categoryStats: {
-          'real_estate': { count: 1, volume: 0, averagePrice: 3.8 },
-          'property_deed': { count: 0, volume: 0, averagePrice: 0 },
-          'rental_agreement': { count: 0, volume: 0, averagePrice: 0 },
-          'investment_certificate': { count: 0, volume: 0, averagePrice: 0 },
-          'membership': { count: 0, volume: 0, averagePrice: 0 },
-          'utility': { count: 0, volume: 0, averagePrice: 0 },
-          'collectible': { count: 0, volume: 0, averagePrice: 0 }
-        }
+          real_estate: { count: 1, volume: 0, averagePrice: 3.8 },
+          property_deed: { count: 0, volume: 0, averagePrice: 0 },
+          rental_agreement: { count: 0, volume: 0, averagePrice: 0 },
+          investment_certificate: { count: 0, volume: 0, averagePrice: 0 },
+          membership: { count: 0, volume: 0, averagePrice: 0 },
+          utility: { count: 0, volume: 0, averagePrice: 0 },
+          collectible: { count: 0, volume: 0, averagePrice: 0 },
+        },
       },
       security: {
         securityScore: 75,
@@ -1530,21 +1545,21 @@ export class Web3Service {
           low: 1,
           medium: 1,
           high: 1,
-          critical: 0
-        }
+          critical: 0,
+        },
       },
       performance: {
         averageResponseTime: 1250,
         successRate: 96.8,
         uptime: 99.5,
         apiPerformance: {
-          'ethereum': { calls: 1250, averageLatency: 850, errorRate: 2.1 },
-          'polygon': { calls: 890, averageLatency: 650, errorRate: 1.8 },
-          'arbitrum': { calls: 456, averageLatency: 550, errorRate: 1.2 }
-        }
+          ethereum: { calls: 1250, averageLatency: 850, errorRate: 2.1 },
+          polygon: { calls: 890, averageLatency: 650, errorRate: 1.8 },
+          arbitrum: { calls: 456, averageLatency: 550, errorRate: 1.2 },
+        },
       },
       generatedAt: new Date(),
-      period: '30d'
+      period: '30d',
     };
   }
 
@@ -1566,8 +1581,8 @@ export class Web3Service {
   }
 
   getTransactions(): Transaction[] {
-    return Array.from(this.transactions.values()).sort((a, b) => 
-      b.submittedAt.getTime() - a.submittedAt.getTime()
+    return Array.from(this.transactions.values()).sort(
+      (a, b) => b.submittedAt.getTime() - a.submittedAt.getTime()
     );
   }
 
@@ -1613,23 +1628,27 @@ export class Web3Service {
   }
 
   // Ricerca transazioni
-  searchTransactions(query: string, filters?: {
-    network?: BlockchainNetwork;
-    status?: TransactionStatus;
-    type?: string;
-    dateFrom?: Date;
-    dateTo?: Date;
-  }): Transaction[] {
+  searchTransactions(
+    query: string,
+    filters?: {
+      network?: BlockchainNetwork;
+      status?: TransactionStatus;
+      type?: string;
+      dateFrom?: Date;
+      dateTo?: Date;
+    }
+  ): Transaction[] {
     let results = Array.from(this.transactions.values());
 
     // Filtro per query testuale
     if (query.trim()) {
       const searchTerm = query.toLowerCase();
-      results = results.filter(tx => 
-        tx.hash.toLowerCase().includes(searchTerm) ||
-        tx.description.toLowerCase().includes(searchTerm) ||
-        tx.from.toLowerCase().includes(searchTerm) ||
-        tx.to.toLowerCase().includes(searchTerm)
+      results = results.filter(
+        tx =>
+          tx.hash.toLowerCase().includes(searchTerm) ||
+          tx.description.toLowerCase().includes(searchTerm) ||
+          tx.from.toLowerCase().includes(searchTerm) ||
+          tx.to.toLowerCase().includes(searchTerm)
       );
     }
 

@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { feasibilityService } from '@/lib/feasibilityService';
+import { useEffect } from 'react';
 import { toast } from 'react-hot-toast';
+
+import { feasibilityService } from '@/lib/feasibilityService';
 
 export default function EditFeasibilityProjectPage() {
   const params = useParams();
@@ -20,7 +21,7 @@ export default function EditFeasibilityProjectPage() {
 
         // Carica il progetto per verificare che esista
         const project = await feasibilityService.getProjectById(params.id as string);
-        
+
         if (!project) {
           toast.error('❌ Progetto non trovato');
           router.push('/dashboard/feasibility-analysis');
@@ -30,7 +31,6 @@ export default function EditFeasibilityProjectPage() {
         // Reindirizza alla pagina di creazione con i dati del progetto
         // I dati verranno caricati automaticamente nella pagina di creazione
         router.push(`/dashboard/feasibility-analysis/new?edit=${params.id}`);
-        
       } catch (error) {
         console.error('❌ Errore caricamento progetto per edit:', error);
         toast.error('❌ Errore nel caricamento del progetto');

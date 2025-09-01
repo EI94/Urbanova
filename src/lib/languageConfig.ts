@@ -12,8 +12,8 @@ export const SUPPORTED_LANGUAGES: Record<SupportedLanguage, LanguageConfig> = {
     numberFormat: {
       decimal: ',',
       thousands: '.',
-      currency: 'EUR'
-    }
+      currency: 'EUR',
+    },
   },
   en: {
     code: 'en',
@@ -25,8 +25,8 @@ export const SUPPORTED_LANGUAGES: Record<SupportedLanguage, LanguageConfig> = {
     numberFormat: {
       decimal: '.',
       thousands: ',',
-      currency: 'USD'
-    }
+      currency: 'USD',
+    },
   },
   es: {
     code: 'es',
@@ -38,8 +38,8 @@ export const SUPPORTED_LANGUAGES: Record<SupportedLanguage, LanguageConfig> = {
     numberFormat: {
       decimal: ',',
       thousands: '.',
-      currency: 'EUR'
-    }
+      currency: 'EUR',
+    },
   },
   fr: {
     code: 'fr',
@@ -51,8 +51,8 @@ export const SUPPORTED_LANGUAGES: Record<SupportedLanguage, LanguageConfig> = {
     numberFormat: {
       decimal: ',',
       thousands: ' ',
-      currency: 'EUR'
-    }
+      currency: 'EUR',
+    },
   },
   de: {
     code: 'de',
@@ -64,8 +64,8 @@ export const SUPPORTED_LANGUAGES: Record<SupportedLanguage, LanguageConfig> = {
     numberFormat: {
       decimal: ',',
       thousands: '.',
-      currency: 'EUR'
-    }
+      currency: 'EUR',
+    },
   },
   pt: {
     code: 'pt',
@@ -77,8 +77,8 @@ export const SUPPORTED_LANGUAGES: Record<SupportedLanguage, LanguageConfig> = {
     numberFormat: {
       decimal: ',',
       thousands: '.',
-      currency: 'EUR'
-    }
+      currency: 'EUR',
+    },
   },
   ru: {
     code: 'ru',
@@ -90,8 +90,8 @@ export const SUPPORTED_LANGUAGES: Record<SupportedLanguage, LanguageConfig> = {
     numberFormat: {
       decimal: ',',
       thousands: ' ',
-      currency: 'RUB'
-    }
+      currency: 'RUB',
+    },
   },
   zh: {
     code: 'zh',
@@ -103,8 +103,8 @@ export const SUPPORTED_LANGUAGES: Record<SupportedLanguage, LanguageConfig> = {
     numberFormat: {
       decimal: '.',
       thousands: ',',
-      currency: 'CNY'
-    }
+      currency: 'CNY',
+    },
   },
   ja: {
     code: 'ja',
@@ -116,8 +116,8 @@ export const SUPPORTED_LANGUAGES: Record<SupportedLanguage, LanguageConfig> = {
     numberFormat: {
       decimal: '.',
       thousands: ',',
-      currency: 'JPY'
-    }
+      currency: 'JPY',
+    },
   },
   ko: {
     code: 'ko',
@@ -129,9 +129,9 @@ export const SUPPORTED_LANGUAGES: Record<SupportedLanguage, LanguageConfig> = {
     numberFormat: {
       decimal: '.',
       thousands: ',',
-      currency: 'KRW'
-    }
-  }
+      currency: 'KRW',
+    },
+  },
 };
 
 export const DEFAULT_LANGUAGE: SupportedLanguage = 'it';
@@ -151,17 +151,17 @@ export function getSupportedLanguages(): LanguageConfig[] {
 // Funzione per rilevare la lingua del browser
 export function detectBrowserLanguage(): SupportedLanguage {
   if (typeof window === 'undefined') return DEFAULT_LANGUAGE;
-  
+
   const browserLang = navigator.language || navigator.languages?.[0] || 'it';
   const langCode = browserLang.split('-')[0] as SupportedLanguage;
-  
+
   return SUPPORTED_LANGUAGES[langCode] ? langCode : DEFAULT_LANGUAGE;
 }
 
 // Funzione per salvare la lingua nelle impostazioni
 export function saveLanguagePreference(language: SupportedLanguage): void {
   if (typeof window === 'undefined') return;
-  
+
   try {
     localStorage.setItem('urbanova-language', language);
     localStorage.setItem('urbanova-language-timestamp', Date.now().toString());
@@ -173,11 +173,11 @@ export function saveLanguagePreference(language: SupportedLanguage): void {
 // Funzione per caricare la lingua dalle impostazioni
 export function loadLanguagePreference(): SupportedLanguage {
   if (typeof window === 'undefined') return DEFAULT_LANGUAGE;
-  
+
   try {
     const savedLanguage = localStorage.getItem('urbanova-language') as SupportedLanguage;
     const timestamp = localStorage.getItem('urbanova-language-timestamp');
-    
+
     // Verifica che la lingua sia ancora supportata
     if (savedLanguage && SUPPORTED_LANGUAGES[savedLanguage]) {
       return savedLanguage;
@@ -185,6 +185,6 @@ export function loadLanguagePreference(): SupportedLanguage {
   } catch (error) {
     console.error('Errore nel caricamento della lingua:', error);
   }
-  
+
   return DEFAULT_LANGUAGE;
-} 
+}

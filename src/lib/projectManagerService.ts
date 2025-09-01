@@ -1,5 +1,6 @@
-import { feasibilityService, FeasibilityProject } from './feasibilityService';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
+
+import { feasibilityService, FeasibilityProject } from './feasibilityService';
 import { db } from './firebase';
 
 export interface ProjectIdentifier {
@@ -16,7 +17,6 @@ export interface ProjectSaveResult {
 }
 
 export class ProjectManagerService {
-  
   /**
    * Gestisce il salvataggio intelligente di un progetto
    * Evita duplicati controllando nome e indirizzo
@@ -29,48 +29,49 @@ export class ProjectManagerService {
       console.log('🧠 Salvataggio intelligente progetto...', {
         name: projectData.name,
         address: projectData.address,
-        userId
+        userId,
       });
 
       // Verifica se esiste già un progetto con lo stesso nome e indirizzo
       const existingProject = await this.findExistingProject({
         name: projectData.name || '',
         address: projectData.address || '',
-        userId
+        userId,
       });
 
       if (existingProject) {
         console.log('🔄 Progetto esistente trovato, aggiornamento in corso...', existingProject.id);
-        
+
         // Aggiorna il progetto esistente
         const updatedProject = {
           ...existingProject,
           ...projectData,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         };
 
         await feasibilityService.updateProject(existingProject.id, updatedProject);
-        
+
         return {
           success: true,
           projectId: existingProject.id,
           isNew: false,
-          message: 'Progetto aggiornato con successo'
+          message: 'Progetto aggiornato con successo',
         };
       } else {
         console.log('🆕 Nuovo progetto, creazione in corso...');
-        
+
         // Crea un nuovo progetto
-        const newProjectId = await feasibilityService.createProject(projectData as Omit<FeasibilityProject, 'id' | 'createdAt' | 'updatedAt'>);
-        
+        const newProjectId = await feasibilityService.createProject(
+          projectData as Omit<FeasibilityProject, 'id' | 'createdAt' | 'updatedAt'>
+        );
+
         return {
           success: true,
           projectId: newProjectId,
           isNew: true,
-          message: 'Nuovo progetto creato con successo'
+          message: 'Nuovo progetto creato con successo',
         };
       }
-
     } catch (error) {
       console.error('❌ Errore salvataggio intelligente:', error);
       throw new Error(`Errore nel salvataggio intelligente: ${error}`);
@@ -80,7 +81,9 @@ export class ProjectManagerService {
   /**
    * Trova un progetto esistente basandosi su nome e indirizzo
    */
-  private async findExistingProject(identifier: ProjectIdentifier): Promise<FeasibilityProject | null> {
+  private async findExistingProject(
+    identifier: ProjectIdentifier
+  ): Promise<FeasibilityProject | null> {
     try {
       console.log('🔍 Ricerca progetto esistente...', identifier);
 
@@ -94,26 +97,25 @@ export class ProjectManagerService {
       );
 
       const querySnapshot = await getDocs(q);
-      
+
       if (!querySnapshot.empty) {
         const doc = querySnapshot.docs[0];
         const projectData = doc.data() as FeasibilityProject;
-        
+
         console.log('✅ Progetto esistente trovato:', {
           id: doc.id,
           name: projectData.name,
-          address: projectData.address
+          address: projectData.address,
         });
-        
+
         return {
           ...projectData,
-          id: doc.id
+          id: doc.id,
         };
       }
 
       console.log('❌ Nessun progetto esistente trovato');
       return null;
-
     } catch (error) {
       console.error('❌ Errore ricerca progetto esistente:', error);
       return null;
@@ -129,19 +131,18 @@ export class ProjectManagerService {
 
       // Usa il servizio esistente per trovare il progetto
       const project = await feasibilityService.getProjectById(projectId);
-      
+
       if (project) {
         console.log('✅ Progetto trovato per ID:', {
           id: project.id,
           name: project.name,
-          address: project.address
+          address: project.address,
         });
         return project;
       }
 
       console.log('❌ Nessun progetto trovato per ID:', projectId);
       return null;
-
     } catch (error) {
       console.error('❌ Errore ricerca progetto per ID:', error);
       return null;
@@ -164,17 +165,17 @@ export class ProjectManagerService {
       const projectsRef = collection(db, 'feasibilityProjects');
       const q = query(
         projectsRef,
-        where('userId', '==', userId),
+        where('userId', '==', userId)
         // where('deleted', '==', false) // Se implementi soft delete
       );
 
       const querySnapshot = await getDocs(q);
       const projects: FeasibilityProject[] = [];
 
-      querySnapshot.forEach((doc) => {
+      querySnapshot.forEach(doc => {
         projects.push({
-          ...doc.data() as FeasibilityProject,
-          id: doc.id
+          ...(doc.data() as FeasibilityProject),
+          id: doc.id,
         });
       });
 
@@ -196,10 +197,10 @@ export class ProjectManagerService {
   }> {
     try {
       console.log('🧹 Pulizia progetti duplicati per utente:', userId);
-      
+
       const projects = await this.getUserProjects(userId);
       const projectGroups = new Map<string, FeasibilityProject[]>();
-      
+
       // Raggruppa progetti per nome+indirizzo
       projects.forEach(project => {
         const key = `${project.name}|${project.address}`;
@@ -229,14 +230,18 @@ export class ProjectManagerService {
           for (const duplicate of duplicates) {
             try {
               // Importa il servizio robusto per eliminazione
-              const { robustProjectDeletionService } = await import('./robustProjectDeletionService');
+              const { robustProjectDeletionService } = await import(
+                './robustProjectDeletionService'
+              );
               const result = await robustProjectDeletionService.robustDeleteProject(duplicate.id);
-              
+
               if (result.success && result.backendVerified) {
                 duplicatesRemoved++;
                 console.log(`🗑️ Rimosso progetto duplicato: ${duplicate.id}`);
               } else {
-                console.error(`❌ Eliminazione progetto duplicato fallita: ${duplicate.id} - ${result.message}`);
+                console.error(
+                  `❌ Eliminazione progetto duplicato fallita: ${duplicate.id} - ${result.message}`
+                );
               }
             } catch (error) {
               console.error(`❌ Errore rimozione progetto duplicato ${duplicate.id}:`, error);
@@ -250,12 +255,11 @@ export class ProjectManagerService {
       const result = {
         totalProjects: projects.length,
         duplicatesRemoved,
-        projectsKept
+        projectsKept,
       };
 
       console.log('✅ Pulizia progetti completata:', result);
       return result;
-
     } catch (error) {
       console.error('❌ Errore pulizia progetti duplicati:', error);
       throw error;
@@ -308,9 +312,8 @@ export class ProjectManagerService {
         totalProjects: projects.length,
         validProjects,
         invalidProjects,
-        issues
+        issues,
       };
-
     } catch (error) {
       console.error('❌ Errore verifica integrità progetti:', error);
       throw error;
@@ -320,7 +323,10 @@ export class ProjectManagerService {
   /**
    * Cancella un progetto in modo sicuro
    */
-  async safeDeleteProject(projectId: string, userId?: string): Promise<{
+  async safeDeleteProject(
+    projectId: string,
+    userId?: string
+  ): Promise<{
     success: boolean;
     message: string;
     projectId: string;
@@ -342,31 +348,30 @@ export class ProjectManagerService {
       // Importa il servizio robusto per eliminazione
       const { robustProjectDeletionService } = await import('./robustProjectDeletionService');
       const result = await robustProjectDeletionService.robustDeleteProject(projectId);
-      
+
       if (!result.success || !result.backendVerified) {
         throw new Error(`Eliminazione fallita: ${result.message}`);
       }
-      
+
       console.log('✅ Progetto cancellato con successo:', projectId);
-      
+
       return {
         success: true,
         message: 'Progetto cancellato con successo',
-        projectId
+        projectId,
       };
-
     } catch (error) {
       console.error('❌ Errore cancellazione progetto:', error);
-      
+
       let errorMessage = 'Errore durante la cancellazione';
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      
+
       return {
         success: false,
         message: errorMessage,
-        projectId
+        projectId,
       };
     }
   }
@@ -374,7 +379,10 @@ export class ProjectManagerService {
   /**
    * Cancella più progetti in batch
    */
-  async deleteMultipleProjects(projectIds: string[], userId?: string): Promise<{
+  async deleteMultipleProjects(
+    projectIds: string[],
+    userId?: string
+  ): Promise<{
     success: boolean;
     deleted: string[];
     failed: Array<{ id: string; error: string }>;
@@ -395,9 +403,9 @@ export class ProjectManagerService {
             failed.push({ id: projectId, error: result.message });
           }
         } catch (error) {
-          failed.push({ 
-            id: projectId, 
-            error: error instanceof Error ? error.message : 'Errore sconosciuto' 
+          failed.push({
+            id: projectId,
+            error: error instanceof Error ? error.message : 'Errore sconosciuto',
           });
         }
       }
@@ -406,12 +414,11 @@ export class ProjectManagerService {
         success: failed.length === 0,
         deleted,
         failed,
-        total: projectIds.length
+        total: projectIds.length,
       };
 
       console.log('✅ Cancellazione multipla completata:', result);
       return result;
-
     } catch (error) {
       console.error('❌ Errore cancellazione multipla:', error);
       throw error;
@@ -421,7 +428,10 @@ export class ProjectManagerService {
   /**
    * Verifica se un progetto può essere cancellato
    */
-  async canDeleteProject(projectId: string, userId?: string): Promise<{
+  async canDeleteProject(
+    projectId: string,
+    userId?: string
+  ): Promise<{
     canDelete: boolean;
     reason?: string;
     project?: FeasibilityProject;
@@ -431,7 +441,7 @@ export class ProjectManagerService {
       if (!project) {
         return {
           canDelete: false,
-          reason: 'Progetto non trovato'
+          reason: 'Progetto non trovato',
         };
       }
 
@@ -439,7 +449,7 @@ export class ProjectManagerService {
       if (userId && project.userId && project.userId !== userId) {
         return {
           canDelete: false,
-          reason: 'Non autorizzato a cancellare questo progetto'
+          reason: 'Non autorizzato a cancellare questo progetto',
         };
       }
 
@@ -447,20 +457,19 @@ export class ProjectManagerService {
       if (project.status === 'COMPLETATO') {
         return {
           canDelete: false,
-          reason: 'Non è possibile cancellare un progetto completato'
+          reason: 'Non è possibile cancellare un progetto completato',
         };
       }
 
       return {
         canDelete: true,
-        project
+        project,
       };
-
     } catch (error) {
       console.error('❌ Errore verifica cancellazione progetto:', error);
       return {
         canDelete: false,
-        reason: 'Errore durante la verifica'
+        reason: 'Errore durante la verifica',
       };
     }
   }

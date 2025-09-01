@@ -1,18 +1,19 @@
-import { 
-  collection, 
-  doc, 
-  getDocs, 
-  getDoc, 
-  setDoc, 
-  updateDoc, 
-  query, 
-  where, 
-  orderBy, 
+import {
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  setDoc,
+  updateDoc,
+  query,
+  where,
+  orderBy,
   limit,
   onSnapshot,
   serverTimestamp,
-  Timestamp 
+  Timestamp,
 } from 'firebase/firestore';
+
 import { db } from './firebase';
 
 // Fallback data per quando Firebase non è disponibile
@@ -46,8 +47,8 @@ const FALLBACK_TEMPLATES = [
     constructionTime: 18,
     popularity: 85,
     createdAt: new Date(),
-    updatedAt: new Date()
-  }
+    updatedAt: new Date(),
+  },
 ];
 
 export interface DesignTemplate {
@@ -92,7 +93,15 @@ export interface ProjectDesign {
   budget: BudgetBreakdown;
   timeline: ProjectTimeline;
   approvals: ApprovalStatus[];
-  status: 'DRAFT' | 'IN_REVIEW' | 'APPROVED' | 'REJECTED' | 'PLANNING' | 'IN_PROGRESS' | 'COMPLETED' | 'ON_HOLD';
+  status:
+    | 'DRAFT'
+    | 'IN_REVIEW'
+    | 'APPROVED'
+    | 'REJECTED'
+    | 'PLANNING'
+    | 'IN_PROGRESS'
+    | 'COMPLETED'
+    | 'ON_HOLD';
   createdAt: Date;
   updatedAt: Date;
   name?: string;
@@ -261,10 +270,10 @@ class DesignCenterService {
   }): Promise<DesignTemplate[]> {
     try {
       console.log('🎨 [DesignCenter] Recupero template con filtri:', filters);
-      
+
       const templatesRef = collection(db, this.TEMPLATES_COLLECTION);
       let q = query(templatesRef, orderBy('popularity', 'desc'));
-      
+
       // Applica filtri se specificati
       if (filters?.category) {
         q = query(q, where('category', '==', filters.category));
@@ -278,10 +287,10 @@ class DesignCenterService {
       if (filters?.density) {
         q = query(q, where('density', '==', filters.density));
       }
-      
+
       const snapshot = await getDocs(q);
       let templates: DesignTemplate[] = [];
-      
+
       snapshot.forEach(doc => {
         const data = doc.data();
         templates.push({
@@ -313,10 +322,10 @@ class DesignCenterService {
           constructionTime: data.constructionTime || 0,
           popularity: data.popularity || 0,
           createdAt: data.createdAt?.toDate() || new Date(),
-          updatedAt: data.updatedAt?.toDate() || new Date()
+          updatedAt: data.updatedAt?.toDate() || new Date(),
         });
       });
-      
+
       // Filtra per area e budget se specificati
       if (filters?.minArea) {
         templates = templates.filter(t => t.maxArea >= filters.minArea!);
@@ -330,7 +339,7 @@ class DesignCenterService {
       if (filters?.maxBudget) {
         templates = templates.filter(t => t.minBudget <= filters.maxBudget!);
       }
-      
+
       console.log(`✅ [DesignCenter] Trovati ${templates.length} template`);
       return templates;
     } catch (error) {
@@ -346,7 +355,7 @@ class DesignCenterService {
     try {
       const templateRef = doc(db, this.TEMPLATES_COLLECTION, templateId);
       const snapshot = await getDoc(templateRef);
-      
+
       if (snapshot.exists()) {
         const data = snapshot.data();
         return {
@@ -378,10 +387,10 @@ class DesignCenterService {
           constructionTime: data.constructionTime || 0,
           popularity: data.popularity || 0,
           createdAt: data.createdAt?.toDate() || new Date(),
-          updatedAt: data.updatedAt?.toDate() || new Date()
+          updatedAt: data.updatedAt?.toDate() || new Date(),
         };
       }
-      
+
       return null;
     } catch (error) {
       console.error('❌ [DesignCenter] Errore recupero template:', error);
@@ -392,17 +401,19 @@ class DesignCenterService {
   /**
    * Crea un nuovo progetto di design
    */
-  async createProjectDesign(projectData: Omit<ProjectDesign, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+  async createProjectDesign(
+    projectData: Omit<ProjectDesign, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<string> {
     try {
       console.log('🎨 [DesignCenter] Creazione progetto design:', projectData.projectId);
-      
+
       const projectRef = doc(collection(db, this.PROJECTS_COLLECTION));
       await setDoc(projectRef, {
         ...projectData,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
-      
+
       console.log('✅ [DesignCenter] Progetto design creato:', projectRef.id);
       return projectRef.id;
     } catch (error) {
@@ -419,9 +430,9 @@ class DesignCenterService {
       const projectRef = doc(db, this.PROJECTS_COLLECTION, projectId);
       await updateDoc(projectRef, {
         ...updates,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
-      
+
       console.log('✅ [DesignCenter] Progetto design aggiornato:', projectId);
     } catch (error) {
       console.error('❌ [DesignCenter] Errore aggiornamento progetto design:', error);
@@ -440,10 +451,10 @@ class DesignCenterService {
         where('projectId', '==', projectId),
         orderBy('updatedAt', 'desc')
       );
-      
+
       const snapshot = await getDocs(q);
       const projects: ProjectDesign[] = [];
-      
+
       snapshot.forEach(doc => {
         const data = doc.data();
         projects.push({
@@ -458,10 +469,10 @@ class DesignCenterService {
           approvals: data.approvals || [],
           status: data.status,
           createdAt: data.createdAt?.toDate() || new Date(),
-          updatedAt: data.updatedAt?.toDate() || new Date()
+          updatedAt: data.updatedAt?.toDate() || new Date(),
         });
       });
-      
+
       return projects;
     } catch (error) {
       console.error('❌ [DesignCenter] Errore recupero progetti design:', error);
@@ -476,10 +487,10 @@ class DesignCenterService {
     try {
       const projectsRef = collection(db, this.PROJECTS_COLLECTION);
       const q = query(projectsRef, orderBy('updatedAt', 'desc'));
-      
+
       const snapshot = await getDocs(q);
       const projects: ProjectDesign[] = [];
-      
+
       snapshot.forEach(doc => {
         const data = doc.data();
         projects.push({
@@ -494,10 +505,10 @@ class DesignCenterService {
           approvals: data.approvals || [],
           status: data.status || 'PLANNING',
           createdAt: data.createdAt?.toDate() || new Date(),
-          updatedAt: data.updatedAt?.toDate() || new Date()
+          updatedAt: data.updatedAt?.toDate() || new Date(),
         });
       });
-      
+
       return projects;
     } catch (error) {
       console.error('❌ [DesignCenter] Errore recupero tutti i progetti design:', error);
@@ -520,64 +531,72 @@ class DesignCenterService {
   }> {
     try {
       console.log('🔍 [DesignCenter] Validazione vincoli design per:', location.address);
-      
+
       const violations: string[] = [];
       const recommendations: string[] = [];
-      
+
       // Calcola vincoli basati su zona e regolamenti
       const constraints = this.calculateConstraints(location, customizations);
-      
+
       // Valida area copertura
-      const coverage = (customizations.area / (customizations.area + constraints.greenAreaMin)) * 100;
+      const coverage =
+        (customizations.area / (customizations.area + constraints.greenAreaMin)) * 100;
       if (coverage > constraints.maxCoverage) {
-        violations.push(`Copertura terreno ${coverage.toFixed(1)}% supera il limite ${constraints.maxCoverage}%`);
+        violations.push(
+          `Copertura terreno ${coverage.toFixed(1)}% supera il limite ${constraints.maxCoverage}%`
+        );
         recommendations.push('Ridurre area edificabile o aumentare area verde');
       }
-      
+
       // Valida distanza confini
       if (customizations.area > 0) {
         const minSide = Math.sqrt(customizations.area);
         if (minSide / 2 < constraints.boundaryDistance) {
-          violations.push(`Distanza minima dal confine (${constraints.boundaryDistance}m) non rispettata`);
+          violations.push(
+            `Distanza minima dal confine (${constraints.boundaryDistance}m) non rispettata`
+          );
           recommendations.push('Ridurre area edificabile o verificare dimensioni terreno');
         }
       }
-      
+
       // Valida altezza massima
       const maxHeight = customizations.floors * 3; // 3m per piano
       if (maxHeight > constraints.maxHeight) {
         violations.push(`Altezza massima ${maxHeight}m supera il limite ${constraints.maxHeight}m`);
         recommendations.push('Ridurre numero piani o verificare regolamenti zona');
       }
-      
+
       // Valida posti auto
       const requiredParking = Math.ceil(customizations.bedrooms * 1.5) + 1; // 1.5 per camera + 1 ospiti
       if (customizations.parkingSpaces < requiredParking) {
-        violations.push(`Posti auto ${customizations.parkingSpaces} insufficienti (richiesti: ${requiredParking})`);
+        violations.push(
+          `Posti auto ${customizations.parkingSpaces} insufficienti (richiesti: ${requiredParking})`
+        );
         recommendations.push('Aumentare posti auto o ridurre camere');
       }
-      
+
       // Valida area verde
       const greenArea = customizations.gardenArea + customizations.balconyArea;
       const minGreenArea = (customizations.area + greenArea) * (constraints.greenAreaMin / 100);
       if (greenArea < minGreenArea) {
-        violations.push(`Area verde ${greenArea}m² insufficiente (minima: ${minGreenArea.toFixed(0)}m²)`);
+        violations.push(
+          `Area verde ${greenArea}m² insufficiente (minima: ${minGreenArea.toFixed(0)}m²)`
+        );
         recommendations.push('Aumentare area giardino o balconi');
       }
-      
+
       const isValid = violations.length === 0;
-      
+
       if (isValid) {
         recommendations.push('✅ Design conforme a tutti i vincoli');
       }
-      
+
       return {
         isValid,
         violations,
         recommendations,
-        adjustedConstraints: constraints
+        adjustedConstraints: constraints,
       };
-      
     } catch (error) {
       console.error('❌ [DesignCenter] Errore validazione vincoli:', error);
       throw new Error('Impossibile validare i vincoli di design');
@@ -587,7 +606,10 @@ class DesignCenterService {
   /**
    * Calcola i vincoli basati su zona e regolamenti
    */
-  private calculateConstraints(location: GeoLocation, customizations: DesignCustomization): DesignConstraints {
+  private calculateConstraints(
+    location: GeoLocation,
+    customizations: DesignCustomization
+  ): DesignConstraints {
     // Vincoli base per zona residenziale
     const baseConstraints = {
       boundaryDistance: 10, // 10m dal confine (standard italiano)
@@ -601,9 +623,9 @@ class DesignCenterService {
       accessibility: true,
       fireSafety: true,
       seismic: 'Zona 2', // Default zona sismica
-      environmental: []
+      environmental: [],
     };
-    
+
     // Aggiusta per zona specifica
     if (location.zoning.density === 'ALTA') {
       baseConstraints.maxHeight = 15; // 15m per zone ad alta densità
@@ -614,13 +636,14 @@ class DesignCenterService {
       baseConstraints.maxCoverage = 40; // 40% per zone a bassa densità
       baseConstraints.greenAreaMin = 40; // 40% per zone a bassa densità
     }
-    
+
     // Aggiusta per tipo di progetto
-    if (customizations.area > 500) { // Progetti grandi
+    if (customizations.area > 500) {
+      // Progetti grandi
       baseConstraints.boundaryDistance = 15; // 15m per progetti grandi
       baseConstraints.setbackFront = 8; // 8m per progetti grandi
     }
-    
+
     return baseConstraints;
   }
 
@@ -634,10 +657,10 @@ class DesignCenterService {
   ): Promise<BudgetBreakdown> {
     try {
       console.log('💰 [DesignCenter] Calcolo budget per progetto:', template.name);
-      
+
       // Costi base per m² (variano per zona e qualità)
       const baseCostPerSqm = this.getBaseCostPerSqm(location, template.budget);
-      
+
       // Calcola costi per categoria
       const foundationCost = customizations.area * baseCostPerSqm.foundation;
       const structureCost = customizations.area * baseCostPerSqm.structure;
@@ -646,24 +669,31 @@ class DesignCenterService {
       const mechanicalCost = customizations.area * baseCostPerSqm.mechanical;
       const electricalCost = customizations.area * baseCostPerSqm.electrical;
       const finishesCost = customizations.area * baseCostPerSqm.finishes;
-      
+
       // Costi materiali e manodopera
       const materialsCost = (foundationCost + structureCost + envelopeCost) * 0.6;
       const laborCost = (foundationCost + structureCost + envelopeCost) * 0.4;
-      
+
       // Costi aggiuntivi
       const designCost = customizations.area * 50; // €50/m² per design
       const permitsCost = customizations.area * 30; // €30/m² per permessi
       const utilitiesCost = customizations.area * 80; // €80/m² per impianti
       const landscapingCost = customizations.gardenArea * 100; // €100/m² per giardino
-      
+
       // Costi totali
-      const constructionCost = foundationCost + structureCost + envelopeCost + interiorCost + mechanicalCost + electricalCost + finishesCost;
+      const constructionCost =
+        foundationCost +
+        structureCost +
+        envelopeCost +
+        interiorCost +
+        mechanicalCost +
+        electricalCost +
+        finishesCost;
       const total = constructionCost + designCost + permitsCost + utilitiesCost + landscapingCost;
-      
+
       // Contingency (10-15%)
       const contingency = total * 0.12;
-      
+
       return {
         total: total + contingency,
         land: 0, // Non incluso nel calcolo
@@ -683,10 +713,9 @@ class DesignCenterService {
           interior: interiorCost,
           mechanical: mechanicalCost,
           electrical: electricalCost,
-          finishes: finishesCost
-        }
+          finishes: finishesCost,
+        },
       };
-      
     } catch (error) {
       console.error('❌ [DesignCenter] Errore calcolo budget:', error);
       throw new Error('Impossibile calcolare il budget del progetto');
@@ -696,7 +725,10 @@ class DesignCenterService {
   /**
    * Ottiene i costi base per m² basati su zona e qualità
    */
-  private getBaseCostPerSqm(location: GeoLocation, budget: string): {
+  private getBaseCostPerSqm(
+    location: GeoLocation,
+    budget: string
+  ): {
     foundation: number;
     structure: number;
     envelope: number;
@@ -708,7 +740,7 @@ class DesignCenterService {
     // Costi base per zona (€/m²)
     const zoneMultiplier = this.getZoneMultiplier(location);
     const qualityMultiplier = this.getQualityMultiplier(budget);
-    
+
     const baseCosts = {
       foundation: 120,
       structure: 180,
@@ -716,14 +748,14 @@ class DesignCenterService {
       interior: 200,
       mechanical: 120,
       electrical: 80,
-      finishes: 250
+      finishes: 250,
     };
-    
+
     // Applica moltiplicatori
     Object.keys(baseCosts).forEach(key => {
       baseCosts[key as keyof typeof baseCosts] *= zoneMultiplier * qualityMultiplier;
     });
-    
+
     return baseCosts;
   }
 
@@ -747,11 +779,16 @@ class DesignCenterService {
    */
   private getQualityMultiplier(budget: string): number {
     switch (budget) {
-      case 'ECONOMIC': return 0.8;
-      case 'MEDIUM': return 1.0;
-      case 'PREMIUM': return 1.3;
-      case 'LUXURY': return 1.8;
-      default: return 1.0;
+      case 'ECONOMIC':
+        return 0.8;
+      case 'MEDIUM':
+        return 1.0;
+      case 'PREMIUM':
+        return 1.3;
+      case 'LUXURY':
+        return 1.8;
+      default:
+        return 1.0;
     }
   }
 
@@ -765,7 +802,7 @@ class DesignCenterService {
   ): Promise<ProjectTimeline> {
     try {
       console.log('⏱️ [DesignCenter] Calcolo timeline per progetto:', template.name);
-      
+
       // Timeline base per progetto standard
       const baseTimeline = {
         design: 4, // 4 settimane per design
@@ -777,15 +814,16 @@ class DesignCenterService {
         interior: 5, // 5 settimane interni
         finishes: 4, // 4 settimane finiture
         testing: 2, // 2 settimane test
-        handover: 1 // 1 settimana consegna
+        handover: 1, // 1 settimana consegna
       };
-      
+
       // Aggiusta per complessità
       const complexityMultiplier = complexity === 'LOW' ? 0.8 : complexity === 'HIGH' ? 1.3 : 1.0;
-      
+
       // Aggiusta per dimensioni
-      const sizeMultiplier = customizations.area > 300 ? 1.2 : customizations.area > 150 ? 1.0 : 0.9;
-      
+      const sizeMultiplier =
+        customizations.area > 300 ? 1.2 : customizations.area > 150 ? 1.0 : 0.9;
+
       // Calcola timeline finale
       const finalTimeline = { ...baseTimeline };
       Object.keys(finalTimeline).forEach(key => {
@@ -793,30 +831,83 @@ class DesignCenterService {
           finalTimeline[key as keyof typeof finalTimeline] * complexityMultiplier * sizeMultiplier
         );
       });
-      
+
       // Calcola totale mesi
       const totalWeeks = Object.values(finalTimeline).reduce((sum, weeks) => sum + weeks, 0);
       const totalMonths = Math.ceil(totalWeeks / 4.33); // 4.33 settimane per mese
-      
+
       // Calcola milestone dates (inizia da oggi)
       const startDate = new Date();
       const milestones = {
-        designComplete: new Date(startDate.getTime() + finalTimeline.design * 7 * 24 * 60 * 60 * 1000),
-        permitsObtained: new Date(startDate.getTime() + (finalTimeline.design + finalTimeline.permits) * 7 * 24 * 60 * 60 * 1000),
-        constructionStart: new Date(startDate.getTime() + (finalTimeline.design + finalTimeline.permits + finalTimeline.sitePrep) * 7 * 24 * 60 * 60 * 1000),
-        structureComplete: new Date(startDate.getTime() + (finalTimeline.design + finalTimeline.permits + finalTimeline.sitePrep + finalTimeline.foundation + finalTimeline.structure) * 7 * 24 * 60 * 60 * 1000),
-        envelopeComplete: new Date(startDate.getTime() + (finalTimeline.design + finalTimeline.permits + finalTimeline.sitePrep + finalTimeline.foundation + finalTimeline.structure + finalTimeline.envelope) * 7 * 24 * 60 * 60 * 1000),
-        interiorComplete: new Date(startDate.getTime() + (finalTimeline.design + finalTimeline.permits + finalTimeline.sitePrep + finalTimeline.foundation + finalTimeline.structure + finalTimeline.envelope + finalTimeline.interior) * 7 * 24 * 60 * 60 * 1000),
-        finalInspection: new Date(startDate.getTime() + (totalWeeks - finalTimeline.handover) * 7 * 24 * 60 * 60 * 1000),
-        handover: new Date(startDate.getTime() + totalWeeks * 7 * 24 * 60 * 60 * 1000)
+        designComplete: new Date(
+          startDate.getTime() + finalTimeline.design * 7 * 24 * 60 * 60 * 1000
+        ),
+        permitsObtained: new Date(
+          startDate.getTime() +
+            (finalTimeline.design + finalTimeline.permits) * 7 * 24 * 60 * 60 * 1000
+        ),
+        constructionStart: new Date(
+          startDate.getTime() +
+            (finalTimeline.design + finalTimeline.permits + finalTimeline.sitePrep) *
+              7 *
+              24 *
+              60 *
+              60 *
+              1000
+        ),
+        structureComplete: new Date(
+          startDate.getTime() +
+            (finalTimeline.design +
+              finalTimeline.permits +
+              finalTimeline.sitePrep +
+              finalTimeline.foundation +
+              finalTimeline.structure) *
+              7 *
+              24 *
+              60 *
+              60 *
+              1000
+        ),
+        envelopeComplete: new Date(
+          startDate.getTime() +
+            (finalTimeline.design +
+              finalTimeline.permits +
+              finalTimeline.sitePrep +
+              finalTimeline.foundation +
+              finalTimeline.structure +
+              finalTimeline.envelope) *
+              7 *
+              24 *
+              60 *
+              60 *
+              1000
+        ),
+        interiorComplete: new Date(
+          startDate.getTime() +
+            (finalTimeline.design +
+              finalTimeline.permits +
+              finalTimeline.sitePrep +
+              finalTimeline.foundation +
+              finalTimeline.structure +
+              finalTimeline.envelope +
+              finalTimeline.interior) *
+              7 *
+              24 *
+              60 *
+              60 *
+              1000
+        ),
+        finalInspection: new Date(
+          startDate.getTime() + (totalWeeks - finalTimeline.handover) * 7 * 24 * 60 * 60 * 1000
+        ),
+        handover: new Date(startDate.getTime() + totalWeeks * 7 * 24 * 60 * 60 * 1000),
       };
-      
+
       return {
         totalMonths,
         phases: finalTimeline,
-        milestones
+        milestones,
       };
-      
     } catch (error) {
       console.error('❌ [DesignCenter] Errore calcolo timeline:', error);
       throw new Error('Impossibile calcolare la timeline del progetto');
@@ -829,13 +920,13 @@ class DesignCenterService {
   async initializeSampleTemplates(): Promise<void> {
     try {
       console.log('🚀 [DesignCenter] Inizializzazione template di esempio...');
-      
+
       const existingTemplates = await this.getTemplates();
       if (existingTemplates.length > 0) {
         console.log('✅ [DesignCenter] Template già esistenti, skip inizializzazione');
         return;
       }
-      
+
       const sampleTemplates: Omit<DesignTemplate, 'id' | 'createdAt' | 'updatedAt'>[] = [
         {
           name: 'Villa Moderna Roma',
@@ -859,11 +950,18 @@ class DesignCenterService {
           previewImage: '/images/templates/villa-moderna-roma.jpg',
           floorPlanImage: '/images/templates/villa-moderna-roma-plan.jpg',
           sectionImage: '/images/templates/villa-moderna-roma-section.jpg',
-          description: 'Villa moderna con design contemporaneo, perfetta per famiglie che cercano eleganza e comfort',
-          features: ['Giardino privato', 'Terrazza panoramica', 'Cantina', 'Sala fitness', 'Domotica'],
+          description:
+            'Villa moderna con design contemporaneo, perfetta per famiglie che cercano eleganza e comfort',
+          features: [
+            'Giardino privato',
+            'Terrazza panoramica',
+            'Cantina',
+            'Sala fitness',
+            'Domotica',
+          ],
           estimatedROI: 25.5,
           constructionTime: 14,
-          popularity: 95
+          popularity: 95,
         },
         {
           name: 'Appartamento Centro Milano',
@@ -887,11 +985,18 @@ class DesignCenterService {
           previewImage: '/images/templates/appartamento-milano.jpg',
           floorPlanImage: '/images/templates/appartamento-milano-plan.jpg',
           sectionImage: '/images/templates/appartamento-milano-section.jpg',
-          description: 'Appartamento di lusso nel cuore di Milano, design minimalista e finiture di pregio',
-          features: ['Vista città', 'Balcone panoramico', 'Cucina open space', 'Bagno spa', 'Closet'],
+          description:
+            'Appartamento di lusso nel cuore di Milano, design minimalista e finiture di pregio',
+          features: [
+            'Vista città',
+            'Balcone panoramico',
+            'Cucina open space',
+            'Bagno spa',
+            'Closet',
+          ],
           estimatedROI: 18.2,
           constructionTime: 8,
-          popularity: 88
+          popularity: 88,
         },
         {
           name: 'Uffici Commerciali Torino',
@@ -915,26 +1020,32 @@ class DesignCenterService {
           previewImage: '/images/templates/uffici-torino.jpg',
           floorPlanImage: '/images/templates/uffici-torino-plan.jpg',
           sectionImage: '/images/templates/uffici-torino-section.jpg',
-          description: 'Edificio commerciale moderno per uffici, negozi e servizi, perfetto per investimenti',
-          features: ['Reception', 'Sale riunioni', 'Spazi coworking', 'Caffetteria', 'Parcheggio sotterraneo'],
+          description:
+            'Edificio commerciale moderno per uffici, negozi e servizi, perfetto per investimenti',
+          features: [
+            'Reception',
+            'Sale riunioni',
+            'Spazi coworking',
+            'Caffetteria',
+            'Parcheggio sotterraneo',
+          ],
           estimatedROI: 22.8,
           constructionTime: 12,
-          popularity: 76
-        }
+          popularity: 76,
+        },
       ];
-      
+
       // Salva i template
       for (const template of sampleTemplates) {
         const templateRef = doc(collection(db, this.TEMPLATES_COLLECTION));
         await setDoc(templateRef, {
           ...template,
           createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
+          updatedAt: serverTimestamp(),
         });
       }
-      
+
       console.log('✅ [DesignCenter] Template di esempio inizializzati:', sampleTemplates.length);
-      
     } catch (error) {
       console.warn('⚠️ [DesignCenter] Firebase non disponibile, skip inizializzazione:', error);
       // Non bloccare l'app se Firebase non è disponibile

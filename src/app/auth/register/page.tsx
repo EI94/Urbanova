@@ -1,20 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
+import React, { useState } from 'react';
 import toast from 'react-hot-toast';
+
 import AuthLayout from '@/components/AuthLayout';
-import FormInput from '@/components/ui/FormInput';
-import Button from '@/components/ui/Button';
-import Alert from '@/components/ui/Alert';
 import { EmailIcon, LockIcon, UserIcon } from '@/components/icons';
+import Alert from '@/components/ui/Alert';
+import Button from '@/components/ui/Button';
+import FormInput from '@/components/ui/FormInput';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function RegisterPage() {
   const router = useRouter();
   const { signup } = useAuth();
-  
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -22,58 +23,67 @@ export default function RegisterPage() {
     company: '',
     role: '',
     password: '',
-    passwordConfirm: ''
+    passwordConfirm: '',
   });
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validazione
     if (formData.password !== formData.passwordConfirm) {
       setError('Le password non coincidono');
       return;
     }
-    
+
     if (formData.password.length < 6) {
       setError('La password deve contenere almeno 6 caratteri');
       return;
     }
-    
+
     setError('');
     setLoading(true);
-    
+
     try {
       // Registrazione con Firebase
       const displayName = `${formData.firstName} ${formData.lastName}`;
-      await signup(formData.email, formData.password, displayName, formData.firstName, formData.lastName);
-      
+      await signup(
+        formData.email,
+        formData.password,
+        displayName,
+        formData.firstName,
+        formData.lastName
+      );
+
       // Mostra messaggio di successo
-      toast('Richiesta di accesso inviata con successo! Verrai contattato a breve per l\'attivazione del tuo account.', { icon: '✅' });
-      
+      toast(
+        "Richiesta di accesso inviata con successo! Verrai contattato a breve per l'attivazione del tuo account.",
+        { icon: '✅' }
+      );
+
       // Reindirizza alla login
       router.push('/auth/login');
     } catch (error: any) {
       // Gestisci gli errori di Firebase
       let errorMessage = 'Si è verificato un errore durante la registrazione';
-      
+
       if (error.message) {
         errorMessage = error.message;
       } else if (error.code === 'auth/email-already-in-use') {
         errorMessage = 'Questo indirizzo email è già in uso';
       } else if (error.code === 'auth/invalid-email') {
-        errorMessage = 'L\'indirizzo email non è valido';
+        errorMessage = "L'indirizzo email non è valido";
       } else if (error.code === 'auth/weak-password') {
         errorMessage = 'La password è troppo debole';
       }
-      
+
       setError(errorMessage);
       toast(errorMessage, { icon: '❌' });
     } finally {
@@ -82,18 +92,12 @@ export default function RegisterPage() {
   };
 
   return (
-    <AuthLayout 
+    <AuthLayout
       title="Richiedi accesso"
       subtitle="Compila il modulo per richiedere l'accesso alla piattaforma"
     >
-      {error && (
-        <Alert
-          type="error"
-          message={error}
-          onClose={() => setError('')}
-        />
-      )}
-      
+      {error && <Alert type="error" message={error} onClose={() => setError('')} />}
+
       <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -109,7 +113,7 @@ export default function RegisterPage() {
               placeholder="Mario"
               icon={<UserIcon className="h-5 w-5 text-neutral-400" />}
             />
-            
+
             <FormInput
               label="Cognome"
               id="lastName"
@@ -122,7 +126,7 @@ export default function RegisterPage() {
               placeholder="Rossi"
             />
           </div>
-          
+
           <FormInput
             label="Indirizzo Email"
             id="email"
@@ -135,7 +139,7 @@ export default function RegisterPage() {
             placeholder="mario.rossi@azienda.it"
             icon={<EmailIcon className="h-5 w-5 text-neutral-400" />}
           />
-          
+
           <FormInput
             label="Azienda"
             id="company"
@@ -146,7 +150,7 @@ export default function RegisterPage() {
             onChange={handleChange}
             placeholder="Nome della tua azienda"
           />
-          
+
           <FormInput
             label="Ruolo"
             id="role"
@@ -157,7 +161,7 @@ export default function RegisterPage() {
             onChange={handleChange}
             placeholder="Es. Project Manager, Architetto, Imprenditore..."
           />
-          
+
           <FormInput
             label="Password"
             id="password"
@@ -170,7 +174,7 @@ export default function RegisterPage() {
             placeholder="••••••••"
             icon={<LockIcon className="h-5 w-5 text-neutral-400" />}
           />
-          
+
           <FormInput
             label="Conferma Password"
             id="passwordConfirm"
@@ -183,7 +187,7 @@ export default function RegisterPage() {
             placeholder="••••••••"
             icon={<LockIcon className="h-5 w-5 text-neutral-400" />}
           />
-          
+
           <div className="flex items-start py-2">
             <div className="flex items-center h-5">
               <input
@@ -208,7 +212,7 @@ export default function RegisterPage() {
             </div>
           </div>
         </div>
-        
+
         <Button
           type="submit"
           isLoading={loading}
@@ -219,7 +223,7 @@ export default function RegisterPage() {
         >
           Invia richiesta di accesso
         </Button>
-        
+
         <div className="text-center mt-4">
           <p className="text-sm text-neutral-600">
             Hai già un account?{' '}

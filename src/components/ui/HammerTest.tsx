@@ -1,17 +1,18 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useLanguageTest } from '@/hooks/useLanguageTest';
-import { 
-  PlayIcon, 
-  StopIcon, 
+
+import {
+  PlayIcon,
+  StopIcon,
   RefreshIcon,
   DownloadIcon,
   CheckIcon,
   XIcon,
   AlertTriangleIcon,
-  ZapIcon
+  ZapIcon,
 } from '@/components/icons';
+import { useLanguageTest } from '@/hooks/useLanguageTest';
 
 interface HammerTestProps {
   iterations?: number;
@@ -20,11 +21,11 @@ interface HammerTestProps {
   onComplete?: (results: any) => void;
 }
 
-export default function HammerTest({ 
+export default function HammerTest({
   iterations = 10,
   delayBetweenTests = 1000,
   autoStart = false,
-  onComplete 
+  onComplete,
 }: HammerTestProps) {
   const {
     isRunning,
@@ -36,17 +37,19 @@ export default function HammerTest({
     testSingleLanguage,
     resetResults,
     exportResults,
-    supportedLanguages
+    supportedLanguages,
   } = useLanguageTest();
 
-  const [hammerResults, setHammerResults] = useState<Array<{
-    iteration: number;
-    timestamp: Date;
-    results: any;
-    success: boolean;
-    duration: number;
-  }>>([]);
-  
+  const [hammerResults, setHammerResults] = useState<
+    Array<{
+      iteration: number;
+      timestamp: Date;
+      results: any;
+      success: boolean;
+      duration: number;
+    }>
+  >([]);
+
   const [isHammerRunning, setIsHammerRunning] = useState(false);
   const [currentIteration, setCurrentIteration] = useState(0);
   const [hammerProgress, setHammerProgress] = useState(0);
@@ -73,21 +76,21 @@ export default function HammerTest({
 
         // Esegui test per tutte le lingue
         const iterationResults = [];
-        
+
         for (const language of supportedLanguages) {
           try {
             const languageResults = await testSingleLanguage(language.code);
             iterationResults.push({
               language: language.code,
               results: languageResults,
-              success: languageResults.every(r => r.status === 'pass')
+              success: languageResults.every(r => r.status === 'pass'),
             });
           } catch (error) {
             iterationResults.push({
               language: language.code,
               results: [],
               success: false,
-              error: error instanceof Error ? error.message : 'Errore sconosciuto'
+              error: error instanceof Error ? error.message : 'Errore sconosciuto',
             });
           }
         }
@@ -99,7 +102,7 @@ export default function HammerTest({
           timestamp: new Date(),
           results: iterationResults,
           success: iterationResults.every(r => r.success),
-          duration: iterationDuration
+          duration: iterationDuration,
         };
 
         hammerTestResults.push(iterationResult);
@@ -129,7 +132,7 @@ export default function HammerTest({
         successRate,
         totalDuration,
         averageDuration,
-        averageDurationPerLanguage: averageDuration / supportedLanguages.length
+        averageDurationPerLanguage: averageDuration / supportedLanguages.length,
       };
 
       console.log(`🔨 [HammerTest] Hammer test completato:`, hammerStats);
@@ -139,10 +142,9 @@ export default function HammerTest({
         onComplete({
           hammerResults,
           hammerStats,
-          individualResults: results
+          individualResults: results,
         });
       }
-
     } catch (error) {
       console.error('❌ [HammerTest] Errore durante hammer test:', error);
     } finally {
@@ -171,23 +173,23 @@ export default function HammerTest({
         const iterationStart = Date.now();
 
         // Cambia lingua rapidamente
-        const randomLanguage = supportedLanguages[Math.floor(Math.random() * supportedLanguages.length)];
-        
+        const randomLanguage =
+          supportedLanguages[Math.floor(Math.random() * supportedLanguages.length)];
+
         try {
           const languageResults = await testSingleLanguage(randomLanguage.code);
-          
+
           const iterationResult = {
             iteration: i + 1,
             timestamp: new Date(),
             language: randomLanguage.code,
             results: languageResults,
             success: languageResults.every(r => r.status === 'pass'),
-            duration: Date.now() - iterationStart
+            duration: Date.now() - iterationStart,
           };
 
           stressResults.push(iterationResult);
           setHammerResults([...stressResults]);
-
         } catch (error) {
           stressResults.push({
             iteration: i + 1,
@@ -196,7 +198,7 @@ export default function HammerTest({
             results: [],
             success: false,
             duration: Date.now() - iterationStart,
-            error: error instanceof Error ? error.message : 'Errore sconosciuto'
+            error: error instanceof Error ? error.message : 'Errore sconosciuto',
           });
         }
 
@@ -206,7 +208,6 @@ export default function HammerTest({
 
       setHammerProgress(100);
       console.log(`⚡ [HammerTest] Stress test completato`);
-
     } catch (error) {
       console.error('❌ [HammerTest] Errore durante stress test:', error);
     } finally {
@@ -227,12 +228,14 @@ export default function HammerTest({
     totalIterations: hammerResults.length,
     successfulIterations: hammerResults.filter(r => r.success).length,
     failedIterations: hammerResults.filter(r => !r.success).length,
-    successRate: hammerResults.length > 0 
-      ? (hammerResults.filter(r => r.success).length / hammerResults.length) * 100 
-      : 0,
-    averageDuration: hammerResults.length > 0
-      ? hammerResults.reduce((sum, r) => sum + r.duration, 0) / hammerResults.length
-      : 0
+    successRate:
+      hammerResults.length > 0
+        ? (hammerResults.filter(r => r.success).length / hammerResults.length) * 100
+        : 0,
+    averageDuration:
+      hammerResults.length > 0
+        ? hammerResults.reduce((sum, r) => sum + r.duration, 0) / hammerResults.length
+        : 0,
   };
 
   return (
@@ -247,7 +250,7 @@ export default function HammerTest({
             Test di stress e affidabilità del sistema multilingua
           </p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           {hammerStats.totalIterations > 0 && (
             <div className="text-right">
@@ -259,16 +262,17 @@ export default function HammerTest({
               </div>
             </div>
           )}
-          
+
           <div className="flex gap-2">
             <button
               onClick={runHammerTest}
               disabled={isHammerRunning}
               className={`
                 flex items-center gap-2 px-3 py-2 rounded-md transition-colors text-sm
-                ${isHammerRunning 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-blue-600 hover:bg-blue-700'
+                ${
+                  isHammerRunning
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700'
                 }
                 text-white
               `}
@@ -276,15 +280,14 @@ export default function HammerTest({
               <PlayIcon className="h-4 w-4" />
               Hammer Test
             </button>
-            
+
             <button
               onClick={runStressTest}
               disabled={isHammerRunning}
               className={`
                 flex items-center gap-2 px-3 py-2 rounded-md transition-colors text-sm
-                ${isHammerRunning 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-red-600 hover:bg-red-700'
+                ${
+                  isHammerRunning ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'
                 }
                 text-white
               `}
@@ -300,24 +303,18 @@ export default function HammerTest({
       {isHammerRunning && (
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">
-              Hammer Test Progresso
-            </span>
+            <span className="text-sm font-medium">Hammer Test Progresso</span>
             <span className="text-sm text-gray-500">
               {currentIteration}/{iterations} ({hammerProgress.toFixed(1)}%)
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
+            <div
               className="bg-yellow-600 h-2 rounded-full transition-all duration-300"
               style={{ width: `${hammerProgress}%` }}
             ></div>
           </div>
-          {currentTest && (
-            <p className="text-sm text-gray-600 mt-2">
-              Testando: {currentTest}
-            </p>
-          )}
+          {currentTest && <p className="text-sm text-gray-600 mt-2">Testando: {currentTest}</p>}
         </div>
       )}
 
@@ -329,7 +326,9 @@ export default function HammerTest({
             <div className="text-sm text-blue-700">Iterazioni</div>
           </div>
           <div className="text-center p-3 bg-green-50 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">{hammerStats.successfulIterations}</div>
+            <div className="text-2xl font-bold text-green-600">
+              {hammerStats.successfulIterations}
+            </div>
             <div className="text-sm text-green-700">Riuscite</div>
           </div>
           <div className="text-center p-3 bg-red-50 rounded-lg">
@@ -337,7 +336,9 @@ export default function HammerTest({
             <div className="text-sm text-red-700">Fallite</div>
           </div>
           <div className="text-center p-3 bg-yellow-50 rounded-lg">
-            <div className="text-2xl font-bold text-yellow-600">{hammerStats.successRate.toFixed(1)}%</div>
+            <div className="text-2xl font-bold text-yellow-600">
+              {hammerStats.successRate.toFixed(1)}%
+            </div>
             <div className="text-sm text-yellow-700">Successo</div>
           </div>
         </div>
@@ -364,7 +365,7 @@ export default function HammerTest({
               </button>
             </div>
           </div>
-          
+
           {hammerResults.map((result, index) => (
             <div
               key={index}
@@ -380,13 +381,9 @@ export default function HammerTest({
                   ) : (
                     <XIcon className="h-4 w-4 text-red-600" />
                   )}
-                  <span className="font-medium text-sm">
-                    Iterazione {result.iteration}
-                  </span>
+                  <span className="font-medium text-sm">Iterazione {result.iteration}</span>
                   {result.language && (
-                    <span className="text-xs bg-gray-200 px-2 py-1 rounded">
-                      {result.language}
-                    </span>
+                    <span className="text-xs bg-gray-200 px-2 py-1 rounded">{result.language}</span>
                   )}
                 </div>
                 <p className="text-sm text-gray-600">
@@ -411,4 +408,4 @@ export default function HammerTest({
       )}
     </div>
   );
-} 
+}

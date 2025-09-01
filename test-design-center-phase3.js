@@ -6,18 +6,15 @@ console.log('🧪 Test Design Center - Fase 3: Integrazione AI Reale & API Ester
 
 // Test 1: Verifica servizi AI avanzati
 console.log('1️⃣ Verifica Servizi AI Avanzati:');
-const aiServices = [
-  'src/lib/aiIntegrationService.ts',
-  'src/lib/externalAPIService.ts'
-];
+const aiServices = ['src/lib/aiIntegrationService.ts', 'src/lib/externalAPIService.ts'];
 
 aiServices.forEach(service => {
   if (fs.existsSync(service)) {
     console.log(`✅ ${service} - CREATO`);
-    
+
     // Verifica contenuto del servizio
     const content = fs.readFileSync(service, 'utf8');
-    
+
     if (service.includes('aiIntegrationService')) {
       const hasAIIntegrationService = content.includes('class AIIntegrationService');
       const hasCompleteAnalysis = content.includes('performCompleteAnalysis');
@@ -26,7 +23,7 @@ aiServices.forEach(service => {
       const hasSustainabilityAnalysis = content.includes('analyzeSustainability');
       const hasComplianceAnalysis = content.includes('analyzeCompliance');
       const hasRiskAssessment = content.includes('assessRisks');
-      
+
       console.log(`   - Classe AIIntegrationService: ${hasAIIntegrationService ? '✅' : '❌'}`);
       console.log(`   - Metodo performCompleteAnalysis: ${hasCompleteAnalysis ? '✅' : '❌'}`);
       console.log(`   - Metodo analyzeROI: ${hasROIAnalysis ? '✅' : '❌'}`);
@@ -35,7 +32,7 @@ aiServices.forEach(service => {
       console.log(`   - Metodo analyzeCompliance: ${hasComplianceAnalysis ? '✅' : '❌'}`);
       console.log(`   - Metodo assessRisks: ${hasRiskAssessment ? '✅' : '❌'}`);
     }
-    
+
     if (service.includes('externalAPIService')) {
       const hasExternalAPIService = content.includes('class ExternalAPIService');
       const hasMarketData = content.includes('getMarketData');
@@ -45,7 +42,7 @@ aiServices.forEach(service => {
       const hasTerrainAnalysis = content.includes('performTerrainAnalysis');
       const hasISTATIntegration = content.includes('ISTAT_API_URL');
       const hasGoogleMapsIntegration = content.includes('GOOGLE_MAPS_API_KEY');
-      
+
       console.log(`   - Classe ExternalAPIService: ${hasExternalAPIService ? '✅' : '❌'}`);
       console.log(`   - Metodo getMarketData: ${hasMarketData ? '✅' : '❌'}`);
       console.log(`   - Metodo getRegulatoryData: ${hasRegulatoryData ? '✅' : '❌'}`);
@@ -62,26 +59,30 @@ aiServices.forEach(service => {
 
 // Test 2: Verifica componenti UI avanzati
 console.log('\n2️⃣ Verifica Componenti UI Avanzati:');
-const advancedComponents = [
-  'src/components/ui/TerrainAnalysisAdvanced.tsx'
-];
+const advancedComponents = ['src/components/ui/TerrainAnalysisAdvanced.tsx'];
 
 advancedComponents.forEach(component => {
   if (fs.existsSync(component)) {
     console.log(`✅ ${component} - CREATO`);
-    
+
     const content = fs.readFileSync(component, 'utf8');
-    
+
     const hasTerrainAnalysisAdvanced = content.includes('TerrainAnalysisAdvanced');
-    const hasTabs = content.includes('activeTab') && content.includes('overview') && content.includes('market') && content.includes('regulatory');
+    const hasTabs =
+      content.includes('activeTab') &&
+      content.includes('overview') &&
+      content.includes('market') &&
+      content.includes('regulatory');
     const hasMarketData = content.includes('marketData');
     const hasRegulatoryData = content.includes('regulatoryData');
     const hasGeospatialData = content.includes('geospatialData');
     const hasDemographicData = content.includes('demographicData');
     const hasSuitabilityAnalysis = content.includes('suitability');
     const hasRiskAssessment = content.includes('risks') && content.includes('opportunities');
-    
-    console.log(`   - Componente TerrainAnalysisAdvanced: ${hasTerrainAnalysisAdvanced ? '✅' : '❌'}`);
+
+    console.log(
+      `   - Componente TerrainAnalysisAdvanced: ${hasTerrainAnalysisAdvanced ? '✅' : '❌'}`
+    );
     console.log(`   - Sistema di tab: ${hasTabs ? '✅' : '❌'}`);
     console.log(`   - Dati mercato: ${hasMarketData ? '✅' : '❌'}`);
     console.log(`   - Dati normativi: ${hasRegulatoryData ? '✅' : '❌'}`);
@@ -99,13 +100,13 @@ console.log('\n3️⃣ Verifica Integrazione Template Customizer:');
 const templateCustomizer = 'src/components/ui/TemplateCustomizer.tsx';
 if (fs.existsSync(templateCustomizer)) {
   const content = fs.readFileSync(templateCustomizer, 'utf8');
-  
+
   const hasTerrainAnalysisImport = content.includes('import TerrainAnalysisAdvanced');
   const hasTerrainAnalysisState = content.includes('showTerrainAnalysis');
   const hasTerrainAnalysisButton = content.includes('🗺️ Analisi Terreno');
   const hasTerrainAnalysisModal = content.includes('Terrain Analysis Advanced Modal');
   const hasTerrainAnalysisHandler = content.includes('handleTerrainAnalysisComplete');
-  
+
   console.log(`   - Import TerrainAnalysisAdvanced: ${hasTerrainAnalysisImport ? '✅' : '❌'}`);
   console.log(`   - Stato showTerrainAnalysis: ${hasTerrainAnalysisState ? '✅' : '❌'}`);
   console.log(`   - Pulsante Analisi Terreno: ${hasTerrainAnalysisButton ? '✅' : '❌'}`);
@@ -120,7 +121,7 @@ console.log('\n4️⃣ Verifica Interfacce e Tipi Avanzati:');
 const aiIntegrationService = 'src/lib/aiIntegrationService.ts';
 if (fs.existsSync(aiIntegrationService)) {
   const content = fs.readFileSync(aiIntegrationService, 'utf8');
-  
+
   const hasAIAnalysisRequest = content.includes('interface AIAnalysisRequest');
   const hasAIAnalysisResponse = content.includes('interface AIAnalysisResponse');
   const hasAISuggestion = content.includes('interface AISuggestion');
@@ -128,7 +129,7 @@ if (fs.existsSync(aiIntegrationService)) {
   const hasMarketInsight = content.includes('interface MarketInsight');
   const hasComplianceCheck = content.includes('interface ComplianceCheck');
   const hasRiskAssessment = content.includes('interface RiskAssessment');
-  
+
   console.log(`   - Interfaccia AIAnalysisRequest: ${hasAIAnalysisRequest ? '✅' : '❌'}`);
   console.log(`   - Interfaccia AIAnalysisResponse: ${hasAIAnalysisResponse ? '✅' : '❌'}`);
   console.log(`   - Interfaccia AISuggestion: ${hasAISuggestion ? '✅' : '❌'}`);
@@ -145,7 +146,7 @@ console.log('\n5️⃣ Verifica Interfacce API Esterne:');
 const externalAPIService = 'src/lib/externalAPIService.ts';
 if (fs.existsSync(externalAPIService)) {
   const content = fs.readFileSync(externalAPIService, 'utf8');
-  
+
   const hasMarketData = content.includes('interface MarketData');
   const hasRegulatoryData = content.includes('interface RegulatoryData');
   const hasBuildingCode = content.includes('interface BuildingCode');
@@ -153,12 +154,14 @@ if (fs.existsSync(externalAPIService)) {
   const hasEnvironmentalRequirement = content.includes('interface EnvironmentalRequirement');
   const hasGeospatialData = content.includes('interface GeospatialData');
   const hasDemographicData = content.includes('interface DemographicData');
-  
+
   console.log(`   - Interfaccia MarketData: ${hasMarketData ? '✅' : '❌'}`);
   console.log(`   - Interfaccia RegulatoryData: ${hasRegulatoryData ? '✅' : '❌'}`);
   console.log(`   - Interfaccia BuildingCode: ${hasBuildingCode ? '✅' : '❌'}`);
   console.log(`   - Interfaccia ZoningRegulation: ${hasZoningRegulation ? '✅' : '❌'}`);
-  console.log(`   - Interfaccia EnvironmentalRequirement: ${hasEnvironmentalRequirement ? '✅' : '❌'}`);
+  console.log(
+    `   - Interfaccia EnvironmentalRequirement: ${hasEnvironmentalRequirement ? '✅' : '❌'}`
+  );
   console.log(`   - Interfaccia GeospatialData: ${hasGeospatialData ? '✅' : '❌'}`);
   console.log(`   - Interfaccia DemographicData: ${hasDemographicData ? '✅' : '❌'}`);
 } else {
@@ -170,14 +173,20 @@ console.log('\n6️⃣ Verifica Funzionalità AI Reali:');
 const aiService = 'src/lib/aiIntegrationService.ts';
 if (fs.existsSync(aiService)) {
   const content = fs.readFileSync(aiService, 'utf8');
-  
-  const hasRealCalculations = content.includes('calculateOriginalROI') && content.includes('calculateTimeline');
-  const hasOptimizationLogic = content.includes('identifyOptimizationOpportunities') && content.includes('applyOptimizations');
-  const hasRiskCalculation = content.includes('calculateRiskScore') && content.includes('assessOptimizationRisk');
-  const hasSustainabilityAnalysis = content.includes('calculateSolarPotential') && content.includes('calculateSustainabilityScore');
-  const hasComplianceChecks = content.includes('checkBoundaryCompliance') && content.includes('checkHeightCompliance');
-  const hasMarketAnalysis = content.includes('analyzeMarketTrends') && content.includes('identifyMarketOpportunities');
-  
+
+  const hasRealCalculations =
+    content.includes('calculateOriginalROI') && content.includes('calculateTimeline');
+  const hasOptimizationLogic =
+    content.includes('identifyOptimizationOpportunities') && content.includes('applyOptimizations');
+  const hasRiskCalculation =
+    content.includes('calculateRiskScore') && content.includes('assessOptimizationRisk');
+  const hasSustainabilityAnalysis =
+    content.includes('calculateSolarPotential') && content.includes('calculateSustainabilityScore');
+  const hasComplianceChecks =
+    content.includes('checkBoundaryCompliance') && content.includes('checkHeightCompliance');
+  const hasMarketAnalysis =
+    content.includes('analyzeMarketTrends') && content.includes('identifyMarketOpportunities');
+
   console.log(`   - Calcoli ROI reali: ${hasRealCalculations ? '✅' : '❌'}`);
   console.log(`   - Logica ottimizzazione: ${hasOptimizationLogic ? '✅' : '❌'}`);
   console.log(`   - Calcolo rischi: ${hasRiskCalculation ? '✅' : '❌'}`);
@@ -193,14 +202,20 @@ console.log('\n7️⃣ Verifica Integrazione API Esterne Reali:');
 const externalService = 'src/lib/externalAPIService.ts';
 if (fs.existsSync(externalService)) {
   const content = fs.readFileSync(externalService, 'utf8');
-  
-  const hasISTATIntegration = content.includes('ISTAT_API_URL') && content.includes('fetchISTATData');
-  const hasAgenziaEntrateIntegration = content.includes('AGENZIA_ENTRATE_URL') && content.includes('fetchAgenziaEntrateData');
-  const hasGoogleMapsIntegration = content.includes('GOOGLE_MAPS_API_KEY') && content.includes('fetchGoogleMapsData');
-  const hasOpenStreetMapIntegration = content.includes('OPENSTREETMAP_URL') && content.includes('fetchOpenStreetMapData');
-  const hasLocalBuildingCodes = content.includes('getLocalBuildingCodes') && content.includes('getLocalZoningRegulations');
-  const hasIntegratedAnalysis = content.includes('performIntegratedAnalysis') && content.includes('performTerrainAnalysis');
-  
+
+  const hasISTATIntegration =
+    content.includes('ISTAT_API_URL') && content.includes('fetchISTATData');
+  const hasAgenziaEntrateIntegration =
+    content.includes('AGENZIA_ENTRATE_URL') && content.includes('fetchAgenziaEntrateData');
+  const hasGoogleMapsIntegration =
+    content.includes('GOOGLE_MAPS_API_KEY') && content.includes('fetchGoogleMapsData');
+  const hasOpenStreetMapIntegration =
+    content.includes('OPENSTREETMAP_URL') && content.includes('fetchOpenStreetMapData');
+  const hasLocalBuildingCodes =
+    content.includes('getLocalBuildingCodes') && content.includes('getLocalZoningRegulations');
+  const hasIntegratedAnalysis =
+    content.includes('performIntegratedAnalysis') && content.includes('performTerrainAnalysis');
+
   console.log(`   - Integrazione ISTAT: ${hasISTATIntegration ? '✅' : '❌'}`);
   console.log(`   - Integrazione Agenzia Entrate: ${hasAgenziaEntrateIntegration ? '✅' : '❌'}`);
   console.log(`   - Integrazione Google Maps: ${hasGoogleMapsIntegration ? '✅' : '❌'}`);
@@ -216,17 +231,33 @@ console.log('\n8️⃣ Verifica UI/UX Avanzata:');
 const terrainAnalysis = 'src/components/ui/TerrainAnalysisAdvanced.tsx';
 if (fs.existsSync(terrainAnalysis)) {
   const content = fs.readFileSync(terrainAnalysis, 'utf8');
-  
-  const hasAdvancedTabs = content.includes('overview') && content.includes('market') && content.includes('regulatory') && content.includes('geospatial') && content.includes('demographics');
-  const hasSummaryCards = content.includes('Summary Cards') && content.includes('grid-cols-1 md:grid-cols-4');
-  const hasRiskOpportunityGrid = content.includes('Rischi Identificati') && content.includes('Opportunità');
-  const hasRecommendations = content.includes('Raccomandazioni AI') && content.includes('bg-gradient-to-r from-blue-50 to-indigo-50');
-  const hasDataSources = content.includes('Fonti Dati Utilizzate') && content.includes('Ultimo aggiornamento');
-  const hasMarketAnalysis = content.includes('Analisi Mercato Immobiliare') && content.includes('Metriche Chiave');
-  const hasRegulatoryAnalysis = content.includes('Analisi Normativa e Compliance') && content.includes('Regolamenti Edilizi');
-  const hasGeospatialAnalysis = content.includes('Analisi Geospaziale e Topografica') && content.includes('Caratteristiche Terreno');
-  const hasDemographicAnalysis = content.includes('Analisi Demografica e Socioeconomica') && content.includes('Dati Demografici');
-  
+
+  const hasAdvancedTabs =
+    content.includes('overview') &&
+    content.includes('market') &&
+    content.includes('regulatory') &&
+    content.includes('geospatial') &&
+    content.includes('demographics');
+  const hasSummaryCards =
+    content.includes('Summary Cards') && content.includes('grid-cols-1 md:grid-cols-4');
+  const hasRiskOpportunityGrid =
+    content.includes('Rischi Identificati') && content.includes('Opportunità');
+  const hasRecommendations =
+    content.includes('Raccomandazioni AI') &&
+    content.includes('bg-gradient-to-r from-blue-50 to-indigo-50');
+  const hasDataSources =
+    content.includes('Fonti Dati Utilizzate') && content.includes('Ultimo aggiornamento');
+  const hasMarketAnalysis =
+    content.includes('Analisi Mercato Immobiliare') && content.includes('Metriche Chiave');
+  const hasRegulatoryAnalysis =
+    content.includes('Analisi Normativa e Compliance') && content.includes('Regolamenti Edilizi');
+  const hasGeospatialAnalysis =
+    content.includes('Analisi Geospaziale e Topografica') &&
+    content.includes('Caratteristiche Terreno');
+  const hasDemographicAnalysis =
+    content.includes('Analisi Demografica e Socioeconomica') &&
+    content.includes('Dati Demografici');
+
   console.log(`   - Tab avanzati: ${hasAdvancedTabs ? '✅' : '❌'}`);
   console.log(`   - Card riepilogo: ${hasSummaryCards ? '✅' : '❌'}`);
   console.log(`   - Griglia rischi/opportunità: ${hasRiskOpportunityGrid ? '✅' : '❌'}`);
@@ -245,7 +276,7 @@ console.log('\n9️⃣ Verifica Integrazione Completa:');
 const mainComponents = [
   'src/components/ui/TemplateCustomizer.tsx',
   'src/components/ui/AIDesignAssistant.tsx',
-  'src/components/ui/TerrainAnalysisAdvanced.tsx'
+  'src/components/ui/TerrainAnalysisAdvanced.tsx',
 ];
 
 let integrationScore = 0;
@@ -254,12 +285,22 @@ const maxIntegrationScore = 8;
 mainComponents.forEach(component => {
   if (fs.existsSync(component)) {
     const content = fs.readFileSync(component, 'utf8');
-    
+
     if (component.includes('TemplateCustomizer')) {
-      if (content.includes('AIDesignAssistant') && content.includes('TerrainAnalysisAdvanced')) integrationScore += 2;
-      if (content.includes('showAIAssistant') && content.includes('showTerrainAnalysis')) integrationScore += 2;
-      if (content.includes('AI Design Assistant Modal') && content.includes('Terrain Analysis Advanced Modal')) integrationScore += 2;
-      if (content.includes('handleAIOptimization') && content.includes('handleTerrainAnalysisComplete')) integrationScore += 2;
+      if (content.includes('AIDesignAssistant') && content.includes('TerrainAnalysisAdvanced'))
+        integrationScore += 2;
+      if (content.includes('showAIAssistant') && content.includes('showTerrainAnalysis'))
+        integrationScore += 2;
+      if (
+        content.includes('AI Design Assistant Modal') &&
+        content.includes('Terrain Analysis Advanced Modal')
+      )
+        integrationScore += 2;
+      if (
+        content.includes('handleAIOptimization') &&
+        content.includes('handleTerrainAnalysisComplete')
+      )
+        integrationScore += 2;
     }
   }
 });
@@ -283,7 +324,9 @@ if (hasAdvancedTypes) qualityScore += 2;
 const hasAdvancedErrorHandling = aiServices.every(service => {
   if (!fs.existsSync(service)) return false;
   const content = fs.readFileSync(service, 'utf8');
-  return content.includes('try') && content.includes('catch') && content.includes('throw new Error');
+  return (
+    content.includes('try') && content.includes('catch') && content.includes('throw new Error')
+  );
 });
 if (hasAdvancedErrorHandling) qualityScore += 2;
 
@@ -291,7 +334,11 @@ if (hasAdvancedErrorHandling) qualityScore += 2;
 const hasAdvancedLogging = aiServices.every(service => {
   if (!fs.existsSync(service)) return false;
   const content = fs.readFileSync(service, 'utf8');
-  return content.includes('console.log') && content.includes('console.error') && content.includes('console.warn');
+  return (
+    content.includes('console.log') &&
+    content.includes('console.error') &&
+    content.includes('console.warn')
+  );
 });
 if (hasAdvancedLogging) qualityScore += 2;
 
@@ -299,7 +346,9 @@ if (hasAdvancedLogging) qualityScore += 2;
 const hasEnvironmentConfig = aiServices.every(service => {
   if (!fs.existsSync(service)) return false;
   const content = fs.readFileSync(service, 'utf8');
-  return content.includes('process.env') && content.includes('API_KEY') && content.includes('API_URL');
+  return (
+    content.includes('process.env') && content.includes('API_KEY') && content.includes('API_URL')
+  );
 });
 if (hasEnvironmentConfig) qualityScore += 2;
 
@@ -307,7 +356,9 @@ if (hasEnvironmentConfig) qualityScore += 2;
 const hasFallbackRetry = aiServices.every(service => {
   if (!fs.existsSync(service)) return false;
   const content = fs.readFileSync(service, 'utf8');
-  return content.includes('fallback') || content.includes('retry') || content.includes('MAX_RETRIES');
+  return (
+    content.includes('fallback') || content.includes('retry') || content.includes('MAX_RETRIES')
+  );
 });
 if (hasFallbackRetry) qualityScore += 2;
 
@@ -327,14 +378,18 @@ let passedTests = 0;
 const testResults = [
   aiServices.every(service => fs.existsSync(service)),
   advancedComponents.every(comp => fs.existsSync(comp)),
-  fs.existsSync(templateCustomizer) && fs.readFileSync(templateCustomizer, 'utf8').includes('TerrainAnalysisAdvanced'),
-  fs.existsSync(aiIntegrationService) && fs.readFileSync(aiIntegrationService, 'utf8').includes('interface AIAnalysisRequest'),
-  fs.existsSync(externalAPIService) && fs.readFileSync(externalAPIService, 'utf8').includes('interface MarketData'),
+  fs.existsSync(templateCustomizer) &&
+    fs.readFileSync(templateCustomizer, 'utf8').includes('TerrainAnalysisAdvanced'),
+  fs.existsSync(aiIntegrationService) &&
+    fs.readFileSync(aiIntegrationService, 'utf8').includes('interface AIAnalysisRequest'),
+  fs.existsSync(externalAPIService) &&
+    fs.readFileSync(externalAPIService, 'utf8').includes('interface MarketData'),
   fs.existsSync(aiService) && fs.readFileSync(aiService, 'utf8').includes('calculateOriginalROI'),
-  fs.existsSync(externalService) && fs.readFileSync(externalService, 'utf8').includes('ISTAT_API_URL'),
+  fs.existsSync(externalService) &&
+    fs.readFileSync(externalService, 'utf8').includes('ISTAT_API_URL'),
   fs.existsSync(terrainAnalysis) && fs.readFileSync(terrainAnalysis, 'utf8').includes('overview'),
   integrationScore >= 6,
-  qualityScore >= 6
+  qualityScore >= 6,
 ];
 
 testResults.forEach((result, index) => {

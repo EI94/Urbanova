@@ -11,16 +11,15 @@ export class VercelWorkingScreenshotService {
   async generatePDFFromScreenshot(options: VercelWorkingScreenshotOptions): Promise<Buffer> {
     try {
       console.log('📸 Generazione PDF con SCREENSHOT ALTERNATIVO per Vercel...');
-      
+
       // GENERA HTML PERFETTO IDENTICO ALLA SCHERMATA VEDI PROGETTO
       const htmlContent = this.generatePerfectVediProgettoHTML(options);
-      
+
       // CONVERTI HTML IN CANVAS E POI IN IMMAGINE
       const imageData = await this.convertHTMLToImage(htmlContent);
-      
+
       // INSERISCI IMMAGINE NEL PDF
       return this.createPDFWithImage(imageData, options);
-      
     } catch (error) {
       console.error('❌ Errore screenshot alternativo:', error);
       // FALLBACK: PDF PERFETTO CON JSPDF
@@ -48,20 +47,20 @@ export class VercelWorkingScreenshotService {
       toDataURL: (type: string) => {
         // Restituisce un'immagine base64 fittizia
         return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
-      }
+      },
     } as HTMLCanvasElement;
-    
+
     return canvas;
   }
 
   private createPDFWithImage(imageData: string, options: VercelWorkingScreenshotOptions): Buffer {
     try {
       console.log('🔄 Creazione PDF con immagine...');
-      
+
       const doc = new jsPDF('p', 'mm', 'a4');
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
-      
+
       // INSERISCI IMMAGINE NEL PDF
       doc.addImage(
         imageData,
@@ -71,10 +70,9 @@ export class VercelWorkingScreenshotService {
         pageWidth - 20, // width
         pageHeight - 20 // height
       );
-      
+
       console.log('✅ PDF con immagine generato');
       return Buffer.from(doc.output('arraybuffer'));
-      
     } catch (error) {
       console.error('❌ Errore creazione PDF con immagine:', error);
       throw error;
@@ -84,17 +82,16 @@ export class VercelWorkingScreenshotService {
   public createPerfectPDFWithJsPDF(options: VercelWorkingScreenshotOptions): Buffer {
     try {
       console.log('🔄 Creazione PDF perfetto con jsPDF...');
-      
+
       const doc = new jsPDF('p', 'mm', 'a4');
       doc.setFont('helvetica');
-      
+
       this.generateHeaderBluPerfetto(doc, options.project);
       this.generateMetricheCardsPerfette(doc, options);
       this.generateSezioniAnalisiPerfette(doc, options);
-      
+
       console.log('✅ PDF perfetto con jsPDF generato');
       return Buffer.from(doc.output('arraybuffer'));
-      
     } catch (error) {
       console.error('❌ Errore PDF jsPDF:', error);
       throw error;
@@ -105,17 +102,17 @@ export class VercelWorkingScreenshotService {
     // Header blu perfetto
     doc.setFillColor(59, 130, 246);
     doc.rect(0, 0, 210, 40, 'F');
-    
+
     // Logo Urbanova
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(24);
     doc.setFont('helvetica', 'bold');
     doc.text('URBANOVA', 20, 25);
-    
+
     // Nome progetto
     doc.setFontSize(16);
     doc.text(project.name || 'Studio di Fattibilità', 20, 35);
-    
+
     // Tag pianificazione
     this.generateTagPianificazionePerfetto(doc, 150, 25);
   }
@@ -131,69 +128,79 @@ export class VercelWorkingScreenshotService {
 
   private generateMetricheCardsPerfette(doc: jsPDF, options: VercelWorkingScreenshotOptions) {
     const { calculatedResults } = options;
-    
+
     // Card Utile Netto
     this.generateCardPerfetta(
-      doc, 
-      'Utile Netto', 
-      `€${calculatedResults?.utileNetto?.toLocaleString() || '0'}`, 
-      '💰', 
-      20, 
-      60, 
-      50, 
-      30, 
+      doc,
+      'Utile Netto',
+      `€${calculatedResults?.utileNetto?.toLocaleString() || '0'}`,
+      '💰',
+      20,
+      60,
+      50,
+      30,
       '#10B981'
     );
-    
+
     // Card ROI
     this.generateCardPerfetta(
-      doc, 
-      'ROI', 
-      `${calculatedResults?.roi?.toFixed(1) || '0'}%`, 
-      '📈', 
-      80, 
-      60, 
-      50, 
-      30, 
+      doc,
+      'ROI',
+      `${calculatedResults?.roi?.toFixed(1) || '0'}%`,
+      '📈',
+      80,
+      60,
+      50,
+      30,
       '#3B82F6'
     );
-    
+
     // Card Marginalità
     this.generateCardPerfetta(
-      doc, 
-      'Marginalità', 
-      `${calculatedResults?.marginalita?.toFixed(1) || '0'}%`, 
-      '🎯', 
-      140, 
-      60, 
-      50, 
-      30, 
+      doc,
+      'Marginalità',
+      `${calculatedResults?.marginalita?.toFixed(1) || '0'}%`,
+      '🎯',
+      140,
+      60,
+      50,
+      30,
       '#8B5CF6'
     );
   }
 
-  private generateCardPerfetta(doc: jsPDF, title: string, value: string, icon: string, x: number, y: number, width: number, height: number, color: string) {
+  private generateCardPerfetta(
+    doc: jsPDF,
+    title: string,
+    value: string,
+    icon: string,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    color: string
+  ) {
     // Bordo card
     doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(0.5);
     doc.rect(x, y, width, height);
-    
+
     // Sfondo colorato
     doc.setFillColor(color);
     doc.rect(x, y, width, 15, 'F');
-    
+
     // Titolo
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
     doc.text(title, x + 5, y + 10);
-    
+
     // Valore
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.text(value, x + 5, y + 25);
-    
+
     // Icona
     doc.setFontSize(16);
     doc.text(icon, x + width - 15, y + 10);
@@ -201,9 +208,9 @@ export class VercelWorkingScreenshotService {
 
   private generateSezioniAnalisiPerfette(doc: jsPDF, options: VercelWorkingScreenshotOptions) {
     const { project, calculatedCosts, calculatedRevenues } = options;
-    
+
     let yPosition = 110;
-    
+
     // Sezione Dati Base
     doc.setFillColor(243, 244, 246);
     doc.rect(20, yPosition, 170, 20, 'F');
@@ -211,16 +218,20 @@ export class VercelWorkingScreenshotService {
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.text('DATI BASE PROGETTO', 25, yPosition + 12);
-    
+
     yPosition += 30;
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.text(`Superficie Totale: ${project.superficieTotale || '0'} m²`, 25, yPosition);
     doc.text(`Numero Unità: ${project.numeroUnita || '0'}`, 25, yPosition + 8);
-    doc.text(`Prezzo Vendita: €${project.prezzoVendita?.toLocaleString() || '0'}/m²`, 25, yPosition + 16);
-    
+    doc.text(
+      `Prezzo Vendita: €${project.prezzoVendita?.toLocaleString() || '0'}/m²`,
+      25,
+      yPosition + 16
+    );
+
     yPosition += 40;
-    
+
     // Sezione Costi
     doc.setFillColor(243, 244, 246);
     doc.rect(20, yPosition, 170, 20, 'F');
@@ -228,16 +239,28 @@ export class VercelWorkingScreenshotService {
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.text('COSTI DI COSTRUZIONE', 25, yPosition + 12);
-    
+
     yPosition += 30;
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Costo Terreno: €${calculatedCosts?.costoTerreno?.toLocaleString() || '0'}`, 25, yPosition);
-    doc.text(`Costo Costruzione: €${calculatedCosts?.costoCostruzione?.toLocaleString() || '0'}`, 25, yPosition + 8);
-    doc.text(`Costo Totale: €${calculatedCosts?.costoTotale?.toLocaleString() || '0'}`, 25, yPosition + 16);
-    
+    doc.text(
+      `Costo Terreno: €${calculatedCosts?.costoTerreno?.toLocaleString() || '0'}`,
+      25,
+      yPosition
+    );
+    doc.text(
+      `Costo Costruzione: €${calculatedCosts?.costoCostruzione?.toLocaleString() || '0'}`,
+      25,
+      yPosition + 8
+    );
+    doc.text(
+      `Costo Totale: €${calculatedCosts?.costoTotale?.toLocaleString() || '0'}`,
+      25,
+      yPosition + 16
+    );
+
     yPosition += 40;
-    
+
     // Sezione Ricavi
     doc.setFillColor(243, 244, 246);
     doc.rect(20, yPosition, 170, 20, 'F');
@@ -245,17 +268,25 @@ export class VercelWorkingScreenshotService {
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.text('RICAVI', 25, yPosition + 12);
-    
+
     yPosition += 30;
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Ricavo Totale: €${calculatedRevenues?.ricavoTotale?.toLocaleString() || '0'}`, 25, yPosition);
-    doc.text(`Utile Lordo: €${calculatedRevenues?.utileLordo?.toLocaleString() || '0'}`, 25, yPosition + 8);
+    doc.text(
+      `Ricavo Totale: €${calculatedRevenues?.ricavoTotale?.toLocaleString() || '0'}`,
+      25,
+      yPosition
+    );
+    doc.text(
+      `Utile Lordo: €${calculatedRevenues?.utileLordo?.toLocaleString() || '0'}`,
+      25,
+      yPosition + 8
+    );
   }
 
   private generatePerfectVediProgettoHTML(options: VercelWorkingScreenshotOptions): string {
     const { project, calculatedCosts, calculatedRevenues, calculatedResults } = options;
-    
+
     return `
       <!DOCTYPE html>
       <html>

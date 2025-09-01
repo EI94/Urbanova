@@ -77,7 +77,8 @@ export interface DemographicData {
 
 class ExternalAPIService {
   private readonly ISTAT_API_URL = process.env.ISTAT_API_URL || 'https://www.istat.it/it/api';
-  private readonly AGENZIA_ENTRATE_URL = process.env.AGENZIA_ENTRATE_URL || 'https://www.agenziaentrate.gov.it/api';
+  private readonly AGENZIA_ENTRATE_URL =
+    process.env.AGENZIA_ENTRATE_URL || 'https://www.agenziaentrate.gov.it/api';
   private readonly OPENSTREETMAP_URL = 'https://nominatim.openstreetmap.org';
   private readonly GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
   private readonly MAX_RETRIES = 3;
@@ -99,7 +100,7 @@ class ExternalAPIService {
   async getMarketData(location: GeoLocation): Promise<MarketData> {
     try {
       console.log('📊 [ExternalAPIService] Recupero dati mercato per:', location.address);
-      
+
       // Prova prima da Agenzia delle Entrate (se disponibile)
       try {
         const agenziaData = await this.fetchAgenziaEntrateData(location);
@@ -113,7 +114,6 @@ class ExternalAPIService {
       // Fallback a ISTAT
       const istatData = await this.fetchISTATData(location);
       return this.transformISTATData(istatData, location);
-      
     } catch (error) {
       console.error('❌ [ExternalAPIService] Errore recupero dati mercato:', error);
       throw new Error(`Impossibile recuperare dati mercato: ${error.message}`);
@@ -126,25 +126,24 @@ class ExternalAPIService {
   async getRegulatoryData(location: GeoLocation): Promise<RegulatoryData> {
     try {
       console.log('📋 [ExternalAPIService] Recupero dati normativi per:', location.address);
-      
+
       // Recupera regolamenti edilizi locali
       const buildingCodes = await this.fetchBuildingCodes(location);
-      
+
       // Recupera regolamenti di zonizzazione
       const zoningRegulations = await this.fetchZoningRegulations(location);
-      
+
       // Recupera requisiti ambientali
       const environmentalRequirements = await this.fetchEnvironmentalRequirements(location);
-      
+
       return {
         location: location.address,
         buildingCodes,
         zoningRegulations,
         environmentalRequirements,
         lastUpdated: new Date(),
-        dataSource: 'Comune + Regione + Stato'
+        dataSource: 'Comune + Regione + Stato',
       };
-      
     } catch (error) {
       console.error('❌ [ExternalAPIService] Errore recupero dati normativi:', error);
       throw new Error(`Impossibile recuperare dati normativi: ${error.message}`);
@@ -157,7 +156,7 @@ class ExternalAPIService {
   async getGeospatialData(location: GeoLocation): Promise<GeospatialData> {
     try {
       console.log('🗺️ [ExternalAPIService] Recupero dati geospaziali per:', location.coordinates);
-      
+
       // Prova Google Maps Elevation API (più accurata)
       if (this.GOOGLE_MAPS_API_KEY) {
         try {
@@ -173,7 +172,6 @@ class ExternalAPIService {
       // Fallback a OpenStreetMap
       const osmData = await this.fetchOpenStreetMapData(location.coordinates);
       return this.transformOpenStreetMapData(osmData, location);
-      
     } catch (error) {
       console.error('❌ [ExternalAPIService] Errore recupero dati geospaziali:', error);
       throw new Error(`Impossibile recuperare dati geospaziali: ${error.message}`);
@@ -186,10 +184,9 @@ class ExternalAPIService {
   async getDemographicData(location: GeoLocation): Promise<DemographicData> {
     try {
       console.log('👥 [ExternalAPIService] Recupero dati demografici per:', location.address);
-      
+
       const istatData = await this.fetchISTATDemographics(location);
       return this.transformISTATDemographics(istatData, location);
-      
     } catch (error) {
       console.error('❌ [ExternalAPIService] Errore recupero dati demografici:', error);
       throw new Error(`Impossibile recuperare dati demografici: ${error.message}`);
@@ -213,17 +210,17 @@ class ExternalAPIService {
   }> {
     try {
       console.log('🔍 [ExternalAPIService] Analisi completa terreno per:', location.address);
-      
+
       const startTime = Date.now();
-      
+
       // Recupera tutti i dati in parallelo
       const [marketData, regulatoryData, geospatialData, demographicData] = await Promise.all([
         this.getMarketData(location),
         this.getRegulatoryData(location),
         this.getGeospatialData(location),
-        this.getDemographicData(location)
+        this.getDemographicData(location),
       ]);
-      
+
       // Analisi integrata
       const analysis = this.performIntegratedAnalysis(
         marketData,
@@ -231,18 +228,17 @@ class ExternalAPIService {
         geospatialData,
         demographicData
       );
-      
+
       const processingTime = Date.now() - startTime;
       console.log('✅ [ExternalAPIService] Analisi terreno completata in', processingTime, 'ms');
-      
+
       return {
         marketData,
         regulatoryData,
         geospatialData,
         demographicData,
-        analysis
+        analysis,
       };
-      
     } catch (error) {
       console.error('❌ [ExternalAPIService] Errore analisi terreno:', error);
       throw new Error(`Analisi terreno fallita: ${error.message}`);
@@ -253,18 +249,18 @@ class ExternalAPIService {
   private async fetchAgenziaEntrateData(location: GeoLocation): Promise<any> {
     // Simula chiamata API reale all'Agenzia delle Entrate
     // In produzione, qui si integrerebbe l'API ufficiale
-    
+
     const response = await fetch(`${this.AGENZIA_ENTRATE_URL}/immobili/prezzi`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.AGENZIA_ENTRATE_TOKEN || 'demo'}`,
+        Authorization: `Bearer ${process.env.AGENZIA_ENTRATE_TOKEN || 'demo'}`,
       },
       body: JSON.stringify({
         location: location.address,
         propertyType: 'terreno',
-        area: 'residenziale'
-      })
+        area: 'residenziale',
+      }),
     });
 
     if (!response.ok) {
@@ -277,12 +273,12 @@ class ExternalAPIService {
   private async fetchISTATData(location: GeoLocation): Promise<any> {
     // Simula chiamata API reale all'ISTAT
     // In produzione, qui si integrerebbe l'API ufficiale
-    
+
     const response = await fetch(`${this.ISTAT_API_URL}/dati/immobili`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-      }
+      },
     });
 
     if (!response.ok) {
@@ -295,68 +291,76 @@ class ExternalAPIService {
   private async fetchBuildingCodes(location: GeoLocation): Promise<BuildingCode[]> {
     // Simula recupero regolamenti edilizi reali
     // In produzione, qui si integrerebbero le API dei comuni
-    
+
     const comune = this.extractComune(location.address);
-    
+
     // Regolamenti standard nazionali
     const nationalCodes: BuildingCode[] = [
       {
         code: 'D.Lgs. 192/2005',
-        title: 'Attuazione della direttiva 2002/91/CE relativa al rendimento energetico nell\'edilizia',
+        title:
+          "Attuazione della direttiva 2002/91/CE relativa al rendimento energetico nell'edilizia",
         description: 'Norme per il risparmio energetico degli edifici',
-        requirements: ['Classe energetica minima C', 'Isolamento termico conforme', 'Certificazione energetica'],
+        requirements: [
+          'Classe energetica minima C',
+          'Isolamento termico conforme',
+          'Certificazione energetica',
+        ],
         penalties: ['Sanzione €500-2000', 'Impossibilità di vendita'],
         effectiveDate: new Date('2005-08-19'),
-        status: 'ACTIVE'
+        status: 'ACTIVE',
       },
       {
         code: 'D.M. 26/06/2015',
-        title: 'Applicazione delle metodologie di calcolo delle prestazioni energetiche e definizione delle prescrizioni e dei requisiti minimi degli edifici',
+        title:
+          'Applicazione delle metodologie di calcolo delle prestazioni energetiche e definizione delle prescrizioni e dei requisiti minimi degli edifici',
         description: 'Metodologie per il calcolo delle prestazioni energetiche',
         requirements: ['Calcolo prestazioni energetiche', 'Verifica requisiti minimi'],
         penalties: ['Sanzione €1000-5000'],
         effectiveDate: new Date('2015-06-26'),
-        status: 'ACTIVE'
-      }
+        status: 'ACTIVE',
+      },
     ];
 
     // Regolamenti locali specifici
     const localCodes: BuildingCode[] = this.getLocalBuildingCodes(comune);
-    
+
     return [...nationalCodes, ...localCodes];
   }
 
   private async fetchZoningRegulations(location: GeoLocation): Promise<ZoningRegulation[]> {
     // Simula recupero regolamenti di zonizzazione reali
     const comune = this.extractComune(location.address);
-    
+
     return this.getLocalZoningRegulations(comune);
   }
 
-  private async fetchEnvironmentalRequirements(location: GeoLocation): Promise<EnvironmentalRequirement[]> {
+  private async fetchEnvironmentalRequirements(
+    location: GeoLocation
+  ): Promise<EnvironmentalRequirement[]> {
     // Simula recupero requisiti ambientali reali
     return [
       {
         requirement: 'Valutazione Impatto Ambientale',
-        description: 'Valutazione dell\'impatto ambientale del progetto',
+        description: "Valutazione dell'impatto ambientale del progetto",
         compliance: 'MANDATORY',
         certification: 'VIA',
-        standards: ['D.Lgs. 152/2006', 'Direttiva 2011/92/UE']
+        standards: ['D.Lgs. 152/2006', 'Direttiva 2011/92/UE'],
       },
       {
         requirement: 'Certificazione Energetica',
         description: 'Certificazione delle prestazioni energetiche',
         compliance: 'MANDATORY',
         certification: 'APE',
-        standards: ['D.Lgs. 192/2005', 'D.M. 26/06/2015']
+        standards: ['D.Lgs. 192/2005', 'D.M. 26/06/2015'],
       },
       {
         requirement: 'Certificazione Sostenibilità',
         description: 'Certificazione di sostenibilità edilizia',
         compliance: 'RECOMMENDED',
         certification: 'LEED/BREEAM',
-        standards: ['USGBC LEED', 'BRE BREEAM']
-      }
+        standards: ['USGBC LEED', 'BRE BREEAM'],
+      },
     ];
   }
 
@@ -391,9 +395,9 @@ class ExternalAPIService {
   private async fetchISTATDemographics(location: GeoLocation): Promise<any> {
     // Simula chiamata API reale per dati demografici ISTAT
     const comune = this.extractComune(location.address);
-    
+
     const response = await fetch(`${this.ISTAT_API_URL}/dati/demografia/${comune}`);
-    
+
     if (!response.ok) {
       throw new Error(`ISTAT Demographics API error: ${response.status}`);
     }
@@ -411,7 +415,7 @@ class ExternalAPIService {
       supplyLevel: data.supplyLevel || 'MEDIUM',
       marketStability: data.marketStability || 'STABLE',
       lastUpdated: new Date(),
-      dataSource: 'Agenzia delle Entrate'
+      dataSource: 'Agenzia delle Entrate',
     };
   }
 
@@ -424,13 +428,13 @@ class ExternalAPIService {
       supplyLevel: data.immobili?.livelloOfferta || 'MEDIUM',
       marketStability: data.immobili?.stabilitaMercato || 'STABLE',
       lastUpdated: new Date(),
-      dataSource: 'ISTAT'
+      dataSource: 'ISTAT',
     };
   }
 
   private transformGoogleMapsData(data: any, location: GeoLocation): GeospatialData {
     const elevation = data.results?.[0]?.elevation || 0;
-    
+
     return {
       coordinates: location.coordinates,
       elevation,
@@ -440,14 +444,14 @@ class ExternalAPIService {
       floodRisk: this.assessFloodRisk(elevation),
       seismicZone: this.getSeismicZone(location.coordinates),
       dataSource: 'Google Maps Elevation API',
-      accuracy: 95
+      accuracy: 95,
     };
   }
 
   private transformOpenStreetMapData(data: any, location: GeoLocation): GeospatialData {
     // Estrai informazioni da OpenStreetMap
     const elevation = data.elevation || 0;
-    
+
     return {
       coordinates: location.coordinates,
       elevation,
@@ -457,7 +461,7 @@ class ExternalAPIService {
       floodRisk: this.assessFloodRisk(elevation),
       seismicZone: this.getSeismicZone(location.coordinates),
       dataSource: 'OpenStreetMap',
-      accuracy: 85
+      accuracy: 85,
     };
   }
 
@@ -469,11 +473,11 @@ class ExternalAPIService {
       ageDistribution: {
         under18: data.popolazione?.eta?.under18 || 15,
         age18to65: data.popolazione?.eta?.age18to65 || 60,
-        over65: data.popolazione?.eta?.over65 || 25
+        over65: data.popolazione?.eta?.over65 || 25,
       },
       incomeLevel: data.economia?.redditoMedio || 'MEDIUM',
       educationLevel: data.istruzione?.livelloMedio || 'MEDIUM',
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
   }
 
@@ -487,7 +491,7 @@ class ExternalAPIService {
   private getLocalBuildingCodes(comune: string): BuildingCode[] {
     // Regolamenti edilizi locali specifici per comune
     const localCodes: { [key: string]: BuildingCode[] } = {
-      'Milano': [
+      Milano: [
         {
           code: 'REG_MILANO_2020',
           title: 'Regolamento Edilizio Comune di Milano',
@@ -495,10 +499,10 @@ class ExternalAPIService {
           requirements: ['Altezza max 24m', 'Copertura max 60%', 'Distanza confini 10m'],
           penalties: ['Sanzione €2000-10000'],
           effectiveDate: new Date('2020-01-01'),
-          status: 'ACTIVE'
-        }
+          status: 'ACTIVE',
+        },
       ],
-      'Roma': [
+      Roma: [
         {
           code: 'REG_ROMA_2019',
           title: 'Regolamento Edilizio Comune di Roma',
@@ -506,9 +510,9 @@ class ExternalAPIService {
           requirements: ['Altezza max 18m', 'Copertura max 50%', 'Distanza confini 8m'],
           penalties: ['Sanzione €1500-8000'],
           effectiveDate: new Date('2019-01-01'),
-          status: 'ACTIVE'
-        }
-      ]
+          status: 'ACTIVE',
+        },
+      ],
     };
 
     return localCodes[comune] || [];
@@ -517,7 +521,7 @@ class ExternalAPIService {
   private getLocalZoningRegulations(comune: string): ZoningRegulation[] {
     // Regolamenti di zonizzazione locali
     const localRegulations: { [key: string]: ZoningRegulation[] } = {
-      'Milano': [
+      Milano: [
         {
           zone: 'Zona A - Centro Storico',
           category: 'residenziale',
@@ -526,7 +530,7 @@ class ExternalAPIService {
           minSetback: 10,
           parkingRequirements: 2,
           greenAreaMin: 25,
-          restrictions: ['Vincoli architettonici', 'Materiali tradizionali']
+          restrictions: ['Vincoli architettonici', 'Materiali tradizionali'],
         },
         {
           zone: 'Zona B - Semi-centro',
@@ -536,10 +540,10 @@ class ExternalAPIService {
           minSetback: 8,
           parkingRequirements: 1.5,
           greenAreaMin: 30,
-          restrictions: ['Altezza limitata', 'Area verde minima']
-        }
+          restrictions: ['Altezza limitata', 'Area verde minima'],
+        },
       ],
-      'Roma': [
+      Roma: [
         {
           zone: 'Zona Storica',
           category: 'residenziale',
@@ -548,23 +552,25 @@ class ExternalAPIService {
           minSetback: 8,
           parkingRequirements: 1.5,
           greenAreaMin: 30,
-          restrictions: ['Vincoli paesaggistici', 'Materiali locali']
-        }
-      ]
+          restrictions: ['Vincoli paesaggistici', 'Materiali locali'],
+        },
+      ],
     };
 
-    return localRegulations[comune] || [
-      {
-        zone: 'Zona Generica',
-        category: 'residenziale',
-        maxHeight: 15,
-        maxCoverage: 45,
-        minSetback: 10,
-        parkingRequirements: 1,
-        greenAreaMin: 35,
-        restrictions: ['Standard nazionali']
-      }
-    ];
+    return (
+      localRegulations[comune] || [
+        {
+          zone: 'Zona Generica',
+          category: 'residenziale',
+          maxHeight: 15,
+          maxCoverage: 45,
+          minSetback: 10,
+          parkingRequirements: 1,
+          greenAreaMin: 35,
+          restrictions: ['Standard nazionali'],
+        },
+      ]
+    );
   }
 
   private performIntegratedAnalysis(
@@ -649,7 +655,7 @@ class ExternalAPIService {
       suitability,
       risks,
       opportunities,
-      recommendations
+      recommendations,
     };
   }
 

@@ -1,19 +1,20 @@
-import { 
-  collection, 
-  doc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
-  orderBy, 
+import {
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
   onSnapshot,
   serverTimestamp,
   Timestamp,
   getDoc,
   getDocs,
-  limit
+  limit,
 } from 'firebase/firestore';
+
 import { db } from '@/lib/firebase';
 
 // ===== INTERFACES =====
@@ -179,9 +180,9 @@ export class ExternalIntegrationService {
       const toolData = {
         ...tool,
         lastSync: serverTimestamp(),
-        syncStatus: 'idle'
+        syncStatus: 'idle',
       };
-      
+
       const docRef = await addDoc(collection(db, 'externalTools'), toolData);
       return docRef.id;
     } catch (error) {
@@ -213,7 +214,7 @@ export class ExternalIntegrationService {
     try {
       const snapshot = await getDocs(collection(db, 'externalTools'));
       const tools: ExternalTool[] = [];
-      snapshot.forEach((doc) => {
+      snapshot.forEach(doc => {
         tools.push({ id: doc.id, ...doc.data() } as ExternalTool);
       });
       return tools;
@@ -225,10 +226,10 @@ export class ExternalIntegrationService {
 
   getToolsRealtime(callback: (tools: ExternalTool[]) => void): () => void {
     const q = query(collection(db, 'externalTools'), orderBy('name'));
-    
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+
+    const unsubscribe = onSnapshot(q, snapshot => {
       const tools: ExternalTool[] = [];
-      snapshot.forEach((doc) => {
+      snapshot.forEach(doc => {
         tools.push({ id: doc.id, ...doc.data() } as ExternalTool);
       });
       callback(tools);
@@ -238,15 +239,17 @@ export class ExternalIntegrationService {
   }
 
   // ===== DESIGN FILES MANAGEMENT =====
-  async importFile(file: Omit<DesignFile, 'id' | 'importDate' | 'lastModified' | 'status'>): Promise<string> {
+  async importFile(
+    file: Omit<DesignFile, 'id' | 'importDate' | 'lastModified' | 'status'>
+  ): Promise<string> {
     try {
       const fileData = {
         ...file,
         importDate: serverTimestamp(),
         lastModified: serverTimestamp(),
-        status: 'imported'
+        status: 'imported',
       };
-      
+
       const docRef = await addDoc(collection(db, 'designFiles'), fileData);
       return docRef.id;
     } catch (error) {
@@ -260,7 +263,7 @@ export class ExternalIntegrationService {
       const fileRef = doc(db, 'designFiles', fileId);
       await updateDoc(fileRef, {
         ...updates,
-        lastModified: serverTimestamp()
+        lastModified: serverTimestamp(),
       });
     } catch (error) {
       console.error('Error updating file:', error);
@@ -284,10 +287,10 @@ export class ExternalIntegrationService {
         where('designId', '==', designId),
         orderBy('importDate', 'desc')
       );
-      
+
       const snapshot = await getDocs(q);
       const files: DesignFile[] = [];
-      snapshot.forEach((doc) => {
+      snapshot.forEach(doc => {
         files.push({ id: doc.id, ...doc.data() } as DesignFile);
       });
       return files;
@@ -304,9 +307,9 @@ export class ExternalIntegrationService {
       orderBy('importDate', 'desc')
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(q, snapshot => {
       const files: DesignFile[] = [];
-      snapshot.forEach((doc) => {
+      snapshot.forEach(doc => {
         files.push({ id: doc.id, ...doc.data() } as DesignFile);
       });
       callback(files);
@@ -316,15 +319,17 @@ export class ExternalIntegrationService {
   }
 
   // ===== FILE CONVERSION =====
-  async startConversion(conversion: Omit<FileConversion, 'id' | 'startedAt' | 'status' | 'progress'>): Promise<string> {
+  async startConversion(
+    conversion: Omit<FileConversion, 'id' | 'startedAt' | 'status' | 'progress'>
+  ): Promise<string> {
     try {
       const conversionData = {
         ...conversion,
         startedAt: serverTimestamp(),
         status: 'pending',
-        progress: 0
+        progress: 0,
       };
-      
+
       const docRef = await addDoc(collection(db, 'fileConversions'), conversionData);
       return docRef.id;
     } catch (error) {
@@ -333,18 +338,22 @@ export class ExternalIntegrationService {
     }
   }
 
-  async updateConversionProgress(conversionId: string, progress: number, status?: FileConversion['status']): Promise<void> {
+  async updateConversionProgress(
+    conversionId: string,
+    progress: number,
+    status?: FileConversion['status']
+  ): Promise<void> {
     try {
       const conversionRef = doc(db, 'fileConversions', conversionId);
       const updates: Partial<FileConversion> = { progress };
-      
+
       if (status) {
         updates.status = status;
         if (status === 'completed' || status === 'failed') {
           updates.completedAt = serverTimestamp();
         }
       }
-      
+
       await updateDoc(conversionRef, updates);
     } catch (error) {
       console.error('Error updating conversion progress:', error);
@@ -359,10 +368,10 @@ export class ExternalIntegrationService {
         where('sourceFileId', '==', fileId),
         orderBy('startedAt', 'desc')
       );
-      
+
       const snapshot = await getDocs(q);
       const conversions: FileConversion[] = [];
-      snapshot.forEach((doc) => {
+      snapshot.forEach(doc => {
         conversions.push({ id: doc.id, ...doc.data() } as FileConversion);
       });
       return conversions;
@@ -373,7 +382,12 @@ export class ExternalIntegrationService {
   }
 
   // ===== TOOL SYNCHRONIZATION =====
-  async createSync(sync: Omit<ToolSync, 'id' | 'lastSync' | 'status' | 'filesProcessed' | 'filesFailed' | 'errorLog'>): Promise<string> {
+  async createSync(
+    sync: Omit<
+      ToolSync,
+      'id' | 'lastSync' | 'status' | 'filesProcessed' | 'filesFailed' | 'errorLog'
+    >
+  ): Promise<string> {
     try {
       const syncData = {
         ...sync,
@@ -381,9 +395,9 @@ export class ExternalIntegrationService {
         status: 'pending',
         filesProcessed: 0,
         filesFailed: 0,
-        errorLog: []
+        errorLog: [],
       };
-      
+
       const docRef = await addDoc(collection(db, 'toolSyncs'), syncData);
       return docRef.id;
     } catch (error) {
@@ -409,10 +423,10 @@ export class ExternalIntegrationService {
         where('designId', '==', designId),
         where('status', 'in', ['pending', 'syncing'])
       );
-      
+
       const snapshot = await getDocs(q);
       const syncs: ToolSync[] = [];
-      snapshot.forEach((doc) => {
+      snapshot.forEach(doc => {
         syncs.push({ id: doc.id, ...doc.data() } as ToolSync);
       });
       return syncs;
@@ -427,9 +441,9 @@ export class ExternalIntegrationService {
     try {
       const bimDataDoc = {
         ...bimData,
-        lastUpdated: serverTimestamp()
+        lastUpdated: serverTimestamp(),
       };
-      
+
       const docRef = await addDoc(collection(db, 'bimData'), bimDataDoc);
       return docRef.id;
     } catch (error) {
@@ -443,7 +457,7 @@ export class ExternalIntegrationService {
       const bimDataRef = doc(db, 'bimData', bimDataId);
       await updateDoc(bimDataRef, {
         ...updates,
-        lastUpdated: serverTimestamp()
+        lastUpdated: serverTimestamp(),
       });
     } catch (error) {
       console.error('Error updating BIM data:', error);
@@ -459,12 +473,12 @@ export class ExternalIntegrationService {
         orderBy('lastUpdated', 'desc'),
         limit(1)
       );
-      
+
       const snapshot = await getDocs(q);
       if (snapshot.empty) {
         return null;
       }
-      
+
       const doc = snapshot.docs[0];
       return { id: doc.id, ...doc.data() } as BIMData;
     } catch (error) {
@@ -478,11 +492,11 @@ export class ExternalIntegrationService {
     try {
       const tools = await this.getTools();
       const formats = new Set<string>();
-      
+
       tools.forEach(tool => {
         tool.supportedFormats.forEach(format => formats.add(format));
       });
-      
+
       return Array.from(formats).sort();
     } catch (error) {
       console.error('Error getting supported formats:', error);
@@ -492,17 +506,13 @@ export class ExternalIntegrationService {
 
   async getToolByName(name: string): Promise<ExternalTool | null> {
     try {
-      const q = query(
-        collection(db, 'externalTools'),
-        where('name', '==', name),
-        limit(1)
-      );
-      
+      const q = query(collection(db, 'externalTools'), where('name', '==', name), limit(1));
+
       const snapshot = await getDocs(q);
       if (snapshot.empty) {
         return null;
       }
-      
+
       const doc = snapshot.docs[0];
       return { id: doc.id, ...doc.data() } as ExternalTool;
     } catch (error) {
@@ -517,7 +527,7 @@ export class ExternalIntegrationService {
       if (!tool) {
         return false;
       }
-      
+
       return tool.supportedFormats.includes(fileType.toLowerCase());
     } catch (error) {
       console.error('Error validating file format:', error);
@@ -534,31 +544,31 @@ export class ExternalIntegrationService {
   }> {
     try {
       const files = await this.getDesignFiles(designId);
-      
+
       const totalSize = files.reduce((sum, file) => sum + file.fileSize, 0);
       const filesByType: Record<string, number> = {};
       const filesByStatus: Record<string, number> = {};
       let lastImport: Timestamp | null = null;
-      
+
       files.forEach(file => {
         // Count by type
         filesByType[file.fileType] = (filesByType[file.fileType] || 0) + 1;
-        
+
         // Count by status
         filesByStatus[file.status] = (filesByStatus[file.status] || 0) + 1;
-        
+
         // Track last import
         if (!lastImport || file.importDate.toMillis() > lastImport.toMillis()) {
           lastImport = file.importDate;
         }
       });
-      
+
       return {
         totalFiles: files.length,
         totalSize,
         filesByType,
         filesByStatus,
-        lastImport
+        lastImport,
       };
     } catch (error) {
       console.error('Error getting design file stats:', error);
@@ -567,7 +577,7 @@ export class ExternalIntegrationService {
         totalSize: 0,
         filesByType: {},
         filesByStatus: {},
-        lastImport: null
+        lastImport: null,
       };
     }
   }

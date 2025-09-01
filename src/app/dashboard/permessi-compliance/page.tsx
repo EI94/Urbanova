@@ -1,14 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { permitsService, Permit, PermitType, ComplianceReport, InspectionSchedule } from '@/lib/permitsService';
-import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'react-hot-toast';
-import { 
-  BuildingIcon, 
-  TrendingUpIcon, 
-  ClockIcon, 
+
+import {
+  BuildingIcon,
+  TrendingUpIcon,
+  ClockIcon,
   AlertTriangleIcon,
   EuroIcon,
   DocumentIcon,
@@ -25,26 +23,37 @@ import {
   UploadIcon,
   ShieldIcon,
   GlobeIcon,
-  ZapIcon
+  ZapIcon,
 } from '@/components/icons';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  permitsService,
+  Permit,
+  PermitType,
+  ComplianceReport,
+  InspectionSchedule,
+} from '@/lib/permitsService';
 
 export default function PermessiCompliancePage() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'overview' | 'permessi' | 'timeline' | 'alert'>('overview');
-  
+  const [activeTab, setActiveTab] = useState<'overview' | 'permessi' | 'timeline' | 'alert'>(
+    'overview'
+  );
+
   // Stati principali
   const [permits, setPermits] = useState<Permit[]>([]);
   const [permitTypes, setPermitTypes] = useState<PermitType[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Stati per modali e azioni
   const [showNewPermitModal, setShowNewPermitModal] = useState(false);
   const [showComplianceReportModal, setShowComplianceReportModal] = useState(false);
   const [showInspectionModal, setShowInspectionModal] = useState(false);
   const [selectedPermit, setSelectedPermit] = useState<Permit | null>(null);
-  
+
   // Stati per nuovo permesso
   const [newPermitData, setNewPermitData] = useState({
     projectId: '',
@@ -53,7 +62,7 @@ export default function PermessiCompliancePage() {
     estimatedApprovalTime: 90,
     estimatedCost: 0,
     documents: [] as any[],
-    notes: ''
+    notes: '',
   });
 
   // Stati per progetti disponibili
@@ -69,34 +78,33 @@ export default function PermessiCompliancePage() {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Inizializza i tipi di permesso se non esistono
       await permitsService.initializePermitTypes();
-      
+
       // Carica dati in parallelo
       const [userPermits, allPermitTypes, permitsStats] = await Promise.all([
         permitsService.getUserPermits(user?.uid || 'demo-user'),
         permitsService.getAllPermitTypes(),
-        permitsService.getPermitsStats(user?.uid)
+        permitsService.getPermitsStats(user?.uid),
       ]);
-      
+
       setPermits(userPermits);
       setPermitTypes(allPermitTypes);
       setStats(permitsStats);
-      
+
       // Simula progetti disponibili (in produzione verrebbero da un servizio progetti)
       setAvailableProjects([
         { id: 'project-1', name: 'Villa Moderna Roma', location: 'Roma, Italia' },
         { id: 'project-2', name: 'Appartamento Centro Milano', location: 'Milano, Italia' },
-        { id: 'project-3', name: 'Uffici Commerciali Torino', location: 'Torino, Italia' }
+        { id: 'project-3', name: 'Uffici Commerciali Torino', location: 'Torino, Italia' },
       ]);
-      
+
       console.log('✅ [Permessi] Dati caricati:', {
         permits: userPermits.length,
         types: allPermitTypes.length,
-        stats: permitsStats
+        stats: permitsStats,
       });
-      
     } catch (error) {
       console.error('❌ [Permessi] Errore caricamento dati:', error);
       setError('Impossibile caricare i dati dei permessi');
@@ -114,10 +122,10 @@ export default function PermessiCompliancePage() {
 
       const permitId = await permitsService.createPermit(newPermitData);
       console.log('✅ [Permessi] Nuovo permesso creato:', permitId);
-      
+
       toast.success('✅ Permesso creato con successo!');
       setShowNewPermitModal(false);
-      
+
       // Reset form e ricarica dati
       setNewPermitData({
         projectId: '',
@@ -126,11 +134,10 @@ export default function PermessiCompliancePage() {
         estimatedApprovalTime: 90,
         estimatedCost: 0,
         documents: [],
-        notes: ''
+        notes: '',
       });
-      
+
       await loadData();
-      
     } catch (error) {
       console.error('❌ [Permessi] Errore creazione permesso:', error);
       toast.error('❌ Errore durante la creazione del permesso');
@@ -146,10 +153,9 @@ export default function PermessiCompliancePage() {
 
       const report = await permitsService.generateComplianceReport(newPermitData.projectId);
       console.log('✅ [Permessi] Report compliance generato:', report.id);
-      
+
       toast.success('✅ Report compliance generato con successo!');
       setShowComplianceReportModal(false);
-      
     } catch (error) {
       console.error('❌ [Permessi] Errore generazione report:', error);
       toast.error('❌ Errore durante la generazione del report');
@@ -165,7 +171,7 @@ export default function PermessiCompliancePage() {
 
       const project = availableProjects.find(p => p.id === newPermitData.projectId);
       const permitType = permitTypes.find(t => t.id === newPermitData.permitTypeId);
-      
+
       if (!project || !permitType) {
         toast.error('❌ Dati progetto o permesso non validi');
         return;
@@ -182,15 +188,14 @@ export default function PermessiCompliancePage() {
         inspector: 'Ispettore Tecnico',
         location: project.location,
         requirements: ['Documentazione progetto', 'Planimetrie', 'Relazione tecnica'],
-        notes: ['Sopralluogo preliminare per valutazione conformità']
+        notes: ['Sopralluogo preliminare per valutazione conformità'],
       };
 
       const inspectionId = await permitsService.scheduleInspection(inspectionData);
       console.log('✅ [Permessi] Sopralluogo programmato:', inspectionId);
-      
+
       toast.success('✅ Sopralluogo programmato con successo!');
       setShowInspectionModal(false);
-      
     } catch (error) {
       console.error('❌ [Permessi] Errore programmazione sopralluogo:', error);
       toast.error('❌ Errore durante la programmazione del sopralluogo');
@@ -199,31 +204,44 @@ export default function PermessiCompliancePage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'DRAFT': return 'bg-gray-100 text-gray-800';
-      case 'SUBMITTED': return 'bg-blue-100 text-blue-800';
-      case 'UNDER_REVIEW': return 'bg-yellow-100 text-yellow-800';
-      case 'APPROVED': return 'bg-green-100 text-green-800';
-      case 'REJECTED': return 'bg-red-100 text-red-800';
-      case 'EXPIRED': return 'bg-orange-100 text-orange-800';
-      case 'EXTENDED': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'DRAFT':
+        return 'bg-gray-100 text-gray-800';
+      case 'SUBMITTED':
+        return 'bg-blue-100 text-blue-800';
+      case 'UNDER_REVIEW':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'APPROVED':
+        return 'bg-green-100 text-green-800';
+      case 'REJECTED':
+        return 'bg-red-100 text-red-800';
+      case 'EXPIRED':
+        return 'bg-orange-100 text-orange-800';
+      case 'EXTENDED':
+        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getRiskColor = (risk: string) => {
     switch (risk) {
-      case 'LOW': return 'bg-green-100 text-green-800';
-      case 'MEDIUM': return 'bg-yellow-100 text-yellow-800';
-      case 'HIGH': return 'bg-orange-100 text-orange-800';
-      case 'CRITICAL': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'LOW':
+        return 'bg-green-100 text-green-800';
+      case 'MEDIUM':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'HIGH':
+        return 'bg-orange-100 text-orange-800';
+      case 'CRITICAL':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('it-IT', {
       style: 'currency',
-      currency: 'EUR'
+      currency: 'EUR',
     }).format(amount);
   };
 
@@ -231,7 +249,7 @@ export default function PermessiCompliancePage() {
     return new Intl.DateTimeFormat('it-IT', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     }).format(date);
   };
 
@@ -253,7 +271,7 @@ export default function PermessiCompliancePage() {
       <DashboardLayout title="Permessi & Compliance">
         <div className="flex flex-col items-center justify-center h-64 space-y-4">
           <div className="text-red-600 text-xl">❌ {error}</div>
-          <button 
+          <button
             onClick={loadData}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
@@ -275,26 +293,26 @@ export default function PermessiCompliancePage() {
               AI-powered compliance tracking e gestione autorizzazioni
             </p>
           </div>
-          
+
           {/* Azioni principali */}
           <div className="flex space-x-3">
-            <button 
+            <button
               onClick={() => setShowNewPermitModal(true)}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <PlusIcon className="h-4 w-4 mr-2 inline" />
               Nuovo Permesso
             </button>
-            
-            <button 
+
+            <button
               onClick={() => setShowComplianceReportModal(true)}
               className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
               <ChartBarIcon className="h-4 w-4 mr-2 inline" />
               Report Compliance
             </button>
-            
-            <button 
+
+            <button
               onClick={() => setShowInspectionModal(true)}
               className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
             >
@@ -311,8 +329,8 @@ export default function PermessiCompliancePage() {
               { id: 'overview', label: 'Overview', icon: <BuildingIcon className="h-4 w-4" /> },
               { id: 'permessi', label: 'Permessi', icon: <DocumentIcon className="h-4 w-4" /> },
               { id: 'timeline', label: 'Timeline', icon: <ClockIcon className="h-4 w-4" /> },
-              { id: 'alert', label: 'Alert', icon: <AlertTriangleIcon className="h-4 w-4" /> }
-            ].map((tab) => (
+              { id: 'alert', label: 'Alert', icon: <AlertTriangleIcon className="h-4 w-4" /> },
+            ].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
@@ -345,7 +363,7 @@ export default function PermessiCompliancePage() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex items-center">
                   <div className="p-2 bg-green-100 rounded-lg">
@@ -353,11 +371,13 @@ export default function PermessiCompliancePage() {
                   </div>
                   <div className="ml-3">
                     <p className="text-sm font-medium text-gray-600">Approvati</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats?.byStatus?.APPROVED || 0}</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {stats?.byStatus?.APPROVED || 0}
+                    </p>
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex items-center">
                   <div className="p-2 bg-yellow-100 rounded-lg">
@@ -371,7 +391,7 @@ export default function PermessiCompliancePage() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex items-center">
                   <div className="p-2 bg-red-100 rounded-lg">
@@ -383,7 +403,7 @@ export default function PermessiCompliancePage() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex items-center">
                   <div className="p-2 bg-purple-100 rounded-lg">
@@ -397,7 +417,7 @@ export default function PermessiCompliancePage() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex items-center">
                   <div className="p-2 bg-orange-100 rounded-lg">
@@ -405,7 +425,9 @@ export default function PermessiCompliancePage() {
                   </div>
                   <div className="ml-3">
                     <p className="text-sm font-medium text-gray-600">Progresso Medio</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats?.averageProgress || 0}%</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {stats?.averageProgress || 0}%
+                    </p>
                   </div>
                 </div>
               </div>
@@ -418,9 +440,10 @@ export default function PermessiCompliancePage() {
                 <h3 className="text-xl font-semibold text-gray-900">Nuovo Permesso</h3>
               </div>
               <p className="text-gray-600 mb-4">
-                Crea un nuovo permesso per il tuo progetto. Il sistema ti guiderà attraverso tutti i passaggi necessari.
+                Crea un nuovo permesso per il tuo progetto. Il sistema ti guiderà attraverso tutti i
+                passaggi necessari.
               </p>
-              <button 
+              <button
                 onClick={() => setShowNewPermitModal(true)}
                 className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
               >
@@ -430,16 +453,18 @@ export default function PermessiCompliancePage() {
 
             {/* Azioni rapide */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button 
+              <button
                 onClick={() => setShowComplianceReportModal(true)}
                 className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow text-left"
               >
                 <ChartBarIcon className="h-6 w-6 text-green-600 mb-2" />
                 <h4 className="font-medium text-gray-900">Genera Report Compliance</h4>
-                <p className="text-sm text-gray-600">Analisi completa della conformità del progetto</p>
+                <p className="text-sm text-gray-600">
+                  Analisi completa della conformità del progetto
+                </p>
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => setShowInspectionModal(true)}
                 className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow text-left"
               >
@@ -447,8 +472,8 @@ export default function PermessiCompliancePage() {
                 <h4 className="font-medium text-gray-900">Programma Sopralluogo</h4>
                 <p className="text-sm text-gray-600">Organizza ispezioni tecniche e sopralluoghi</p>
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => setActiveTab('timeline')}
                 className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow text-left"
               >
@@ -462,12 +487,23 @@ export default function PermessiCompliancePage() {
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Progresso per Categoria</h3>
               <div className="space-y-4">
-                {['URBANISTICO', 'AMBIENTALE', 'SICUREZZA', 'ENERGETICO', 'STRUTTURALE', 'ANTINCENDIO'].map((category) => {
+                {[
+                  'URBANISTICO',
+                  'AMBIENTALE',
+                  'SICUREZZA',
+                  'ENERGETICO',
+                  'STRUTTURALE',
+                  'ANTINCENDIO',
+                ].map(category => {
                   const categoryPermits = permits.filter(p => p.permitType.category === category);
-                  const avgProgress = categoryPermits.length > 0 
-                    ? Math.round(categoryPermits.reduce((total, p) => total + p.progress, 0) / categoryPermits.length)
-                    : 0;
-                  
+                  const avgProgress =
+                    categoryPermits.length > 0
+                      ? Math.round(
+                          categoryPermits.reduce((total, p) => total + p.progress, 0) /
+                            categoryPermits.length
+                        )
+                      : 0;
+
                   return (
                     <div key={category} className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
@@ -476,8 +512,8 @@ export default function PermessiCompliancePage() {
                       </div>
                       <div className="flex-1 mx-4">
                         <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                          <div
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${avgProgress}%` }}
                           ></div>
                         </div>
@@ -497,14 +533,15 @@ export default function PermessiCompliancePage() {
                 <AlertTriangleIcon className="h-6 w-6 text-red-600 mr-2" />
                 <h3 className="text-lg font-medium text-red-800">! Alert Critici</h3>
               </div>
-              
+
               {stats?.criticalAlerts > 0 || stats?.expiringSoon > 0 ? (
                 <ul className="space-y-2 text-red-700">
                   {stats?.expiringSoon > 0 && (
                     <li className="flex items-start">
                       <span className="text-red-500 mr-2">•</span>
                       <span>
-                        <strong>Scadenza Permesso di Costruire:</strong> Presentare richiesta proroga entro 10 giorni
+                        <strong>Scadenza Permesso di Costruire:</strong> Presentare richiesta
+                        proroga entro 10 giorni
                       </span>
                     </li>
                   )}
@@ -520,8 +557,8 @@ export default function PermessiCompliancePage() {
               ) : (
                 <p className="text-red-600">Nessun alert critico al momento</p>
               )}
-              
-              <button 
+
+              <button
                 onClick={() => setActiveTab('alert')}
                 className="mt-4 text-red-600 hover:text-red-800 font-medium text-sm"
               >
@@ -536,7 +573,7 @@ export default function PermessiCompliancePage() {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-medium text-gray-900">Gestione Permessi</h3>
-              <button 
+              <button
                 onClick={() => setShowNewPermitModal(true)}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
@@ -550,7 +587,7 @@ export default function PermessiCompliancePage() {
                 <DocumentIcon className="h-16 w-16 mx-auto text-gray-400 mb-4" />
                 <h3 className="text-lg font-medium text-gray-700 mb-2">Nessun permesso trovato</h3>
                 <p className="text-gray-500 mb-4">Crea il tuo primo permesso per iniziare</p>
-                <button 
+                <button
                   onClick={() => setShowNewPermitModal(true)}
                   className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
@@ -588,30 +625,38 @@ export default function PermessiCompliancePage() {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {permits.map((permit) => (
+                      {permits.map(permit => (
                         <tr key={permit.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
-                              <div className="text-sm font-medium text-gray-900">{permit.projectName}</div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {permit.projectName}
+                              </div>
                               <div className="text-sm text-gray-500">ID: {permit.projectId}</div>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
-                              <div className="text-sm font-medium text-gray-900">{permit.permitType.name}</div>
-                              <div className="text-sm text-gray-500">{permit.permitType.category}</div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {permit.permitType.name}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {permit.permitType.category}
+                              </div>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(permit.status)}`}>
+                            <span
+                              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(permit.status)}`}
+                            >
                               {permit.status}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <div className="w-full bg-gray-200 rounded-full h-2 w-20">
-                                <div 
-                                  className="bg-blue-600 h-2 rounded-full" 
+                                <div
+                                  className="bg-blue-600 h-2 rounded-full"
                                   style={{ width: `${permit.progress}%` }}
                                 ></div>
                               </div>
@@ -621,7 +666,9 @@ export default function PermessiCompliancePage() {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRiskColor(permit.riskLevel)}`}>
+                            <span
+                              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRiskColor(permit.riskLevel)}`}
+                            >
                               {permit.riskLevel}
                             </span>
                           </td>
@@ -630,7 +677,7 @@ export default function PermessiCompliancePage() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div className="flex items-center space-x-2">
-                              <button 
+                              <button
                                 onClick={() => setSelectedPermit(permit)}
                                 className="text-blue-600 hover:text-blue-900"
                               >
@@ -658,17 +705,19 @@ export default function PermessiCompliancePage() {
         {activeTab === 'timeline' && (
           <div className="space-y-6">
             <h3 className="text-lg font-medium text-gray-900">Timeline Progetto</h3>
-            
+
             <div className="bg-white rounded-lg shadow p-6">
               <div className="space-y-4">
-                {permits.map((permit) => (
+                {permits.map(permit => (
                   <div key={permit.id} className="border-l-4 border-blue-500 pl-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-medium text-gray-900">{permit.permitType.name}</h4>
                         <p className="text-sm text-gray-600">{permit.projectName}</p>
                       </div>
-                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(permit.status)}`}>
+                      <span
+                        className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(permit.status)}`}
+                      >
                         {permit.status}
                       </span>
                     </div>
@@ -690,7 +739,7 @@ export default function PermessiCompliancePage() {
         {activeTab === 'alert' && (
           <div className="space-y-6">
             <h3 className="text-lg font-medium text-gray-900">Sistema di Alert</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Alert critici */}
               <div className="bg-red-50 border border-red-200 rounded-lg p-6">
@@ -699,11 +748,14 @@ export default function PermessiCompliancePage() {
                   <h4 className="text-lg font-medium text-red-800">Alert Critici</h4>
                 </div>
                 <div className="space-y-2">
-                  {permits.filter(p => p.riskLevel === 'CRITICAL').map((permit) => (
-                    <div key={permit.id} className="text-red-700 text-sm">
-                      • <strong>{permit.permitType.name}:</strong> Rischio critico - Intervento immediato richiesto
-                    </div>
-                  ))}
+                  {permits
+                    .filter(p => p.riskLevel === 'CRITICAL')
+                    .map(permit => (
+                      <div key={permit.id} className="text-red-700 text-sm">
+                        • <strong>{permit.permitType.name}:</strong> Rischio critico - Intervento
+                        immediato richiesto
+                      </div>
+                    ))}
                   {permits.filter(p => p.riskLevel === 'CRITICAL').length === 0 && (
                     <p className="text-red-600">Nessun alert critico al momento</p>
                   )}
@@ -717,18 +769,22 @@ export default function PermessiCompliancePage() {
                   <h4 className="text-lg font-medium text-orange-800">Scadenze Prossime</h4>
                 </div>
                 <div className="space-y-2">
-                  {permits.filter(p => p.expiryDate && 
-                    p.expiryDate.getTime() - Date.now() < 30 * 24 * 60 * 60 * 1000
-                  ).map((permit) => (
-                    <div key={permit.id} className="text-orange-700 text-sm">
-                      • <strong>{permit.permitType.name}:</strong> Scade il {permit.expiryDate ? formatDate(permit.expiryDate) : 'N/A'}
-                    </div>
-                  ))}
-                  {permits.filter(p => p.expiryDate && 
-                    p.expiryDate.getTime() - Date.now() < 30 * 24 * 60 * 60 * 1000
-                  ).length === 0 && (
-                    <p className="text-orange-600">Nessuna scadenza prossima</p>
-                  )}
+                  {permits
+                    .filter(
+                      p =>
+                        p.expiryDate &&
+                        p.expiryDate.getTime() - Date.now() < 30 * 24 * 60 * 60 * 1000
+                    )
+                    .map(permit => (
+                      <div key={permit.id} className="text-orange-700 text-sm">
+                        • <strong>{permit.permitType.name}:</strong> Scade il{' '}
+                        {permit.expiryDate ? formatDate(permit.expiryDate) : 'N/A'}
+                      </div>
+                    ))}
+                  {permits.filter(
+                    p =>
+                      p.expiryDate && p.expiryDate.getTime() - Date.now() < 30 * 24 * 60 * 60 * 1000
+                  ).length === 0 && <p className="text-orange-600">Nessuna scadenza prossima</p>}
                 </div>
               </div>
             </div>
@@ -741,94 +797,106 @@ export default function PermessiCompliancePage() {
             <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
               <div className="mt-3">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Nuovo Permesso</h3>
-                
+
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Progetto</label>
                     <select
                       value={newPermitData.projectId}
-                      onChange={(e) => {
+                      onChange={e => {
                         const project = availableProjects.find(p => p.id === e.target.value);
                         setNewPermitData(prev => ({
                           ...prev,
                           projectId: e.target.value,
-                          projectName: project?.name || ''
+                          projectName: project?.name || '',
                         }));
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Seleziona progetto</option>
-                      {availableProjects.map((project) => (
+                      {availableProjects.map(project => (
                         <option key={project.id} value={project.id}>
                           {project.name} - {project.location}
                         </option>
                       ))}
                     </select>
                   </div>
-                  
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Tipo Permesso</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Tipo Permesso
+                    </label>
                     <select
                       value={newPermitData.permitTypeId}
-                      onChange={(e) => {
+                      onChange={e => {
                         const permitType = permitTypes.find(t => t.id === e.target.value);
                         setNewPermitData(prev => ({
                           ...prev,
                           permitTypeId: e.target.value,
-                          estimatedCost: permitType?.estimatedCost || 0
+                          estimatedCost: permitType?.estimatedCost || 0,
                         }));
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Seleziona tipo</option>
-                      {permitTypes.map((type) => (
+                      {permitTypes.map(type => (
                         <option key={type.id} value={type.id}>
                           {type.name} ({type.category})
                         </option>
                       ))}
                     </select>
                   </div>
-                  
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Tempo Approvazione Stimato (giorni)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Tempo Approvazione Stimato (giorni)
+                    </label>
                     <input
                       type="number"
                       value={newPermitData.estimatedApprovalTime}
-                      onChange={(e) => setNewPermitData(prev => ({
-                        ...prev,
-                        estimatedApprovalTime: parseInt(e.target.value) || 0
-                      }))}
+                      onChange={e =>
+                        setNewPermitData(prev => ({
+                          ...prev,
+                          estimatedApprovalTime: parseInt(e.target.value) || 0,
+                        }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-                  
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Costo Stimato (€)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Costo Stimato (€)
+                    </label>
                     <input
                       type="number"
                       value={newPermitData.estimatedCost}
-                      onChange={(e) => setNewPermitData(prev => ({
-                        ...prev,
-                        estimatedCost: parseInt(e.target.value) || 0
-                      }))}
+                      onChange={e =>
+                        setNewPermitData(prev => ({
+                          ...prev,
+                          estimatedCost: parseInt(e.target.value) || 0,
+                        }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Note</label>
                     <textarea
                       value={newPermitData.notes}
-                      onChange={(e) => setNewPermitData(prev => ({
-                        ...prev,
-                        notes: e.target.value
-                      }))}
+                      onChange={e =>
+                        setNewPermitData(prev => ({
+                          ...prev,
+                          notes: e.target.value,
+                        }))
+                      }
                       rows={3}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
-                
+
                 <div className="flex justify-end space-x-3 mt-6">
                   <button
                     onClick={() => setShowNewPermitModal(false)}
@@ -854,20 +922,22 @@ export default function PermessiCompliancePage() {
             <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
               <div className="mt-3">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Genera Report Compliance</h3>
-                
+
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Progetto</label>
                     <select
                       value={newPermitData.projectId}
-                      onChange={(e) => setNewPermitData(prev => ({
-                        ...prev,
-                        projectId: e.target.value
-                      }))}
+                      onChange={e =>
+                        setNewPermitData(prev => ({
+                          ...prev,
+                          projectId: e.target.value,
+                        }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Seleziona progetto</option>
-                      {availableProjects.map((project) => (
+                      {availableProjects.map(project => (
                         <option key={project.id} value={project.id}>
                           {project.name} - {project.location}
                         </option>
@@ -875,7 +945,7 @@ export default function PermessiCompliancePage() {
                     </select>
                   </div>
                 </div>
-                
+
                 <div className="flex justify-end space-x-3 mt-6">
                   <button
                     onClick={() => setShowComplianceReportModal(false)}
@@ -901,39 +971,45 @@ export default function PermessiCompliancePage() {
             <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
               <div className="mt-3">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Programma Sopralluogo</h3>
-                
+
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Progetto</label>
                     <select
                       value={newPermitData.projectId}
-                      onChange={(e) => setNewPermitData(prev => ({
-                        ...prev,
-                        projectId: e.target.value
-                      }))}
+                      onChange={e =>
+                        setNewPermitData(prev => ({
+                          ...prev,
+                          projectId: e.target.value,
+                        }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Seleziona progetto</option>
-                      {availableProjects.map((project) => (
+                      {availableProjects.map(project => (
                         <option key={project.id} value={project.id}>
                           {project.name} - {project.location}
                         </option>
                       ))}
                     </select>
                   </div>
-                  
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Tipo Permesso</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Tipo Permesso
+                    </label>
                     <select
                       value={newPermitData.permitTypeId}
-                      onChange={(e) => setNewPermitData(prev => ({
-                        ...prev,
-                        permitTypeId: e.target.value
-                      }))}
+                      onChange={e =>
+                        setNewPermitData(prev => ({
+                          ...prev,
+                          permitTypeId: e.target.value,
+                        }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Seleziona tipo</option>
-                      {permitTypes.map((type) => (
+                      {permitTypes.map(type => (
                         <option key={type.id} value={type.id}>
                           {type.name} ({type.category})
                         </option>
@@ -941,7 +1017,7 @@ export default function PermessiCompliancePage() {
                     </select>
                   </div>
                 </div>
-                
+
                 <div className="flex justify-end space-x-3 mt-6">
                   <button
                     onClick={() => setShowInspectionModal(false)}

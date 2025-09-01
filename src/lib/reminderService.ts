@@ -1,6 +1,6 @@
 import { addDays, addHours, addMinutes, isAfter, isBefore, startOfDay } from 'date-fns';
-import { it } from 'date-fns/locale';
 import { format } from 'date-fns';
+import { it } from 'date-fns/locale';
 
 export interface ProjectReminder {
   id: string;
@@ -29,7 +29,9 @@ class ReminderService {
   private reminders: ProjectReminder[] = [];
 
   // Crea un nuovo reminder
-  async createReminder(reminderData: Omit<ProjectReminder, 'id' | 'status' | 'createdAt'>): Promise<ProjectReminder> {
+  async createReminder(
+    reminderData: Omit<ProjectReminder, 'id' | 'status' | 'createdAt'>
+  ): Promise<ProjectReminder> {
     try {
       console.log('🔄 Creazione reminder...', reminderData);
 
@@ -37,7 +39,7 @@ class ReminderService {
         ...reminderData,
         id: this.generateId(),
         status: 'pending',
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       // Aggiungi alla lista locale (in produzione sarebbe nel database)
@@ -57,7 +59,10 @@ class ReminderService {
   // Programma l'invio della mail del reminder
   private scheduleReminderEmail(reminder: ProjectReminder): void {
     try {
-      const reminderDateTime = this.combineDateAndTime(reminder.reminderDate, reminder.reminderTime);
+      const reminderDateTime = this.combineDateAndTime(
+        reminder.reminderDate,
+        reminder.reminderTime
+      );
       const now = new Date();
 
       if (isBefore(reminderDateTime, now)) {
@@ -67,13 +72,14 @@ class ReminderService {
       }
 
       const delayMs = reminderDateTime.getTime() - now.getTime();
-      
-      console.log(`⏰ Reminder programmato per ${reminderDateTime.toLocaleString('it-IT')} (tra ${Math.round(delayMs / 1000 / 60)} minuti)`);
+
+      console.log(
+        `⏰ Reminder programmato per ${reminderDateTime.toLocaleString('it-IT')} (tra ${Math.round(delayMs / 1000 / 60)} minuti)`
+      );
 
       setTimeout(() => {
         this.sendReminderEmail(reminder);
       }, delayMs);
-
     } catch (error) {
       console.error('❌ Errore programmazione reminder:', error);
     }
@@ -94,7 +100,7 @@ class ReminderService {
 
       // Genera il report del progetto
       const projectReport = await this.generateProjectReport(reminder.projectId);
-      
+
       // Prepara i dati per la mail
       const emailData: ReminderEmailData = {
         projectName: reminder.projectName,
@@ -102,7 +108,7 @@ class ReminderService {
         reminderTime: reminder.reminderTime,
         note: reminder.note,
         projectLink: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/feasibility-analysis/${reminder.projectId}`,
-        projectReport: projectReport
+        projectReport: projectReport,
       };
 
       // Invia la mail (qui integreremo con il servizio email esistente)
@@ -150,7 +156,10 @@ class ReminderService {
   }
 
   // Invia la mail del reminder tramite API
-  private async sendReminderEmailViaAPI(emailData: ReminderEmailData, userEmail: string): Promise<void> {
+  private async sendReminderEmailViaAPI(
+    emailData: ReminderEmailData,
+    userEmail: string
+  ): Promise<void> {
     try {
       const response = await fetch('/api/send-reminder-email', {
         method: 'POST',
@@ -159,7 +168,7 @@ class ReminderService {
         },
         body: JSON.stringify({
           emailData,
-          userEmail
+          userEmail,
         }),
       });
 
@@ -221,11 +230,11 @@ class ReminderService {
   getAvailableDates(): Date[] {
     const dates: Date[] = [];
     const today = startOfDay(new Date());
-    
+
     for (let i = 0; i < 30; i++) {
       dates.push(addDays(today, i));
     }
-    
+
     return dates;
   }
 }

@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import DashboardLayout from '@/components/layout/DashboardLayout';
+
 import { BuildingIcon } from '@/components/icons';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import Button from '@/components/ui/Button';
 
 interface BusinessPlanData {
@@ -96,7 +97,7 @@ export default function BusinessPlanPage() {
     financingType: 'PROPRIO',
     loanAmount: 0,
     interestRate: 3.5,
-    loanTermYears: 15
+    loanTermYears: 15,
   });
 
   const [businessPlan, setBusinessPlan] = useState<BusinessPlanResult | null>(null);
@@ -107,42 +108,42 @@ export default function BusinessPlanPage() {
     const { name, value } = e.target;
     setFormData((prev: BusinessPlanData) => ({
       ...prev,
-      [name]: e.target.type === 'number' ? Number(value) : value
+      [name]: e.target.type === 'number' ? Number(value) : value,
     }));
   };
 
   const generateBusinessPlan = async () => {
     setLoading(true);
-    
+
     // Simula analisi AI per business plan
     setTimeout(() => {
       const netProfit = formData.expectedRevenue - formData.totalInvestment;
       const roi = (netProfit / formData.totalInvestment) * 100;
-      const irr = roi > 0 ? 8 + (roi * 0.2) : 3;
+      const irr = roi > 0 ? 8 + roi * 0.2 : 3;
 
       // Genera proiezioni finanziarie per 5 anni
       const projections = [];
       const projectYears = Math.ceil(formData.projectDuration / 12) + 2;
-      
+
       for (let year = 1; year <= projectYears; year++) {
         const isConstructionYear = year <= Math.ceil(formData.projectDuration / 12);
-        const cashOutflow = isConstructionYear 
-          ? (formData.totalInvestment / Math.ceil(formData.projectDuration / 12))
-          : (formData.expectedRevenue * 0.1); // costi operativi
-        
-        const cashInflow = !isConstructionYear 
-          ? (formData.expectedRevenue / (projectYears - Math.ceil(formData.projectDuration / 12)))
+        const cashOutflow = isConstructionYear
+          ? formData.totalInvestment / Math.ceil(formData.projectDuration / 12)
+          : formData.expectedRevenue * 0.1; // costi operativi
+
+        const cashInflow = !isConstructionYear
+          ? formData.expectedRevenue / (projectYears - Math.ceil(formData.projectDuration / 12))
           : 0;
-          
+
         const netCashFlow = cashInflow - cashOutflow;
         const prevCumulative = year > 1 ? projections[year - 2].cumulativeCashFlow : 0;
-        
+
         projections.push({
           year,
           cashInflow,
           cashOutflow,
           netCashFlow,
-          cumulativeCashFlow: prevCumulative + netCashFlow
+          cumulativeCashFlow: prevCumulative + netCashFlow,
         });
       }
 
@@ -165,44 +166,50 @@ export default function BusinessPlanPage() {
           expectedRevenue: formData.expectedRevenue,
           netProfit,
           roi,
-          irr
+          irr,
         },
         financialProjections: projections,
         keyMetrics: {
           breakEvenPoint,
           paybackPeriod: breakEvenPoint,
           profitMargin: (netProfit / formData.expectedRevenue) * 100,
-          debtServiceCoverage: formData.loanAmount ? (netProfit / (formData.loanAmount * (formData.interestRate || 0) / 100)) : undefined
+          debtServiceCoverage: formData.loanAmount
+            ? netProfit / ((formData.loanAmount * (formData.interestRate || 0)) / 100)
+            : undefined,
         },
         riskAnalysis: {
           riskLevel: roi > 15 ? 'LOW' : roi > 8 ? 'MEDIUM' : 'HIGH',
           riskFactors: [
             ...(roi < 10 ? ['Bassa redditività prevista'] : []),
             ...(formData.projectDuration > 30 ? ['Tempi di realizzazione lunghi'] : []),
-            ...(formData.financingType !== 'PROPRIO' ? ['Dipendenza da finanziamento esterno'] : []),
+            ...(formData.financingType !== 'PROPRIO'
+              ? ['Dipendenza da finanziamento esterno']
+              : []),
             'Variazioni costi materie prime',
-            'Fluttuazioni mercato immobiliare'
+            'Fluttuazioni mercato immobiliare',
           ],
           mitigationStrategies: [
             'Diversificazione fornitori',
             'Contratti fixed-price con costruttori',
             'Pre-vendite per ridurre rischio mercato',
             'Buffer finanziario del 10-15%',
-            'Monitoring continuo KPI progetto'
-          ]
+            'Monitoring continuo KPI progetto',
+          ],
         },
         marketAnalysis: {
           marketSize: `Mercato ${formData.location} valutato in crescita del 5-8% annuo`,
-          targetMarket: formData.projectType === 'RESIDENZIALE' 
-            ? 'Famiglie giovani e professionisti' 
-            : 'Aziende in espansione e investitori',
-          competitorAnalysis: 'Analisi competitor indica posizionamento competitivo nel segmento medio-alto',
+          targetMarket:
+            formData.projectType === 'RESIDENZIALE'
+              ? 'Famiglie giovani e professionisti'
+              : 'Aziende in espansione e investitori',
+          competitorAnalysis:
+            'Analisi competitor indica posizionamento competitivo nel segmento medio-alto',
           marketTrends: [
             'Crescente domanda sostenibilità',
             'Preferenza per soluzioni smart',
             'Aumento valore immobili zona',
-            'Miglioramento infrastrutture trasporti'
-          ]
+            'Miglioramento infrastrutture trasporti',
+          ],
         },
         executionPlan: {
           phases: [
@@ -210,41 +217,54 @@ export default function BusinessPlanPage() {
               name: 'Fase 1: Progettazione e Permessi',
               duration: 6,
               budget: formData.totalInvestment * 0.1,
-              milestones: ['Approvazione progetto', 'Permesso di costruire', 'Finanziamenti confermati']
+              milestones: [
+                'Approvazione progetto',
+                'Permesso di costruire',
+                'Finanziamenti confermati',
+              ],
             },
             {
               name: 'Fase 2: Costruzione',
               duration: formData.projectDuration - 6,
               budget: formData.constructionCost,
-              milestones: ['Fondazioni complete', 'Struttura completata', 'Finitures terminate']
+              milestones: ['Fondazioni complete', 'Struttura completata', 'Finitures terminate'],
             },
             {
               name: 'Fase 3: Commercializzazione',
               duration: 12,
               budget: formData.marketingCost,
-              milestones: ['Lancio vendite', '50% unità vendute', 'Progetto completato']
-            }
-          ]
+              milestones: ['Lancio vendite', '50% unità vendute', 'Progetto completato'],
+            },
+          ],
         },
         fundingStrategy: {
           sources: [
-            ...(formData.financingType === 'PROPRIO' || formData.financingType === 'MISTO' 
-              ? [{ 
-                source: 'Capital Proprio', 
-                amount: formData.totalInvestment - (formData.loanAmount || 0), 
-                percentage: ((formData.totalInvestment - (formData.loanAmount || 0)) / formData.totalInvestment) * 100,
-                terms: 'Equity investment senza restituzione'
-              }] : []),
-            ...(formData.loanAmount && formData.loanAmount > 0 
-              ? [{ 
-                source: 'Finanziamento Bancario', 
-                amount: formData.loanAmount, 
-                percentage: (formData.loanAmount / formData.totalInvestment) * 100,
-                terms: `Tasso ${formData.interestRate}% per ${formData.loanTermYears} anni`
-              }] : [])
+            ...(formData.financingType === 'PROPRIO' || formData.financingType === 'MISTO'
+              ? [
+                  {
+                    source: 'Capital Proprio',
+                    amount: formData.totalInvestment - (formData.loanAmount || 0),
+                    percentage:
+                      ((formData.totalInvestment - (formData.loanAmount || 0)) /
+                        formData.totalInvestment) *
+                      100,
+                    terms: 'Equity investment senza restituzione',
+                  },
+                ]
+              : []),
+            ...(formData.loanAmount && formData.loanAmount > 0
+              ? [
+                  {
+                    source: 'Finanziamento Bancario',
+                    amount: formData.loanAmount,
+                    percentage: (formData.loanAmount / formData.totalInvestment) * 100,
+                    terms: `Tasso ${formData.interestRate}% per ${formData.loanTermYears} anni`,
+                  },
+                ]
+              : []),
           ],
-          totalFunding: formData.totalInvestment
-        }
+          totalFunding: formData.totalInvestment,
+        },
       };
 
       setBusinessPlan(mockBusinessPlan);
@@ -254,10 +274,10 @@ export default function BusinessPlanPage() {
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('it-IT', { 
-      style: 'currency', 
+    return new Intl.NumberFormat('it-IT', {
+      style: 'currency',
       currency: 'EUR',
-      minimumFractionDigits: 0 
+      minimumFractionDigits: 0,
     }).format(value);
   };
 
@@ -267,10 +287,14 @@ export default function BusinessPlanPage() {
 
   const getRiskColor = (level: string) => {
     switch (level) {
-      case 'LOW': return 'text-green-600 bg-green-50';
-      case 'MEDIUM': return 'text-yellow-600 bg-yellow-50';
-      case 'HIGH': return 'text-red-600 bg-red-50';
-      default: return 'text-gray-600 bg-gray-50';
+      case 'LOW':
+        return 'text-green-600 bg-green-50';
+      case 'MEDIUM':
+        return 'text-yellow-600 bg-yellow-50';
+      case 'HIGH':
+        return 'text-red-600 bg-red-50';
+      default:
+        return 'text-gray-600 bg-gray-50';
     }
   };
 
@@ -286,7 +310,9 @@ export default function BusinessPlanPage() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Business Plan Generator AI</h1>
-            <p className="text-gray-600">Genera piani d'affari professionali con proiezioni finanziarie intelligenti</p>
+            <p className="text-gray-600">
+              Genera piani d'affari professionali con proiezioni finanziarie intelligenti
+            </p>
           </div>
           <BuildingIcon className="h-8 w-8 text-blue-600" />
         </div>
@@ -297,8 +323,8 @@ export default function BusinessPlanPage() {
             {[
               { id: 'form', name: 'Parametri Progetto', icon: '📝' },
               { id: 'results', name: 'Business Plan', icon: '📊' },
-              { id: 'export', name: 'Esporta & Condividi', icon: '📄' }
-            ].map((tab) => (
+              { id: 'export', name: 'Esporta & Condividi', icon: '📄' },
+            ].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveSection(tab.id)}
@@ -323,12 +349,14 @@ export default function BusinessPlanPage() {
             {/* Input Form */}
             <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-6">Dati del Progetto</h3>
-              
+
               <div className="space-y-6">
                 {/* Informazioni Base */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Nome Progetto</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Nome Progetto
+                    </label>
                     <input
                       type="text"
                       name="projectName"
@@ -338,9 +366,11 @@ export default function BusinessPlanPage() {
                       placeholder="Es. Residenza Vista Mare"
                     />
                   </div>
-                  
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Tipologia</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Tipologia
+                    </label>
                     <select
                       name="projectType"
                       value={formData.projectType}
@@ -372,7 +402,9 @@ export default function BusinessPlanPage() {
                   <h4 className="text-md font-semibold text-gray-800 mb-3">💰 Struttura Costi</h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Costo Terreno (€)</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Costo Terreno (€)
+                      </label>
                       <input
                         type="number"
                         name="landCost"
@@ -382,7 +414,9 @@ export default function BusinessPlanPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Costo Costruzione (€)</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Costo Costruzione (€)
+                      </label>
                       <input
                         type="number"
                         name="constructionCost"
@@ -392,7 +426,9 @@ export default function BusinessPlanPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Marketing & Vendita (€)</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Marketing & Vendita (€)
+                      </label>
                       <input
                         type="number"
                         name="marketingCost"
@@ -402,7 +438,9 @@ export default function BusinessPlanPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Contingency (€)</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Contingency (€)
+                      </label>
                       <input
                         type="number"
                         name="contingencyCost"
@@ -414,7 +452,13 @@ export default function BusinessPlanPage() {
                   </div>
                   <div className="mt-3 p-3 bg-blue-50 rounded-lg">
                     <div className="text-sm font-medium text-blue-800">
-                      Investimento Totale: {formatCurrency(formData.landCost + formData.constructionCost + formData.marketingCost + formData.contingencyCost)}
+                      Investimento Totale:{' '}
+                      {formatCurrency(
+                        formData.landCost +
+                          formData.constructionCost +
+                          formData.marketingCost +
+                          formData.contingencyCost
+                      )}
                     </div>
                   </div>
                 </div>
@@ -424,7 +468,9 @@ export default function BusinessPlanPage() {
                   <h4 className="text-md font-semibold text-gray-800 mb-3">📈 Proiezioni Ricavi</h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Numero Unità</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Numero Unità
+                      </label>
                       <input
                         type="number"
                         name="units"
@@ -434,7 +480,9 @@ export default function BusinessPlanPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Prezzo Medio Unità (€)</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Prezzo Medio Unità (€)
+                      </label>
                       <input
                         type="number"
                         name="averageUnitPrice"
@@ -446,17 +494,22 @@ export default function BusinessPlanPage() {
                   </div>
                   <div className="mt-3 p-3 bg-green-50 rounded-lg">
                     <div className="text-sm font-medium text-green-800">
-                      Ricavo Totale Previsto: {formatCurrency(formData.units * formData.averageUnitPrice)}
+                      Ricavo Totale Previsto:{' '}
+                      {formatCurrency(formData.units * formData.averageUnitPrice)}
                     </div>
                   </div>
                 </div>
 
                 {/* Finanziamento */}
                 <div>
-                  <h4 className="text-md font-semibold text-gray-800 mb-3">🏦 Strategia Finanziamento</h4>
+                  <h4 className="text-md font-semibold text-gray-800 mb-3">
+                    🏦 Strategia Finanziamento
+                  </h4>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Tipo Finanziamento</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Tipo Finanziamento
+                      </label>
                       <select
                         name="financingType"
                         value={formData.financingType}
@@ -469,11 +522,14 @@ export default function BusinessPlanPage() {
                         <option value="MISTO">Finanziamento Misto</option>
                       </select>
                     </div>
-                    
-                    {(formData.financingType === 'PRESTITO_BANCARIO' || formData.financingType === 'MISTO') && (
+
+                    {(formData.financingType === 'PRESTITO_BANCARIO' ||
+                      formData.financingType === 'MISTO') && (
                       <div className="grid grid-cols-3 gap-3">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Importo Prestito (€)</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Importo Prestito (€)
+                          </label>
                           <input
                             type="number"
                             name="loanAmount"
@@ -483,7 +539,9 @@ export default function BusinessPlanPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Tasso Interesse (%)</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Tasso Interesse (%)
+                          </label>
                           <input
                             type="number"
                             step="0.1"
@@ -494,7 +552,9 @@ export default function BusinessPlanPage() {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Durata (anni)</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Durata (anni)
+                          </label>
                           <input
                             type="number"
                             name="loanTermYears"
@@ -509,7 +569,9 @@ export default function BusinessPlanPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Durata Progetto (mesi)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Durata Progetto (mesi)
+                  </label>
                   <input
                     type="number"
                     name="projectDuration"
@@ -524,43 +586,76 @@ export default function BusinessPlanPage() {
             {/* Summary Panel */}
             <div className="bg-white rounded-lg shadow-sm p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">📊 Riepilogo Rapido</h3>
-              
+
               <div className="space-y-4">
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <div className="text-sm text-gray-600">Investimento Totale</div>
                   <div className="text-lg font-bold text-gray-900">
-                    {formatCurrency(formData.landCost + formData.constructionCost + formData.marketingCost + formData.contingencyCost)}
+                    {formatCurrency(
+                      formData.landCost +
+                        formData.constructionCost +
+                        formData.marketingCost +
+                        formData.contingencyCost
+                    )}
                   </div>
                 </div>
-                
+
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <div className="text-sm text-gray-600">Ricavo Previsto</div>
                   <div className="text-lg font-bold text-green-600">
                     {formatCurrency(formData.units * formData.averageUnitPrice)}
                   </div>
                 </div>
-                
+
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <div className="text-sm text-gray-600">Utile Stimato</div>
-                  <div className={`text-lg font-bold ${
-                    (formData.units * formData.averageUnitPrice) - (formData.landCost + formData.constructionCost + formData.marketingCost + formData.contingencyCost) > 0 
-                      ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {formatCurrency((formData.units * formData.averageUnitPrice) - (formData.landCost + formData.constructionCost + formData.marketingCost + formData.contingencyCost))}
+                  <div
+                    className={`text-lg font-bold ${
+                      formData.units * formData.averageUnitPrice -
+                        (formData.landCost +
+                          formData.constructionCost +
+                          formData.marketingCost +
+                          formData.contingencyCost) >
+                      0
+                        ? 'text-green-600'
+                        : 'text-red-600'
+                    }`}
+                  >
+                    {formatCurrency(
+                      formData.units * formData.averageUnitPrice -
+                        (formData.landCost +
+                          formData.constructionCost +
+                          formData.marketingCost +
+                          formData.contingencyCost)
+                    )}
                   </div>
                 </div>
-                
+
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <div className="text-sm text-gray-600">ROI Stimato</div>
                   <div className="text-lg font-bold text-purple-600">
-                    {formData.landCost + formData.constructionCost + formData.marketingCost + formData.contingencyCost > 0 
-                      ? formatPercentage(((formData.units * formData.averageUnitPrice) - (formData.landCost + formData.constructionCost + formData.marketingCost + formData.contingencyCost)) / (formData.landCost + formData.constructionCost + formData.marketingCost + formData.contingencyCost) * 100)
-                      : '0.00%'
-                    }
+                    {formData.landCost +
+                      formData.constructionCost +
+                      formData.marketingCost +
+                      formData.contingencyCost >
+                    0
+                      ? formatPercentage(
+                          ((formData.units * formData.averageUnitPrice -
+                            (formData.landCost +
+                              formData.constructionCost +
+                              formData.marketingCost +
+                              formData.contingencyCost)) /
+                            (formData.landCost +
+                              formData.constructionCost +
+                              formData.marketingCost +
+                              formData.contingencyCost)) *
+                            100
+                        )
+                      : '0.00%'}
                   </div>
                 </div>
               </div>
-              
+
               <div className="mt-6">
                 <Button
                   variant="primary"
@@ -577,7 +672,8 @@ export default function BusinessPlanPage() {
               {loading && (
                 <div className="mt-4 text-center text-sm text-gray-600">
                   <div className="animate-pulse">
-                    L'AI sta elaborando proiezioni finanziarie,<br/>
+                    L'AI sta elaborando proiezioni finanziarie,
+                    <br />
                     analisi di mercato e piano esecutivo...
                   </div>
                 </div>
@@ -592,7 +688,7 @@ export default function BusinessPlanPage() {
             {/* Executive Summary */}
             <div className="bg-white rounded-lg shadow-sm p-6">
               <h3 className="text-xl font-semibold text-gray-900 mb-6">📋 Executive Summary</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
                   <div className="text-2xl font-bold text-blue-600">
@@ -619,20 +715,25 @@ export default function BusinessPlanPage() {
                   <div className="text-sm text-orange-800">Payback</div>
                 </div>
               </div>
-              
+
               <div className="prose max-w-none">
                 <p className="text-gray-700">
-                  <strong>{businessPlan.projectSummary.name}</strong> è un progetto {businessPlan.projectSummary.type.toLowerCase()} 
-                  localizzato a {businessPlan.projectSummary.location}. L'investimento totale di {formatCurrency(businessPlan.projectSummary.totalInvestment)} 
-                  è previsto generare ricavi per {formatCurrency(businessPlan.projectSummary.expectedRevenue)} con un ROI del {formatPercentage(businessPlan.projectSummary.roi)}.
+                  <strong>{businessPlan.projectSummary.name}</strong> è un progetto{' '}
+                  {businessPlan.projectSummary.type.toLowerCase()}
+                  localizzato a {businessPlan.projectSummary.location}. L'investimento totale di{' '}
+                  {formatCurrency(businessPlan.projectSummary.totalInvestment)}è previsto generare
+                  ricavi per {formatCurrency(businessPlan.projectSummary.expectedRevenue)} con un
+                  ROI del {formatPercentage(businessPlan.projectSummary.roi)}.
                 </p>
               </div>
             </div>
 
             {/* Financial Projections */}
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">📈 Proiezioni Finanziarie</h3>
-              
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">
+                📈 Proiezioni Finanziarie
+              </h3>
+
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -640,20 +741,32 @@ export default function BusinessPlanPage() {
                       <th className="text-left py-3 px-4 font-medium text-gray-500">Anno</th>
                       <th className="text-right py-3 px-4 font-medium text-gray-500">Entrate</th>
                       <th className="text-right py-3 px-4 font-medium text-gray-500">Uscite</th>
-                      <th className="text-right py-3 px-4 font-medium text-gray-500">Flusso Netto</th>
-                      <th className="text-right py-3 px-4 font-medium text-gray-500">Flusso Cumulativo</th>
+                      <th className="text-right py-3 px-4 font-medium text-gray-500">
+                        Flusso Netto
+                      </th>
+                      <th className="text-right py-3 px-4 font-medium text-gray-500">
+                        Flusso Cumulativo
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {businessPlan.financialProjections.map((projection) => (
+                    {businessPlan.financialProjections.map(projection => (
                       <tr key={projection.year} className="border-b border-gray-100">
                         <td className="py-3 px-4 font-medium">Anno {projection.year}</td>
-                        <td className="py-3 px-4 text-right">{formatCurrency(projection.cashInflow)}</td>
-                        <td className="py-3 px-4 text-right">{formatCurrency(projection.cashOutflow)}</td>
-                        <td className={`py-3 px-4 text-right font-medium ${projection.netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <td className="py-3 px-4 text-right">
+                          {formatCurrency(projection.cashInflow)}
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          {formatCurrency(projection.cashOutflow)}
+                        </td>
+                        <td
+                          className={`py-3 px-4 text-right font-medium ${projection.netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                        >
                           {formatCurrency(projection.netCashFlow)}
                         </td>
-                        <td className={`py-3 px-4 text-right font-medium ${projection.cumulativeCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <td
+                          className={`py-3 px-4 text-right font-medium ${projection.cumulativeCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                        >
                           {formatCurrency(projection.cumulativeCashFlow)}
                         </td>
                       </tr>
@@ -667,13 +780,15 @@ export default function BusinessPlanPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">⚠️ Analisi dei Rischi</h3>
-                
+
                 <div className="mb-4">
-                  <div className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getRiskColor(businessPlan.riskAnalysis.riskLevel)}`}>
+                  <div
+                    className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getRiskColor(businessPlan.riskAnalysis.riskLevel)}`}
+                  >
                     Livello Rischio: {businessPlan.riskAnalysis.riskLevel}
                   </div>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div>
                     <h5 className="font-medium text-gray-900 mb-2">Fattori di Rischio:</h5>
@@ -683,7 +798,7 @@ export default function BusinessPlanPage() {
                       ))}
                     </ul>
                   </div>
-                  
+
                   <div>
                     <h5 className="font-medium text-gray-900 mb-2">Strategie di Mitigazione:</h5>
                     <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
@@ -694,26 +809,32 @@ export default function BusinessPlanPage() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">🎯 Analisi di Mercato</h3>
-                
+
                 <div className="space-y-4">
                   <div>
                     <h5 className="font-medium text-gray-900 mb-1">Dimensione Mercato:</h5>
-                    <p className="text-sm text-gray-600">{businessPlan.marketAnalysis.marketSize}</p>
+                    <p className="text-sm text-gray-600">
+                      {businessPlan.marketAnalysis.marketSize}
+                    </p>
                   </div>
-                  
+
                   <div>
                     <h5 className="font-medium text-gray-900 mb-1">Target di Mercato:</h5>
-                    <p className="text-sm text-gray-600">{businessPlan.marketAnalysis.targetMarket}</p>
+                    <p className="text-sm text-gray-600">
+                      {businessPlan.marketAnalysis.targetMarket}
+                    </p>
                   </div>
-                  
+
                   <div>
                     <h5 className="font-medium text-gray-900 mb-1">Analisi Competitor:</h5>
-                    <p className="text-sm text-gray-600">{businessPlan.marketAnalysis.competitorAnalysis}</p>
+                    <p className="text-sm text-gray-600">
+                      {businessPlan.marketAnalysis.competitorAnalysis}
+                    </p>
                   </div>
-                  
+
                   <div>
                     <h5 className="font-medium text-gray-900 mb-2">Trend di Mercato:</h5>
                     <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
@@ -729,7 +850,7 @@ export default function BusinessPlanPage() {
             {/* Execution Plan */}
             <div className="bg-white rounded-lg shadow-sm p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-6">🚀 Piano di Esecuzione</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {businessPlan.executionPlan.phases.map((phase, idx) => (
                   <div key={idx} className="border rounded-lg p-4">
@@ -759,27 +880,36 @@ export default function BusinessPlanPage() {
 
             {/* Funding Strategy */}
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">💰 Strategia di Finanziamento</h3>
-              
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">
+                💰 Strategia di Finanziamento
+              </h3>
+
               <div className="space-y-4">
                 {businessPlan.fundingStrategy.sources.map((source, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
                     <div>
                       <div className="font-medium text-gray-900">{source.source}</div>
                       <div className="text-sm text-gray-600">{source.terms}</div>
                     </div>
                     <div className="text-right">
                       <div className="font-bold text-gray-900">{formatCurrency(source.amount)}</div>
-                      <div className="text-sm text-gray-500">{formatPercentage(source.percentage)}</div>
+                      <div className="text-sm text-gray-500">
+                        {formatPercentage(source.percentage)}
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
-              
+
               <div className="mt-4 pt-4 border-t">
                 <div className="flex justify-between items-center">
                   <span className="font-semibold text-gray-900">Totale Finanziamento:</span>
-                  <span className="font-bold text-xl text-blue-600">{formatCurrency(businessPlan.fundingStrategy.totalFunding)}</span>
+                  <span className="font-bold text-xl text-blue-600">
+                    {formatCurrency(businessPlan.fundingStrategy.totalFunding)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -789,39 +919,45 @@ export default function BusinessPlanPage() {
         {/* Export Section */}
         {activeSection === 'export' && businessPlan && (
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">📄 Esporta & Condividi Business Plan</h3>
-            
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">
+              📄 Esporta & Condividi Business Plan
+            </h3>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 transition-colors">
                 <div className="text-3xl mb-3">📄</div>
                 <h4 className="font-semibold text-gray-900 mb-2">Download PDF</h4>
-                <p className="text-sm text-gray-600 mb-4">Business plan completo in formato PDF professionale</p>
+                <p className="text-sm text-gray-600 mb-4">
+                  Business plan completo in formato PDF professionale
+                </p>
                 <Button variant="primary" onClick={downloadBusinessPlan}>
                   Scarica PDF
                 </Button>
               </div>
-              
+
               <div className="text-center p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-400 transition-colors">
                 <div className="text-3xl mb-3">📊</div>
                 <h4 className="font-semibold text-gray-900 mb-2">Export Excel</h4>
-                <p className="text-sm text-gray-600 mb-4">Proiezioni finanziarie modificabili in Excel</p>
-                <Button variant="outline">
-                  Scarica Excel
-                </Button>
+                <p className="text-sm text-gray-600 mb-4">
+                  Proiezioni finanziarie modificabili in Excel
+                </p>
+                <Button variant="outline">Scarica Excel</Button>
               </div>
-              
+
               <div className="text-center p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-400 transition-colors">
                 <div className="text-3xl mb-3">🔗</div>
                 <h4 className="font-semibold text-gray-900 mb-2">Condividi Link</h4>
-                <p className="text-sm text-gray-600 mb-4">Genera link di condivisione per investitori</p>
-                <Button variant="outline">
-                  Crea Link
-                </Button>
+                <p className="text-sm text-gray-600 mb-4">
+                  Genera link di condivisione per investitori
+                </p>
+                <Button variant="outline">Crea Link</Button>
               </div>
             </div>
-            
+
             <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <h5 className="font-medium text-blue-900 mb-2">💡 Suggerimenti per la presentazione:</h5>
+              <h5 className="font-medium text-blue-900 mb-2">
+                💡 Suggerimenti per la presentazione:
+              </h5>
               <ul className="text-sm text-blue-800 space-y-1">
                 <li>• Personalizza il documento con il tuo branding aziendale</li>
                 <li>• Includi documentazione di supporto (render, planimetrie, permessi)</li>
@@ -834,4 +970,4 @@ export default function BusinessPlanPage() {
       </div>
     </DashboardLayout>
   );
-} 
+}

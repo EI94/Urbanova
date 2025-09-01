@@ -4,12 +4,34 @@
   "installCommand": "npm install",
   "outputDirectory": ".next",
   "functions": {
-    "src/app/api/web-scraper/route.ts": { "maxDuration": 30 },
-    "src/app/api/land-scraping/route.ts": { "maxDuration": 60 },
-    "src/app/api/cleanup/route.ts": { "maxDuration": 120 },
-    "src/app/api/market-data/route.ts": { "maxDuration": 45 },
-    "src/app/api/land-search/route.ts": { "maxDuration": 120 },
-    "src/app/api/test-email/route.ts": { "maxDuration": 30 },
-    "src/app/api/debug-env/route.ts": { "maxDuration": 10 }
-  }
+    "app/api/**/route.js": { 
+      "memory": 1024, 
+      "maxDuration": 30 
+    }
+  },
+  "crons": [
+    { 
+      "path": "/api/cron/watchlists-runner", 
+      "schedule": "*/30 * * * *" 
+    },
+    { 
+      "path": "/api/cron/docs-reminders", 
+      "schedule": "0 * * * *" 
+    },
+    { 
+      "path": "/api/cron/usage-aggregate", 
+      "schedule": "5 0 * * *" 
+    }
+  ],
+  "headers": [
+    { 
+      "source": "/(.*)", 
+      "headers": [
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
+      ]
+    }
+  ]
 }

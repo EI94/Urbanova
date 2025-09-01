@@ -24,7 +24,7 @@ export class WorkingEmailService {
 
       // PRIMO TENTATIVO: RESEND (PRINCIPALE)
       const resendSuccess = await this.sendViaResend(emailData);
-      
+
       if (resendSuccess) {
         console.log('✅ Email inviata con successo tramite Resend');
         return true;
@@ -33,7 +33,7 @@ export class WorkingEmailService {
       // SECONDO TENTATIVO: Formspree (FALLBACK REALE E FUNZIONANTE)
       console.log('🔄 Resend fallito, provo Formspree...');
       const formspreeSuccess = await this.sendViaFormspree(emailData);
-      
+
       if (formspreeSuccess) {
         console.log('✅ Email inviata con successo tramite Formspree');
         return true;
@@ -42,7 +42,7 @@ export class WorkingEmailService {
       // TERZO TENTATIVO: Web3Forms (FALLBACK REALE)
       console.log('🔄 Formspree fallito, provo Web3Forms...');
       const web3formsSuccess = await this.sendViaWeb3Forms(emailData);
-      
+
       if (web3formsSuccess) {
         console.log('✅ Email inviata con successo tramite Web3Forms');
         return true;
@@ -51,7 +51,6 @@ export class WorkingEmailService {
       // TUTTI I SERVIZI SONO FALLITI - ERRORE REALE
       console.error('❌ TUTTI I SERVIZI EMAIL SONO FALLITI');
       throw new Error('Impossibile inviare email: tutti i servizi sono falliti');
-
     } catch (error) {
       console.error('❌ Errore critico invio email:', error);
       return false; // RITORNA FALSE, NON SIMULARE SUCCESSO
@@ -61,14 +60,14 @@ export class WorkingEmailService {
   private async sendViaResend(emailData: WorkingEmailData): Promise<boolean> {
     try {
       console.log('🔄 Tentativo invio tramite Resend...');
-      
+
       const { data, error } = await this.resend.emails.send({
         from: 'Urbanova <noreply@urbanova.com>',
         to: [emailData.to],
         subject: emailData.subject,
         html: this.generateEmailHTML(emailData),
         text: this.generateEmailText(emailData),
-        replyTo: 'support@urbanova.com'
+        replyTo: 'support@urbanova.com',
       });
 
       if (error) {
@@ -78,7 +77,6 @@ export class WorkingEmailService {
 
       console.log('✅ Resend success:', data);
       return true;
-
     } catch (error) {
       console.error('❌ Errore Resend:', error);
       return false;
@@ -88,7 +86,7 @@ export class WorkingEmailService {
   private async sendViaFormspree(emailData: WorkingEmailData): Promise<boolean> {
     try {
       console.log('🔄 Tentativo invio tramite Formspree...');
-      
+
       // Formspree con endpoint reale e funzionante
       const response = await fetch('https://formspree.io/f/xpzgwqjz', {
         method: 'POST',
@@ -101,7 +99,7 @@ export class WorkingEmailService {
           subject: emailData.subject,
           message: this.generateEmailMessage(emailData),
           report_title: emailData.reportTitle,
-          report_url: emailData.reportUrl
+          report_url: emailData.reportUrl,
         }),
       });
 
@@ -112,7 +110,6 @@ export class WorkingEmailService {
       const result = await response.json();
       console.log('✅ Formspree success:', result);
       return true;
-
     } catch (error) {
       console.error('❌ Errore Formspree:', error);
       return false;
@@ -122,7 +119,7 @@ export class WorkingEmailService {
   private async sendViaWeb3Forms(emailData: WorkingEmailData): Promise<boolean> {
     try {
       console.log('🔄 Tentativo invio tramite Web3Forms...');
-      
+
       // Web3Forms con access key reale e funzionante
       const response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
@@ -136,7 +133,7 @@ export class WorkingEmailService {
           subject: emailData.subject,
           message: this.generateEmailMessage(emailData),
           to: emailData.to,
-          reply_to: emailData.to
+          reply_to: emailData.to,
         }),
       });
 
@@ -147,7 +144,6 @@ export class WorkingEmailService {
       const result = await response.json();
       console.log('✅ Web3Forms success:', result);
       return true;
-
     } catch (error) {
       console.error('❌ Errore Web3Forms:', error);
       return false;
@@ -326,9 +322,10 @@ Generato da Urbanova AI - Analisi di Fattibilità Intelligente
     const testData: WorkingEmailData = {
       to: 'test@example.com',
       subject: '🧪 TEST Email Service - Urbanova',
-      message: 'Questo è un test del servizio email Urbanova. Se ricevi questa email, il servizio funziona!',
+      message:
+        'Questo è un test del servizio email Urbanova. Se ricevi questa email, il servizio funziona!',
       reportTitle: 'Test Report - Urbanova',
-      reportUrl: 'https://urbanova.com/test'
+      reportUrl: 'https://urbanova.com/test',
     };
 
     return this.sendEmail(testData);
@@ -339,7 +336,7 @@ Generato da Urbanova AI - Analisi di Fattibilità Intelligente
     return {
       available: true,
       services: ['Resend (PRINCIPALE)', 'Formspree (FALLBACK)', 'Web3Forms (FALLBACK)'],
-      note: 'Resend configurato con API KEY reale'
+      note: 'Resend configurato con API KEY reale',
     };
   }
 }

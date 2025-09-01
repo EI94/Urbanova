@@ -3,11 +3,13 @@
 ## 🚨 PROBLEMI RISOLTI
 
 ### ❌ Errori Precedenti:
+
 - `calculateCosts is not a function` - Metodi mancanti nel servizio
 - Errori 400/403 Firestore - Problemi di permessi e connessione
 - Regole di sicurezza non configurate
 
 ### ✅ Soluzioni Implementate:
+
 - Aggiunti metodi `calculateCosts`, `calculateRevenues`, `calculateResults`
 - Creato servizio di test per verificare connessione Firebase
 - Aggiornate regole di sicurezza Firestore
@@ -16,6 +18,7 @@
 ## 🔧 CONFIGURAZIONE FIREBASE
 
 ### 1. Regole Firestore
+
 Le regole sono nel file `firestore.rules`. **IMPORTANTE**: Devi deployarle su Firebase Console.
 
 ```bash
@@ -33,6 +36,7 @@ firebase deploy --only firestore:rules
 ```
 
 ### 2. Regole Storage
+
 Le regole sono nel file `storage.rules`. Deployale con:
 
 ```bash
@@ -42,11 +46,13 @@ firebase deploy --only storage
 ### 3. Configurazione Console Firebase
 
 #### A. Abilita Servizi:
+
 - ✅ **Authentication** - Email/Password
 - ✅ **Firestore Database** - Modalità produzione
 - ✅ **Storage** - Modalità produzione
 
 #### B. Regole Firestore (Console):
+
 ```javascript
 rules_version = '2';
 service cloud.firestore {
@@ -55,7 +61,7 @@ service cloud.firestore {
     match /feasibilityProjects/{projectId} {
       allow read, write: if true;
     }
-    
+
     // Altri permessi
     match /{document=**} {
       allow read, write: if request.auth != null;
@@ -65,6 +71,7 @@ service cloud.firestore {
 ```
 
 #### C. Regole Storage (Console):
+
 ```javascript
 rules_version = '2';
 service firebase.storage {
@@ -79,11 +86,13 @@ service firebase.storage {
 ## 🧪 TEST CONNESSIONE
 
 ### Pulsante Test Firebase:
+
 1. Vai su **Analisi di Fattibilità → Nuovo**
 2. Clicca **🧪 Test Firebase**
 3. Controlla la console per risultati dettagliati
 
 ### Test Manuale Console:
+
 ```javascript
 // Apri console browser e esegui:
 import { feasibilityTestService } from '@/lib/feasibilityTestService';
@@ -94,17 +103,20 @@ console.log('Risultati test:', results);
 ## 🚀 DEPLOY PRODUZIONE
 
 ### 1. Build e Deploy:
+
 ```bash
 npm run build
 npm start
 ```
 
 ### 2. Verifica Regole:
+
 - Controlla che le regole Firestore siano attive
 - Controlla che le regole Storage siano attive
 - Verifica che Auth sia configurato
 
 ### 3. Test Finale:
+
 - Crea un nuovo progetto di fattibilità
 - Verifica che si salvi senza errori
 - Controlla che appaia in Firestore Console
@@ -114,16 +126,19 @@ npm start
 ### Se Continui ad Avere Errori:
 
 #### A. Controlla Console Browser:
+
 - Errori 400/403 = Problemi regole
 - Errori di connessione = Problemi rete/Firebase
 - Errori di autenticazione = Problemi Auth
 
 #### B. Controlla Firebase Console:
+
 - Stato servizi (verde = OK, rosso = KO)
 - Regole attive
 - Quota e limiti
 
 #### C. Controlla Variabili Ambiente:
+
 ```bash
 # .env.local
 NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
@@ -155,6 +170,7 @@ Se continui ad avere problemi:
 ## 🎯 RISULTATO FINALE
 
 Dopo questa configurazione, dovresti vedere:
+
 - ✅ Progetti salvati correttamente in Firestore
 - ✅ Nessun errore 400/403
 - ✅ Metodi di calcolo funzionanti

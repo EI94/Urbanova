@@ -1,7 +1,7 @@
 'use client';
 
-import DashboardLayout from '@/components/layout/DashboardLayout';
 import { BellIcon, MailIcon, AlertIcon } from '@/components/icons';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 
 export default function NotifichePage() {
   return (
@@ -11,7 +11,7 @@ export default function NotifichePage() {
           <h1 className="text-3xl font-bold text-gray-900">🔔 Notifiche</h1>
           <p className="text-gray-600 mt-1">Gestisci notifiche e comunicazioni del sistema</p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Notifiche Sistema */}
           <div className="bg-white rounded-lg shadow-sm p-6">

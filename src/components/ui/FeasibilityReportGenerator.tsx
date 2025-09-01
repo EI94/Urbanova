@@ -1,11 +1,25 @@
 'use client';
 
+import {
+  Download,
+  FileText,
+  Sparkles,
+  TrendingUp,
+  TrendingDown,
+  Building2,
+  MapPin,
+  Calculator,
+  Target,
+  Mail,
+  Share2,
+} from 'lucide-react';
 import React, { useState } from 'react';
+import { toast } from 'react-hot-toast';
+
+import { Badge } from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { Download, FileText, Sparkles, TrendingUp, TrendingDown, Building2, MapPin, Calculator, Target, Mail, Share2 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+
 import EmailSharingModal from './EmailSharingModal';
 
 interface FeasibilityAnalysis {
@@ -30,7 +44,10 @@ interface FeasibilityReportGeneratorProps {
   onGenerateReport: () => void;
 }
 
-export default function FeasibilityReportGenerator({ analysis, onGenerateReport }: FeasibilityReportGeneratorProps) {
+export default function FeasibilityReportGenerator({
+  analysis,
+  onGenerateReport,
+}: FeasibilityReportGeneratorProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
 
@@ -43,9 +60,9 @@ export default function FeasibilityReportGenerator({ analysis, onGenerateReport 
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           analysisId: analysis.id,
-          notes: analysis.notes // Includi le note per l'elaborazione LLM
+          notes: analysis.notes, // Includi le note per l'elaborazione LLM
         }),
       });
 
@@ -59,7 +76,7 @@ export default function FeasibilityReportGenerator({ analysis, onGenerateReport 
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
-        
+
         toast.success('Report generato con successo! 🎉');
         onGenerateReport();
       } else {
@@ -83,26 +100,36 @@ export default function FeasibilityReportGenerator({ analysis, onGenerateReport 
 
   const getRiskColor = (risk: string) => {
     switch (risk) {
-      case 'LOW': return 'bg-green-100 text-green-800 border-green-200';
-      case 'MEDIUM': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'HIGH': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'LOW':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'MEDIUM':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'HIGH':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {
-      case 'POSITIVE': return <TrendingUp className="w-4 h-4 text-green-600" />;
-      case 'NEGATIVE': return <TrendingDown className="w-4 h-4 text-red-600" />;
-      default: return <TrendingUp className="w-4 h-4 text-gray-600" />;
+      case 'POSITIVE':
+        return <TrendingUp className="w-4 h-4 text-green-600" />;
+      case 'NEGATIVE':
+        return <TrendingDown className="w-4 h-4 text-red-600" />;
+      default:
+        return <TrendingUp className="w-4 h-4 text-gray-600" />;
     }
   };
 
   const getTrendColor = (trend: string) => {
     switch (trend) {
-      case 'POSITIVE': return 'text-green-600';
-      case 'NEGATIVE': return 'text-red-600';
-      default: return 'text-gray-600';
+      case 'POSITIVE':
+        return 'text-green-600';
+      case 'NEGATIVE':
+        return 'text-red-600';
+      default:
+        return 'text-gray-600';
     }
   };
 
@@ -115,9 +142,7 @@ export default function FeasibilityReportGenerator({ analysis, onGenerateReport 
             Studio di Fattibilità
           </h1>
         </div>
-        <p className="text-gray-600 text-lg">
-          Analisi completa dell'investimento immobiliare
-        </p>
+        <p className="text-gray-600 text-lg">Analisi completa dell'investimento immobiliare</p>
       </CardHeader>
 
       <CardContent className="space-y-6">
@@ -160,9 +185,7 @@ export default function FeasibilityReportGenerator({ analysis, onGenerateReport 
               <Target className="w-6 h-6 text-green-600" />
             </div>
             <p className="text-sm text-gray-600 mb-1">ROI Atteso</p>
-            <p className="text-xl font-bold text-green-600">
-              {analysis.expectedROI.toFixed(1)}%
-            </p>
+            <p className="text-xl font-bold text-green-600">{analysis.expectedROI.toFixed(1)}%</p>
           </div>
 
           <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm text-center">
@@ -197,8 +220,11 @@ export default function FeasibilityReportGenerator({ analysis, onGenerateReport 
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">Livello di Rischio:</span>
                 <Badge className={getRiskColor(analysis.riskLevel)}>
-                  {analysis.riskLevel === 'LOW' ? 'Basso' : 
-                   analysis.riskLevel === 'MEDIUM' ? 'Medio' : 'Alto'}
+                  {analysis.riskLevel === 'LOW'
+                    ? 'Basso'
+                    : analysis.riskLevel === 'MEDIUM'
+                      ? 'Medio'
+                      : 'Alto'}
                 </Badge>
               </div>
               <div className="flex items-center justify-between">
@@ -221,8 +247,11 @@ export default function FeasibilityReportGenerator({ analysis, onGenerateReport 
                 <div className="flex items-center">
                   {getTrendIcon(analysis.marketTrend)}
                   <span className={`ml-2 font-semibold ${getTrendColor(analysis.marketTrend)}`}>
-                    {analysis.marketTrend === 'POSITIVE' ? 'Positivo' : 
-                     analysis.marketTrend === 'NEGATIVE' ? 'Negativo' : 'Neutro'}
+                    {analysis.marketTrend === 'POSITIVE'
+                      ? 'Positivo'
+                      : analysis.marketTrend === 'NEGATIVE'
+                        ? 'Negativo'
+                        : 'Neutro'}
                   </span>
                 </div>
               </div>
@@ -270,7 +299,7 @@ export default function FeasibilityReportGenerator({ analysis, onGenerateReport 
                 </>
               )}
             </Button>
-            
+
             <Button
               onClick={openEmailSharing}
               variant="outline"
@@ -286,7 +315,7 @@ export default function FeasibilityReportGenerator({ analysis, onGenerateReport 
         <div className="text-center text-gray-500 text-sm">
           <p>Report generato da Urbanova - Piattaforma di Analisi Immobiliare</p>
           <p className="mt-1">
-            <a 
+            <a
               href={`/dashboard/feasibility-analysis/${analysis.id}`}
               className="text-blue-600 hover:underline font-medium"
             >

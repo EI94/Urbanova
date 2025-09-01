@@ -1,7 +1,16 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { SearchIcon, MapIcon, XIcon, PlusIcon, TagIcon, GlobeIcon, MapPinIcon } from '@/components/icons';
+
+import {
+  SearchIcon,
+  MapIcon,
+  XIcon,
+  PlusIcon,
+  TagIcon,
+  GlobeIcon,
+  MapPinIcon,
+} from '@/components/icons';
 import { advancedLocationsService, AdvancedLocation } from '@/lib/advancedLocationsService';
 
 interface AdvancedLocationSelectorProps {
@@ -15,9 +24,9 @@ interface AdvancedLocationSelectorProps {
 export default function AdvancedLocationSelector({
   value,
   onChange,
-  placeholder = "Cerca localizzazioni (es. Frascati, Roma, Milano...)",
-  className = "",
-  showMultiple = false
+  placeholder = 'Cerca localizzazioni (es. Frascati, Roma, Milano...)',
+  className = '',
+  showMultiple = false,
 }: AdvancedLocationSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,7 +38,7 @@ export default function AdvancedLocationSelector({
     italian: number;
     european: number;
   }>({ total: 0, italian: 0, european: 0 });
-  
+
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -49,17 +58,22 @@ export default function AdvancedLocationSelector({
   useEffect(() => {
     if (value && showMultiple) {
       // Se c'è un valore esistente, cerca di mapparlo alle località
-      const locationNames = value.split(',').map(name => name.trim()).filter(Boolean);
-      
+      const locationNames = value
+        .split(',')
+        .map(name => name.trim())
+        .filter(Boolean);
+
       if (locationNames.length > 0) {
         const initializeLocations = async () => {
           const foundLocations: AdvancedLocation[] = [];
-          
+
           for (const name of locationNames) {
             try {
               const results = await advancedLocationsService.searchLocations(name, 5);
               if (results.length > 0) {
-                const exactMatch = results.find(loc => loc.name.toLowerCase() === name.toLowerCase());
+                const exactMatch = results.find(
+                  loc => loc.name.toLowerCase() === name.toLowerCase()
+                );
                 if (exactMatch && !foundLocations.find(loc => loc.id === exactMatch.id)) {
                   foundLocations.push(exactMatch);
                 }
@@ -68,11 +82,11 @@ export default function AdvancedLocationSelector({
               console.warn('Errore mappatura località esistente:', error);
             }
           }
-          
+
           // Sostituisci completamente le località selezionate invece di aggiungerle
           setSelectedLocations(foundLocations);
         };
-        
+
         initializeLocations();
       } else {
         // Se non ci sono località, resetta lo stato
@@ -92,20 +106,20 @@ export default function AdvancedLocationSelector({
     }
 
     setIsLoading(true);
-    
+
     // Debounce per evitare troppe ricerche
     const timeoutId = setTimeout(async () => {
       try {
         const results = await advancedLocationsService.searchLocations(searchQuery, 30);
         setSuggestions(results);
-        
+
         // Statistiche di ricerca
         const italian = results.filter(loc => loc.country === 'IT').length;
         const european = results.filter(loc => loc.country === 'EU').length;
         setSearchStats({
           total: results.length,
           italian,
-          european
+          european,
         });
       } catch (error) {
         console.error('Errore ricerca località:', error);
@@ -127,10 +141,10 @@ export default function AdvancedLocationSelector({
   const handleSuggestionClick = (location: AdvancedLocation) => {
     if (showMultiple) {
       // Controlla se la località è già selezionata (per ID e per nome)
-      const isAlreadySelected = selectedLocations.find(loc => 
-        loc.id === location.id || loc.name.toLowerCase() === location.name.toLowerCase()
+      const isAlreadySelected = selectedLocations.find(
+        loc => loc.id === location.id || loc.name.toLowerCase() === location.name.toLowerCase()
       );
-      
+
       if (!isAlreadySelected) {
         const newSelectedLocations = [...selectedLocations, location];
         setSelectedLocations(newSelectedLocations);
@@ -144,7 +158,7 @@ export default function AdvancedLocationSelector({
       setSearchQuery('');
       setIsOpen(false);
     }
-    
+
     setSearchQuery('');
     setIsOpen(false);
     inputRef.current?.focus();
@@ -163,20 +177,22 @@ export default function AdvancedLocationSelector({
       onChange(locations[0].name);
     } else {
       // Per selezione multipla, rimuovi duplicati e mantieni solo località uniche
-      const uniqueLocations = locations.filter((location, index, self) => 
-        index === self.findIndex(loc => 
-          loc.id === location.id || loc.name.toLowerCase() === location.name.toLowerCase()
-        )
+      const uniqueLocations = locations.filter(
+        (location, index, self) =>
+          index ===
+          self.findIndex(
+            loc => loc.id === location.id || loc.name.toLowerCase() === location.name.toLowerCase()
+          )
       );
-      
+
       // Aggiorna lo stato con località uniche
       if (uniqueLocations.length !== locations.length) {
         setSelectedLocations(uniqueLocations);
       }
-      
+
       const locationNames = uniqueLocations.map(loc => loc.name);
       const newValue = locationNames.join(', ');
-      
+
       // Evita aggiornamenti inutili se il valore è identico
       if (newValue !== value) {
         onChange(newValue);
@@ -248,7 +264,7 @@ export default function AdvancedLocationSelector({
       {/* Località selezionate (solo per selezione multipla) */}
       {showMultiple && selectedLocations.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-2">
-          {selectedLocations.map((location) => (
+          {selectedLocations.map(location => (
             <span
               key={location.id}
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
@@ -287,9 +303,7 @@ export default function AdvancedLocationSelector({
 
           {/* Messaggio caricamento */}
           {isLoading && (
-            <div className="px-4 py-2 text-sm text-gray-500">
-              🔍 Ricerca in corso...
-            </div>
+            <div className="px-4 py-2 text-sm text-gray-500">🔍 Ricerca in corso...</div>
           )}
 
           {/* Nessun risultato */}
@@ -300,7 +314,7 @@ export default function AdvancedLocationSelector({
           )}
 
           {/* Suggerimenti */}
-          {suggestions.map((location) => (
+          {suggestions.map(location => (
             <button
               key={location.id}
               onClick={() => handleSuggestionClick(location)}
@@ -316,9 +330,7 @@ export default function AdvancedLocationSelector({
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {getLocationBadge(location)}
-                </div>
+                <div className="flex items-center gap-2">{getLocationBadge(location)}</div>
               </div>
             </button>
           ))}

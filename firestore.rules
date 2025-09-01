@@ -1,15 +1,296 @@
 rules_version = '2';
+
+/**
+ * Firestore Security Rules - Urbanova
+ * 
+ * Regole di sicurezza per:
+ * - users: solo owner
+ * - projects: RBAC con membri del progetto
+ * - toolRuns/auditEvents: read owner/pm, write server only
+ * - documents: access via JWT-signed URLs only
+ * - leads/conversations/messages: access a utenti dell'org
+ */
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Regole per la collezione feedback - solo scrittura per raccogliere feedback
-    match /feedback/{document} {
-      allow create: if true; // Permette creazione feedback da chiunque
-      allow read, update, delete: if false; // Solo admin possono leggere/modificare
+    
+    // ============================================================================
+    // FUNCTIONS UTILITY
+    // ============================================================================
+    
+    // Verifica se l'utente è autenticato
+    function isAuthenticated() {
+      return request.auth != null;
     }
     
-    // Regole per altre collezioni - solo utenti autenticati
+    // Verifica se l'utente è owner del documento
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Verifica se l'utente è membro del progetto
+    function isProjectMember(projectId) {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/projects/$(projectId)/members/$(request.auth.uid));
+    }
+    
+    // Verifica se l'utente è owner o project manager del progetto
+    function isProjectOwnerOrPM(projectId) {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/projects/$(projectId)/members/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/projects/$(projectId)/members/$(request.auth.uid)).data.role in ['owner', 'pm'];
+    }
+    
+    // Verifica se l'utente è membro dell'organizzazione
+    function isOrgMember(orgId) {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/organizations/$(orgId)/members/$(request.auth.uid));
+    }
+    
+    // Verifica se la richiesta viene dal server (App Check o service account)
+    function isServerRequest() {
+      return request.auth != null && 
+             (request.auth.token.firebase.sign_in_provider == 'service_account' ||
+              request.auth.token.app_check == true);
+    }
+    
+    // ============================================================================
+    // USERS COLLECTION
+    // ============================================================================
+    
+    match /users/{userId} {
+      // Solo l'owner può leggere e scrivere il proprio profilo
+      allow read, write: if isOwner(userId);
+      
+      // Eccezione: admin possono leggere tutti i profili per supporto
+      allow read: if isAuthenticated() && 
+                   exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // ============================================================================
+    // PROJECTS COLLECTION
+    // ============================================================================
+    
+    match /projects/{projectId} {
+      // Lettura: membri del progetto
+      allow read: if isProjectMember(projectId);
+      
+      // Scrittura: owner o project manager
+      allow create, update, delete: if isProjectOwnerOrPM(projectId);
+      
+      // Eccezione: admin possono accedere a tutti i progetti
+      allow read, write: if isAuthenticated() && 
+                         exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Membri del progetto
+    match /projects/{projectId}/members/{memberId} {
+      // Lettura: membri del progetto
+      allow read: if isProjectMember(projectId);
+      
+      // Scrittura: owner o project manager
+      allow create, update, delete: if isProjectOwnerOrPM(projectId);
+    }
+    
+    // ============================================================================
+    // TOOL RUNS COLLECTION
+    // ============================================================================
+    
+    match /toolRuns/{runId} {
+      // Lettura: owner del progetto o project manager
+      allow read: if isAuthenticated() && 
+                   resource.data.projectId != null &&
+                   isProjectOwnerOrPM(resource.data.projectId);
+      
+      // Scrittura: solo server (App Check o service account)
+      allow create, update, delete: if isServerRequest();
+      
+      // Eccezione: admin possono leggere tutti i tool runs
+      allow read: if isAuthenticated() && 
+                   exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // ============================================================================
+    // AUDIT EVENTS COLLECTION
+    // ============================================================================
+    
+    match /auditEvents/{eventId} {
+      // Lettura: owner del progetto o project manager
+      allow read: if isAuthenticated() && 
+                   resource.data.projectId != null &&
+                   isProjectOwnerOrPM(resource.data.projectId);
+      
+      // Scrittura: solo server (App Check o service account)
+      allow create, update, delete: if isServerRequest();
+      
+      // Eccezione: admin possono leggere tutti gli audit events
+      allow read: if isAuthenticated() && 
+                   exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // ============================================================================
+    // DOCUMENTS COLLECTION (Doc Hunter uploads)
+    // ============================================================================
+    
+    match /documents/{documentId} {
+      // Accesso pubblico negato per default
+      allow read, write: if false;
+      
+      // Eccezione: accesso via JWT-signed URLs (gestito da Cloud Functions)
+      // Questi documenti sono accessibili solo tramite URL firmati temporanei
+      // La sicurezza è gestita a livello di Cloud Storage + JWT validation
+    }
+    
+    // ============================================================================
+    // LEADS COLLECTION
+    // ============================================================================
+    
+    match /leads/{leadId} {
+      // Lettura: membri dell'organizzazione
+      allow read: if isAuthenticated() && 
+                   resource.data.organizationId != null &&
+                   isOrgMember(resource.data.organizationId);
+      
+      // Scrittura: membri dell'organizzazione con ruolo appropriato
+      allow create, update: if isAuthenticated() && 
+                             resource.data.organizationId != null &&
+                             isOrgMember(resource.data.organizationId);
+      
+      // Eliminazione: solo admin o owner del lead
+      allow delete: if isAuthenticated() && 
+                     (resource.data.organizationId != null && isOrgMember(resource.data.organizationId) &&
+                      (request.auth.uid == resource.data.createdBy ||
+                       exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'));
+    }
+    
+    // ============================================================================
+    // CONVERSATIONS COLLECTION
+    // ============================================================================
+    
+    match /conversations/{conversationId} {
+      // Lettura: membri dell'organizzazione
+      allow read: if isAuthenticated() && 
+                   resource.data.organizationId != null &&
+                   isOrgMember(resource.data.organizationId);
+      
+      // Scrittura: membri dell'organizzazione
+      allow create, update: if isAuthenticated() && 
+                             resource.data.organizationId != null &&
+                             isOrgMember(resource.data.organizationId);
+      
+      // Eliminazione: solo admin o owner della conversazione
+      allow delete: if isAuthenticated() && 
+                     (resource.data.organizationId != null && isOrgMember(resource.data.organizationId) &&
+                      (request.auth.uid == resource.data.createdBy ||
+                       exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'));
+    }
+    
+    // ============================================================================
+    // MESSAGES COLLECTION
+    // ============================================================================
+    
+    match /messages/{messageId} {
+      // Lettura: membri dell'organizzazione
+      allow read: if isAuthenticated() && 
+                   resource.data.organizationId != null &&
+                   isOrgMember(resource.data.organizationId);
+      
+      // Scrittura: membri dell'organizzazione
+      allow create, update: if isAuthenticated() && 
+                             resource.data.organizationId != null &&
+                             isOrgMember(resource.data.organizationId);
+      
+      // Eliminazione: solo admin o sender del messaggio
+      allow delete: if isAuthenticated() && 
+                     (resource.data.organizationId != null && isOrgMember(resource.data.organizationId) &&
+                      (request.auth.uid == resource.data.senderId ||
+                       exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'));
+    }
+    
+    // ============================================================================
+    // ORGANIZATIONS COLLECTION
+    // ============================================================================
+    
+    match /organizations/{orgId} {
+      // Lettura: membri dell'organizzazione
+      allow read: if isOrgMember(orgId);
+      
+      // Scrittura: solo admin dell'organizzazione
+      allow create, update, delete: if isAuthenticated() && 
+                                     exists(/databases/$(database)/documents/organizations/$(orgId)/members/$(request.auth.uid)) &&
+                                     get(/databases/$(database)/documents/organizations/$(orgId)/members/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Membri dell'organizzazione
+    match /organizations/{orgId}/members/{memberId} {
+      // Lettura: membri dell'organizzazione
+      allow read: if isOrgMember(orgId);
+      
+      // Scrittura: solo admin dell'organizzazione
+      allow create, update, delete: if isAuthenticated() && 
+                                     exists(/databases/$(database)/documents/organizations/$(orgId)/members/$(request.auth.uid)) &&
+                                     get(/databases/$(database)/documents/organizations/$(orgId)/members/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // ============================================================================
+    // DEALS COLLECTION
+    // ============================================================================
+    
+    match /deals/{dealId} {
+      // Lettura: membri dell'organizzazione
+      allow read: if isAuthenticated() && 
+                   resource.data.organizationId != null &&
+                   isOrgMember(resource.data.organizationId);
+      
+      // Scrittura: membri dell'organizzazione con ruolo appropriato
+      allow create, update: if isAuthenticated() && 
+                             resource.data.organizationId != null &&
+                             isOrgMember(resource.data.organizationId);
+      
+      // Eliminazione: solo admin o owner del deal
+      allow delete: if isAuthenticated() && 
+                     (resource.data.organizationId != null && isOrgMember(resource.data.organizationId) &&
+                      (request.auth.uid == resource.data.createdBy ||
+                       exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'));
+    }
+    
+    // ============================================================================
+    // FEASIBILITY ANALYSIS COLLECTION
+    // ============================================================================
+    
+    match /feasibilityAnalysis/{analysisId} {
+      // Lettura: owner del progetto o project manager
+      allow read: if isAuthenticated() && 
+                   resource.data.projectId != null &&
+                   isProjectMember(resource.data.projectId);
+      
+      // Scrittura: owner del progetto o project manager
+      allow create, update: if isAuthenticated() && 
+                             resource.data.projectId != null &&
+                             isProjectOwnerOrPM(resource.data.projectId);
+      
+      // Eliminazione: solo owner del progetto
+      allow delete: if isAuthenticated() && 
+                     resource.data.projectId != null &&
+                     exists(/databases/$(database)/documents/projects/$(resource.data.projectId)) &&
+                     get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.ownerId == request.auth.uid;
+    }
+    
+    // ============================================================================
+    // DEFAULT DENY
+    // ============================================================================
+    
+    // Negazione esplicita per tutte le altre collezioni
     match /{document=**} {
-      allow read, write: if request.auth != null;
+      allow read, write: if false;
     }
   }
 }

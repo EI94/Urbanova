@@ -39,14 +39,14 @@ export class RealResendEmailService {
 
       // INVIA EMAIL CON RESEND
       console.log('🔄 Invio email tramite Resend...');
-      
+
       const { data, error } = await this.resend.emails.send({
         from: 'Urbanova <noreply@urbanova.com>',
         to: [emailData.to],
         subject: emailData.subject,
         html: htmlContent,
         text: textContent,
-        replyTo: 'support@urbanova.com'
+        replyTo: 'support@urbanova.com',
       });
 
       if (error) {
@@ -56,7 +56,6 @@ export class RealResendEmailService {
 
       console.log('✅ Email inviata con successo tramite Resend:', data);
       return true;
-
     } catch (error) {
       console.error('❌ Errore critico invio email Resend:', error);
       return false;
@@ -215,13 +214,14 @@ Supporto: support@urbanova.com
   // METODO PER TESTARE IL SERVIZIO
   async testEmail(to: string): Promise<boolean> {
     console.log('🧪 TEST EMAIL RESEND REALE a:', to);
-    
+
     const testData: RealEmailData = {
       to,
       subject: '🧪 TEST Resend Reale - Urbanova',
-      message: 'Questo è un test del servizio Resend REALE Urbanova. Se ricevi questa email, Resend funziona perfettamente!',
+      message:
+        'Questo è un test del servizio Resend REALE Urbanova. Se ricevi questa email, Resend funziona perfettamente!',
       reportTitle: 'Test Report - Urbanova',
-      reportUrl: 'https://urbanova.life/test'
+      reportUrl: 'https://urbanova.life/test',
     };
 
     return this.sendEmail(testData);
@@ -233,7 +233,7 @@ Supporto: support@urbanova.com
       available: true,
       provider: 'Resend (REALE)',
       apiKey: 're_jpHbTT42_AtqjMBMxrp2u773kKofMZw9k',
-      note: 'Servizio email Resend funzionante con NUOVA API key reale'
+      note: 'Servizio email Resend funzionante con NUOVA API key reale',
     };
   }
 }

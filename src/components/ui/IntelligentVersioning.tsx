@@ -1,12 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { 
-  GitBranch, 
-  GitCommit, 
-  GitCompare, 
-  GitMerge, 
+import {
+  GitBranch,
+  GitCommit,
+  GitCompare,
+  GitMerge,
   GitPullRequest,
   Plus,
   Download,
@@ -24,9 +22,12 @@ import {
   ArrowUpDown,
   History,
   Tag,
-  MessageSquare
+  MessageSquare,
 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
+
+import { useAuth } from '@/contexts/AuthContext';
 import collaborationService, { DesignVersion } from '@/lib/collaborationService';
 
 interface IntelligentVersioningProps {
@@ -62,7 +63,7 @@ export default function IntelligentVersioning({
   designId,
   onVersionCreate,
   onVersionSelect,
-  onVersionCompare
+  onVersionCompare,
 }: IntelligentVersioningProps) {
   const { user } = useAuth();
   const [versions, setVersions] = useState<DesignVersion[]>([]);
@@ -73,7 +74,7 @@ export default function IntelligentVersioning({
     description: '',
     changes: [],
     fileUrl: '',
-    thumbnailUrl: ''
+    thumbnailUrl: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [comparisonMode, setComparisonMode] = useState(false);
@@ -96,7 +97,7 @@ export default function IntelligentVersioning({
     setIsLoading(true);
     try {
       const nextVersionNumber = await collaborationService.getNextVersionNumber(designId);
-      
+
       const versionData = {
         designId,
         versionNumber: nextVersionNumber,
@@ -112,24 +113,24 @@ export default function IntelligentVersioning({
           fileType: 'unknown',
           dimensions: undefined,
           layers: undefined,
-          components: undefined
-        }
+          components: undefined,
+        },
       };
 
       const versionId = await collaborationService.createVersion(versionData);
-      
+
       // Reset form
       setVersionForm({
         versionName: '',
         description: '',
         changes: [],
         fileUrl: '',
-        thumbnailUrl: ''
+        thumbnailUrl: '',
       });
-      
+
       setShowVersionForm(false);
       toast.success(`Versione ${nextVersionNumber} creata con successo`);
-      
+
       if (onVersionCreate) {
         const newVersion = { ...versionData, id: versionId } as DesignVersion;
         onVersionCreate(newVersion);
@@ -150,7 +151,7 @@ export default function IntelligentVersioning({
       toast.success('Versione approvata');
     } catch (error) {
       console.error('Error approving version:', error);
-      toast.error('Errore nell\'approvazione della versione');
+      toast.error("Errore nell'approvazione della versione");
     }
   };
 
@@ -168,7 +169,7 @@ export default function IntelligentVersioning({
 
   const handleVersionCompare = (version1: DesignVersion, version2: DesignVersion) => {
     const differences: VersionDifference[] = [];
-    
+
     // Compare basic fields
     if (version1.versionName !== version2.versionName) {
       differences.push({
@@ -176,42 +177,42 @@ export default function IntelligentVersioning({
         field: 'Nome Versione',
         oldValue: version1.versionName,
         newValue: version2.versionName,
-        description: 'Il nome della versione è stato modificato'
+        description: 'Il nome della versione è stato modificato',
       });
     }
-    
+
     if (version1.description !== version2.description) {
       differences.push({
         type: 'modified',
         field: 'Descrizione',
         oldValue: version1.description,
         newValue: version2.description,
-        description: 'La descrizione è stata modificata'
+        description: 'La descrizione è stata modificata',
       });
     }
-    
+
     // Compare changes
     const addedChanges = version2.changes.filter(change => !version1.changes.includes(change));
     const removedChanges = version1.changes.filter(change => !version2.changes.includes(change));
-    
+
     addedChanges.forEach(change => {
       differences.push({
         type: 'added',
         field: 'Modifiche',
         newValue: change,
-        description: 'Nuova modifica aggiunta'
+        description: 'Nuova modifica aggiunta',
       });
     });
-    
+
     removedChanges.forEach(change => {
       differences.push({
         type: 'removed',
         field: 'Modifiche',
         oldValue: change,
-        description: 'Modifica rimossa'
+        description: 'Modifica rimossa',
       });
     });
-    
+
     // Compare metadata
     if (version1.metadata.fileSize !== version2.metadata.fileSize) {
       differences.push({
@@ -219,28 +220,29 @@ export default function IntelligentVersioning({
         field: 'Dimensione File',
         oldValue: `${version1.metadata.fileSize} bytes`,
         newValue: `${version2.metadata.fileSize} bytes`,
-        description: 'La dimensione del file è cambiata'
+        description: 'La dimensione del file è cambiata',
       });
     }
-    
+
     setComparison({
       version1,
       version2,
-      differences
+      differences,
     });
-    
+
     setComparisonMode(true);
-    
+
     if (onVersionCompare) {
       onVersionCompare(version1, version2);
     }
   };
 
   const addChange = () => {
-    if (versionForm.changes.length < 10) { // Limit to 10 changes
+    if (versionForm.changes.length < 10) {
+      // Limit to 10 changes
       setVersionForm(prev => ({
         ...prev,
-        changes: [...prev.changes, '']
+        changes: [...prev.changes, ''],
       }));
     }
   };
@@ -248,41 +250,55 @@ export default function IntelligentVersioning({
   const updateChange = (index: number, value: string) => {
     setVersionForm(prev => ({
       ...prev,
-      changes: prev.changes.map((change, i) => i === index ? value : change)
+      changes: prev.changes.map((change, i) => (i === index ? value : change)),
     }));
   };
 
   const removeChange = (index: number) => {
     setVersionForm(prev => ({
       ...prev,
-      changes: prev.changes.filter((_, i) => i !== index)
+      changes: prev.changes.filter((_, i) => i !== index),
     }));
   };
 
   const filteredVersions = versions.filter(version => {
     if (filterStatus !== 'all' && version.status !== filterStatus) return false;
-    if (searchTerm && !version.versionName.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !version.description.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+    if (
+      searchTerm &&
+      !version.versionName.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !version.description.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+      return false;
     return true;
   });
 
   const getStatusColor = (status: DesignVersion['status']) => {
     switch (status) {
-      case 'draft': return 'bg-gray-100 text-gray-800';
-      case 'review': return 'bg-yellow-100 text-yellow-800';
-      case 'approved': return 'bg-green-100 text-green-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'draft':
+        return 'bg-gray-100 text-gray-800';
+      case 'review':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'approved':
+        return 'bg-green-100 text-green-800';
+      case 'rejected':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusIcon = (status: DesignVersion['status']) => {
     switch (status) {
-      case 'draft': return <FileText className="w-4 h-4" />;
-      case 'review': return <Eye className="w-4 h-4" />;
-      case 'approved': return <CheckCircle className="w-4 h-4" />;
-      case 'rejected': return <XCircle className="w-4 h-4" />;
-      default: return <FileText className="w-4 h-4" />;
+      case 'draft':
+        return <FileText className="w-4 h-4" />;
+      case 'review':
+        return <Eye className="w-4 h-4" />;
+      case 'approved':
+        return <CheckCircle className="w-4 h-4" />;
+      case 'rejected':
+        return <XCircle className="w-4 h-4" />;
+      default:
+        return <FileText className="w-4 h-4" />;
     }
   };
 
@@ -311,12 +327,16 @@ export default function IntelligentVersioning({
           <div className="flex items-center space-x-4 mt-2">
             <div className="flex items-center space-x-2">
               <GitCommit className="w-4 h-4 text-blue-600" />
-              <span className="text-sm font-medium">v{comparison.version1.versionNumber} - {comparison.version1.versionName}</span>
+              <span className="text-sm font-medium">
+                v{comparison.version1.versionNumber} - {comparison.version1.versionName}
+              </span>
             </div>
             <GitCompare className="w-4 h-4 text-gray-400" />
             <div className="flex items-center space-x-2">
               <GitCommit className="w-4 h-4 text-green-600" />
-              <span className="text-sm font-medium">v{comparison.version2.versionNumber} - {comparison.version2.versionName}</span>
+              <span className="text-sm font-medium">
+                v{comparison.version2.versionNumber} - {comparison.version2.versionName}
+              </span>
             </div>
           </div>
         </div>
@@ -330,26 +350,35 @@ export default function IntelligentVersioning({
           ) : (
             <div className="space-y-4">
               {comparison.differences.map((diff, index) => (
-                <div key={index} className={`border rounded-lg p-4 ${
-                  diff.type === 'added' ? 'bg-green-50 border-green-200' :
-                  diff.type === 'removed' ? 'bg-red-50 border-red-200' :
-                  'bg-yellow-50 border-yellow-200'
-                }`}>
+                <div
+                  key={index}
+                  className={`border rounded-lg p-4 ${
+                    diff.type === 'added'
+                      ? 'bg-green-50 border-green-200'
+                      : diff.type === 'removed'
+                        ? 'bg-red-50 border-red-200'
+                        : 'bg-yellow-50 border-yellow-200'
+                  }`}
+                >
                   <div className="flex items-center space-x-2 mb-2">
                     {diff.type === 'added' && <Plus className="w-4 h-4 text-green-600" />}
                     {diff.type === 'removed' && <Trash2 className="w-4 h-4 text-red-600" />}
                     {diff.type === 'modified' && <Edit3 className="w-4 h-4 text-yellow-600" />}
-                    <span className={`text-sm font-medium ${
-                      diff.type === 'added' ? 'text-green-800' :
-                      diff.type === 'removed' ? 'text-red-800' :
-                      'text-yellow-800'
-                    }`}>
+                    <span
+                      className={`text-sm font-medium ${
+                        diff.type === 'added'
+                          ? 'text-green-800'
+                          : diff.type === 'removed'
+                            ? 'text-red-800'
+                            : 'text-yellow-800'
+                      }`}
+                    >
                       {diff.field}
                     </span>
                   </div>
-                  
+
                   <p className="text-sm text-gray-700 mb-2">{diff.description}</p>
-                  
+
                   {diff.type === 'modified' && (
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div className="bg-red-50 p-2 rounded border border-red-200">
@@ -362,14 +391,14 @@ export default function IntelligentVersioning({
                       </div>
                     </div>
                   )}
-                  
+
                   {diff.type === 'added' && (
                     <div className="bg-green-50 p-2 rounded border border-green-200">
                       <div className="font-medium text-green-800">Nuovo Valore:</div>
                       <div className="text-green-700">{diff.newValue}</div>
                     </div>
                   )}
-                  
+
                   {diff.type === 'removed' && (
                     <div className="bg-red-50 p-2 rounded border border-red-200">
                       <div className="font-medium text-red-800">Valore Rimosso:</div>
@@ -400,11 +429,27 @@ export default function IntelligentVersioning({
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: 'Bozze', count: versions.filter(v => v.status === 'draft').length, color: 'bg-gray-100 text-gray-600' },
-            { label: 'In Revisione', count: versions.filter(v => v.status === 'review').length, color: 'bg-yellow-100 text-yellow-600' },
-            { label: 'Approvate', count: versions.filter(v => v.status === 'approved').length, color: 'bg-green-100 text-green-600' },
-            { label: 'Rifiutate', count: versions.filter(v => v.status === 'rejected').length, color: 'bg-red-100 text-red-600' }
-          ].map((stat) => (
+            {
+              label: 'Bozze',
+              count: versions.filter(v => v.status === 'draft').length,
+              color: 'bg-gray-100 text-gray-600',
+            },
+            {
+              label: 'In Revisione',
+              count: versions.filter(v => v.status === 'review').length,
+              color: 'bg-yellow-100 text-yellow-600',
+            },
+            {
+              label: 'Approvate',
+              count: versions.filter(v => v.status === 'approved').length,
+              color: 'bg-green-100 text-green-600',
+            },
+            {
+              label: 'Rifiutate',
+              count: versions.filter(v => v.status === 'rejected').length,
+              color: 'bg-red-100 text-red-600',
+            },
+          ].map(stat => (
             <div key={stat.label} className={`text-center p-3 rounded-lg ${stat.color}`}>
               <div className="text-2xl font-bold">{stat.count}</div>
               <div className="text-xs">{stat.label}</div>
@@ -419,7 +464,7 @@ export default function IntelligentVersioning({
           <div className="flex items-center space-x-4">
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as any)}
+              onChange={e => setFilterStatus(e.target.value as any)}
               className="border border-gray-300 rounded-md px-3 py-2 text-sm"
             >
               <option value="all">Tutti gli stati</option>
@@ -433,7 +478,7 @@ export default function IntelligentVersioning({
               type="text"
               placeholder="Cerca versioni..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               className="border border-gray-300 rounded-md px-3 py-2 text-sm w-64"
             />
           </div>
@@ -443,8 +488,8 @@ export default function IntelligentVersioning({
               {[
                 { id: 'grid', icon: <Layers className="w-4 h-4" />, label: 'Griglia' },
                 { id: 'list', icon: <FileText className="w-4 h-4" />, label: 'Lista' },
-                { id: 'timeline', icon: <History className="w-4 h-4" />, label: 'Timeline' }
-              ].map((view) => (
+                { id: 'timeline', icon: <History className="w-4 h-4" />, label: 'Timeline' },
+              ].map(view => (
                 <button
                   key={view.id}
                   onClick={() => setViewMode(view.id as any)}
@@ -476,7 +521,7 @@ export default function IntelligentVersioning({
         {showVersionForm && (
           <div className="mb-6 bg-gray-50 p-6 rounded-lg border">
             <h4 className="text-lg font-medium text-gray-900 mb-4">Crea Nuova Versione</h4>
-            
+
             <form onSubmit={handleVersionSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -486,7 +531,9 @@ export default function IntelligentVersioning({
                   <input
                     type="text"
                     value={versionForm.versionName}
-                    onChange={(e) => setVersionForm(prev => ({ ...prev, versionName: e.target.value }))}
+                    onChange={e =>
+                      setVersionForm(prev => ({ ...prev, versionName: e.target.value }))
+                    }
                     placeholder="es. Versione 2.0 - Layout Finale"
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                     required
@@ -500,7 +547,7 @@ export default function IntelligentVersioning({
                   <input
                     type="url"
                     value={versionForm.fileUrl}
-                    onChange={(e) => setVersionForm(prev => ({ ...prev, fileUrl: e.target.value }))}
+                    onChange={e => setVersionForm(prev => ({ ...prev, fileUrl: e.target.value }))}
                     placeholder="https://..."
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                   />
@@ -513,7 +560,7 @@ export default function IntelligentVersioning({
                 </label>
                 <textarea
                   value={versionForm.description}
-                  onChange={(e) => setVersionForm(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={e => setVersionForm(prev => ({ ...prev, description: e.target.value }))}
                   placeholder="Descrivi le modifiche principali di questa versione..."
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm resize-none"
                   rows={3}
@@ -531,7 +578,7 @@ export default function IntelligentVersioning({
                       <input
                         type="text"
                         value={change}
-                        onChange={(e) => updateChange(index, e.target.value)}
+                        onChange={e => updateChange(index, e.target.value)}
                         placeholder={`Modifica ${index + 1}...`}
                         className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
                       />
@@ -567,7 +614,9 @@ export default function IntelligentVersioning({
                 </button>
                 <button
                   type="submit"
-                  disabled={isLoading || !versionForm.versionName.trim() || !versionForm.description.trim()}
+                  disabled={
+                    isLoading || !versionForm.versionName.trim() || !versionForm.description.trim()
+                  }
                   className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? 'Creazione...' : 'Crea Versione'}
@@ -585,7 +634,7 @@ export default function IntelligentVersioning({
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredVersions.map((version) => (
+            {filteredVersions.map(version => (
               <div
                 key={version.id}
                 className={`border rounded-lg p-4 hover:shadow-md transition-shadow ${
@@ -602,13 +651,16 @@ export default function IntelligentVersioning({
                         <span className="font-medium text-gray-900">
                           v{version.versionNumber} - {version.versionName}
                         </span>
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(version.status)}`}>
+                        <span
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(version.status)}`}
+                        >
                           {getStatusIcon(version.status)}
                           <span className="ml-1">{version.status}</span>
                         </span>
                       </div>
                       <div className="text-sm text-gray-500">
-                        Creato da {version.createdBy} • {version.createdAt?.toDate().toLocaleString()}
+                        Creato da {version.createdBy} •{' '}
+                        {version.createdAt?.toDate().toLocaleString()}
                       </div>
                     </div>
                   </div>
@@ -623,7 +675,7 @@ export default function IntelligentVersioning({
                         <Download className="w-4 h-4" />
                       </button>
                     )}
-                    
+
                     <button
                       onClick={() => setSelectedVersion(version)}
                       className="p-2 text-gray-600 hover:text-gray-800"
@@ -641,7 +693,10 @@ export default function IntelligentVersioning({
                     <div className="text-sm font-medium text-gray-700 mb-2">Modifiche:</div>
                     <ul className="space-y-1">
                       {version.changes.map((change, index) => (
-                        <li key={index} className="text-sm text-gray-600 flex items-start space-x-2">
+                        <li
+                          key={index}
+                          className="text-sm text-gray-600 flex items-start space-x-2"
+                        >
                           <span className="text-blue-500 mt-1">•</span>
                           <span>{change}</span>
                         </li>
@@ -661,7 +716,7 @@ export default function IntelligentVersioning({
                         Approva
                       </button>
                     )}
-                    
+
                     {version.status === 'draft' && (
                       <button
                         onClick={() => {

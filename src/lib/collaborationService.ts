@@ -1,12 +1,12 @@
-import { 
-  collection, 
-  doc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
-  orderBy, 
+import {
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
   onSnapshot,
   serverTimestamp,
   Timestamp,
@@ -16,8 +16,9 @@ import {
   limit,
   startAfter,
   DocumentData,
-  QueryDocumentSnapshot
+  QueryDocumentSnapshot,
 } from 'firebase/firestore';
+
 import { db } from '@/lib/firebase';
 
 // ===== INTERFACES =====
@@ -127,14 +128,16 @@ export class CollaborationService {
   }
 
   // ===== COMMENTS MANAGEMENT =====
-  async addComment(comment: Omit<DesignComment, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+  async addComment(
+    comment: Omit<DesignComment, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<string> {
     try {
       const commentData = {
         ...comment,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       };
-      
+
       const docRef = await addDoc(collection(db, 'designComments'), commentData);
       return docRef.id;
     } catch (error) {
@@ -148,7 +151,7 @@ export class CollaborationService {
       const commentRef = doc(db, 'designComments', commentId);
       await updateDoc(commentRef, {
         ...updates,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
     } catch (error) {
       console.error('Error updating comment:', error);
@@ -172,7 +175,7 @@ export class CollaborationService {
         status: 'resolved',
         resolvedAt: serverTimestamp(),
         resolvedBy,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
     } catch (error) {
       console.error('Error resolving comment:', error);
@@ -187,9 +190,9 @@ export class CollaborationService {
       orderBy('createdAt', 'desc')
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(q, snapshot => {
       const comments: DesignComment[] = [];
-      snapshot.forEach((doc) => {
+      snapshot.forEach(doc => {
         comments.push({ id: doc.id, ...doc.data() } as DesignComment);
       });
       callback(comments);
@@ -203,9 +206,9 @@ export class CollaborationService {
     try {
       const versionData = {
         ...version,
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
       };
-      
+
       const docRef = await addDoc(collection(db, 'designVersions'), versionData);
       return docRef.id;
     } catch (error) {
@@ -230,7 +233,7 @@ export class CollaborationService {
       await updateDoc(versionRef, {
         status: 'approved',
         approvedBy,
-        approvedAt: serverTimestamp()
+        approvedAt: serverTimestamp(),
       });
     } catch (error) {
       console.error('Error approving version:', error);
@@ -244,7 +247,7 @@ export class CollaborationService {
       await updateDoc(versionRef, {
         status: 'rejected',
         rejectionReason,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
     } catch (error) {
       console.error('Error rejecting version:', error);
@@ -259,9 +262,9 @@ export class CollaborationService {
       orderBy('versionNumber', 'desc')
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(q, snapshot => {
       const versions: DesignVersion[] = [];
-      snapshot.forEach((doc) => {
+      snapshot.forEach(doc => {
         versions.push({ id: doc.id, ...doc.data() } as DesignVersion);
       });
       callback(versions);
@@ -278,12 +281,12 @@ export class CollaborationService {
         orderBy('versionNumber', 'desc'),
         limit(1)
       );
-      
+
       const snapshot = await getDocs(q);
       if (snapshot.empty) {
         return 1;
       }
-      
+
       const lastVersion = snapshot.docs[0].data() as DesignVersion;
       return lastVersion.versionNumber + 1;
     } catch (error) {
@@ -293,16 +296,21 @@ export class CollaborationService {
   }
 
   // ===== APPROVAL WORKFLOW =====
-  async createWorkflow(workflow: Omit<ApprovalWorkflow, 'id' | 'createdAt' | 'updatedAt' | 'totalSteps' | 'completedSteps'>): Promise<string> {
+  async createWorkflow(
+    workflow: Omit<
+      ApprovalWorkflow,
+      'id' | 'createdAt' | 'updatedAt' | 'totalSteps' | 'completedSteps'
+    >
+  ): Promise<string> {
     try {
       const workflowData = {
         ...workflow,
         totalSteps: workflow.steps.length,
         completedSteps: 0,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       };
-      
+
       const docRef = await addDoc(collection(db, 'approvalWorkflows'), workflowData);
       return docRef.id;
     } catch (error) {
@@ -311,34 +319,39 @@ export class CollaborationService {
     }
   }
 
-  async updateWorkflowStep(workflowId: string, stepNumber: number, updates: Partial<ApprovalStep>): Promise<void> {
+  async updateWorkflowStep(
+    workflowId: string,
+    stepNumber: number,
+    updates: Partial<ApprovalStep>
+  ): Promise<void> {
     try {
       const workflowRef = doc(db, 'approvalWorkflows', workflowId);
       const workflowDoc = await getDoc(workflowRef);
-      
+
       if (!workflowDoc.exists()) {
         throw new Error('Workflow not found');
       }
-      
+
       const workflow = workflowDoc.data() as ApprovalWorkflow;
-      const updatedSteps = workflow.steps.map(step => 
+      const updatedSteps = workflow.steps.map(step =>
         step.stepNumber === stepNumber ? { ...step, ...updates } : step
       );
-      
-      const completedSteps = updatedSteps.filter(step => 
-        step.status === 'approved' || step.status === 'skipped'
+
+      const completedSteps = updatedSteps.filter(
+        step => step.status === 'approved' || step.status === 'skipped'
       ).length;
-      
-      const currentStep = completedSteps < workflow.totalSteps ? completedSteps + 1 : workflow.totalSteps;
+
+      const currentStep =
+        completedSteps < workflow.totalSteps ? completedSteps + 1 : workflow.totalSteps;
       const status = completedSteps === workflow.totalSteps ? 'completed' : 'active';
-      
+
       await updateDoc(workflowRef, {
         steps: updatedSteps,
         completedSteps,
         currentStep,
         status,
         updatedAt: serverTimestamp(),
-        ...(status === 'completed' && { completedAt: serverTimestamp() })
+        ...(status === 'completed' && { completedAt: serverTimestamp() }),
       });
     } catch (error) {
       console.error('Error updating workflow step:', error);
@@ -346,10 +359,13 @@ export class CollaborationService {
     }
   }
 
-  getWorkflowRealtime(workflowId: string, callback: (workflow: ApprovalWorkflow | null) => void): () => void {
+  getWorkflowRealtime(
+    workflowId: string,
+    callback: (workflow: ApprovalWorkflow | null) => void
+  ): () => void {
     const workflowRef = doc(db, 'approvalWorkflows', workflowId);
-    
-    const unsubscribe = onSnapshot(workflowRef, (doc) => {
+
+    const unsubscribe = onSnapshot(workflowRef, doc => {
       if (doc.exists()) {
         callback({ id: doc.id, ...doc.data() } as ApprovalWorkflow);
       } else {
@@ -361,15 +377,17 @@ export class CollaborationService {
   }
 
   // ===== COLLABORATION SESSIONS =====
-  async startSession(session: Omit<CollaborationSession, 'id' | 'startedAt' | 'lastActivity' | 'duration'>): Promise<string> {
+  async startSession(
+    session: Omit<CollaborationSession, 'id' | 'startedAt' | 'lastActivity' | 'duration'>
+  ): Promise<string> {
     try {
       const sessionData = {
         ...session,
         startedAt: serverTimestamp(),
         lastActivity: serverTimestamp(),
-        duration: 0
+        duration: 0,
       };
-      
+
       const docRef = await addDoc(collection(db, 'collaborationSessions'), sessionData);
       return docRef.id;
     } catch (error) {
@@ -382,24 +400,24 @@ export class CollaborationService {
     try {
       const sessionRef = doc(db, 'collaborationSessions', sessionId);
       const sessionDoc = await getDoc(sessionRef);
-      
+
       if (!sessionDoc.exists()) {
         throw new Error('Session not found');
       }
-      
+
       const session = sessionDoc.data() as CollaborationSession;
       const now = Timestamp.now();
       const duration = Math.floor((now.toMillis() - session.startedAt.toMillis()) / (1000 * 60));
-      
+
       let activeUsers = session.activeUsers;
       if (!activeUsers.includes(userId)) {
         activeUsers = [...activeUsers, userId];
       }
-      
+
       await updateDoc(sessionRef, {
         lastActivity: now,
         duration,
-        activeUsers
+        activeUsers,
       });
     } catch (error) {
       console.error('Error updating session activity:', error);
@@ -412,7 +430,7 @@ export class CollaborationService {
       const sessionRef = doc(db, 'collaborationSessions', sessionId);
       await updateDoc(sessionRef, {
         status: 'ended',
-        lastActivity: serverTimestamp()
+        lastActivity: serverTimestamp(),
       });
     } catch (error) {
       console.error('Error ending session:', error);
@@ -420,16 +438,19 @@ export class CollaborationService {
     }
   }
 
-  getSessionsRealtime(designId: string, callback: (sessions: CollaborationSession[]) => void): () => void {
+  getSessionsRealtime(
+    designId: string,
+    callback: (sessions: CollaborationSession[]) => void
+  ): () => void {
     const q = query(
       collection(db, 'collaborationSessions'),
       where('designId', '==', designId),
       orderBy('startedAt', 'desc')
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(q, snapshot => {
       const sessions: CollaborationSession[] = [];
-      snapshot.forEach((doc) => {
+      snapshot.forEach(doc => {
         sessions.push({ id: doc.id, ...doc.data() } as CollaborationSession);
       });
       callback(sessions);
@@ -447,15 +468,28 @@ export class CollaborationService {
     activeSessions: number;
   }> {
     try {
-      const [commentsSnapshot, versionsSnapshot, workflowsSnapshot, sessionsSnapshot] = await Promise.all([
-        getDocs(query(collection(db, 'designComments'), where('designId', '==', designId))),
-        getDocs(query(collection(db, 'designVersions'), where('designId', '==', designId))),
-        getDocs(query(collection(db, 'approvalWorkflows'), where('designId', '==', designId), where('status', '==', 'active'))),
-        getDocs(query(collection(db, 'collaborationSessions'), where('designId', '==', designId), where('status', '==', 'active')))
-      ]);
+      const [commentsSnapshot, versionsSnapshot, workflowsSnapshot, sessionsSnapshot] =
+        await Promise.all([
+          getDocs(query(collection(db, 'designComments'), where('designId', '==', designId))),
+          getDocs(query(collection(db, 'designVersions'), where('designId', '==', designId))),
+          getDocs(
+            query(
+              collection(db, 'approvalWorkflows'),
+              where('designId', '==', designId),
+              where('status', '==', 'active')
+            )
+          ),
+          getDocs(
+            query(
+              collection(db, 'collaborationSessions'),
+              where('designId', '==', designId),
+              where('status', '==', 'active')
+            )
+          ),
+        ]);
 
-      const pendingComments = commentsSnapshot.docs.filter(doc => 
-        doc.data().status === 'pending'
+      const pendingComments = commentsSnapshot.docs.filter(
+        doc => doc.data().status === 'pending'
       ).length;
 
       return {
@@ -463,7 +497,7 @@ export class CollaborationService {
         pendingComments,
         totalVersions: versionsSnapshot.size,
         activeWorkflows: workflowsSnapshot.size,
-        activeSessions: sessionsSnapshot.size
+        activeSessions: sessionsSnapshot.size,
       };
     } catch (error) {
       console.error('Error getting collaboration stats:', error);
@@ -472,7 +506,7 @@ export class CollaborationService {
         pendingComments: 0,
         totalVersions: 0,
         activeWorkflows: 0,
-        activeSessions: 0
+        activeSessions: 0,
       };
     }
   }
@@ -484,18 +518,20 @@ export class CollaborationService {
         where('designId', '==', designId),
         orderBy('createdAt', 'desc')
       );
-      
+
       const snapshot = await getDocs(q);
       const comments: DesignComment[] = [];
-      
-      snapshot.forEach((doc) => {
+
+      snapshot.forEach(doc => {
         const comment = { id: doc.id, ...doc.data() } as DesignComment;
-        if (comment.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            comment.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))) {
+        if (
+          comment.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          comment.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+        ) {
           comments.push(comment);
         }
       });
-      
+
       return comments;
     } catch (error) {
       console.error('Error searching comments:', error);

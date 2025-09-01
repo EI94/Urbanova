@@ -1,17 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { 
-  BrainIcon, 
-  TrendingUpIcon, 
-  LightbulbIcon, 
+
+import {
+  BrainIcon,
+  TrendingUpIcon,
+  LightbulbIcon,
   TargetIcon,
   CheckCircleIcon,
   AlertTriangleIcon,
   ClockIcon,
   ZapIcon,
   MapPinIcon,
-  ChartBarIcon
+  ChartBarIcon,
 } from '@/components/icons';
 
 interface AIInsight {
@@ -56,26 +57,34 @@ export default function AIDesignAssistant({
   onZoneSelect,
   onOptimize,
   loading,
-  selectedZone
+  selectedZone,
 }: AIDesignAssistantProps) {
   const [activeTab, setActiveTab] = useState<'insights' | 'optimization' | 'zones'>('insights');
   const [selectedInsight, setSelectedInsight] = useState<AIInsight | null>(null);
 
   const getImpactColor = (impact: string) => {
     switch (impact) {
-      case 'HIGH': return 'text-green-600 bg-green-100';
-      case 'MEDIUM': return 'text-yellow-600 bg-yellow-100';
-      case 'LOW': return 'text-gray-600 bg-gray-100';
-      default: return 'text-blue-600 bg-blue-100';
+      case 'HIGH':
+        return 'text-green-600 bg-green-100';
+      case 'MEDIUM':
+        return 'text-yellow-600 bg-yellow-100';
+      case 'LOW':
+        return 'text-gray-600 bg-gray-100';
+      default:
+        return 'text-blue-600 bg-blue-100';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'HIGH': return 'text-red-600 bg-red-100';
-      case 'MEDIUM': return 'text-yellow-600 bg-yellow-100';
-      case 'LOW': return 'text-green-600 bg-green-100';
-      default: return 'text-blue-600 bg-blue-100';
+      case 'HIGH':
+        return 'text-red-600 bg-red-100';
+      case 'MEDIUM':
+        return 'text-yellow-600 bg-yellow-100';
+      case 'LOW':
+        return 'text-green-600 bg-green-100';
+      default:
+        return 'text-blue-600 bg-blue-100';
     }
   };
 
@@ -89,7 +98,7 @@ export default function AIDesignAssistant({
     { id: 'Appio', name: 'Appio', city: 'Roma', projects: 3, roi: '12.5%', trend: '+8.2%' },
     { id: 'Centro', name: 'Centro', city: 'Roma', projects: 2, roi: '18.5%', trend: '+15.3%' },
     { id: 'Eur', name: 'Eur', city: 'Roma', projects: 1, roi: '14.2%', trend: '+6.8%' },
-    { id: 'Ostiense', name: 'Ostiense', city: 'Roma', projects: 2, roi: '16.8%', trend: '+12.1%' }
+    { id: 'Ostiense', name: 'Ostiense', city: 'Roma', projects: 2, roi: '16.8%', trend: '+12.1%' },
   ];
 
   return (
@@ -151,7 +160,7 @@ export default function AIDesignAssistant({
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {insights.map((insight) => (
+                {insights.map(insight => (
                   <div
                     key={insight.id}
                     onClick={() => setSelectedInsight(insight)}
@@ -159,21 +168,25 @@ export default function AIDesignAssistant({
                   >
                     <div className="flex items-start justify-between mb-3">
                       <h4 className="font-semibold text-gray-900 text-sm">{insight.title}</h4>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getImpactColor(insight.impact)}`}>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getImpactColor(insight.impact)}`}
+                      >
                         {insight.impact}
                       </span>
                     </div>
-                    
+
                     <p className="text-gray-600 text-sm mb-3 line-clamp-2">{insight.description}</p>
-                    
+
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <BrainIcon className="h-4 w-4 text-purple-600" />
-                        <span className={`text-xs font-medium ${getConfidenceColor(insight.confidence)}`}>
+                        <span
+                          className={`text-xs font-medium ${getConfidenceColor(insight.confidence)}`}
+                        >
                           {(insight.confidence * 100).toFixed(0)}% confidenza
                         </span>
                       </div>
-                      
+
                       <div className="text-xs text-gray-500">
                         {insight.recommendations.length} raccomandazioni
                       </div>
@@ -214,18 +227,24 @@ export default function AIDesignAssistant({
                       <LightbulbIcon className="h-5 w-5 text-yellow-500" />
                       <span>Raccomandazioni AI</span>
                     </h4>
-                    
+
                     <div className="space-y-3">
                       {optimization.recommendations.map((rec, index) => (
                         <div key={index} className="border-l-4 border-green-500 pl-4 py-2">
                           <div className="flex items-start justify-between mb-2">
-                            <span className="font-medium text-gray-900 text-sm">{rec.description}</span>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(rec.priority)}`}>
+                            <span className="font-medium text-gray-900 text-sm">
+                              {rec.description}
+                            </span>
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(rec.priority)}`}
+                            >
                               {rec.priority}
                             </span>
                           </div>
-                          
-                          <div className="text-green-600 text-sm font-medium mb-1">{rec.impact}</div>
+
+                          <div className="text-green-600 text-sm font-medium mb-1">
+                            {rec.impact}
+                          </div>
                           <div className="text-gray-600 text-xs">{rec.implementation}</div>
                         </div>
                       ))}
@@ -239,7 +258,7 @@ export default function AIDesignAssistant({
                         <AlertTriangleIcon className="h-5 w-5 text-orange-500" />
                         <span>Vincoli</span>
                       </h4>
-                      
+
                       <div className="space-y-2 text-sm">
                         {Object.entries(optimization.constraints).map(([key, value]) => (
                           <div key={key} className="flex items-center space-x-2">
@@ -256,7 +275,7 @@ export default function AIDesignAssistant({
                         <TrendingUpIcon className="h-5 w-5 text-blue-500" />
                         <span>Opportunità</span>
                       </h4>
-                      
+
                       <div className="space-y-2 text-sm">
                         {Object.entries(optimization.opportunities).map(([key, value]) => (
                           <div key={key} className="flex items-center space-x-2">
@@ -273,8 +292,12 @@ export default function AIDesignAssistant({
             ) : (
               <div className="text-center py-12">
                 <BrainIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <h4 className="text-lg font-medium text-gray-900 mb-2">Nessuna ottimizzazione disponibile</h4>
-                <p className="text-gray-600 mb-4">Clicca su "Genera Ottimizzazioni" per iniziare l'analisi AI</p>
+                <h4 className="text-lg font-medium text-gray-900 mb-2">
+                  Nessuna ottimizzazione disponibile
+                </h4>
+                <p className="text-gray-600 mb-4">
+                  Clicca su "Genera Ottimizzazioni" per iniziare l'analisi AI
+                </p>
               </div>
             )}
           </div>
@@ -291,7 +314,7 @@ export default function AIDesignAssistant({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {zones.map((zone) => (
+              {zones.map(zone => (
                 <div
                   key={zone.id}
                   onClick={() => onZoneSelect(zone.id)}
@@ -304,13 +327,13 @@ export default function AIDesignAssistant({
                       <h4 className="font-semibold text-gray-900">{zone.name}</h4>
                       <p className="text-sm text-gray-600">{zone.city}</p>
                     </div>
-                    
+
                     <div className="text-right">
                       <div className="text-lg font-bold text-green-600">{zone.roi}</div>
                       <div className="text-xs text-gray-500">ROI</div>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
                       <span className="text-gray-600">Progetti:</span>
@@ -321,7 +344,7 @@ export default function AIDesignAssistant({
                       <div className="font-medium text-green-600">{zone.trend}</div>
                     </div>
                   </div>
-                  
+
                   {selectedZone === zone.id && (
                     <div className="mt-3 pt-3 border-t border-gray-200">
                       <div className="flex items-center space-x-2 text-purple-600">
@@ -353,32 +376,41 @@ export default function AIDesignAssistant({
                 >
                   <span className="sr-only">Chiudi</span>
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-2">Descrizione</h4>
                   <p className="text-gray-600">{selectedInsight.description}</p>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <span className="text-sm text-gray-600">Confidenza AI:</span>
-                    <div className={`font-semibold ${getConfidenceColor(selectedInsight.confidence)}`}>
+                    <div
+                      className={`font-semibold ${getConfidenceColor(selectedInsight.confidence)}`}
+                    >
                       {(selectedInsight.confidence * 100).toFixed(0)}%
                     </div>
                   </div>
                   <div>
                     <span className="text-sm text-gray-600">Impatto:</span>
-                    <div className={`px-2 py-1 rounded-full text-xs font-medium inline-block ${getImpactColor(selectedInsight.impact)}`}>
+                    <div
+                      className={`px-2 py-1 rounded-full text-xs font-medium inline-block ${getImpactColor(selectedInsight.impact)}`}
+                    >
                       {selectedInsight.impact}
                     </div>
                   </div>
                 </div>
-                
+
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-3">Raccomandazioni</h4>
                   <div className="space-y-2">
@@ -390,7 +422,7 @@ export default function AIDesignAssistant({
                     ))}
                   </div>
                 </div>
-                
+
                 {selectedInsight.data && (
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-3">Dati Analisi</h4>

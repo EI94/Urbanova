@@ -1,0 +1,19 @@
+{
+  "name": "@urbanova/messaging",
+  "version": "1.0.0",
+  "description": "Messaging services for email, SMS, and WhatsApp",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@urbanova/types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0"
+  }
+}

@@ -6,17 +6,33 @@ export const ROLE_PERMISSIONS: RolePermissions[] = [
     role: 'PROJECT_MANAGER',
     permissions: [
       // Gestione Sessioni
-      'CREATE_SESSIONS', 'JOIN_SESSIONS', 'MANAGE_SESSIONS', 'DELETE_SESSIONS',
+      'CREATE_SESSIONS',
+      'JOIN_SESSIONS',
+      'MANAGE_SESSIONS',
+      'DELETE_SESSIONS',
       // Gestione Commenti
-      'ADD_COMMENTS', 'EDIT_COMMENTS', 'DELETE_COMMENTS', 'MODERATE_COMMENTS',
+      'ADD_COMMENTS',
+      'EDIT_COMMENTS',
+      'DELETE_COMMENTS',
+      'MODERATE_COMMENTS',
       // Gestione Preferiti
-      'ADD_TO_FAVORITES', 'REMOVE_FROM_FAVORITES', 'UPDATE_PRIORITY', 'UPDATE_STATUS',
+      'ADD_TO_FAVORITES',
+      'REMOVE_FROM_FAVORITES',
+      'UPDATE_PRIORITY',
+      'UPDATE_STATUS',
       // Gestione Team
-      'INVITE_MEMBERS', 'REMOVE_MEMBERS', 'ASSIGN_ROLES', 'MANAGE_PERMISSIONS',
+      'INVITE_MEMBERS',
+      'REMOVE_MEMBERS',
+      'ASSIGN_ROLES',
+      'MANAGE_PERMISSIONS',
       // Analytics e Reporting
-      'VIEW_ANALYTICS', 'EXPORT_REPORTS', 'VIEW_TEAM_PERFORMANCE',
+      'VIEW_ANALYTICS',
+      'EXPORT_REPORTS',
+      'VIEW_TEAM_PERFORMANCE',
       // Approvazioni
-      'APPROVE_DECISIONS', 'REJECT_DECISIONS', 'OVERRIDE_DECISIONS'
+      'APPROVE_DECISIONS',
+      'REJECT_DECISIONS',
+      'OVERRIDE_DECISIONS',
     ],
     description: 'Gestisce progetti, team e workflow. Ha accesso completo a tutte le funzionalità.',
     capabilities: [
@@ -25,20 +41,25 @@ export const ROLE_PERMISSIONS: RolePermissions[] = [
       'Approvare decisioni critiche del team',
       'Monitorare performance e analytics',
       'Gestire workflow e approvazioni',
-      'Moderare contenuti e commenti'
-    ]
+      'Moderare contenuti e commenti',
+    ],
   },
   {
     role: 'FINANCIAL_ANALYST',
     permissions: [
       // Gestione Sessioni
-      'CREATE_SESSIONS', 'JOIN_SESSIONS',
+      'CREATE_SESSIONS',
+      'JOIN_SESSIONS',
       // Gestione Commenti
-      'ADD_COMMENTS', 'EDIT_COMMENTS',
+      'ADD_COMMENTS',
+      'EDIT_COMMENTS',
       // Gestione Preferiti
-      'ADD_TO_FAVORITES', 'UPDATE_PRIORITY', 'UPDATE_STATUS',
+      'ADD_TO_FAVORITES',
+      'UPDATE_PRIORITY',
+      'UPDATE_STATUS',
       // Analytics
-      'VIEW_ANALYTICS', 'VIEW_TEAM_PERFORMANCE'
+      'VIEW_ANALYTICS',
+      'VIEW_TEAM_PERFORMANCE',
     ],
     description: 'Specializzato in analisi finanziarie, ROI e valutazioni economiche.',
     capabilities: [
@@ -47,20 +68,23 @@ export const ROLE_PERMISSIONS: RolePermissions[] = [
       'Risk assessment e proiezioni',
       'Commenti specializzati su aspetti economici',
       'Prioritizzazione basata su criteri finanziari',
-      'Analisi di mercato e trend economici'
-    ]
+      'Analisi di mercato e trend economici',
+    ],
   },
   {
     role: 'ARCHITECT',
     permissions: [
       // Gestione Sessioni
-      'CREATE_SESSIONS', 'JOIN_SESSIONS',
+      'CREATE_SESSIONS',
+      'JOIN_SESSIONS',
       // Gestione Commenti
-      'ADD_COMMENTS', 'EDIT_COMMENTS',
+      'ADD_COMMENTS',
+      'EDIT_COMMENTS',
       // Gestione Preferiti
-      'ADD_TO_FAVORITES', 'UPDATE_PRIORITY',
+      'ADD_TO_FAVORITES',
+      'UPDATE_PRIORITY',
       // Analytics
-      'VIEW_ANALYTICS'
+      'VIEW_ANALYTICS',
     ],
     description: 'Specializzato in valutazioni tecniche, design e compliance edilizia.',
     capabilities: [
@@ -69,8 +93,8 @@ export const ROLE_PERMISSIONS: RolePermissions[] = [
       'Review compliance e building codes',
       'Suggerimenti ottimizzazione design',
       'Commenti su aspetti tecnici',
-      'Valutazioni sostenibilità e innovazione'
-    ]
+      'Valutazioni sostenibilità e innovazione',
+    ],
   },
   {
     role: 'DEVELOPER',
@@ -78,11 +102,12 @@ export const ROLE_PERMISSIONS: RolePermissions[] = [
       // Gestione Sessioni
       'JOIN_SESSIONS',
       // Gestione Commenti
-      'ADD_COMMENTS', 'EDIT_COMMENTS',
+      'ADD_COMMENTS',
+      'EDIT_COMMENTS',
       // Gestione Preferiti
       'ADD_TO_FAVORITES',
       // Analytics
-      'VIEW_ANALYTICS'
+      'VIEW_ANALYTICS',
     ],
     description: 'Gestisce aspetti tecnici, integrazioni e performance del sistema.',
     capabilities: [
@@ -91,8 +116,8 @@ export const ROLE_PERMISSIONS: RolePermissions[] = [
       'Integrazioni API e servizi',
       'Debugging e troubleshooting',
       'Documentazione tecnica',
-      'Supporto tecnico al team'
-    ]
+      'Supporto tecnico al team',
+    ],
   },
   {
     role: 'TEAM_MEMBER',
@@ -102,7 +127,7 @@ export const ROLE_PERMISSIONS: RolePermissions[] = [
       // Gestione Commenti
       'ADD_COMMENTS',
       // Gestione Preferiti
-      'ADD_TO_FAVORITES'
+      'ADD_TO_FAVORITES',
     ],
     description: 'Membro base del team con accesso limitato alle funzionalità collaborative.',
     capabilities: [
@@ -110,9 +135,9 @@ export const ROLE_PERMISSIONS: RolePermissions[] = [
       'Aggiungere commenti e feedback',
       'Votare e valutare terreni',
       'Aggiungere ai preferiti condivisi',
-      'Collaborare con il team'
-    ]
-  }
+      'Collaborare con il team',
+    ],
+  },
 ];
 
 export class TeamRoleManager {
@@ -193,26 +218,32 @@ export class TeamRoleManager {
   // Calcola il peso del voto basato sul ruolo
   getVoteWeight(role: TeamRole): number {
     switch (role) {
-      case 'PROJECT_MANAGER': return 3.0;
-      case 'FINANCIAL_ANALYST': return 2.5;
-      case 'ARCHITECT': return 2.0;
-      case 'DEVELOPER': return 1.5;
-      case 'TEAM_MEMBER': return 1.0;
-      default: return 1.0;
+      case 'PROJECT_MANAGER':
+        return 3.0;
+      case 'FINANCIAL_ANALYST':
+        return 2.5;
+      case 'ARCHITECT':
+        return 2.0;
+      case 'DEVELOPER':
+        return 1.5;
+      case 'TEAM_MEMBER':
+        return 1.0;
+      default:
+        return 1.0;
     }
   }
 
   // Verifica se l'utente può gestire un altro membro
   canManageMember(targetRole: TeamRole): boolean {
     if (!this.currentUser) return false;
-    
+
     const currentUserRole = this.currentUser.role;
     const roleHierarchy: { [key in TeamRole]: number } = {
-      'PROJECT_MANAGER': 5,
-      'FINANCIAL_ANALYST': 4,
-      'ARCHITECT': 3,
-      'DEVELOPER': 2,
-      'TEAM_MEMBER': 1
+      PROJECT_MANAGER: 5,
+      FINANCIAL_ANALYST: 4,
+      ARCHITECT: 3,
+      DEVELOPER: 2,
+      TEAM_MEMBER: 1,
     };
 
     return roleHierarchy[currentUserRole] > roleHierarchy[targetRole];
@@ -241,7 +272,7 @@ export class TeamRoleManager {
   // Ottiene le funzionalità disponibili per l'utente corrente
   getAvailableCapabilities(): string[] {
     if (!this.currentUser) return [];
-    
+
     const roleConfig = this.getRoleConfig(this.currentUser.role);
     return roleConfig ? roleConfig.capabilities : [];
   }
@@ -255,33 +286,33 @@ export class TeamRoleManager {
   // Verifica se l'utente può eseguire un'azione specifica
   canPerformAction(action: string): boolean {
     const actionPermissions: { [key: string]: Permission[] } = {
-      'create_session': ['CREATE_SESSIONS'],
-      'join_session': ['JOIN_SESSIONS'],
-      'manage_session': ['MANAGE_SESSIONS'],
-      'delete_session': ['DELETE_SESSIONS'],
-      'add_comment': ['ADD_COMMENTS'],
-      'edit_comment': ['EDIT_COMMENTS'],
-      'delete_comment': ['DELETE_COMMENTS'],
-      'moderate_comment': ['MODERATE_COMMENTS'],
-      'add_favorite': ['ADD_TO_FAVORITES'],
-      'remove_favorite': ['REMOVE_FROM_FAVORITES'],
-      'update_priority': ['UPDATE_PRIORITY'],
-      'update_status': ['UPDATE_STATUS'],
-      'invite_member': ['INVITE_MEMBERS'],
-      'remove_member': ['REMOVE_MEMBERS'],
-      'assign_role': ['ASSIGN_ROLES'],
-      'manage_permissions': ['MANAGE_PERMISSIONS'],
-      'view_analytics': ['VIEW_ANALYTICS'],
-      'export_reports': ['EXPORT_REPORTS'],
-      'view_team_performance': ['VIEW_TEAM_PERFORMANCE'],
-      'approve_decision': ['APPROVE_DECISIONS'],
-      'reject_decision': ['REJECT_DECISIONS'],
-      'override_decision': ['OVERRIDE_DECISIONS']
+      create_session: ['CREATE_SESSIONS'],
+      join_session: ['JOIN_SESSIONS'],
+      manage_session: ['MANAGE_SESSIONS'],
+      delete_session: ['DELETE_SESSIONS'],
+      add_comment: ['ADD_COMMENTS'],
+      edit_comment: ['EDIT_COMMENTS'],
+      delete_comment: ['DELETE_COMMENTS'],
+      moderate_comment: ['MODERATE_COMMENTS'],
+      add_favorite: ['ADD_TO_FAVORITES'],
+      remove_favorite: ['REMOVE_FROM_FAVORITES'],
+      update_priority: ['UPDATE_PRIORITY'],
+      update_status: ['UPDATE_STATUS'],
+      invite_member: ['INVITE_MEMBERS'],
+      remove_member: ['REMOVE_MEMBERS'],
+      assign_role: ['ASSIGN_ROLES'],
+      manage_permissions: ['MANAGE_PERMISSIONS'],
+      view_analytics: ['VIEW_ANALYTICS'],
+      export_reports: ['EXPORT_REPORTS'],
+      view_team_performance: ['VIEW_TEAM_PERFORMANCE'],
+      approve_decision: ['APPROVE_DECISIONS'],
+      reject_decision: ['REJECT_DECISIONS'],
+      override_decision: ['OVERRIDE_DECISIONS'],
     };
 
     const requiredPermissions = actionPermissions[action];
     if (!requiredPermissions) return false;
-    
+
     return this.hasAllPermissions(requiredPermissions);
   }
 
@@ -306,7 +337,7 @@ export class TeamRoleManager {
       canManage: this.canManageMember('TEAM_MEMBER'),
       canApprove: this.canApproveDecisions(),
       canModerate: this.canModerateContent(),
-      voteWeight: this.getVoteWeight(this.currentUser.role)
+      voteWeight: this.getVoteWeight(this.currentUser.role),
     };
   }
 }

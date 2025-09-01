@@ -1,23 +1,19 @@
-import { db, storage } from './firebase';
-import { 
-  doc, 
-  getDoc, 
-  setDoc, 
-  updateDoc, 
-  collection, 
-  addDoc, 
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  collection,
+  addDoc,
   getDocs,
   query,
   where,
   orderBy,
-  serverTimestamp 
+  serverTimestamp,
 } from 'firebase/firestore';
-import { 
-  ref, 
-  uploadBytes, 
-  getDownloadURL, 
-  deleteObject 
-} from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+
+import { db, storage } from './firebase';
 
 // Tipi per il profilo utente
 export interface UserProfile {
@@ -122,7 +118,7 @@ class FirebaseUserProfileService {
     try {
       const profileRef = doc(db, 'userProfiles', userId);
       const profileSnap = await getDoc(profileRef);
-      
+
       if (profileSnap.exists()) {
         const data = profileSnap.data();
         return {
@@ -133,11 +129,11 @@ class FirebaseUserProfileService {
           security: {
             ...data.security,
             lastPasswordChange: data.security?.lastPasswordChange?.toDate() || new Date(),
-            loginHistory: data.security?.loginHistory || []
-          }
+            loginHistory: data.security?.loginHistory || [],
+          },
         } as UserProfile;
       }
-      
+
       return null;
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -145,12 +141,15 @@ class FirebaseUserProfileService {
     }
   }
 
-  async createUserProfile(userId: string, profileData: {
-    email: string;
-    displayName: string;
-    firstName?: string;
-    lastName?: string;
-  }): Promise<UserProfile> {
+  async createUserProfile(
+    userId: string,
+    profileData: {
+      email: string;
+      displayName: string;
+      firstName?: string;
+      lastName?: string;
+    }
+  ): Promise<UserProfile> {
     try {
       const defaultProfile: Omit<UserProfile, 'id'> = {
         userId,
@@ -166,16 +165,16 @@ class FirebaseUserProfileService {
           theme: 'light',
           sidebarCollapsed: false,
           emailNotifications: true,
-          pushNotifications: true
+          pushNotifications: true,
         },
         security: {
           twoFactorEnabled: false,
           lastPasswordChange: new Date(),
-          loginHistory: []
+          loginHistory: [],
         },
         metadata: {},
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       const profileRef = doc(db, 'userProfiles', userId);
@@ -185,13 +184,13 @@ class FirebaseUserProfileService {
         updatedAt: serverTimestamp(),
         security: {
           ...defaultProfile.security,
-          lastPasswordChange: serverTimestamp()
-        }
+          lastPasswordChange: serverTimestamp(),
+        },
       });
 
       return {
         id: userId,
-        ...defaultProfile
+        ...defaultProfile,
       };
     } catch (error) {
       console.error('Error creating user profile:', error);
@@ -202,7 +201,7 @@ class FirebaseUserProfileService {
   async updateUserProfile(userId: string, updates: ProfileUpdate): Promise<UserProfile | null> {
     try {
       const profileRef = doc(db, 'userProfiles', userId);
-      
+
       // Se displayName viene aggiornato, aggiorna anche firstName e lastName
       if (updates.firstName || updates.lastName) {
         const firstName = updates.firstName || '';
@@ -212,7 +211,7 @@ class FirebaseUserProfileService {
 
       await updateDoc(profileRef, {
         ...updates,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
 
       // Restituisci il profilo aggiornato
@@ -280,11 +279,11 @@ class FirebaseUserProfileService {
       if (!profile) return false;
 
       const newValue = !profile.security.twoFactorEnabled;
-      
+
       const profileRef = doc(db, 'userProfiles', userId);
       await updateDoc(profileRef, {
         'security.twoFactorEnabled': newValue,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
 
       return newValue;
@@ -294,12 +293,15 @@ class FirebaseUserProfileService {
     }
   }
 
-  async recordLoginAttempt(userId: string, attempt: Omit<LoginAttempt, 'id' | 'timestamp'>): Promise<void> {
+  async recordLoginAttempt(
+    userId: string,
+    attempt: Omit<LoginAttempt, 'id' | 'timestamp'>
+  ): Promise<void> {
     try {
       const loginData = {
         ...attempt,
         userId,
-        timestamp: serverTimestamp()
+        timestamp: serverTimestamp(),
       };
 
       await addDoc(collection(db, 'loginHistory'), loginData);
@@ -311,7 +313,7 @@ class FirebaseUserProfileService {
         loginHistory.unshift({
           id: Date.now().toString(),
           timestamp: new Date(),
-          ...attempt
+          ...attempt,
         });
 
         // Mantieni solo gli ultimi 10 tentativi
@@ -320,7 +322,7 @@ class FirebaseUserProfileService {
         const profileRef = doc(db, 'userProfiles', userId);
         await updateDoc(profileRef, {
           'security.loginHistory': updatedHistory,
-          updatedAt: serverTimestamp()
+          updatedAt: serverTimestamp(),
         });
       }
     } catch (error) {
@@ -339,12 +341,12 @@ class FirebaseUserProfileService {
       const snapshot = await getDocs(q);
       const loginHistory: LoginAttempt[] = [];
 
-      snapshot.forEach((doc) => {
+      snapshot.forEach(doc => {
         const data = doc.data();
         loginHistory.push({
           id: doc.id,
           ...data,
-          timestamp: data.timestamp?.toDate() || new Date()
+          timestamp: data.timestamp?.toDate() || new Date(),
         } as LoginAttempt);
       });
 
@@ -372,7 +374,7 @@ class FirebaseUserProfileService {
         averageSessionTime: this.calculateAverageSessionTime(loginHistory),
         securityScore: this.calculateSecurityScore(profile),
         preferredLanguage: profile?.language || 'it',
-        timezone: profile?.timezone || 'Europe/Rome'
+        timezone: profile?.timezone || 'Europe/Rome',
       };
 
       return analytics;
@@ -386,10 +388,17 @@ class FirebaseUserProfileService {
     if (!profile) return 0;
 
     const fields = [
-      'firstName', 'lastName', 'email', 'phone', 'company', 
-      'position', 'bio', 'location', 'avatar'
+      'firstName',
+      'lastName',
+      'email',
+      'phone',
+      'company',
+      'position',
+      'bio',
+      'location',
+      'avatar',
     ];
-    
+
     let completedFields = 0;
     fields.forEach(field => {
       if (profile[field as keyof UserProfile]) {
@@ -404,7 +413,7 @@ class FirebaseUserProfileService {
     if (loginHistory.length === 0) return 0;
 
     let streak = 0;
-    let currentDate = new Date();
+    const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
 
     for (const login of loginHistory) {
@@ -432,16 +441,16 @@ class FirebaseUserProfileService {
     if (!profile) return 0;
 
     let score = 0;
-    
+
     // Password recente (max 90 giorni)
     const daysSincePasswordChange = Math.floor(
       (Date.now() - profile.security.lastPasswordChange.getTime()) / (1000 * 60 * 60 * 24)
     );
     if (daysSincePasswordChange <= 90) score += 30;
-    
+
     // 2FA attivato
     if (profile.security.twoFactorEnabled) score += 40;
-    
+
     // Profilo completo
     const completeness = this.calculateProfileCompleteness(profile);
     score += Math.floor(completeness * 0.3);
@@ -479,7 +488,7 @@ class FirebaseUserProfileService {
         profile,
         loginHistory,
         analytics,
-        exportedAt: new Date()
+        exportedAt: new Date(),
       };
     } catch (error) {
       console.error('Error exporting user data:', error);

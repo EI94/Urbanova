@@ -1,10 +1,27 @@
 // Tipi per il sistema di Advanced AI & Machine Learning
 
-export type ModelType = 'classification' | 'regression' | 'clustering' | 'anomaly_detection' | 'recommendation' | 'nlp' | 'computer_vision' | 'time_series' | 'reinforcement_learning';
+export type ModelType =
+  | 'classification'
+  | 'regression'
+  | 'clustering'
+  | 'anomaly_detection'
+  | 'recommendation'
+  | 'nlp'
+  | 'computer_vision'
+  | 'time_series'
+  | 'reinforcement_learning';
 
 export type ModelStatus = 'training' | 'trained' | 'deployed' | 'failed' | 'deprecated' | 'testing';
 
-export type DatasetType = 'structured' | 'unstructured' | 'time_series' | 'text' | 'image' | 'audio' | 'video' | 'mixed';
+export type DatasetType =
+  | 'structured'
+  | 'unstructured'
+  | 'time_series'
+  | 'text'
+  | 'image'
+  | 'audio'
+  | 'video'
+  | 'mixed';
 
 export type DatasetStatus = 'uploading' | 'processing' | 'ready' | 'error' | 'archived';
 
@@ -14,21 +31,69 @@ export type DeploymentStatus = 'deploying' | 'deployed' | 'failed' | 'updating' 
 
 export type PredictionStatus = 'pending' | 'processing' | 'completed' | 'failed';
 
-export type ModelFramework = 'tensorflow' | 'pytorch' | 'scikit_learn' | 'xgboost' | 'lightgbm' | 'huggingface' | 'openai' | 'custom';
+export type ModelFramework =
+  | 'tensorflow'
+  | 'pytorch'
+  | 'scikit_learn'
+  | 'xgboost'
+  | 'lightgbm'
+  | 'huggingface'
+  | 'openai'
+  | 'custom';
 
-export type OptimizationMetric = 'accuracy' | 'precision' | 'recall' | 'f1_score' | 'auc_roc' | 'mse' | 'mae' | 'r2_score' | 'custom';
+export type OptimizationMetric =
+  | 'accuracy'
+  | 'precision'
+  | 'recall'
+  | 'f1_score'
+  | 'auc_roc'
+  | 'mse'
+  | 'mae'
+  | 'r2_score'
+  | 'custom';
 
 export type DataSplitStrategy = 'random' | 'stratified' | 'time_based' | 'group_based' | 'custom';
 
-export type FeatureType = 'numerical' | 'categorical' | 'text' | 'datetime' | 'binary' | 'ordinal' | 'image' | 'audio';
+export type FeatureType =
+  | 'numerical'
+  | 'categorical'
+  | 'text'
+  | 'datetime'
+  | 'binary'
+  | 'ordinal'
+  | 'image'
+  | 'audio';
 
-export type AutoMLTask = 'classification' | 'regression' | 'forecasting' | 'anomaly_detection' | 'feature_engineering' | 'hyperparameter_tuning';
+export type AutoMLTask =
+  | 'classification'
+  | 'regression'
+  | 'forecasting'
+  | 'anomaly_detection'
+  | 'feature_engineering'
+  | 'hyperparameter_tuning';
 
-export type ExplainabilityMethod = 'lime' | 'shap' | 'permutation_importance' | 'partial_dependence' | 'feature_importance' | 'attention_maps';
+export type ExplainabilityMethod =
+  | 'lime'
+  | 'shap'
+  | 'permutation_importance'
+  | 'partial_dependence'
+  | 'feature_importance'
+  | 'attention_maps';
 
-export type ModelValidationType = 'holdout' | 'cross_validation' | 'time_series_split' | 'bootstrap' | 'custom';
+export type ModelValidationType =
+  | 'holdout'
+  | 'cross_validation'
+  | 'time_series_split'
+  | 'bootstrap'
+  | 'custom';
 
-export type AlertType = 'model_drift' | 'data_drift' | 'performance_degradation' | 'prediction_anomaly' | 'resource_usage' | 'training_failure';
+export type AlertType =
+  | 'model_drift'
+  | 'data_drift'
+  | 'performance_degradation'
+  | 'prediction_anomaly'
+  | 'resource_usage'
+  | 'training_failure';
 
 export interface MLModel {
   id: string;
@@ -36,43 +101,43 @@ export interface MLModel {
   description: string;
   type: ModelType;
   framework: ModelFramework;
-  
+
   // Configurazione modello
   version: string;
   algorithm: string;
   hyperparameters: Record<string, any>;
-  
+
   // Dataset
   datasetId: string;
   datasetName: string;
   features: FeatureDefinition[];
   targetVariable: string;
-  
+
   // Training
   trainingConfig: TrainingConfiguration;
   trainingHistory: TrainingRun[];
-  
+
   // Performance
   metrics: ModelMetrics;
   validationResults: ValidationResults;
-  
+
   // Deployment
   deploymentConfig?: DeploymentConfiguration;
   endpoints: ModelEndpoint[];
-  
+
   // Stato
   status: ModelStatus;
   deploymentStatus?: DeploymentStatus;
-  
+
   // Monitoring
   monitoringEnabled: boolean;
   driftDetection: DriftDetectionConfig;
-  
+
   // Metadata
   tags: string[];
   owner: string;
   team: string;
-  
+
   // Timeline
   createdAt: Date;
   updatedAt: Date;
@@ -85,13 +150,13 @@ export interface FeatureDefinition {
   name: string;
   type: FeatureType;
   description: string;
-  
+
   // Preprocessing
   preprocessing: Array<{
     method: string;
     parameters: Record<string, any>;
   }>;
-  
+
   // Statistics
   statistics: {
     mean?: number;
@@ -102,11 +167,11 @@ export interface FeatureDefinition {
     uniqueCount: number;
     mostFrequent?: string;
   };
-  
+
   // Importance
   importance: number;
   correlationWithTarget: number;
-  
+
   // Validation
   isRequired: boolean;
   validationRules: Array<{
@@ -121,40 +186,40 @@ export interface TrainingConfiguration {
   trainSize: number;
   validationSize: number;
   testSize: number;
-  
+
   // Training parameters
   epochs?: number;
   batchSize?: number;
   learningRate?: number;
-  
+
   // Optimization
   optimizer: string;
   lossFunction: string;
   optimizationMetric: OptimizationMetric;
-  
+
   // Early stopping
   earlyStoppingEnabled: boolean;
   patience?: number;
   minDelta?: number;
-  
+
   // Regularization
   regularization: {
     l1: number;
     l2: number;
     dropout?: number;
   };
-  
+
   // Cross-validation
   crossValidation: {
     enabled: boolean;
     folds: number;
     strategy: ModelValidationType;
   };
-  
+
   // AutoML
   autoMLEnabled: boolean;
   autoMLConfig?: AutoMLConfiguration;
-  
+
   // Resources
   computeResources: {
     cpu: number;
@@ -167,11 +232,11 @@ export interface TrainingConfiguration {
 export interface AutoMLConfiguration {
   task: AutoMLTask;
   timeLimit: number; // in minutes
-  
+
   // Search space
   algorithms: string[];
   hyperparameterRanges: Record<string, any>;
-  
+
   // Feature engineering
   featureEngineering: {
     enabled: boolean;
@@ -179,14 +244,14 @@ export interface AutoMLConfiguration {
     polynomialFeatures: boolean;
     featureSelection: boolean;
   };
-  
+
   // Ensemble
   ensembleEnabled: boolean;
   ensembleMethods: string[];
-  
+
   // Early stopping
   earlyStoppingRounds: number;
-  
+
   // Evaluation
   evaluationMetric: OptimizationMetric;
   crossValidationFolds: number;
@@ -195,25 +260,25 @@ export interface AutoMLConfiguration {
 export interface TrainingRun {
   id: string;
   modelId: string;
-  
+
   // Configuration
   configuration: TrainingConfiguration;
-  
+
   // Status
   status: TrainingStatus;
-  
+
   // Progress
   progress: number; // 0-100
   currentEpoch?: number;
   totalEpochs?: number;
-  
+
   // Metrics
   metrics: {
     training: Record<string, number[]>;
     validation: Record<string, number[]>;
     test?: Record<string, number>;
   };
-  
+
   // Resources
   resourceUsage: {
     cpuUsage: number[];
@@ -221,19 +286,19 @@ export interface TrainingRun {
     gpuUsage?: number[];
     trainingTime: number; // in seconds
   };
-  
+
   // Logs
   logs: TrainingLog[];
-  
+
   // Results
   finalMetrics?: Record<string, number>;
   bestEpoch?: number;
-  
+
   // Timeline
   startedAt: Date;
   completedAt?: Date;
   duration?: number; // in seconds
-  
+
   // Error handling
   errorMessage?: string;
   errorDetails?: string;
@@ -256,21 +321,21 @@ export interface ModelMetrics {
   f1Score?: number;
   aucRoc?: number;
   confusionMatrix?: number[][];
-  
+
   // Regression
   mse?: number;
   mae?: number;
   r2Score?: number;
   mape?: number;
-  
+
   // Clustering
   silhouetteScore?: number;
   calinskiHarabaszScore?: number;
   daviesBouldinScore?: number;
-  
+
   // Custom metrics
   customMetrics: Record<string, number>;
-  
+
   // Business metrics
   businessMetrics: {
     costSavings?: number;
@@ -278,7 +343,7 @@ export interface ModelMetrics {
     timeToDecision?: number;
     userSatisfaction?: number;
   };
-  
+
   // Fairness metrics
   fairnessMetrics?: {
     demographicParity: number;
@@ -289,29 +354,29 @@ export interface ModelMetrics {
 
 export interface ValidationResults {
   validationType: ModelValidationType;
-  
+
   // Cross-validation results
   cvScores?: number[];
   cvMean?: number;
   cvStd?: number;
-  
+
   // Holdout results
   holdoutScore?: number;
-  
+
   // Feature importance
   featureImportance: Array<{
     feature: string;
     importance: number;
     rank: number;
   }>;
-  
+
   // Learning curves
   learningCurves: {
     trainSizes: number[];
     trainScores: number[];
     validationScores: number[];
   };
-  
+
   // Validation curves
   validationCurves?: {
     paramName: string;
@@ -319,7 +384,7 @@ export interface ValidationResults {
     trainScores: number[];
     validationScores: number[];
   };
-  
+
   // Residual analysis (for regression)
   residualAnalysis?: {
     residuals: number[];
@@ -335,7 +400,7 @@ export interface ValidationResults {
 export interface DeploymentConfiguration {
   // Environment
   environment: 'development' | 'staging' | 'production';
-  
+
   // Scaling
   replicas: number;
   autoScaling: {
@@ -345,21 +410,21 @@ export interface DeploymentConfiguration {
     targetCPUUtilization: number;
     targetMemoryUtilization: number;
   };
-  
+
   // Resources
   resources: {
     cpu: string;
     memory: string;
     gpu?: string;
   };
-  
+
   // Traffic routing
   trafficRouting: {
     strategy: 'blue_green' | 'canary' | 'rolling' | 'immediate';
     canaryPercentage?: number;
     rolloutDuration?: number; // in minutes
   };
-  
+
   // Health checks
   healthCheck: {
     enabled: boolean;
@@ -368,7 +433,7 @@ export interface DeploymentConfiguration {
     timeoutSeconds: number;
     failureThreshold: number;
   };
-  
+
   // Security
   security: {
     authentication: boolean;
@@ -378,7 +443,7 @@ export interface DeploymentConfiguration {
     };
     encryption: boolean;
   };
-  
+
   // Monitoring
   monitoring: {
     enabled: boolean;
@@ -391,16 +456,16 @@ export interface DeploymentConfiguration {
 export interface ModelEndpoint {
   id: string;
   modelId: string;
-  
+
   // Configuration
   url: string;
   version: string;
   environment: string;
-  
+
   // Status
   status: DeploymentStatus;
   health: 'healthy' | 'unhealthy' | 'unknown';
-  
+
   // Performance
   metrics: {
     requestsPerSecond: number;
@@ -408,18 +473,18 @@ export interface ModelEndpoint {
     errorRate: number;
     uptime: number;
   };
-  
+
   // Scaling
   currentReplicas: number;
   targetReplicas: number;
-  
+
   // Traffic
   trafficPercentage: number;
-  
+
   // Timeline
   deployedAt: Date;
   lastHealthCheck: Date;
-  
+
   // Configuration
   deploymentConfig: DeploymentConfiguration;
 }
@@ -429,14 +494,14 @@ export interface Dataset {
   name: string;
   description: string;
   type: DatasetType;
-  
+
   // Source
   source: {
     type: 'upload' | 'database' | 'api' | 's3' | 'url' | 'streaming';
     location: string;
     credentials?: Record<string, string>;
   };
-  
+
   // Schema
   schema: {
     columns: DatasetColumn[];
@@ -444,7 +509,7 @@ export interface Dataset {
     size: number; // in bytes
     format: string;
   };
-  
+
   // Quality
   quality: {
     completeness: number; // 0-100
@@ -454,28 +519,28 @@ export interface Dataset {
     duplicates: number;
     outliers: number;
   };
-  
+
   // Processing
   preprocessing: Array<{
     step: string;
     parameters: Record<string, any>;
     appliedAt: Date;
   }>;
-  
+
   // Versioning
   version: string;
   parentDatasetId?: string;
-  
+
   // Status
   status: DatasetStatus;
-  
+
   // Statistics
   statistics: DatasetStatistics;
-  
+
   // Metadata
   tags: string[];
   owner: string;
-  
+
   // Timeline
   createdAt: Date;
   updatedAt: Date;
@@ -486,12 +551,12 @@ export interface DatasetColumn {
   name: string;
   type: FeatureType;
   nullable: boolean;
-  
+
   // Statistics
   nullCount: number;
   nullPercentage: number;
   uniqueCount: number;
-  
+
   // Numerical columns
   mean?: number;
   median?: number;
@@ -499,18 +564,18 @@ export interface DatasetColumn {
   min?: number;
   max?: number;
   quartiles?: number[];
-  
+
   // Categorical columns
   categories?: Array<{
     value: string;
     count: number;
     percentage: number;
   }>;
-  
+
   // Text columns
   avgLength?: number;
   maxLength?: number;
-  
+
   // Quality issues
   outliers?: number[];
   anomalies?: number[];
@@ -521,19 +586,19 @@ export interface DatasetStatistics {
   totalRows: number;
   totalColumns: number;
   memoryUsage: number;
-  
+
   // Data types
   numericalColumns: number;
   categoricalColumns: number;
   textColumns: number;
   datetimeColumns: number;
-  
+
   // Quality
   missingValues: number;
   missingPercentage: number;
   duplicateRows: number;
   duplicatePercentage: number;
-  
+
   // Correlations
   correlationMatrix?: number[][];
   strongCorrelations: Array<{
@@ -541,7 +606,7 @@ export interface DatasetStatistics {
     feature2: string;
     correlation: number;
   }>;
-  
+
   // Target variable analysis
   targetDistribution?: Record<string, number>;
   classBalance?: number;
@@ -551,37 +616,37 @@ export interface Prediction {
   id: string;
   modelId: string;
   endpointId: string;
-  
+
   // Input
   input: Record<string, any>;
   inputHash: string;
-  
+
   // Output
   prediction: any;
   confidence?: number;
   probabilities?: Record<string, number>;
-  
+
   // Explanation
   explanation?: ModelExplanation;
-  
+
   // Status
   status: PredictionStatus;
-  
+
   // Performance
   latency: number; // in milliseconds
-  
+
   // Context
   userId?: string;
   sessionId?: string;
   requestId?: string;
-  
+
   // Timeline
   requestedAt: Date;
   completedAt?: Date;
-  
+
   // Error handling
   errorMessage?: string;
-  
+
   // Feedback
   feedback?: {
     actualValue?: any;
@@ -593,14 +658,14 @@ export interface Prediction {
 
 export interface ModelExplanation {
   method: ExplainabilityMethod;
-  
+
   // Feature importance
   featureImportance?: Array<{
     feature: string;
     importance: number;
     direction: 'positive' | 'negative';
   }>;
-  
+
   // LIME explanation
   limeExplanation?: {
     features: Array<{
@@ -610,17 +675,17 @@ export interface ModelExplanation {
     }>;
     score: number;
   };
-  
+
   // SHAP values
   shapValues?: {
     values: number[];
     baseValue: number;
     expectedValue: number;
   };
-  
+
   // Text explanations
   textExplanation?: string;
-  
+
   // Visual explanations
   visualExplanations?: Array<{
     type: 'heatmap' | 'attention' | 'gradient';
@@ -630,7 +695,7 @@ export interface ModelExplanation {
 
 export interface DriftDetectionConfig {
   enabled: boolean;
-  
+
   // Data drift
   dataDrift: {
     enabled: boolean;
@@ -638,14 +703,14 @@ export interface DriftDetectionConfig {
     threshold: number;
     windowSize: number;
   };
-  
+
   // Concept drift
   conceptDrift: {
     enabled: boolean;
     method: 'ddm' | 'eddm' | 'adwin' | 'page_hinkley' | 'custom';
     threshold: number;
   };
-  
+
   // Performance drift
   performanceDrift: {
     enabled: boolean;
@@ -653,17 +718,17 @@ export interface DriftDetectionConfig {
     threshold: number;
     windowSize: number;
   };
-  
+
   // Monitoring frequency
   checkFrequency: 'real_time' | 'hourly' | 'daily' | 'weekly';
-  
+
   // Actions
   alerting: {
     enabled: boolean;
     channels: string[];
     severity: 'low' | 'medium' | 'high' | 'critical';
   };
-  
+
   // Automatic retraining
   autoRetraining: {
     enabled: boolean;
@@ -675,27 +740,27 @@ export interface DriftDetectionConfig {
 export interface DriftDetectionResult {
   id: string;
   modelId: string;
-  
+
   // Detection details
   detectionType: 'data_drift' | 'concept_drift' | 'performance_drift';
   method: string;
-  
+
   // Results
   driftDetected: boolean;
   driftScore: number;
   threshold: number;
-  
+
   // Affected features
   affectedFeatures?: Array<{
     feature: string;
     driftScore: number;
     pValue?: number;
   }>;
-  
+
   // Statistics
   referenceStatistics: Record<string, number>;
   currentStatistics: Record<string, number>;
-  
+
   // Timeline
   detectedAt: Date;
   referenceWindow: {
@@ -706,7 +771,7 @@ export interface DriftDetectionResult {
     start: Date;
     end: Date;
   };
-  
+
   // Actions taken
   actionsTaken: Array<{
     action: string;
@@ -719,29 +784,29 @@ export interface MLAlert {
   id: string;
   type: AlertType;
   severity: 'low' | 'medium' | 'high' | 'critical';
-  
+
   // Context
   modelId?: string;
   endpointId?: string;
   datasetId?: string;
-  
+
   // Details
   title: string;
   description: string;
   details: Record<string, any>;
-  
+
   // Status
   status: 'active' | 'acknowledged' | 'resolved' | 'suppressed';
-  
+
   // Metrics
   triggerValue: number;
   threshold: number;
-  
+
   // Timeline
   triggeredAt: Date;
   acknowledgedAt?: Date;
   resolvedAt?: Date;
-  
+
   // Actions
   suggestedActions: string[];
   actionsTaken: Array<{
@@ -750,7 +815,7 @@ export interface MLAlert {
     takenAt: Date;
     result?: string;
   }>;
-  
+
   // Notifications
   notificationsSent: Array<{
     channel: string;
@@ -764,38 +829,38 @@ export interface MLExperiment {
   id: string;
   name: string;
   description: string;
-  
+
   // Hypothesis
   hypothesis: string;
   objectives: string[];
-  
+
   // Configuration
   baselineModelId?: string;
   variants: ExperimentVariant[];
-  
+
   // Design
   trafficSplit: Record<string, number>; // variant_id -> percentage
   duration: number; // in days
   sampleSize: number;
-  
+
   // Status
   status: 'draft' | 'running' | 'completed' | 'cancelled' | 'paused';
-  
+
   // Results
   results?: ExperimentResults;
-  
+
   // Statistical analysis
   statisticalSignificance?: {
     pValue: number;
     confidenceLevel: number;
     powerAnalysis: number;
   };
-  
+
   // Timeline
   createdAt: Date;
   startedAt?: Date;
   completedAt?: Date;
-  
+
   // Metadata
   owner: string;
   tags: string[];
@@ -805,17 +870,17 @@ export interface ExperimentVariant {
   id: string;
   name: string;
   description: string;
-  
+
   // Configuration
   modelId: string;
   configuration: Record<string, any>;
-  
+
   // Metrics
   metrics: Record<string, number>;
-  
+
   // Traffic allocation
   trafficPercentage: number;
-  
+
   // Status
   isControl: boolean;
   isWinner?: boolean;
@@ -824,23 +889,29 @@ export interface ExperimentVariant {
 export interface ExperimentResults {
   // Primary metrics
   primaryMetric: string;
-  results: Record<string, {
-    value: number;
-    confidence_interval: [number, number];
-    improvement: number; // percentage vs control
-    statistical_significance: boolean;
-  }>;
-  
+  results: Record<
+    string,
+    {
+      value: number;
+      confidence_interval: [number, number];
+      improvement: number; // percentage vs control
+      statistical_significance: boolean;
+    }
+  >;
+
   // Secondary metrics
-  secondaryMetrics: Record<string, {
-    value: number;
-    improvement: number;
-  }>;
-  
+  secondaryMetrics: Record<
+    string,
+    {
+      value: number;
+      improvement: number;
+    }
+  >;
+
   // Winner
   winningVariant?: string;
   recommendation: string;
-  
+
   // Analysis
   analysis: {
     summary: string;
@@ -854,12 +925,12 @@ export interface AutoMLPipeline {
   id: string;
   name: string;
   description: string;
-  
+
   // Configuration
   task: AutoMLTask;
   datasetId: string;
   targetColumn: string;
-  
+
   // Search configuration
   searchConfig: {
     timeLimit: number; // in minutes
@@ -867,24 +938,24 @@ export interface AutoMLPipeline {
     algorithms: string[];
     hyperparameterBudget: number;
   };
-  
+
   // Feature engineering
   featureEngineering: {
     enabled: boolean;
     strategies: string[];
     maxFeatures: number;
   };
-  
+
   // Model selection
   modelSelection: {
     strategy: 'best_single' | 'ensemble' | 'stacking';
     ensembleSize?: number;
   };
-  
+
   // Status
   status: 'configured' | 'running' | 'completed' | 'failed';
   progress: number; // 0-100
-  
+
   // Results
   trials: AutoMLTrial[];
   bestModel?: string;
@@ -893,13 +964,13 @@ export interface AutoMLPipeline {
     score: number;
     rank: number;
   }>;
-  
+
   // Timeline
   createdAt: Date;
   startedAt?: Date;
   completedAt?: Date;
   estimatedCompletionTime?: Date;
-  
+
   // Resources
   resourceUsage: {
     cpuHours: number;
@@ -912,30 +983,30 @@ export interface AutoMLPipeline {
 export interface AutoMLTrial {
   id: string;
   pipelineId: string;
-  
+
   // Configuration
   algorithm: string;
   hyperparameters: Record<string, any>;
   featureEngineering: string[];
-  
+
   // Results
   score: number;
   metrics: Record<string, number>;
-  
+
   // Status
   status: TrainingStatus;
-  
+
   // Performance
   trainingTime: number; // in seconds
   evaluationTime: number; // in seconds
-  
+
   // Model
   modelId?: string;
-  
+
   // Timeline
   startedAt: Date;
   completedAt?: Date;
-  
+
   // Error handling
   errorMessage?: string;
 }
@@ -944,7 +1015,7 @@ export interface MLWorkflow {
   id: string;
   name: string;
   description: string;
-  
+
   // Configuration
   steps: WorkflowStep[];
   schedule?: {
@@ -952,23 +1023,23 @@ export interface MLWorkflow {
     cron: string;
     timezone: string;
   };
-  
+
   // Triggers
   triggers: Array<{
     type: 'manual' | 'schedule' | 'data_change' | 'model_drift' | 'performance_threshold';
     configuration: Record<string, any>;
   }>;
-  
+
   // Status
   status: 'active' | 'paused' | 'disabled';
-  
+
   // Execution history
   executions: WorkflowExecution[];
-  
+
   // Metadata
   owner: string;
   tags: string[];
-  
+
   // Timeline
   createdAt: Date;
   updatedAt: Date;
@@ -979,14 +1050,22 @@ export interface MLWorkflow {
 export interface WorkflowStep {
   id: string;
   name: string;
-  type: 'data_ingestion' | 'data_preprocessing' | 'feature_engineering' | 'model_training' | 'model_evaluation' | 'model_deployment' | 'monitoring' | 'custom';
-  
+  type:
+    | 'data_ingestion'
+    | 'data_preprocessing'
+    | 'feature_engineering'
+    | 'model_training'
+    | 'model_evaluation'
+    | 'model_deployment'
+    | 'monitoring'
+    | 'custom';
+
   // Configuration
   configuration: Record<string, any>;
-  
+
   // Dependencies
   dependsOn: string[];
-  
+
   // Resources
   resources: {
     cpu?: string;
@@ -994,14 +1073,14 @@ export interface WorkflowStep {
     gpu?: string;
     timeout?: number; // in minutes
   };
-  
+
   // Retry policy
   retryPolicy: {
     maxRetries: number;
     retryDelay: number; // in seconds
     backoffMultiplier: number;
   };
-  
+
   // Outputs
   outputs: Record<string, string>;
 }
@@ -1009,10 +1088,10 @@ export interface WorkflowStep {
 export interface WorkflowExecution {
   id: string;
   workflowId: string;
-  
+
   // Status
   status: 'running' | 'completed' | 'failed' | 'cancelled';
-  
+
   // Steps
   stepExecutions: Array<{
     stepId: string;
@@ -1022,23 +1101,23 @@ export interface WorkflowExecution {
     outputs?: Record<string, any>;
     errorMessage?: string;
   }>;
-  
+
   // Timeline
   startedAt: Date;
   completedAt?: Date;
   duration?: number; // in seconds
-  
+
   // Trigger
   triggeredBy: string;
   triggerType: string;
-  
+
   // Resources
   resourceUsage: {
     totalCpuTime: number;
     totalMemoryUsage: number;
     totalCost: number;
   };
-  
+
   // Logs
   logs: Array<{
     timestamp: Date;
@@ -1053,13 +1132,13 @@ export interface MLDashboard {
   name: string;
   description: string;
   type: 'overview' | 'model_performance' | 'data_quality' | 'operations' | 'business' | 'custom';
-  
+
   // Layout
   layout: {
     columns: number;
     widgets: MLWidget[];
   };
-  
+
   // Filters
   filters: Array<{
     name: string;
@@ -1067,20 +1146,20 @@ export interface MLDashboard {
     options?: string[];
     defaultValue?: any;
   }>;
-  
+
   // Refresh
   autoRefresh: boolean;
   refreshInterval: number; // in seconds
-  
+
   // Access control
   visibility: 'private' | 'team' | 'organization';
   sharedWith: string[];
-  
+
   // Timeline
   createdAt: Date;
   updatedAt: Date;
   lastViewedAt?: Date;
-  
+
   // Metadata
   owner: string;
   tags: string[];
@@ -1088,8 +1167,16 @@ export interface MLDashboard {
 
 export interface MLWidget {
   id: string;
-  type: 'metric' | 'chart' | 'table' | 'model_list' | 'alert_list' | 'prediction_distribution' | 'feature_importance' | 'drift_monitor';
-  
+  type:
+    | 'metric'
+    | 'chart'
+    | 'table'
+    | 'model_list'
+    | 'alert_list'
+    | 'prediction_distribution'
+    | 'feature_importance'
+    | 'drift_monitor';
+
   // Layout
   position: {
     x: number;
@@ -1097,19 +1184,19 @@ export interface MLWidget {
     width: number;
     height: number;
   };
-  
+
   // Configuration
   title: string;
   description?: string;
   config: Record<string, any>;
-  
+
   // Data
   dataSource: string;
   query?: string;
-  
+
   // Visualization
   chartType?: 'line' | 'bar' | 'pie' | 'scatter' | 'heatmap' | 'gauge';
-  
+
   // Status
   isLoading: boolean;
   lastUpdated?: Date;
@@ -1124,21 +1211,21 @@ export interface MLResourceUsage {
     peak: number;
     unit: 'cores';
   };
-  
+
   memory: {
     current: number;
     average: number;
     peak: number;
     unit: 'GB';
   };
-  
+
   gpu?: {
     current: number;
     average: number;
     peak: number;
     unit: 'GPU-hours';
   };
-  
+
   // Storage
   storage: {
     datasets: number;
@@ -1147,14 +1234,14 @@ export interface MLResourceUsage {
     total: number;
     unit: 'GB';
   };
-  
+
   // Network
   network: {
     ingress: number;
     egress: number;
     unit: 'GB';
   };
-  
+
   // Costs
   costs: {
     compute: number;
@@ -1164,7 +1251,7 @@ export interface MLResourceUsage {
     currency: 'USD';
     period: 'monthly';
   };
-  
+
   // Timeline
   period: {
     start: Date;
@@ -1181,7 +1268,7 @@ export interface MLStats {
     deployed: number;
     training: number;
   };
-  
+
   // Datasets
   datasets: {
     total: number;
@@ -1189,7 +1276,7 @@ export interface MLStats {
     byType: Record<DatasetType, number>;
     byStatus: Record<DatasetStatus, number>;
   };
-  
+
   // Predictions
   predictions: {
     total: number;
@@ -1199,7 +1286,7 @@ export interface MLStats {
     averageLatency: number; // in ms
     errorRate: number; // percentage
   };
-  
+
   // Training
   training: {
     activeJobs: number;
@@ -1207,31 +1294,31 @@ export interface MLStats {
     averageTrainingTime: number; // in minutes
     successRate: number; // percentage
   };
-  
+
   // Experiments
   experiments: {
     active: number;
     completed: number;
     successfulOptimizations: number;
   };
-  
+
   // Alerts
   alerts: {
     active: number;
     byType: Record<AlertType, number>;
     bySeverity: Record<'low' | 'medium' | 'high' | 'critical', number>;
   };
-  
+
   // Resource usage
   resourceUsage: MLResourceUsage;
-  
+
   // Performance
   performance: {
     systemUptime: number; // percentage
     averageResponseTime: number; // in ms
     throughput: number; // predictions per second
   };
-  
+
   // Timeline
   generatedAt: Date;
   period: string;

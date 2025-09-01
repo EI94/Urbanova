@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Badge } from './Badge';
+
+import { aimlService } from '@/lib/aimlService';
 import {
   MLModel,
   Dataset,
@@ -20,10 +21,11 @@ import {
   PredictionStatus,
   ModelFramework,
   AlertType,
-  OptimizationMetric
+  OptimizationMetric,
 } from '@/types/aiml';
-import { aimlService } from '@/lib/aimlService';
 import { TeamRole } from '@/types/team';
+
+import { Badge } from './Badge';
 
 interface AIMLCenterProps {
   isOpen: boolean;
@@ -40,10 +42,19 @@ export default function AIMLCenter({
   currentUserId,
   currentUserName,
   currentUserRole,
-  currentUserAvatar
+  currentUserAvatar,
 }: AIMLCenterProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'models' | 'datasets' | 'training' | 'predictions' | 'experiments' | 'workflows' | 'alerts'>('overview');
-  
+  const [activeTab, setActiveTab] = useState<
+    | 'overview'
+    | 'models'
+    | 'datasets'
+    | 'training'
+    | 'predictions'
+    | 'experiments'
+    | 'workflows'
+    | 'alerts'
+  >('overview');
+
   // Stati per i dati
   const [mlStats, setMLStats] = useState<MLStats | null>(null);
   const [models, setModels] = useState<MLModel[]>([]);
@@ -77,7 +88,7 @@ export default function AIMLCenter({
     description: '',
     type: 'classification' as ModelType,
     framework: 'scikit_learn' as ModelFramework,
-    datasetId: ''
+    datasetId: '',
   });
 
   const [predictionInput, setPredictionInput] = useState<Record<string, any>>({});
@@ -119,7 +130,7 @@ export default function AIMLCenter({
         description: '',
         type: 'classification',
         framework: 'scikit_learn',
-        datasetId: ''
+        datasetId: '',
       });
       setShowCreateModel(false);
 
@@ -136,20 +147,20 @@ export default function AIMLCenter({
       loadData(); // Ricarica per aggiornare lo stato del modello
       console.log('Training avviato con successo!');
     } catch (error) {
-      console.error('Errore nell\'avvio del training:', error);
+      console.error("Errore nell'avvio del training:", error);
     }
   };
 
   const handleMakePrediction = () => {
     if (!selectedModel) return;
-    
+
     try {
       const prediction = aimlService.createPrediction(
         selectedModel.id,
         predictionInput,
         currentUserId
       );
-      
+
       setPredictions(prev => [...prev, prediction]);
       setPredictionInput({});
       setShowPredictionModal(false);
@@ -167,7 +178,10 @@ export default function AIMLCenter({
     }
   };
 
-  const handleUpdateAlertStatus = (alertId: string, status: 'active' | 'acknowledged' | 'resolved' | 'suppressed') => {
+  const handleUpdateAlertStatus = (
+    alertId: string,
+    status: 'active' | 'acknowledged' | 'resolved' | 'suppressed'
+  ) => {
     const success = aimlService.updateAlertStatus(alertId, status);
     if (success) {
       loadData();
@@ -185,12 +199,14 @@ export default function AIMLCenter({
       nlp: 'bg-indigo-100 text-indigo-800',
       computer_vision: 'bg-pink-100 text-pink-800',
       time_series: 'bg-teal-100 text-teal-800',
-      reinforcement_learning: 'bg-orange-100 text-orange-800'
+      reinforcement_learning: 'bg-orange-100 text-orange-800',
     };
     return colors[type] || 'bg-gray-100 text-gray-800';
   };
 
-  const getStatusColor = (status: ModelStatus | DatasetStatus | TrainingStatus | DeploymentStatus) => {
+  const getStatusColor = (
+    status: ModelStatus | DatasetStatus | TrainingStatus | DeploymentStatus
+  ) => {
     const colors = {
       training: 'bg-yellow-100 text-yellow-800',
       trained: 'bg-blue-100 text-blue-800',
@@ -210,7 +226,7 @@ export default function AIMLCenter({
       paused: 'bg-yellow-100 text-yellow-800',
       deploying: 'bg-yellow-100 text-yellow-800',
       updating: 'bg-blue-100 text-blue-800',
-      stopped: 'bg-gray-100 text-gray-800'
+      stopped: 'bg-gray-100 text-gray-800',
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
@@ -220,7 +236,7 @@ export default function AIMLCenter({
       low: 'bg-blue-100 text-blue-800',
       medium: 'bg-yellow-100 text-yellow-800',
       high: 'bg-orange-100 text-orange-800',
-      critical: 'bg-red-100 text-red-800'
+      critical: 'bg-red-100 text-red-800',
     };
     return colors[severity] || 'bg-gray-100 text-gray-800';
   };
@@ -231,7 +247,7 @@ export default function AIMLCenter({
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     }).format(date);
   };
 
@@ -242,9 +258,9 @@ export default function AIMLCenter({
   };
 
   const formatNumber = (num: number, decimals: number = 2) => {
-    return num.toLocaleString('it-IT', { 
+    return num.toLocaleString('it-IT', {
       minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals
+      maximumFractionDigits: decimals,
     });
   };
 
@@ -252,34 +268,36 @@ export default function AIMLCenter({
     const units = ['B', 'KB', 'MB', 'GB', 'TB'];
     let size = bytes;
     let unitIndex = 0;
-    
+
     while (size >= 1024 && unitIndex < units.length - 1) {
       size /= 1024;
       unitIndex++;
     }
-    
+
     return `${size.toFixed(1)} ${units[unitIndex]}`;
   };
 
   const filteredModels = models.filter(model => {
-    const matchesQuery = searchQuery === '' || 
+    const matchesQuery =
+      searchQuery === '' ||
       model.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       model.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       model.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    
+
     const matchesType = modelTypeFilter === '' || model.type === modelTypeFilter;
     const matchesStatus = modelStatusFilter === '' || model.status === modelStatusFilter;
-    
+
     return matchesQuery && matchesType && matchesStatus;
   });
 
   const filteredDatasets = datasets.filter(dataset => {
-    const matchesQuery = searchQuery === '' || 
+    const matchesQuery =
+      searchQuery === '' ||
       dataset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       dataset.description.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesType = datasetTypeFilter === '' || dataset.type === datasetTypeFilter;
-    
+
     return matchesQuery && matchesType;
   });
 
@@ -301,13 +319,12 @@ export default function AIMLCenter({
             </div>
             <div>
               <h2 className="text-xl font-semibold text-gray-900">AI & Machine Learning Center</h2>
-              <p className="text-sm text-gray-500">Centro avanzato per gestione AI e Machine Learning</p>
+              <p className="text-sm text-gray-500">
+                Centro avanzato per gestione AI e Machine Learning
+              </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
             <span className="text-2xl">×</span>
           </button>
         </div>
@@ -326,11 +343,9 @@ export default function AIMLCenter({
                     <span className="text-blue-600">🧠</span>
                   </div>
                 </div>
-                <p className="text-xs text-blue-600 mt-1">
-                  su {mlStats.models.total} totali
-                </p>
+                <p className="text-xs text-blue-600 mt-1">su {mlStats.models.total} totali</p>
               </div>
-              
+
               <div className="bg-green-50 rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -350,7 +365,9 @@ export default function AIMLCenter({
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-yellow-600 font-medium">Training Attivi</p>
-                    <p className="text-2xl font-bold text-yellow-900">{mlStats.training.activeJobs}</p>
+                    <p className="text-2xl font-bold text-yellow-900">
+                      {mlStats.training.activeJobs}
+                    </p>
                   </div>
                   <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
                     <span className="text-yellow-600">⚡</span>
@@ -386,16 +403,16 @@ export default function AIMLCenter({
                     <span className="text-red-600">🚨</span>
                   </div>
                 </div>
-                <p className="text-xs text-red-600 mt-1">
-                  drift e performance
-                </p>
+                <p className="text-xs text-red-600 mt-1">drift e performance</p>
               </div>
 
               <div className="bg-indigo-50 rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-indigo-600 font-medium">Esperimenti</p>
-                    <p className="text-2xl font-bold text-indigo-900">{mlStats.experiments.active}</p>
+                    <p className="text-2xl font-bold text-indigo-900">
+                      {mlStats.experiments.active}
+                    </p>
                   </div>
                   <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
                     <span className="text-indigo-600">🔬</span>
@@ -416,12 +433,22 @@ export default function AIMLCenter({
               { id: 'overview', label: 'Overview', icon: '🎯', count: 0 },
               { id: 'models', label: 'Modelli', icon: '🧠', count: models.length },
               { id: 'datasets', label: 'Dataset', icon: '📊', count: datasets.length },
-              { id: 'training', label: 'Training', icon: '⚡', count: trainingRuns.filter(tr => tr.status === 'running').length },
+              {
+                id: 'training',
+                label: 'Training',
+                icon: '⚡',
+                count: trainingRuns.filter(tr => tr.status === 'running').length,
+              },
               { id: 'predictions', label: 'Predizioni', icon: '🎯', count: predictions.length },
               { id: 'experiments', label: 'Esperimenti', icon: '🔬', count: experiments.length },
               { id: 'workflows', label: 'Workflow', icon: '🔄', count: workflows.length },
-              { id: 'alerts', label: 'Alert', icon: '🚨', count: alerts.filter(a => a.status === 'active').length }
-            ].map((tab) => (
+              {
+                id: 'alerts',
+                label: 'Alert',
+                icon: '🚨',
+                count: alerts.filter(a => a.status === 'active').length,
+              },
+            ].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
@@ -434,9 +461,7 @@ export default function AIMLCenter({
                 <span>{tab.icon}</span>
                 <span>{tab.label}</span>
                 {tab.count > 0 && (
-                  <Badge className="ml-2 bg-purple-100 text-purple-800">
-                    {tab.count}
-                  </Badge>
+                  <Badge className="ml-2 bg-purple-100 text-purple-800">{tab.count}</Badge>
                 )}
               </button>
             ))}
@@ -458,27 +483,40 @@ export default function AIMLCenter({
                         <span className="text-sm font-medium text-gray-900">87.5%</span>
                       </div>
                       <div className="h-2 bg-gray-200 rounded-full">
-                        <div className="h-2 bg-green-500 rounded-full" style={{ width: '87.5%' }}></div>
+                        <div
+                          className="h-2 bg-green-500 rounded-full"
+                          style={{ width: '87.5%' }}
+                        ></div>
                       </div>
                     </div>
-                    
+
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm text-gray-600">Latenza Media</span>
-                        <span className="text-sm font-medium text-gray-900">{formatNumber(mlStats.predictions.averageLatency)}ms</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {formatNumber(mlStats.predictions.averageLatency)}ms
+                        </span>
                       </div>
                       <div className="h-2 bg-gray-200 rounded-full">
-                        <div className="h-2 bg-blue-500 rounded-full" style={{ width: '75%' }}></div>
+                        <div
+                          className="h-2 bg-blue-500 rounded-full"
+                          style={{ width: '75%' }}
+                        ></div>
                       </div>
                     </div>
-                    
+
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm text-gray-600">Success Rate</span>
-                        <span className="text-sm font-medium text-gray-900">{formatNumber(100 - mlStats.predictions.errorRate)}%</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {formatNumber(100 - mlStats.predictions.errorRate)}%
+                        </span>
                       </div>
                       <div className="h-2 bg-gray-200 rounded-full">
-                        <div className="h-2 bg-green-500 rounded-full" style={{ width: `${100 - mlStats.predictions.errorRate}%` }}></div>
+                        <div
+                          className="h-2 bg-green-500 rounded-full"
+                          style={{ width: `${100 - mlStats.predictions.errorRate}%` }}
+                        ></div>
                       </div>
                     </div>
                   </div>
@@ -492,39 +530,59 @@ export default function AIMLCenter({
                       <span className="text-sm text-gray-600">CPU</span>
                       <div className="flex items-center space-x-2">
                         <div className="w-32 h-2 bg-gray-200 rounded-full">
-                          <div className="h-2 bg-blue-500 rounded-full" style={{ width: '45%' }}></div>
+                          <div
+                            className="h-2 bg-blue-500 rounded-full"
+                            style={{ width: '45%' }}
+                          ></div>
                         </div>
-                        <span className="text-sm font-medium text-gray-900">{mlStats.resourceUsage.cpu.current} cores</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {mlStats.resourceUsage.cpu.current} cores
+                        </span>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Memory</span>
                       <div className="flex items-center space-x-2">
                         <div className="w-32 h-2 bg-gray-200 rounded-full">
-                          <div className="h-2 bg-green-500 rounded-full" style={{ width: '60%' }}></div>
+                          <div
+                            className="h-2 bg-green-500 rounded-full"
+                            style={{ width: '60%' }}
+                          ></div>
                         </div>
-                        <span className="text-sm font-medium text-gray-900">{mlStats.resourceUsage.memory.current}GB</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {mlStats.resourceUsage.memory.current}GB
+                        </span>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">GPU</span>
                       <div className="flex items-center space-x-2">
                         <div className="w-32 h-2 bg-gray-200 rounded-full">
-                          <div className="h-2 bg-purple-500 rounded-full" style={{ width: '35%' }}></div>
+                          <div
+                            className="h-2 bg-purple-500 rounded-full"
+                            style={{ width: '35%' }}
+                          ></div>
                         </div>
-                        <span className="text-sm font-medium text-gray-900">{mlStats.resourceUsage.gpu?.current}h</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {mlStats.resourceUsage.gpu?.current}h
+                        </span>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Storage</span>
                       <div className="flex items-center space-x-2">
                         <div className="w-32 h-2 bg-gray-200 rounded-full">
-                          <div className="h-2 bg-yellow-500 rounded-full" style={{ width: '40%' }}></div>
+                          <div
+                            className="h-2 bg-yellow-500 rounded-full"
+                            style={{ width: '40%' }}
+                          ></div>
                         </div>
-                        <span className="text-sm font-medium text-gray-900">{formatNumber(mlStats.resourceUsage.storage.total)}GB</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {formatNumber(mlStats.resourceUsage.storage.total)}GB
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -533,14 +591,14 @@ export default function AIMLCenter({
 
               {/* Model Types Distribution */}
               <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Distribuzione Tipi di Modello</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  Distribuzione Tipi di Modello
+                </h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {Object.entries(mlStats.models.byType).map(([type, count]) => (
                     <div key={type} className="text-center">
                       <div className="text-2xl font-bold text-gray-900">{count}</div>
-                      <Badge className={getModelTypeColor(type as ModelType)}>
-                        {type}
-                      </Badge>
+                      <Badge className={getModelTypeColor(type as ModelType)}>{type}</Badge>
                     </div>
                   ))}
                 </div>
@@ -550,19 +608,22 @@ export default function AIMLCenter({
               <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Attività Recenti</h3>
                 <div className="space-y-3">
-                  {trainingRuns.slice(0, 5).map((training) => (
-                    <div key={training.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  {trainingRuns.slice(0, 5).map(training => (
+                    <div
+                      key={training.id}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    >
                       <div className="flex items-center space-x-3">
                         <span className="text-lg">⚡</span>
                         <div>
-                          <p className="text-sm font-medium text-gray-900">Training {training.modelId}</p>
+                          <p className="text-sm font-medium text-gray-900">
+                            Training {training.modelId}
+                          </p>
                           <p className="text-xs text-gray-500">{formatDate(training.startedAt)}</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Badge className={getStatusColor(training.status)}>
-                          {training.status}
-                        </Badge>
+                        <Badge className={getStatusColor(training.status)}>{training.status}</Badge>
                         {training.progress !== undefined && (
                           <span className="text-sm text-gray-600">{training.progress}%</span>
                         )}
@@ -582,13 +643,13 @@ export default function AIMLCenter({
                   <input
                     type="text"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={e => setSearchQuery(e.target.value)}
                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500"
                     placeholder="Cerca modelli..."
                   />
                   <select
                     value={modelTypeFilter}
-                    onChange={(e) => setModelTypeFilter(e.target.value as ModelType | '')}
+                    onChange={e => setModelTypeFilter(e.target.value as ModelType | '')}
                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500"
                   >
                     <option value="">Tutti i tipi</option>
@@ -601,7 +662,7 @@ export default function AIMLCenter({
                   </select>
                   <select
                     value={modelStatusFilter}
-                    onChange={(e) => setModelStatusFilter(e.target.value as ModelStatus | '')}
+                    onChange={e => setModelStatusFilter(e.target.value as ModelStatus | '')}
                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500"
                   >
                     <option value="">Tutti gli stati</option>
@@ -620,21 +681,20 @@ export default function AIMLCenter({
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {filteredModels.map((model) => (
-                  <div key={model.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                {filteredModels.map(model => (
+                  <div
+                    key={model.id}
+                    className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                  >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
                           <h4 className="font-medium text-gray-900">{model.name}</h4>
-                          <Badge className={getModelTypeColor(model.type)}>
-                            {model.type}
-                          </Badge>
-                          <Badge className={getStatusColor(model.status)}>
-                            {model.status}
-                          </Badge>
+                          <Badge className={getModelTypeColor(model.type)}>{model.type}</Badge>
+                          <Badge className={getStatusColor(model.status)}>{model.status}</Badge>
                         </div>
                         <p className="text-sm text-gray-600 mb-3">{model.description}</p>
-                        
+
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
                             <span className="text-gray-500">Framework:</span>
@@ -660,22 +720,42 @@ export default function AIMLCenter({
                             <h5 className="text-sm font-medium text-gray-900 mb-2">Performance</h5>
                             <div className="grid grid-cols-2 gap-2 text-xs">
                               {model.metrics.accuracy && (
-                                <div>Accuracy: <span className="font-medium">{formatNumber(model.metrics.accuracy * 100)}%</span></div>
+                                <div>
+                                  Accuracy:{' '}
+                                  <span className="font-medium">
+                                    {formatNumber(model.metrics.accuracy * 100)}%
+                                  </span>
+                                </div>
                               )}
                               {model.metrics.mae && (
-                                <div>MAE: <span className="font-medium">{formatNumber(model.metrics.mae)}</span></div>
+                                <div>
+                                  MAE:{' '}
+                                  <span className="font-medium">
+                                    {formatNumber(model.metrics.mae)}
+                                  </span>
+                                </div>
                               )}
                               {model.metrics.r2Score && (
-                                <div>R²: <span className="font-medium">{formatNumber(model.metrics.r2Score)}</span></div>
+                                <div>
+                                  R²:{' '}
+                                  <span className="font-medium">
+                                    {formatNumber(model.metrics.r2Score)}
+                                  </span>
+                                </div>
                               )}
                               {model.metrics.aucRoc && (
-                                <div>AUC-ROC: <span className="font-medium">{formatNumber(model.metrics.aucRoc)}</span></div>
+                                <div>
+                                  AUC-ROC:{' '}
+                                  <span className="font-medium">
+                                    {formatNumber(model.metrics.aucRoc)}
+                                  </span>
+                                </div>
                               )}
                             </div>
                           </div>
                         )}
                       </div>
-                      
+
                       <div className="flex flex-col space-y-2 ml-4">
                         {model.status === 'trained' && (
                           <button
@@ -715,7 +795,7 @@ export default function AIMLCenter({
                         </button>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center justify-between text-xs text-gray-500">
                       <span>Creato: {formatDate(model.createdAt)}</span>
                       {model.lastPredictionAt && (
@@ -736,13 +816,13 @@ export default function AIMLCenter({
                   <input
                     type="text"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={e => setSearchQuery(e.target.value)}
                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500"
                     placeholder="Cerca dataset..."
                   />
                   <select
                     value={datasetTypeFilter}
-                    onChange={(e) => setDatasetTypeFilter(e.target.value as DatasetType | '')}
+                    onChange={e => setDatasetTypeFilter(e.target.value as DatasetType | '')}
                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500"
                   >
                     <option value="">Tutti i tipi</option>
@@ -756,12 +836,15 @@ export default function AIMLCenter({
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {filteredDatasets.map((dataset) => (
-                  <div key={dataset.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow cursor-pointer"
-                       onClick={() => {
-                         setSelectedDataset(dataset);
-                         setShowDatasetDetails(true);
-                       }}>
+                {filteredDatasets.map(dataset => (
+                  <div
+                    key={dataset.id}
+                    className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => {
+                      setSelectedDataset(dataset);
+                      setShowDatasetDetails(true);
+                    }}
+                  >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
@@ -769,24 +852,28 @@ export default function AIMLCenter({
                           <Badge className={getModelTypeColor(dataset.type as any)}>
                             {dataset.type}
                           </Badge>
-                          <Badge className={getStatusColor(dataset.status)}>
-                            {dataset.status}
-                          </Badge>
+                          <Badge className={getStatusColor(dataset.status)}>{dataset.status}</Badge>
                         </div>
                         <p className="text-sm text-gray-600 mb-3">{dataset.description}</p>
-                        
+
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
                             <span className="text-gray-500">Righe:</span>
-                            <span className="ml-2 font-medium">{dataset.schema.rowCount.toLocaleString()}</span>
+                            <span className="ml-2 font-medium">
+                              {dataset.schema.rowCount.toLocaleString()}
+                            </span>
                           </div>
                           <div>
                             <span className="text-gray-500">Colonne:</span>
-                            <span className="ml-2 font-medium">{dataset.schema.columns.length}</span>
+                            <span className="ml-2 font-medium">
+                              {dataset.schema.columns.length}
+                            </span>
                           </div>
                           <div>
                             <span className="text-gray-500">Dimensione:</span>
-                            <span className="ml-2 font-medium">{formatBytes(dataset.schema.size)}</span>
+                            <span className="ml-2 font-medium">
+                              {formatBytes(dataset.schema.size)}
+                            </span>
                           </div>
                           <div>
                             <span className="text-gray-500">Versione:</span>
@@ -800,25 +887,33 @@ export default function AIMLCenter({
                           <div className="grid grid-cols-2 gap-2 text-xs">
                             <div>
                               <span className="text-gray-500">Completezza:</span>
-                              <span className="ml-2 font-medium text-green-600">{formatNumber(dataset.quality.completeness)}%</span>
+                              <span className="ml-2 font-medium text-green-600">
+                                {formatNumber(dataset.quality.completeness)}%
+                              </span>
                             </div>
                             <div>
                               <span className="text-gray-500">Validità:</span>
-                              <span className="ml-2 font-medium text-blue-600">{formatNumber(dataset.quality.validity)}%</span>
+                              <span className="ml-2 font-medium text-blue-600">
+                                {formatNumber(dataset.quality.validity)}%
+                              </span>
                             </div>
                             <div>
                               <span className="text-gray-500">Consistenza:</span>
-                              <span className="ml-2 font-medium text-purple-600">{formatNumber(dataset.quality.consistency)}%</span>
+                              <span className="ml-2 font-medium text-purple-600">
+                                {formatNumber(dataset.quality.consistency)}%
+                              </span>
                             </div>
                             <div>
                               <span className="text-gray-500">Accuratezza:</span>
-                              <span className="ml-2 font-medium text-orange-600">{formatNumber(dataset.quality.accuracy)}%</span>
+                              <span className="ml-2 font-medium text-orange-600">
+                                {formatNumber(dataset.quality.accuracy)}%
+                              </span>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center justify-between text-xs text-gray-500">
                       <span>Owner: {dataset.owner}</span>
                       <span>Aggiornato: {formatDate(dataset.updatedAt)}</span>
@@ -832,10 +927,13 @@ export default function AIMLCenter({
           {activeTab === 'training' && (
             <div className="p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-6">Training Jobs</h3>
-              
+
               <div className="space-y-4">
-                {trainingRuns.map((training) => (
-                  <div key={training.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                {trainingRuns.map(training => (
+                  <div
+                    key={training.id}
+                    className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                  >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
@@ -844,25 +942,33 @@ export default function AIMLCenter({
                             {training.status}
                           </Badge>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
                           <div>
                             <span className="text-gray-500">Progresso:</span>
-                            <span className="ml-2 font-medium">{training.progress?.toFixed(1)}%</span>
+                            <span className="ml-2 font-medium">
+                              {training.progress?.toFixed(1)}%
+                            </span>
                           </div>
                           <div>
                             <span className="text-gray-500">Epoca:</span>
-                            <span className="ml-2 font-medium">{training.currentEpoch}/{training.totalEpochs}</span>
+                            <span className="ml-2 font-medium">
+                              {training.currentEpoch}/{training.totalEpochs}
+                            </span>
                           </div>
                           <div>
                             <span className="text-gray-500">Durata:</span>
                             <span className="ml-2 font-medium">
-                              {training.duration ? formatDuration(training.duration) : 'In corso...'}
+                              {training.duration
+                                ? formatDuration(training.duration)
+                                : 'In corso...'}
                             </span>
                           </div>
                           <div>
                             <span className="text-gray-500">Avviato:</span>
-                            <span className="ml-2 font-medium">{formatDate(training.startedAt)}</span>
+                            <span className="ml-2 font-medium">
+                              {formatDate(training.startedAt)}
+                            </span>
                           </div>
                         </div>
 
@@ -874,8 +980,8 @@ export default function AIMLCenter({
                               <span className="font-medium">{training.progress.toFixed(1)}%</span>
                             </div>
                             <div className="h-2 bg-gray-200 rounded-full">
-                              <div 
-                                className="h-2 bg-purple-500 rounded-full transition-all duration-300" 
+                              <div
+                                className="h-2 bg-purple-500 rounded-full transition-all duration-300"
                                 style={{ width: `${training.progress}%` }}
                               ></div>
                             </div>
@@ -885,7 +991,9 @@ export default function AIMLCenter({
                         {/* Metriche Training */}
                         {training.finalMetrics && (
                           <div className="p-3 bg-gray-50 rounded-lg">
-                            <h5 className="text-sm font-medium text-gray-900 mb-2">Metriche Finali</h5>
+                            <h5 className="text-sm font-medium text-gray-900 mb-2">
+                              Metriche Finali
+                            </h5>
                             <div className="grid grid-cols-2 gap-2 text-xs">
                               {Object.entries(training.finalMetrics).map(([key, value]) => (
                                 <div key={key}>
@@ -897,7 +1005,7 @@ export default function AIMLCenter({
                           </div>
                         )}
                       </div>
-                      
+
                       <div className="flex flex-col space-y-2 ml-4">
                         <button
                           onClick={() => {
@@ -909,9 +1017,7 @@ export default function AIMLCenter({
                           👁️ Dettagli
                         </button>
                         {training.status === 'running' && (
-                          <button
-                            className="bg-red-50 hover:bg-red-100 text-red-700 px-3 py-1 rounded text-sm font-medium transition-colors"
-                          >
+                          <button className="bg-red-50 hover:bg-red-100 text-red-700 px-3 py-1 rounded text-sm font-medium transition-colors">
                             ⏹️ Stop
                           </button>
                         )}
@@ -929,7 +1035,7 @@ export default function AIMLCenter({
                 <h3 className="text-lg font-medium text-gray-900">Alert Machine Learning</h3>
                 <select
                   value={alertTypeFilter}
-                  onChange={(e) => setAlertTypeFilter(e.target.value as AlertType | '')}
+                  onChange={e => setAlertTypeFilter(e.target.value as AlertType | '')}
                   className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500"
                 >
                   <option value="">Tutti i tipi</option>
@@ -942,8 +1048,11 @@ export default function AIMLCenter({
               </div>
 
               <div className="space-y-4">
-                {filteredAlerts.map((alert) => (
-                  <div key={alert.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                {filteredAlerts.map(alert => (
+                  <div
+                    key={alert.id}
+                    className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                  >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
@@ -951,14 +1060,20 @@ export default function AIMLCenter({
                           <Badge className={getAlertSeverityColor(alert.severity)}>
                             {alert.severity}
                           </Badge>
-                          <Badge className={alert.status === 'active' ? 'bg-red-100 text-red-800' : 
-                                         alert.status === 'acknowledged' ? 'bg-yellow-100 text-yellow-800' :
-                                         'bg-green-100 text-green-800'}>
+                          <Badge
+                            className={
+                              alert.status === 'active'
+                                ? 'bg-red-100 text-red-800'
+                                : alert.status === 'acknowledged'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-green-100 text-green-800'
+                            }
+                          >
                             {alert.status}
                           </Badge>
                         </div>
                         <p className="text-sm text-gray-600 mb-3">{alert.description}</p>
-                        
+
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                           <div>
                             <span className="text-gray-500">Tipo:</span>
@@ -972,22 +1087,30 @@ export default function AIMLCenter({
                           )}
                           <div>
                             <span className="text-gray-500">Valore:</span>
-                            <span className="ml-2 font-medium">{formatNumber(alert.triggerValue)}</span>
+                            <span className="ml-2 font-medium">
+                              {formatNumber(alert.triggerValue)}
+                            </span>
                           </div>
                           <div>
                             <span className="text-gray-500">Soglia:</span>
-                            <span className="ml-2 font-medium">{formatNumber(alert.threshold)}</span>
+                            <span className="ml-2 font-medium">
+                              {formatNumber(alert.threshold)}
+                            </span>
                           </div>
                           <div>
                             <span className="text-gray-500">Attivato:</span>
-                            <span className="ml-2 font-medium">{formatDate(alert.triggeredAt)}</span>
+                            <span className="ml-2 font-medium">
+                              {formatDate(alert.triggeredAt)}
+                            </span>
                           </div>
                         </div>
 
                         {/* Azioni suggerite */}
                         {alert.suggestedActions.length > 0 && (
                           <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                            <h5 className="text-sm font-medium text-blue-900 mb-2">Azioni Suggerite</h5>
+                            <h5 className="text-sm font-medium text-blue-900 mb-2">
+                              Azioni Suggerite
+                            </h5>
                             <ul className="text-sm text-blue-800 space-y-1">
                               {alert.suggestedActions.map((action, index) => (
                                 <li key={index}>• {action}</li>
@@ -996,7 +1119,7 @@ export default function AIMLCenter({
                           </div>
                         )}
                       </div>
-                      
+
                       <div className="flex flex-col space-y-2 ml-4">
                         {alert.status === 'active' && (
                           <>
@@ -1036,36 +1159,40 @@ export default function AIMLCenter({
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Crea Nuovo Modello ML</h3>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
                   <input
                     type="text"
                     value={newModel.name}
-                    onChange={(e) => setNewModel(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={e => setNewModel(prev => ({ ...prev, name: e.target.value }))}
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500"
                     placeholder="Nome del modello"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Descrizione</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Descrizione
+                  </label>
                   <textarea
                     value={newModel.description}
-                    onChange={(e) => setNewModel(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={e => setNewModel(prev => ({ ...prev, description: e.target.value }))}
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500"
                     rows={3}
                     placeholder="Descrizione del modello"
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
                     <select
                       value={newModel.type}
-                      onChange={(e) => setNewModel(prev => ({ ...prev, type: e.target.value as ModelType }))}
+                      onChange={e =>
+                        setNewModel(prev => ({ ...prev, type: e.target.value as ModelType }))
+                      }
                       className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500"
                     >
                       <option value="classification">Classification</option>
@@ -1076,12 +1203,19 @@ export default function AIMLCenter({
                       <option value="computer_vision">Computer Vision</option>
                     </select>
                   </div>
-                  
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Framework</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Framework
+                    </label>
                     <select
                       value={newModel.framework}
-                      onChange={(e) => setNewModel(prev => ({ ...prev, framework: e.target.value as ModelFramework }))}
+                      onChange={e =>
+                        setNewModel(prev => ({
+                          ...prev,
+                          framework: e.target.value as ModelFramework,
+                        }))
+                      }
                       className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500"
                     >
                       <option value="scikit_learn">Scikit-Learn</option>
@@ -1093,22 +1227,24 @@ export default function AIMLCenter({
                     </select>
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Dataset</label>
                   <select
                     value={newModel.datasetId}
-                    onChange={(e) => setNewModel(prev => ({ ...prev, datasetId: e.target.value }))}
+                    onChange={e => setNewModel(prev => ({ ...prev, datasetId: e.target.value }))}
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500"
                   >
                     <option value="">Seleziona dataset</option>
-                    {datasets.map((dataset) => (
-                      <option key={dataset.id} value={dataset.id}>{dataset.name}</option>
+                    {datasets.map(dataset => (
+                      <option key={dataset.id} value={dataset.id}>
+                        {dataset.name}
+                      </option>
                     ))}
                   </select>
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-end space-x-3 mt-6">
                 <button
                   onClick={() => setShowCreateModel(false)}
@@ -1132,10 +1268,12 @@ export default function AIMLCenter({
         {showPredictionModal && selectedModel && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Crea Predizione - {selectedModel.name}</h3>
-              
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Crea Predizione - {selectedModel.name}
+              </h3>
+
               <div className="space-y-4">
-                {selectedModel.features.slice(0, 4).map((feature) => (
+                {selectedModel.features.slice(0, 4).map(feature => (
                   <div key={feature.name}>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       {feature.name} ({feature.type})
@@ -1143,7 +1281,9 @@ export default function AIMLCenter({
                     {feature.type === 'categorical' ? (
                       <select
                         value={predictionInput[feature.name] || ''}
-                        onChange={(e) => setPredictionInput(prev => ({ ...prev, [feature.name]: e.target.value }))}
+                        onChange={e =>
+                          setPredictionInput(prev => ({ ...prev, [feature.name]: e.target.value }))
+                        }
                         className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500"
                       >
                         <option value="">Seleziona...</option>
@@ -1168,7 +1308,12 @@ export default function AIMLCenter({
                       <input
                         type="number"
                         value={predictionInput[feature.name] || ''}
-                        onChange={(e) => setPredictionInput(prev => ({ ...prev, [feature.name]: parseFloat(e.target.value) }))}
+                        onChange={e =>
+                          setPredictionInput(prev => ({
+                            ...prev,
+                            [feature.name]: parseFloat(e.target.value),
+                          }))
+                        }
                         className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500"
                         placeholder={`Inserisci ${feature.name}`}
                         step="0.01"
@@ -1177,7 +1322,7 @@ export default function AIMLCenter({
                   </div>
                 ))}
               </div>
-              
+
               <div className="flex items-center justify-end space-x-3 mt-6">
                 <button
                   onClick={() => {

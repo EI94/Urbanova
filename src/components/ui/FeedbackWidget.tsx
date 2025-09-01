@@ -1,8 +1,18 @@
 'use client';
 
+import {
+  MessageSquare,
+  X,
+  Send,
+  Bug,
+  Lightbulb,
+  Star,
+  AlertCircle,
+  CheckCircle,
+} from 'lucide-react';
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, Send, Bug, Lightbulb, Star, AlertCircle, CheckCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+
 import { useAuth } from '@/contexts/AuthContext';
 
 interface FeedbackData {
@@ -40,7 +50,7 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
     userAgent: typeof window !== 'undefined' ? navigator.userAgent : '',
     timestamp: new Date(),
     userEmail: currentUser?.email || '',
-    attachments: []
+    attachments: [],
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,36 +69,36 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
       label: 'Bug o Problema',
       description: 'Qualcosa non funziona correttamente',
       icon: Bug,
-      color: 'text-red-600 bg-red-50 border-red-200'
+      color: 'text-red-600 bg-red-50 border-red-200',
     },
     {
       id: 'improvement',
       label: 'Idea di Miglioramento',
-      description: 'Suggerimento per migliorare l\'esperienza',
+      description: "Suggerimento per migliorare l'esperienza",
       icon: Lightbulb,
-      color: 'text-blue-600 bg-blue-50 border-blue-200'
+      color: 'text-blue-600 bg-blue-50 border-blue-200',
     },
     {
       id: 'feature',
       label: 'Nuova Funzionalità',
       description: 'Richiesta per una nuova caratteristica',
       icon: Star,
-      color: 'text-green-600 bg-green-50 border-green-200'
+      color: 'text-green-600 bg-green-50 border-green-200',
     },
     {
       id: 'other',
       label: 'Altro',
       description: 'Altro tipo di feedback',
       icon: AlertCircle,
-      color: 'text-gray-600 bg-gray-50 border-gray-200'
-    }
+      color: 'text-gray-600 bg-gray-50 border-gray-200',
+    },
   ];
 
   const priorityLevels = [
     { id: 'low', label: 'Bassa', description: 'Non urgente', color: 'text-green-600' },
     { id: 'medium', label: 'Media', description: 'Importante', color: 'text-yellow-600' },
     { id: 'high', label: 'Alta', description: 'Molto importante', color: 'text-orange-600' },
-    { id: 'critical', label: 'Critica', description: 'Blocca l\'uso', color: 'text-red-600' }
+    { id: 'critical', label: 'Critica', description: "Blocca l'uso", color: 'text-red-600' },
   ];
 
   const screens = [
@@ -100,7 +110,7 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
     'Project Timeline',
     'Permessi & Compliance',
     'Impostazioni',
-    'Altro'
+    'Altro',
   ];
 
   const handleTypeSelect = (type: FeedbackData['type']) => {
@@ -125,7 +135,8 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size <= 5 * 1024 * 1024) { // 5MB
+      if (file.size <= 5 * 1024 * 1024) {
+        // 5MB
         setSelectedFile(file);
         toast('File selezionato correttamente', { icon: '✅' });
       } else {
@@ -156,18 +167,18 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
         userLastName: currentUser.lastName || '',
         userRole: currentUser.role || 'USER',
         userCompany: currentUser.company || '',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       console.log('📝 [Feedback] Preparazione dati per invio:', enhancedFeedbackData);
-      
+
       const formData = new FormData();
       const feedbackJson = JSON.stringify(enhancedFeedbackData);
       formData.append('feedback', feedbackJson);
-      
+
       console.log('📝 [Feedback] FormData preparato:', {
         feedback: feedbackJson,
-        formDataEntries: Array.from(formData.entries())
+        formDataEntries: Array.from(formData.entries()),
       });
 
       const response = await fetch('/api/feedback', {
@@ -189,15 +200,15 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
           userAgent: typeof window !== 'undefined' ? navigator.userAgent : '',
           timestamp: new Date(),
           userEmail: currentUser.email || '',
-          attachments: []
+          attachments: [],
         });
         setSelectedFile(null);
       } else {
-        throw new Error('Errore nell\'invio');
+        throw new Error("Errore nell'invio");
       }
     } catch (error) {
       console.error('Errore invio feedback:', error);
-      toast('Errore nell\'invio del feedback. Riprova più tardi.', { icon: '❌' });
+      toast("Errore nell'invio del feedback. Riprova più tardi.", { icon: '❌' });
     } finally {
       setIsSubmitting(false);
     }
@@ -209,21 +220,31 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
 
   const getStepTitle = () => {
     switch (currentStep) {
-      case 1: return 'Cosa vuoi segnalare?';
-      case 2: return 'Quanto è importante?';
-      case 3: return 'A quale schermata si riferisce?';
-      case 4: return 'Dettagli del feedback';
-      default: return '';
+      case 1:
+        return 'Cosa vuoi segnalare?';
+      case 2:
+        return 'Quanto è importante?';
+      case 3:
+        return 'A quale schermata si riferisce?';
+      case 4:
+        return 'Dettagli del feedback';
+      default:
+        return '';
     }
   };
 
   const getStepDescription = () => {
     switch (currentStep) {
-      case 1: return 'Scegli il tipo di feedback che vuoi inviarci. Il tuo contributo è fondamentale per migliorare Urbanova AI!';
-      case 2: return 'Aiutaci a capire l\'urgenza del tuo feedback per poterlo gestire al meglio.';
-      case 3: return 'Se il feedback si riferisce a una schermata specifica, selezionala per aiutarci a localizzare il problema.';
-      case 4: return 'Descrivi nel dettaglio il tuo feedback. Più informazioni ci dai, meglio possiamo aiutarti!';
-      default: return '';
+      case 1:
+        return 'Scegli il tipo di feedback che vuoi inviarci. Il tuo contributo è fondamentale per migliorare Urbanova AI!';
+      case 2:
+        return "Aiutaci a capire l'urgenza del tuo feedback per poterlo gestire al meglio.";
+      case 3:
+        return 'Se il feedback si riferisce a una schermata specifica, selezionala per aiutarci a localizzare il problema.';
+      case 4:
+        return 'Descrivi nel dettaglio il tuo feedback. Più informazioni ci dai, meglio possiamo aiutarti!';
+      default:
+        return '';
     }
   };
 
@@ -239,11 +260,15 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
           setIsOpen(true);
         }}
         className={`fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200 ${
-          currentUser?.email 
-            ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' 
+          currentUser?.email
+            ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
             : 'bg-gray-400 text-gray-200 cursor-not-allowed'
         } ${className}`}
-        title={currentUser?.email ? "Invia feedback o segnala un problema" : "Accedi per inviare feedback"}
+        title={
+          currentUser?.email
+            ? 'Invia feedback o segnala un problema'
+            : 'Accedi per inviare feedback'
+        }
       >
         <MessageSquare className="w-6 h-6" />
       </button>
@@ -288,8 +313,12 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
               {/* Progress Bar */}
               <div className="px-6 py-4 bg-gray-50">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">Passo {currentStep} di 4</span>
-                  <span className="text-sm text-gray-500">{Math.round((currentStep / 4) * 100)}%</span>
+                  <span className="text-sm font-medium text-gray-700">
+                    Passo {currentStep} di 4
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    {Math.round((currentStep / 4) * 100)}%
+                  </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
@@ -309,7 +338,7 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
                       <p className="text-gray-600 mt-2">{getStepDescription()}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                      {feedbackTypes.map((type) => {
+                      {feedbackTypes.map(type => {
                         const Icon = type.icon;
                         return (
                           <button
@@ -335,10 +364,12 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
                       <p className="text-gray-600 mt-2">{getStepDescription()}</p>
                     </div>
                     <div className="space-y-3">
-                      {priorityLevels.map((priority) => (
+                      {priorityLevels.map(priority => (
                         <button
                           key={priority.id}
-                          onClick={() => handlePrioritySelect(priority.id as FeedbackData['priority'])}
+                          onClick={() =>
+                            handlePrioritySelect(priority.id as FeedbackData['priority'])
+                          }
                           className={`w-full p-4 rounded-lg border-2 border-gray-200 hover:border-blue-300 transition-all duration-200 text-left ${priority.color}`}
                         >
                           <div className="font-medium">{priority.label}</div>
@@ -357,7 +388,7 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
                       <p className="text-gray-600 mt-2">{getStepDescription()}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      {screens.map((screen) => (
+                      {screens.map(screen => (
                         <button
                           key={screen}
                           onClick={() => handleScreenSelect(screen)}
@@ -379,7 +410,7 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
                       <h3 className="text-xl font-semibold text-gray-900">{getStepTitle()}</h3>
                       <p className="text-gray-600 mt-2">{getStepDescription()}</p>
                     </div>
-                    
+
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -388,7 +419,7 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
                         <input
                           type="text"
                           value={feedbackData.title}
-                          onChange={(e) => handleInputChange('title', e.target.value)}
+                          onChange={e => handleInputChange('title', e.target.value)}
                           placeholder="Descrivi brevemente il problema o l'idea"
                           className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           maxLength={100}
@@ -401,7 +432,7 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
                         </label>
                         <textarea
                           value={feedbackData.description}
-                          onChange={(e) => handleInputChange('description', e.target.value)}
+                          onChange={e => handleInputChange('description', e.target.value)}
                           placeholder="Descrivi nel dettaglio il problema, l'idea o la richiesta. Più informazioni ci dai, meglio possiamo aiutarti!"
                           rows={4}
                           className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -417,7 +448,9 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                               <span className="text-blue-600 font-medium text-sm">
-                                {currentUser?.displayName?.charAt(0) || currentUser?.email?.charAt(0) || 'U'}
+                                {currentUser?.displayName?.charAt(0) ||
+                                  currentUser?.email?.charAt(0) ||
+                                  'U'}
                               </span>
                             </div>
                             <div className="flex-1">
@@ -470,14 +503,16 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
               <div className="px-6 py-4 bg-gray-50 border-t">
                 <div className="flex items-center justify-between">
                   <div className="text-sm text-gray-600">
-                    {currentStep === 4 && (
-                      <span>I campi con * sono obbligatori</span>
-                    )}
+                    {currentStep === 4 && <span>I campi con * sono obbligatori</span>}
                   </div>
                   {currentStep === 4 && (
                     <button
                       onClick={handleSubmit}
-                      disabled={isSubmitting || !feedbackData.title.trim() || !feedbackData.description.trim()}
+                      disabled={
+                        isSubmitting ||
+                        !feedbackData.title.trim() ||
+                        !feedbackData.description.trim()
+                      }
                       className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2"
                     >
                       {isSubmitting ? (

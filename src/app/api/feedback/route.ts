@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+
 import { realEmailService } from '@/lib/realEmailService';
 
 export async function POST(request: NextRequest) {
   try {
     console.log('🚀 [Feedback] Inizio elaborazione richiesta...');
     console.log('📝 [Feedback] Headers ricevuti:', Object.fromEntries(request.headers.entries()));
-    
+
     const contentType = request.headers.get('content-type') || '';
     console.log('📝 [Feedback] Content-Type:', contentType);
-    
+
     let feedback: any;
     let feedbackJson: string;
-    
+
     // Gestisci diversi tipi di contenuto
     if (contentType.includes('multipart/form-data')) {
       try {
@@ -33,10 +34,7 @@ export async function POST(request: NextRequest) {
         console.log('✅ [Feedback] JSON parsato correttamente');
       } catch (jsonError) {
         console.error('❌ [Feedback] Errore parsing JSON:', jsonError);
-        return NextResponse.json(
-          { error: 'Errore nel parsing dei dati JSON' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Errore nel parsing dei dati JSON' }, { status: 400 });
       }
     } else {
       console.error('❌ [Feedback] Content-Type non supportato:', contentType);
@@ -45,27 +43,30 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     console.log('📝 [Feedback] Feedback JSON ricevuto:', feedbackJson);
 
     if (!feedbackJson) {
       console.error('❌ [Feedback] Dati feedback mancanti');
-      return NextResponse.json(
-        { error: 'Dati feedback mancanti' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Dati feedback mancanti' }, { status: 400 });
     }
 
     console.log('🔍 [Feedback] Feedback ricevuto:', feedback);
-    
+
     // Validazione dati
-    if (!feedback.title || !feedback.description || !feedback.type || !feedback.priority || !feedback.userEmail) {
-      console.error('❌ [Feedback] Campi obbligatori mancanti:', { 
-        title: !!feedback.title, 
-        description: !!feedback.description, 
-        type: !!feedback.type, 
+    if (
+      !feedback.title ||
+      !feedback.description ||
+      !feedback.type ||
+      !feedback.priority ||
+      !feedback.userEmail
+    ) {
+      console.error('❌ [Feedback] Campi obbligatori mancanti:', {
+        title: !!feedback.title,
+        description: !!feedback.description,
+        type: !!feedback.type,
         priority: !!feedback.priority,
-        userEmail: !!feedback.userEmail
+        userEmail: !!feedback.userEmail,
       });
       return NextResponse.json(
         { error: 'Campi obbligatori mancanti. Assicurati di essere autenticato.' },
@@ -80,12 +81,12 @@ export async function POST(request: NextRequest) {
 
     // Genera email professionale per Pierpaolo
     const emailHtml = generateFeedbackEmail(feedback, feedbackId, '');
-    
+
     // Invia email a Pierpaolo usando realEmailService (stesso servizio delle email funzionanti)
     let emailSuccess = false;
     try {
       console.log('📧 [Feedback] Invio email usando realEmailService...');
-      
+
       // Crea la notifica email nel formato richiesto da realEmailService
       const emailNotification = {
         to: 'pierpaolo.laurito@gmail.com',
@@ -95,31 +96,30 @@ export async function POST(request: NextRequest) {
         summary: {
           totalFound: 0,
           averagePrice: 0,
-          bestOpportunities: []
-        }
+          bestOpportunities: [],
+        },
       };
-      
+
       // Invia email usando realEmailService (stesso servizio delle email funzionanti)
       await realEmailService.sendEmail(emailNotification);
-      
+
       emailSuccess = true;
       console.log('✅ [Feedback] Email inviata con successo tramite realEmailService');
-      
     } catch (emailError) {
       console.error('❌ [Feedback] Errore invio email:', emailError);
       // Se le email falliscono, è un problema critico
       return NextResponse.json(
-        { error: 'Errore nell\'invio delle email di feedback' },
+        { error: "Errore nell'invio delle email di feedback" },
         { status: 500 }
       );
     }
 
     // Se l'utente ha fornito email, invia conferma usando realEmailService
     if (feedback.userEmail) {
-      console.log('📧 [Feedback] Invio email di conferma all\'utente...');
+      console.log("📧 [Feedback] Invio email di conferma all'utente...");
       try {
         const confirmationHtml = generateConfirmationEmail(feedback, feedbackId);
-        
+
         const confirmationNotification = {
           to: feedback.userEmail,
           subject: `✅ Feedback ricevuto - Urbanova AI`,
@@ -128,10 +128,10 @@ export async function POST(request: NextRequest) {
           summary: {
             totalFound: 0,
             averagePrice: 0,
-            bestOpportunities: []
-          }
+            bestOpportunities: [],
+          },
         };
-        
+
         await realEmailService.sendEmail(confirmationNotification);
         console.log('📧 [Feedback] Email conferma inviata con successo');
       } catch (confirmationError) {
@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
       // Import dinamico per evitare errori di build
       const { db } = await import('@/lib/firebase');
       const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
-      
+
       const feedbackData = {
         ...feedback,
         id: feedbackId,
@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
         resolution: null,
         tags: [feedback.type, feedback.priority, feedback.screen].filter(Boolean),
         emailSent: emailSuccess,
-        emailSentAt: serverTimestamp()
+        emailSentAt: serverTimestamp(),
       };
 
       console.log('💾 [Feedback] Tentativo salvataggio su Firebase...');
@@ -167,14 +167,14 @@ export async function POST(request: NextRequest) {
       console.log('✅ [Feedback] Feedback salvato su Firebase con ID:', feedbackRef.id);
     } catch (firebaseError) {
       console.warn('⚠️ [Feedback] Errore Firebase (non critico):', firebaseError);
-      
+
       // Tentativo di salvataggio locale come fallback
       try {
         const { feedbackFallbackService } = await import('@/lib/feedbackFallbackService');
         if (feedbackFallbackService.isAvailable()) {
           await feedbackFallbackService.saveFeedbackLocally({
             ...feedback,
-            tags: [feedback.type, feedback.priority, feedback.screen].filter(Boolean)
+            tags: [feedback.type, feedback.priority, feedback.screen].filter(Boolean),
           });
           console.log('💾 [Feedback] Feedback salvato localmente come fallback');
         }
@@ -188,7 +188,7 @@ export async function POST(request: NextRequest) {
       emailSuccess,
       firebaseSuccess,
       feedbackId,
-      userEmail: feedback.userEmail || 'non fornita'
+      userEmail: feedback.userEmail || 'non fornita',
     });
 
     // Risposta di successo
@@ -197,15 +197,14 @@ export async function POST(request: NextRequest) {
       message: 'Feedback inviato con successo',
       feedbackId,
       emailSent: emailSuccess,
-      firebaseSaved: firebaseSuccess
+      firebaseSaved: firebaseSuccess,
     });
-
   } catch (error) {
     console.error('💥 [Feedback] Errore critico:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Errore interno del server',
-        details: error instanceof Error ? error.message : 'Errore sconosciuto'
+        details: error instanceof Error ? error.message : 'Errore sconosciuto',
       },
       { status: 500 }
     );
@@ -216,16 +215,16 @@ export async function POST(request: NextRequest) {
 function generateFeedbackEmail(feedback: any, feedbackId: string, attachmentUrl: string): string {
   const priorityColors = {
     low: '#10B981',
-    medium: '#F59E0B', 
+    medium: '#F59E0B',
     high: '#EF4444',
-    critical: '#DC2626'
+    critical: '#DC2626',
   };
 
   const priorityLabels = {
     low: 'Bassa',
     medium: 'Media',
     high: 'Alta',
-    critical: 'Critica'
+    critical: 'Critica',
   };
 
   const typeLabels = {
@@ -233,7 +232,7 @@ function generateFeedbackEmail(feedback: any, feedbackId: string, attachmentUrl:
     feature: 'Nuova Funzionalità',
     improvement: 'Miglioramento',
     question: 'Domanda',
-    other: 'Altro'
+    other: 'Altro',
   };
 
   return `
@@ -279,19 +278,27 @@ function generateFeedbackEmail(feedback: any, feedbackId: string, attachmentUrl:
               <div class="field-value">${feedback.description}</div>
             </div>
             
-            ${feedback.screen ? `
+            ${
+              feedback.screen
+                ? `
             <div class="field">
               <div class="field-label">🖥️ Schermata</div>
               <div class="field-value">${feedback.screen}</div>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
             
-            ${feedback.category ? `
+            ${
+              feedback.category
+                ? `
             <div class="field">
               <div class="field-label">🏷️ Categoria</div>
               <div class="field-value">${feedback.category}</div>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
             
             <div class="field">
               <div class="field-label">👤 Dati Utente</div>
@@ -314,12 +321,16 @@ function generateFeedbackEmail(feedback: any, feedbackId: string, attachmentUrl:
               <div class="field-value">${new Date().toLocaleString('it-IT')}</div>
             </div>
             
-            ${feedback.userAgent ? `
+            ${
+              feedback.userAgent
+                ? `
             <div class="field">
               <div class="field-label">🌐 User Agent</div>
               <div class="field-value">${feedback.userAgent}</div>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
           </div>
         </div>
         

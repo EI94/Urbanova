@@ -1,12 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useLanguageTest } from '@/hooks/useLanguageTest';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { getSupportedLanguages } from '@/lib/languageConfig';
-import { 
-  PlayIcon, 
-  StopIcon, 
+
+import {
+  PlayIcon,
+  StopIcon,
   CheckIcon,
   XIcon,
   ClockIcon,
@@ -14,8 +12,11 @@ import {
   EyeIcon,
   SaveIcon,
   DownloadIcon,
-  TrophyIcon
+  TrophyIcon,
 } from '@/components/icons';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useLanguageTest } from '@/hooks/useLanguageTest';
+import { getSupportedLanguages } from '@/lib/languageConfig';
 
 interface CompleteTestResult {
   testSuite: string;
@@ -41,7 +42,7 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
     testSingleLanguage,
     resetResults,
     exportResults,
-    supportedLanguages
+    supportedLanguages,
   } = useLanguageTest();
 
   const [isCompleteTestRunning, setIsCompleteTestRunning] = useState(false);
@@ -58,23 +59,27 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
       test: async () => {
         setCurrentTestSuite('Test Base Traduzioni');
         const startTime = Date.now();
-        
+
         await runAllTests();
-        
+
         const duration = Date.now() - startTime;
-        
+
         return {
-          status: languageStats.successRate >= 90 ? 'pass' : 
-                  languageStats.successRate >= 70 ? 'warning' : 'fail',
+          status:
+            languageStats.successRate >= 90
+              ? 'pass'
+              : languageStats.successRate >= 70
+                ? 'warning'
+                : 'fail',
           duration,
           details: {
             successRate: languageStats.successRate,
             totalTests: languageStats.total,
             passedTests: languageStats.passed,
-            failedTests: languageStats.failed
-          }
+            failedTests: languageStats.failed,
+          },
         };
-      }
+      },
     },
     {
       name: 'Test Persistenza',
@@ -82,35 +87,35 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
       test: async () => {
         setCurrentTestSuite('Test Persistenza');
         const startTime = Date.now();
-        
+
         // Simula test di persistenza
         const testLanguage = supportedLanguages.find(l => l.code !== currentLanguage)?.code || 'en';
         const originalLang = currentLanguage;
-        
+
         // Cambia lingua
         await testSingleLanguage(testLanguage);
-        
+
         // Verifica localStorage
         const savedLanguage = localStorage.getItem('urbanova-language');
         const savedTimestamp = localStorage.getItem('urbanova-language-timestamp');
-        
+
         // Ripristina lingua originale
         await testSingleLanguage(originalLang);
-        
+
         const duration = Date.now() - startTime;
-        
+
         const isPersistent = savedLanguage === testLanguage && savedTimestamp;
-        
+
         return {
           status: isPersistent ? 'pass' : 'fail',
           duration,
           details: {
             savedLanguage,
             savedTimestamp,
-            isPersistent
-          }
+            isPersistent,
+          },
         };
-      }
+      },
     },
     {
       name: 'Test Performance',
@@ -118,34 +123,35 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
       test: async () => {
         setCurrentTestSuite('Test Performance');
         const startTime = Date.now();
-        
+
         const performanceResults = [];
-        
+
         // Test performance per ogni lingua
-        for (const language of supportedLanguages.slice(0, 3)) { // Test solo prime 3 lingue
+        for (const language of supportedLanguages.slice(0, 3)) {
+          // Test solo prime 3 lingue
           const langStart = Date.now();
           await testSingleLanguage(language.code);
           const langDuration = Date.now() - langStart;
           performanceResults.push({
             language: language.code,
-            duration: langDuration
+            duration: langDuration,
           });
         }
-        
+
         const duration = Date.now() - startTime;
-        const averageDuration = performanceResults.reduce((sum, r) => sum + r.duration, 0) / performanceResults.length;
-        
+        const averageDuration =
+          performanceResults.reduce((sum, r) => sum + r.duration, 0) / performanceResults.length;
+
         return {
-          status: averageDuration < 500 ? 'pass' : 
-                  averageDuration < 1000 ? 'warning' : 'fail',
+          status: averageDuration < 500 ? 'pass' : averageDuration < 1000 ? 'warning' : 'fail',
           duration,
           details: {
             averageDuration,
             performanceResults,
-            threshold: 500
-          }
+            threshold: 500,
+          },
         };
-      }
+      },
     },
     {
       name: 'Test Integrità',
@@ -153,30 +159,39 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
       test: async () => {
         setCurrentTestSuite('Test Integrità');
         const startTime = Date.now();
-        
+
         // Verifica configurazione lingua
         const configChecks = supportedLanguages.map(lang => ({
           language: lang.code,
           hasConfig: !!lang,
           hasFlag: !!lang.flag,
           hasName: !!lang.name,
-          hasNativeName: !!lang.nativeName
+          hasNativeName: !!lang.nativeName,
         }));
-        
+
         // Verifica localStorage
         const storageChecks = {
           hasLanguage: !!localStorage.getItem('urbanova-language'),
           hasTimestamp: !!localStorage.getItem('urbanova-language-timestamp'),
-          validLanguage: supportedLanguages.some(l => l.code === localStorage.getItem('urbanova-language')),
-          validTimestamp: !isNaN(parseInt(localStorage.getItem('urbanova-language-timestamp') || '0'))
+          validLanguage: supportedLanguages.some(
+            l => l.code === localStorage.getItem('urbanova-language')
+          ),
+          validTimestamp: !isNaN(
+            parseInt(localStorage.getItem('urbanova-language-timestamp') || '0')
+          ),
         };
-        
+
         const duration = Date.now() - startTime;
-        
-        const allConfigValid = configChecks.every(c => c.hasConfig && c.hasFlag && c.hasName && c.hasNativeName);
-        const allStorageValid = storageChecks.hasLanguage && storageChecks.hasTimestamp && 
-                               storageChecks.validLanguage && storageChecks.validTimestamp;
-        
+
+        const allConfigValid = configChecks.every(
+          c => c.hasConfig && c.hasFlag && c.hasName && c.hasNativeName
+        );
+        const allStorageValid =
+          storageChecks.hasLanguage &&
+          storageChecks.hasTimestamp &&
+          storageChecks.validLanguage &&
+          storageChecks.validTimestamp;
+
         return {
           status: allConfigValid && allStorageValid ? 'pass' : 'fail',
           duration,
@@ -184,10 +199,10 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
             configChecks,
             storageChecks,
             allConfigValid,
-            allStorageValid
-          }
+            allStorageValid,
+          },
         };
-      }
+      },
     },
     {
       name: 'Test Stress',
@@ -195,10 +210,10 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
       test: async () => {
         setCurrentTestSuite('Test Stress');
         const startTime = Date.now();
-        
+
         const stressResults = [];
         const testLanguages = ['it', 'en', 'es'];
-        
+
         for (let i = 0; i < 3; i++) {
           for (const lang of testLanguages) {
             const langStart = Date.now();
@@ -208,28 +223,27 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
               iteration: i + 1,
               language: lang,
               duration: langDuration,
-              success: langDuration < 1000
+              success: langDuration < 1000,
             });
           }
         }
-        
+
         const duration = Date.now() - startTime;
         const successfulChanges = stressResults.filter(r => r.success).length;
         const successRate = (successfulChanges / stressResults.length) * 100;
-        
+
         return {
-          status: successRate >= 90 ? 'pass' : 
-                  successRate >= 70 ? 'warning' : 'fail',
+          status: successRate >= 90 ? 'pass' : successRate >= 70 ? 'warning' : 'fail',
           duration,
           details: {
             successRate,
             totalChanges: stressResults.length,
             successfulChanges,
-            stressResults
-          }
+            stressResults,
+          },
         };
-      }
-    }
+      },
+    },
   ];
 
   // Esegui test completo
@@ -238,57 +252,58 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
     setCompleteResults([]);
     setCompleteProgress(0);
     setOriginalLanguage(currentLanguage);
-    
+
     console.log(`🏆 [CompleteLanguageTest] Avvio test completo sistema multilingua`);
-    
+
     const allResults: CompleteTestResult[] = [];
-    
+
     try {
       for (let i = 0; i < testSuites.length; i++) {
         const testSuite = testSuites[i];
         setCompleteProgress((i / testSuites.length) * 100);
-        
+
         console.log(`🏆 [CompleteLanguageTest] Esecuzione: ${testSuite.name}`);
-        
+
         try {
           const result = await testSuite.test();
-          
+
           const completeResult: CompleteTestResult = {
             testSuite: testSuite.name,
             status: result.status,
             duration: result.duration,
             details: result.details,
-            timestamp: new Date()
+            timestamp: new Date(),
           };
-          
+
           allResults.push(completeResult);
           setCompleteResults([...allResults]);
-          
-          console.log(`🏆 [CompleteLanguageTest] ${testSuite.name}: ${result.status} (${result.duration}ms)`);
-          
+
+          console.log(
+            `🏆 [CompleteLanguageTest] ${testSuite.name}: ${result.status} (${result.duration}ms)`
+          );
+
           // Pausa tra i test suite
           if (i < testSuites.length - 1) {
             await new Promise(resolve => setTimeout(resolve, 500));
           }
-          
         } catch (error) {
           console.error(`❌ [CompleteLanguageTest] Errore ${testSuite.name}:`, error);
-          
+
           const errorResult: CompleteTestResult = {
             testSuite: testSuite.name,
             status: 'fail',
             duration: 0,
             details: { error: error instanceof Error ? error.message : 'Errore sconosciuto' },
-            timestamp: new Date()
+            timestamp: new Date(),
           };
-          
+
           allResults.push(errorResult);
           setCompleteResults([...allResults]);
         }
       }
-      
+
       setCompleteProgress(100);
-      
+
       // Calcola statistiche finali
       const totalTests = allResults.length;
       const passedTests = allResults.filter(r => r.status === 'pass').length;
@@ -296,7 +311,7 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
       const warningTests = allResults.filter(r => r.status === 'warning').length;
       const totalDuration = allResults.reduce((sum, r) => sum + r.duration, 0);
       const successRate = (passedTests / totalTests) * 100;
-      
+
       const finalStats = {
         totalTests,
         passedTests,
@@ -305,21 +320,25 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
         successRate,
         totalDuration,
         averageDuration: totalDuration / totalTests,
-        overallStatus: successRate >= 90 ? 'excellent' : 
-                      successRate >= 70 ? 'good' : 
-                      successRate >= 50 ? 'acceptable' : 'poor'
+        overallStatus:
+          successRate >= 90
+            ? 'excellent'
+            : successRate >= 70
+              ? 'good'
+              : successRate >= 50
+                ? 'acceptable'
+                : 'poor',
       };
-      
+
       console.log(`🏆 [CompleteLanguageTest] Test completati:`, finalStats);
-      
+
       // Callback di completamento
       if (onComplete) {
         onComplete({
           results: allResults,
-          stats: finalStats
+          stats: finalStats,
         });
       }
-      
     } catch (error) {
       console.error('❌ [CompleteLanguageTest] Errore generale:', error);
     } finally {
@@ -334,8 +353,11 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
     passed: completeResults.filter(r => r.status === 'pass').length,
     failed: completeResults.filter(r => r.status === 'fail').length,
     warning: completeResults.filter(r => r.status === 'warning').length,
-    successRate: completeResults.length > 0 ? (completeResults.filter(r => r.status === 'pass').length / completeResults.length) * 100 : 0,
-    totalDuration: completeResults.reduce((sum, r) => sum + r.duration, 0)
+    successRate:
+      completeResults.length > 0
+        ? (completeResults.filter(r => r.status === 'pass').length / completeResults.length) * 100
+        : 0,
+    totalDuration: completeResults.reduce((sum, r) => sum + r.duration, 0),
   };
 
   return (
@@ -350,7 +372,7 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
             Esegue tutti i test per verificare il sistema completo
           </p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           {stats.total > 0 && (
             <div className="text-right">
@@ -362,16 +384,17 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
               </div>
             </div>
           )}
-          
+
           <div className="flex gap-2">
             <button
               onClick={runCompleteTest}
               disabled={isCompleteTestRunning}
               className={`
                 flex items-center gap-2 px-4 py-2 rounded-md transition-colors text-sm
-                ${isCompleteTestRunning 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-yellow-600 hover:bg-yellow-700'
+                ${
+                  isCompleteTestRunning
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-yellow-600 hover:bg-yellow-700'
                 }
                 text-white
               `}
@@ -379,7 +402,7 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
               <PlayIcon className="h-4 w-4" />
               {isCompleteTestRunning ? 'Test in corso...' : 'Test Completo'}
             </button>
-            
+
             {stats.total > 0 && (
               <button
                 onClick={exportResults}
@@ -401,16 +424,12 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
             <span className="text-sm text-gray-500">{completeProgress.toFixed(1)}%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
+            <div
               className="bg-yellow-600 h-2 rounded-full transition-all duration-300"
               style={{ width: `${completeProgress}%` }}
             ></div>
           </div>
-          {currentTestSuite && (
-            <p className="text-sm text-gray-600 mt-2">
-              {currentTestSuite}
-            </p>
-          )}
+          {currentTestSuite && <p className="text-sm text-gray-600 mt-2">{currentTestSuite}</p>}
         </div>
       )}
 
@@ -447,24 +466,32 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
                 key={index}
                 className={`
                   p-3 rounded-lg border-2 transition-all
-                  ${result 
-                    ? result.status === 'pass' ? 'border-green-500 bg-green-50' :
-                      result.status === 'warning' ? 'border-yellow-500 bg-yellow-50' :
-                      'border-red-500 bg-red-50'
-                    : 'border-gray-200 bg-gray-50'
+                  ${
+                    result
+                      ? result.status === 'pass'
+                        ? 'border-green-500 bg-green-50'
+                        : result.status === 'warning'
+                          ? 'border-yellow-500 bg-yellow-50'
+                          : 'border-red-500 bg-red-50'
+                      : 'border-gray-200 bg-gray-50'
                   }
                 `}
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-medium text-sm">{suite.name}</span>
                   {result && (
-                    <span className={`
+                    <span
+                      className={`
                       px-2 py-1 rounded-full text-xs font-medium
-                      ${result.status === 'pass' ? 'bg-green-100 text-green-800' :
-                        result.status === 'warning' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
+                      ${
+                        result.status === 'pass'
+                          ? 'bg-green-100 text-green-800'
+                          : result.status === 'warning'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
                       }
-                    `}>
+                    `}
+                    >
                       {result.status.toUpperCase()}
                     </span>
                   )}
@@ -485,15 +512,18 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
       {completeResults.length > 0 && (
         <div className="space-y-3 max-h-64 overflow-y-auto">
           <h4 className="font-medium mb-3">Risultati Dettagliati</h4>
-          
+
           {completeResults.map((result, index) => (
             <div
               key={index}
               className={`
                 p-3 rounded-lg border-l-4 flex items-center justify-between
-                ${result.status === 'pass' ? 'border-green-500 bg-green-50' :
-                  result.status === 'warning' ? 'border-yellow-500 bg-yellow-50' :
-                  'border-red-500 bg-red-50'
+                ${
+                  result.status === 'pass'
+                    ? 'border-green-500 bg-green-50'
+                    : result.status === 'warning'
+                      ? 'border-yellow-500 bg-yellow-50'
+                      : 'border-red-500 bg-red-50'
                 }
               `}
             >
@@ -530,4 +560,4 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
       )}
     </div>
   );
-} 
+}

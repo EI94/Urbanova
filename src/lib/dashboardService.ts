@@ -1,17 +1,19 @@
-import { 
-  collection, 
-  doc, 
-  getDocs, 
-  getDoc, 
-  query, 
-  where, 
-  orderBy, 
+import {
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  query,
+  where,
+  orderBy,
   limit,
   onSnapshot,
   serverTimestamp,
-  Timestamp 
+  Timestamp,
 } from 'firebase/firestore';
+
 import { db } from './firebase';
+
 import { Project, ProjectStatus, ProjectType } from '@/types/project';
 
 export interface DashboardStats {
@@ -71,15 +73,15 @@ class DashboardService {
   async getDashboardStats(): Promise<DashboardStats> {
     try {
       console.log('📊 [DashboardService] Recupero statistiche dashboard...');
-      
+
       const [projects, activities, metrics] = await Promise.all([
         this.getAllProjects(),
         this.getRecentActivities(10),
-        this.getAllProjectMetrics()
+        this.getAllProjectMetrics(),
       ]);
-      
+
       const stats = this.calculateDashboardStats(projects, activities, metrics);
-      
+
       console.log('✅ [DashboardService] Statistiche dashboard calcolate:', stats);
       return stats;
     } catch (error) {
@@ -93,42 +95,42 @@ class DashboardService {
    */
   subscribeToDashboardUpdates(callback: (stats: DashboardStats) => void): () => void {
     console.log('🔄 [DashboardService] Sottoscrizione aggiornamenti dashboard...');
-    
+
     const projectsRef = collection(db, this.PROJECTS_COLLECTION);
     const activitiesRef = collection(db, this.ACTIVITIES_COLLECTION);
-    
+
     // Sottoscrizione ai progetti
-    const projectsUnsubscribe = onSnapshot(projectsRef, async (snapshot) => {
+    const projectsUnsubscribe = onSnapshot(projectsRef, async snapshot => {
       console.log('🔄 [DashboardService] Progetti aggiornati, ricalcolo statistiche...');
-      
+
       try {
         const projects = this.parseProjectsSnapshot(snapshot);
         const activities = await this.getRecentActivities(10);
         const metrics = await this.getAllProjectMetrics();
-        
+
         const stats = this.calculateDashboardStats(projects, activities, metrics);
         callback(stats);
       } catch (error) {
         console.error('❌ [DashboardService] Errore aggiornamento dashboard:', error);
       }
     });
-    
+
     // Sottoscrizione alle attività
-    const activitiesUnsubscribe = onSnapshot(activitiesRef, async (snapshot) => {
+    const activitiesUnsubscribe = onSnapshot(activitiesRef, async snapshot => {
       console.log('🔄 [DashboardService] Attività aggiornate, ricalcolo statistiche...');
-      
+
       try {
         const projects = await this.getAllProjects();
         const activities = this.parseActivitiesSnapshot(snapshot);
         const metrics = await this.getAllProjectMetrics();
-        
+
         const stats = this.calculateDashboardStats(projects, activities, metrics);
         callback(stats);
       } catch (error) {
         console.error('❌ [DashboardService] Errore aggiornamento dashboard:', error);
       }
     });
-    
+
     return () => {
       projectsUnsubscribe();
       activitiesUnsubscribe();
@@ -142,12 +144,8 @@ class DashboardService {
   async getAllProjects(): Promise<Project[]> {
     try {
       const projectsRef = collection(db, this.PROJECTS_COLLECTION);
-      const q = query(
-        projectsRef,
-        where('isActive', '==', true),
-        orderBy('lastUpdated', 'desc')
-      );
-      
+      const q = query(projectsRef, where('isActive', '==', true), orderBy('lastUpdated', 'desc'));
+
       const snapshot = await getDocs(q);
       return this.parseProjectsSnapshot(snapshot);
     } catch (error) {
@@ -163,10 +161,10 @@ class DashboardService {
     try {
       const metricsRef = collection(db, this.METRICS_COLLECTION);
       const q = query(metricsRef, orderBy('lastUpdated', 'desc'));
-      
+
       const snapshot = await getDocs(q);
       const metrics: ProjectMetrics[] = [];
-      
+
       snapshot.forEach(doc => {
         const data = doc.data();
         metrics.push({
@@ -180,10 +178,10 @@ class DashboardService {
           margin: data.margin || 0,
           roi: data.roi || 0,
           progress: data.progress || 0,
-          lastUpdated: data.lastUpdated?.toDate() || new Date()
+          lastUpdated: data.lastUpdated?.toDate() || new Date(),
         });
       });
-      
+
       return metrics;
     } catch (error) {
       console.error('❌ [DashboardService] Errore recupero metriche:', error);
@@ -197,12 +195,8 @@ class DashboardService {
   async getRecentActivities(limitCount: number = 10): Promise<DashboardActivity[]> {
     try {
       const activitiesRef = collection(db, this.ACTIVITIES_COLLECTION);
-      const q = query(
-        activitiesRef,
-        orderBy('timestamp', 'desc'),
-        limit(limitCount)
-      );
-      
+      const q = query(activitiesRef, orderBy('timestamp', 'desc'), limit(limitCount));
+
       const snapshot = await getDocs(q);
       return this.parseActivitiesSnapshot(snapshot);
     } catch (error) {
@@ -219,9 +213,9 @@ class DashboardService {
       const activitiesRef = collection(db, this.ACTIVITIES_COLLECTION);
       await doc(activitiesRef).set({
         ...activity,
-        timestamp: Timestamp.fromDate(activity.timestamp)
+        timestamp: Timestamp.fromDate(activity.timestamp),
       });
-      
+
       console.log('✅ [DashboardService] Attività dashboard registrata:', activity.type);
     } catch (error) {
       console.error('❌ [DashboardService] Errore registrazione attività:', error);
@@ -234,11 +228,14 @@ class DashboardService {
   async updateProjectMetrics(projectId: string, metrics: Partial<ProjectMetrics>): Promise<void> {
     try {
       const metricsRef = doc(db, this.METRICS_COLLECTION, projectId);
-      await metricsRef.set({
-        ...metrics,
-        lastUpdated: serverTimestamp()
-      }, { merge: true });
-      
+      await metricsRef.set(
+        {
+          ...metrics,
+          lastUpdated: serverTimestamp(),
+        },
+        { merge: true }
+      );
+
       console.log('✅ [DashboardService] Metriche progetto aggiornate:', projectId);
     } catch (error) {
       console.error('❌ [DashboardService] Errore aggiornamento metriche:', error);
@@ -249,50 +246,52 @@ class DashboardService {
    * Calcola le statistiche della dashboard dai dati grezzi
    */
   private calculateDashboardStats(
-    projects: Project[], 
-    activities: DashboardActivity[], 
+    projects: Project[],
+    activities: DashboardActivity[],
     metrics: ProjectMetrics[]
   ): DashboardStats {
     // Calcolo progetti totali e attivi
     const totalProjects = projects.length;
-    const activeProjects = projects.filter(p => p.status !== 'COMPLETED' && p.status !== 'CANCELLED').length;
-    
+    const activeProjects = projects.filter(
+      p => p.status !== 'COMPLETED' && p.status !== 'CANCELLED'
+    ).length;
+
     // Calcolo budget totale
     const totalBudget = projects.reduce((sum, p) => sum + (p.totalInvestment || 0), 0);
-    
+
     // Calcolo ROI medio
     const totalROI = metrics.reduce((sum, m) => sum + m.roi, 0);
     const averageROI = metrics.length > 0 ? totalROI / metrics.length : 0;
-    
+
     // Calcolo progetti per tipo
     const projectsByType: Record<ProjectType, number> = {
-      'RESIDENTIAL': 0,
-      'COMMERCIAL': 0,
-      'MIXED': 0,
-      'INDUSTRIAL': 0
+      RESIDENTIAL: 0,
+      COMMERCIAL: 0,
+      MIXED: 0,
+      INDUSTRIAL: 0,
     };
-    
+
     projects.forEach(project => {
       if (project.type && projectsByType[project.type] !== undefined) {
         projectsByType[project.type]++;
       }
     });
-    
+
     // Calcolo progetti per status
     const projectsByStatus: Record<ProjectStatus, number> = {
-      'PLANNING': 0,
-      'IN_PROGRESS': 0,
-      'PENDING': 0,
-      'COMPLETED': 0,
-      'CANCELLED': 0
+      PLANNING: 0,
+      IN_PROGRESS: 0,
+      PENDING: 0,
+      COMPLETED: 0,
+      CANCELLED: 0,
     };
-    
+
     projects.forEach(project => {
       if (project.status && projectsByStatus[project.status] !== undefined) {
         projectsByStatus[project.status]++;
       }
     });
-    
+
     // Top performers (progetti con ROI più alto)
     const topPerformers = projects
       .filter(p => p.status !== 'CANCELLED')
@@ -302,20 +301,27 @@ class DashboardService {
         return roiB - roiA;
       })
       .slice(0, 5);
-    
+
     // Riepilogo finanziario
     const financialSummary: FinancialSummary = {
       totalInvestment: totalBudget,
       totalRevenue: metrics.reduce((sum, m) => sum + m.revenue, 0),
       totalProfit: metrics.reduce((sum, m) => sum + m.profit, 0),
-      averageMargin: metrics.length > 0 ? metrics.reduce((sum, m) => sum + m.margin, 0) / metrics.length : 0,
-      roiByProject: metrics.reduce((acc, m) => {
-        acc[m.projectId] = m.roi;
-        return acc;
-      }, {} as Record<string, number>),
-      budgetUtilization: totalBudget > 0 ? (metrics.reduce((sum, m) => sum + m.investment, 0) / totalBudget) * 100 : 0
+      averageMargin:
+        metrics.length > 0 ? metrics.reduce((sum, m) => sum + m.margin, 0) / metrics.length : 0,
+      roiByProject: metrics.reduce(
+        (acc, m) => {
+          acc[m.projectId] = m.roi;
+          return acc;
+        },
+        {} as Record<string, number>
+      ),
+      budgetUtilization:
+        totalBudget > 0
+          ? (metrics.reduce((sum, m) => sum + m.investment, 0) / totalBudget) * 100
+          : 0,
     };
-    
+
     return {
       totalProjects,
       activeProjects,
@@ -325,7 +331,7 @@ class DashboardService {
       projectsByStatus,
       recentActivities: activities,
       topPerformers,
-      financialSummary
+      financialSummary,
     };
   }
 
@@ -334,7 +340,7 @@ class DashboardService {
    */
   private parseProjectsSnapshot(snapshot: any): Project[] {
     const projects: Project[] = [];
-    
+
     snapshot.forEach(doc => {
       const data = doc.data();
       projects.push({
@@ -354,10 +360,10 @@ class DashboardService {
         ownerId: data.ownerId || '',
         teamMembers: data.teamMembers || [],
         documents: data.documents || [],
-        milestones: data.milestones || []
+        milestones: data.milestones || [],
       });
     });
-    
+
     return projects;
   }
 
@@ -366,7 +372,7 @@ class DashboardService {
    */
   private parseActivitiesSnapshot(snapshot: any): DashboardActivity[] {
     const activities: DashboardActivity[] = [];
-    
+
     snapshot.forEach(doc => {
       const data = doc.data();
       activities.push({
@@ -377,10 +383,10 @@ class DashboardService {
         description: data.description,
         timestamp: data.timestamp?.toDate() || new Date(),
         userId: data.userId,
-        userName: data.userName
+        userName: data.userName,
       });
     });
-    
+
     return activities;
   }
 
@@ -390,13 +396,15 @@ class DashboardService {
   async initializeDashboardData(): Promise<void> {
     try {
       console.log('🚀 [DashboardService] Inizializzazione dati dashboard...');
-      
+
       // Verifica se esistono già progetti
       const existingProjects = await this.getAllProjects();
-      
+
       if (existingProjects.length === 0) {
-        console.log('📝 [DashboardService] Nessun progetto esistente, creazione dati di esempio...');
-        
+        console.log(
+          '📝 [DashboardService] Nessun progetto esistente, creazione dati di esempio...'
+        );
+
         // Crea progetti di esempio basati sui dati reali che hai
         const sampleProjects = [
           {
@@ -415,7 +423,7 @@ class DashboardService {
             ownerId: 'current-user',
             teamMembers: [],
             documents: [],
-            milestones: []
+            milestones: [],
           },
           {
             id: 'morena-editoriale-project',
@@ -433,23 +441,25 @@ class DashboardService {
             ownerId: 'current-user',
             teamMembers: [],
             documents: [],
-            milestones: []
-          }
+            milestones: [],
+          },
         ];
-        
+
         // Salva i progetti di esempio
         for (const project of sampleProjects) {
           const projectRef = doc(db, this.PROJECTS_COLLECTION, project.id);
           await projectRef.set({
             ...project,
             createdAt: serverTimestamp(),
-            lastUpdated: serverTimestamp()
+            lastUpdated: serverTimestamp(),
           });
-          
+
           // Crea le metriche del progetto
-          const margin = ((project.expectedRevenue - project.totalInvestment) / project.expectedRevenue) * 100;
-          const roi = ((project.expectedRevenue - project.totalInvestment) / project.totalInvestment) * 100;
-          
+          const margin =
+            ((project.expectedRevenue - project.totalInvestment) / project.expectedRevenue) * 100;
+          const roi =
+            ((project.expectedRevenue - project.totalInvestment) / project.totalInvestment) * 100;
+
           await this.updateProjectMetrics(project.id, {
             projectId: project.id,
             projectName: project.name,
@@ -461,9 +471,9 @@ class DashboardService {
             margin: Math.round(margin * 100) / 100,
             roi: Math.round(roi * 100) / 100,
             progress: 25, // 25% per progetti in pianificazione
-            lastUpdated: new Date()
+            lastUpdated: new Date(),
           });
-          
+
           // Registra l'attività di creazione
           await this.logDashboardActivity({
             type: 'project_created',
@@ -472,13 +482,15 @@ class DashboardService {
             description: `Progetto ${project.name} creato`,
             timestamp: new Date(),
             userId: 'current-user',
-            userName: 'Sistema'
+            userName: 'Sistema',
           });
         }
-        
+
         console.log('✅ [DashboardService] Dati dashboard inizializzati con successo');
       } else {
-        console.log('✅ [DashboardService] Progetti esistenti trovati, dashboard già inizializzata');
+        console.log(
+          '✅ [DashboardService] Progetti esistenti trovati, dashboard già inizializzata'
+        );
       }
     } catch (error) {
       console.error('❌ [DashboardService] Errore inizializzazione dashboard:', error);

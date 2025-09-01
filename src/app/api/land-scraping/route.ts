@@ -1,27 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { realWebScraper } from '@/lib/realWebScraper';
+
 import { realEmailService } from '@/lib/realEmailService';
+import { realWebScraper } from '@/lib/realWebScraper';
 import { LandSearchCriteria, RealLandScrapingResult } from '@/types/land';
 
 export async function POST(request: NextRequest) {
   try {
     const { location, criteria, aiAnalysis, email } = await request.json();
 
-    console.log('🔍 LAND-SCRAPING API - Richiesta ricevuta:', { location, criteria, aiAnalysis, email });
+    console.log('🔍 LAND-SCRAPING API - Richiesta ricevuta:', {
+      location,
+      criteria,
+      aiAnalysis,
+      email,
+    });
 
     // Validazione input
     if (!location) {
-      return NextResponse.json(
-        { error: 'Localizzazione richiesta' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Localizzazione richiesta' }, { status: 400 });
     }
 
     if (!email) {
-      return NextResponse.json(
-        { error: 'Email richiesta per notifiche' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email richiesta per notifiche' }, { status: 400 });
     }
 
     console.log('✅ Validazione completata, avvio scraping...');
@@ -33,24 +33,24 @@ export async function POST(request: NextRequest) {
       maxPrice: criteria?.maxPrice || 1000000,
       minArea: criteria?.minArea || 500,
       maxArea: criteria?.maxArea || 10000,
-      propertyType: criteria?.propertyType || 'residenziale'
+      propertyType: criteria?.propertyType || 'residenziale',
     };
 
     console.log('🔍 Criteri di ricerca:', searchCriteria);
 
     // Scraping terreni
     const lands = await realWebScraper.scrapeLands(searchCriteria);
-    
+
     console.log(`✅ Scraping completato: ${lands.length} terreni trovati`);
 
     // Analisi AI avanzata se richiesta
     let analysis = [];
     let marketTrends = '';
     let aiRecommendations = [];
-    
+
     if (aiAnalysis && lands.length > 0) {
       console.log('🤖 Avvio analisi AI avanzata...');
-      
+
       // Analisi approfondita per i top 5 terreni
       const topLands = lands.slice(0, 5);
       analysis = topLands.map((land, index) => ({
@@ -62,31 +62,31 @@ export async function POST(request: NextRequest) {
         recommendations: [
           'Ottima opportunità di investimento',
           'Valutare permessi edilizi',
-          'Considerare infrastrutture esistenti'
+          'Considerare infrastrutture esistenti',
         ],
         opportunities: [
           'Potenziale sviluppo residenziale',
           'Possibilità di frazionamento',
-          'Valore aggiunto con migliorie'
+          'Valore aggiunto con migliorie',
         ],
         warnings: [
           'Verificare vincoli urbanistici',
           'Controllare servizi disponibili',
-          'Valutare accessibilità'
+          'Valutare accessibilità',
         ],
         estimatedROI: Math.floor(Math.random() * 20) + 10, // 10-30%
         timeToMarket: ['6-12 mesi', '12-18 mesi', '18-24 mesi'][Math.floor(Math.random() * 3)],
         competitiveAdvantage: [
           'Posizione strategica',
           'Prezzo competitivo',
-          'Potenziale di sviluppo'
-        ][Math.floor(Math.random() * 3)]
+          'Potenziale di sviluppo',
+        ][Math.floor(Math.random() * 3)],
       }));
 
       // Analisi di mercato approfondita con LLM
       marketTrends = await generateMarketTrends(location, lands);
       aiRecommendations = await generateAIRecommendations(lands, location);
-      
+
       console.log('✅ Analisi AI avanzata completata');
     }
 
@@ -97,15 +97,18 @@ export async function POST(request: NextRequest) {
       emailSent: false,
       summary: {
         totalFound: lands.length,
-        averagePrice: lands.length > 0 ? Math.round(lands.reduce((sum, land) => sum + land.price, 0) / lands.length) : 0,
+        averagePrice:
+          lands.length > 0
+            ? Math.round(lands.reduce((sum, land) => sum + land.price, 0) / lands.length)
+            : 0,
         bestOpportunities: lands.slice(0, 3),
         marketTrends: marketTrends || 'Mercato stabile con opportunità di crescita',
         recommendations: [
           'Valutare terreni con permessi edilizi',
           'Considerare zone in espansione',
-          'Analizzare potenziale di sviluppo'
-        ]
-      }
+          'Analizzare potenziale di sviluppo',
+        ],
+      },
     };
 
     // Invia email se richiesta
@@ -115,9 +118,15 @@ export async function POST(request: NextRequest) {
     if (email && lands.length > 0) {
       try {
         console.log('📧 Invio email risultati avanzati...');
-        
+
         // Genera contenuto HTML avanzato per l'email con analisi LLM
-        const htmlContent = generateAdvancedEmailHTML(location, lands, analysis, marketTrends, aiRecommendations);
+        const htmlContent = generateAdvancedEmailHTML(
+          location,
+          lands,
+          analysis,
+          marketTrends,
+          aiRecommendations
+        );
 
         // Invia email usando il servizio funzionante
         await realEmailService.sendEmail({
@@ -128,12 +137,11 @@ export async function POST(request: NextRequest) {
           summary: results.summary,
           analysis,
           marketTrends,
-          aiRecommendations
+          aiRecommendations,
         });
 
         emailSent = true;
         console.log('✅ Email avanzata inviata con successo!');
-        
       } catch (error) {
         console.error('❌ Errore invio email:', error);
         emailError = error instanceof Error ? error.message : 'Errore sconosciuto';
@@ -141,24 +149,23 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ API land-scraping completata con successo');
-    
+
     return NextResponse.json({
       success: true,
       message: 'Ricerca completata con successo',
       data: results,
       emailSent,
       emailError,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error('❌ Errore critico API land-scraping:', error);
     return NextResponse.json(
-      { 
+      {
         success: false,
         error: 'Errore interno del server',
         details: error instanceof Error ? error.message : 'Errore sconosciuto',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
       { status: 500 }
     );
@@ -169,9 +176,17 @@ export async function POST(request: NextRequest) {
 async function generateMarketTrends(location: string, lands: any[]): Promise<string> {
   try {
     // Simula analisi LLM avanzata del mercato immobiliare
-    const averagePrice = lands.length > 0 ? Math.round(lands.reduce((sum, land) => sum + land.price, 0) / lands.length) : 0;
-    const pricePerSqm = lands.length > 0 ? Math.round(averagePrice / (lands.reduce((sum, land) => sum + land.area, 0) / lands.length)) : 0;
-    
+    const averagePrice =
+      lands.length > 0
+        ? Math.round(lands.reduce((sum, land) => sum + land.price, 0) / lands.length)
+        : 0;
+    const pricePerSqm =
+      lands.length > 0
+        ? Math.round(
+            averagePrice / (lands.reduce((sum, land) => sum + land.area, 0) / lands.length)
+          )
+        : 0;
+
     return `
       Il mercato immobiliare di ${location} mostra segni di ripresa significativi dopo l'impatto della pandemia COVID-19. 
       
@@ -197,9 +212,9 @@ async function generateAIRecommendations(lands: any[], location: string): Promis
       `**Timing di Mercato:** Il momento attuale è ottimale per l'acquisto di terreni, con prezzi stabili e domanda in crescita. Si consiglia di procedere entro i prossimi 6-12 mesi.`,
       `**Strategia di Investimento:** Considerare un approccio graduale, iniziando con terreni di dimensioni medie (1000-3000 m²) per ridurre il rischio e massimizzare la flessibilità.`,
       `**Valutazione ROI:** I terreni analizzati mostrano un potenziale ROI medio del 15-25% su un orizzonte temporale di 18-36 mesi, superiore alla media del settore.`,
-      `**Fattori di Rischio:** Attenzione ai vincoli urbanistici e alla disponibilità di servizi. Si consiglia di verificare sempre la classificazione urbanistica e i permessi edilizi prima dell'acquisto.`
+      `**Fattori di Rischio:** Attenzione ai vincoli urbanistici e alla disponibilità di servizi. Si consiglia di verificare sempre la classificazione urbanistica e i permessi edilizi prima dell'acquisto.`,
     ];
-    
+
     return recommendations;
   } catch (error) {
     console.error('❌ Errore generazione raccomandazioni AI:', error);
@@ -208,10 +223,19 @@ async function generateAIRecommendations(lands: any[], location: string): Promis
 }
 
 // Genera HTML avanzato per l'email con analisi LLM e design professionale
-function generateAdvancedEmailHTML(location: string, lands: any[], analysis: any[], marketTrends: string, aiRecommendations: string[]): string {
-  const averagePrice = lands.length > 0 ? Math.round(lands.reduce((sum, land) => sum + land.price, 0) / lands.length) : 0;
+function generateAdvancedEmailHTML(
+  location: string,
+  lands: any[],
+  analysis: any[],
+  marketTrends: string,
+  aiRecommendations: string[]
+): string {
+  const averagePrice =
+    lands.length > 0
+      ? Math.round(lands.reduce((sum, land) => sum + land.price, 0) / lands.length)
+      : 0;
   const totalArea = lands.length > 0 ? lands.reduce((sum, land) => sum + land.area, 0) : 0;
-  
+
   return `
     <!DOCTYPE html>
     <html>
@@ -452,7 +476,10 @@ function generateAdvancedEmailHTML(location: string, lands: any[], analysis: any
           </div>
           
           <h3>🏆 Migliori Opportunità</h3>
-          ${lands.slice(0, 5).map((land, index) => `
+          ${lands
+            .slice(0, 5)
+            .map(
+              (land, index) => `
             <div class="land-item">
               <div class="land-header">
                 <div class="land-title">${land.title || `Terreno Immobiliare ${index + 1}`}</div>
@@ -487,7 +514,9 @@ function generateAdvancedEmailHTML(location: string, lands: any[], analysis: any
               
               <a href="${land.url || '#'}" class="view-details-btn">Vedi Dettagli</a>
             </div>
-          `).join('')}
+          `
+            )
+            .join('')}
           
           <p style="text-align: center; margin: 30px 0; color: #666;">
             <em>Analisi generata automaticamente da Urbanova AI con tecnologia di machine learning avanzata</em>
@@ -517,7 +546,7 @@ export async function GET() {
           location: 'string (obbligatorio)',
           criteria: 'object (opzionale)',
           aiAnalysis: 'boolean (opzionale)',
-          email: 'string (obbligatorio per notifiche)'
+          email: 'string (obbligatorio per notifiche)',
         },
         example: {
           location: 'Milano',
@@ -525,12 +554,12 @@ export async function GET() {
             minPrice: 100000,
             maxPrice: 500000,
             minArea: 500,
-            maxArea: 2000
+            maxArea: 2000,
           },
           aiAnalysis: true,
-          email: 'user@example.com'
-        }
-      }
-    }
+          email: 'user@example.com',
+        },
+      },
+    },
   });
 }

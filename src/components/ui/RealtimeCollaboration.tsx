@@ -1,17 +1,15 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { 
-  MessageSquare, 
-  Users, 
-  Eye, 
-  EyeOff, 
-  Send, 
-  MoreHorizontal, 
-  Edit3, 
-  Trash2, 
-  CheckCircle, 
+import {
+  MessageSquare,
+  Users,
+  Eye,
+  EyeOff,
+  Send,
+  MoreHorizontal,
+  Edit3,
+  Trash2,
+  CheckCircle,
   XCircle,
   Tag,
   AtSign,
@@ -20,14 +18,17 @@ import {
   User,
   AlertCircle,
   Star,
-  Filter
+  Filter,
 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-hot-toast';
-import collaborationService, { 
-  DesignComment, 
-  DesignVersion, 
+
+import { useAuth } from '@/contexts/AuthContext';
+import collaborationService, {
+  DesignComment,
+  DesignVersion,
   ApprovalWorkflow,
-  CollaborationSession 
+  CollaborationSession,
 } from '@/lib/collaborationService';
 
 interface RealTimeCollaborationProps {
@@ -45,14 +46,16 @@ interface CommentFormData {
   mentions: string[];
 }
 
-export default function RealTimeCollaboration({ 
-  designId, 
-  onCommentAdd, 
-  onVersionChange, 
-  onWorkflowUpdate 
+export default function RealTimeCollaboration({
+  designId,
+  onCommentAdd,
+  onVersionChange,
+  onWorkflowUpdate,
 }: RealTimeCollaborationProps) {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'comments' | 'versions' | 'workflow' | 'sessions'>('comments');
+  const [activeTab, setActiveTab] = useState<'comments' | 'versions' | 'workflow' | 'sessions'>(
+    'comments'
+  );
   const [comments, setComments] = useState<DesignComment[]>([]);
   const [versions, setVersions] = useState<DesignVersion[]>([]);
   const [workflows, setWorkflows] = useState<ApprovalWorkflow[]>([]);
@@ -62,7 +65,7 @@ export default function RealTimeCollaboration({
     type: 'comment',
     priority: 'medium',
     tags: [],
-    mentions: []
+    mentions: [],
   });
   const [editingComment, setEditingComment] = useState<string | null>(null);
   const [showCommentForm, setShowCommentForm] = useState(false);
@@ -75,7 +78,7 @@ export default function RealTimeCollaboration({
     pendingComments: 0,
     totalVersions: 0,
     activeWorkflows: 0,
-    activeSessions: 0
+    activeSessions: 0,
   });
 
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
@@ -87,12 +90,12 @@ export default function RealTimeCollaboration({
     // Subscribe to real-time updates
     const unsubscribeComments = collaborationService.getCommentsRealtime(designId, setComments);
     const unsubscribeVersions = collaborationService.getVersionsRealtime(designId, setVersions);
-    const unsubscribeWorkflows = collaborationService.getWorkflowRealtime(designId, (workflow) => {
+    const unsubscribeWorkflows = collaborationService.getWorkflowRealtime(designId, workflow => {
       if (workflow) {
         setWorkflows(prev => {
           const existing = prev.find(w => w.id === workflow.id);
           if (existing) {
-            return prev.map(w => w.id === workflow.id ? workflow : w);
+            return prev.map(w => (w.id === workflow.id ? workflow : w));
           } else {
             return [...prev, workflow];
           }
@@ -101,7 +104,12 @@ export default function RealTimeCollaboration({
     });
     const unsubscribeSessions = collaborationService.getSessionsRealtime(designId, setSessions);
 
-    unsubscribeRefs.current = [unsubscribeComments, unsubscribeVersions, unsubscribeWorkflows, unsubscribeSessions];
+    unsubscribeRefs.current = [
+      unsubscribeComments,
+      unsubscribeVersions,
+      unsubscribeWorkflows,
+      unsubscribeSessions,
+    ];
 
     // Load initial stats
     loadCollaborationStats();
@@ -136,30 +144,30 @@ export default function RealTimeCollaboration({
         priority: commentForm.priority,
         tags: commentForm.tags,
         mentions: commentForm.mentions,
-        status: 'pending' as const
+        status: 'pending' as const,
       };
 
       const commentId = await collaborationService.addComment(commentData);
-      
+
       // Reset form
       setCommentForm({
         content: '',
         type: 'comment',
         priority: 'medium',
         tags: [],
-        mentions: []
+        mentions: [],
       });
-      
+
       setShowCommentForm(false);
       toast('Commento aggiunto con successo', { icon: '✅' });
-      
+
       if (onCommentAdd) {
         const newComment = { ...commentData, id: commentId } as DesignComment;
         onCommentAdd(newComment);
       }
     } catch (error) {
       console.error('Error adding comment:', error);
-      toast('Errore nell\'aggiunta del commento', { icon: '❌' });
+      toast("Errore nell'aggiunta del commento", { icon: '❌' });
     } finally {
       setIsLoading(false);
     }
@@ -174,7 +182,7 @@ export default function RealTimeCollaboration({
       toast('Commento aggiornato', { icon: '✅' });
     } catch (error) {
       console.error('Error updating comment:', error);
-      toast('Errore nell\'aggiornamento del commento', { icon: '❌' });
+      toast("Errore nell'aggiornamento del commento", { icon: '❌' });
     }
   };
 
@@ -186,7 +194,7 @@ export default function RealTimeCollaboration({
       toast('Commento eliminato', { icon: '✅' });
     } catch (error) {
       console.error('Error deleting comment:', error);
-      toast('Errore nell\'eliminazione del commento', { icon: '❌' });
+      toast("Errore nell'eliminazione del commento", { icon: '❌' });
     }
   };
 
@@ -209,7 +217,7 @@ export default function RealTimeCollaboration({
       if (!commentForm.tags.includes(newTag)) {
         setCommentForm(prev => ({
           ...prev,
-          tags: [...prev.tags, newTag]
+          tags: [...prev.tags, newTag],
         }));
       }
       e.currentTarget.value = '';
@@ -219,43 +227,58 @@ export default function RealTimeCollaboration({
   const removeTag = (tagToRemove: string) => {
     setCommentForm(prev => ({
       ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
+      tags: prev.tags.filter(tag => tag !== tagToRemove),
     }));
   };
 
   const filteredComments = comments.filter(comment => {
     if (filterType !== 'all' && comment.type !== filterType) return false;
     if (filterPriority !== 'all' && comment.priority !== filterPriority) return false;
-    if (searchTerm && !comment.content.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+    if (searchTerm && !comment.content.toLowerCase().includes(searchTerm.toLowerCase()))
+      return false;
     return true;
   });
 
   const getPriorityColor = (priority: DesignComment['priority']) => {
     switch (priority) {
-      case 'critical': return 'text-red-600 bg-red-50 border-red-200';
-      case 'high': return 'text-orange-600 bg-orange-50 border-orange-200';
-      case 'medium': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'low': return 'text-green-600 bg-green-50 border-green-200';
-      default: return 'text-gray-600 bg-gray-50 border-gray-200';
+      case 'critical':
+        return 'text-red-600 bg-red-50 border-red-200';
+      case 'high':
+        return 'text-orange-600 bg-orange-50 border-orange-200';
+      case 'medium':
+        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+      case 'low':
+        return 'text-green-600 bg-green-50 border-green-200';
+      default:
+        return 'text-gray-600 bg-gray-50 border-gray-200';
     }
   };
 
   const getTypeIcon = (type: DesignComment['type']) => {
     switch (type) {
-      case 'comment': return <MessageSquare className="w-4 h-4" />;
-      case 'review': return <Eye className="w-4 h-4" />;
-      case 'approval': return <CheckCircle className="w-4 h-4" />;
-      case 'rejection': return <XCircle className="w-4 h-4" />;
-      default: return <MessageSquare className="w-4 h-4" />;
+      case 'comment':
+        return <MessageSquare className="w-4 h-4" />;
+      case 'review':
+        return <Eye className="w-4 h-4" />;
+      case 'approval':
+        return <CheckCircle className="w-4 h-4" />;
+      case 'rejection':
+        return <XCircle className="w-4 h-4" />;
+      default:
+        return <MessageSquare className="w-4 h-4" />;
     }
   };
 
   const getStatusColor = (status: DesignComment['status']) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'resolved': return 'bg-green-100 text-green-800';
-      case 'archived': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'resolved':
+        return 'bg-green-100 text-green-800';
+      case 'archived':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -312,8 +335,8 @@ export default function RealTimeCollaboration({
             { id: 'comments', label: 'Commenti', count: comments.length },
             { id: 'versions', label: 'Versioni', count: versions.length },
             { id: 'workflow', label: 'Workflow', count: workflows.length },
-            { id: 'sessions', label: 'Sessioni', count: sessions.length }
-          ].map((tab) => (
+            { id: 'sessions', label: 'Sessioni', count: sessions.length },
+          ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
@@ -342,7 +365,7 @@ export default function RealTimeCollaboration({
                 <Filter className="w-4 h-4 text-gray-500" />
                 <select
                   value={filterType}
-                  onChange={(e) => setFilterType(e.target.value as any)}
+                  onChange={e => setFilterType(e.target.value as any)}
                   className="border border-gray-300 rounded-md px-3 py-2 text-sm"
                 >
                   <option value="all">Tutti i tipi</option>
@@ -352,11 +375,11 @@ export default function RealTimeCollaboration({
                   <option value="rejection">Rifiuti</option>
                 </select>
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <select
                   value={filterPriority}
-                  onChange={(e) => setFilterPriority(e.target.value as any)}
+                  onChange={e => setFilterPriority(e.target.value as any)}
                   className="border border-gray-300 rounded-md px-3 py-2 text-sm"
                 >
                   <option value="all">Tutte le priorità</option>
@@ -372,7 +395,7 @@ export default function RealTimeCollaboration({
                   type="text"
                   placeholder="Cerca commenti..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={e => setSearchTerm(e.target.value)}
                   className="border border-gray-300 rounded-md px-3 py-2 text-sm w-64"
                 />
               </div>
@@ -396,7 +419,7 @@ export default function RealTimeCollaboration({
                   <textarea
                     ref={commentInputRef}
                     value={commentForm.content}
-                    onChange={(e) => setCommentForm(prev => ({ ...prev, content: e.target.value }))}
+                    onChange={e => setCommentForm(prev => ({ ...prev, content: e.target.value }))}
                     placeholder="Scrivi il tuo commento..."
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm resize-none"
                     rows={4}
@@ -408,7 +431,9 @@ export default function RealTimeCollaboration({
                   <div className="flex items-center space-x-2">
                     <select
                       value={commentForm.type}
-                      onChange={(e) => setCommentForm(prev => ({ ...prev, type: e.target.value as any }))}
+                      onChange={e =>
+                        setCommentForm(prev => ({ ...prev, type: e.target.value as any }))
+                      }
                       className="border border-gray-300 rounded-md px-3 py-2 text-sm"
                     >
                       <option value="comment">Commento</option>
@@ -421,7 +446,9 @@ export default function RealTimeCollaboration({
                   <div className="flex items-center space-x-2">
                     <select
                       value={commentForm.priority}
-                      onChange={(e) => setCommentForm(prev => ({ ...prev, priority: e.target.value as any }))}
+                      onChange={e =>
+                        setCommentForm(prev => ({ ...prev, priority: e.target.value as any }))
+                      }
                       className="border border-gray-300 rounded-md px-3 py-2 text-sm"
                     >
                       <option value="low">Bassa Priorità</option>
@@ -439,7 +466,7 @@ export default function RealTimeCollaboration({
                     Tag
                   </label>
                   <div className="flex flex-wrap gap-2 mb-2">
-                    {commentForm.tags.map((tag) => (
+                    {commentForm.tags.map(tag => (
                       <span
                         key={tag}
                         className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
@@ -490,7 +517,7 @@ export default function RealTimeCollaboration({
                   <p className="text-gray-600">Nessun commento trovato</p>
                 </div>
               ) : (
-                filteredComments.map((comment) => (
+                filteredComments.map(comment => (
                   <div
                     key={comment.id}
                     className={`border rounded-lg p-4 ${
@@ -517,12 +544,16 @@ export default function RealTimeCollaboration({
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center space-x-2">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(comment.priority)}`}>
+                        <span
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(comment.priority)}`}
+                        >
                           {comment.priority}
                         </span>
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(comment.status)}`}>
+                        <span
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(comment.status)}`}
+                        >
                           {comment.status}
                         </span>
                         <div className="flex items-center space-x-1">
@@ -548,7 +579,9 @@ export default function RealTimeCollaboration({
                             </button>
                             <button
                               onClick={() => {
-                                const textarea = document.querySelector(`textarea[data-comment-id="${comment.id}"]`) as HTMLTextAreaElement;
+                                const textarea = document.querySelector(
+                                  `textarea[data-comment-id="${comment.id}"]`
+                                ) as HTMLTextAreaElement;
                                 if (textarea) {
                                   handleCommentEdit(comment.id, textarea.value);
                                 }
@@ -567,7 +600,7 @@ export default function RealTimeCollaboration({
                     {/* Tags and Mentions */}
                     {(comment.tags.length > 0 || comment.mentions.length > 0) && (
                       <div className="flex flex-wrap gap-2 mb-3">
-                        {comment.tags.map((tag) => (
+                        {comment.tags.map(tag => (
                           <span
                             key={tag}
                             className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
@@ -576,7 +609,7 @@ export default function RealTimeCollaboration({
                             {tag}
                           </span>
                         ))}
-                        {comment.mentions.map((mention) => (
+                        {comment.mentions.map(mention => (
                           <span
                             key={mention}
                             className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
@@ -634,7 +667,9 @@ export default function RealTimeCollaboration({
               <Clock className="w-8 h-8 text-gray-400" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">Gestione Versioni</h3>
-            <p className="text-gray-600">Funzionalità in sviluppo per la gestione avanzata delle versioni</p>
+            <p className="text-gray-600">
+              Funzionalità in sviluppo per la gestione avanzata delle versioni
+            </p>
           </div>
         )}
 

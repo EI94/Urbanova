@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Badge } from './Badge';
+
+import { monitoringService } from '@/lib/monitoringService';
 import {
   MetricDefinition,
   MetricSeries,
@@ -21,10 +22,11 @@ import {
   LogLevel,
   ServiceStatus,
   TimeRange,
-  ChartType
+  ChartType,
 } from '@/types/monitoring';
-import { monitoringService } from '@/lib/monitoringService';
 import { TeamRole } from '@/types/team';
+
+import { Badge } from './Badge';
 
 interface MonitoringObservabilityProps {
   isOpen: boolean;
@@ -41,10 +43,12 @@ export default function MonitoringObservability({
   currentUserId,
   currentUserName,
   currentUserRole,
-  currentUserAvatar
+  currentUserAvatar,
 }: MonitoringObservabilityProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'metrics' | 'alerts' | 'logs' | 'traces' | 'slo' | 'infrastructure'>('overview');
-  
+  const [activeTab, setActiveTab] = useState<
+    'overview' | 'metrics' | 'alerts' | 'logs' | 'traces' | 'slo' | 'infrastructure'
+  >('overview');
+
   // Stati per i dati
   const [monitoringStats, setMonitoringStats] = useState<MonitoringStats | null>(null);
   const [metrics, setMetrics] = useState<MetricDefinition[]>([]);
@@ -79,7 +83,7 @@ export default function MonitoringObservability({
     metricId: '',
     condition: '>',
     threshold: 0,
-    severity: 'warning' as AlertSeverity
+    severity: 'warning' as AlertSeverity,
   });
 
   useEffect(() => {
@@ -100,7 +104,7 @@ export default function MonitoringObservability({
     setTargets(monitoringService.getTargets());
     setSlos(monitoringService.getSLOs());
     setIncidents(monitoringService.getIncidents());
-    
+
     // Carica log con query di default
     const defaultLogQuery: LogQuery = {
       query: logQuery,
@@ -110,9 +114,9 @@ export default function MonitoringObservability({
       limit: 50,
       offset: 0,
       orderBy: 'timestamp',
-      orderDirection: 'desc'
+      orderDirection: 'desc',
     };
-    
+
     const logResult = monitoringService.searchLogs(defaultLogQuery);
     setLogs(logResult.entries);
   };
@@ -135,13 +139,13 @@ export default function MonitoringObservability({
         metricId: '',
         condition: '>',
         threshold: 0,
-        severity: 'warning'
+        severity: 'warning',
       });
       setShowCreateAlert(false);
 
       console.log('Alert creato con successo!');
     } catch (error) {
-      console.error('Errore nella creazione dell\'alert:', error);
+      console.error("Errore nella creazione dell'alert:", error);
     }
   };
 
@@ -162,9 +166,9 @@ export default function MonitoringObservability({
       limit: 100,
       offset: 0,
       orderBy: 'timestamp',
-      orderDirection: 'desc'
+      orderDirection: 'desc',
     };
-    
+
     const result = monitoringService.searchLogs(query);
     setLogs(result.entries);
   };
@@ -174,7 +178,7 @@ export default function MonitoringObservability({
       info: 'bg-blue-100 text-blue-800',
       warning: 'bg-yellow-100 text-yellow-800',
       error: 'bg-orange-100 text-orange-800',
-      critical: 'bg-red-100 text-red-800'
+      critical: 'bg-red-100 text-red-800',
     };
     return colors[severity] || 'bg-gray-100 text-gray-800';
   };
@@ -189,7 +193,7 @@ export default function MonitoringObservability({
       healthy: 'bg-green-100 text-green-800',
       degraded: 'bg-yellow-100 text-yellow-800',
       unhealthy: 'bg-red-100 text-red-800',
-      unknown: 'bg-gray-100 text-gray-800'
+      unknown: 'bg-gray-100 text-gray-800',
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
@@ -201,7 +205,7 @@ export default function MonitoringObservability({
       info: 'bg-green-100 text-green-600',
       warn: 'bg-yellow-100 text-yellow-600',
       error: 'bg-red-100 text-red-600',
-      fatal: 'bg-red-100 text-red-800'
+      fatal: 'bg-red-100 text-red-800',
     };
     return colors[level] || 'bg-gray-100 text-gray-800';
   };
@@ -213,7 +217,7 @@ export default function MonitoringObservability({
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      second: '2-digit'
+      second: '2-digit',
     }).format(date);
   };
 
@@ -227,12 +231,12 @@ export default function MonitoringObservability({
     const units = ['B', 'KB', 'MB', 'GB', 'TB'];
     let size = bytes;
     let unitIndex = 0;
-    
+
     while (size >= 1024 && unitIndex < units.length - 1) {
       size /= 1024;
       unitIndex++;
     }
-    
+
     return `${size.toFixed(1)} ${units[unitIndex]}`;
   };
 
@@ -253,13 +257,12 @@ export default function MonitoringObservability({
             </div>
             <div>
               <h2 className="text-xl font-semibold text-gray-900">Monitoring & Observability</h2>
-              <p className="text-sm text-gray-500">Sistema completo di monitoring e osservabilità</p>
+              <p className="text-sm text-gray-500">
+                Sistema completo di monitoring e osservabilità
+              </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
             <span className="text-2xl">×</span>
           </button>
         </div>
@@ -272,19 +275,23 @@ export default function MonitoringObservability({
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-green-600 font-medium">System Uptime</p>
-                    <p className="text-2xl font-bold text-green-900">{monitoringStats.system.uptime}%</p>
+                    <p className="text-2xl font-bold text-green-900">
+                      {monitoringStats.system.uptime}%
+                    </p>
                   </div>
                   <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                     <span className="text-green-600">🟢</span>
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-blue-50 rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-blue-600 font-medium">Metriche</p>
-                    <p className="text-2xl font-bold text-blue-900">{monitoringStats.system.totalMetrics}</p>
+                    <p className="text-2xl font-bold text-blue-900">
+                      {monitoringStats.system.totalMetrics}
+                    </p>
                   </div>
                   <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                     <span className="text-blue-600">📈</span>
@@ -297,7 +304,9 @@ export default function MonitoringObservability({
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-red-600 font-medium">Alert Attivi</p>
-                    <p className="text-2xl font-bold text-red-900">{monitoringStats.alerting.activeAlerts}</p>
+                    <p className="text-2xl font-bold text-red-900">
+                      {monitoringStats.alerting.activeAlerts}
+                    </p>
                   </div>
                   <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
                     <span className="text-red-600">🚨</span>
@@ -312,7 +321,9 @@ export default function MonitoringObservability({
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-purple-600 font-medium">Servizi</p>
-                    <p className="text-2xl font-bold text-purple-900">{monitoringStats.system.servicesMonitored}</p>
+                    <p className="text-2xl font-bold text-purple-900">
+                      {monitoringStats.system.servicesMonitored}
+                    </p>
                   </div>
                   <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
                     <span className="text-purple-600">🔧</span>
@@ -326,7 +337,8 @@ export default function MonitoringObservability({
                   <div>
                     <p className="text-sm text-yellow-600 font-medium">SLO Compliance</p>
                     <p className="text-2xl font-bold text-yellow-900">
-                      {monitoringStats.sloCompliance.healthySLOs}/{monitoringStats.sloCompliance.totalSLOs}
+                      {monitoringStats.sloCompliance.healthySLOs}/
+                      {monitoringStats.sloCompliance.totalSLOs}
                     </p>
                   </div>
                   <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
@@ -334,7 +346,12 @@ export default function MonitoringObservability({
                   </div>
                 </div>
                 <p className="text-xs text-yellow-600 mt-1">
-                  {Math.round((monitoringStats.sloCompliance.healthySLOs / monitoringStats.sloCompliance.totalSLOs) * 100)}% healthy
+                  {Math.round(
+                    (monitoringStats.sloCompliance.healthySLOs /
+                      monitoringStats.sloCompliance.totalSLOs) *
+                      100
+                  )}
+                  % healthy
                 </p>
               </div>
 
@@ -342,7 +359,9 @@ export default function MonitoringObservability({
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-indigo-600 font-medium">Query Latency</p>
-                    <p className="text-2xl font-bold text-indigo-900">{monitoringStats.system.queryLatency}ms</p>
+                    <p className="text-2xl font-bold text-indigo-900">
+                      {monitoringStats.system.queryLatency}ms
+                    </p>
                   </div>
                   <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
                     <span className="text-indigo-600">⚡</span>
@@ -360,12 +379,17 @@ export default function MonitoringObservability({
             {[
               { id: 'overview', label: 'Overview', icon: '📊', count: 0 },
               { id: 'metrics', label: 'Metriche', icon: '📈', count: metrics.length },
-              { id: 'alerts', label: 'Alert', icon: '🚨', count: alerts.filter(a => a.status === 'active').length },
+              {
+                id: 'alerts',
+                label: 'Alert',
+                icon: '🚨',
+                count: alerts.filter(a => a.status === 'active').length,
+              },
               { id: 'logs', label: 'Log', icon: '📝', count: logs.length },
               { id: 'traces', label: 'Traces', icon: '🔍', count: 0 },
               { id: 'slo', label: 'SLO/SLI', icon: '🎯', count: slos.length },
-              { id: 'infrastructure', label: 'Infrastructure', icon: '🏗️', count: targets.length }
-            ].map((tab) => (
+              { id: 'infrastructure', label: 'Infrastructure', icon: '🏗️', count: targets.length },
+            ].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
@@ -378,9 +402,7 @@ export default function MonitoringObservability({
                 <span>{tab.icon}</span>
                 <span>{tab.label}</span>
                 {tab.count > 0 && (
-                  <Badge className="ml-2 bg-blue-100 text-blue-800">
-                    {tab.count}
-                  </Badge>
+                  <Badge className="ml-2 bg-blue-100 text-blue-800">{tab.count}</Badge>
                 )}
               </button>
             ))}
@@ -400,35 +422,43 @@ export default function MonitoringObservability({
                       <span className="text-sm text-gray-600">Uptime</span>
                       <div className="flex items-center space-x-2">
                         <div className="w-32 h-2 bg-gray-200 rounded-full">
-                          <div 
-                            className="h-2 bg-green-500 rounded-full" 
+                          <div
+                            className="h-2 bg-green-500 rounded-full"
                             style={{ width: `${monitoringStats.system.uptime}%` }}
                           ></div>
                         </div>
-                        <span className="text-sm font-medium text-gray-900">{monitoringStats.system.uptime}%</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {monitoringStats.system.uptime}%
+                        </span>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Query Latency</span>
-                      <span className="text-sm font-medium text-gray-900">{monitoringStats.system.queryLatency}ms</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        {monitoringStats.system.queryLatency}ms
+                      </span>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Ingestion Rate</span>
-                      <span className="text-sm font-medium text-gray-900">{monitoringStats.system.ingestionRate}/sec</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        {monitoringStats.system.ingestionRate}/sec
+                      </span>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Storage Usage</span>
                       <div className="flex items-center space-x-2">
                         <div className="w-32 h-2 bg-gray-200 rounded-full">
-                          <div 
-                            className="h-2 bg-blue-500 rounded-full" 
+                          <div
+                            className="h-2 bg-blue-500 rounded-full"
                             style={{ width: `${monitoringStats.system.storageUsage}%` }}
                           ></div>
                         </div>
-                        <span className="text-sm font-medium text-gray-900">{monitoringStats.system.storageUsage}%</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {monitoringStats.system.storageUsage}%
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -438,27 +468,33 @@ export default function MonitoringObservability({
                 <div className="bg-white border border-gray-200 rounded-lg p-6">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">Alert Summary</h3>
                   <div className="space-y-3">
-                    {Object.entries(monitoringStats.alerting.alertsBySeverity).map(([severity, count]) => (
-                      <div key={severity} className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <Badge className={getSeverityColor(severity as AlertSeverity)}>
-                            {severity}
-                          </Badge>
+                    {Object.entries(monitoringStats.alerting.alertsBySeverity).map(
+                      ([severity, count]) => (
+                        <div key={severity} className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <Badge className={getSeverityColor(severity as AlertSeverity)}>
+                              {severity}
+                            </Badge>
+                          </div>
+                          <span className="text-sm font-medium text-gray-900">{count}</span>
                         </div>
-                        <span className="text-sm font-medium text-gray-900">{count}</span>
-                      </div>
-                    ))}
+                      )
+                    )}
                   </div>
-                  
+
                   <div className="mt-6 pt-4 border-t border-gray-100">
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="text-gray-500">MTTR:</span>
-                        <span className="ml-2 font-medium">{monitoringStats.alerting.meanTimeToResolve}min</span>
+                        <span className="ml-2 font-medium">
+                          {monitoringStats.alerting.meanTimeToResolve}min
+                        </span>
                       </div>
                       <div>
                         <span className="text-gray-500">MTTA:</span>
-                        <span className="ml-2 font-medium">{monitoringStats.alerting.meanTimeToAcknowledge}min</span>
+                        <span className="ml-2 font-medium">
+                          {monitoringStats.alerting.meanTimeToAcknowledge}min
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -470,21 +506,28 @@ export default function MonitoringObservability({
                 <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">Service Map</h3>
                   <div className="relative bg-gray-50 rounded-lg p-8 min-h-64">
-                    {serviceMap.services.map((service) => (
+                    {serviceMap.services.map(service => (
                       <div
                         key={service.id}
                         className="absolute bg-white border-2 rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
                         style={{
                           left: `${service.position.x}px`,
                           top: `${service.position.y}px`,
-                          borderColor: service.status === 'healthy' ? '#10B981' : 
-                                     service.status === 'degraded' ? '#F59E0B' : '#EF4444'
+                          borderColor:
+                            service.status === 'healthy'
+                              ? '#10B981'
+                              : service.status === 'degraded'
+                                ? '#F59E0B'
+                                : '#EF4444',
                         }}
                       >
                         <div className="flex items-center space-x-2 mb-2">
                           <span className="text-lg">
-                            {service.type === 'service' ? '⚙️' : 
-                             service.type === 'database' ? '🗄️' : '🔧'}
+                            {service.type === 'service'
+                              ? '⚙️'
+                              : service.type === 'database'
+                                ? '🗄️'
+                                : '🔧'}
                           </span>
                           <h4 className="font-medium text-sm">{service.name}</h4>
                         </div>
@@ -498,14 +541,14 @@ export default function MonitoringObservability({
                         </Badge>
                       </div>
                     ))}
-                    
+
                     {/* Connections */}
                     <svg className="absolute inset-0 pointer-events-none">
-                      {serviceMap.connections.map((conn) => {
+                      {serviceMap.connections.map(conn => {
                         const source = serviceMap.services.find(s => s.id === conn.sourceId);
                         const target = serviceMap.services.find(s => s.id === conn.targetId);
                         if (!source || !target) return null;
-                        
+
                         return (
                           <line
                             key={conn.id}
@@ -529,7 +572,10 @@ export default function MonitoringObservability({
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Query più Frequenti</h3>
                 <div className="space-y-3">
                   {monitoringStats.usage.topQueries.map((query, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    >
                       <div className="flex-1">
                         <code className="text-sm text-gray-800 font-mono">{query.query}</code>
                       </div>
@@ -551,7 +597,7 @@ export default function MonitoringObservability({
                 <div className="flex items-center space-x-4">
                   <select
                     value={selectedTimeRange}
-                    onChange={(e) => setSelectedTimeRange(e.target.value as TimeRange)}
+                    onChange={e => setSelectedTimeRange(e.target.value as TimeRange)}
                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="5m">Ultimi 5 minuti</option>
@@ -564,27 +610,34 @@ export default function MonitoringObservability({
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {metrics.map((metric) => (
-                  <div key={metric.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow cursor-pointer"
-                       onClick={() => {
-                         setSelectedMetric(metric);
-                         setShowMetricDetails(true);
-                       }}>
+                {metrics.map(metric => (
+                  <div
+                    key={metric.id}
+                    className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => {
+                      setSelectedMetric(metric);
+                      setShowMetricDetails(true);
+                    }}
+                  >
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <h4 className="font-medium text-gray-900">{metric.name}</h4>
                         <p className="text-sm text-gray-500 mt-1">{metric.description}</p>
                       </div>
                       <div className="flex flex-col items-end space-y-1">
-                        <Badge className="bg-blue-100 text-blue-800">
-                          {metric.type}
-                        </Badge>
-                        <Badge className={metric.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                        <Badge className="bg-blue-100 text-blue-800">{metric.type}</Badge>
+                        <Badge
+                          className={
+                            metric.isActive
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }
+                        >
                           {metric.isActive ? 'Attiva' : 'Inattiva'}
                         </Badge>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center justify-between">
                         <span className="text-gray-500">Categoria:</span>
@@ -601,20 +654,24 @@ export default function MonitoringObservability({
                       {metric.thresholds.warning && (
                         <div className="flex items-center justify-between">
                           <span className="text-gray-500">Soglia Warning:</span>
-                          <span className="font-medium text-yellow-600">{metric.thresholds.warning}</span>
+                          <span className="font-medium text-yellow-600">
+                            {metric.thresholds.warning}
+                          </span>
                         </div>
                       )}
                       {metric.thresholds.critical && (
                         <div className="flex items-center justify-between">
                           <span className="text-gray-500">Soglia Critical:</span>
-                          <span className="font-medium text-red-600">{metric.thresholds.critical}</span>
+                          <span className="font-medium text-red-600">
+                            {metric.thresholds.critical}
+                          </span>
                         </div>
                       )}
                     </div>
 
                     <div className="mt-4 pt-4 border-t border-gray-100">
                       <div className="flex flex-wrap gap-1">
-                        {metric.tags.slice(0, 3).map((tag) => (
+                        {metric.tags.slice(0, 3).map(tag => (
                           <Badge key={tag} className="bg-gray-100 text-gray-600 text-xs">
                             {tag}
                           </Badge>
@@ -639,7 +696,7 @@ export default function MonitoringObservability({
                 <div className="flex items-center space-x-4">
                   <select
                     value={alertFilter}
-                    onChange={(e) => setAlertFilter(e.target.value as AlertSeverity | '')}
+                    onChange={e => setAlertFilter(e.target.value as AlertSeverity | '')}
                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Tutte le severità</option>
@@ -658,8 +715,11 @@ export default function MonitoringObservability({
               </div>
 
               <div className="space-y-4">
-                {filteredAlerts.map((alert) => (
-                  <div key={alert.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                {filteredAlerts.map(alert => (
+                  <div
+                    key={alert.id}
+                    className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                  >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
@@ -667,12 +727,10 @@ export default function MonitoringObservability({
                           <Badge className={getSeverityColor(alert.severity)}>
                             {alert.severity}
                           </Badge>
-                          <Badge className={getStatusColor(alert.status)}>
-                            {alert.status}
-                          </Badge>
+                          <Badge className={getStatusColor(alert.status)}>{alert.status}</Badge>
                         </div>
                         <p className="text-sm text-gray-600 mb-3">{alert.description}</p>
-                        
+
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                           <div>
                             <span className="text-gray-500">Metrica:</span>
@@ -680,11 +738,15 @@ export default function MonitoringObservability({
                           </div>
                           <div>
                             <span className="text-gray-500">Condizione:</span>
-                            <span className="ml-2 font-medium">{alert.condition} {alert.threshold}</span>
+                            <span className="ml-2 font-medium">
+                              {alert.condition} {alert.threshold}
+                            </span>
                           </div>
                           <div>
                             <span className="text-gray-500">Valore corrente:</span>
-                            <span className="ml-2 font-medium">{alert.currentValue?.toFixed(2)}</span>
+                            <span className="ml-2 font-medium">
+                              {alert.currentValue?.toFixed(2)}
+                            </span>
                           </div>
                           <div>
                             <span className="text-gray-500">Durata:</span>
@@ -695,14 +757,16 @@ export default function MonitoringObservability({
                         <div className="mt-3 text-sm text-gray-500">
                           <span>Attivato: {formatDate(alert.triggeredAt)}</span>
                           {alert.acknowledgedAt && (
-                            <span className="ml-4">Riconosciuto: {formatDate(alert.acknowledgedAt)}</span>
+                            <span className="ml-4">
+                              Riconosciuto: {formatDate(alert.acknowledgedAt)}
+                            </span>
                           )}
                           {alert.resolvedAt && (
                             <span className="ml-4">Risolto: {formatDate(alert.resolvedAt)}</span>
                           )}
                         </div>
                       </div>
-                      
+
                       <div className="flex flex-col space-y-2 ml-4">
                         {alert.status === 'active' && (
                           <>
@@ -753,14 +817,14 @@ export default function MonitoringObservability({
                     <input
                       type="text"
                       value={logQuery}
-                      onChange={(e) => setLogQuery(e.target.value)}
+                      onChange={e => setLogQuery(e.target.value)}
                       className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Cerca nei log..."
                     />
                   </div>
                   <select
                     value={logLevel}
-                    onChange={(e) => setLogLevel(e.target.value as LogLevel | '')}
+                    onChange={e => setLogLevel(e.target.value as LogLevel | '')}
                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Tutti i livelli</option>
@@ -771,7 +835,7 @@ export default function MonitoringObservability({
                   </select>
                   <select
                     value={logService}
-                    onChange={(e) => setLogService(e.target.value)}
+                    onChange={e => setLogService(e.target.value)}
                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Tutti i servizi</option>
@@ -789,7 +853,7 @@ export default function MonitoringObservability({
               </div>
 
               <div className="bg-black rounded-lg p-4 font-mono text-sm overflow-y-auto max-h-96">
-                {logs.map((log) => (
+                {logs.map(log => (
                   <div
                     key={log.id}
                     className="flex items-start space-x-4 py-1 hover:bg-gray-800 cursor-pointer"
@@ -801,20 +865,21 @@ export default function MonitoringObservability({
                     <span className="text-gray-400 text-xs whitespace-nowrap">
                       {formatDate(log.timestamp)}
                     </span>
-                    <span className={`text-xs px-2 py-0.5 rounded whitespace-nowrap ${
-                      log.level === 'error' ? 'bg-red-900 text-red-200' :
-                      log.level === 'warn' ? 'bg-yellow-900 text-yellow-200' :
-                      log.level === 'info' ? 'bg-green-900 text-green-200' :
-                      'bg-gray-700 text-gray-300'
-                    }`}>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded whitespace-nowrap ${
+                        log.level === 'error'
+                          ? 'bg-red-900 text-red-200'
+                          : log.level === 'warn'
+                            ? 'bg-yellow-900 text-yellow-200'
+                            : log.level === 'info'
+                              ? 'bg-green-900 text-green-200'
+                              : 'bg-gray-700 text-gray-300'
+                      }`}
+                    >
                       {log.level.toUpperCase()}
                     </span>
-                    <span className="text-blue-400 text-xs whitespace-nowrap">
-                      [{log.service}]
-                    </span>
-                    <span className="text-white flex-1 truncate">
-                      {log.message}
-                    </span>
+                    <span className="text-blue-400 text-xs whitespace-nowrap">[{log.service}]</span>
+                    <span className="text-white flex-1 truncate">{log.message}</span>
                   </div>
                 ))}
               </div>
@@ -824,9 +889,9 @@ export default function MonitoringObservability({
           {activeTab === 'slo' && (
             <div className="p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-6">Service Level Objectives</h3>
-              
+
               <div className="space-y-6">
-                {slos.map((slo) => (
+                {slos.map(slo => (
                   <div key={slo.id} className="bg-white border border-gray-200 rounded-lg p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div>
@@ -834,29 +899,37 @@ export default function MonitoringObservability({
                         <p className="text-sm text-gray-500 mt-1">{slo.description}</p>
                       </div>
                       <div className="flex flex-col items-end space-y-2">
-                        <Badge className={slo.status === 'healthy' ? 'bg-green-100 text-green-800' : 
-                                       slo.status === 'warning' ? 'bg-yellow-100 text-yellow-800' : 
-                                       'bg-red-100 text-red-800'}>
+                        <Badge
+                          className={
+                            slo.status === 'healthy'
+                              ? 'bg-green-100 text-green-800'
+                              : slo.status === 'warning'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-red-100 text-red-800'
+                          }
+                        >
                           {slo.status}
                         </Badge>
-                        <span className="text-lg font-bold text-gray-900">{slo.currentCompliance}%</span>
+                        <span className="text-lg font-bold text-gray-900">
+                          {slo.currentCompliance}%
+                        </span>
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div>
                         <h5 className="text-sm font-medium text-gray-700 mb-2">Obiettivo</h5>
                         <div className="flex items-center space-x-2">
                           <div className="flex-1 h-2 bg-gray-200 rounded-full">
-                            <div 
-                              className="h-2 bg-blue-500 rounded-full" 
+                            <div
+                              className="h-2 bg-blue-500 rounded-full"
                               style={{ width: `${slo.currentCompliance}%` }}
                             ></div>
                           </div>
                           <span className="text-sm font-medium">{slo.objective}%</span>
                         </div>
                       </div>
-                      
+
                       <div>
                         <h5 className="text-sm font-medium text-gray-700 mb-2">Error Budget</h5>
                         <div className="space-y-1">
@@ -866,19 +939,23 @@ export default function MonitoringObservability({
                           </div>
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-gray-600">Consumato:</span>
-                            <span className="font-medium text-red-600">{slo.errorBudget.consumed}%</span>
+                            <span className="font-medium text-red-600">
+                              {slo.errorBudget.consumed}%
+                            </span>
                           </div>
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-gray-600">Rimanente:</span>
-                            <span className="font-medium text-green-600">{slo.errorBudget.remaining}%</span>
+                            <span className="font-medium text-green-600">
+                              {slo.errorBudget.remaining}%
+                            </span>
                           </div>
                         </div>
                       </div>
-                      
+
                       <div>
                         <h5 className="text-sm font-medium text-gray-700 mb-2">SLI Associati</h5>
                         <div className="space-y-1">
-                          {slo.slis.map((sli) => (
+                          {slo.slis.map(sli => (
                             <div key={sli.id} className="text-sm">
                               <span className="text-gray-600">{sli.name}:</span>
                               <span className="ml-2 font-medium">{sli.currentValue}%</span>
@@ -887,7 +964,7 @@ export default function MonitoringObservability({
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="mt-4 pt-4 border-t border-gray-100">
                       <div className="flex items-center justify-between text-sm text-gray-500">
                         <span>Servizio: {slo.service}</span>
@@ -904,9 +981,9 @@ export default function MonitoringObservability({
           {activeTab === 'infrastructure' && (
             <div className="p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-6">Infrastructure Monitoring</h3>
-              
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {targets.map((target) => (
+                {targets.map(target => (
                   <div key={target.id} className="bg-white border border-gray-200 rounded-lg p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div>
@@ -916,15 +993,13 @@ export default function MonitoringObservability({
                         </p>
                       </div>
                       <div className="flex flex-col items-end space-y-1">
-                        <Badge className={getStatusColor(target.status)}>
-                          {target.status}
-                        </Badge>
+                        <Badge className={getStatusColor(target.status)}>{target.status}</Badge>
                         <Badge className="bg-gray-100 text-gray-800">
                           {target.type.toUpperCase()}
                         </Badge>
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                       <div>
                         <span className="text-gray-500">Uptime:</span>
@@ -943,7 +1018,7 @@ export default function MonitoringObservability({
                         <span className="ml-2 font-medium">{target.timeout}s</span>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center justify-between">
                         <span className="text-gray-500">Ultimo check:</span>
@@ -973,50 +1048,56 @@ export default function MonitoringObservability({
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Crea Nuovo Alert</h3>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
                   <input
                     type="text"
                     value={newAlert.name}
-                    onChange={(e) => setNewAlert(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={e => setNewAlert(prev => ({ ...prev, name: e.target.value }))}
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Nome dell'alert"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Descrizione</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Descrizione
+                  </label>
                   <textarea
                     value={newAlert.description}
-                    onChange={(e) => setNewAlert(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={e => setNewAlert(prev => ({ ...prev, description: e.target.value }))}
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
                     rows={3}
                     placeholder="Descrizione dell'alert"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Metrica</label>
                   <select
                     value={newAlert.metricId}
-                    onChange={(e) => setNewAlert(prev => ({ ...prev, metricId: e.target.value }))}
+                    onChange={e => setNewAlert(prev => ({ ...prev, metricId: e.target.value }))}
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Seleziona metrica</option>
-                    {metrics.map((metric) => (
-                      <option key={metric.id} value={metric.id}>{metric.name}</option>
+                    {metrics.map(metric => (
+                      <option key={metric.id} value={metric.id}>
+                        {metric.name}
+                      </option>
                     ))}
                   </select>
                 </div>
-                
+
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Condizione</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Condizione
+                    </label>
                     <select
                       value={newAlert.condition}
-                      onChange={(e) => setNewAlert(prev => ({ ...prev, condition: e.target.value }))}
+                      onChange={e => setNewAlert(prev => ({ ...prev, condition: e.target.value }))}
                       className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value=">">Maggiore di</option>
@@ -1024,23 +1105,30 @@ export default function MonitoringObservability({
                       <option value="=">Uguale a</option>
                     </select>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Soglia</label>
                     <input
                       type="number"
                       value={newAlert.threshold}
-                      onChange={(e) => setNewAlert(prev => ({ ...prev, threshold: parseFloat(e.target.value) }))}
+                      onChange={e =>
+                        setNewAlert(prev => ({ ...prev, threshold: parseFloat(e.target.value) }))
+                      }
                       className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
                       step="0.1"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Severità</label>
                     <select
                       value={newAlert.severity}
-                      onChange={(e) => setNewAlert(prev => ({ ...prev, severity: e.target.value as AlertSeverity }))}
+                      onChange={e =>
+                        setNewAlert(prev => ({
+                          ...prev,
+                          severity: e.target.value as AlertSeverity,
+                        }))
+                      }
                       className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="info">Info</option>
@@ -1051,7 +1139,7 @@ export default function MonitoringObservability({
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-end space-x-3 mt-6">
                 <button
                   onClick={() => setShowCreateAlert(false)}
@@ -1087,13 +1175,15 @@ export default function MonitoringObservability({
                   <span className="text-2xl">×</span>
                 </button>
               </div>
-              
+
               <div className="p-6 overflow-y-auto">
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Timestamp</label>
-                      <p className="mt-1 text-sm text-gray-900">{formatDate(selectedLogEntry.timestamp)}</p>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {formatDate(selectedLogEntry.timestamp)}
+                      </p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Level</label>
@@ -1110,14 +1200,14 @@ export default function MonitoringObservability({
                       <p className="mt-1 text-sm text-gray-900">{selectedLogEntry.instance}</p>
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Message</label>
                     <div className="mt-1 p-3 bg-gray-50 rounded-md">
                       <p className="text-sm text-gray-900 font-mono">{selectedLogEntry.message}</p>
                     </div>
                   </div>
-                  
+
                   {Object.keys(selectedLogEntry.fields).length > 0 && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Fields</label>

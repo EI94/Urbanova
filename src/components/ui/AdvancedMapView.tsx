@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+
 import { BrainIcon, TrendingUpIcon, BuildingIcon } from '@/components/icons';
 
 interface AdvancedMapViewProps {
@@ -9,10 +10,10 @@ interface AdvancedMapViewProps {
   onZoneAnalysis: (zone: string) => void;
 }
 
-export default function AdvancedMapView({ 
-  projectLocations, 
-  onLocationSelect, 
-  onZoneAnalysis 
+export default function AdvancedMapView({
+  projectLocations,
+  onLocationSelect,
+  onZoneAnalysis,
 }: AdvancedMapViewProps) {
   const [selectedZone, setSelectedZone] = useState<string | null>(null);
 
@@ -37,7 +38,7 @@ export default function AdvancedMapView({
             {/* Zone Principali con AI Insights */}
             <div className="grid grid-cols-3 gap-4 h-full">
               {/* Zona Appio - Roma con AI */}
-              <div 
+              <div
                 onClick={() => handleZoneClick('Appio')}
                 className="bg-gradient-to-br from-green-200 to-blue-200 rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all transform hover:scale-105"
               >
@@ -45,7 +46,7 @@ export default function AdvancedMapView({
                   <h4 className="font-medium text-gray-900">Appio</h4>
                   <TrendingUpIcon className="h-5 w-5 text-green-600" />
                 </div>
-                
+
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center space-x-2">
                     <BuildingIcon className="h-4 w-4 text-blue-600" />
@@ -55,7 +56,7 @@ export default function AdvancedMapView({
                     <TrendingUpIcon className="h-4 w-4 text-green-600" />
                     <span>ROI: 12.5%</span>
                   </div>
-                  
+
                   {/* AI Prediction Badge */}
                   <div className="mt-3 p-2 bg-green-100 rounded-lg">
                     <div className="flex items-center space-x-2">
@@ -67,7 +68,7 @@ export default function AdvancedMapView({
               </div>
 
               {/* Zona Centro - Milano con AI */}
-              <div 
+              <div
                 onClick={() => handleZoneClick('Centro')}
                 className="bg-gradient-to-br from-blue-200 to-purple-200 rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all transform hover:scale-105"
               >
@@ -75,7 +76,7 @@ export default function AdvancedMapView({
                   <h4 className="font-medium text-gray-900">Centro</h4>
                   <TrendingUpIcon className="h-5 w-5 text-blue-600" />
                 </div>
-                
+
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center space-x-2">
                     <BuildingIcon className="h-4 w-4 text-blue-600" />
@@ -85,7 +86,7 @@ export default function AdvancedMapView({
                     <TrendingUpIcon className="h-4 w-4 text-green-600" />
                     <span>ROI: 18.5%</span>
                   </div>
-                  
+
                   {/* AI Prediction Badge */}
                   <div className="mt-3 p-2 bg-blue-100 rounded-lg">
                     <div className="flex items-center space-x-2">
@@ -97,7 +98,7 @@ export default function AdvancedMapView({
               </div>
 
               {/* Zona Centro - Torino con AI */}
-              <div 
+              <div
                 onClick={() => handleZoneClick('Centro')}
                 className="bg-gradient-to-br from-gray-200 to-blue-200 rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all transform hover:scale-105"
               >
@@ -105,7 +106,7 @@ export default function AdvancedMapView({
                   <h4 className="font-medium text-gray-900">Centro</h4>
                   <TrendingUpIcon className="h-5 w-5 text-gray-600" />
                 </div>
-                
+
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center space-x-2">
                     <BuildingIcon className="h-4 w-4 text-blue-600" />
@@ -115,7 +116,7 @@ export default function AdvancedMapView({
                     <TrendingUpIcon className="h-4 w-4 text-green-600" />
                     <span>ROI: 12.8%</span>
                   </div>
-                  
+
                   {/* AI Prediction Badge */}
                   <div className="mt-3 p-2 bg-purple-100 rounded-lg">
                     <div className="flex items-center space-x-2">
@@ -133,7 +134,7 @@ export default function AdvancedMapView({
               <div className="space-y-2 text-xs">
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-green-200 rounded"></div>
-                  <span>ROI > 15%</span>
+                  <span>ROI &gt; 15%</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-blue-200 rounded"></div>

@@ -5,18 +5,15 @@ const nextConfig = {
     // Next.js 13.4 e superiori hanno App Router abilitato di default
   },
   images: {
-    domains: [
-      'firebasestorage.googleapis.com',
-      'via.placeholder.com'
-    ],
+    domains: ['firebasestorage.googleapis.com', 'via.placeholder.com'],
   },
   // Escludiamo le directory che non devono essere compilate
   distDir: '.next',
   eslint: {
-    ignoreDuringBuilds: true
+    ignoreDuringBuilds: true,
   },
   typescript: {
-    ignoreBuildErrors: true
+    ignoreBuildErrors: true,
   },
   // Configurazione per gestire Puppeteer e dipendenze problematiche
   webpack: (config, { isServer }) => {
@@ -38,16 +35,23 @@ const nextConfig = {
         path: false,
         child_process: false,
         'puppeteer-core': false,
-        puppeteer: false
+        puppeteer: false,
       };
     }
-    
+
     // Escludi Puppeteer dal bundle client
     config.externals = config.externals || [];
     if (!isServer) {
       config.externals.push('puppeteer', 'puppeteer-core');
     }
-    
+
+    // Ignora file TypeScript nei node_modules
+    config.module.rules.push({
+      test: /\.ts$/,
+      include: /node_modules/,
+      use: 'ignore-loader'
+    });
+
     return config;
   },
   // Configurazione per Vercel
@@ -68,7 +72,7 @@ const nextConfig = {
   // Disabilita completamente TypeScript per il build
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
-  }
+  },
 };
 
-module.exports = nextConfig; 
+module.exports = nextConfig;

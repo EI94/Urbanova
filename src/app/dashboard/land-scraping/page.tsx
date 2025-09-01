@@ -2,41 +2,14 @@
 
 export const dynamic = 'force-dynamic';
 
+import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { LandSearchCriteria, RealLandScrapingResult } from '@/types/land';
-import { emailService, EmailConfig } from '@/lib/emailService';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { toast } from 'react-hot-toast';
 
-import ProgressBar from '@/components/ui/ProgressBar';
-import LandCard from '@/components/ui/LandCard';
-import AdvancedFilters from '@/components/ui/AdvancedFilters';
-import MultiLocationSelector from '@/components/ui/MultiLocationSelector';
-import PerformanceStats from '@/components/ui/PerformanceStats';
-import SearchSchedulerModal from '@/components/ui/SearchSchedulerModal';
-import TeamCollaborationPanel from '@/components/ui/TeamCollaborationPanel';
-import CollaborativeSearchSession from '@/components/ui/CollaborativeSearchSession';
-import TeamCommentsVoting from '@/components/ui/TeamCommentsVoting';
-import SharedFavorites from '@/components/ui/SharedFavorites';
-import AdvancedTeamManagement from '@/components/ui/AdvancedTeamManagement';
-import WorkflowManagement from '@/components/ui/WorkflowManagement';
-import RealtimeCollaboration from '@/components/ui/RealtimeCollaboration';
-import AdvancedAnalytics from '@/components/ui/AdvancedAnalytics';
-import KnowledgeManagement from '@/components/ui/KnowledgeManagement';
-import SecurityCompliance from '@/components/ui/SecurityCompliance';
-import MonitoringObservability from '@/components/ui/MonitoringObservability';
-import AIMLCenter from '@/components/ui/AIMLCenter';
-import Web3Center from '@/components/ui/Web3Center';
-import APIGatewayCenter from '@/components/ui/APIGatewayCenter';
-import DevOpsCenter from '@/components/ui/DevOpsCenter';
-import SecurityCenter from '@/components/ui/SecurityCenter';
-import { teamRoleManager, ROLE_PERMISSIONS } from '@/lib/teamRoleManager';
-import { TeamRole, TeamMember, Permission } from '@/types/team';
-
-import { 
-  SearchIcon, 
-  MailIcon, 
-  EuroIcon, 
+import {
+  SearchIcon,
+  MailIcon,
+  EuroIcon,
   CalendarIcon,
   TrendingUpIcon,
   CheckCircleIcon,
@@ -48,10 +21,36 @@ import {
   MapIcon,
   EyeIcon,
   PlusIcon,
-  BuildingIcon
+  BuildingIcon,
 } from '@/components/icons';
-import { toast } from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdvancedAnalytics from '@/components/ui/AdvancedAnalytics';
+import AdvancedFilters from '@/components/ui/AdvancedFilters';
+import LandCard from '@/components/ui/LandCard';
+import ProgressBar from '@/components/ui/ProgressBar';
+import MultiLocationSelector from '@/components/ui/MultiLocationSelector';
+import PerformanceStats from '@/components/ui/PerformanceStats';
+import RealtimeCollaboration from '@/components/ui/RealtimeCollaboration';
+import SearchSchedulerModal from '@/components/ui/SearchSchedulerModal';
+import SecurityCompliance from '@/components/ui/SecurityCompliance';
+import SharedFavorites from '@/components/ui/SharedFavorites';
+import TeamCollaborationPanel from '@/components/ui/TeamCollaborationPanel';
+import CollaborativeSearchSession from '@/components/ui/CollaborativeSearchSession';
+import TeamCommentsVoting from '@/components/ui/TeamCommentsVoting';
+import AdvancedTeamManagement from '@/components/ui/AdvancedTeamManagement';
+import Web3Center from '@/components/ui/Web3Center';
+import WorkflowManagement from '@/components/ui/WorkflowManagement';
+import KnowledgeManagement from '@/components/ui/KnowledgeManagement';
+import MonitoringObservability from '@/components/ui/MonitoringObservability';
+import AIMLCenter from '@/components/ui/AIMLCenter';
+import APIGatewayCenter from '@/components/ui/APIGatewayCenter';
+import DevOpsCenter from '@/components/ui/DevOpsCenter';
+import SecurityCenter from '@/components/ui/SecurityCenter';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { emailService, EmailConfig } from '@/lib/emailService';
+import { teamRoleManager, ROLE_PERMISSIONS } from '@/lib/teamRoleManager';
+import { LandSearchCriteria, RealLandScrapingResult } from '@/types/land';
+import { TeamRole, TeamMember, Permission } from '@/types/team';
 
 interface SearchProgress {
   phase: 'idle' | 'searching' | 'analyzing' | 'filtering' | 'complete' | 'error';
@@ -84,9 +83,9 @@ export default function LandScrapingPage() {
     maxPrice: 1000000,
     minArea: 500,
     maxArea: 10000,
-    propertyType: 'residenziale'
+    propertyType: 'residenziale',
   });
-  
+
   const [email, setEmail] = useState('');
   const [searchProgress, setSearchProgress] = useState<SearchProgress>({
     phase: 'idle',
@@ -94,20 +93,22 @@ export default function LandScrapingPage() {
     sourcesCompleted: [],
     sourcesTotal: ['immobiliare.it', 'borsinoimmobiliare.it'],
     progress: 0,
-    message: ''
+    message: '',
   });
-  
+
   const [searchResults, setSearchResults] = useState<RealLandScrapingResult | null>(null);
   const [filteredResults, setFilteredResults] = useState<any[]>([]);
-  const [searchHistory, setSearchHistory] = useState<Array<{
-    id: string;
-    criteria: LandSearchCriteria;
-    email: string;
-    date: Date;
-    resultsCount: number;
-    emailSent: boolean;
-  }>>([]);
-  
+  const [searchHistory, setSearchHistory] = useState<
+    Array<{
+      id: string;
+      criteria: LandSearchCriteria;
+      email: string;
+      date: Date;
+      resultsCount: number;
+      emailSent: boolean;
+    }>
+  >([]);
+
   // Stati per filtri avanzati
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
@@ -117,37 +118,39 @@ export default function LandScrapingPage() {
     hasPermits: false,
     minAIScore: 70,
     riskLevel: 'all',
-    maxDistance: 50
+    maxDistance: 50,
   });
-  
+
   // Stati per UI
   const [showMap, setShowMap] = useState(false);
   const [selectedView, setSelectedView] = useState<'cards' | 'list' | 'map'>('cards');
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [showEmailSettings, setShowEmailSettings] = useState(false);
   const [emailConfig, setEmailConfig] = useState<EmailConfig | null>(null);
-  
+
   // Stati per ricerca automatica programmata
   const [showSearchScheduler, setShowSearchScheduler] = useState(false);
-  const [scheduledSearches, setScheduledSearches] = useState<Array<{
-    id: string;
-    name: string;
-    criteria: LandSearchCriteria;
-    email: string;
-    frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
-    time: string;
-    isActive: boolean;
-    lastRun?: Date;
-    nextRun?: Date;
-  }>>([]);
-  
+  const [scheduledSearches, setScheduledSearches] = useState<
+    Array<{
+      id: string;
+      name: string;
+      criteria: LandSearchCriteria;
+      email: string;
+      frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
+      time: string;
+      isActive: boolean;
+      lastRun?: Date;
+      nextRun?: Date;
+    }>
+  >([]);
+
   // Stati per servizi
   const [servicesStatus, setServicesStatus] = useState<{
     email: boolean;
     webScraping: boolean;
     ai: boolean;
   } | null>(null);
-  
+
   const [emailError, setEmailError] = useState<string | null>(null);
 
   // Stati per collaborazione team
@@ -157,12 +160,15 @@ export default function LandScrapingPage() {
   const [showSharedFavorites, setShowSharedFavorites] = useState(false);
   const [showAdvancedTeamManagement, setShowAdvancedTeamManagement] = useState(false);
   const [showWorkflowManagement, setShowWorkflowManagement] = useState(false);
-  
+
   // Stati per gestione avanzata team
   const [currentUserRole, setCurrentUserRole] = useState<TeamRole>('PROJECT_MANAGER');
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [teamPermissions, setTeamPermissions] = useState<Permission[]>([]);
-  const [selectedLandForComments, setSelectedLandForComments] = useState<{id: string, title: string} | null>(null);
+  const [selectedLandForComments, setSelectedLandForComments] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
 
   // Stati per Realtime Collaboration
   const [showRealtimeCollaboration, setShowRealtimeCollaboration] = useState(false);
@@ -251,10 +257,10 @@ export default function LandScrapingPage() {
         favoritesCount: 0,
         sessionsCreated: 0,
         sessionsJoined: 0,
-        lastActivity: new Date()
-      }
+        lastActivity: new Date(),
+      },
     };
-    
+
     setTeamMembers([currentUser]);
     setTeamPermissions(currentUser.permissions);
   }, [currentUserRole]);
@@ -278,7 +284,7 @@ export default function LandScrapingPage() {
       while (attempts < maxAttempts) {
         try {
           console.log(`🔍 Tentativo ${attempts + 1}/${maxAttempts} - Health check...`);
-          
+
           // Timeout di 10 secondi per evitare blocchi
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -287,8 +293,8 @@ export default function LandScrapingPage() {
             signal: controller.signal,
             headers: {
               'Cache-Control': 'no-cache',
-              'Pragma': 'no-cache'
-            }
+              Pragma: 'no-cache',
+            },
           });
 
           clearTimeout(timeoutId);
@@ -296,11 +302,11 @@ export default function LandScrapingPage() {
           if (response.ok) {
             const data = await response.json();
             console.log('✅ Health check riuscito:', data);
-            
+
             setServicesStatus({
               email: data.services?.email === 'configured' || false,
               webScraping: data.services?.webScraping === 'operational' || false,
-              ai: data.services?.ai === 'configured' || false
+              ai: data.services?.ai === 'configured' || false,
             });
             return; // Successo, esci dal loop
           } else {
@@ -309,12 +315,14 @@ export default function LandScrapingPage() {
         } catch (error: any) {
           lastError = error;
           attempts++;
-          
+
           if (error.name === 'AbortError') {
             console.warn(`⏰ Timeout tentativo ${attempts}/${maxAttempts}`);
-          } else if (error.message.includes('ERR_NETWORK_CHANGED') || 
-                     error.message.includes('ERR_INTERNET_DISCONNECTED') ||
-                     error.message.includes('Failed to fetch')) {
+          } else if (
+            error.message.includes('ERR_NETWORK_CHANGED') ||
+            error.message.includes('ERR_INTERNET_DISCONNECTED') ||
+            error.message.includes('Failed to fetch')
+          ) {
             console.warn(`🌐 Errore di rete tentativo ${attempts}/${maxAttempts}:`, error.message);
           } else {
             console.error(`❌ Errore tentativo ${attempts}/${maxAttempts}:`, error);
@@ -334,18 +342,19 @@ export default function LandScrapingPage() {
       setServicesStatus({
         email: false,
         webScraping: false,
-        ai: false
+        ai: false,
       });
 
       // Mostra errore all'utente
-      toast('Problemi di connessione. Verifica la tua connessione internet e riprova.', { icon: '❌' });
-
+      toast('Problemi di connessione. Verifica la tua connessione internet e riprova.', {
+        icon: '❌',
+      });
     } catch (error) {
       console.error('❌ Errore critico verifica servizi:', error);
       setServicesStatus({
         email: false,
         webScraping: false,
-        ai: false
+        ai: false,
       });
     }
   };
@@ -372,7 +381,7 @@ export default function LandScrapingPage() {
           // Converti le date da stringhe a oggetti Date
           const historyWithDates = history.map((entry: any) => ({
             ...entry,
-            date: new Date(entry.date)
+            date: new Date(entry.date),
           }));
           setSearchHistory(historyWithDates);
         } else {
@@ -405,7 +414,7 @@ export default function LandScrapingPage() {
         const searchesWithDates = searches.map((search: any) => ({
           ...search,
           lastRun: search.lastRun ? new Date(search.lastRun) : undefined,
-          nextRun: search.nextRun ? new Date(search.nextRun) : undefined
+          nextRun: search.nextRun ? new Date(search.nextRun) : undefined,
         }));
         setScheduledSearches(searchesWithDates);
       }
@@ -430,13 +439,13 @@ export default function LandScrapingPage() {
       id: Date.now().toString(),
       isActive: true,
       lastRun: undefined,
-      nextRun: calculateNextRun(scheduleData.frequency, scheduleData.time)
+      nextRun: calculateNextRun(scheduleData.frequency, scheduleData.time),
     };
-    
+
     const updatedSearches = [...scheduledSearches, newSearch];
     setScheduledSearches(updatedSearches);
     saveScheduledSearches(updatedSearches);
-          toast(`Ricerca programmata "${scheduleData.name}" aggiunta con successo!`, { icon: '✅' });
+    toast(`Ricerca programmata "${scheduleData.name}" aggiunta con successo!`, { icon: '✅' });
   };
 
   const calculateNextRun = (frequency: string, time: string) => {
@@ -444,7 +453,7 @@ export default function LandScrapingPage() {
     const [hours, minutes] = time.split(':');
     const nextRun = new Date(now);
     nextRun.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-    
+
     // Se l'orario di oggi è già passato, calcola per il prossimo periodo
     if (nextRun <= now) {
       switch (frequency) {
@@ -464,24 +473,24 @@ export default function LandScrapingPage() {
           nextRun.setDate(nextRun.getDate() + 1);
       }
     }
-    
+
     return nextRun;
   };
 
   const toggleScheduledSearch = (id: string) => {
-    const updatedSearches = scheduledSearches.map(search => 
+    const updatedSearches = scheduledSearches.map(search =>
       search.id === id ? { ...search, isActive: !search.isActive } : search
     );
     setScheduledSearches(updatedSearches);
     saveScheduledSearches(updatedSearches);
-          toast('Stato ricerca programmata aggiornato!', { icon: '✅' });
+    toast('Stato ricerca programmata aggiornato!', { icon: '✅' });
   };
 
   const deleteScheduledSearch = (id: string) => {
     const updatedSearches = scheduledSearches.filter(search => search.id !== id);
     setScheduledSearches(updatedSearches);
     saveScheduledSearches(updatedSearches);
-            toast('Ricerca programmata eliminata!', { icon: '✅' });
+    toast('Ricerca programmata eliminata!', { icon: '✅' });
   };
 
   // Funzioni per collaborazione team
@@ -526,20 +535,26 @@ export default function LandScrapingPage() {
         favoritesCount: 0,
         sessionsCreated: 0,
         sessionsJoined: 0,
-        lastActivity: new Date()
-      }
+        lastActivity: new Date(),
+      },
     };
-    
+
     setTeamMembers(prev => [...prev, newMember]);
     toast(`Membro invitato con ruolo ${role}`, { icon: '👥' });
   };
 
   const handleUpdateMemberRole = (memberId: string, newRole: TeamRole) => {
-    setTeamMembers(prev => prev.map(member => 
-      member.id === memberId 
-        ? { ...member, role: newRole, permissions: ROLE_PERMISSIONS.find(r => r.role === newRole)?.permissions || [] }
-        : member
-    ));
+    setTeamMembers(prev =>
+      prev.map(member =>
+        member.id === memberId
+          ? {
+              ...member,
+              role: newRole,
+              permissions: ROLE_PERMISSIONS.find(r => r.role === newRole)?.permissions || [],
+            }
+          : member
+      )
+    );
     toast('Ruolo aggiornato', { icon: '🔄' });
   };
 
@@ -549,9 +564,9 @@ export default function LandScrapingPage() {
   };
 
   const handleUpdateMemberPermissions = (memberId: string, permissions: Permission[]) => {
-    setTeamMembers(prev => prev.map(member => 
-      member.id === memberId ? { ...member, permissions } : member
-    ));
+    setTeamMembers(prev =>
+      prev.map(member => (member.id === memberId ? { ...member, permissions } : member))
+    );
     toast('Permessi aggiornati', { icon: '🔐' });
   };
 
@@ -586,7 +601,9 @@ export default function LandScrapingPage() {
       newFavorites.add(landId);
     }
     saveFavorites(newFavorites);
-            toast(newFavorites.has(landId) ? 'Aggiunto ai preferiti' : 'Rimosso dai preferiti', { icon: '✅' });
+    toast(newFavorites.has(landId) ? 'Aggiunto ai preferiti' : 'Rimosso dai preferiti', {
+      icon: '✅',
+    });
   };
 
   const applyFilters = useCallback(() => {
@@ -595,32 +612,31 @@ export default function LandScrapingPage() {
     let filtered = [...searchResults.lands];
 
     // Filtro prezzo
-    filtered = filtered.filter(land => 
-      land.price >= filters.priceRange[0] && land.price <= filters.priceRange[1]
+    filtered = filtered.filter(
+      land => land.price >= filters.priceRange[0] && land.price <= filters.priceRange[1]
     );
 
     // Filtro area
-    filtered = filtered.filter(land => 
-      land.area >= filters.areaRange[0] && land.area <= filters.areaRange[1]
+    filtered = filtered.filter(
+      land => land.area >= filters.areaRange[0] && land.area <= filters.areaRange[1]
     );
 
     // Filtro tipologia
     if (filters.propertyTypes.length > 0) {
-      filtered = filtered.filter(land => 
-        filters.propertyTypes.some(type => 
-          land.features.some(feature => 
-            feature.toLowerCase().includes(type.toLowerCase())
-          )
+      filtered = filtered.filter(land =>
+        filters.propertyTypes.some(type =>
+          land.features.some(feature => feature.toLowerCase().includes(type.toLowerCase()))
         )
       );
     }
 
     // Filtro permessi
     if (filters.hasPermits) {
-      filtered = filtered.filter(land => 
-        land.features.some(feature => 
-          feature.toLowerCase().includes('permessi') || 
-          feature.toLowerCase().includes('edificabile')
+      filtered = filtered.filter(land =>
+        land.features.some(
+          feature =>
+            feature.toLowerCase().includes('permessi') ||
+            feature.toLowerCase().includes('edificabile')
         )
       );
     }
@@ -642,7 +658,7 @@ export default function LandScrapingPage() {
   const handleSearch = async (criteria?: LandSearchCriteria, searchEmail?: string) => {
     const searchCriteriaToUse = criteria || searchCriteria;
     const emailToUse = searchEmail || email;
-    
+
     if (!emailToUse.trim()) {
       toast('Inserisci un indirizzo email per ricevere i risultati', { icon: '⚠️' });
       return;
@@ -657,9 +673,9 @@ export default function LandScrapingPage() {
       phase: 'searching',
       currentSource: '',
       sourcesCompleted: [],
-              sourcesTotal: ['immobiliare.it', 'borsinoimmobiliare.it'],
+      sourcesTotal: ['immobiliare.it', 'borsinoimmobiliare.it'],
       progress: 0,
-      message: 'Inizializzazione ricerca...'
+      message: 'Inizializzazione ricerca...',
     });
 
     try {
@@ -704,7 +720,7 @@ export default function LandScrapingPage() {
             progress: newProgress,
             message: newMessage,
             currentSource: newCurrentSource,
-            sourcesCompleted: newSourcesCompleted
+            sourcesCompleted: newSourcesCompleted,
           };
         });
       }, 500);
@@ -717,7 +733,7 @@ export default function LandScrapingPage() {
       while (searchAttempts < maxSearchAttempts) {
         try {
           console.log(`🔍 Tentativo ricerca ${searchAttempts + 1}/${maxSearchAttempts}...`);
-          
+
           // Timeout di 120 secondi per la ricerca
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 120000);
@@ -727,7 +743,7 @@ export default function LandScrapingPage() {
             headers: {
               'Content-Type': 'application/json',
               'Cache-Control': 'no-cache',
-              'Pragma': 'no-cache'
+              Pragma: 'no-cache',
             },
             signal: controller.signal,
             body: JSON.stringify({
@@ -737,11 +753,11 @@ export default function LandScrapingPage() {
                 maxPrice: searchCriteriaToUse.maxPrice,
                 minArea: searchCriteriaToUse.minArea,
                 maxArea: searchCriteriaToUse.maxArea,
-                propertyType: searchCriteriaToUse.propertyType
+                propertyType: searchCriteriaToUse.propertyType,
               },
               aiAnalysis: true,
-              email: emailToUse
-            })
+              email: emailToUse,
+            }),
           });
 
           clearTimeout(timeoutId);
@@ -751,22 +767,22 @@ export default function LandScrapingPage() {
           }
 
           const results = await response.json();
-          
+
           if (!results.success) {
             throw new Error(results.error || 'Errore durante la ricerca');
           }
-          
+
           clearInterval(progressInterval);
-          
+
           const finalResults = results.data || results;
           console.log('📊 Risultati ricevuti:', {
             landsCount: finalResults.lands?.length || 0,
             emailSent: finalResults.emailSent,
-            summary: finalResults.summary
+            summary: finalResults.summary,
           });
-          
+
           setSearchResults(finalResults);
-          
+
           // Applica filtri ai nuovi risultati
           setTimeout(() => {
             if (finalResults.lands) {
@@ -775,14 +791,14 @@ export default function LandScrapingPage() {
               console.log('✅ Filtri applicati:', filtered.length, 'risultati');
             }
           }, 100);
-          
+
           setSearchProgress({
             phase: 'complete',
             currentSource: '',
             sourcesCompleted: ['immobiliare.it', 'borsinoimmobiliare.it'],
             sourcesTotal: ['immobiliare.it', 'borsinoimmobiliare.it'],
             progress: 100,
-            message: 'Ricerca completata!'
+            message: 'Ricerca completata!',
           });
 
           // Salva nella cronologia
@@ -792,11 +808,11 @@ export default function LandScrapingPage() {
             email: emailToUse,
             date: new Date(),
             resultsCount: results.data?.lands?.length || 0,
-            emailSent: results.data?.emailSent || false
+            emailSent: results.data?.emailSent || false,
           };
           const newHistory = [historyEntry, ...searchHistory.slice(0, 9)];
           setSearchHistory(newHistory);
-          
+
           // Salva in localStorage per persistenza
           try {
             if (typeof window !== 'undefined') {
@@ -809,15 +825,20 @@ export default function LandScrapingPage() {
           const landsCount = results.data?.lands?.length || 0;
           const emailSent = results.data?.emailSent;
           const emailError = results.emailError;
-          
+
           if (emailError) {
             setEmailError(emailError);
             toast(`⚠️ ${emailError}`, { icon: '⚠️' });
-            toast(`✅ Trovati ${landsCount} terreni! Email non inviata - configura RESEND_API_KEY`, { icon: '✅' });
+            toast(
+              `✅ Trovati ${landsCount} terreni! Email non inviata - configura RESEND_API_KEY`,
+              { icon: '✅' }
+            );
           } else {
             setEmailError(null);
             if (emailSent) {
-              toast(`✅ Trovati ${landsCount} terreni! Email inviata con successo.`, { icon: '✅' });
+              toast(`✅ Trovati ${landsCount} terreni! Email inviata con successo.`, {
+                icon: '✅',
+              });
             } else {
               toast(`✅ Trovati ${landsCount} terreni!`, { icon: '✅' });
             }
@@ -826,15 +847,23 @@ export default function LandScrapingPage() {
         } catch (error: any) {
           searchLastError = error;
           searchAttempts++;
-          
+
           if (error.name === 'AbortError') {
             console.warn(`⏰ Timeout tentativo ricerca ${searchAttempts}/${maxSearchAttempts}`);
-          } else if (error.message.includes('ERR_NETWORK_CHANGED') || 
-                     error.message.includes('ERR_INTERNET_DISCONNECTED') ||
-                     error.message.includes('Failed to fetch')) {
-            console.warn(`🌐 Errore di rete tentativo ricerca ${searchAttempts}/${maxSearchAttempts}:`, error.message);
+          } else if (
+            error.message.includes('ERR_NETWORK_CHANGED') ||
+            error.message.includes('ERR_INTERNET_DISCONNECTED') ||
+            error.message.includes('Failed to fetch')
+          ) {
+            console.warn(
+              `🌐 Errore di rete tentativo ricerca ${searchAttempts}/${maxSearchAttempts}:`,
+              error.message
+            );
           } else {
-            console.error(`❌ Errore tentativo ricerca ${searchAttempts}/${maxSearchAttempts}:`, error);
+            console.error(
+              `❌ Errore tentativo ricerca ${searchAttempts}/${maxSearchAttempts}:`,
+              error
+            );
           }
 
           if (searchAttempts < maxSearchAttempts) {
@@ -853,40 +882,41 @@ export default function LandScrapingPage() {
         sourcesCompleted: [],
         sourcesTotal: ['immobiliare.it', 'borsinoimmobiliare.it'],
         progress: 0,
-        message: `Errore: ${searchLastError instanceof Error ? searchLastError.message : 'Errore sconosciuto'}`
+        message: `Errore: ${searchLastError instanceof Error ? searchLastError.message : 'Errore sconosciuto'}`,
       });
-      
-      // Messaggio di errore più dettagliato
-      const errorMessage = searchLastError instanceof Error 
-        ? `❌ Errore: ${searchLastError.message}` 
-        : '❌ Errore durante la ricerca. Riprova.';
-      toast(errorMessage, { icon: '❌' });
 
+      // Messaggio di errore più dettagliato
+      const errorMessage =
+        searchLastError instanceof Error
+          ? `❌ Errore: ${searchLastError.message}`
+          : '❌ Errore durante la ricerca. Riprova.';
+      toast(errorMessage, { icon: '❌' });
     } catch (error) {
       console.error('❌ Errore ricerca:', error);
-      
+
       // Log dettagliato per debugging
       if (error instanceof Error) {
         console.error('Dettagli errore:', {
           message: error.message,
           stack: error.stack,
-          name: error.name
+          name: error.name,
         });
       }
-      
+
       setSearchProgress({
         phase: 'error',
         currentSource: '',
         sourcesCompleted: [],
         sourcesTotal: ['immobiliare.it', 'borsinoimmobiliare.it'],
         progress: 0,
-        message: `Errore: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`
+        message: `Errore: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`,
       });
-      
+
       // Messaggio di errore più dettagliato
-      const errorMessage = error instanceof Error 
-        ? `❌ Errore: ${error.message}` 
-        : '❌ Errore durante la ricerca. Riprova.';
+      const errorMessage =
+        error instanceof Error
+          ? `❌ Errore: ${error.message}`
+          : '❌ Errore durante la ricerca. Riprova.';
       toast(errorMessage, { icon: '❌' });
     }
   };
@@ -894,7 +924,9 @@ export default function LandScrapingPage() {
   const handleCreateFeasibilityProject = async (land: any) => {
     try {
       // Funzionalità temporaneamente disabilitata per evitare errori Firebase
-      toast('✅ Funzionalità progetto di fattibilità temporaneamente non disponibile', { icon: '✅' });
+      toast('✅ Funzionalità progetto di fattibilità temporaneamente non disponibile', {
+        icon: '✅',
+      });
       console.log('📋 Progetto di fattibilità richiesto per:', land.title);
     } catch (error) {
       console.error('❌ Errore creazione progetto:', error);
@@ -903,11 +935,11 @@ export default function LandScrapingPage() {
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('it-IT', { 
-      style: 'currency', 
+    return new Intl.NumberFormat('it-IT', {
+      style: 'currency',
       currency: 'EUR',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(value);
   };
 
@@ -935,11 +967,12 @@ export default function LandScrapingPage() {
 
   const getActiveFiltersCount = () => {
     if (!filters) return 0;
-    
+
     let count = 0;
     if (filters.priceRange?.[0] > 0 || filters.priceRange?.[1] < 1000000) count++;
     if (filters.areaRange?.[0] > 500 || filters.areaRange?.[1] < 10000) count++;
-    if (filters.propertyTypes?.length !== 1 || filters.propertyTypes?.[0] !== 'residenziale') count++;
+    if (filters.propertyTypes?.length !== 1 || filters.propertyTypes?.[0] !== 'residenziale')
+      count++;
     if (filters.hasPermits) count++;
     if (filters.minAIScore > 70) count++;
     if (filters.riskLevel !== 'all') count++;
@@ -954,7 +987,7 @@ export default function LandScrapingPage() {
       hasPermits: false,
       minAIScore: 70,
       riskLevel: 'all',
-      maxDistance: 50
+      maxDistance: 50,
     });
   };
 
@@ -982,11 +1015,9 @@ export default function LandScrapingPage() {
               {/* <BrainIcon className="h-8 w-8 text-blue-600" /> */}
               {t('title', 'aiLandScraping')}
             </h1>
-            <p className="text-gray-600 mt-2">
-              {t('subtitle', 'aiLandScraping')}
-            </p>
+            <p className="text-gray-600 mt-2">{t('subtitle', 'aiLandScraping')}</p>
           </div>
-          
+
           {/* Stato servizi */}
           <div className="flex items-center gap-4">
             {/* Pulsanti Collaborazione Team */}
@@ -997,14 +1028,14 @@ export default function LandScrapingPage() {
               >
                 👥 Team
               </button>
-              
+
               <button
                 onClick={() => setShowCollaborativeSearch(true)}
                 className="px-3 py-2 text-sm bg-green-50 text-green-700 border border-green-200 rounded hover:bg-green-100 transition-colors"
               >
                 👥 Sessioni
               </button>
-              
+
               <button
                 onClick={() => setShowSharedFavorites(true)}
                 className="px-3 py-2 text-sm bg-yellow-50 text-yellow-700 border border-yellow-200 rounded hover:bg-yellow-100 transition-colors"
@@ -1026,79 +1057,81 @@ export default function LandScrapingPage() {
                 🔄 Workflow & Approvazioni
               </button>
 
-                              <button
-                  onClick={() => setShowRealtimeCollaboration(true)}
-                  className="px-3 py-2 text-sm bg-green-50 text-green-700 border border-green-200 rounded hover:bg-green-100 transition-colors"
-                >
-                  ⚡ Real-time Collaboration
-                </button>
-                
-                <button
-                  onClick={() => setShowAdvancedAnalytics(true)}
-                  className="px-3 py-2 text-sm bg-purple-50 text-purple-700 border border-purple-200 rounded hover:bg-purple-100 transition-colors"
-                >
-                  📊 Advanced Analytics
-                </button>
-                
-                <button
-                  onClick={() => setShowKnowledgeManagement(true)}
-                  className="px-3 py-2 text-sm bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 transition-colors"
-                >
-                  📚 Knowledge Base
-                </button>
-                
-                <button
-                  onClick={() => setShowSecurityCenter(true)}
-                  className="px-3 py-2 text-sm bg-red-50 text-red-700 border border-red-200 rounded hover:bg-red-100 transition-colors"
-                >
-                  🛡️ Security Center
-                </button>
-                
-                <button
-                  onClick={() => setShowMonitoringObservability(true)}
-                  className="px-3 py-2 text-sm bg-indigo-50 text-indigo-700 border border-indigo-200 rounded hover:bg-indigo-100 transition-colors"
-                >
-                  📊 Monitoring & Observability
-                </button>
-                
-                <button
-                  onClick={() => setShowAIMLCenter(true)}
-                  className="px-3 py-2 text-sm bg-purple-50 text-purple-700 border border-purple-200 rounded hover:bg-purple-100 transition-colors"
-                >
-                  🤖 AI & Machine Learning
-                </button>
-                
-                <button
-                  onClick={() => setShowWeb3Center(true)}
-                  className="px-3 py-2 text-sm bg-indigo-50 text-indigo-700 border border-indigo-200 rounded hover:bg-indigo-100 transition-colors"
-                >
-                  ⛓️ Web3 & Blockchain
-                </button>
-                
-                <button
-                  onClick={() => setShowAPIGatewayCenter(true)}
-                  className="px-3 py-2 text-sm bg-teal-50 text-teal-700 border border-teal-200 rounded hover:bg-teal-100 transition-colors"
-                >
-                  🔗 API Gateway & Microservices
-                </button>
-                
-                <button
-                  onClick={() => setShowDevOpsCenter(true)}
-                  className="px-3 py-2 text-sm bg-orange-50 text-orange-700 border border-orange-200 rounded hover:bg-orange-100 transition-colors"
-                >
-                  🚀 DevOps & CI/CD Pipeline
-                </button>
+              <button
+                onClick={() => setShowRealtimeCollaboration(true)}
+                className="px-3 py-2 text-sm bg-green-50 text-green-700 border border-green-200 rounded hover:bg-green-100 transition-colors"
+              >
+                ⚡ Real-time Collaboration
+              </button>
+
+              <button
+                onClick={() => setShowAdvancedAnalytics(true)}
+                className="px-3 py-2 text-sm bg-purple-50 text-purple-700 border border-purple-200 rounded hover:bg-purple-100 transition-colors"
+              >
+                📊 Advanced Analytics
+              </button>
+
+              <button
+                onClick={() => setShowKnowledgeManagement(true)}
+                className="px-3 py-2 text-sm bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 transition-colors"
+              >
+                📚 Knowledge Base
+              </button>
+
+              <button
+                onClick={() => setShowSecurityCenter(true)}
+                className="px-3 py-2 text-sm bg-red-50 text-red-700 border border-red-200 rounded hover:bg-red-100 transition-colors"
+              >
+                🛡️ Security Center
+              </button>
+
+              <button
+                onClick={() => setShowMonitoringObservability(true)}
+                className="px-3 py-2 text-sm bg-indigo-50 text-indigo-700 border border-indigo-200 rounded hover:bg-indigo-100 transition-colors"
+              >
+                📊 Monitoring & Observability
+              </button>
+
+              <button
+                onClick={() => setShowAIMLCenter(true)}
+                className="px-3 py-2 text-sm bg-purple-50 text-purple-700 border border-purple-200 rounded hover:bg-purple-100 transition-colors"
+              >
+                🤖 AI & Machine Learning
+              </button>
+
+              <button
+                onClick={() => setShowWeb3Center(true)}
+                className="px-3 py-2 text-sm bg-indigo-50 text-indigo-700 border border-indigo-200 rounded hover:bg-indigo-100 transition-colors"
+              >
+                ⛓️ Web3 & Blockchain
+              </button>
+
+              <button
+                onClick={() => setShowAPIGatewayCenter(true)}
+                className="px-3 py-2 text-sm bg-teal-50 text-teal-700 border border-teal-200 rounded hover:bg-teal-100 transition-colors"
+              >
+                🔗 API Gateway & Microservices
+              </button>
+
+              <button
+                onClick={() => setShowDevOpsCenter(true)}
+                className="px-3 py-2 text-sm bg-orange-50 text-orange-700 border border-orange-200 rounded hover:bg-orange-100 transition-colors"
+              >
+                🚀 DevOps & CI/CD Pipeline
+              </button>
             </div>
-            
+
             {/* Indicatore stato connessione e ruolo */}
             <div className="flex items-center gap-4 text-sm">
               <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <div
+                  className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`}
+                ></div>
                 <span className={`text-sm ${isOnline ? 'text-green-600' : 'text-red-600'}`}>
                   {isOnline ? t('online', 'aiLandScraping') : 'Offline'}
                 </span>
               </div>
-              
+
               {/* Indicatore ruolo corrente */}
               <div className="flex items-center gap-2 px-3 py-1 bg-purple-100 text-purple-700 rounded-full">
                 <span className="text-xs">👑</span>
@@ -1111,21 +1144,25 @@ export default function LandScrapingPage() {
                 </span>
               </div>
             </div>
-            
+
             {servicesStatus ? (
               <div className="flex items-center gap-2 text-sm">
-                <div className={`w-2 h-2 rounded-full ${servicesStatus.email ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <div
+                  className={`w-2 h-2 rounded-full ${servicesStatus.email ? 'bg-green-500' : 'bg-red-500'}`}
+                ></div>
                 <span className="text-gray-600">{t('email', 'aiLandScraping')}</span>
-                <div className={`w-2 h-2 rounded-full ${servicesStatus.webScraping ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <div
+                  className={`w-2 h-2 rounded-full ${servicesStatus.webScraping ? 'bg-green-500' : 'bg-red-500'}`}
+                ></div>
                 <span className="text-gray-600">{t('scraping', 'aiLandScraping')}</span>
-                <div className={`w-2 h-2 rounded-full ${servicesStatus.ai ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <div
+                  className={`w-2 h-2 rounded-full ${servicesStatus.ai ? 'bg-green-500' : 'bg-red-500'}`}
+                ></div>
                 <span className="text-gray-600">{t('ai', 'aiLandScraping')}</span>
               </div>
             ) : null}
           </div>
         </div>
-
-
 
         {/* Avviso offline */}
         {!isOnline && (
@@ -1142,16 +1179,14 @@ export default function LandScrapingPage() {
                 </h3>
                 <div className="mt-2 text-sm text-red-700">
                   <p>
-                    Non hai una connessione internet attiva. Alcune funzionalità potrebbero non funzionare correttamente. 
-                    Verifica la tua connessione e riprova.
+                    Non hai una connessione internet attiva. Alcune funzionalità potrebbero non
+                    funzionare correttamente. Verifica la tua connessione e riprova.
                   </p>
                 </div>
               </div>
             </div>
           </div>
         )}
-
-
 
         {/* Progress Bar durante la ricerca */}
         <ProgressBar
@@ -1165,8 +1200,6 @@ export default function LandScrapingPage() {
 
         {/* Criteri di ricerca principali */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
-
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Localizzazione Avanzata */}
             <div>
@@ -1175,7 +1208,7 @@ export default function LandScrapingPage() {
               </label>
               <MultiLocationSelector
                 value={searchCriteria.location}
-                onChange={(location) => setSearchCriteria(prev => ({ ...prev, location }))}
+                onChange={location => setSearchCriteria(prev => ({ ...prev, location }))}
                 placeholder="Cerca localizzazioni (es. Latina, Roma, Milano...)"
                 className="w-full"
               />
@@ -1190,10 +1223,12 @@ export default function LandScrapingPage() {
               <input
                 type="number"
                 value={searchCriteria.minPrice || 0}
-                onChange={(e) => setSearchCriteria(prev => ({ 
-                  ...prev, 
-                  minPrice: parseInt(e.target.value) || 0
-                }))}
+                onChange={e =>
+                  setSearchCriteria(prev => ({
+                    ...prev,
+                    minPrice: parseInt(e.target.value) || 0,
+                  }))
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -1207,10 +1242,12 @@ export default function LandScrapingPage() {
               <input
                 type="number"
                 value={searchCriteria.maxPrice || 1000000}
-                onChange={(e) => setSearchCriteria(prev => ({ 
-                  ...prev, 
-                  maxPrice: parseInt(e.target.value) || 1000000
-                }))}
+                onChange={e =>
+                  setSearchCriteria(prev => ({
+                    ...prev,
+                    maxPrice: parseInt(e.target.value) || 1000000,
+                  }))
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -1224,14 +1261,16 @@ export default function LandScrapingPage() {
               <input
                 type="number"
                 value={searchCriteria.minArea || 500}
-                onChange={(e) => setSearchCriteria(prev => ({ 
-                  ...prev, 
-                  minArea: parseInt(e.target.value) || 500
-                }))}
+                onChange={e =>
+                  setSearchCriteria(prev => ({
+                    ...prev,
+                    minArea: parseInt(e.target.value) || 500,
+                  }))
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <BuildingIcon className="inline h-4 w-4 mr-1" />
@@ -1240,10 +1279,12 @@ export default function LandScrapingPage() {
               <input
                 type="number"
                 value={searchCriteria.maxArea || 10000}
-                onChange={(e) => setSearchCriteria(prev => ({ 
-                  ...prev, 
-                  maxArea: parseInt(e.target.value) || 10000
-                }))}
+                onChange={e =>
+                  setSearchCriteria(prev => ({
+                    ...prev,
+                    maxArea: parseInt(e.target.value) || 10000,
+                  }))
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -1268,24 +1309,31 @@ export default function LandScrapingPage() {
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={e => setEmail(e.target.value)}
                 placeholder="pierpaolo.laurito@gmail.com"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-            
+
             <div className="flex items-end gap-3">
               <button
                 onClick={() => setShowSearchScheduler(true)}
                 disabled={searchProgress.phase !== 'idle' || !isOnline}
                 className="flex-1 flex items-center justify-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                title={!isOnline ? 'Connessione internet richiesta per la ricerca' : 'Avvia Ricerca o Programmala'}
+                title={
+                  !isOnline
+                    ? 'Connessione internet richiesta per la ricerca'
+                    : 'Avvia Ricerca o Programmala'
+                }
               >
                 <SearchIcon className="h-4 w-4" />
-                {!isOnline ? 'Offline' : 
-                 searchProgress.phase === 'idle' ? 'Cerca o Programma' : 'Ricerca in corso...'}
+                {!isOnline
+                  ? 'Offline'
+                  : searchProgress.phase === 'idle'
+                    ? 'Cerca o Programma'
+                    : 'Ricerca in corso...'}
               </button>
-              
+
               <button
                 onClick={() => setShowEmailSettings(true)}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
@@ -1303,7 +1351,8 @@ export default function LandScrapingPage() {
             {/* Informazioni semplici sulla fonte */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
               <p className="text-sm text-blue-700">
-                ℹ️ <strong>Nota:</strong> I risultati provengono da <strong>immobiliare.it</strong> e <strong>borsinoimmobiliare.it</strong>
+                ℹ️ <strong>Nota:</strong> I risultati provengono da <strong>immobiliare.it</strong>{' '}
+                e <strong>borsinoimmobiliare.it</strong>
               </p>
             </div>
 
@@ -1314,13 +1363,14 @@ export default function LandScrapingPage() {
                   Risultati ({filteredResults.length} terreni)
                 </h2>
                 <p className="text-sm text-gray-600">
-                  Prezzo medio: {formatCurrency(
-                    filteredResults.reduce((sum, land) => sum + land.price, 0) / filteredResults.length
+                  Prezzo medio:{' '}
+                  {formatCurrency(
+                    filteredResults.reduce((sum, land) => sum + land.price, 0) /
+                      filteredResults.length
                   )}
                 </p>
-
               </div>
-              
+
               {/* Controlli vista */}
               <div className="flex items-center gap-2">
                 <button
@@ -1359,14 +1409,14 @@ export default function LandScrapingPage() {
             {/* Risultati in card */}
             {selectedView === 'cards' && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredResults.map((land) => (
+                {filteredResults.map(land => (
                   <LandCard
                     key={land.id}
                     land={land}
                     isFavorite={favorites.has(land.id)}
                     onToggleFavorite={toggleFavorite}
                     onCreateFeasibility={handleCreateFeasibilityProject}
-                    onViewDetails={(url) => window.open(url, '_blank')}
+                    onViewDetails={url => window.open(url, '_blank')}
                   />
                 ))}
               </div>
@@ -1381,16 +1431,20 @@ export default function LandScrapingPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
                           <h3 className="font-semibold text-gray-900">{land.title}</h3>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getAIScoreColor(land.aiScore)}`}>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${getAIScoreColor(land.aiScore)}`}
+                          >
                             AI Score: {land.aiScore}/100
                           </span>
                           {land.analysis?.riskAssessment && (
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRiskColor(land.analysis.riskAssessment)}`}>
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${getRiskColor(land.analysis.riskAssessment)}`}
+                            >
                               {land.analysis.riskAssessment}
                             </span>
                           )}
                         </div>
-                        
+
                         <div className="grid grid-cols-4 gap-4 text-sm">
                           <div>
                             <span className="text-gray-500">Prezzo:</span>
@@ -1402,23 +1456,27 @@ export default function LandScrapingPage() {
                           </div>
                           <div>
                             <span className="text-gray-500">€/m²:</span>
-                            <span className="ml-1 font-medium">{formatCurrency(Math.round(land.price / land.area))}</span>
+                            <span className="ml-1 font-medium">
+                              {formatCurrency(Math.round(land.price / land.area))}
+                            </span>
                           </div>
                           <div>
                             <span className="text-gray-500">ROI:</span>
                             <span className="ml-1 font-medium">
-                              {land.analysis?.estimatedROI ? `${land.analysis.estimatedROI}%` : 'N/A'}
+                              {land.analysis?.estimatedROI
+                                ? `${land.analysis.estimatedROI}%`
+                                : 'N/A'}
                             </span>
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => toggleFavorite(land.id)}
                           className={`p-2 rounded-full ${
-                            favorites.has(land.id) 
-                              ? 'text-yellow-500 hover:text-yellow-600' 
+                            favorites.has(land.id)
+                              ? 'text-yellow-500 hover:text-yellow-600'
                               : 'text-gray-400 hover:text-yellow-500'
                           }`}
                         >
@@ -1468,10 +1526,26 @@ export default function LandScrapingPage() {
                 <div className="mt-2 text-sm text-yellow-700">
                   <p>Per ricevere i risultati via email, configura Resend:</p>
                   <ol className="list-decimal list-inside mt-2 space-y-1">
-                    <li>Vai su <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="underline">https://resend.com</a></li>
+                    <li>
+                      Vai su{' '}
+                      <a
+                        href="https://resend.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        https://resend.com
+                      </a>
+                    </li>
                     <li>Crea un account e ottieni l'API key</li>
-                    <li>Aggiungi <code className="bg-yellow-100 px-1 rounded">RESEND_API_KEY</code> nelle variabili ambiente</li>
-                    <li>Verifica il dominio o usa <code className="bg-yellow-100 px-1 rounded">onboarding@resend.dev</code></li>
+                    <li>
+                      Aggiungi <code className="bg-yellow-100 px-1 rounded">RESEND_API_KEY</code>{' '}
+                      nelle variabili ambiente
+                    </li>
+                    <li>
+                      Verifica il dominio o usa{' '}
+                      <code className="bg-yellow-100 px-1 rounded">onboarding@resend.dev</code>
+                    </li>
                   </ol>
                 </div>
               </div>
@@ -1494,23 +1568,32 @@ export default function LandScrapingPage() {
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {scheduledSearches.slice(0, 3).map((search) => (
+              {scheduledSearches.slice(0, 3).map(search => (
                 <div key={search.id} className="border border-gray-200 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium text-gray-900 text-sm">{search.name}</h4>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      search.isActive 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        search.isActive
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
                       {search.isActive ? 'Attiva' : 'Inattiva'}
                     </span>
                   </div>
                   <div className="text-xs text-gray-600 space-y-1">
                     <div>📍 {search.criteria.location}</div>
-                    <div>📅 {search.frequency === 'daily' ? 'Giornaliera' : 
-                           search.frequency === 'weekly' ? 'Settimanale' : 
-                           search.frequency === 'monthly' ? 'Mensile' : 'Annuale'}</div>
+                    <div>
+                      📅{' '}
+                      {search.frequency === 'daily'
+                        ? 'Giornaliera'
+                        : search.frequency === 'weekly'
+                          ? 'Settimanale'
+                          : search.frequency === 'monthly'
+                            ? 'Mensile'
+                            : 'Annuale'}
+                    </div>
                     <div>📧 {search.email}</div>
                     {search.nextRun && (
                       <div>⏰ Prossima: {search.nextRun.toLocaleDateString('it-IT')}</div>
@@ -1537,12 +1620,18 @@ export default function LandScrapingPage() {
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Ricerche Recenti</h3>
             <div className="space-y-3">
-              {searchHistory.slice(0, 5).map((entry) => (
-                <div key={entry.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              {searchHistory.slice(0, 5).map(entry => (
+                <div
+                  key={entry.id}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                >
                   <div>
                     <p className="font-medium text-gray-900">{entry.criteria.location}</p>
                     <p className="text-sm text-gray-600">
-                      {entry.resultsCount} risultati • {entry.date instanceof Date ? entry.date.toLocaleDateString('it-IT') : 'Data non disponibile'}
+                      {entry.resultsCount} risultati •{' '}
+                      {entry.date instanceof Date
+                        ? entry.date.toLocaleDateString('it-IT')
+                        : 'Data non disponibile'}
                     </p>
                   </div>
                   <button
@@ -1603,7 +1692,7 @@ export default function LandScrapingPage() {
         <SharedFavorites
           isOpen={showSharedFavorites}
           onClose={() => setShowSharedFavorites(false)}
-          onViewLand={(landId) => {
+          onViewLand={landId => {
             // TODO: Implementare visualizzazione terreno
             toast('Visualizzazione terreno in sviluppo', { icon: '🔧' });
           }}
@@ -1615,7 +1704,7 @@ export default function LandScrapingPage() {
           onUpdateStatus={(landId, status) => {
             toast(`Stato aggiornato a ${status}`, { icon: '🔄' });
           }}
-          onRemove={(landId) => {
+          onRemove={landId => {
             toast('Terreno rimosso dai preferiti condivisi', { icon: '🗑️' });
           }}
         />

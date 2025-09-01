@@ -32,11 +32,7 @@ const Alert: React.FC<AlertProps> = ({ type, title, children, onClose }) => {
         <div className="text-sm">{children}</div>
       </div>
       {onClose && (
-        <button
-          onClick={onClose}
-          className="btn btn-sm btn-ghost"
-          aria-label="Chiudi"
-        >
+        <button onClick={onClose} className="btn btn-sm btn-ghost" aria-label="Chiudi">
           ✕
         </button>
       )}
@@ -44,4 +40,4 @@ const Alert: React.FC<AlertProps> = ({ type, title, children, onClose }) => {
   );
 };
 
-export default Alert; 
+export default Alert;

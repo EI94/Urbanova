@@ -1,14 +1,13 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
+import { toast } from 'react-hot-toast';
 
-
-import { 
-  CalculatorIcon, 
-  TrendingUpIcon, 
-  EuroIcon, 
+import {
+  CalculatorIcon,
+  TrendingUpIcon,
+  EuroIcon,
   BuildingIcon,
   PlusIcon,
   ChartBarIcon,
@@ -19,12 +18,12 @@ import {
   EditIcon,
   TrashIcon,
   EyeIcon,
-  TrophyIcon
+  TrophyIcon,
 } from '@/components/icons';
-import { toast } from 'react-hot-toast';
-import Link from 'next/link';
-import { useLanguage } from '@/contexts/LanguageContext';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
 
 export default function FeasibilityAnalysisPage() {
   const { t, formatCurrency: fmtCurrency } = useLanguage();
@@ -41,8 +40,6 @@ export default function FeasibilityAnalysisPage() {
   const [comparisonMode, setComparisonMode] = useState<'basic' | 'advanced' | 'financial'>('basic');
   const [deletionInProgress, setDeletionInProgress] = useState<Set<string>>(new Set());
 
-
-
   useEffect(() => {
     // Aspetta che l'autenticazione sia pronta
     if (!authLoading) {
@@ -54,28 +51,27 @@ export default function FeasibilityAnalysisPage() {
     if (authLoading) {
       return;
     }
-    
+
     if (!user) {
       setError('Utente non autenticato. Effettua il login per continuare.');
       setLoading(false);
       return;
     }
-    
+
     setLoading(true);
     setError(null);
     try {
       // Forza il refresh dei dati se richiesto
       const timestamp = forceRefresh ? Date.now() : 0;
-      
+
       if (forceRefresh) {
-        
         // Forza refresh completo bypassando cache
         const [allProjects, projectsRanking, stats] = await Promise.all([
           feasibilityService.getAllProjects(),
           feasibilityService.getProjectsRanking(),
-          feasibilityService.getStatistics()
+          feasibilityService.getStatistics(),
         ]);
-        
+
         // Forza aggiornamento stato
         setProjects([]); // Pulisci prima
         setTimeout(() => {
@@ -83,20 +79,18 @@ export default function FeasibilityAnalysisPage() {
           setRanking(projectsRanking || []);
           setStatistics(stats || {});
         }, 50);
-        
       } else {
         // Caricamento normale
         const [allProjects, projectsRanking, stats] = await Promise.all([
           feasibilityService.getAllProjects(),
           feasibilityService.getProjectsRanking(),
-          feasibilityService.getStatistics()
+          feasibilityService.getStatistics(),
         ]);
-        
+
         setProjects(allProjects || []);
         setRanking(projectsRanking || []);
         setStatistics(stats || {});
       }
-      
     } catch (error) {
       console.error('❌ Errore caricamento dati:', error);
       setError('Errore nel caricamento dei dati. Riprova più tardi.');
@@ -123,7 +117,11 @@ export default function FeasibilityAnalysisPage() {
       return;
     }
 
-    if (!confirm('Sei sicuro di voler eliminare questo progetto? L\'operazione non può essere annullata.')) {
+    if (
+      !confirm(
+        "Sei sicuro di voler eliminare questo progetto? L'operazione non può essere annullata."
+      )
+    ) {
       return;
     }
 
@@ -132,52 +130,56 @@ export default function FeasibilityAnalysisPage() {
 
     try {
       toast('🗑️ Eliminazione progetto in corso...', { icon: '⏳' });
-      
+
       // 1. ELIMINAZIONE PROGETTO
       const deletionResult = await feasibilityService.deleteProject(projectId);
-      
+
       if (deletionResult) {
         // 2. AGGIORNA IMMEDIATAMENTE TUTTE LE LISTE
         setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
         setRanking(prevRanking => prevRanking.filter(p => p.id !== projectId));
-        
+
         // 3. RICALCOLA STATISTICHE
         const remainingProjects = projects.filter(p => p.id !== projectId);
         if (remainingProjects.length > 0) {
           const totalProjects = remainingProjects.length;
-          const avgMargin = remainingProjects.reduce((sum, p) => sum + (p.results?.margin || 0), 0) / totalProjects;
-          const totalInvestment = remainingProjects.reduce((sum, p) => sum + (p.costs?.land?.purchasePrice || 0), 0);
-          const onTarget = remainingProjects.filter(p => (p.results?.margin || 0) >= (p.targetMargin || 0)).length;
-          
+          const avgMargin =
+            remainingProjects.reduce((sum, p) => sum + (p.results?.margin || 0), 0) / totalProjects;
+          const totalInvestment = remainingProjects.reduce(
+            (sum, p) => sum + (p.costs?.land?.purchasePrice || 0),
+            0
+          );
+          const onTarget = remainingProjects.filter(
+            p => (p.results?.margin || 0) >= (p.targetMargin || 0)
+          ).length;
+
           setStatistics({
             totalProjects,
             averageMargin: avgMargin,
             totalInvestment,
-            onTarget
+            onTarget,
           });
         } else {
           setStatistics({
             totalProjects: 0,
             averageMargin: 0,
             totalInvestment: 0,
-            onTarget: 0
+            onTarget: 0,
           });
         }
-        
+
         toast(`✅ ${deletionResult.message}`, { icon: '✅' });
-        
+
         // 4. FORZA REFRESH COMPLETO DOPO 1 SECONDO
         setTimeout(() => {
           loadData(true);
         }, 1000);
-        
       } else {
         throw new Error(`Eliminazione fallita: ${deletionResult.message}`);
       }
-      
     } catch (error) {
       toast(`❌ Errore eliminazione: ${error}`, { icon: '❌' });
-      
+
       // 5. FORZA REFRESH PER VERIFICARE STATO REALE
       setTimeout(() => {
         loadData(true);
@@ -202,10 +204,9 @@ export default function FeasibilityAnalysisPage() {
       // Genera confronto intelligente
       const projectsToCompare = projects.filter(p => selectedProjects.includes(p.id));
       const comparison = generateSmartComparison(projectsToCompare);
-      
+
       setComparisonData(comparison);
       toast('✅ Confronto generato con successo!', { icon: '✅' });
-      
     } catch (error) {
       toast(`❌ Errore generazione confronto: ${error}`, { icon: '❌' });
     }
@@ -218,13 +219,14 @@ export default function FeasibilityAnalysisPage() {
       summary: {
         totalProjects: projects.length,
         totalInvestment: projects.reduce((sum, p) => sum + (p.costs?.land?.purchasePrice || 0), 0),
-        averageMargin: projects.reduce((sum, p) => sum + (p.results?.margin || 0), 0) / projects.length,
-        bestPerformer: projects.reduce((best, current) => 
+        averageMargin:
+          projects.reduce((sum, p) => sum + (p.results?.margin || 0), 0) / projects.length,
+        bestPerformer: projects.reduce((best, current) =>
           (current.results?.margin || 0) > (best.results?.margin || 0) ? current : best
         ),
-        worstPerformer: projects.reduce((worst, current) => 
+        worstPerformer: projects.reduce((worst, current) =>
           (current.results?.margin || 0) < (worst.results?.margin || 0) ? current : worst
-        )
+        ),
       },
       detailed: projects.map(project => ({
         id: project.id,
@@ -237,9 +239,9 @@ export default function FeasibilityAnalysisPage() {
         roi: project.results?.roi || 0,
         status: project.status,
         risk: calculateProjectRisk(project),
-        potential: calculateProjectPotential(project)
+        potential: calculateProjectPotential(project),
       })),
-      insights: generateInsights(projects)
+      insights: generateInsights(projects),
     };
 
     return comparison;
@@ -249,18 +251,18 @@ export default function FeasibilityAnalysisPage() {
     const margin = project.results?.margin || 0;
     const roi = project.results?.roi || 0;
     const investment = project.costs?.land?.purchasePrice || 0;
-    
+
     let riskScore = 0;
-    
+
     if (margin < 20) riskScore += 3;
     else if (margin < 30) riskScore += 2;
     else if (margin < 40) riskScore += 1;
-    
+
     if (roi < 15) riskScore += 2;
     else if (roi < 25) riskScore += 1;
-    
+
     if (investment > 1000000) riskScore += 1;
-    
+
     if (riskScore <= 2) return 'Basso';
     if (riskScore <= 4) return 'Medio';
     return 'Alto';
@@ -270,20 +272,20 @@ export default function FeasibilityAnalysisPage() {
     const margin = project.results?.margin || 0;
     const roi = project.results?.roi || 0;
     const location = project.location || '';
-    
+
     let potentialScore = 0;
-    
+
     if (margin > 40) potentialScore += 3;
     else if (margin > 30) potentialScore += 2;
     else if (margin > 20) potentialScore += 1;
-    
+
     if (roi > 25) potentialScore += 3;
     else if (roi > 20) potentialScore += 2;
     else if (roi > 15) potentialScore += 1;
-    
+
     if (location.includes('Roma') || location.includes('Milano')) potentialScore += 2;
     else if (location.includes('Torino') || location.includes('Napoli')) potentialScore += 1;
-    
+
     if (potentialScore >= 6) return 'Eccellente';
     if (potentialScore >= 4) return 'Buono';
     if (potentialScore >= 2) return 'Discreto';
@@ -292,23 +294,24 @@ export default function FeasibilityAnalysisPage() {
 
   const generateInsights = (projects: FeasibilityProject[]) => {
     const insights = [];
-    
+
     // Analisi ROI
     const avgRoi = projects.reduce((sum, p) => sum + (p.results?.roi || 0), 0) / projects.length;
     if (avgRoi > 25) insights.push('🎯 ROI medio eccellente - Portfolio molto profittevole');
     else if (avgRoi > 20) insights.push('📈 ROI medio buono - Portfolio solido');
     else insights.push('⚠️ ROI medio basso - Necessario ottimizzazione');
-    
+
     // Analisi diversificazione
     const locations = [...new Set(projects.map(p => p.location))];
     if (locations.length > 2) insights.push('🌍 Buona diversificazione geografica');
     else insights.push('📍 Concentrazione geografica - Considera diversificazione');
-    
+
     // Analisi margini
     const highMarginProjects = projects.filter(p => (p.results?.margin || 0) > 35);
-    if (highMarginProjects.length > projects.length / 2) insights.push('💎 Portfolio con margini elevati');
+    if (highMarginProjects.length > projects.length / 2)
+      insights.push('💎 Portfolio con margini elevati');
     else insights.push('📊 Portfolio con margini variabili');
-    
+
     return insights;
   };
 
@@ -336,11 +339,16 @@ export default function FeasibilityAnalysisPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PIANIFICAZIONE': return 'bg-blue-100 text-blue-800';
-      case 'IN_CORSO': return 'bg-yellow-100 text-yellow-800';
-      case 'COMPLETATO': return 'bg-green-100 text-green-800';
-      case 'SOSPESO': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'PIANIFICAZIONE':
+        return 'bg-blue-100 text-blue-800';
+      case 'IN_CORSO':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'COMPLETATO':
+        return 'bg-green-100 text-green-800';
+      case 'SOSPESO':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -372,10 +380,7 @@ export default function FeasibilityAnalysisPage() {
       <DashboardLayout>
         <div className="flex flex-col items-center justify-center h-64 space-y-4">
           <div className="text-red-600 text-xl">❌ {error}</div>
-          <button 
-            onClick={() => loadData()}
-            className="btn btn-primary"
-          >
+          <button onClick={() => loadData()} className="btn btn-primary">
             🔄 Riprova
           </button>
         </div>
@@ -399,15 +404,10 @@ export default function FeasibilityAnalysisPage() {
                 {t('newProject', 'feasibility')}
               </button>
             </Link>
-            <button 
-              onClick={() => setShowComparison(true)}
-              className="btn btn-outline"
-            >
+            <button onClick={() => setShowComparison(true)} className="btn btn-outline">
               <CompareIcon className="h-4 w-4 mr-2" />
               {t('compare', 'feasibility')}
             </button>
-            
-
           </div>
         </div>
 
@@ -418,32 +418,44 @@ export default function FeasibilityAnalysisPage() {
               <div className="stat-figure text-primary">
                 <BuildingIcon className="h-6 w-6" />
               </div>
-              <div className="stat-title text-gray-500">{t('stats.totalProjects', 'feasibility')}</div>
+              <div className="stat-title text-gray-500">
+                {t('stats.totalProjects', 'feasibility')}
+              </div>
               <div className="stat-value text-2xl">{statistics.totalProjects}</div>
             </div>
-            
+
             <div className="stat bg-white shadow-sm rounded-lg p-6">
               <div className="stat-figure text-success">
                 <TrendingUpIcon className="h-6 w-6" />
               </div>
-              <div className="stat-title text-gray-500">{t('stats.averageMargin', 'feasibility')}</div>
-              <div className="stat-value text-2xl">{formatPercentage(statistics.averageMargin)}</div>
+              <div className="stat-title text-gray-500">
+                {t('stats.averageMargin', 'feasibility')}
+              </div>
+              <div className="stat-value text-2xl">
+                {formatPercentage(statistics.averageMargin)}
+              </div>
             </div>
-            
+
             <div className="stat bg-white shadow-sm rounded-lg p-6">
               <div className="stat-figure text-info">
                 <EuroIcon className="h-6 w-6" />
               </div>
-              <div className="stat-title text-gray-500">{t('stats.totalInvestment', 'feasibility')}</div>
-              <div className="stat-value text-2xl">{formatCurrency(statistics.totalInvestment)}</div>
+              <div className="stat-title text-gray-500">
+                {t('stats.totalInvestment', 'feasibility')}
+              </div>
+              <div className="stat-value text-2xl">
+                {formatCurrency(statistics.totalInvestment)}
+              </div>
             </div>
-            
+
             <div className="stat bg-white shadow-sm rounded-lg p-6">
               <div className="stat-figure text-warning">
                 <CheckCircleIcon className="h-6 w-6" />
               </div>
               <div className="stat-title text-gray-500">{t('stats.onTarget', 'feasibility')}</div>
-              <div className="stat-value text-2xl">{statistics.projectsOnTarget}/{statistics.totalProjects}</div>
+              <div className="stat-value text-2xl">
+                {statistics.projectsOnTarget}/{statistics.totalProjects}
+              </div>
             </div>
           </div>
         )}
@@ -455,13 +467,17 @@ export default function FeasibilityAnalysisPage() {
               <TrophyIcon className="h-5 w-5 mr-2 text-yellow-600" />
               {t('rankingTitle', 'feasibility')}
             </h2>
-            <span className="text-sm text-gray-500">{t('stats.fromMostProfitable', 'feasibility')}</span>
+            <span className="text-sm text-gray-500">
+              {t('stats.fromMostProfitable', 'feasibility')}
+            </span>
           </div>
-          
+
           {ranking.length === 0 ? (
             <div className="text-center py-12">
               <CalculatorIcon className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-700 mb-2">{t('emptyRankingTitle', 'feasibility')}</h3>
+              <h3 className="text-lg font-medium text-gray-700 mb-2">
+                {t('emptyRankingTitle', 'feasibility')}
+              </h3>
               <p className="text-gray-500 mb-4">{t('emptyRankingSubtitle', 'feasibility')}</p>
               <div className="flex justify-center">
                 <Link href="/dashboard/feasibility-analysis/new">
@@ -475,7 +491,10 @@ export default function FeasibilityAnalysisPage() {
           ) : (
             <div className="space-y-4">
               {ranking.slice(0, 5).map((project, index) => (
-                <div key={project.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <div
+                  key={project.id}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center justify-center w-8 h-8 bg-yellow-100 text-yellow-800 rounded-full font-bold">
                       {index + 1}
@@ -488,29 +507,31 @@ export default function FeasibilityAnalysisPage() {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-6">
                     <div className="text-right">
-                      <div className={`font-bold text-lg ${getMarginColor(project.results.margin, project.targetMargin)}`}>
+                      <div
+                        className={`font-bold text-lg ${getMarginColor(project.results.margin, project.targetMargin)}`}
+                      >
                         {formatPercentage(project.results.margin)}
                       </div>
                       <div className="text-xs text-gray-500">Marginalità</div>
                     </div>
-                    
+
                     <div className="text-right">
                       <div className="font-medium text-gray-900">
                         {formatCurrency(project.costs.land.purchasePrice)}
                       </div>
                       <div className="text-xs text-gray-500">Costo Terreno</div>
                     </div>
-                    
+
                     <div className="text-right">
                       <div className="font-medium text-gray-900">
                         {formatCurrency(project.results.profit)}
                       </div>
                       <div className="text-xs text-gray-500">Utile</div>
                     </div>
-                    
+
                     <div className="flex items-center space-x-2">
                       <span className={`badge ${getStatusColor(project.status)}`}>
                         {project.status}
@@ -533,10 +554,14 @@ export default function FeasibilityAnalysisPage() {
                             </Link>
                           </li>
                           <li>
-                            <button 
+                            <button
                               onClick={() => handleDeleteProject(project.id!)}
                               disabled={deletionInProgress.has(project.id!)}
-                              className={deletionInProgress.has(project.id!) ? 'opacity-50 cursor-not-allowed' : ''}
+                              className={
+                                deletionInProgress.has(project.id!)
+                                  ? 'opacity-50 cursor-not-allowed'
+                                  : ''
+                              }
                             >
                               <TrashIcon className="h-4 w-4" />
                               {deletionInProgress.has(project.id!) ? 'Eliminazione...' : 'Elimina'}
@@ -554,8 +579,10 @@ export default function FeasibilityAnalysisPage() {
 
         {/* Lista Completa Progetti */}
         <div className="bg-white shadow-sm rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">📋 {t('allProjects', 'feasibility')}</h2>
-          
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">
+            📋 {t('allProjects', 'feasibility')}
+          </h2>
+
           {projects.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-gray-500">{t('noProjects', 'feasibility')}</p>
@@ -576,25 +603,31 @@ export default function FeasibilityAnalysisPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {projects.map((project) => (
+                  {projects.map(project => (
                     <tr key={project.id}>
                       <td>
                         <div>
                           <div className="font-medium">{project.name}</div>
                           <div className="text-sm text-gray-500">
-                            {project?.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'N/A'}
+                            {project?.createdAt
+                              ? new Date(project.createdAt).toLocaleDateString()
+                              : 'N/A'}
                           </div>
                         </div>
                       </td>
                       <td>{project?.address || 'N/A'}</td>
                       <td>
-                        <span className={`badge ${getStatusColor(project?.status || 'PIANIFICAZIONE')}`}>
+                        <span
+                          className={`badge ${getStatusColor(project?.status || 'PIANIFICAZIONE')}`}
+                        >
                           {project?.status || 'PIANIFICAZIONE'}
                         </span>
                       </td>
                       <td>{formatCurrency(project?.costs?.land?.purchasePrice || 0)}</td>
                       <td>
-                        <span className={`font-bold ${getMarginColor(project?.results?.margin || 0, project?.targetMargin || 0)}`}>
+                        <span
+                          className={`font-bold ${getMarginColor(project?.results?.margin || 0, project?.targetMargin || 0)}`}
+                        >
                           {formatPercentage(project?.results?.margin || 0)}
                         </span>
                       </td>
@@ -606,17 +639,21 @@ export default function FeasibilityAnalysisPage() {
                       <td>{formatCurrency(project?.results?.profit || 0)}</td>
                       <td>
                         <div className="flex items-center space-x-2">
-                          <Link href={`/dashboard/feasibility-analysis/${project?.id || 'unknown'}`}>
+                          <Link
+                            href={`/dashboard/feasibility-analysis/${project?.id || 'unknown'}`}
+                          >
                             <button className="btn btn-ghost btn-sm">
                               <EyeIcon className="h-4 w-4" />
                             </button>
                           </Link>
-                          <Link href={`/dashboard/feasibility-analysis/${project?.id || 'unknown'}/edit`}>
+                          <Link
+                            href={`/dashboard/feasibility-analysis/${project?.id || 'unknown'}/edit`}
+                          >
                             <button className="btn btn-ghost btn-sm">
                               <EditIcon className="h-4 w-4" />
                             </button>
                           </Link>
-                          <button 
+                          <button
                             onClick={() => project?.id && handleDeleteProject(project.id)}
                             disabled={project?.id ? deletionInProgress.has(project.id) : false}
                             className={`btn btn-ghost btn-sm ${project?.id && deletionInProgress.has(project.id) ? 'text-gray-400 cursor-not-allowed' : 'text-red-600'}`}
@@ -639,20 +676,22 @@ export default function FeasibilityAnalysisPage() {
           <div className="modal modal-open">
             <div className="modal-box max-w-4xl">
               <h3 className="font-bold text-xl mb-6">🔍 Confronto Intelligente Progetti</h3>
-              
+
               {/* Selezione Progetti */}
               <div className="mb-6">
                 <label className="label">
-                  <span className="label-text font-medium">Seleziona progetti da confrontare (minimo 2):</span>
+                  <span className="label-text font-medium">
+                    Seleziona progetti da confrontare (minimo 2):
+                  </span>
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
-                  {projects.map((project) => (
+                  {projects.map(project => (
                     <label key={project.id} className="flex items-center space-x-2 cursor-pointer">
                       <input
                         type="checkbox"
                         className="checkbox checkbox-primary"
                         checked={selectedProjects.includes(project.id || '')}
-                        onChange={(e) => {
+                        onChange={e => {
                           if (e.target.checked) {
                             setSelectedProjects(prev => [...prev, project.id || '']);
                           } else {
@@ -707,15 +746,21 @@ export default function FeasibilityAnalysisPage() {
                       </div>
                       <div>
                         <span className="text-blue-600 font-medium">Investimento Totale:</span>
-                        <p className="text-blue-800">{formatCurrency(comparisonData.summary.totalInvestment)}</p>
+                        <p className="text-blue-800">
+                          {formatCurrency(comparisonData.summary.totalInvestment)}
+                        </p>
                       </div>
                       <div>
                         <span className="text-blue-600 font-medium">Margine Medio:</span>
-                        <p className="text-blue-800">{formatPercentage(comparisonData.summary.averageMargin)}</p>
+                        <p className="text-blue-800">
+                          {formatPercentage(comparisonData.summary.averageMargin)}
+                        </p>
                       </div>
                       <div>
                         <span className="text-blue-600 font-medium">Miglior Performer:</span>
-                        <p className="text-blue-800">{comparisonData.summary.bestPerformer?.name}</p>
+                        <p className="text-blue-800">
+                          {comparisonData.summary.bestPerformer?.name}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -734,7 +779,7 @@ export default function FeasibilityAnalysisPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {comparisonData.detailed.map((project) => (
+                        {comparisonData.detailed.map(project => (
                           <tr key={project.id}>
                             <td className="font-medium">{project.name}</td>
                             <td>{formatCurrency(project.investment)}</td>
@@ -743,19 +788,30 @@ export default function FeasibilityAnalysisPage() {
                             </td>
                             <td>{formatPercentage(project.roi)}</td>
                             <td>
-                              <span className={`badge ${
-                                project.risk === 'Basso' ? 'badge-success' :
-                                project.risk === 'Medio' ? 'badge-warning' : 'badge-error'
-                              }`}>
+                              <span
+                                className={`badge ${
+                                  project.risk === 'Basso'
+                                    ? 'badge-success'
+                                    : project.risk === 'Medio'
+                                      ? 'badge-warning'
+                                      : 'badge-error'
+                                }`}
+                              >
                                 {project.risk}
                               </span>
                             </td>
                             <td>
-                              <span className={`badge ${
-                                project.potential === 'Eccellente' ? 'badge-success' :
-                                project.potential === 'Buono' ? 'badge-primary' :
-                                project.potential === 'Discreto' ? 'badge-warning' : 'badge-error'
-                              }`}>
+                              <span
+                                className={`badge ${
+                                  project.potential === 'Eccellente'
+                                    ? 'badge-success'
+                                    : project.potential === 'Buono'
+                                      ? 'badge-primary'
+                                      : project.potential === 'Discreto'
+                                        ? 'badge-warning'
+                                        : 'badge-error'
+                                }`}
+                              >
                                 {project.potential}
                               </span>
                             </td>
@@ -782,7 +838,7 @@ export default function FeasibilityAnalysisPage() {
 
               {/* Azioni */}
               <div className="modal-action">
-                <button 
+                <button
                   className="btn btn-outline"
                   onClick={() => {
                     setShowComparison(false);
@@ -792,7 +848,7 @@ export default function FeasibilityAnalysisPage() {
                 >
                   Chiudi
                 </button>
-                <button 
+                <button
                   className="btn btn-primary"
                   onClick={handleCompareProjects}
                   disabled={selectedProjects.length < 2}
@@ -803,9 +859,7 @@ export default function FeasibilityAnalysisPage() {
             </div>
           </div>
         )}
-
-        
       </div>
     </DashboardLayout>
   );
-} 
+}

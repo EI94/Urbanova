@@ -1,13 +1,20 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
 import { firebaseAuthService, User } from '@/lib/firebaseAuthService';
 
 // Interfaccia per il contesto di autenticazione
 interface AuthContextType {
   currentUser: User | null;
   loading: boolean;
-  signup: (email: string, password: string, displayName: string, firstName?: string, lastName?: string) => Promise<void>;
+  signup: (
+    email: string,
+    password: string,
+    displayName: string,
+    firstName?: string,
+    lastName?: string
+  ) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
@@ -20,7 +27,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth deve essere utilizzato all\'interno di un AuthProvider');
+    throw new Error("useAuth deve essere utilizzato all'interno di un AuthProvider");
   }
   return context;
 }
@@ -36,10 +43,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [loading, setLoading] = useState(true);
 
   // Funzione per registrazione
-  async function signup(email: string, password: string, displayName: string, firstName?: string, lastName?: string) {
+  async function signup(
+    email: string,
+    password: string,
+    displayName: string,
+    firstName?: string,
+    lastName?: string
+  ) {
     try {
-      const result = await firebaseAuthService.signup(email, password, displayName, firstName, lastName);
-      
+      const result = await firebaseAuthService.signup(
+        email,
+        password,
+        displayName,
+        firstName,
+        lastName
+      );
+
       if (result.success) {
         setCurrentUser(result.user);
       } else {
@@ -55,7 +74,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   async function login(email: string, password: string) {
     try {
       const result = await firebaseAuthService.login(email, password);
-      
+
       if (result.success) {
         setCurrentUser(result.user);
       } else {
@@ -104,12 +123,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signup,
     login,
     logout,
-    resetPassword
+    resetPassword,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-} 
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}

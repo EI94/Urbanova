@@ -1,21 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
+
 import { ReminderEmailData } from '@/lib/reminderService';
 
 export async function POST(request: NextRequest) {
   try {
     console.log('📧 API: Invio mail reminder...');
 
-    const { emailData, userEmail }: {
+    const {
+      emailData,
+      userEmail,
+    }: {
       emailData: ReminderEmailData;
       userEmail: string;
     } = await request.json();
 
     // Valida i dati
     if (!emailData || !userEmail) {
-      return NextResponse.json(
-        { error: 'Dati mancanti per l\'invio della mail' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Dati mancanti per l'invio della mail" }, { status: 400 });
     }
 
     // Prepara il contenuto della mail
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
     console.log('📧 Mail reminder preparata:', {
       to: userEmail,
       subject: emailSubject,
-      content: emailContent
+      content: emailContent,
     });
 
     // TODO: Integrare con il servizio email esistente
@@ -42,15 +43,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Reminder inviato con successo',
-      reminderId: Date.now().toString()
+      reminderId: Date.now().toString(),
     });
-
   } catch (error) {
     console.error('❌ Errore API reminder email:', error);
-    return NextResponse.json(
-      { error: 'Errore interno del server' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Errore interno del server' }, { status: 500 });
   }
 }
 

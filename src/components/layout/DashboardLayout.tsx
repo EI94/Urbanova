@@ -1,18 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
-import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
-import { UserProfile } from '@/types/userProfile';
-import { NotificationStats } from '@/types/notifications';
-import LanguageSelector from '@/components/ui/LanguageSelector';
-import NotificationsPanel from '@/components/ui/NotificationsPanel';
-import UserProfilePanel from '@/components/ui/UserProfilePanel';
-import { 
+import React, { useState, useEffect } from 'react';
+
+import {
   DashboardIcon,
   SearchIcon,
   CalculatorIcon,
@@ -34,39 +27,52 @@ import {
   ClientIcon,
   PlusIcon,
   ProjectIcon,
-  MapIcon
+  MapIcon,
 } from '@/components/icons';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
-import { MessageSquare } from 'lucide-react';
+import LanguageSelector from '@/components/ui/LanguageSelector';
+import NotificationsPanel from '@/components/ui/NotificationsPanel';
+import UserProfilePanel from '@/components/ui/UserProfilePanel';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
+import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
+import { NotificationStats } from '@/types/notifications';
+import { UserProfile } from '@/types/userProfile';
 
 // Componente NavItem spostato fuori per evitare re-render infiniti
-const NavItem = ({ href, icon, text, isActive, collapsed }: { 
-  href: string; 
-  icon: React.ReactNode; 
-  text: string; 
-  isActive: boolean; 
+const NavItem = ({
+  href,
+  icon,
+  text,
+  isActive,
+  collapsed,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  text: string;
+  isActive: boolean;
   collapsed: boolean;
 }) => (
   <Link
     href={href}
     className={`
       flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors
-      ${isActive
-        ? 'bg-blue-700 text-white'
-        : 'text-blue-100 hover:bg-blue-700/50 hover:text-white'
-      }
+      ${isActive ? 'bg-blue-700 text-white' : 'text-blue-100 hover:bg-blue-700/50 hover:text-white'}
       ${collapsed ? 'justify-center' : ''}
     `}
   >
-    <span className={`${collapsed ? 'mx-auto' : 'mr-3'}`}>
-      {icon}
-    </span>
+    <span className={`${collapsed ? 'mx-auto' : 'mr-3'}`}>{icon}</span>
     {!collapsed && <span>{text}</span>}
   </Link>
 );
 
 // Componente NavSection spostato fuori per evitare re-render infiniti
-const NavSection = ({ title, children, collapsed }: {
+const NavSection = ({
+  title,
+  children,
+  collapsed,
+}: {
   title: string;
   children: React.ReactNode;
   collapsed: boolean;
@@ -109,7 +115,7 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
     // Sottoscrizione agli eventi per aggiornamenti in tempo reale
     // Rimuovo il listener per ora - Firebase ha real-time updates nativi
     // const unsubscribeNotifications = notificationService.subscribe((event) => {
-    //   if (event.detail.type === 'notification_created' || 
+    //   if (event.detail.type === 'notification_created' ||
     //       event.detail.type === 'notification_updated' ||
     //       event.detail.type === 'notification_deleted') {
     //     loadNotificationStats();
@@ -118,7 +124,7 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
 
     // Rimuovo il listener per ora - Firebase ha real-time updates nativi
     // const unsubscribeProfile = userProfileService.subscribe((event) => {
-    //   if (event.detail.type === 'profile_updated' || 
+    //   if (event.detail.type === 'profile_updated' ||
     //       event.detail.type === 'avatar_updated') {
     //     loadUserProfile();
     //   }
@@ -136,7 +142,7 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
         firebaseUserProfileService.getUserProfile(userId),
         firebaseNotificationService.getNotificationStats(userId),
       ]);
-      
+
       setUserProfile(profile);
       setNotificationStats(stats);
     } catch (error) {
@@ -171,49 +177,115 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
   };
 
   const navigation = {
-    main: [
-      { href: '/dashboard', icon: <DashboardIcon />, text: t('dashboard', 'navigation') },
-    ],
+    main: [{ href: '/dashboard', icon: <DashboardIcon />, text: t('dashboard', 'navigation') }],
     discovery: [
-      { href: '/dashboard/market-intelligence', icon: <SearchIcon />, text: t('marketIntelligence', 'navigation') },
-      { href: '/dashboard/feasibility-analysis', icon: <CalculatorIcon />, text: t('feasibilityAnalysis', 'navigation') },
-      { href: '/dashboard/design-center', icon: <PaletteIcon />, text: t('designCenter', 'navigation') },
+      {
+        href: '/dashboard/market-intelligence',
+        icon: <SearchIcon />,
+        text: t('marketIntelligence', 'navigation'),
+      },
+      {
+        href: '/dashboard/feasibility-analysis',
+        icon: <CalculatorIcon />,
+        text: t('feasibilityAnalysis', 'navigation'),
+      },
+      {
+        href: '/dashboard/design-center',
+        icon: <PaletteIcon />,
+        text: t('designCenter', 'navigation'),
+      },
     ],
     planning: [
-      { href: '/dashboard/business-plan', icon: <BusinessPlanIcon />, text: t('businessPlan', 'navigation') },
-      { href: '/dashboard/permits-compliance', icon: <PermitIcon />, text: t('permitsCompliance', 'navigation') },
-      { href: '/dashboard/project-timeline', icon: <CalendarIcon />, text: t('projectTimeline', 'navigation') },
+      {
+        href: '/dashboard/business-plan',
+        icon: <BusinessPlanIcon />,
+        text: t('businessPlan', 'navigation'),
+      },
+      {
+        href: '/dashboard/permits-compliance',
+        icon: <PermitIcon />,
+        text: t('permitsCompliance', 'navigation'),
+      },
+      {
+        href: '/dashboard/project-timeline',
+        icon: <CalendarIcon />,
+        text: t('projectTimeline', 'navigation'),
+      },
     ],
     progetti: [
       { href: '/dashboard/progetti', icon: <BuildingIcon />, text: t('projects', 'navigation') },
-      { href: '/dashboard/progetti/nuovo', icon: <NewProjectIcon />, text: t('newProject', 'navigation') },
+      {
+        href: '/dashboard/progetti/nuovo',
+        icon: <NewProjectIcon />,
+        text: t('newProject', 'navigation'),
+      },
       { href: '/dashboard/mappa-progetti', icon: <MapIcon />, text: t('projectMap', 'navigation') },
     ],
     gestioneProgetti: [
-      { href: '/dashboard/project-management', icon: <ProjectIcon />, text: t('projectManagement', 'navigation') },
-      { href: '/dashboard/project-management/documents', icon: <DocumentIcon />, text: t('documents', 'navigation') },
-      { href: '/dashboard/project-management/meetings', icon: <MeetingIcon />, text: t('meetings', 'navigation') },
+      {
+        href: '/dashboard/project-management',
+        icon: <ProjectIcon />,
+        text: t('projectManagement', 'navigation'),
+      },
+      {
+        href: '/dashboard/project-management/documents',
+        icon: <DocumentIcon />,
+        text: t('documents', 'navigation'),
+      },
+      {
+        href: '/dashboard/project-management/meetings',
+        icon: <MeetingIcon />,
+        text: t('meetings', 'navigation'),
+      },
     ],
     marketing: [
       { href: '/dashboard/marketing', icon: <MarketingIcon />, text: t('marketing', 'navigation') },
-      { href: '/dashboard/marketing/campaigns', icon: <CampaignIcon />, text: t('campaigns', 'navigation') },
-      { href: '/dashboard/marketing/materials', icon: <DocumentIcon />, text: t('materials', 'navigation') },
+      {
+        href: '/dashboard/marketing/campaigns',
+        icon: <CampaignIcon />,
+        text: t('campaigns', 'navigation'),
+      },
+      {
+        href: '/dashboard/marketing/materials',
+        icon: <DocumentIcon />,
+        text: t('materials', 'navigation'),
+      },
     ],
     epc: [
       { href: '/dashboard/epc', icon: <ConstructionIcon />, text: t('epc', 'navigation') },
-      { href: '/dashboard/epc/construction-site', icon: <ConstructionIcon />, text: t('constructionSite', 'navigation') },
-      { href: '/dashboard/epc/technical-documents', icon: <DocumentIcon />, text: t('technicalDocuments', 'navigation') },
+      {
+        href: '/dashboard/epc/construction-site',
+        icon: <ConstructionIcon />,
+        text: t('constructionSite', 'navigation'),
+      },
+      {
+        href: '/dashboard/epc/technical-documents',
+        icon: <DocumentIcon />,
+        text: t('technicalDocuments', 'navigation'),
+      },
       { href: '/dashboard/epc/permits', icon: <PermitIcon />, text: t('permits', 'navigation') },
     ],
     businessPlan: [
-      { href: '/dashboard/business-plan', icon: <BusinessPlanIcon />, text: t('businessPlan', 'navigation') },
+      {
+        href: '/dashboard/business-plan',
+        icon: <BusinessPlanIcon />,
+        text: t('businessPlan', 'navigation'),
+      },
     ],
     altro: [
       { href: '/dashboard/clienti', icon: <ClientIcon />, text: t('clients', 'navigation') },
       { href: '/dashboard/documenti', icon: <DocumentIcon />, text: t('documents', 'navigation') },
       { href: '/dashboard/notifiche', icon: <BellIcon />, text: t('notifications', 'navigation') },
-      { href: '/dashboard/feedback', icon: <MessageSquare className="w-5 h-5" />, text: 'Feedback' },
-      { href: '/dashboard/impostazioni', icon: <SettingsIcon />, text: t('settings', 'navigation') },
+      {
+        href: '/dashboard/feedback',
+        icon: <MessageSquare className="w-5 h-5" />,
+        text: 'Feedback',
+      },
+      {
+        href: '/dashboard/impostazioni',
+        icon: <SettingsIcon />,
+        text: t('settings', 'navigation'),
+      },
     ],
   };
 
@@ -243,9 +315,7 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
               {!sidebarCollapsed && (
                 <span className="text-xl font-semibold tracking-tight">Urbanova</span>
               )}
-              {sidebarCollapsed && (
-                <span className="text-xl font-semibold mx-auto">U</span>
-              )}
+              {sidebarCollapsed && <span className="text-xl font-semibold mx-auto">U</span>}
             </Link>
             <div className="flex items-center">
               <button
@@ -253,7 +323,12 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
                 onClick={() => setSidebarOpen(false)}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
               <button
@@ -265,9 +340,10 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d={sidebarCollapsed
-                      ? "M13 5l7 7-7 7M5 5l7 7-7 7"
-                      : "M11 19l-7-7 7-7M19 19l-7-7 7-7"
+                    d={
+                      sidebarCollapsed
+                        ? 'M13 5l7 7-7 7M5 5l7 7-7 7'
+                        : 'M11 19l-7-7 7-7M19 19l-7-7 7-7'
                     }
                   />
                 </svg>
@@ -279,7 +355,7 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
           <nav className="flex-1 px-2 py-3 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-700 scrollbar-track-transparent">
             {/* Sezione principale */}
             <NavSection title={t('dashboard', 'navigationSections')} collapsed={sidebarCollapsed}>
-              {navigation.main.map((item) => (
+              {navigation.main.map(item => (
                 <NavItem
                   key={item.href}
                   href={item.href}
@@ -293,7 +369,7 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
 
             {/* Sezione Discovery */}
             <NavSection title={t('discovery', 'navigationSections')} collapsed={sidebarCollapsed}>
-              {navigation.discovery.map((item) => (
+              {navigation.discovery.map(item => (
                 <NavItem
                   key={item.href}
                   href={item.href}
@@ -306,8 +382,11 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
             </NavSection>
 
             {/* Sezione Planning & Compliance */}
-            <NavSection title={t('planningCompliance', 'navigationSections')} collapsed={sidebarCollapsed}>
-              {navigation.planning.map((item) => (
+            <NavSection
+              title={t('planningCompliance', 'navigationSections')}
+              collapsed={sidebarCollapsed}
+            >
+              {navigation.planning.map(item => (
                 <NavItem
                   key={item.href}
                   href={item.href}
@@ -321,7 +400,7 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
 
             {/* Sezione Progetti */}
             <NavSection title={t('projects', 'navigationSections')} collapsed={sidebarCollapsed}>
-              {navigation.progetti.map((item) => (
+              {navigation.progetti.map(item => (
                 <NavItem
                   key={item.href}
                   href={item.href}
@@ -334,8 +413,11 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
             </NavSection>
 
             {/* Sezione Project Management */}
-            <NavSection title={t('projectManagement', 'navigationSections')} collapsed={sidebarCollapsed}>
-              {navigation.gestioneProgetti.map((item) => (
+            <NavSection
+              title={t('projectManagement', 'navigationSections')}
+              collapsed={sidebarCollapsed}
+            >
+              {navigation.gestioneProgetti.map(item => (
                 <NavItem
                   key={item.href}
                   href={item.href}
@@ -348,8 +430,11 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
             </NavSection>
 
             {/* Sezione Marketing */}
-            <NavSection title={t('marketingSales', 'navigationSections')} collapsed={sidebarCollapsed}>
-              {navigation.marketing.map((item) => (
+            <NavSection
+              title={t('marketingSales', 'navigationSections')}
+              collapsed={sidebarCollapsed}
+            >
+              {navigation.marketing.map(item => (
                 <NavItem
                   key={item.href}
                   href={item.href}
@@ -362,8 +447,11 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
             </NavSection>
 
             {/* Sezione EPC */}
-            <NavSection title={t('constructionEPC', 'navigationSections')} collapsed={sidebarCollapsed}>
-              {navigation.epc.map((item) => (
+            <NavSection
+              title={t('constructionEPC', 'navigationSections')}
+              collapsed={sidebarCollapsed}
+            >
+              {navigation.epc.map(item => (
                 <NavItem
                   key={item.href}
                   href={item.href}
@@ -376,8 +464,11 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
             </NavSection>
 
             {/* Sezione Business Plan */}
-            <NavSection title={t('businessPlan', 'navigationSections')} collapsed={sidebarCollapsed}>
-              {navigation.businessPlan.map((item) => (
+            <NavSection
+              title={t('businessPlan', 'navigationSections')}
+              collapsed={sidebarCollapsed}
+            >
+              {navigation.businessPlan.map(item => (
                 <NavItem
                   key={item.href}
                   href={item.href}
@@ -391,7 +482,7 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
 
             {/* Altre sezioni */}
             <NavSection title={t('other', 'navigationSections')} collapsed={sidebarCollapsed}>
-              {navigation.altro.map((item) => (
+              {navigation.altro.map(item => (
                 <NavItem
                   key={item.href}
                   href={item.href}
@@ -405,7 +496,9 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
           </nav>
 
           {/* User Section */}
-          <div className={`p-3 border-t border-blue-700/50 ${sidebarCollapsed ? 'text-center' : ''}`}>
+          <div
+            className={`p-3 border-t border-blue-700/50 ${sidebarCollapsed ? 'text-center' : ''}`}
+          >
             {!sidebarCollapsed && (
               <div className="flex items-center mb-3">
                 <div className="avatar">
@@ -414,7 +507,9 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
                   </div>
                 </div>
                 <div className="ml-2.5 overflow-hidden">
-                  <p className="text-xs font-medium truncate">{auth.user?.displayName || t('user', 'common')}</p>
+                  <p className="text-xs font-medium truncate">
+                    {auth.user?.displayName || t('user', 'common')}
+                  </p>
                   <p className="text-[11px] text-blue-300/80 truncate">{auth.user?.email}</p>
                 </div>
               </div>
@@ -457,7 +552,12 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
                 aria-label="Menu"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 </svg>
               </button>
               <h1 className="text-lg font-semibold text-slate-800 hidden sm:block">{title}</h1>
@@ -465,8 +565,18 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
 
             <div className="flex items-center space-x-3">
               <div className="hidden md:flex items-center bg-slate-100 rounded-md px-3 py-1.5 focus-within:bg-white focus-within:ring-1 focus-within:ring-blue-500/50">
-                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg
+                  className="w-4 h-4 text-slate-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
                 <input
                   type="text"
@@ -479,7 +589,7 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
               <LanguageSelector variant="header" />
 
               {/* Notifications Button */}
-              <button 
+              <button
                 className="p-1.5 rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-700 relative"
                 onClick={() => setNotificationsOpen(true)}
               >
@@ -501,9 +611,9 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
                 >
                   <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white overflow-hidden">
                     {userProfile?.avatar ? (
-                      <img 
-                        src={userProfile.avatar} 
-                        alt="Avatar" 
+                      <img
+                        src={userProfile.avatar}
+                        alt="Avatar"
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -514,9 +624,7 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
                     <p className="text-xs font-medium text-slate-800">
                       {userProfile?.displayName || auth.user?.displayName || t('user', 'common')}
                     </p>
-                    <p className="text-xs text-slate-500">
-                      {userProfile?.role || 'Utente'}
-                    </p>
+                    <p className="text-xs text-slate-500">{userProfile?.role || 'Utente'}</p>
                   </div>
                 </button>
               </div>
@@ -528,9 +636,9 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
                   className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white"
                 >
                   {userProfile?.avatar ? (
-                    <img 
-                      src={userProfile.avatar} 
-                      alt="Avatar" 
+                    <img
+                      src={userProfile.avatar}
+                      alt="Avatar"
                       className="w-full h-full object-cover rounded-full"
                     />
                   ) : (
@@ -543,25 +651,17 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-5 overflow-y-auto">
-          {children}
-        </main>
+        <main className="flex-1 p-5 overflow-y-auto">{children}</main>
       </div>
 
       {/* Notifications Panel */}
-      <NotificationsPanel 
-        isOpen={notificationsOpen}
-        onClose={() => setNotificationsOpen(false)}
-      />
+      <NotificationsPanel isOpen={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
 
       {/* User Profile Panel */}
-      <UserProfilePanel 
-        isOpen={userProfileOpen}
-        onClose={() => setUserProfileOpen(false)}
-      />
+      <UserProfilePanel isOpen={userProfileOpen} onClose={() => setUserProfileOpen(false)} />
 
       {/* Feedback Widget Globale */}
       <FeedbackWidget />
     </div>
   );
-} 
+}

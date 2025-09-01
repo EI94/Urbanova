@@ -34,16 +34,16 @@ export class ResendDebugService {
 
       // VERIFICA STATO SERVIZIO RESEND
       console.log('🔄 Verifica stato servizio Resend...');
-      
+
       // TEST 1: VERIFICA DOMINIO
       console.log('🔍 Test 1: Verifica dominio mittente...');
       const fromDomain = 'noreply@urbanova.com';
       console.log('📧 Dominio mittente:', fromDomain);
-      
+
       // TEST 2: VERIFICA DESTINATARIO
       console.log('🔍 Test 2: Verifica destinatario...');
       console.log('📧 Destinatario:', data.to);
-      
+
       // TEST 3: PREPARA EMAIL SEMPLICE
       console.log('🔍 Test 3: Preparazione email semplice...');
       const simpleEmail = {
@@ -51,19 +51,19 @@ export class ResendDebugService {
         to: [data.to],
         subject: `TEST RESEND: ${data.subject}`,
         html: this.generateSimpleHTML(data),
-        text: this.generateSimpleText(data)
+        text: this.generateSimpleText(data),
       };
-      
+
       console.log('📧 Email preparata:', {
         from: simpleEmail.from,
         to: simpleEmail.to,
-        subject: simpleEmail.subject
+        subject: simpleEmail.subject,
       });
 
       // TEST 4: INVIO EMAIL CON RESEND
       console.log('🔍 Test 4: Invio email tramite Resend...');
       console.log('📧 Opzioni email:', simpleEmail);
-      
+
       const { data: resendData, error } = await this.resend.emails.send(simpleEmail);
 
       console.log('📊 Risposta Resend completa:', { resendData, error });
@@ -81,8 +81,8 @@ export class ResendDebugService {
             fromDomain: fromDomain,
             toEmail: data.to,
             errorType: error.name,
-            errorCode: error.statusCode
-          }
+            errorCode: error.statusCode,
+          },
         };
       }
 
@@ -90,7 +90,7 @@ export class ResendDebugService {
         console.log('✅ Resend ha accettato la richiesta:', resendData);
         console.log('📧 Message ID:', resendData.id);
         console.log('📧 Stato:', resendData.status);
-        
+
         return {
           success: true,
           message: 'Resend ha accettato la richiesta',
@@ -102,8 +102,8 @@ export class ResendDebugService {
             toEmail: data.to,
             messageId: resendData.id,
             status: resendData.status,
-            warning: 'VERIFICA SE L\'EMAIL È ARRIVATA REALMENTE!'
-          }
+            warning: "VERIFICA SE L'EMAIL È ARRIVATA REALMENTE!",
+          },
         };
       }
 
@@ -119,10 +119,9 @@ export class ResendDebugService {
           apiKey: this.RESEND_API_KEY,
           fromDomain: fromDomain,
           toEmail: data.to,
-          warning: 'Resend accetta ma non invia email!'
-        }
+          warning: 'Resend accetta ma non invia email!',
+        },
       };
-
     } catch (error) {
       console.error('❌ Errore critico Resend Debug:', error);
       return {
@@ -134,8 +133,8 @@ export class ResendDebugService {
         debugInfo: {
           apiKey: this.RESEND_API_KEY,
           errorType: error instanceof Error ? error.constructor.name : 'Unknown',
-          stack: error instanceof Error ? error.stack : 'No stack'
-        }
+          stack: error instanceof Error ? error.stack : 'No stack',
+        },
       };
     }
   }
@@ -144,46 +143,45 @@ export class ResendDebugService {
   async testResendDomain(): Promise<ResendDebugResult> {
     try {
       console.log('🔍 Test dominio Resend...');
-      
+
       // TEST CON EMAIL SEMPLICISSIMA
       const testEmail = {
         from: 'Urbanova <noreply@urbanova.com>',
         to: ['test@example.com'],
         subject: 'Test Dominio Resend',
         html: '<h1>Test</h1><p>Questo è un test del dominio Resend.</p>',
-        text: 'Test dominio Resend'
+        text: 'Test dominio Resend',
       };
 
       console.log('📧 Test email:', testEmail);
-      
+
       const { data, error } = await this.resend.emails.send(testEmail);
-      
+
       console.log('📊 Test dominio risultato:', { data, error });
-      
+
       if (error) {
         return {
           success: false,
           message: 'Test dominio fallito',
           provider: 'Resend (Test Dominio)',
           error: error.message,
-          details: error
+          details: error,
         };
       }
-      
+
       return {
         success: true,
         message: 'Test dominio riuscito',
         provider: 'Resend (Test Dominio)',
-        details: data
+        details: data,
       };
-      
     } catch (error) {
       return {
         success: false,
         message: 'Test dominio fallito con errore',
         provider: 'Resend (Test Dominio)',
         error: error instanceof Error ? error.message : 'Errore sconosciuto',
-        details: error
+        details: error,
       };
     }
   }

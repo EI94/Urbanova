@@ -1,5 +1,16 @@
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  doc,
+  updateDoc,
+  serverTimestamp,
+  getDocs,
+  where,
+} from 'firebase/firestore';
+
 import { db } from '@/lib/firebase';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, serverTimestamp, getDocs, where } from 'firebase/firestore';
 
 export interface Feedback {
   id: string;
@@ -27,11 +38,11 @@ export class FeedbackService {
     try {
       const feedbacksRef = collection(db, this.COLLECTION);
       const q = query(feedbacksRef, orderBy('createdAt', 'desc'));
-      
+
       const snapshot = await getDocs(q);
       return snapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       })) as Feedback[];
     } catch (error) {
       console.error('❌ [FeedbackService] Errore recupero feedback:', error);
@@ -43,16 +54,12 @@ export class FeedbackService {
   async getFeedbackByStatus(status: Feedback['status']): Promise<Feedback[]> {
     try {
       const feedbacksRef = collection(db, this.COLLECTION);
-      const q = query(
-        feedbacksRef, 
-        where('status', '==', status),
-        orderBy('createdAt', 'desc')
-      );
-      
+      const q = query(feedbacksRef, where('status', '==', status), orderBy('createdAt', 'desc'));
+
       const snapshot = await getDocs(q);
       return snapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       })) as Feedback[];
     } catch (error) {
       console.error('❌ [FeedbackService] Errore recupero feedback per stato:', error);
@@ -65,15 +72,15 @@ export class FeedbackService {
     try {
       const feedbacksRef = collection(db, this.COLLECTION);
       const q = query(
-        feedbacksRef, 
+        feedbacksRef,
         where('priority', '==', priority),
         orderBy('createdAt', 'desc')
       );
-      
+
       const snapshot = await getDocs(q);
       return snapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       })) as Feedback[];
     } catch (error) {
       console.error('❌ [FeedbackService] Errore recupero feedback per priorità:', error);
@@ -88,7 +95,7 @@ export class FeedbackService {
       await updateDoc(feedbackRef, {
         status,
         updatedAt: serverTimestamp(),
-        ...(status === 'resolved' && { resolvedAt: serverTimestamp() })
+        ...(status === 'resolved' && { resolvedAt: serverTimestamp() }),
       });
     } catch (error) {
       console.error('❌ [FeedbackService] Errore aggiornamento stato:', error);
@@ -102,7 +109,7 @@ export class FeedbackService {
       const feedbackRef = doc(db, this.COLLECTION, feedbackId);
       await updateDoc(feedbackRef, {
         assignedTo,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
     } catch (error) {
       console.error('❌ [FeedbackService] Errore assegnazione feedback:', error);
@@ -118,7 +125,7 @@ export class FeedbackService {
         resolution,
         status: 'resolved',
         resolvedAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
     } catch (error) {
       console.error('❌ [FeedbackService] Errore aggiunta risoluzione:', error);
@@ -135,27 +142,36 @@ export class FeedbackService {
   }> {
     try {
       const feedbacks = await this.getAllFeedback();
-      
-      const byStatus = feedbacks.reduce((acc, feedback) => {
-        acc[feedback.status] = (acc[feedback.status] || 0) + 1;
-        return acc;
-      }, {} as Record<Feedback['status'], number>);
 
-      const byPriority = feedbacks.reduce((acc, feedback) => {
-        acc[feedback.priority] = (acc[feedback.priority] || 0) + 1;
-        return acc;
-      }, {} as Record<Feedback['priority'], number>);
+      const byStatus = feedbacks.reduce(
+        (acc, feedback) => {
+          acc[feedback.status] = (acc[feedback.status] || 0) + 1;
+          return acc;
+        },
+        {} as Record<Feedback['status'], number>
+      );
 
-      const byType = feedbacks.reduce((acc, feedback) => {
-        acc[feedback.type] = (acc[feedback.type] || 0) + 1;
-        return acc;
-      }, {} as Record<Feedback['type'], number>);
+      const byPriority = feedbacks.reduce(
+        (acc, feedback) => {
+          acc[feedback.priority] = (acc[feedback.priority] || 0) + 1;
+          return acc;
+        },
+        {} as Record<Feedback['priority'], number>
+      );
+
+      const byType = feedbacks.reduce(
+        (acc, feedback) => {
+          acc[feedback.type] = (acc[feedback.type] || 0) + 1;
+          return acc;
+        },
+        {} as Record<Feedback['type'], number>
+      );
 
       return {
         total: feedbacks.length,
         byStatus,
         byPriority,
-        byType
+        byType,
       };
     } catch (error) {
       console.error('❌ [FeedbackService] Errore recupero statistiche:', error);
@@ -167,12 +183,13 @@ export class FeedbackService {
   async searchFeedback(searchTerm: string): Promise<Feedback[]> {
     try {
       const feedbacks = await this.getAllFeedback();
-      
-      return feedbacks.filter(feedback => 
-        feedback.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        feedback.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        feedback.screen?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        feedback.userEmail?.toLowerCase().includes(searchTerm.toLowerCase())
+
+      return feedbacks.filter(
+        feedback =>
+          feedback.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          feedback.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          feedback.screen?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          feedback.userEmail?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     } catch (error) {
       console.error('❌ [FeedbackService] Errore ricerca feedback:', error);

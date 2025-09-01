@@ -1,7 +1,17 @@
 // Servizio Email per Urbanova AI Land Scraping
-import { db } from './firebase';
-import { collection, addDoc, getDocs, updateDoc, doc, query, where, orderBy } from 'firebase/firestore';
+import {
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
+  doc,
+  query,
+  where,
+  orderBy,
+} from 'firebase/firestore';
 import { Resend } from 'resend';
+
+import { db } from './firebase';
 
 // Inizializza Resend solo se la chiave API è disponibile
 let resend: Resend | null = null;
@@ -48,7 +58,10 @@ export class EmailService {
   private readonly COLLECTION = 'emailConfigs';
 
   // Salva configurazione email
-  async saveEmailConfig(email: string, preferences?: Partial<EmailConfig['preferences']>): Promise<string> {
+  async saveEmailConfig(
+    email: string,
+    preferences?: Partial<EmailConfig['preferences']>
+  ): Promise<string> {
     try {
       const config: Omit<EmailConfig, 'id'> = {
         email,
@@ -60,8 +73,8 @@ export class EmailService {
           maxResults: 5,
           includeStats: true,
           includeContactInfo: true,
-          ...preferences
-        }
+          ...preferences,
+        },
       };
 
       const docRef = await addDoc(collection(db, this.COLLECTION), config);
@@ -81,9 +94,9 @@ export class EmailService {
         where('email', '==', email),
         orderBy('createdAt', 'desc')
       );
-      
+
       const snapshot = await getDocs(q);
-      
+
       if (snapshot.empty) {
         return null;
       }
@@ -91,7 +104,7 @@ export class EmailService {
       const doc = snapshot.docs[0];
       return {
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       } as EmailConfig;
     } catch (error) {
       console.error('❌ Errore recupero email config:', error);
@@ -105,7 +118,7 @@ export class EmailService {
       const docRef = doc(db, this.COLLECTION, id);
       await updateDoc(docRef, {
         ...updates,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       });
       console.log(`✅ Email config aggiornata: ${id}`);
     } catch (error) {
@@ -119,14 +132,14 @@ export class EmailService {
     try {
       console.log(`📧 [EmailService] Invio email a ${notification.to}`);
       console.log(`📧 [EmailService] Oggetto: ${notification.subject}`);
-      
+
       // TODO: Collegare a servizio email reale (SendGrid, AWS SES, etc.)
       // Per ora simuliamo l'invio
       await this.simulateEmailSending(notification);
-      
+
       // Salva log dell'email inviata
       await this.saveEmailLog(notification);
-      
+
       console.log(`✅ [EmailService] Email inviata con successo`);
     } catch (error) {
       console.error('❌ Errore invio email:', error);
@@ -137,7 +150,7 @@ export class EmailService {
   private async simulateEmailSending(notification: EmailNotification): Promise<void> {
     // Simula delay di invio
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
+
     // Log dettagliato per debug
     console.log(`📧 [EmailService] Contenuto email:`);
     console.log(`   - Destinatario: ${notification.to}`);
@@ -153,7 +166,7 @@ export class EmailService {
         subject: notification.subject,
         landsCount: notification.lands.length,
         sentAt: new Date(),
-        status: 'sent'
+        status: 'sent',
       });
     } catch (error) {
       console.error('❌ Errore salvataggio log email:', error);
@@ -172,7 +185,7 @@ export class EmailService {
       const snapshot = await getDocs(collection(db, this.COLLECTION));
       return snapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       })) as EmailConfig[];
     } catch (error) {
       console.error('❌ Errore recupero email configs:', error);
@@ -201,7 +214,7 @@ export class EmailService {
         subject: emailData.subject,
         html: htmlContent,
         text: textContent,
-        replyTo: 'support@urbanova.com'
+        replyTo: 'support@urbanova.com',
       });
 
       if (error) {
@@ -211,10 +224,9 @@ export class EmailService {
 
       console.log('✅ Email inviata con successo tramite Resend:', data);
       return true;
-
     } catch (error) {
       console.error('❌ Errore invio email:', error);
-      
+
       // Fallback se Resend fallisce
       try {
         return await this.sendFreeEmailService(emailData);
@@ -228,7 +240,7 @@ export class EmailService {
   private async sendFreeEmailService(emailData: EmailData): Promise<boolean> {
     try {
       console.log('🔄 Tentativo invio email tramite servizio gratuito...');
-      
+
       // Usa EmailJS come servizio gratuito
       const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
         method: 'POST',
@@ -245,8 +257,8 @@ export class EmailService {
             subject: emailData.subject,
             message: emailData.message,
             report_title: emailData.reportTitle,
-            report_url: emailData.reportUrl
-          }
+            report_url: emailData.reportUrl,
+          },
         }),
       });
 
@@ -257,16 +269,15 @@ export class EmailService {
       const result = await response.json();
       console.log('✅ Email inviata tramite servizio gratuito:', result);
       return true;
-
     } catch (error) {
       console.error('❌ Errore servizio gratuito:', error);
-      
+
       // Usa un altro servizio gratuito come fallback
       try {
         return await this.sendAlternativeFreeService(emailData);
       } catch (alternativeError) {
         console.error('❌ Anche il servizio alternativo è fallito:', alternativeError);
-        
+
         // Ultimo fallback: simula invio riuscito per evitare errori
         console.log('📧 EMAIL SIMULATA - Dati email:', {
           to: emailData.to,
@@ -275,9 +286,9 @@ export class EmailService {
           reportTitle: emailData.reportTitle,
           reportUrl: emailData.reportUrl,
           timestamp: new Date().toISOString(),
-          note: 'Email simulata - servizi email non disponibili'
+          note: 'Email simulata - servizi email non disponibili',
         });
-        
+
         return true; // Simula invio riuscito
       }
     }
@@ -286,7 +297,7 @@ export class EmailService {
   private async sendAlternativeFreeService(emailData: EmailData): Promise<boolean> {
     try {
       console.log('🔄 Tentativo invio email tramite servizio alternativo gratuito...');
-      
+
       // Usa un servizio email gratuito alternativo
       const response = await fetch('https://formspree.io/f/xpzgwqzw', {
         method: 'POST',
@@ -300,7 +311,7 @@ export class EmailService {
           message: emailData.message,
           report_title: emailData.reportTitle,
           report_url: emailData.reportUrl,
-          _subject: `Studio di Fattibilità: ${emailData.reportTitle}`
+          _subject: `Studio di Fattibilità: ${emailData.reportTitle}`,
         }),
       });
 
@@ -311,7 +322,6 @@ export class EmailService {
       const result = await response.json();
       console.log('✅ Email inviata tramite servizio alternativo:', result);
       return true;
-
     } catch (error) {
       console.error('❌ Errore servizio alternativo:', error);
       throw error;
@@ -469,9 +479,9 @@ Supporto: support@urbanova.com
   getServiceInfo(): { available: boolean; provider: string } {
     return {
       available: resend !== null,
-      provider: resend ? 'Resend' : 'Fallback API'
+      provider: resend ? 'Resend' : 'Fallback API',
     };
   }
 }
 
-export const emailService = new EmailService(); 
+export const emailService = new EmailService();

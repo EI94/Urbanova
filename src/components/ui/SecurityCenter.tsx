@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Badge } from './Badge';
+
+import { securityService } from '@/lib/securityService';
 import {
   ThreatIntelligence,
   SecurityVulnerability,
@@ -16,10 +17,11 @@ import {
   VulnerabilityType,
   ThreatCategory,
   AlertSeverity,
-  IncidentStatus
+  IncidentStatus,
 } from '@/types/security';
-import { securityService } from '@/lib/securityService';
 import { TeamRole } from '@/types/team';
+
+import { Badge } from './Badge';
 
 interface SecurityCenterProps {
   isOpen: boolean;
@@ -36,10 +38,21 @@ export default function SecurityCenter({
   currentUserId,
   currentUserName,
   currentUserRole,
-  currentUserAvatar
+  currentUserAvatar,
 }: SecurityCenterProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'threats' | 'vulnerabilities' | 'incidents' | 'alerts' | 'compliance' | 'identity' | 'analytics' | 'policies' | 'configuration'>('overview');
-  
+  const [activeTab, setActiveTab] = useState<
+    | 'overview'
+    | 'threats'
+    | 'vulnerabilities'
+    | 'incidents'
+    | 'alerts'
+    | 'compliance'
+    | 'identity'
+    | 'analytics'
+    | 'policies'
+    | 'configuration'
+  >('overview');
+
   // Stati per i dati
   const [securityMetrics, setSecurityMetrics] = useState<SecurityMetrics | null>(null);
   const [threats, setThreats] = useState<ThreatIntelligence[]>([]);
@@ -64,7 +77,9 @@ export default function SecurityCenter({
   const [showCreateIncident, setShowCreateIncident] = useState(false);
   const [showCreateAlert, setShowCreateAlert] = useState(false);
   const [selectedThreat, setSelectedThreat] = useState<ThreatIntelligence | null>(null);
-  const [selectedVulnerability, setSelectedVulnerability] = useState<SecurityVulnerability | null>(null);
+  const [selectedVulnerability, setSelectedVulnerability] = useState<SecurityVulnerability | null>(
+    null
+  );
   const [selectedIncident, setSelectedIncident] = useState<SecurityIncident | null>(null);
   const [selectedAlert, setSelectedAlert] = useState<SecurityAlert | null>(null);
 
@@ -76,7 +91,7 @@ export default function SecurityCenter({
     severity: 'medium' as SecurityThreatLevel,
     confidence: 70,
     attackVectors: [] as string[],
-    targetedSectors: [] as string[]
+    targetedSectors: [] as string[],
   });
 
   const [createVulnerabilityForm, setCreateVulnerabilityForm] = useState({
@@ -86,7 +101,7 @@ export default function SecurityCenter({
     severity: 'medium' as SecurityThreatLevel,
     cvssScore: 5.0,
     assetName: '',
-    environment: 'production' as 'development' | 'staging' | 'production'
+    environment: 'production' as 'development' | 'staging' | 'production',
   });
 
   const [createIncidentForm, setCreateIncidentForm] = useState({
@@ -95,7 +110,7 @@ export default function SecurityCenter({
     category: 'malware' as ThreatCategory,
     severity: 'medium' as SecurityThreatLevel,
     priority: 'medium' as SecurityThreatLevel,
-    affectedSystems: [] as string[]
+    affectedSystems: [] as string[],
   });
 
   const [createAlertForm, setCreateAlertForm] = useState({
@@ -104,7 +119,7 @@ export default function SecurityCenter({
     severity: 'warning' as AlertSeverity,
     category: 'malware' as ThreatCategory,
     sourceSystem: '',
-    sourceIp: ''
+    sourceIp: '',
   });
 
   useEffect(() => {
@@ -143,7 +158,7 @@ export default function SecurityCenter({
         targetedCountries: [],
         targetedTechnologies: [],
         attribution: {
-          confidence: createThreatForm.confidence
+          confidence: createThreatForm.confidence,
         },
         firstSeen: new Date(),
         lastSeen: new Date(),
@@ -151,9 +166,9 @@ export default function SecurityCenter({
         mitigations: [],
         status: 'active',
         tags: [],
-        createdBy: currentUserId
+        createdBy: currentUserId,
       });
-      
+
       setThreats(prev => [threat, ...prev]);
       setCreateThreatForm({
         name: '',
@@ -162,7 +177,7 @@ export default function SecurityCenter({
         severity: 'medium',
         confidence: 70,
         attackVectors: [],
-        targetedSectors: []
+        targetedSectors: [],
       });
       setShowCreateThreat(false);
       console.log('Threat creata con successo!', threat);
@@ -186,7 +201,7 @@ export default function SecurityCenter({
           type: 'application',
           environment: createVulnerabilityForm.environment,
           owner: currentUserId,
-          criticality: 'medium'
+          criticality: 'medium',
         },
         location: {},
         evidence: [],
@@ -199,11 +214,11 @@ export default function SecurityCenter({
           priority: createVulnerabilityForm.severity,
           steps: ['Implementare fix di sicurezza', 'Testare la correzione'],
           estimatedTime: 16,
-          resources: ['Security Engineer', 'Developer']
+          resources: ['Security Engineer', 'Developer'],
         },
         patch: {
           available: false,
-          tested: false
+          tested: false,
         },
         status: 'open',
         complianceImpact: [],
@@ -214,12 +229,12 @@ export default function SecurityCenter({
           version: '1.0.0',
           scanType: 'manual',
           scanDate: new Date(),
-          confidence: 95
+          confidence: 95,
         },
         references: [],
-        tags: ['manual']
+        tags: ['manual'],
       });
-      
+
       setVulnerabilities(prev => [vulnerability, ...prev]);
       setCreateVulnerabilityForm({
         title: '',
@@ -228,7 +243,7 @@ export default function SecurityCenter({
         severity: 'medium',
         cvssScore: 5.0,
         assetName: '',
-        environment: 'production'
+        environment: 'production',
       });
       setShowCreateVulnerability(false);
       console.log('Vulnerabilità creata con successo!', vulnerability);
@@ -257,7 +272,7 @@ export default function SecurityCenter({
           reputationalImpact: 'low',
           complianceViolation: false,
           regulatoryNotificationRequired: false,
-          affectedRegulations: []
+          affectedRegulations: [],
         },
         detectedAt: new Date(),
         reportedAt: new Date(),
@@ -266,12 +281,12 @@ export default function SecurityCenter({
             userId: currentUserId,
             name: currentUserName,
             role: 'lead',
-            contactInfo: `${currentUserId}@urbanova.com`
-          }
+            contactInfo: `${currentUserId}@urbanova.com`,
+          },
         ],
         investigation: {
           attackTimeline: [],
-          iocs: []
+          iocs: [],
         },
         actions: [],
         communications: [],
@@ -280,12 +295,12 @@ export default function SecurityCenter({
           vulnerabilities: [],
           threats: [],
           incidents: [],
-          alerts: []
+          alerts: [],
         },
         tags: ['manual'],
-        createdBy: currentUserId
+        createdBy: currentUserId,
       });
-      
+
       setIncidents(prev => [incident, ...prev]);
       setCreateIncidentForm({
         title: '',
@@ -293,7 +308,7 @@ export default function SecurityCenter({
         category: 'malware',
         severity: 'medium',
         priority: 'medium',
-        affectedSystems: []
+        affectedSystems: [],
       });
       setShowCreateIncident(false);
       console.log('Incident creato con successo!', incident);
@@ -318,7 +333,7 @@ export default function SecurityCenter({
       high: 'bg-orange-100 text-orange-800',
       critical: 'bg-red-100 text-red-800',
       emergency: 'bg-purple-100 text-purple-800',
-      warning: 'bg-yellow-100 text-yellow-800'
+      warning: 'bg-yellow-100 text-yellow-800',
     };
     return colors[severity as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
@@ -334,7 +349,7 @@ export default function SecurityCenter({
       closed: 'bg-gray-100 text-gray-600',
       new: 'bg-blue-100 text-blue-800',
       investigating: 'bg-yellow-100 text-yellow-800',
-      acknowledged: 'bg-purple-100 text-purple-800'
+      acknowledged: 'bg-purple-100 text-purple-800',
     };
     return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
@@ -352,7 +367,7 @@ export default function SecurityCenter({
       social_engineering: '🎭',
       zero_day: '🕳️',
       botnet: '🤖',
-      cryptojacking: '⛏️'
+      cryptojacking: '⛏️',
     };
     return icons[category] || '⚠️';
   };
@@ -363,59 +378,63 @@ export default function SecurityCenter({
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     }).format(date);
   };
 
   const formatNumber = (num: number, decimals: number = 1) => {
-    return num.toLocaleString('it-IT', { 
+    return num.toLocaleString('it-IT', {
       minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals
+      maximumFractionDigits: decimals,
     });
   };
 
   const filteredThreats = threats.filter(threat => {
-    const matchesQuery = searchQuery === '' || 
+    const matchesQuery =
+      searchQuery === '' ||
       threat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       threat.description.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesSeverity = severityFilter === '' || threat.severity === severityFilter;
     const matchesCategory = categoryFilter === '' || threat.category === categoryFilter;
-    
+
     return matchesQuery && matchesSeverity && matchesCategory;
   });
 
   const filteredVulnerabilities = vulnerabilities.filter(vuln => {
-    const matchesQuery = searchQuery === '' || 
+    const matchesQuery =
+      searchQuery === '' ||
       vuln.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       vuln.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       vuln.asset.name.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesSeverity = severityFilter === '' || vuln.severity === severityFilter;
     const matchesStatus = statusFilter === '' || vuln.status === statusFilter;
-    
+
     return matchesQuery && matchesSeverity && matchesStatus;
   });
 
   const filteredIncidents = incidents.filter(incident => {
-    const matchesQuery = searchQuery === '' || 
+    const matchesQuery =
+      searchQuery === '' ||
       incident.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       incident.description.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesSeverity = severityFilter === '' || incident.severity === severityFilter;
     const matchesCategory = categoryFilter === '' || incident.category === categoryFilter;
-    
+
     return matchesQuery && matchesSeverity && matchesCategory;
   });
 
   const filteredAlerts = alerts.filter(alert => {
-    const matchesQuery = searchQuery === '' || 
+    const matchesQuery =
+      searchQuery === '' ||
       alert.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       alert.description.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesSeverity = alertSeverityFilter === '' || alert.severity === alertSeverityFilter;
     const matchesCategory = categoryFilter === '' || alert.category === categoryFilter;
-    
+
     return matchesQuery && matchesSeverity && matchesCategory;
   });
 
@@ -431,14 +450,15 @@ export default function SecurityCenter({
               <span className="text-red-600 text-lg">🛡️</span>
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Security & Threat Intelligence Center</h2>
-              <p className="text-sm text-gray-500">Centro avanzato per sicurezza, threat intelligence e compliance</p>
+              <h2 className="text-xl font-semibold text-gray-900">
+                Security & Threat Intelligence Center
+              </h2>
+              <p className="text-sm text-gray-500">
+                Centro avanzato per sicurezza, threat intelligence e compliance
+              </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
             <span className="text-2xl">×</span>
           </button>
         </div>
@@ -451,7 +471,9 @@ export default function SecurityCenter({
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-red-600 font-medium">Threats Active</p>
-                    <p className="text-2xl font-bold text-red-900">{securityMetrics.threats.activeThreats}</p>
+                    <p className="text-2xl font-bold text-red-900">
+                      {securityMetrics.threats.activeThreats}
+                    </p>
                   </div>
                   <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
                     <span className="text-red-600">🎯</span>
@@ -461,12 +483,14 @@ export default function SecurityCenter({
                   {securityMetrics.threats.newThreats} nuove
                 </p>
               </div>
-              
+
               <div className="bg-orange-50 rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-orange-600 font-medium">Vulnerabilities</p>
-                    <p className="text-2xl font-bold text-orange-900">{securityMetrics.vulnerabilities.openVulnerabilities}</p>
+                    <p className="text-2xl font-bold text-orange-900">
+                      {securityMetrics.vulnerabilities.openVulnerabilities}
+                    </p>
                   </div>
                   <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
                     <span className="text-orange-600">🔍</span>
@@ -481,7 +505,9 @@ export default function SecurityCenter({
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-yellow-600 font-medium">Open Incidents</p>
-                    <p className="text-2xl font-bold text-yellow-900">{securityMetrics.incidents.openIncidents}</p>
+                    <p className="text-2xl font-bold text-yellow-900">
+                      {securityMetrics.incidents.openIncidents}
+                    </p>
                   </div>
                   <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
                     <span className="text-yellow-600">🚨</span>
@@ -496,30 +522,30 @@ export default function SecurityCenter({
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-blue-600 font-medium">Security Score</p>
-                    <p className="text-2xl font-bold text-blue-900">{securityMetrics.posture.overallScore}</p>
+                    <p className="text-2xl font-bold text-blue-900">
+                      {securityMetrics.posture.overallScore}
+                    </p>
                   </div>
                   <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                     <span className="text-blue-600">📊</span>
                   </div>
                 </div>
-                <p className="text-xs text-blue-600 mt-1">
-                  overall posture
-                </p>
+                <p className="text-xs text-blue-600 mt-1">overall posture</p>
               </div>
 
               <div className="bg-purple-50 rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-purple-600 font-medium">Compliance</p>
-                    <p className="text-2xl font-bold text-purple-900">{formatNumber(securityMetrics.compliance.overallScore)}%</p>
+                    <p className="text-2xl font-bold text-purple-900">
+                      {formatNumber(securityMetrics.compliance.overallScore)}%
+                    </p>
                   </div>
                   <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
                     <span className="text-purple-600">✅</span>
                   </div>
                 </div>
-                <p className="text-xs text-purple-600 mt-1">
-                  framework score
-                </p>
+                <p className="text-xs text-purple-600 mt-1">framework score</p>
               </div>
 
               <div className="bg-green-50 rounded-lg p-4">
@@ -527,17 +553,18 @@ export default function SecurityCenter({
                   <div>
                     <p className="text-sm text-green-600 font-medium">Risk Level</p>
                     <p className="text-2xl font-bold text-green-900">
-                      {securityMetrics.risk.overallRisk === 'low' ? '🟢' : 
-                       securityMetrics.risk.overallRisk === 'medium' ? '🟡' : '🔴'}
+                      {securityMetrics.risk.overallRisk === 'low'
+                        ? '🟢'
+                        : securityMetrics.risk.overallRisk === 'medium'
+                          ? '🟡'
+                          : '🔴'}
                     </p>
                   </div>
                   <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                     <span className="text-green-600">⚖️</span>
                   </div>
                 </div>
-                <p className="text-xs text-green-600 mt-1">
-                  {securityMetrics.risk.overallRisk}
-                </p>
+                <p className="text-xs text-green-600 mt-1">{securityMetrics.risk.overallRisk}</p>
               </div>
             </div>
           </div>
@@ -549,15 +576,20 @@ export default function SecurityCenter({
             {[
               { id: 'overview', label: 'Overview', icon: '🎯', count: 0 },
               { id: 'threats', label: 'Threats', icon: '🎯', count: threats.length },
-              { id: 'vulnerabilities', label: 'Vulnerabilities', icon: '🔍', count: vulnerabilities.length },
+              {
+                id: 'vulnerabilities',
+                label: 'Vulnerabilities',
+                icon: '🔍',
+                count: vulnerabilities.length,
+              },
               { id: 'incidents', label: 'Incidents', icon: '🚨', count: incidents.length },
               { id: 'alerts', label: 'Alerts', icon: '⚠️', count: alerts.length },
               { id: 'compliance', label: 'Compliance', icon: '✅', count: audits.length },
               { id: 'identity', label: 'Identity', icon: '👤', count: identities.length },
               { id: 'analytics', label: 'Analytics', icon: '📊', count: 0 },
               { id: 'policies', label: 'Policies', icon: '📋', count: policies.length },
-              { id: 'configuration', label: 'Config', icon: '⚙️', count: 0 }
-            ].map((tab) => (
+              { id: 'configuration', label: 'Config', icon: '⚙️', count: 0 },
+            ].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
@@ -570,9 +602,7 @@ export default function SecurityCenter({
                 <span>{tab.icon}</span>
                 <span>{tab.label}</span>
                 {tab.count > 0 && (
-                  <Badge className="ml-2 bg-red-100 text-red-800">
-                    {tab.count}
-                  </Badge>
+                  <Badge className="ml-2 bg-red-100 text-red-800">{tab.count}</Badge>
                 )}
               </button>
             ))}
@@ -591,26 +621,32 @@ export default function SecurityCenter({
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Overall Score</span>
                       <div className="text-right">
-                        <span className="text-lg font-bold text-gray-900">{securityMetrics.posture.overallScore}</span>
+                        <span className="text-lg font-bold text-gray-900">
+                          {securityMetrics.posture.overallScore}
+                        </span>
                         <div className="text-sm text-blue-600">out of 100</div>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2">
-                      {Object.entries(securityMetrics.posture.components).map(([component, score]) => (
-                        <div key={component} className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600 capitalize">{component.replace(/([A-Z])/g, ' $1')}</span>
-                          <div className="flex items-center">
-                            <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                              <div 
-                                className={`h-2 rounded-full ${score >= 85 ? 'bg-green-500' : score >= 70 ? 'bg-yellow-500' : 'bg-red-500'}`}
-                                style={{ width: `${score}%` }}
-                              ></div>
+                      {Object.entries(securityMetrics.posture.components).map(
+                        ([component, score]) => (
+                          <div key={component} className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600 capitalize">
+                              {component.replace(/([A-Z])/g, ' $1')}
+                            </span>
+                            <div className="flex items-center">
+                              <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                <div
+                                  className={`h-2 rounded-full ${score >= 85 ? 'bg-green-500' : score >= 70 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                                  style={{ width: `${score}%` }}
+                                ></div>
+                              </div>
+                              <span className="text-sm font-medium w-8">{score}</span>
                             </div>
-                            <span className="text-sm font-medium w-8">{score}</span>
                           </div>
-                        </div>
-                      ))}
+                        )
+                      )}
                     </div>
                   </div>
                 </div>
@@ -621,19 +657,25 @@ export default function SecurityCenter({
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Active Threats</span>
-                      <span className="text-lg font-bold text-red-600">{securityMetrics.threats.activeThreats}</span>
+                      <span className="text-lg font-bold text-red-600">
+                        {securityMetrics.threats.activeThreats}
+                      </span>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">MTTD</span>
-                      <span className="text-sm font-medium text-blue-600">{securityMetrics.threats.mttd}m</span>
+                      <span className="text-sm font-medium text-blue-600">
+                        {securityMetrics.threats.mttd}m
+                      </span>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">MTTR</span>
-                      <span className="text-sm font-medium text-green-600">{securityMetrics.threats.mttr}m</span>
+                      <span className="text-sm font-medium text-green-600">
+                        {securityMetrics.threats.mttr}m
+                      </span>
                     </div>
-                    
+
                     <div>
                       <div className="text-sm text-gray-600 mb-2">Top Threats</div>
                       <div className="space-y-1">
@@ -645,11 +687,20 @@ export default function SecurityCenter({
                             </div>
                             <div className="flex items-center space-x-2">
                               <span className="text-gray-500">{threat.count}</span>
-                              <span className={`text-xs ${
-                                threat.trend === 'up' ? 'text-red-600' : 
-                                threat.trend === 'down' ? 'text-green-600' : 'text-gray-600'
-                              }`}>
-                                {threat.trend === 'up' ? '↗' : threat.trend === 'down' ? '↘' : '→'}
+                              <span
+                                className={`text-xs ${
+                                  threat.trend === 'up'
+                                    ? 'text-red-600'
+                                    : threat.trend === 'down'
+                                      ? 'text-green-600'
+                                      : 'text-gray-600'
+                                }`}
+                              >
+                                {threat.trend === 'up'
+                                  ? '↗'
+                                  : threat.trend === 'down'
+                                    ? '↘'
+                                    : '→'}
                               </span>
                             </div>
                           </div>
@@ -665,31 +716,43 @@ export default function SecurityCenter({
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Vulnerability Status</h3>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-red-600">{securityMetrics.vulnerabilities.bySeverity.critical}</div>
+                    <div className="text-2xl font-bold text-red-600">
+                      {securityMetrics.vulnerabilities.bySeverity.critical}
+                    </div>
                     <div className="text-sm text-gray-600">Critical</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-orange-600">{securityMetrics.vulnerabilities.bySeverity.high}</div>
+                    <div className="text-2xl font-bold text-orange-600">
+                      {securityMetrics.vulnerabilities.bySeverity.high}
+                    </div>
                     <div className="text-sm text-gray-600">High</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-yellow-600">{securityMetrics.vulnerabilities.bySeverity.medium}</div>
+                    <div className="text-2xl font-bold text-yellow-600">
+                      {securityMetrics.vulnerabilities.bySeverity.medium}
+                    </div>
                     <div className="text-sm text-gray-600">Medium</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">{securityMetrics.vulnerabilities.bySeverity.low}</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      {securityMetrics.vulnerabilities.bySeverity.low}
+                    </div>
                     <div className="text-sm text-gray-600">Low</div>
                   </div>
                 </div>
-                
+
                 <div className="mt-4 pt-4 border-t border-gray-100">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">SLA Compliance</span>
-                    <span className="font-medium text-green-600">{formatNumber(securityMetrics.vulnerabilities.slaCompliance)}%</span>
+                    <span className="font-medium text-green-600">
+                      {formatNumber(securityMetrics.vulnerabilities.slaCompliance)}%
+                    </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Mean Time to Remediation</span>
-                    <span className="font-medium text-blue-600">{formatNumber(securityMetrics.vulnerabilities.mttr)} days</span>
+                    <span className="font-medium text-blue-600">
+                      {formatNumber(securityMetrics.vulnerabilities.mttr)} days
+                    </span>
                   </div>
                 </div>
               </div>
@@ -699,20 +762,26 @@ export default function SecurityCenter({
                 <div className="bg-white border border-gray-200 rounded-lg p-6">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">Compliance Status</h3>
                   <div className="space-y-3">
-                    {Object.entries(securityMetrics.compliance.byFramework).filter(([_, data]) => data.totalControls > 0).map(([framework, data]) => (
-                      <div key={framework} className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600 uppercase">{framework.replace('_', ' ')}</span>
-                        <div className="flex items-center">
-                          <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                            <div 
-                              className={`h-2 rounded-full ${data.score >= 90 ? 'bg-green-500' : data.score >= 70 ? 'bg-yellow-500' : 'bg-red-500'}`}
-                              style={{ width: `${data.score}%` }}
-                            ></div>
+                    {Object.entries(securityMetrics.compliance.byFramework)
+                      .filter(([_, data]) => data.totalControls > 0)
+                      .map(([framework, data]) => (
+                        <div key={framework} className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600 uppercase">
+                            {framework.replace('_', ' ')}
+                          </span>
+                          <div className="flex items-center">
+                            <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                              <div
+                                className={`h-2 rounded-full ${data.score >= 90 ? 'bg-green-500' : data.score >= 70 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                                style={{ width: `${data.score}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-sm font-medium text-green-600">
+                              {data.score}%
+                            </span>
                           </div>
-                          <span className="text-sm font-medium text-green-600">{data.score}%</span>
                         </div>
-                      </div>
-                    ))}
+                      ))}
                   </div>
                 </div>
 
@@ -759,13 +828,13 @@ export default function SecurityCenter({
                   <input
                     type="text"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={e => setSearchQuery(e.target.value)}
                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-red-500 focus:border-red-500"
                     placeholder="Cerca threats..."
                   />
                   <select
                     value={severityFilter}
-                    onChange={(e) => setSeverityFilter(e.target.value as SecurityThreatLevel | '')}
+                    onChange={e => setSeverityFilter(e.target.value as SecurityThreatLevel | '')}
                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-red-500 focus:border-red-500"
                   >
                     <option value="">Tutte le severità</option>
@@ -776,7 +845,7 @@ export default function SecurityCenter({
                   </select>
                   <select
                     value={categoryFilter}
-                    onChange={(e) => setCategoryFilter(e.target.value as ThreatCategory | '')}
+                    onChange={e => setCategoryFilter(e.target.value as ThreatCategory | '')}
                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-red-500 focus:border-red-500"
                   >
                     <option value="">Tutte le categorie</option>
@@ -795,8 +864,11 @@ export default function SecurityCenter({
               </div>
 
               <div className="space-y-4">
-                {filteredThreats.map((threat) => (
-                  <div key={threat.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                {filteredThreats.map(threat => (
+                  <div
+                    key={threat.id}
+                    className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                  >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
@@ -808,13 +880,11 @@ export default function SecurityCenter({
                           <Badge className={getSeverityColor(threat.severity)}>
                             {threat.severity.toUpperCase()}
                           </Badge>
-                          <Badge className={getStatusColor(threat.status)}>
-                            {threat.status}
-                          </Badge>
+                          <Badge className={getStatusColor(threat.status)}>{threat.status}</Badge>
                         </div>
-                        
+
                         <p className="text-sm text-gray-600 mb-4">{threat.description}</p>
-                        
+
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
                           <div>
                             <span className="text-gray-500">Confidence:</span>
@@ -854,7 +924,7 @@ export default function SecurityCenter({
                           ))}
                         </div>
                       </div>
-                      
+
                       <div className="flex flex-col space-y-2 ml-4">
                         <button
                           onClick={() => setSelectedThreat(threat)}
@@ -870,7 +940,7 @@ export default function SecurityCenter({
                         </button>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center justify-between text-xs text-gray-500 pt-4 border-t border-gray-100 mt-4">
                       <span>Creata: {formatDate(threat.createdAt)}</span>
                       <span>Aggiornata: {formatDate(threat.updatedAt)}</span>
@@ -890,13 +960,13 @@ export default function SecurityCenter({
                   <input
                     type="text"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={e => setSearchQuery(e.target.value)}
                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-red-500 focus:border-red-500"
                     placeholder="Cerca vulnerabilità..."
                   />
                   <select
                     value={severityFilter}
-                    onChange={(e) => setSeverityFilter(e.target.value as SecurityThreatLevel | '')}
+                    onChange={e => setSeverityFilter(e.target.value as SecurityThreatLevel | '')}
                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-red-500 focus:border-red-500"
                   >
                     <option value="">Tutte le severità</option>
@@ -907,7 +977,7 @@ export default function SecurityCenter({
                   </select>
                   <select
                     value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
+                    onChange={e => setStatusFilter(e.target.value)}
                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-red-500 focus:border-red-500"
                   >
                     <option value="">Tutti gli stati</option>
@@ -926,8 +996,11 @@ export default function SecurityCenter({
               </div>
 
               <div className="space-y-4">
-                {filteredVulnerabilities.map((vuln) => (
-                  <div key={vuln.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                {filteredVulnerabilities.map(vuln => (
+                  <div
+                    key={vuln.id}
+                    className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                  >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
@@ -935,16 +1008,12 @@ export default function SecurityCenter({
                           <Badge className={getSeverityColor(vuln.severity)}>
                             {vuln.severity.toUpperCase()}
                           </Badge>
-                          <Badge className={getStatusColor(vuln.status)}>
-                            {vuln.status}
-                          </Badge>
-                          <Badge className="bg-blue-100 text-blue-800">
-                            CVSS {vuln.cvssScore}
-                          </Badge>
+                          <Badge className={getStatusColor(vuln.status)}>{vuln.status}</Badge>
+                          <Badge className="bg-blue-100 text-blue-800">CVSS {vuln.cvssScore}</Badge>
                         </div>
-                        
+
                         <p className="text-sm text-gray-600 mb-4">{vuln.description}</p>
-                        
+
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
                           <div>
                             <span className="text-gray-500">Asset:</span>
@@ -952,11 +1021,15 @@ export default function SecurityCenter({
                           </div>
                           <div>
                             <span className="text-gray-500">Environment:</span>
-                            <span className="ml-2 font-medium capitalize">{vuln.asset.environment}</span>
+                            <span className="ml-2 font-medium capitalize">
+                              {vuln.asset.environment}
+                            </span>
                           </div>
                           <div>
                             <span className="text-gray-500">Type:</span>
-                            <span className="ml-2 font-medium capitalize">{vuln.type.replace('_', ' ')}</span>
+                            <span className="ml-2 font-medium capitalize">
+                              {vuln.type.replace('_', ' ')}
+                            </span>
                           </div>
                           <div>
                             <span className="text-gray-500">Scanner:</span>
@@ -966,19 +1039,27 @@ export default function SecurityCenter({
 
                         {/* Risk Assessment */}
                         <div className="bg-gray-50 rounded-lg p-3 mb-4">
-                          <div className="text-sm font-medium text-gray-700 mb-2">Risk Assessment</div>
+                          <div className="text-sm font-medium text-gray-700 mb-2">
+                            Risk Assessment
+                          </div>
                           <div className="grid grid-cols-3 gap-4 text-sm">
                             <div>
                               <span className="text-gray-500">Exploitability:</span>
-                              <span className="ml-2 font-medium">{formatNumber(vuln.exploitability)}/10</span>
+                              <span className="ml-2 font-medium">
+                                {formatNumber(vuln.exploitability)}/10
+                              </span>
                             </div>
                             <div>
                               <span className="text-gray-500">Impact:</span>
-                              <span className="ml-2 font-medium">{formatNumber(vuln.impact)}/10</span>
+                              <span className="ml-2 font-medium">
+                                {formatNumber(vuln.impact)}/10
+                              </span>
                             </div>
                             <div>
                               <span className="text-gray-500">Risk Score:</span>
-                              <span className="ml-2 font-medium">{formatNumber(vuln.riskScore)}/10</span>
+                              <span className="ml-2 font-medium">
+                                {formatNumber(vuln.riskScore)}/10
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -987,13 +1068,12 @@ export default function SecurityCenter({
                         <div className="bg-blue-50 rounded-lg p-3">
                           <div className="text-sm font-medium text-blue-900 mb-1">Remediation</div>
                           <div className="text-sm text-blue-700">
-                            Priority: {vuln.remediation.priority.toUpperCase()} • 
-                            Effort: {vuln.remediation.effort} • 
-                            ETA: {vuln.remediation.estimatedTime}h
+                            Priority: {vuln.remediation.priority.toUpperCase()} • Effort:{' '}
+                            {vuln.remediation.effort} • ETA: {vuln.remediation.estimatedTime}h
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="flex flex-col space-y-2 ml-4">
                         <button
                           onClick={() => setSelectedVulnerability(vuln)}
@@ -1009,7 +1089,7 @@ export default function SecurityCenter({
                         </button>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center justify-between text-xs text-gray-500 pt-4 border-t border-gray-100 mt-4">
                       <span>Scoperta: {formatDate(vuln.discoveredAt)}</span>
                       <span>Segnalata: {formatDate(vuln.reportedAt)}</span>
@@ -1029,13 +1109,13 @@ export default function SecurityCenter({
                   <input
                     type="text"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={e => setSearchQuery(e.target.value)}
                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-red-500 focus:border-red-500"
                     placeholder="Cerca alert..."
                   />
                   <select
                     value={alertSeverityFilter}
-                    onChange={(e) => setAlertSeverityFilter(e.target.value as AlertSeverity | '')}
+                    onChange={e => setAlertSeverityFilter(e.target.value as AlertSeverity | '')}
                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-red-500 focus:border-red-500"
                   >
                     <option value="">Tutte le severità</option>
@@ -1046,7 +1126,7 @@ export default function SecurityCenter({
                   </select>
                   <select
                     value={categoryFilter}
-                    onChange={(e) => setCategoryFilter(e.target.value as ThreatCategory | '')}
+                    onChange={e => setCategoryFilter(e.target.value as ThreatCategory | '')}
                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-red-500 focus:border-red-500"
                   >
                     <option value="">Tutte le categorie</option>
@@ -1059,8 +1139,11 @@ export default function SecurityCenter({
               </div>
 
               <div className="space-y-3">
-                {filteredAlerts.slice(0, 20).map((alert) => (
-                  <div key={alert.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                {filteredAlerts.slice(0, 20).map(alert => (
+                  <div
+                    key={alert.id}
+                    className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
@@ -1073,9 +1156,9 @@ export default function SecurityCenter({
                             {alert.response.status}
                           </Badge>
                         </div>
-                        
+
                         <p className="text-sm text-gray-600 mb-2">{alert.description}</p>
-                        
+
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                           <div>
                             <span className="text-gray-500">Source:</span>
@@ -1095,7 +1178,7 @@ export default function SecurityCenter({
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center space-x-2 ml-4">
                         <button
                           onClick={() => setSelectedAlert(alert)}
@@ -1113,7 +1196,7 @@ export default function SecurityCenter({
                         )}
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100 mt-3">
                       <span>Creato: {formatDate(alert.createdAt)}</span>
                       <span>Evento: {formatDate(alert.event.timestamp)}</span>
@@ -1130,37 +1213,52 @@ export default function SecurityCenter({
         {showCreateThreat && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Crea Nuova Threat Intelligence</h3>
-              
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Crea Nuova Threat Intelligence
+              </h3>
+
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nome Threat</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nome Threat
+                  </label>
                   <input
                     type="text"
                     value={createThreatForm.name}
-                    onChange={(e) => setCreateThreatForm(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={e => setCreateThreatForm(prev => ({ ...prev, name: e.target.value }))}
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-red-500 focus:border-red-500"
                     placeholder="Nome della threat"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Descrizione</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Descrizione
+                  </label>
                   <textarea
                     value={createThreatForm.description}
-                    onChange={(e) => setCreateThreatForm(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={e =>
+                      setCreateThreatForm(prev => ({ ...prev, description: e.target.value }))
+                    }
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-red-500 focus:border-red-500"
                     rows={3}
                     placeholder="Descrizione della threat"
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Categoria
+                    </label>
                     <select
                       value={createThreatForm.category}
-                      onChange={(e) => setCreateThreatForm(prev => ({ ...prev, category: e.target.value as ThreatCategory }))}
+                      onChange={e =>
+                        setCreateThreatForm(prev => ({
+                          ...prev,
+                          category: e.target.value as ThreatCategory,
+                        }))
+                      }
                       className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-red-500 focus:border-red-500"
                     >
                       <option value="malware">Malware</option>
@@ -1170,12 +1268,17 @@ export default function SecurityCenter({
                       <option value="insider_threat">Insider Threat</option>
                     </select>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Severità</label>
                     <select
                       value={createThreatForm.severity}
-                      onChange={(e) => setCreateThreatForm(prev => ({ ...prev, severity: e.target.value as SecurityThreatLevel }))}
+                      onChange={e =>
+                        setCreateThreatForm(prev => ({
+                          ...prev,
+                          severity: e.target.value as SecurityThreatLevel,
+                        }))
+                      }
                       className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-red-500 focus:border-red-500"
                     >
                       <option value="low">Low</option>
@@ -1184,21 +1287,28 @@ export default function SecurityCenter({
                       <option value="critical">Critical</option>
                     </select>
                   </div>
-                  
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Confidence (%)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Confidence (%)
+                    </label>
                     <input
                       type="number"
                       min="0"
                       max="100"
                       value={createThreatForm.confidence}
-                      onChange={(e) => setCreateThreatForm(prev => ({ ...prev, confidence: parseInt(e.target.value) }))}
+                      onChange={e =>
+                        setCreateThreatForm(prev => ({
+                          ...prev,
+                          confidence: parseInt(e.target.value),
+                        }))
+                      }
                       className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-red-500 focus:border-red-500"
                     />
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-end space-x-3 mt-6">
                 <button
                   onClick={() => setShowCreateThreat(false)}

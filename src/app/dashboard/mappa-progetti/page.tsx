@@ -1,13 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { projectMapService, ProjectLocation, MapFilter, MapCluster } from '@/lib/projectMapService';
-import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'react-hot-toast';
-import { 
-  MapPinIcon, 
-  BuildingIcon, 
+
+import {
+  MapPinIcon,
+  BuildingIcon,
   ChartBarIcon,
   PlusIcon,
   EyeIcon,
@@ -24,37 +22,40 @@ import {
   UserIcon,
   ClockIcon,
   CheckCircleIcon,
-  AlertTriangleIcon
+  AlertTriangleIcon,
 } from '@/components/icons';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdvancedMapView from '@/components/ui/AdvancedMapView';
+import { useAuth } from '@/contexts/AuthContext';
+import { projectMapService, ProjectLocation, MapFilter, MapCluster } from '@/lib/projectMapService';
 
 export default function MappaProgettiPage() {
   const { user } = useAuth();
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  
+
   // Stati principali
   const [projectLocations, setProjectLocations] = useState<ProjectLocation[]>([]);
   const [clusters, setClusters] = useState<MapCluster[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Stati per mappa
   const [mapViewport, setMapViewport] = useState({
     center: { lat: 41.9028, lng: 12.4964 }, // Roma
-    zoom: 8
+    zoom: 8,
   });
   const [selectedLocation, setSelectedLocation] = useState<ProjectLocation | null>(null);
   const [showLocationDetails, setShowLocationDetails] = useState(false);
-  
+
   // Stati per filtri
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilters, setActiveFilters] = useState<MapFilter>({});
   const [filteredLocations, setFilteredLocations] = useState<ProjectLocation[]>([]);
-  
+
   // Stati per modali
   const [showNewLocationModal, setShowNewLocationModal] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
-  
+
   // Stati per nuovo progetto
   const [newLocationData, setNewLocationData] = useState({
     projectId: '',
@@ -74,26 +75,26 @@ export default function MappaProgettiPage() {
     projectStatus: 'PLANNING' as const,
     budget: {
       estimated: 0,
-      currency: 'EUR'
+      currency: 'EUR',
     },
     area: {
       landArea: 0,
       buildingArea: 0,
-      floors: 1
+      floors: 1,
     },
     timeline: {
       startDate: new Date(),
-      estimatedEndDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000)
+      estimatedEndDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000),
     },
     marketData: {
       estimatedValue: 0,
       roi: 0,
       marketTrend: 'STABLE' as const,
-      demandLevel: 'MEDIUM' as const
+      demandLevel: 'MEDIUM' as const,
     },
     constraints: [] as string[],
     amenities: [] as string[],
-    tags: [] as string[]
+    tags: [] as string[],
   });
 
   // Stati per progetti disponibili
@@ -109,17 +110,17 @@ export default function MappaProgettiPage() {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Simula progetti disponibili (in produzione verrebbero da un servizio progetti)
       setAvailableProjects([
         { id: 'project-1', name: 'Villa Moderna Roma', status: 'IN_PROGRESS' },
         { id: 'project-2', name: 'Appartamento Centro Milano', status: 'PLANNING' },
-        { id: 'project-3', name: 'Uffici Commerciali Torino', status: 'COMPLETED' }
+        { id: 'project-3', name: 'Uffici Commerciali Torino', status: 'COMPLETED' },
       ]);
-      
+
       // Inizializza posizioni progetto di esempio se non esistono
       await projectMapService.initializeSampleProjectLocations();
-      
+
       // Inizializza intelligence territoriale
       try {
         await fetch('/api/map/intelligence/initialize', { method: 'POST' });
@@ -127,37 +128,36 @@ export default function MappaProgettiPage() {
       } catch (error) {
         console.warn('⚠️ [MappaProgetti] Errore inizializzazione intelligence:', error);
       }
-      
+
       // Inizializza mappe avanzate con AI
       try {
-        await fetch('/api/map/advanced', { 
+        await fetch('/api/map/advanced', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             zone: 'Appio',
             city: 'Roma',
-            action: 'create_map_data'
-          })
+            action: 'create_map_data',
+          }),
         });
         console.log('✅ [MappaProgetti] Mappe avanzate inizializzate');
       } catch (error) {
         console.warn('⚠️ [MappaProgetti] Errore inizializzazione mappe avanzate:', error);
       }
-      
+
       // Carica posizioni progetto
       const locations = await projectMapService.getAllProjectLocations();
       setProjectLocations(locations);
       setFilteredLocations(locations);
-      
+
       // Crea cluster per la visualizzazione
       const mapClusters = await projectMapService.createMapClusters(locations, mapViewport.zoom);
       setClusters(mapClusters);
-      
+
       console.log('✅ [MappaProgetti] Dati caricati:', {
         locations: locations.length,
-        clusters: mapClusters.length
+        clusters: mapClusters.length,
       });
-      
     } catch (error) {
       console.error('❌ [MappaProgetti] Errore caricamento dati:', error);
       setError('Impossibile caricare i dati della mappa');
@@ -175,10 +175,10 @@ export default function MappaProgettiPage() {
 
       const locationId = await projectMapService.createProjectLocation(newLocationData);
       console.log('✅ [MappaProgetti] Nuova posizione progetto creata:', locationId);
-      
+
       toast.success('✅ Posizione progetto creata con successo!');
       setShowNewLocationModal(false);
-      
+
       // Reset form e ricarica dati
       setNewLocationData({
         projectId: '',
@@ -200,21 +200,20 @@ export default function MappaProgettiPage() {
         area: { landArea: 0, buildingArea: 0, floors: 1 },
         timeline: {
           startDate: new Date(),
-          estimatedEndDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000)
+          estimatedEndDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000),
         },
         marketData: {
           estimatedValue: 0,
           roi: 0,
           marketTrend: 'STABLE',
-          demandLevel: 'MEDIUM'
+          demandLevel: 'MEDIUM',
         },
         constraints: [],
         amenities: [],
-        tags: []
+        tags: [],
       });
-      
+
       await loadData();
-      
     } catch (error) {
       console.error('❌ [MappaProgetti] Errore creazione posizione progetto:', error);
       toast.error('❌ Errore durante la creazione della posizione progetto');
@@ -224,19 +223,18 @@ export default function MappaProgettiPage() {
   const applyFilters = async () => {
     try {
       console.log('🔍 [MappaProgetti] Applicazione filtri:', activeFilters);
-      
+
       const filtered = await projectMapService.getProjectLocationsWithFilters(activeFilters);
       setFilteredLocations(filtered);
-      
+
       // Ricrea cluster con progetti filtrati
       const mapClusters = await projectMapService.createMapClusters(filtered, mapViewport.zoom);
       setClusters(mapClusters);
-      
+
       toast.success(`✅ Filtri applicati: ${filtered.length} progetti trovati`);
-      
     } catch (error) {
       console.error('❌ [MappaProgetti] Errore applicazione filtri:', error);
-      toast.error('❌ Errore durante l\'applicazione dei filtri');
+      toast.error("❌ Errore durante l'applicazione dei filtri");
     }
   };
 
@@ -261,48 +259,66 @@ export default function MappaProgettiPage() {
       setMapViewport(prev => ({
         ...prev,
         center: { lat: cluster.center.latitude, lng: cluster.center.longitude },
-        zoom: Math.min(prev.zoom + 2, 18)
+        zoom: Math.min(prev.zoom + 2, 18),
       }));
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PLANNING': return 'bg-blue-100 text-blue-800';
-      case 'IN_PROGRESS': return 'bg-yellow-100 text-yellow-800';
-      case 'COMPLETED': return 'bg-green-100 text-green-800';
-      case 'ON_HOLD': return 'bg-gray-100 text-gray-800';
-      case 'CANCELLED': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'PLANNING':
+        return 'bg-blue-100 text-blue-800';
+      case 'IN_PROGRESS':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'COMPLETED':
+        return 'bg-green-100 text-green-800';
+      case 'ON_HOLD':
+        return 'bg-gray-100 text-gray-800';
+      case 'CANCELLED':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getBuildingTypeIcon = (type: string) => {
     switch (type) {
-      case 'VILLA': return <BuildingIcon className="h-4 w-4" />;
-      case 'APARTMENT': return <BuildingIcon className="h-4 w-4" />;
-      case 'OFFICE': return <BuildingIcon className="h-4 w-4" />;
-      case 'COMMERCIAL': return <BuildingIcon className="h-4 w-4" />;
-      case 'INDUSTRIAL': return <BuildingIcon className="h-4 w-4" />;
-      default: return <BuildingIcon className="h-4 w-4" />;
+      case 'VILLA':
+        return <BuildingIcon className="h-4 w-4" />;
+      case 'APARTMENT':
+        return <BuildingIcon className="h-4 w-4" />;
+      case 'OFFICE':
+        return <BuildingIcon className="h-4 w-4" />;
+      case 'COMMERCIAL':
+        return <BuildingIcon className="h-4 w-4" />;
+      case 'INDUSTRIAL':
+        return <BuildingIcon className="h-4 w-4" />;
+      default:
+        return <BuildingIcon className="h-4 w-4" />;
     }
   };
 
   const getUrbanAreaColor = (area: string) => {
     switch (area) {
-      case 'URBAN': return 'bg-blue-100 text-blue-800';
-      case 'SUBURBAN': return 'bg-green-100 text-green-800';
-      case 'RURAL': return 'bg-yellow-100 text-yellow-800';
-      case 'COASTAL': return 'bg-cyan-100 text-cyan-800';
-      case 'MOUNTAIN': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'URBAN':
+        return 'bg-blue-100 text-blue-800';
+      case 'SUBURBAN':
+        return 'bg-green-100 text-green-800';
+      case 'RURAL':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'COASTAL':
+        return 'bg-cyan-100 text-cyan-800';
+      case 'MOUNTAIN':
+        return 'bg-orange-100 text-orange-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('it-IT', {
       style: 'currency',
-      currency: 'EUR'
+      currency: 'EUR',
     }).format(amount);
   };
 
@@ -310,7 +326,7 @@ export default function MappaProgettiPage() {
     return new Intl.DateTimeFormat('it-IT', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     }).format(date);
   };
 
@@ -332,7 +348,7 @@ export default function MappaProgettiPage() {
       <DashboardLayout title="Mappa Progetti">
         <div className="flex flex-col items-center justify-center h-64 space-y-4">
           <div className="text-red-600 text-xl">❌ {error}</div>
-          <button 
+          <button
             onClick={loadData}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
@@ -354,18 +370,18 @@ export default function MappaProgettiPage() {
               Visualizza progetti e opportunità su mappa interattiva
             </p>
           </div>
-          
+
           {/* Azioni principali */}
           <div className="flex space-x-3">
-            <button 
+            <button
               onClick={() => setShowFilters(!showFilters)}
               className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
             >
               <FilterIcon className="h-4 w-4 mr-2 inline" />
               Filtri
             </button>
-            
-            <button 
+
+            <button
               onClick={() => setShowNewLocationModal(true)}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
@@ -379,15 +395,17 @@ export default function MappaProgettiPage() {
         {showFilters && (
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Filtri Avanzati</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Stato Progetto */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Stato Progetto</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Stato Progetto
+                </label>
                 <select
                   multiple
                   value={activeFilters.projectStatus || []}
-                  onChange={(e) => {
+                  onChange={e => {
                     const selected = Array.from(e.target.selectedOptions, option => option.value);
                     setActiveFilters(prev => ({ ...prev, projectStatus: selected }));
                   }}
@@ -403,11 +421,13 @@ export default function MappaProgettiPage() {
 
               {/* Tipo Edificio */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Tipo Edificio</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tipo Edificio
+                </label>
                 <select
                   multiple
                   value={activeFilters.buildingType || []}
-                  onChange={(e) => {
+                  onChange={e => {
                     const selected = Array.from(e.target.selectedOptions, option => option.value);
                     setActiveFilters(prev => ({ ...prev, buildingType: selected }));
                   }}
@@ -427,7 +447,7 @@ export default function MappaProgettiPage() {
                 <select
                   multiple
                   value={activeFilters.urbanArea || []}
-                  onChange={(e) => {
+                  onChange={e => {
                     const selected = Array.from(e.target.selectedOptions, option => option.value);
                     setActiveFilters(prev => ({ ...prev, urbanArea: selected }));
                   }}
@@ -449,20 +469,27 @@ export default function MappaProgettiPage() {
                     type="number"
                     placeholder="Min"
                     value={activeFilters.budgetRange?.min || ''}
-                    onChange={(e) => setActiveFilters(prev => ({
-                      ...prev,
-                      budgetRange: { ...prev.budgetRange, min: parseInt(e.target.value) || 0 }
-                    }))}
+                    onChange={e =>
+                      setActiveFilters(prev => ({
+                        ...prev,
+                        budgetRange: { ...prev.budgetRange, min: parseInt(e.target.value) || 0 },
+                      }))
+                    }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <input
                     type="number"
                     placeholder="Max"
                     value={activeFilters.budgetRange?.max || ''}
-                    onChange={(e) => setActiveFilters(prev => ({
-                      ...prev,
-                      budgetRange: { ...prev.budgetRange, max: parseInt(e.target.value) || 999999999 }
-                    }))}
+                    onChange={e =>
+                      setActiveFilters(prev => ({
+                        ...prev,
+                        budgetRange: {
+                          ...prev.budgetRange,
+                          max: parseInt(e.target.value) || 999999999,
+                        },
+                      }))
+                    }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -476,20 +503,24 @@ export default function MappaProgettiPage() {
                     type="number"
                     placeholder="Min"
                     value={activeFilters.roiRange?.min || ''}
-                    onChange={(e) => setActiveFilters(prev => ({
-                      ...prev,
-                      roiRange: { ...prev.roiRange, min: parseInt(e.target.value) || 0 }
-                    }))}
+                    onChange={e =>
+                      setActiveFilters(prev => ({
+                        ...prev,
+                        roiRange: { ...prev.roiRange, min: parseInt(e.target.value) || 0 },
+                      }))
+                    }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <input
                     type="number"
                     placeholder="Max"
                     value={activeFilters.roiRange?.max || ''}
-                    onChange={(e) => setActiveFilters(prev => ({
-                      ...prev,
-                      roiRange: { ...prev.roiRange, max: parseInt(e.target.value) || 100 }
-                    }))}
+                    onChange={e =>
+                      setActiveFilters(prev => ({
+                        ...prev,
+                        roiRange: { ...prev.roiRange, max: parseInt(e.target.value) || 100 },
+                      }))
+                    }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -501,7 +532,7 @@ export default function MappaProgettiPage() {
                 <select
                   multiple
                   value={activeFilters.city || []}
-                  onChange={(e) => {
+                  onChange={e => {
                     const selected = Array.from(e.target.selectedOptions, option => option.value);
                     setActiveFilters(prev => ({ ...prev, city: selected }));
                   }}
@@ -547,7 +578,7 @@ export default function MappaProgettiPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-lg">
@@ -556,14 +587,18 @@ export default function MappaProgettiPage() {
               <div className="ml-3">
                 <p className="text-sm font-medium text-gray-600">ROI Medio</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {filteredLocations.length > 0 
-                    ? Math.round(filteredLocations.reduce((sum, l) => sum + l.marketData.roi, 0) / filteredLocations.length)
-                    : 0}%
+                  {filteredLocations.length > 0
+                    ? Math.round(
+                        filteredLocations.reduce((sum, l) => sum + l.marketData.roi, 0) /
+                          filteredLocations.length
+                      )
+                    : 0}
+                  %
                 </p>
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="p-2 bg-yellow-100 rounded-lg">
@@ -572,12 +607,14 @@ export default function MappaProgettiPage() {
               <div className="ml-3">
                 <p className="text-sm font-medium text-gray-600">Budget Totale</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(filteredLocations.reduce((sum, l) => sum + l.budget.estimated, 0))}
+                  {formatCurrency(
+                    filteredLocations.reduce((sum, l) => sum + l.budget.estimated, 0)
+                  )}
                 </p>
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="p-2 bg-purple-100 rounded-lg">
@@ -597,7 +634,7 @@ export default function MappaProgettiPage() {
         <AdvancedMapView
           projectLocations={filteredLocations}
           onLocationSelect={handleLocationClick}
-          onZoneAnalysis={(zone) => {
+          onZoneAnalysis={zone => {
             console.log('Analisi zona avanzata richiesta:', zone);
             toast.success(`Analisi AI zona ${zone} in corso...`);
           }}
@@ -606,9 +643,11 @@ export default function MappaProgettiPage() {
         {/* Lista Progetti */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Progetti ({filteredLocations.length})</h3>
+            <h3 className="text-lg font-medium text-gray-900">
+              Progetti ({filteredLocations.length})
+            </h3>
           </div>
-          
+
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -637,7 +676,7 @@ export default function MappaProgettiPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredLocations.map((location) => (
+                {filteredLocations.map(location => (
                   <tr key={location.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -647,24 +686,32 @@ export default function MappaProgettiPage() {
                           </div>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{location.projectName}</div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {location.projectName}
+                          </div>
                           <div className="text-sm text-gray-500">{location.buildingType}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{location.city}, {location.province}</div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {location.city}, {location.province}
+                        </div>
                         <div className="text-sm text-gray-500">{location.neighborhood}</div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(location.projectStatus)}`}>
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(location.projectStatus)}`}
+                      >
                         {location.projectStatus}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getUrbanAreaColor(location.urbanArea)}`}>
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getUrbanAreaColor(location.urbanArea)}`}
+                      >
                         {location.urbanArea}
                       </span>
                     </td>
@@ -676,7 +723,7 @@ export default function MappaProgettiPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center space-x-2">
-                        <button 
+                        <button
                           onClick={() => handleLocationClick(location)}
                           className="text-blue-600 hover:text-blue-900"
                         >
@@ -703,55 +750,76 @@ export default function MappaProgettiPage() {
             <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
               <div className="mt-3">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Nuovo Progetto su Mappa</h3>
-                
+
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Nome Progetto</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Nome Progetto
+                    </label>
                     <input
                       type="text"
                       value={newLocationData.projectName}
-                      onChange={(e) => setNewLocationData(prev => ({ ...prev, projectName: e.target.value }))}
+                      onChange={e =>
+                        setNewLocationData(prev => ({ ...prev, projectName: e.target.value }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-                  
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Indirizzo</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Indirizzo
+                    </label>
                     <input
                       type="text"
                       value={newLocationData.address}
-                      onChange={(e) => setNewLocationData(prev => ({ ...prev, address: e.target.value }))}
+                      onChange={e =>
+                        setNewLocationData(prev => ({ ...prev, address: e.target.value }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Città</label>
                       <input
                         type="text"
                         value={newLocationData.city}
-                        onChange={(e) => setNewLocationData(prev => ({ ...prev, city: e.target.value }))}
+                        onChange={e =>
+                          setNewLocationData(prev => ({ ...prev, city: e.target.value }))
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
-                    
+
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Provincia</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Provincia
+                      </label>
                       <input
                         type="text"
                         value={newLocationData.province}
-                        onChange={(e) => setNewLocationData(prev => ({ ...prev, province: e.target.value }))}
+                        onChange={e =>
+                          setNewLocationData(prev => ({ ...prev, province: e.target.value }))
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
                   </div>
-                  
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Tipo Edificio</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Tipo Edificio
+                    </label>
                     <select
                       value={newLocationData.buildingType}
-                      onChange={(e) => setNewLocationData(prev => ({ ...prev, buildingType: e.target.value as any }))}
+                      onChange={e =>
+                        setNewLocationData(prev => ({
+                          ...prev,
+                          buildingType: e.target.value as any,
+                        }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="VILLA">Villa</option>
@@ -761,21 +829,25 @@ export default function MappaProgettiPage() {
                       <option value="INDUSTRIAL">Industriale</option>
                     </select>
                   </div>
-                  
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Budget Stimato (€)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Budget Stimato (€)
+                    </label>
                     <input
                       type="number"
                       value={newLocationData.budget.estimated}
-                      onChange={(e) => setNewLocationData(prev => ({ 
-                        ...prev, 
-                        budget: { ...prev.budget, estimated: parseInt(e.target.value) || 0 }
-                      }))}
+                      onChange={e =>
+                        setNewLocationData(prev => ({
+                          ...prev,
+                          budget: { ...prev.budget, estimated: parseInt(e.target.value) || 0 },
+                        }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
-                
+
                 <div className="flex justify-end space-x-3 mt-6">
                   <button
                     onClick={() => setShowNewLocationModal(false)}
@@ -800,71 +872,91 @@ export default function MappaProgettiPage() {
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
             <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
               <div className="mt-3">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">{selectedLocation.projectName}</h3>
-                
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  {selectedLocation.projectName}
+                </h3>
+
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Indirizzo</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Indirizzo
+                    </label>
                     <p className="text-sm text-gray-900">{selectedLocation.address}</p>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Città</label>
                       <p className="text-sm text-gray-900">{selectedLocation.city}</p>
                     </div>
-                    
+
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Provincia</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Provincia
+                      </label>
                       <p className="text-sm text-gray-900">{selectedLocation.province}</p>
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Stato</label>
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedLocation.projectStatus)}`}>
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedLocation.projectStatus)}`}
+                    >
                       {selectedLocation.projectStatus}
                     </span>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Budget</label>
-                    <p className="text-sm text-gray-900">{formatCurrency(selectedLocation.budget.estimated)}</p>
+                    <p className="text-sm text-gray-900">
+                      {formatCurrency(selectedLocation.budget.estimated)}
+                    </p>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">ROI</label>
                     <p className="text-sm text-gray-900">{selectedLocation.marketData.roi}%</p>
                   </div>
-                  
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Area Terreno</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Area Terreno
+                    </label>
                     <p className="text-sm text-gray-900">{selectedLocation.area.landArea} m²</p>
                   </div>
-                  
+
                   {selectedLocation.constraints.urbanPlanning.length > 0 && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Vincoli</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Vincoli
+                      </label>
                       <div className="space-y-1">
                         {selectedLocation.constraints.urbanPlanning.map((constraint, index) => (
-                          <p key={index} className="text-sm text-gray-900">• {constraint}</p>
+                          <p key={index} className="text-sm text-gray-900">
+                            • {constraint}
+                          </p>
                         ))}
                       </div>
                     </div>
                   )}
-                  
+
                   {selectedLocation.amenities.transport.length > 0 && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Servizi</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Servizi
+                      </label>
                       <div className="space-y-1">
                         {selectedLocation.amenities.transport.map((amenity, index) => (
-                          <p key={index} className="text-sm text-gray-900">• {amenity}</p>
+                          <p key={index} className="text-sm text-gray-900">
+                            • {amenity}
+                          </p>
                         ))}
                       </div>
                     </div>
                   )}
                 </div>
-                
+
                 <div className="flex justify-end mt-6">
                   <button
                     onClick={() => setShowLocationDetails(false)}

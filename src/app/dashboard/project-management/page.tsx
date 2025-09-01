@@ -1,7 +1,7 @@
 'use client';
 
-import DashboardLayout from '@/components/layout/DashboardLayout';
 import { BuildingIcon, DocumentIcon, MeetingIcon } from '@/components/icons';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 
 export default function ProjectManagementPage() {
   return (
@@ -20,12 +20,8 @@ export default function ProjectManagementPage() {
               <DocumentIcon className="h-8 w-8 text-blue-600 mr-3" />
               <h2 className="text-xl font-semibold text-gray-900">Documenti</h2>
             </div>
-            <p className="text-gray-600 mb-4">
-              Gestisci tutti i documenti dei tuoi progetti
-            </p>
-            <button className="btn btn-primary w-full">
-              Gestisci Documenti
-            </button>
+            <p className="text-gray-600 mb-4">Gestisci tutti i documenti dei tuoi progetti</p>
+            <button className="btn btn-primary w-full">Gestisci Documenti</button>
           </div>
 
           <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
@@ -33,12 +29,8 @@ export default function ProjectManagementPage() {
               <MeetingIcon className="h-8 w-8 text-green-600 mr-3" />
               <h2 className="text-xl font-semibold text-gray-900">Riunioni</h2>
             </div>
-            <p className="text-gray-600 mb-4">
-              Pianifica e gestisci le riunioni di progetto
-            </p>
-            <button className="btn btn-primary w-full">
-              Gestisci Riunioni
-            </button>
+            <p className="text-gray-600 mb-4">Pianifica e gestisci le riunioni di progetto</p>
+            <button className="btn btn-primary w-full">Gestisci Riunioni</button>
           </div>
 
           <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
@@ -46,12 +38,8 @@ export default function ProjectManagementPage() {
               <BuildingIcon className="h-8 w-8 text-purple-600 mr-3" />
               <h2 className="text-xl font-semibold text-gray-900">Timeline</h2>
             </div>
-            <p className="text-gray-600 mb-4">
-              Visualizza e gestisci le timeline dei progetti
-            </p>
-            <button className="btn btn-primary w-full">
-              Gestisci Timeline
-            </button>
+            <p className="text-gray-600 mb-4">Visualizza e gestisci le timeline dei progetti</p>
+            <button className="btn btn-primary w-full">Gestisci Timeline</button>
           </div>
         </div>
       </div>

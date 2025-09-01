@@ -1,25 +1,32 @@
-import { 
-  collection, 
-  doc, 
-  setDoc, 
-  getDocs, 
-  getDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
-  orderBy, 
+import {
+  collection,
+  doc,
+  setDoc,
+  getDocs,
+  getDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
   limit,
   serverTimestamp,
   Timestamp,
-  addDoc
+  addDoc,
 } from 'firebase/firestore';
+
 import { db } from './firebase';
 
 export interface PermitType {
   id: string;
   name: string;
-  category: 'URBANISTICO' | 'AMBIENTALE' | 'SICUREZZA' | 'ENERGETICO' | 'STRUTTURALE' | 'ANTINCENDIO';
+  category:
+    | 'URBANISTICO'
+    | 'AMBIENTALE'
+    | 'SICUREZZA'
+    | 'ENERGETICO'
+    | 'STRUTTURALE'
+    | 'ANTINCENDIO';
   description: string;
   requiredDocuments: string[];
   estimatedTime: number; // giorni
@@ -146,7 +153,7 @@ export class PermitsService {
   async initializePermitTypes(): Promise<void> {
     try {
       console.log('🏗️ [PermitsService] Inizializzazione tipi permesso...');
-      
+
       const permitTypes: PermitType[] = [
         {
           id: 'urbanistico',
@@ -158,7 +165,7 @@ export class PermitsService {
             'Relazione tecnica',
             'Certificato di conformità urbanistica',
             'Documentazione catastale',
-            'Progetto strutturale'
+            'Progetto strutturale',
           ],
           estimatedTime: 90,
           estimatedCost: 2500,
@@ -167,40 +174,36 @@ export class PermitsService {
           regulations: [
             'D.P.R. 380/2001',
             'Regolamento Edilizio Comunale',
-            'Piano Regolatore Generale'
+            'Piano Regolatore Generale',
           ],
           complianceRules: [
             'Rispetto delle distanze dai confini',
-            'Conformità alla destinazione d\'uso',
-            'Rispetto degli indici urbanistici'
-          ]
+            "Conformità alla destinazione d'uso",
+            'Rispetto degli indici urbanistici',
+          ],
         },
         {
           id: 'ambientale',
           name: 'Valutazione Impatto Ambientale (VIA)',
           category: 'AMBIENTALE',
-          description: 'Valutazione dell\'impatto ambientale del progetto',
+          description: "Valutazione dell'impatto ambientale del progetto",
           requiredDocuments: [
             'Studio di impatto ambientale',
             'Relazione ambientale',
             'Piano di monitoraggio',
             'Valutazione acustica',
-            'Valutazione emissioni'
+            'Valutazione emissioni',
           ],
           estimatedTime: 180,
           estimatedCost: 15000,
           isRequired: false,
           priority: 'MEDIUM',
-          regulations: [
-            'D.Lgs. 152/2006',
-            'Direttiva 2011/92/UE',
-            'Regolamento regionale VIA'
-          ],
+          regulations: ['D.Lgs. 152/2006', 'Direttiva 2011/92/UE', 'Regolamento regionale VIA'],
           complianceRules: [
             'Valutazione impatto su flora e fauna',
             'Analisi emissioni inquinanti',
-            'Piano di mitigazione impatti'
-          ]
+            'Piano di mitigazione impatti',
+          ],
         },
         {
           id: 'sicurezza',
@@ -212,22 +215,18 @@ export class PermitsService {
             'Valutazione rischi',
             'Procedure di emergenza',
             'Formazione personale',
-            'Dichiarazione conformità DPI'
+            'Dichiarazione conformità DPI',
           ],
           estimatedTime: 30,
           estimatedCost: 800,
           isRequired: true,
           priority: 'HIGH',
-          regulations: [
-            'D.Lgs. 81/2008',
-            'Accordo Stato-Regioni',
-            'Norme tecniche UNI'
-          ],
+          regulations: ['D.Lgs. 81/2008', 'Accordo Stato-Regioni', 'Norme tecniche UNI'],
           complianceRules: [
             'Valutazione rischi specifici',
             'Formazione obbligatoria personale',
-            'Procedure di emergenza documentate'
-          ]
+            'Procedure di emergenza documentate',
+          ],
         },
         {
           id: 'energetico',
@@ -239,49 +238,41 @@ export class PermitsService {
             'Calcoli termici',
             'Specifiche materiali',
             'Relazione tecnica',
-            'Planimetrie termiche'
+            'Planimetrie termiche',
           ],
           estimatedTime: 45,
           estimatedCost: 1200,
           isRequired: true,
           priority: 'MEDIUM',
-          regulations: [
-            'D.Lgs. 192/2005',
-            'D.M. 26/06/2015',
-            'Norme tecniche UNI/TS 11300'
-          ],
+          regulations: ['D.Lgs. 192/2005', 'D.M. 26/06/2015', 'Norme tecniche UNI/TS 11300'],
           complianceRules: [
             'Rispetto classe energetica minima',
             'Utilizzo fonti rinnovabili',
-            'Isolamento termico conforme'
-          ]
+            'Isolamento termico conforme',
+          ],
         },
         {
           id: 'strutturale',
           name: 'Progetto Strutturale',
           category: 'STRUTTURALE',
-          description: 'Progetto strutturale dell\'edificio',
+          description: "Progetto strutturale dell'edificio",
           requiredDocuments: [
             'Calcoli strutturali',
             'Planimetrie strutturali',
             'Relazione tecnica',
             'Specifiche materiali',
-            'Verifiche di sicurezza'
+            'Verifiche di sicurezza',
           ],
           estimatedTime: 60,
           estimatedCost: 3000,
           isRequired: true,
           priority: 'HIGH',
-          regulations: [
-            'D.M. 17/01/2018',
-            'Norme tecniche costruzioni',
-            'Eurocodici strutturali'
-          ],
+          regulations: ['D.M. 17/01/2018', 'Norme tecniche costruzioni', 'Eurocodici strutturali'],
           complianceRules: [
             'Verifica sicurezza strutturale',
             'Rispetto coefficienti di sicurezza',
-            'Analisi stati limite'
-          ]
+            'Analisi stati limite',
+          ],
         },
         {
           id: 'antincendio',
@@ -293,23 +284,19 @@ export class PermitsService {
             'Relazione tecnica',
             'Planimetrie antincendio',
             'Calcoli evacuazione',
-            'Specifiche materiali'
+            'Specifiche materiali',
           ],
           estimatedTime: 45,
           estimatedCost: 2000,
           isRequired: true,
           priority: 'HIGH',
-          regulations: [
-            'D.M. 03/08/2015',
-            'D.M. 07/08/2012',
-            'Norme tecniche antincendio'
-          ],
+          regulations: ['D.M. 03/08/2015', 'D.M. 07/08/2012', 'Norme tecniche antincendio'],
           complianceRules: [
             'Rispetto distanze di sicurezza',
             'Percorsi di evacuazione idonei',
-            'Resistenza al fuoco strutture'
-          ]
-        }
+            'Resistenza al fuoco strutture',
+          ],
+        },
       ];
 
       for (const permitType of permitTypes) {
@@ -317,12 +304,11 @@ export class PermitsService {
         await setDoc(docRef, {
           ...permitType,
           createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
+          updatedAt: serverTimestamp(),
         });
       }
 
       console.log('✅ [PermitsService] Tipi permesso inizializzati:', permitTypes.length);
-
     } catch (error) {
       console.error('❌ [PermitsService] Errore inizializzazione tipi permesso:', error);
       throw new Error(`Impossibile inizializzare i tipi di permesso: ${error}`);
@@ -334,8 +320,11 @@ export class PermitsService {
    */
   async createPermit(permitData: CreatePermitData): Promise<string> {
     try {
-      console.log('🏗️ [PermitsService] Creazione nuovo permesso per progetto:', permitData.projectName);
-      
+      console.log(
+        '🏗️ [PermitsService] Creazione nuovo permesso per progetto:',
+        permitData.projectName
+      );
+
       // Recupera il tipo di permesso
       const permitType = await this.getPermitType(permitData.permitTypeId);
       if (!permitType) {
@@ -343,7 +332,7 @@ export class PermitsService {
       }
 
       const permitId = `permit-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
+
       const newPermit: Permit = {
         id: permitId,
         projectId: permitData.projectId,
@@ -354,12 +343,12 @@ export class PermitsService {
         cost: {
           estimated: permitData.estimatedCost,
           actual: 0,
-          currency: 'EUR'
+          currency: 'EUR',
         },
         documents: permitData.documents.map(doc => ({
           id: `doc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           ...doc,
-          submittedAt: doc.status === 'SUBMITTED' ? new Date() : undefined
+          submittedAt: doc.status === 'SUBMITTED' ? new Date() : undefined,
         })),
         complianceScore: 0,
         riskLevel: 'MEDIUM',
@@ -369,19 +358,18 @@ export class PermitsService {
         createdAt: new Date(),
         updatedAt: new Date(),
         createdBy: 'current-user', // TODO: Integrare con AuthContext
-        lastModifiedBy: 'current-user'
+        lastModifiedBy: 'current-user',
       };
 
       const permitRef = doc(db, this.PERMITS_COLLECTION, permitId);
       await setDoc(permitRef, {
         ...newPermit,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
 
       console.log('✅ [PermitsService] Permesso creato con successo:', permitId);
       return permitId;
-
     } catch (error) {
       console.error('❌ [PermitsService] Errore creazione permesso:', error);
       throw new Error(`Impossibile creare il permesso: ${error}`);
@@ -394,7 +382,7 @@ export class PermitsService {
   async getProjectPermits(projectId: string): Promise<Permit[]> {
     try {
       console.log('📋 [PermitsService] Recupero permessi progetto:', projectId);
-      
+
       const permitsRef = collection(db, this.PERMITS_COLLECTION);
       const q = query(
         permitsRef,
@@ -405,7 +393,7 @@ export class PermitsService {
       const querySnapshot = await getDocs(q);
       const permits: Permit[] = [];
 
-      querySnapshot.forEach((doc) => {
+      querySnapshot.forEach(doc => {
         const data = doc.data();
         permits.push({
           ...data,
@@ -413,13 +401,12 @@ export class PermitsService {
           updatedAt: data.updatedAt?.toDate() || new Date(),
           submissionDate: data.submissionDate?.toDate(),
           approvalDate: data.approvalDate?.toDate(),
-          expiryDate: data.expiryDate?.toDate()
+          expiryDate: data.expiryDate?.toDate(),
         } as Permit);
       });
 
       console.log('✅ [PermitsService] Permessi recuperati:', permits.length);
       return permits;
-
     } catch (error) {
       console.error('❌ [PermitsService] Errore recupero permessi:', error);
       throw new Error(`Impossibile recuperare i permessi: ${error}`);
@@ -432,18 +419,14 @@ export class PermitsService {
   async getUserPermits(userId: string): Promise<Permit[]> {
     try {
       console.log('📋 [PermitsService] Recupero permessi utente:', userId);
-      
+
       const permitsRef = collection(db, this.PERMITS_COLLECTION);
-      const q = query(
-        permitsRef,
-        where('createdBy', '==', userId),
-        orderBy('createdAt', 'desc')
-      );
+      const q = query(permitsRef, where('createdBy', '==', userId), orderBy('createdAt', 'desc'));
 
       const querySnapshot = await getDocs(q);
       const permits: Permit[] = [];
 
-      querySnapshot.forEach((doc) => {
+      querySnapshot.forEach(doc => {
         const data = doc.data();
         permits.push({
           ...data,
@@ -451,13 +434,12 @@ export class PermitsService {
           updatedAt: data.updatedAt?.toDate() || new Date(),
           submissionDate: data.submissionDate?.toDate(),
           approvalDate: data.approvalDate?.toDate(),
-          expiryDate: data.expiryDate?.toDate()
+          expiryDate: data.expiryDate?.toDate(),
         } as Permit);
       });
 
       console.log('✅ [PermitsService] Permessi utente recuperati:', permits.length);
       return permits;
-
     } catch (error) {
       console.error('❌ [PermitsService] Errore recupero permessi utente:', error);
       throw new Error(`Impossibile recuperare i permessi utente: ${error}`);
@@ -470,7 +452,7 @@ export class PermitsService {
   async getPermit(permitId: string): Promise<Permit | null> {
     try {
       console.log('🔍 [PermitsService] Recupero permesso:', permitId);
-      
+
       const permitRef = doc(db, this.PERMITS_COLLECTION, permitId);
       const permitDoc = await getDoc(permitRef);
 
@@ -486,12 +468,11 @@ export class PermitsService {
         updatedAt: data.updatedAt?.toDate() || new Date(),
         submissionDate: data.submissionDate?.toDate(),
         approvalDate: data.approvalDate?.toDate(),
-        expiryDate: data.expiryDate?.toDate()
+        expiryDate: data.expiryDate?.toDate(),
       } as Permit;
 
       console.log('✅ [PermitsService] Permesso recuperato:', permit.projectName);
       return permit;
-
     } catch (error) {
       console.error('❌ [PermitsService] Errore recupero permesso:', error);
       throw new Error(`Impossibile recuperare il permesso: ${error}`);
@@ -504,7 +485,7 @@ export class PermitsService {
   async getPermitType(typeId: string): Promise<PermitType | null> {
     try {
       console.log('🔍 [PermitsService] Recupero tipo permesso:', typeId);
-      
+
       const typeRef = doc(db, this.PERMIT_TYPES_COLLECTION, typeId);
       const typeDoc = await getDoc(typeRef);
 
@@ -516,7 +497,6 @@ export class PermitsService {
       const data = typeDoc.data() as PermitType;
       console.log('✅ [PermitsService] Tipo permesso recuperato:', data.name);
       return data;
-
     } catch (error) {
       console.error('❌ [PermitsService] Errore recupero tipo permesso:', error);
       throw new Error(`Impossibile recuperare il tipo di permesso: ${error}`);
@@ -529,18 +509,17 @@ export class PermitsService {
   async getAllPermitTypes(): Promise<PermitType[]> {
     try {
       console.log('📋 [PermitsService] Recupero tutti i tipi permesso');
-      
+
       const typesRef = collection(db, this.PERMIT_TYPES_COLLECTION);
       const querySnapshot = await getDocs(typesRef);
-      
+
       const types: PermitType[] = [];
-      querySnapshot.forEach((doc) => {
+      querySnapshot.forEach(doc => {
         types.push(doc.data() as PermitType);
       });
 
       console.log('✅ [PermitsService] Tipi permesso recuperati:', types.length);
       return types;
-
     } catch (error) {
       console.error('❌ [PermitsService] Errore recupero tipi permesso:', error);
       throw new Error(`Impossibile recuperare i tipi di permesso: ${error}`);
@@ -553,16 +532,15 @@ export class PermitsService {
   async updatePermit(permitId: string, updates: Partial<Permit>): Promise<void> {
     try {
       console.log('✏️ [PermitsService] Aggiornamento permesso:', permitId);
-      
+
       const permitRef = doc(db, this.PERMITS_COLLECTION, permitId);
       await updateDoc(permitRef, {
         ...updates,
         updatedAt: serverTimestamp(),
-        lastModifiedBy: 'current-user' // TODO: Integrare con AuthContext
+        lastModifiedBy: 'current-user', // TODO: Integrare con AuthContext
       });
 
       console.log('✅ [PermitsService] Permesso aggiornato con successo');
-
     } catch (error) {
       console.error('❌ [PermitsService] Errore aggiornamento permesso:', error);
       throw new Error(`Impossibile aggiornare il permesso: ${error}`);
@@ -575,9 +553,9 @@ export class PermitsService {
   async changePermitStatus(permitId: string, status: Permit['status']): Promise<void> {
     try {
       console.log('🔄 [PermitsService] Cambio stato permesso:', permitId, status);
-      
+
       const updates: Partial<Permit> = { status };
-      
+
       // Aggiorna date in base al nuovo stato
       if (status === 'SUBMITTED') {
         updates.submissionDate = new Date();
@@ -587,9 +565,8 @@ export class PermitsService {
       }
 
       await this.updatePermit(permitId, updates);
-      
-      console.log('✅ [PermitsService] Stato permesso aggiornato');
 
+      console.log('✅ [PermitsService] Stato permesso aggiornato');
     } catch (error) {
       console.error('❌ [PermitsService] Errore cambio stato permesso:', error);
       throw new Error(`Impossibile cambiare lo stato del permesso: ${error}`);
@@ -602,11 +579,10 @@ export class PermitsService {
   async updatePermitProgress(permitId: string, progress: number): Promise<void> {
     try {
       console.log('📊 [PermitsService] Aggiornamento progresso permesso:', permitId, progress);
-      
-      await this.updatePermit(permitId, { progress });
-      
-      console.log('✅ [PermitsService] Progresso permesso aggiornato');
 
+      await this.updatePermit(permitId, { progress });
+
+      console.log('✅ [PermitsService] Progresso permesso aggiornato');
     } catch (error) {
       console.error('❌ [PermitsService] Errore aggiornamento progresso permesso:', error);
       throw new Error(`Impossibile aggiornare il progresso del permesso: ${error}`);
@@ -616,15 +592,18 @@ export class PermitsService {
   /**
    * Aggiunge un documento a un permesso
    */
-  async addDocumentToPermit(permitId: string, document: {
-    name: string;
-    type: string;
-    url?: string;
-    notes?: string;
-  }): Promise<void> {
+  async addDocumentToPermit(
+    permitId: string,
+    document: {
+      name: string;
+      type: string;
+      url?: string;
+      notes?: string;
+    }
+  ): Promise<void> {
     try {
       console.log('📄 [PermitsService] Aggiunta documento al permesso:', permitId);
-      
+
       const permit = await this.getPermit(permitId);
       if (!permit) {
         throw new Error('Permesso non trovato');
@@ -634,14 +613,13 @@ export class PermitsService {
         id: `doc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         ...document,
         status: 'SUBMITTED' as const,
-        submittedAt: new Date()
+        submittedAt: new Date(),
       };
 
       const updatedDocuments = [...permit.documents, newDocument];
       await this.updatePermit(permitId, { documents: updatedDocuments });
-      
-      console.log('✅ [PermitsService] Documento aggiunto al permesso');
 
+      console.log('✅ [PermitsService] Documento aggiunto al permesso');
     } catch (error) {
       console.error('❌ [PermitsService] Errore aggiunta documento:', error);
       throw new Error(`Impossibile aggiungere il documento: ${error}`);
@@ -654,27 +632,36 @@ export class PermitsService {
   async generateComplianceReport(projectId: string): Promise<ComplianceReport> {
     try {
       console.log('📊 [PermitsService] Generazione report compliance per progetto:', projectId);
-      
+
       const permits = await this.getProjectPermits(projectId);
-      
+
       // Calcola score complessivo
-      const overallScore = permits.length > 0 
-        ? Math.round(permits.reduce((total, p) => total + p.complianceScore, 0) / permits.length)
-        : 0;
+      const overallScore =
+        permits.length > 0
+          ? Math.round(permits.reduce((total, p) => total + p.complianceScore, 0) / permits.length)
+          : 0;
 
       // Calcola score per categoria
       const categoryScores: Record<string, number> = {};
       const categoryRisks: Record<string, 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'> = {};
-      
-      const categories = ['URBANISTICO', 'AMBIENTALE', 'SICUREZZA', 'ENERGETICO', 'STRUTTURALE', 'ANTINCENDIO'];
-      
+
+      const categories = [
+        'URBANISTICO',
+        'AMBIENTALE',
+        'SICUREZZA',
+        'ENERGETICO',
+        'STRUTTURALE',
+        'ANTINCENDIO',
+      ];
+
       categories.forEach(category => {
         const categoryPermits = permits.filter(p => p.permitType.category === category);
         if (categoryPermits.length > 0) {
           categoryScores[category] = Math.round(
-            categoryPermits.reduce((total, p) => total + p.complianceScore, 0) / categoryPermits.length
+            categoryPermits.reduce((total, p) => total + p.complianceScore, 0) /
+              categoryPermits.length
           );
-          
+
           // Determina rischio categoria
           if (categoryScores[category] >= 80) categoryRisks[category] = 'LOW';
           else if (categoryScores[category] >= 60) categoryRisks[category] = 'MEDIUM';
@@ -687,16 +674,23 @@ export class PermitsService {
       });
 
       // Determina rischio complessivo
-      const overallRisk = overallScore >= 80 ? 'LOW' : 
-                         overallScore >= 60 ? 'MEDIUM' : 
-                         overallScore >= 40 ? 'HIGH' : 'CRITICAL';
+      const overallRisk =
+        overallScore >= 80
+          ? 'LOW'
+          : overallScore >= 60
+            ? 'MEDIUM'
+            : overallScore >= 40
+              ? 'HIGH'
+              : 'CRITICAL';
 
       // Identifica documenti mancanti
       const missingDocuments: string[] = [];
       permits.forEach(permit => {
         const requiredDocs = permit.permitType.requiredDocuments;
-        const submittedDocs = permit.documents.filter(d => d.status === 'SUBMITTED').map(d => d.name);
-        
+        const submittedDocs = permit.documents
+          .filter(d => d.status === 'SUBMITTED')
+          .map(d => d.name);
+
         requiredDocs.forEach(required => {
           if (!submittedDocs.includes(required)) {
             missingDocuments.push(`${permit.permitType.name}: ${required}`);
@@ -705,9 +699,8 @@ export class PermitsService {
       });
 
       // Identifica permessi in scadenza
-      const expiringPermits = permits.filter(p => 
-        p.expiryDate && 
-        p.expiryDate.getTime() - Date.now() < 30 * 24 * 60 * 60 * 1000 // 30 giorni
+      const expiringPermits = permits.filter(
+        p => p.expiryDate && p.expiryDate.getTime() - Date.now() < 30 * 24 * 60 * 60 * 1000 // 30 giorni
       );
 
       // Genera raccomandazioni
@@ -716,7 +709,9 @@ export class PermitsService {
         recommendations.push('Priorizzare la risoluzione dei permessi con score basso');
       }
       if (missingDocuments.length > 0) {
-        recommendations.push(`Completare la documentazione mancante (${missingDocuments.length} documenti)`);
+        recommendations.push(
+          `Completare la documentazione mancante (${missingDocuments.length} documenti)`
+        );
       }
       if (expiringPermits.length > 0) {
         recommendations.push(`Gestire i permessi in scadenza (${expiringPermits.length} permessi)`);
@@ -731,13 +726,13 @@ export class PermitsService {
         riskAssessment: {
           overallRisk,
           categoryRisks,
-          recommendations
+          recommendations,
         },
         missingDocuments,
         expiringPermits,
         criticalIssues: recommendations.filter(r => r.includes('CRITICAL')),
         generatedAt: new Date(),
-        validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 giorni
+        validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 giorni
       };
 
       // Salva il report nel database
@@ -745,12 +740,11 @@ export class PermitsService {
       await setDoc(reportRef, {
         ...report,
         generatedAt: serverTimestamp(),
-        validUntil: serverTimestamp()
+        validUntil: serverTimestamp(),
       });
 
       console.log('✅ [PermitsService] Report compliance generato:', report.id);
       return report;
-
     } catch (error) {
       console.error('❌ [PermitsService] Errore generazione report compliance:', error);
       throw new Error(`Impossibile generare il report di compliance: ${error}`);
@@ -774,29 +768,31 @@ export class PermitsService {
     notes?: string[];
   }): Promise<string> {
     try {
-      console.log('📅 [PermitsService] Programmazione sopralluogo per progetto:', inspectionData.projectName);
-      
+      console.log(
+        '📅 [PermitsService] Programmazione sopralluogo per progetto:',
+        inspectionData.projectName
+      );
+
       const inspectionId = `inspection-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
+
       const newInspection: InspectionSchedule = {
         id: inspectionId,
         ...inspectionData,
         status: 'SCHEDULED',
         notes: inspectionData.notes || [],
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       const inspectionRef = doc(db, this.INSPECTION_SCHEDULES_COLLECTION, inspectionId);
       await setDoc(inspectionRef, {
         ...newInspection,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
 
       console.log('✅ [PermitsService] Sopralluogo programmato:', inspectionId);
       return inspectionId;
-
     } catch (error) {
       console.error('❌ [PermitsService] Errore programmazione sopralluogo:', error);
       throw new Error(`Impossibile programmare il sopralluogo: ${error}`);
@@ -818,11 +814,9 @@ export class PermitsService {
   }> {
     try {
       console.log('📊 [PermitsService] Recupero statistiche permessi');
-      
-      const permits = userId 
-        ? await this.getUserPermits(userId)
-        : await this.getAllPermits();
-      
+
+      const permits = userId ? await this.getUserPermits(userId) : await this.getAllPermits();
+
       const stats = {
         total: permits.length,
         byStatus: {} as Record<string, number>,
@@ -831,31 +825,34 @@ export class PermitsService {
         totalCost: 0,
         averageProgress: 0,
         criticalAlerts: 0,
-        expiringSoon: 0
+        expiringSoon: 0,
       };
 
       permits.forEach(permit => {
         // Conta per stato
         stats.byStatus[permit.status] = (stats.byStatus[permit.status] || 0) + 1;
-        
+
         // Conta per categoria
-        stats.byCategory[permit.permitType.category] = (stats.byCategory[permit.permitType.category] || 0) + 1;
-        
+        stats.byCategory[permit.permitType.category] =
+          (stats.byCategory[permit.permitType.category] || 0) + 1;
+
         // Conta per livello rischio
         stats.byRiskLevel[permit.riskLevel] = (stats.byRiskLevel[permit.riskLevel] || 0) + 1;
-        
+
         // Somma costi
         stats.totalCost += permit.cost.estimated;
-        
+
         // Somma progresso
         stats.averageProgress += permit.progress;
-        
+
         // Conta alert critici
         stats.criticalAlerts += permit.alerts.filter(a => !a.isResolved).length;
-        
+
         // Conta permessi in scadenza
-        if (permit.expiryDate && 
-            permit.expiryDate.getTime() - Date.now() < 30 * 24 * 60 * 60 * 1000) {
+        if (
+          permit.expiryDate &&
+          permit.expiryDate.getTime() - Date.now() < 30 * 24 * 60 * 60 * 1000
+        ) {
           stats.expiringSoon++;
         }
       });
@@ -867,7 +864,6 @@ export class PermitsService {
 
       console.log('✅ [PermitsService] Statistiche calcolate:', stats);
       return stats;
-
     } catch (error) {
       console.error('❌ [PermitsService] Errore calcolo statistiche:', error);
       throw new Error(`Impossibile calcolare le statistiche: ${error}`);
@@ -881,11 +877,11 @@ export class PermitsService {
     try {
       const permitsRef = collection(db, this.PERMITS_COLLECTION);
       const q = query(permitsRef, orderBy('createdAt', 'desc'));
-      
+
       const querySnapshot = await getDocs(q);
       const permits: Permit[] = [];
 
-      querySnapshot.forEach((doc) => {
+      querySnapshot.forEach(doc => {
         const data = doc.data();
         permits.push({
           ...data,
@@ -893,12 +889,11 @@ export class PermitsService {
           updatedAt: data.updatedAt?.toDate() || new Date(),
           submissionDate: data.submissionDate?.toDate(),
           approvalDate: data.approvalDate?.toDate(),
-          expiryDate: data.expiryDate?.toDate()
+          expiryDate: data.expiryDate?.toDate(),
         } as Permit);
       });
 
       return permits;
-
     } catch (error) {
       console.error('❌ [PermitsService] Errore recupero tutti i permessi:', error);
       throw new Error(`Impossibile recuperare tutti i permessi: ${error}`);

@@ -1,24 +1,21 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { 
-  LanguageContextType, 
-  SupportedLanguage, 
-  LanguageSettings 
-} from '@/types/language';
-import { 
-  getLanguageConfig, 
-  detectBrowserLanguage, 
-  saveLanguagePreference, 
+
+import {
+  getLanguageConfig,
+  detectBrowserLanguage,
+  saveLanguagePreference,
   loadLanguagePreference,
   DEFAULT_LANGUAGE,
-  FALLBACK_LANGUAGE
+  FALLBACK_LANGUAGE,
 } from '@/lib/languageConfig';
 
 // Importa le traduzioni
-import { it } from '@/translations/it';
 import { en } from '@/translations/en';
 import { es } from '@/translations/es';
+import { it } from '@/translations/it';
+import { LanguageContextType, SupportedLanguage, LanguageSettings } from '@/types/language';
 
 // Mappa delle traduzioni
 const translations = {
@@ -32,7 +29,7 @@ const translations = {
   ru: it, // Fallback temporaneo
   zh: it, // Fallback temporaneo
   ja: it, // Fallback temporaneo
-  ko: it  // Fallback temporaneo
+  ko: it, // Fallback temporaneo
 };
 
 // Funzione per ottenere traduzione nidificata
@@ -45,7 +42,7 @@ function getNestedTranslation(obj: any, path: string): string {
 // Funzione per sostituire parametri nelle traduzioni
 function replaceParams(text: string, params?: Record<string, string | number>): string {
   if (!params) return text;
-  
+
   return text.replace(/\{(\w+)\}/g, (match, key) => {
     return params[key]?.toString() || match;
   });
@@ -58,7 +55,7 @@ const LanguageContext = createContext<LanguageContextType | null>(null);
 export function useLanguage() {
   const context = useContext(LanguageContext);
   if (!context) {
-    throw new Error('useLanguage deve essere utilizzato all\'interno di un LanguageProvider');
+    throw new Error("useLanguage deve essere utilizzato all'interno di un LanguageProvider");
   }
   return context;
 }
@@ -77,16 +74,16 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
       try {
         // 1. Prova a caricare la lingua salvata
         const savedLanguage = loadLanguagePreference();
-        
+
         // 2. Se non c'è lingua salvata, rileva dal browser
         const detectedLanguage = savedLanguage || detectBrowserLanguage();
-        
+
         // 3. Verifica che la lingua sia supportata
         const finalLanguage = translations[detectedLanguage] ? detectedLanguage : DEFAULT_LANGUAGE;
-        
+
         setCurrentLanguage(finalLanguage);
         setIsInitialized(true);
-        
+
         console.log(`🌍 [LanguageProvider] Lingua inizializzata: ${finalLanguage}`);
       } catch (error) {
         console.error('❌ [LanguageProvider] Errore inizializzazione lingua:', error);
@@ -102,31 +99,31 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   const changeLanguage = async (language: SupportedLanguage): Promise<void> => {
     try {
       console.log(`🔄 [LanguageProvider] Cambio lingua da ${currentLanguage} a ${language}`);
-      
+
       // Verifica che la lingua sia supportata
       if (!translations[language]) {
         console.warn(`⚠️ [LanguageProvider] Lingua ${language} non supportata, uso fallback`);
         language = FALLBACK_LANGUAGE;
       }
-      
+
       // Aggiorna lo stato
       setCurrentLanguage(language);
-      
+
       // Salva la preferenza
       saveLanguagePreference(language);
-      
+
       // Aggiorna l'attributo lang del documento
       if (typeof document !== 'undefined') {
         document.documentElement.lang = language;
         document.documentElement.dir = getLanguageConfig(language).direction;
-        
+
         // Aggiorna anche il title e meta tags se necessario
         const titleElement = document.querySelector('title');
         if (titleElement) {
           titleElement.textContent = `Urbanova - ${getLanguageConfig(language).nativeName}`;
         }
       }
-      
+
       console.log(`✅ [LanguageProvider] Lingua cambiata con successo: ${language}`);
     } catch (error) {
       console.error('❌ [LanguageProvider] Errore cambio lingua:', error);
@@ -138,24 +135,26 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   const t = (key: string, namespace?: string, params?: Record<string, string | number>): string => {
     try {
       const translationData = translations[currentLanguage] || translations[DEFAULT_LANGUAGE];
-      
+
       // Costruisci il percorso completo
       const fullPath = namespace ? `${namespace}.${key}` : key;
-      
+
       // Ottieni la traduzione
       let translation = getNestedTranslation(translationData, fullPath);
-      
+
       // Se non trovata, prova con il namespace 'common'
       if (translation === fullPath && namespace && namespace !== 'common') {
         translation = getNestedTranslation(translationData, `common.${key}`);
       }
-      
+
       // Se ancora non trovata, usa la chiave come fallback
       if (translation === fullPath || translation === `common.${key}`) {
-        console.warn(`⚠️ [LanguageProvider] Traduzione mancante: ${fullPath} per lingua ${currentLanguage}`);
+        console.warn(
+          `⚠️ [LanguageProvider] Traduzione mancante: ${fullPath} per lingua ${currentLanguage}`
+        );
         translation = key;
       }
-      
+
       // Sostituisci i parametri
       return replaceParams(translation, params);
     } catch (error) {
@@ -169,11 +168,11 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
     try {
       const dateObj = typeof date === 'string' ? new Date(date) : date;
       const config = getLanguageConfig(currentLanguage);
-      
+
       return new Intl.DateTimeFormat(currentLanguage, {
         year: 'numeric',
         month: '2-digit',
-        day: '2-digit'
+        day: '2-digit',
       }).format(dateObj);
     } catch (error) {
       console.error('❌ [LanguageProvider] Errore formattazione data:', error);
@@ -184,10 +183,10 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   const formatNumber = (number: number): string => {
     try {
       const config = getLanguageConfig(currentLanguage);
-      
+
       return new Intl.NumberFormat(currentLanguage, {
         minimumFractionDigits: 0,
-        maximumFractionDigits: 2
+        maximumFractionDigits: 2,
       }).format(number);
     } catch (error) {
       console.error('❌ [LanguageProvider] Errore formattazione numero:', error);
@@ -198,12 +197,12 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   const formatCurrency = (amount: number): string => {
     try {
       const config = getLanguageConfig(currentLanguage);
-      
+
       return new Intl.NumberFormat(currentLanguage, {
         style: 'currency',
         currency: config.numberFormat.currency,
         minimumFractionDigits: 0,
-        maximumFractionDigits: 0
+        maximumFractionDigits: 0,
       }).format(amount);
     } catch (error) {
       console.error('❌ [LanguageProvider] Errore formattazione valuta:', error);
@@ -223,7 +222,7 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
     isRTL,
     formatDate,
     formatNumber,
-    formatCurrency
+    formatCurrency,
   };
 
   // Non renderizzare finché non è inizializzato
@@ -238,9 +237,5 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
     );
   }
 
-  return (
-    <LanguageContext.Provider value={value}>
-      {children}
-    </LanguageContext.Provider>
-  );
-} 
+  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
+}

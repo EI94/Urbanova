@@ -1,15 +1,22 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import DashboardLayout from '@/components/layout/DashboardLayout';
+
 import { BuildingIcon } from '@/components/icons';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import Button from '@/components/ui/Button';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Task {
   id: string;
   name: string;
-  category: 'PROGETTAZIONE' | 'PERMESSI' | 'COSTRUZIONE' | 'MARKETING' | 'VENDITA' | 'AMMINISTRATIVO';
+  category:
+    | 'PROGETTAZIONE'
+    | 'PERMESSI'
+    | 'COSTRUZIONE'
+    | 'MARKETING'
+    | 'VENDITA'
+    | 'AMMINISTRATIVO';
   status: 'NON_INIZIATO' | 'IN_CORSO' | 'COMPLETATO' | 'IN_RITARDO' | 'BLOCCATO';
   priority: 'CRITICA' | 'ALTA' | 'MEDIA' | 'BASSA';
   startDate: Date;
@@ -54,7 +61,9 @@ export default function ProjectTimelinePage() {
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [timeline, setTimeline] = useState<ProjectTimeline | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeView, setActiveView] = useState<'gantt' | 'kanban' | 'timeline' | 'resources'>('gantt');
+  const [activeView, setActiveView] = useState<'gantt' | 'kanban' | 'timeline' | 'resources'>(
+    'gantt'
+  );
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [timeRange, setTimeRange] = useState<'3M' | '6M' | '1Y'>('6M');
 
@@ -76,7 +85,7 @@ export default function ProjectTimelinePage() {
         milestones: ['Approvazione Cliente'],
         cost: 15000,
         resources: ['CAD License', 'Rendering Software'],
-        aiSuggestions: ['Progetto completato nei tempi previsti']
+        aiSuggestions: ['Progetto completato nei tempi previsti'],
       },
       {
         id: 'task-2',
@@ -94,7 +103,10 @@ export default function ProjectTimelinePage() {
         cost: 5000,
         resources: ['Consulente Urbanistico'],
         notes: 'In attesa risposta ufficio tecnico',
-        aiSuggestions: ['Sollecitare ufficio tecnico entro 5 giorni', 'Preparare documentazione integrativa']
+        aiSuggestions: [
+          'Sollecitare ufficio tecnico entro 5 giorni',
+          'Preparare documentazione integrativa',
+        ],
       },
       {
         id: 'task-3',
@@ -112,7 +124,10 @@ export default function ProjectTimelinePage() {
         cost: 85000,
         resources: ['Escavatore', 'Cemento', 'Operai Specializzati'],
         risks: ['Maltempo', 'Problemi geologici'],
-        aiSuggestions: ['Verificare condizioni meteo marzo', 'Schedulare indagini geotecniche aggiuntive']
+        aiSuggestions: [
+          'Verificare condizioni meteo marzo',
+          'Schedulare indagini geotecniche aggiuntive',
+        ],
       },
       {
         id: 'task-4',
@@ -130,7 +145,10 @@ export default function ProjectTimelinePage() {
         cost: 120000,
         resources: ['Gru', 'Acciaio', 'Calcestruzzo', 'Operai'],
         risks: ['Ritardo forniture acciaio'],
-        aiSuggestions: ['Pre-ordinare materiali con anticipo', 'Identificare fornitori alternativi']
+        aiSuggestions: [
+          'Pre-ordinare materiali con anticipo',
+          'Identificare fornitori alternativi',
+        ],
       },
       {
         id: 'task-5',
@@ -147,7 +165,7 @@ export default function ProjectTimelinePage() {
         milestones: ['Impianti Elettrici', 'Impianti Idraulici', 'Climatizzazione'],
         cost: 45000,
         resources: ['Elettricista', 'Idraulico', 'Materiali Impianti'],
-        aiSuggestions: ['Coordinare con team strutturale per passaggi']
+        aiSuggestions: ['Coordinare con team strutturale per passaggi'],
       },
       {
         id: 'task-6',
@@ -164,8 +182,8 @@ export default function ProjectTimelinePage() {
         milestones: ['Lancio Campagna', 'Showroom Aperto', '50% Pre-vendite'],
         cost: 25000,
         resources: ['Designer Grafico', 'Fotografo', 'Social Media Manager'],
-        aiSuggestions: ['Aumentare budget social media', 'Organizzare eventi VIP']
-      }
+        aiSuggestions: ['Aumentare budget social media', 'Organizzare eventi VIP'],
+      },
     ];
 
     const mockMilestones: Milestone[] = [
@@ -176,7 +194,7 @@ export default function ProjectTimelinePage() {
         status: 'RAGGIUNTO',
         importance: 'CRITICO',
         relatedTasks: ['task-1'],
-        description: 'Approvazione definitiva del progetto architettonico da parte del cliente'
+        description: 'Approvazione definitiva del progetto architettonico da parte del cliente',
       },
       {
         id: 'milestone-2',
@@ -185,7 +203,7 @@ export default function ProjectTimelinePage() {
         status: 'IN_CORSO',
         importance: 'CRITICO',
         relatedTasks: ['task-2'],
-        description: 'Rilascio permesso di costruire dal comune'
+        description: 'Rilascio permesso di costruire dal comune',
       },
       {
         id: 'milestone-3',
@@ -194,7 +212,7 @@ export default function ProjectTimelinePage() {
         status: 'A_RISCHIO',
         importance: 'CRITICO',
         relatedTasks: ['task-3'],
-        description: 'Avvio ufficiale dei lavori di costruzione'
+        description: 'Avvio ufficiale dei lavori di costruzione',
       },
       {
         id: 'milestone-4',
@@ -203,7 +221,7 @@ export default function ProjectTimelinePage() {
         status: 'IN_CORSO',
         importance: 'IMPORTANTE',
         relatedTasks: ['task-4'],
-        description: 'Completamento della struttura portante dell\'edificio'
+        description: "Completamento della struttura portante dell'edificio",
       },
       {
         id: 'milestone-5',
@@ -212,8 +230,8 @@ export default function ProjectTimelinePage() {
         status: 'IN_CORSO',
         importance: 'IMPORTANTE',
         relatedTasks: ['task-6'],
-        description: 'Raggiungimento del 60% di pre-vendite'
-      }
+        description: 'Raggiungimento del 60% di pre-vendite',
+      },
     ];
 
     const mockTimeline: ProjectTimeline = {
@@ -224,7 +242,7 @@ export default function ProjectTimelinePage() {
       progress: 35,
       status: 'IN_CORSO',
       budget: 295000,
-      actualCost: 95000
+      actualCost: 95000,
     };
 
     setTimeout(() => {
@@ -241,32 +259,48 @@ export default function ProjectTimelinePage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'COMPLETATO': return 'bg-green-100 text-green-800';
-      case 'IN_CORSO': return 'bg-blue-100 text-blue-800';
-      case 'NON_INIZIATO': return 'bg-gray-100 text-gray-800';
-      case 'IN_RITARDO': return 'bg-red-100 text-red-800';
-      case 'BLOCCATO': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'COMPLETATO':
+        return 'bg-green-100 text-green-800';
+      case 'IN_CORSO':
+        return 'bg-blue-100 text-blue-800';
+      case 'NON_INIZIATO':
+        return 'bg-gray-100 text-gray-800';
+      case 'IN_RITARDO':
+        return 'bg-red-100 text-red-800';
+      case 'BLOCCATO':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'CRITICA': return 'bg-red-100 text-red-800 border-red-300';
-      case 'ALTA': return 'bg-orange-100 text-orange-800 border-orange-300';
-      case 'MEDIA': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'BASSA': return 'bg-green-100 text-green-800 border-green-300';
-      default: return 'bg-gray-100 text-gray-800 border-gray-300';
+      case 'CRITICA':
+        return 'bg-red-100 text-red-800 border-red-300';
+      case 'ALTA':
+        return 'bg-orange-100 text-orange-800 border-orange-300';
+      case 'MEDIA':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'BASSA':
+        return 'bg-green-100 text-green-800 border-green-300';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
 
   const getMilestoneStatusColor = (status: string) => {
     switch (status) {
-      case 'RAGGIUNTO': return 'bg-green-100 text-green-600 border-green-300';
-      case 'IN_CORSO': return 'bg-blue-100 text-blue-600 border-blue-300';
-      case 'A_RISCHIO': return 'bg-orange-100 text-orange-600 border-orange-300';
-      case 'IN_RITARDO': return 'bg-red-100 text-red-600 border-red-300';
-      default: return 'bg-gray-100 text-gray-600 border-gray-300';
+      case 'RAGGIUNTO':
+        return 'bg-green-100 text-green-600 border-green-300';
+      case 'IN_CORSO':
+        return 'bg-blue-100 text-blue-600 border-blue-300';
+      case 'A_RISCHIO':
+        return 'bg-orange-100 text-orange-600 border-orange-300';
+      case 'IN_RITARDO':
+        return 'bg-red-100 text-red-600 border-red-300';
+      default:
+        return 'bg-gray-100 text-gray-600 border-gray-300';
     }
   };
 
@@ -275,9 +309,8 @@ export default function ProjectTimelinePage() {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
-  const filteredTasks = selectedCategory === 'ALL' 
-    ? tasks 
-    : tasks.filter(t => t.category === selectedCategory);
+  const filteredTasks =
+    selectedCategory === 'ALL' ? tasks : tasks.filter(t => t.category === selectedCategory);
 
   if (loading) {
     return (
@@ -294,7 +327,7 @@ export default function ProjectTimelinePage() {
     completedTasks: tasks.filter(t => t.status === 'COMPLETATO').length,
     inProgressTasks: tasks.filter(t => t.status === 'IN_CORSO').length,
     delayedTasks: tasks.filter(t => t.status === 'IN_RITARDO').length,
-    totalBudget: tasks.reduce((sum, t) => sum + t.cost, 0)
+    totalBudget: tasks.reduce((sum, t) => sum + t.cost, 0),
   };
 
   return (
@@ -311,7 +344,9 @@ export default function ProjectTimelinePage() {
         {/* Project Summary */}
         {timeline && (
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('projectSummary', 'projectTimeline')}</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              {t('projectSummary', 'projectTimeline')}
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-gray-900">{stats.totalTasks}</div>
@@ -341,8 +376,8 @@ export default function ProjectTimelinePage() {
                 { key: 'gantt', label: t('tabs.ganttChart', 'projectTimeline') },
                 { key: 'kanban', label: t('tabs.kanbanBoard', 'projectTimeline') },
                 { key: 'timeline', label: t('tabs.milestoneTimeline', 'projectTimeline') },
-                { key: 'resources', label: t('tabs.resources', 'projectTimeline') }
-              ].map((tab) => (
+                { key: 'resources', label: t('tabs.resources', 'projectTimeline') },
+              ].map(tab => (
                 <button
                   key={tab.key}
                   onClick={() => setActiveView(tab.key as any)}
@@ -367,8 +402,8 @@ export default function ProjectTimelinePage() {
                   { key: 'PROGETTAZIONE', label: t('filters.design', 'projectTimeline') },
                   { key: 'PERMESSI', label: t('filters.permits', 'projectTimeline') },
                   { key: 'COSTRUZIONE', label: t('filters.construction', 'projectTimeline') },
-                  { key: 'MARKETING', label: t('filters.marketing', 'projectTimeline') }
-                ].map((filter) => (
+                  { key: 'MARKETING', label: t('filters.marketing', 'projectTimeline') },
+                ].map(filter => (
                   <button
                     key={filter.key}
                     onClick={() => setSelectedCategory(filter.key)}
@@ -384,7 +419,7 @@ export default function ProjectTimelinePage() {
               </div>
 
               <div className="flex space-x-2">
-                {['3M', '6M', '1Y'].map((range) => (
+                {['3M', '6M', '1Y'].map(range => (
                   <button
                     key={range}
                     onClick={() => setTimeRange(range as any)}
@@ -404,37 +439,52 @@ export default function ProjectTimelinePage() {
           {/* Gantt Chart */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
             <div className="p-4 border-b bg-gray-50">
-              <h3 className="text-lg font-semibold text-gray-900">{t('tabs.ganttChart', 'projectTimeline')}</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {t('tabs.ganttChart', 'projectTimeline')}
+              </h3>
             </div>
-            
+
             <div className="overflow-x-auto">
               <div className="min-w-full">
                 {/* Header Timeline */}
                 <div className="flex bg-gray-100 border-b">
                   <div className="w-80 p-4 font-medium text-gray-700 border-r">Task</div>
                   <div className="flex-1 flex">
-                    {timeline && Array.from({length: 12}, (_, i) => (
-                      <div key={i} className="flex-1 p-2 text-center text-xs text-gray-600 border-r">
-                        {new Date(2024, i).toLocaleDateString('it-IT', { month: 'short' })}
-                      </div>
-                    ))}
+                    {timeline &&
+                      Array.from({ length: 12 }, (_, i) => (
+                        <div
+                          key={i}
+                          className="flex-1 p-2 text-center text-xs text-gray-600 border-r"
+                        >
+                          {new Date(2024, i).toLocaleDateString('it-IT', { month: 'short' })}
+                        </div>
+                      ))}
                   </div>
                 </div>
 
                 {/* Tasks */}
-                {filteredTasks.map((task) => {
-                  const startOffset = getDaysFromStart(timeline?.startDate || new Date(), task.startDate);
+                {filteredTasks.map(task => {
+                  const startOffset = getDaysFromStart(
+                    timeline?.startDate || new Date(),
+                    task.startDate
+                  );
                   const taskDuration = getDaysFromStart(task.startDate, task.endDate);
                   const totalDays = 365;
-                  
+
                   return (
                     <div key={task.id} className="flex border-b hover:bg-gray-50">
                       <div className="w-80 p-4 border-r">
                         <div className="flex items-center space-x-3">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
-                            {task.status === 'COMPLETATO' ? '✓' : 
-                             task.status === 'IN_CORSO' ? '⏳' :
-                             task.status === 'NON_INIZIATO' ? '○' : '⚠️'}
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}
+                          >
+                            {task.status === 'COMPLETATO'
+                              ? '✓'
+                              : task.status === 'IN_CORSO'
+                                ? '⏳'
+                                : task.status === 'NON_INIZIATO'
+                                  ? '○'
+                                  : '⚠️'}
                           </span>
                           <div>
                             <div className="font-medium text-gray-900 text-sm">{task.name}</div>
@@ -442,16 +492,21 @@ export default function ProjectTimelinePage() {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="flex-1 relative h-16 flex items-center">
-                        <div 
+                        <div
                           className="absolute h-6 rounded flex items-center justify-center text-xs text-white font-medium"
                           style={{
                             left: `${(startOffset / totalDays) * 100}%`,
                             width: `${Math.max((taskDuration / totalDays) * 100, 2)}%`,
-                            backgroundColor: task.status === 'COMPLETATO' ? '#10b981' : 
-                                           task.status === 'IN_CORSO' ? '#3b82f6' :
-                                           task.status === 'IN_RITARDO' ? '#ef4444' : '#6b7280'
+                            backgroundColor:
+                              task.status === 'COMPLETATO'
+                                ? '#10b981'
+                                : task.status === 'IN_CORSO'
+                                  ? '#3b82f6'
+                                  : task.status === 'IN_RITARDO'
+                                    ? '#ef4444'
+                                    : '#6b7280',
                           }}
                         >
                           {task.progress > 0 && `${task.progress}%`}
@@ -468,35 +523,41 @@ export default function ProjectTimelinePage() {
         {/* Kanban Board View */}
         {activeView === 'kanban' && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {['NON_INIZIATO', 'IN_CORSO', 'COMPLETATO', 'BLOCCATO'].map((status) => {
+            {['NON_INIZIATO', 'IN_CORSO', 'COMPLETATO', 'BLOCCATO'].map(status => {
               const statusTasks = tasks.filter(t => t.status === status);
-              
+
               return (
                 <div key={status} className="bg-gray-100 rounded-lg p-4">
                   <h3 className="font-semibold text-gray-900 mb-4 flex items-center justify-between">
                     <span>{status.replace('_', ' ')}</span>
-                    <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded text-sm">{statusTasks.length}</span>
+                    <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded text-sm">
+                      {statusTasks.length}
+                    </span>
                   </h3>
-                  
+
                   <div className="space-y-3">
-                    {statusTasks.map((task) => (
+                    {statusTasks.map(task => (
                       <div key={task.id} className="bg-white rounded-lg p-4 shadow-sm border">
                         <div className="flex items-start justify-between mb-2">
                           <h4 className="font-medium text-gray-900 text-sm">{task.name}</h4>
-                          <span className={`px-2 py-1 rounded text-xs font-medium border ${getPriorityColor(task.priority)}`}>
+                          <span
+                            className={`px-2 py-1 rounded text-xs font-medium border ${getPriorityColor(task.priority)}`}
+                          >
                             {task.priority}
                           </span>
                         </div>
-                        
+
                         <div className="text-xs text-gray-600 mb-3">
                           <p>{task.assignedTo}</p>
-                          <p>{formatDate(task.startDate)} - {formatDate(task.endDate)}</p>
+                          <p>
+                            {formatDate(task.startDate)} - {formatDate(task.endDate)}
+                          </p>
                         </div>
-                        
+
                         <div className="flex items-center justify-between">
                           <div className="w-full bg-gray-200 rounded-full h-2 mr-2">
-                            <div 
-                              className="bg-blue-600 h-2 rounded-full" 
+                            <div
+                              className="bg-blue-600 h-2 rounded-full"
                               style={{ width: `${task.progress}%` }}
                             ></div>
                           </div>
@@ -515,20 +576,22 @@ export default function ProjectTimelinePage() {
         {activeView === 'timeline' && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {milestones.map((milestone) => (
+              {milestones.map(milestone => (
                 <div key={milestone.id} className="bg-white rounded-lg shadow-sm p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold text-gray-900">{milestone.name}</h3>
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${getMilestoneStatusColor(milestone.status)}`}>
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-medium ${getMilestoneStatusColor(milestone.status)}`}
+                    >
                       {milestone.status}
                     </span>
                   </div>
-                  
+
                   <div className="text-sm text-gray-600 mb-4">
                     <p className="mb-2">{milestone.description}</p>
                     <p className="font-medium">{formatDate(milestone.date)}</p>
                   </div>
-                  
+
                   <div className="flex items-center justify-between text-xs text-gray-500">
                     <span>Importanza: {milestone.importance}</span>
                     <span>Task correlate: {milestone.relatedTasks.length}</span>
@@ -546,36 +609,48 @@ export default function ProjectTimelinePage() {
               {/* Team Members */}
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">👥 Team e Assegnazioni</h3>
-                
+
                 <div className="space-y-4">
-                  {Array.from(new Set(tasks.map(t => t.assignedTo))).map((person) => {
+                  {Array.from(new Set(tasks.map(t => t.assignedTo))).map(person => {
                     const personTasks = tasks.filter(t => t.assignedTo === person);
-                    const completedTasks = personTasks.filter(t => t.status === 'COMPLETATO').length;
-                    const workload = personTasks.reduce((sum, t) => sum + (t.status !== 'COMPLETATO' ? 1 : 0), 0);
-                    
+                    const completedTasks = personTasks.filter(
+                      t => t.status === 'COMPLETATO'
+                    ).length;
+                    const workload = personTasks.reduce(
+                      (sum, t) => sum + (t.status !== 'COMPLETATO' ? 1 : 0),
+                      0
+                    );
+
                     return (
                       <div key={person} className="p-4 border rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <h4 className="font-medium text-gray-900">{person}</h4>
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${
-                            workload === 0 ? 'bg-green-100 text-green-800' :
-                            workload <= 2 ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
+                          <span
+                            className={`px-2 py-1 rounded text-xs font-medium ${
+                              workload === 0
+                                ? 'bg-green-100 text-green-800'
+                                : workload <= 2
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-red-100 text-red-800'
+                            }`}
+                          >
                             {workload === 0 ? 'Libero' : `${workload} task attive`}
                           </span>
                         </div>
-                        
+
                         <div className="text-sm text-gray-600 space-y-1">
                           <p>Task totali: {personTasks.length}</p>
                           <p>Completate: {completedTasks}</p>
-                          <p>Budget gestito: {formatCurrency(personTasks.reduce((sum, t) => sum + t.cost, 0))}</p>
+                          <p>
+                            Budget gestito:{' '}
+                            {formatCurrency(personTasks.reduce((sum, t) => sum + t.cost, 0))}
+                          </p>
                         </div>
-                        
+
                         <div className="mt-3">
                           <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div 
-                              className="bg-blue-600 h-2 rounded-full" 
+                            <div
+                              className="bg-blue-600 h-2 rounded-full"
                               style={{ width: `${(completedTasks / personTasks.length) * 100}%` }}
                             ></div>
                           </div>
@@ -588,34 +663,39 @@ export default function ProjectTimelinePage() {
 
               {/* Budget Tracking */}
               <div className="bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">💰 Budget per Categoria</h3>
-                
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  💰 Budget per Categoria
+                </h3>
+
                 <div className="space-y-4">
-                  {['PROGETTAZIONE', 'PERMESSI', 'COSTRUZIONE', 'MARKETING'].map((category) => {
+                  {['PROGETTAZIONE', 'PERMESSI', 'COSTRUZIONE', 'MARKETING'].map(category => {
                     const categoryTasks = tasks.filter(t => t.category === category);
                     const categoryBudget = categoryTasks.reduce((sum, t) => sum + t.cost, 0);
                     const totalBudget = stats.totalBudget;
                     const percentage = totalBudget > 0 ? (categoryBudget / totalBudget) * 100 : 0;
-                    
+
                     return (
                       <div key={category} className="p-4 border rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <h4 className="font-medium text-gray-900">{category}</h4>
-                          <span className="font-bold text-gray-900">{formatCurrency(categoryBudget)}</span>
+                          <span className="font-bold text-gray-900">
+                            {formatCurrency(categoryBudget)}
+                          </span>
                         </div>
-                        
+
                         <div className="flex items-center space-x-2">
                           <div className="flex-1 bg-gray-200 rounded-full h-2">
-                            <div 
-                              className="bg-blue-600 h-2 rounded-full" 
+                            <div
+                              className="bg-blue-600 h-2 rounded-full"
                               style={{ width: `${percentage}%` }}
                             ></div>
                           </div>
                           <span className="text-sm text-gray-500">{percentage.toFixed(1)}%</span>
                         </div>
-                        
+
                         <div className="mt-2 text-sm text-gray-600">
-                          {categoryTasks.length} task - {categoryTasks.filter(t => t.status === 'COMPLETATO').length} complete
+                          {categoryTasks.length} task -{' '}
+                          {categoryTasks.filter(t => t.status === 'COMPLETATO').length} complete
                         </div>
                       </div>
                     );
@@ -628,4 +708,4 @@ export default function ProjectTimelinePage() {
       </div>
     </DashboardLayout>
   );
-} 
+}

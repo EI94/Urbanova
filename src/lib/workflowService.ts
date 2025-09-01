@@ -1,17 +1,17 @@
 // Service per la gestione dei Workflow e Approvazioni
-import { 
-  WorkflowInstance, 
-  WorkflowTemplate, 
-  WorkflowStep, 
-  WorkflowApproval, 
-  WorkflowStatus, 
+import { TeamRole, Permission } from '@/types/team';
+import {
+  WorkflowInstance,
+  WorkflowTemplate,
+  WorkflowStep,
+  WorkflowApproval,
+  WorkflowStatus,
   WorkflowType,
   ApprovalAction,
   WorkflowNotification,
   WorkflowMetrics,
-  WorkflowFilter
+  WorkflowFilter,
 } from '@/types/workflow';
-import { TeamRole, Permission } from '@/types/team';
 
 export class WorkflowService {
   private workflows: Map<string, WorkflowInstance> = new Map();
@@ -43,7 +43,7 @@ export class WorkflowService {
           isOptional: false,
           estimatedDuration: 8,
           dependencies: [],
-          status: 'pending'
+          status: 'pending',
         },
         {
           id: 'step-2',
@@ -55,7 +55,7 @@ export class WorkflowService {
           isOptional: false,
           estimatedDuration: 12,
           dependencies: ['step-1'],
-          status: 'pending'
+          status: 'pending',
         },
         {
           id: 'step-3',
@@ -67,14 +67,14 @@ export class WorkflowService {
           isOptional: false,
           estimatedDuration: 2,
           dependencies: ['step-1', 'step-2'],
-          status: 'pending'
-        }
+          status: 'pending',
+        },
       ],
       estimatedTotalDuration: 22,
       requiredRoles: ['ARCHITECT', 'FINANCIAL_ANALYST', 'PROJECT_MANAGER'],
       createdBy: 'system',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     // Template per decisione finanziaria
@@ -96,7 +96,7 @@ export class WorkflowService {
           isOptional: false,
           estimatedDuration: 16,
           dependencies: [],
-          status: 'pending'
+          status: 'pending',
         },
         {
           id: 'step-2',
@@ -108,7 +108,7 @@ export class WorkflowService {
           isOptional: true,
           estimatedDuration: 4,
           dependencies: ['step-1'],
-          status: 'pending'
+          status: 'pending',
         },
         {
           id: 'step-3',
@@ -120,14 +120,14 @@ export class WorkflowService {
           isOptional: false,
           estimatedDuration: 2,
           dependencies: ['step-1'],
-          status: 'pending'
-        }
+          status: 'pending',
+        },
       ],
       estimatedTotalDuration: 22,
       requiredRoles: ['FINANCIAL_ANALYST', 'TEAM_MEMBER', 'PROJECT_MANAGER'],
       createdBy: 'system',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.templates.set(landApprovalTemplate.id, landApprovalTemplate);
@@ -171,7 +171,7 @@ export class WorkflowService {
       attachments: [],
       notes: '',
       lastNotificationSent: undefined,
-      nextReminderDate: undefined
+      nextReminderDate: undefined,
     };
 
     this.workflows.set(workflowId, workflow);
@@ -217,7 +217,7 @@ export class WorkflowService {
       isRead: false,
       createdAt: new Date(),
       actionUrl: `/dashboard/workflows/${workflow.id}`,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 giorni
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 giorni
     };
 
     this.notifications.set(notification.id, notification);
@@ -256,7 +256,7 @@ export class WorkflowService {
       createdAt: new Date(),
       updatedAt: new Date(),
       priority: workflow.priority,
-      reminderSent: false
+      reminderSent: false,
     };
 
     workflow.approvals.push(approval);
@@ -289,10 +289,10 @@ export class WorkflowService {
       workflow.currentStep = currentStepIndex + 2;
       workflow.currentStepId = nextStep.id;
       workflow.progress = Math.round(((currentStepIndex + 1) / workflow.steps.length) * 100);
-      
+
       // Aggiorna lo step corrente
       nextStep.status = 'in_progress';
-      
+
       // Crea notifiche per il nuovo step
       this.createNotificationsForWorkflow(workflow);
     } else {
@@ -300,7 +300,7 @@ export class WorkflowService {
       workflow.status = 'completed';
       workflow.completedAt = new Date();
       workflow.progress = 100;
-      
+
       // Notifica completamento
       this.createCompletionNotification(workflow);
     }
@@ -319,7 +319,7 @@ export class WorkflowService {
       isRead: false,
       createdAt: new Date(),
       actionUrl: `/dashboard/workflows/${workflow.id}`,
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 giorni
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 giorni
     };
 
     this.notifications.set(notification.id, notification);
@@ -327,8 +327,8 @@ export class WorkflowService {
 
   // Ottieni workflow per utente
   getUserWorkflows(userId: string, filter?: WorkflowFilter): WorkflowInstance[] {
-    let workflows = Array.from(this.workflows.values()).filter(w => 
-      w.participants.includes(userId) || w.initiator === userId
+    let workflows = Array.from(this.workflows.values()).filter(
+      w => w.participants.includes(userId) || w.initiator === userId
     );
 
     if (filter) {
@@ -342,9 +342,7 @@ export class WorkflowService {
         workflows = workflows.filter(w => filter.priority!.includes(w.priority));
       }
       if (filter.assignee) {
-        workflows = workflows.filter(w => 
-          Object.values(w.assignees).includes(filter.assignee!)
-        );
+        workflows = workflows.filter(w => Object.values(w.assignees).includes(filter.assignee!));
       }
       if (filter.initiator) {
         workflows = workflows.filter(w => w.initiator === filter.initiator);
@@ -374,7 +372,7 @@ export class WorkflowService {
   getWorkflowMetrics(): WorkflowMetrics {
     const workflows = Array.from(this.workflows.values());
     const completedWorkflows = workflows.filter(w => w.status === 'completed');
-    
+
     const totalCompletionTime = completedWorkflows.reduce((total, w) => {
       if (w.startedAt && w.completedAt) {
         return total + (w.completedAt.getTime() - w.startedAt.getTime());
@@ -382,13 +380,15 @@ export class WorkflowService {
       return total;
     }, 0);
 
-    const averageCompletionTime = completedWorkflows.length > 0 
-      ? totalCompletionTime / completedWorkflows.length / (1000 * 60 * 60) // converti in ore
-      : 0;
+    const averageCompletionTime =
+      completedWorkflows.length > 0
+        ? totalCompletionTime / completedWorkflows.length / (1000 * 60 * 60) // converti in ore
+        : 0;
 
     const totalApprovals = workflows.reduce((total, w) => total + w.approvals.length, 0);
-    const approvedApprovals = workflows.reduce((total, w) => 
-      total + w.approvals.filter(a => a.status === 'approved').length, 0
+    const approvedApprovals = workflows.reduce(
+      (total, w) => total + w.approvals.filter(a => a.status === 'approved').length,
+      0
     );
 
     return {
@@ -397,16 +397,17 @@ export class WorkflowService {
       completedWorkflows: completedWorkflows.length,
       averageCompletionTime,
       approvalRate: totalApprovals > 0 ? (approvedApprovals / totalApprovals) * 100 : 0,
-      rejectionRate: totalApprovals > 0 ? ((totalApprovals - approvedApprovals) / totalApprovals) * 100 : 0,
+      rejectionRate:
+        totalApprovals > 0 ? ((totalApprovals - approvedApprovals) / totalApprovals) * 100 : 0,
       bottlenecks: this.identifyBottlenecks(workflows),
-      topPerformers: this.identifyTopPerformers(workflows)
+      topPerformers: this.identifyTopPerformers(workflows),
     };
   }
 
   // Identifica bottleneck nei workflow
   private identifyBottlenecks(workflows: WorkflowInstance[]): string[] {
     const stepDelays: Record<string, number> = {};
-    
+
     workflows.forEach(workflow => {
       workflow.steps.forEach(step => {
         if (step.status === 'in_progress' && step.estimatedDuration) {
@@ -417,7 +418,7 @@ export class WorkflowService {
     });
 
     return Object.entries(stepDelays)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([, a], [, b]) => b - a)
       .slice(0, 3)
       .map(([step]) => step);
   }
@@ -429,18 +430,19 @@ export class WorkflowService {
     completedWorkflows: number;
     averageResponseTime: number;
   }> {
-    const userStats: Record<string, { completed: number; responseTime: number; count: number }> = {};
-    
+    const userStats: Record<string, { completed: number; responseTime: number; count: number }> =
+      {};
+
     workflows.forEach(workflow => {
       workflow.approvals.forEach(approval => {
         if (approval.status === 'approved' && approval.completedAt) {
           const responseTime = approval.completedAt.getTime() - approval.createdAt.getTime();
           const userKey = approval.approverId;
-          
+
           if (!userStats[userKey]) {
             userStats[userKey] = { completed: 0, responseTime: 0, count: 0 };
           }
-          
+
           userStats[userKey].completed++;
           userStats[userKey].responseTime += responseTime;
           userStats[userKey].count++;
@@ -453,7 +455,8 @@ export class WorkflowService {
         userId,
         name: `User ${userId}`, // TODO: ottenere nome reale
         completedWorkflows: stats.completed,
-        averageResponseTime: stats.count > 0 ? stats.responseTime / stats.count / (1000 * 60 * 60) : 0
+        averageResponseTime:
+          stats.count > 0 ? stats.responseTime / stats.count / (1000 * 60 * 60) : 0,
       }))
       .sort((a, b) => b.completedWorkflows - a.completedWorkflows)
       .slice(0, 5);

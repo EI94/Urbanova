@@ -6,41 +6,31 @@ const STATIC_CACHE_NAME = 'urbanova-static-v1';
 const DYNAMIC_CACHE_NAME = 'urbanova-dynamic-v1';
 
 // File da mettere in cache statica
-const STATIC_FILES = [
-  '/',
-  '/dashboard',
-  '/favicon.ico',
-  '/manifest.json',
-  '/offline.html'
-];
+const STATIC_FILES = ['/', '/dashboard', '/favicon.ico', '/manifest.json', '/offline.html'];
 
 // File da mettere in cache dinamica
-const DYNAMIC_FILES = [
-  '/api/',
-  '/dashboard/',
-  '/static/'
-];
+const DYNAMIC_FILES = ['/api/', '/dashboard/', '/static/'];
 
 // ========================================
 // INSTALLAZIONE E ATTIVAZIONE
 // ========================================
 
-self.addEventListener('install', (event) => {
+self.addEventListener('install', event => {
   console.log('🚀 Service Worker installing...');
-  
+
   event.waitUntil(
     Promise.all([
       // Cache statica
-      caches.open(STATIC_CACHE_NAME).then((cache) => {
+      caches.open(STATIC_CACHE_NAME).then(cache => {
         console.log('📦 Caching static files...');
         return cache.addAll(STATIC_FILES);
       }),
-      
+
       // Cache dinamica
-      caches.open(DYNAMIC_CACHE_NAME).then((cache) => {
+      caches.open(DYNAMIC_CACHE_NAME).then(cache => {
         console.log('📦 Dynamic cache ready...');
         return cache;
-      })
+      }),
     ]).then(() => {
       console.log('✅ Service Worker installed successfully');
       return self.skipWaiting();
@@ -48,26 +38,25 @@ self.addEventListener('install', (event) => {
   );
 });
 
-self.addEventListener('activate', (event) => {
+self.addEventListener('activate', event => {
   console.log('🔄 Service Worker activating...');
-  
+
   event.waitUntil(
     Promise.all([
       // Pulisci cache vecchie
-      caches.keys().then((cacheNames) => {
+      caches.keys().then(cacheNames => {
         return Promise.all(
-          cacheNames.map((cacheName) => {
-            if (cacheName !== STATIC_CACHE_NAME && 
-                cacheName !== DYNAMIC_CACHE_NAME) {
+          cacheNames.map(cacheName => {
+            if (cacheName !== STATIC_CACHE_NAME && cacheName !== DYNAMIC_CACHE_NAME) {
               console.log('🗑️ Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
           })
         );
       }),
-      
+
       // Prendi il controllo immediatamente
-      self.clients.claim()
+      self.clients.claim(),
     ]).then(() => {
       console.log('✅ Service Worker activated successfully');
     })
@@ -78,7 +67,7 @@ self.addEventListener('activate', (event) => {
 // INTERCETTAZIONE RICHIESTE
 // ========================================
 
-self.addEventListener('fetch', (event) => {
+self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
 
@@ -117,7 +106,7 @@ async function handleApiRequest(request) {
   try {
     // Prima prova la rete
     const networkResponse = await fetch(request);
-    
+
     if (networkResponse.ok) {
       // Cache la risposta per uso offline
       const cache = await caches.open(DYNAMIC_CACHE_NAME);
@@ -136,13 +125,13 @@ async function handleApiRequest(request) {
 
   // Fallback generico per API
   return new Response(
-    JSON.stringify({ 
+    JSON.stringify({
       error: 'Service unavailable offline',
-      message: 'Please check your connection and try again'
-    }), 
-    { 
+      message: 'Please check your connection and try again',
+    }),
+    {
       status: 503,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
     }
   );
 }
@@ -151,7 +140,7 @@ async function handleDashboardRequest(request) {
   try {
     // Prima prova la rete
     const networkResponse = await fetch(request);
-    
+
     if (networkResponse.ok) {
       // Cache la risposta
       const cache = await caches.open(DYNAMIC_CACHE_NAME);
@@ -204,14 +193,26 @@ async function handleFallbackRequest(request) {
     if (cachedResponse) {
       return cachedResponse;
     }
-    
+
     // Fallback finale
     return new Response('Content not available offline', { status: 404 });
   }
 }
 
 function isStaticFile(pathname) {
-  const staticExtensions = ['.js', '.css', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf'];
+  const staticExtensions = [
+    '.js',
+    '.css',
+    '.png',
+    '.jpg',
+    '.jpeg',
+    '.gif',
+    '.svg',
+    '.ico',
+    '.woff',
+    '.woff2',
+    '.ttf',
+  ];
   return staticExtensions.some(ext => pathname.endsWith(ext));
 }
 
@@ -219,9 +220,9 @@ function isStaticFile(pathname) {
 // GESTIONE NOTIFICHE PUSH
 // ========================================
 
-self.addEventListener('push', (event) => {
+self.addEventListener('push', event => {
   console.log('📱 Push notification received:', event);
-  
+
   if (!event.data) {
     console.log('No data in push event');
     return;
@@ -241,34 +242,30 @@ self.addEventListener('push', (event) => {
       silent: data.silent || false,
       timestamp: data.timestamp || Date.now(),
       vibrate: [200, 100, 200],
-      sound: data.sound || null
+      sound: data.sound || null,
     };
 
-    event.waitUntil(
-      self.registration.showNotification(data.title || 'Urbanova AI', options)
-    );
+    event.waitUntil(self.registration.showNotification(data.title || 'Urbanova AI', options));
 
     // Traccia la ricezione
     trackNotificationReceived(data);
   } catch (error) {
     console.error('Error handling push notification:', error);
-    
+
     // Notifica di fallback
     const fallbackOptions = {
       body: 'Nuova notifica da Urbanova AI',
       icon: '/favicon.ico',
-      tag: 'urbanova-notification'
+      tag: 'urbanova-notification',
     };
 
-    event.waitUntil(
-      self.registration.showNotification('Urbanova AI', fallbackOptions)
-    );
+    event.waitUntil(self.registration.showNotification('Urbanova AI', fallbackOptions));
   }
 });
 
-self.addEventListener('notificationclick', (event) => {
+self.addEventListener('notificationclick', event => {
   console.log('👆 Notification clicked:', event);
-  
+
   event.notification.close();
 
   if (event.action) {
@@ -276,18 +273,16 @@ self.addEventListener('notificationclick', (event) => {
     handleNotificationAction(event.action, event.notification.data);
   } else {
     // Apri l'app quando si clicca sulla notifica
-    event.waitUntil(
-      clients.openWindow('/dashboard')
-    );
+    event.waitUntil(clients.openWindow('/dashboard'));
   }
 
   // Traccia il click
   trackNotificationClick(event);
 });
 
-self.addEventListener('notificationclose', (event) => {
+self.addEventListener('notificationclose', event => {
   console.log('❌ Notification closed:', event);
-  
+
   // Traccia la chiusura
   trackNotificationClose(event);
 });
@@ -296,9 +291,9 @@ self.addEventListener('notificationclose', (event) => {
 // SINCRONIZZAZIONE IN BACKGROUND
 // ========================================
 
-self.addEventListener('sync', (event) => {
+self.addEventListener('sync', event => {
   console.log('🔄 Background sync triggered:', event.tag);
-  
+
   if (event.tag === 'background-sync') {
     event.waitUntil(performBackgroundSync());
   } else if (event.tag === 'notification-sync') {
@@ -309,16 +304,16 @@ self.addEventListener('sync', (event) => {
 async function performBackgroundSync() {
   try {
     console.log('🔄 Performing background sync...');
-    
+
     // Sincronizza dati offline
     await syncOfflineData();
-    
+
     // Sincronizza notifiche
     await syncNotifications();
-    
+
     // Sincronizza preferenze utente
     await syncUserPreferences();
-    
+
     console.log('✅ Background sync completed');
   } catch (error) {
     console.error('❌ Background sync failed:', error);
@@ -352,7 +347,7 @@ function trackNotificationReceived(data) {
   sendAnalytics('notification_received', {
     title: data.title,
     type: data.type || 'unknown',
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
 }
 
@@ -361,7 +356,7 @@ function trackNotificationClick(event) {
   sendAnalytics('notification_clicked', {
     action: event.action || 'default',
     data: event.notification.data,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
 }
 
@@ -369,7 +364,7 @@ function trackNotificationClose(event) {
   // Invia metriche per chiusura notifiche
   sendAnalytics('notification_closed', {
     data: event.notification.data,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
 }
 
@@ -379,14 +374,14 @@ async function sendAnalytics(event, data) {
     await fetch('/api/analytics', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         event,
         data,
         source: 'service_worker',
-        timestamp: Date.now()
-      })
+        timestamp: Date.now(),
+      }),
     });
   } catch (error) {
     console.log('Analytics not sent (offline):', error);
@@ -399,7 +394,7 @@ async function sendAnalytics(event, data) {
 
 function handleNotificationAction(action, data) {
   console.log('🎯 Handling notification action:', action, data);
-  
+
   switch (action) {
     case 'view':
       // Apri la notifica specifica
@@ -407,17 +402,17 @@ function handleNotificationAction(action, data) {
         clients.openWindow(data.url);
       }
       break;
-      
+
     case 'dismiss':
       // Rimuovi la notifica
       console.log('Dismissing notification');
       break;
-      
+
     case 'snooze':
       // Rimanda la notifica
       console.log('Snoozing notification');
       break;
-      
+
     default:
       // Azione sconosciuta
       console.log('Unknown action:', action);
@@ -431,7 +426,7 @@ function handleNotificationAction(action, data) {
 function log(message, data = null) {
   const timestamp = new Date().toISOString();
   const logMessage = `[${timestamp}] ${message}`;
-  
+
   if (data) {
     console.log(logMessage, data);
   } else {
@@ -443,26 +438,26 @@ function log(message, data = null) {
 // MESSAGGI DAL CLIENT
 // ========================================
 
-self.addEventListener('message', (event) => {
+self.addEventListener('message', event => {
   console.log('📨 Message received from client:', event.data);
-  
+
   const { type, data } = event.data;
-  
+
   switch (type) {
     case 'SKIP_WAITING':
       self.skipWaiting();
       break;
-      
+
     case 'GET_VERSION':
       event.ports[0].postMessage({ version: CACHE_NAME });
       break;
-      
+
     case 'CLEAR_CACHE':
       clearAllCaches().then(() => {
         event.ports[0].postMessage({ success: true });
       });
       break;
-      
+
     default:
       console.log('Unknown message type:', type);
   }
@@ -470,9 +465,7 @@ self.addEventListener('message', (event) => {
 
 async function clearAllCaches() {
   const cacheNames = await caches.keys();
-  await Promise.all(
-    cacheNames.map(name => caches.delete(name))
-  );
+  await Promise.all(cacheNames.map(name => caches.delete(name)));
   console.log('🗑️ All caches cleared');
 }
 

@@ -6,10 +6,7 @@ export async function POST(request: NextRequest) {
     const { to } = await request.json();
 
     if (!to) {
-      return NextResponse.json(
-        { error: 'Email destinatario richiesta' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email destinatario richiesta' }, { status: 400 });
     }
 
     console.log('🧪 TEST RESEND DIRETTO per:', to);
@@ -48,21 +45,24 @@ export async function POST(request: NextRequest) {
         </body>
         </html>
       `,
-      text: 'Test Resend Diretto - Se ricevi questa email, Resend funziona al 100%!'
+      text: 'Test Resend Diretto - Se ricevi questa email, Resend funziona al 100%!',
     });
 
     if (error) {
       console.error('❌ Errore Resend:', error);
-      return NextResponse.json({
-        success: false,
-        message: 'TEST RESEND DIRETTO FALLITO',
-        error: error.message,
-        data: {
-          timestamp: new Date().toISOString(),
-          status: 'RESEND NON FUNZIONANTE',
-          errorDetails: error
-        }
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'TEST RESEND DIRETTO FALLITO',
+          error: error.message,
+          data: {
+            timestamp: new Date().toISOString(),
+            status: 'RESEND NON FUNZIONANTE',
+            errorDetails: error,
+          },
+        },
+        { status: 500 }
+      );
     }
 
     console.log('✅ TEST RESEND DIRETTO COMPLETATO:', data);
@@ -74,23 +74,25 @@ export async function POST(request: NextRequest) {
         timestamp: new Date().toISOString(),
         status: 'RESEND FUNZIONANTE AL 100%',
         recipient: to,
-        messageId: data?.id
-      }
+        messageId: data?.id,
+      },
     });
-
   } catch (error) {
     console.error('❌ ERRORE CRITICO TEST RESEND DIRETTO:', error);
-    
-    return NextResponse.json({
-      success: false,
-      message: 'ERRORE CRITICO nel test Resend diretto',
-      error: error instanceof Error ? error.message : 'Errore sconosciuto',
-      data: {
-        timestamp: new Date().toISOString(),
-        status: 'ERRORE CRITICO RESEND',
-        note: 'Questo spiega perché le email non funzionano'
-      }
-    }, { status: 500 });
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'ERRORE CRITICO nel test Resend diretto',
+        error: error instanceof Error ? error.message : 'Errore sconosciuto',
+        data: {
+          timestamp: new Date().toISOString(),
+          status: 'ERRORE CRITICO RESEND',
+          note: 'Questo spiega perché le email non funzionano',
+        },
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -102,8 +104,8 @@ export async function GET() {
       timestamp: new Date().toISOString(),
       instructions: {
         test: 'POST con {"to": "email@example.com"}',
-        note: 'Test diretto Resend senza deleghe'
-      }
-    }
+        note: 'Test diretto Resend senza deleghe',
+      },
+    },
   });
 }

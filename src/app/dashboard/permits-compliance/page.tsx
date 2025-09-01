@@ -1,15 +1,24 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import Button from '@/components/ui/Button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import ComplianceTab from '@/components/ui/ComplianceTab';
 
 interface Permit {
   id: string;
   name: string;
   category: 'URBANISTICO' | 'AMBIENTALE' | 'SICUREZZA' | 'COMMERCIALE' | 'ENERGETICO';
-  status: 'NON_RICHIESTO' | 'IN_PREPARAZIONE' | 'PRESENTATO' | 'IN_ESAME' | 'APPROVATO' | 'RIGETTATO' | 'SCADUTO';
+  status:
+    | 'NON_RICHIESTO'
+    | 'IN_PREPARAZIONE'
+    | 'PRESENTATO'
+    | 'IN_ESAME'
+    | 'APPROVATO'
+    | 'RIGETTATO'
+    | 'SCADUTO';
   priority: 'CRITICO' | 'ALTO' | 'MEDIO' | 'BASSO';
   requiredBy: Date;
   estimatedDuration: number; // giorni
@@ -43,7 +52,9 @@ export default function PermitsCompliancePage() {
   const [permits, setPermits] = useState<Permit[]>([]);
   const [alerts, setAlerts] = useState<ComplianceAlert[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'permits' | 'timeline' | 'alerts'>('overview');
+  const [activeTab, setActiveTab] = useState<
+    'overview' | 'permits' | 'timeline' | 'alerts' | 'compliance'
+  >('overview');
   const [selectedFilter, setSelectedFilter] = useState<string>('ALL');
 
   // Mock data
@@ -60,12 +71,20 @@ export default function PermitsCompliancePage() {
         cost: 2500,
         authority: 'Comune di Milano - Ufficio Urbanistica',
         dependencies: ['Nulla Osta Soprintendenza'],
-        documentation: ['Progetto architettonico', 'Relazione tecnica', 'Calcoli strutturali', 'Piano sicurezza'],
+        documentation: [
+          'Progetto architettonico',
+          'Relazione tecnica',
+          'Calcoli strutturali',
+          'Piano sicurezza',
+        ],
         currentStep: 'Esame istruttorio',
         progress: 65,
         assignedTo: 'Arch. Marco Rossi',
         submittedDate: new Date('2024-01-10'),
-        aiRecommendations: ['Aggiornare documentazione antincendio entro 5 giorni', 'Schedulare sopralluogo tecnico']
+        aiRecommendations: [
+          'Aggiornare documentazione antincendio entro 5 giorni',
+          'Schedulare sopralluogo tecnico',
+        ],
       },
       {
         id: 'permit-2',
@@ -82,7 +101,7 @@ export default function PermitsCompliancePage() {
         currentStep: 'Raccolta documentazione',
         progress: 30,
         assignedTo: 'Ing. Laura Bianchi',
-        aiRecommendations: ['Richiedere analisi rumore urgente', 'Completare studio flora/fauna']
+        aiRecommendations: ['Richiedere analisi rumore urgente', 'Completare studio flora/fauna'],
       },
       {
         id: 'permit-3',
@@ -116,8 +135,8 @@ export default function PermitsCompliancePage() {
         documentation: ['Progetto antincendio', 'Relazione tecnica', 'Planimetrie evacuazione'],
         currentStep: 'Da avviare',
         progress: 0,
-        aiRecommendations: ['Iniziare iter immediatamente - rischio ritardo critico']
-      }
+        aiRecommendations: ['Iniziare iter immediatamente - rischio ritardo critico'],
+      },
     ];
 
     const mockAlerts: ComplianceAlert[] = [
@@ -126,29 +145,32 @@ export default function PermitsCompliancePage() {
         type: 'SCADENZA',
         severity: 'HIGH',
         title: 'Scadenza Permesso di Costruire',
-        description: 'Il permesso di costruire scade tra 15 giorni. È necessario richiedere la proroga.',
+        description:
+          'Il permesso di costruire scade tra 15 giorni. È necessario richiedere la proroga.',
         actionRequired: 'Presentare richiesta proroga entro 10 giorni',
         deadline: new Date('2024-02-15'),
-        relatedPermits: ['permit-1']
+        relatedPermits: ['permit-1'],
       },
       {
         id: 'alert-2',
         type: 'MODIFICA_NORMATIVA',
         severity: 'MEDIUM',
         title: 'Aggiornamento Normativa Energetica',
-        description: 'Nuove disposizioni regionali per certificazioni energetiche in vigore dal 1 marzo',
+        description:
+          'Nuove disposizioni regionali per certificazioni energetiche in vigore dal 1 marzo',
         actionRequired: 'Verificare conformità progetto alle nuove norme',
-        relatedPermits: ['permit-3']
+        relatedPermits: ['permit-3'],
       },
       {
         id: 'alert-3',
         type: 'RITARDO',
         severity: 'HIGH',
         title: 'Ritardo VIA',
-        description: 'Valutazione Impatto Ambientale in ritardo di 10 giorni sulla tabella di marcia',
+        description:
+          'Valutazione Impatto Ambientale in ritardo di 10 giorni sulla tabella di marcia',
         actionRequired: 'Accelerare raccolta documentazione mancante',
-        relatedPermits: ['permit-2']
-      }
+        relatedPermits: ['permit-2'],
+      },
     ];
 
     setTimeout(() => {
@@ -164,33 +186,50 @@ export default function PermitsCompliancePage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'APPROVATO': return 'bg-green-100 text-green-800';
-      case 'IN_ESAME': return 'bg-blue-100 text-blue-800';
-      case 'PRESENTATO': return 'bg-yellow-100 text-yellow-800';
-      case 'IN_PREPARAZIONE': return 'bg-orange-100 text-orange-800';
-      case 'NON_RICHIESTO': return 'bg-gray-100 text-gray-800';
-      case 'RIGETTATO': return 'bg-red-100 text-red-800';
-      case 'SCADUTO': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'APPROVATO':
+        return 'bg-green-100 text-green-800';
+      case 'IN_ESAME':
+        return 'bg-blue-100 text-blue-800';
+      case 'PRESENTATO':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'IN_PREPARAZIONE':
+        return 'bg-orange-100 text-orange-800';
+      case 'NON_RICHIESTO':
+        return 'bg-gray-100 text-gray-800';
+      case 'RIGETTATO':
+        return 'bg-red-100 text-red-800';
+      case 'SCADUTO':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'CRITICO': return 'bg-red-100 text-red-800 border-red-300';
-      case 'ALTO': return 'bg-orange-100 text-orange-800 border-orange-300';
-      case 'MEDIO': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'BASSO': return 'bg-green-100 text-green-800 border-green-300';
-      default: return 'bg-gray-100 text-gray-800 border-gray-300';
+      case 'CRITICO':
+        return 'bg-red-100 text-red-800 border-red-300';
+      case 'ALTO':
+        return 'bg-orange-100 text-orange-800 border-orange-300';
+      case 'MEDIO':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'BASSO':
+        return 'bg-green-100 text-green-800 border-green-300';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'HIGH': return 'text-red-600 bg-red-50 border-red-200';
-      case 'MEDIUM': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'LOW': return 'text-blue-600 bg-blue-50 border-blue-200';
-      default: return 'text-gray-600 bg-gray-50 border-gray-200';
+      case 'HIGH':
+        return 'text-red-600 bg-red-50 border-red-200';
+      case 'MEDIUM':
+        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+      case 'LOW':
+        return 'text-blue-600 bg-blue-50 border-blue-200';
+      default:
+        return 'text-gray-600 bg-gray-50 border-gray-200';
     }
   };
 
@@ -200,17 +239,18 @@ export default function PermitsCompliancePage() {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
-  const filteredPermits = selectedFilter === 'ALL' 
-    ? permits 
-    : permits.filter(p => p.category === selectedFilter);
+  const filteredPermits =
+    selectedFilter === 'ALL' ? permits : permits.filter(p => p.category === selectedFilter);
 
   const stats = {
     totalPermits: permits.length,
     approved: permits.filter(p => p.status === 'APPROVATO').length,
-    inProgress: permits.filter(p => ['IN_PREPARAZIONE', 'PRESENTATO', 'IN_ESAME'].includes(p.status)).length,
+    inProgress: permits.filter(p =>
+      ['IN_PREPARAZIONE', 'PRESENTATO', 'IN_ESAME'].includes(p.status)
+    ).length,
     critical: permits.filter(p => p.priority === 'CRITICO').length,
     totalCost: permits.reduce((sum, p) => sum + p.cost, 0),
-    averageProgress: Math.round(permits.reduce((sum, p) => sum + p.progress, 0) / permits.length)
+    averageProgress: Math.round(permits.reduce((sum, p) => sum + p.progress, 0) / permits.length),
   };
 
   if (loading) {
@@ -229,7 +269,9 @@ export default function PermitsCompliancePage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">📋 {t('title', 'permitsCompliance')}</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              📋 {t('title', 'permitsCompliance')}
+            </h1>
             <p className="text-gray-600 mt-1">{t('subtitle', 'permitsCompliance')}</p>
           </div>
         </div>
@@ -242,8 +284,9 @@ export default function PermitsCompliancePage() {
                 { key: 'overview', label: t('tabs.overview', 'permitsCompliance') },
                 { key: 'permits', label: t('tabs.permits', 'permitsCompliance') },
                 { key: 'timeline', label: t('tabs.timeline', 'permitsCompliance') },
-                { key: 'alerts', label: t('tabs.alerts', 'permitsCompliance') }
-              ].map((tab) => (
+                { key: 'alerts', label: t('tabs.alerts', 'permitsCompliance') },
+                { key: 'compliance', label: '🏛️ Compliance Documenti' },
+              ].map(tab => (
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key as any)}
@@ -267,12 +310,24 @@ export default function PermitsCompliancePage() {
                 <div className="bg-white rounded-lg shadow-sm p-6 border">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">{t('stats.totalPermits', 'permitsCompliance')}</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        {t('stats.totalPermits', 'permitsCompliance')}
+                      </p>
                       <p className="text-2xl font-bold text-gray-900">{stats.totalPermits}</p>
                     </div>
                     <div className="p-3 bg-blue-100 rounded-full">
-                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      <svg
+                        className="w-6 h-6 text-blue-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
                       </svg>
                     </div>
                   </div>
@@ -281,12 +336,24 @@ export default function PermitsCompliancePage() {
                 <div className="bg-white rounded-lg shadow-sm p-6 border">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">{t('stats.approved', 'permitsCompliance')}</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        {t('stats.approved', 'permitsCompliance')}
+                      </p>
                       <p className="text-2xl font-bold text-green-600">{stats.approved}</p>
                     </div>
                     <div className="p-3 bg-green-100 rounded-full">
-                      <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <svg
+                        className="w-6 h-6 text-green-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
                     </div>
                   </div>
@@ -295,12 +362,24 @@ export default function PermitsCompliancePage() {
                 <div className="bg-white rounded-lg shadow-sm p-6 border">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">{t('stats.inProgress', 'permitsCompliance')}</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        {t('stats.inProgress', 'permitsCompliance')}
+                      </p>
                       <p className="text-2xl font-bold text-blue-600">{stats.inProgress}</p>
                     </div>
                     <div className="p-3 bg-blue-100 rounded-full">
-                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <svg
+                        className="w-6 h-6 text-blue-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
                       </svg>
                     </div>
                   </div>
@@ -309,12 +388,24 @@ export default function PermitsCompliancePage() {
                 <div className="bg-white rounded-lg shadow-sm p-6 border">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">{t('stats.critical', 'permitsCompliance')}</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        {t('stats.critical', 'permitsCompliance')}
+                      </p>
                       <p className="text-2xl font-bold text-red-600">{stats.critical}</p>
                     </div>
                     <div className="p-3 bg-red-100 rounded-full">
-                      <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      <svg
+                        className="w-6 h-6 text-red-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"
+                        />
                       </svg>
                     </div>
                   </div>
@@ -323,12 +414,26 @@ export default function PermitsCompliancePage() {
                 <div className="bg-white rounded-lg shadow-sm p-6 border">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">{t('stats.totalCost', 'permitsCompliance')}</p>
-                      <p className="text-2xl font-bold text-purple-600">{formatCurrency(stats.totalCost)}</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        {t('stats.totalCost', 'permitsCompliance')}
+                      </p>
+                      <p className="text-2xl font-bold text-purple-600">
+                        {formatCurrency(stats.totalCost)}
+                      </p>
                     </div>
                     <div className="p-3 bg-purple-100 rounded-full">
-                      <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                      <svg
+                        className="w-6 h-6 text-purple-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+                        />
                       </svg>
                     </div>
                   </div>
@@ -337,12 +442,24 @@ export default function PermitsCompliancePage() {
                 <div className="bg-white rounded-lg shadow-sm p-6 border">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">{t('stats.averageProgress', 'permitsCompliance')}</p>
+                      <p className="text-sm font-medium text-gray-600">
+                        {t('stats.averageProgress', 'permitsCompliance')}
+                      </p>
                       <p className="text-2xl font-bold text-orange-600">{stats.averageProgress}%</p>
                     </div>
                     <div className="p-3 bg-orange-100 rounded-full">
-                      <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      <svg
+                        className="w-6 h-6 text-orange-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                        />
                       </svg>
                     </div>
                   </div>
@@ -351,38 +468,57 @@ export default function PermitsCompliancePage() {
 
               {/* Quick Actions */}
               <div className="mb-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">🚀 {t('quickActions.newPermit', 'permitsCompliance')}</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  🚀 {t('quickActions.newPermit', 'permitsCompliance')}
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <Button variant="primary" className="w-full">
-                    <span className="text-sm">🆕 {t('quickActions.newPermit', 'permitsCompliance')}</span>
+                    <span className="text-sm">
+                      🆕 {t('quickActions.newPermit', 'permitsCompliance')}
+                    </span>
                   </Button>
                   <Button variant="outline" className="w-full">
-                    <span className="text-sm">📊 {t('quickActions.generateReport', 'permitsCompliance')}</span>
+                    <span className="text-sm">
+                      📊 {t('quickActions.generateReport', 'permitsCompliance')}
+                    </span>
                   </Button>
                   <Button variant="outline" className="w-full">
-                    <span className="text-sm">📅 {t('quickActions.scheduleInspection', 'permitsCompliance')}</span>
+                    <span className="text-sm">
+                      📅 {t('quickActions.scheduleInspection', 'permitsCompliance')}
+                    </span>
                   </Button>
                   <Button variant="outline" className="w-full">
-                    <span className="text-sm">⏰ {t('quickActions.updateTimeline', 'permitsCompliance')}</span>
+                    <span className="text-sm">
+                      ⏰ {t('quickActions.updateTimeline', 'permitsCompliance')}
+                    </span>
                   </Button>
                 </div>
               </div>
 
               {/* Permits by Category */}
               <div className="mb-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">📂 {t('categories.urban', 'permitsCompliance')}</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  📂 {t('categories.urban', 'permitsCompliance')}
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {[
                     { key: 'URBANISTICO', label: t('categories.urban', 'permitsCompliance') },
-                    { key: 'AMBIENTALE', label: t('categories.environmental', 'permitsCompliance') },
+                    {
+                      key: 'AMBIENTALE',
+                      label: t('categories.environmental', 'permitsCompliance'),
+                    },
                     { key: 'SICUREZZA', label: t('categories.safety', 'permitsCompliance') },
-                    { key: 'ENERGETICO', label: t('categories.energy', 'permitsCompliance') }
-                  ].map((category) => {
+                    { key: 'ENERGETICO', label: t('categories.energy', 'permitsCompliance') },
+                  ].map(category => {
                     const categoryPermits = permits.filter(p => p.category === category.key);
-                    const categoryProgress = categoryPermits.length > 0 
-                      ? Math.round(categoryPermits.reduce((sum, p) => sum + p.progress, 0) / categoryPermits.length)
-                      : 0;
-                    
+                    const categoryProgress =
+                      categoryPermits.length > 0
+                        ? Math.round(
+                            categoryPermits.reduce((sum, p) => sum + p.progress, 0) /
+                              categoryPermits.length
+                          )
+                        : 0;
+
                     return (
                       <div key={category.key} className="bg-white rounded-lg shadow-sm p-4 border">
                         <div className="flex items-center justify-between mb-2">
@@ -390,12 +526,14 @@ export default function PermitsCompliancePage() {
                           <span className="text-sm text-gray-500">{categoryPermits.length}</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-blue-600 h-2 rounded-full" 
+                          <div
+                            className="bg-blue-600 h-2 rounded-full"
                             style={{ width: `${categoryProgress}%` }}
                           ></div>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">{categoryProgress}% {t('stats.averageProgress', 'permitsCompliance')}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {categoryProgress}% {t('stats.averageProgress', 'permitsCompliance')}
+                        </p>
                       </div>
                     );
                   })}
@@ -405,17 +543,22 @@ export default function PermitsCompliancePage() {
               {/* Critical Alerts */}
               {alerts.filter(a => a.severity === 'HIGH').length > 0 && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-red-900 mb-3">⚠️ {t('criticalAlerts.title', 'permitsCompliance')}</h3>
+                  <h3 className="text-lg font-semibold text-red-900 mb-3">
+                    ⚠️ {t('criticalAlerts.title', 'permitsCompliance')}
+                  </h3>
                   <div className="space-y-3">
-                    {alerts.filter(a => a.severity === 'HIGH').slice(0, 3).map((alert) => (
-                      <div key={alert.id} className="flex items-start space-x-3">
-                        <div className="flex-shrink-0 w-2 h-2 bg-red-500 rounded-full mt-2"></div>
-                        <div className="flex-1">
-                          <h4 className="font-medium text-red-900">{alert.title}</h4>
-                          <p className="text-sm text-red-700">{alert.actionRequired}</p>
+                    {alerts
+                      .filter(a => a.severity === 'HIGH')
+                      .slice(0, 3)
+                      .map(alert => (
+                        <div key={alert.id} className="flex items-start space-x-3">
+                          <div className="flex-shrink-0 w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+                          <div className="flex-1">
+                            <h4 className="font-medium text-red-900">{alert.title}</h4>
+                            <p className="text-sm text-red-700">{alert.actionRequired}</p>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
                   </div>
                   <div className="mt-3">
                     <a href="#" className="text-sm text-red-600 hover:text-red-800 font-medium">
@@ -436,10 +579,13 @@ export default function PermitsCompliancePage() {
                   {[
                     { key: 'ALL', label: t('filters.all', 'projectTimeline') },
                     { key: 'URBANISTICO', label: t('categories.urban', 'permitsCompliance') },
-                    { key: 'AMBIENTALE', label: t('categories.environmental', 'permitsCompliance') },
+                    {
+                      key: 'AMBIENTALE',
+                      label: t('categories.environmental', 'permitsCompliance'),
+                    },
                     { key: 'SICUREZZA', label: t('categories.safety', 'permitsCompliance') },
-                    { key: 'ENERGETICO', label: t('categories.energy', 'permitsCompliance') }
-                  ].map((filter) => (
+                    { key: 'ENERGETICO', label: t('categories.energy', 'permitsCompliance') },
+                  ].map(filter => (
                     <button
                       key={filter.key}
                       onClick={() => setSelectedFilter(filter.key)}
@@ -457,7 +603,7 @@ export default function PermitsCompliancePage() {
 
               {/* Permits List */}
               <div className="space-y-4">
-                {filteredPermits.map((permit) => (
+                {filteredPermits.map(permit => (
                   <div key={permit.id} className="bg-white rounded-lg shadow-sm p-6 border">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
@@ -465,34 +611,44 @@ export default function PermitsCompliancePage() {
                         <p className="text-sm text-gray-600">{permit.authority}</p>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(permit.status)}`}>
+                        <span
+                          className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(permit.status)}`}
+                        >
                           {permit.status}
                         </span>
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${getPriorityColor(permit.priority)}`}>
+                        <span
+                          className={`px-2 py-1 rounded text-xs font-medium ${getPriorityColor(permit.priority)}`}
+                        >
                           {permit.priority}
                         </span>
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                       <div>
                         <p className="text-sm font-medium text-gray-600">Costo</p>
-                        <p className="text-lg font-semibold text-gray-900">{formatCurrency(permit.cost)}</p>
+                        <p className="text-lg font-semibold text-gray-900">
+                          {formatCurrency(permit.cost)}
+                        </p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-600">Durata Stimata</p>
-                        <p className="text-lg font-semibold text-gray-900">{permit.estimatedDuration} giorni</p>
+                        <p className="text-lg font-semibold text-gray-900">
+                          {permit.estimatedDuration} giorni
+                        </p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-600">Progresso</p>
                         <div className="flex items-center space-x-2">
                           <div className="flex-1 bg-gray-200 rounded-full h-2">
-                            <div 
-                              className="bg-blue-600 h-2 rounded-full" 
+                            <div
+                              className="bg-blue-600 h-2 rounded-full"
                               style={{ width: `${permit.progress}%` }}
                             ></div>
                           </div>
-                          <span className="text-sm font-medium text-gray-900">{permit.progress}%</span>
+                          <span className="text-sm font-medium text-gray-900">
+                            {permit.progress}%
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -505,7 +661,9 @@ export default function PermitsCompliancePage() {
 
                     {permit.aiRecommendations && permit.aiRecommendations.length > 0 && (
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                        <h4 className="text-sm font-medium text-blue-900 mb-2">🤖 AI Recommendations</h4>
+                        <h4 className="text-sm font-medium text-blue-900 mb-2">
+                          🤖 AI Recommendations
+                        </h4>
                         <ul className="text-sm text-blue-800 space-y-1">
                           {permit.aiRecommendations.map((rec, idx) => (
                             <li key={idx}>• {rec}</li>
@@ -530,21 +688,32 @@ export default function PermitsCompliancePage() {
           {/* Alerts Tab */}
           {activeTab === 'alerts' && (
             <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">🚨 {t('tabs.alerts', 'permitsCompliance')}</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                🚨 {t('tabs.alerts', 'permitsCompliance')}
+              </h3>
               <div className="space-y-4">
-                {alerts.map((alert) => (
-                  <div key={alert.id} className={`bg-white rounded-lg shadow-sm p-6 border-l-4 ${
-                    alert.severity === 'HIGH' ? 'border-red-500' :
-                    alert.severity === 'MEDIUM' ? 'border-yellow-500' :
-                    'border-blue-500'
-                  }`}>
+                {alerts.map(alert => (
+                  <div
+                    key={alert.id}
+                    className={`bg-white rounded-lg shadow-sm p-6 border-l-4 ${
+                      alert.severity === 'HIGH'
+                        ? 'border-red-500'
+                        : alert.severity === 'MEDIUM'
+                          ? 'border-yellow-500'
+                          : 'border-blue-500'
+                    }`}
+                  >
                     <div className="flex items-start justify-between mb-3">
                       <h4 className="text-lg font-semibold text-gray-900">{alert.title}</h4>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        alert.severity === 'HIGH' ? 'bg-red-100 text-red-800' :
-                        alert.severity === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-blue-100 text-blue-800'
-                      }`}>
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-medium ${
+                          alert.severity === 'HIGH'
+                            ? 'bg-red-100 text-red-800'
+                            : alert.severity === 'MEDIUM'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-blue-100 text-blue-800'
+                        }`}
+                      >
                         {alert.severity}
                       </span>
                     </div>
@@ -560,8 +729,15 @@ export default function PermitsCompliancePage() {
               </div>
             </div>
           )}
+
+          {/* Compliance Tab */}
+          {activeTab === 'compliance' && (
+            <div className="p-6">
+              <ComplianceTab />
+            </div>
+          )}
         </div>
       </div>
     </DashboardLayout>
   );
-} 
+}

@@ -1,4 +1,9 @@
-import { DesignTemplate, DesignCustomization, GeoLocation, BudgetBreakdown } from './designCenterService';
+import {
+  DesignTemplate,
+  DesignCustomization,
+  GeoLocation,
+  BudgetBreakdown,
+} from './designCenterService';
 
 export interface AIAnalysisRequest {
   template: DesignTemplate;
@@ -119,27 +124,30 @@ class AIIntegrationService {
    */
   async performCompleteAnalysis(request: AIAnalysisRequest): Promise<AIAnalysisResponse> {
     try {
-      console.log('🤖 [AIIntegrationService] Avvio analisi AI completa per:', request.template.name);
-      
+      console.log(
+        '🤖 [AIIntegrationService] Avvio analisi AI completa per:',
+        request.template.name
+      );
+
       const startTime = Date.now();
-      
+
       // Analisi ROI e ottimizzazione
       const roiAnalysis = await this.analyzeROI(request);
-      
+
       // Analisi di mercato
       const marketAnalysis = await this.analyzeMarket(request);
-      
+
       // Analisi sostenibilità
       const sustainabilityAnalysis = await this.analyzeSustainability(request);
-      
+
       // Verifica compliance normativa
       const complianceAnalysis = await this.analyzeCompliance(request);
-      
+
       // Valutazione rischi
       const riskAnalysis = await this.assessRisks(request);
-      
+
       const processingTime = Date.now() - startTime;
-      
+
       // Consolidamento risultati
       const response: AIAnalysisResponse = {
         success: true,
@@ -150,19 +158,22 @@ class AIIntegrationService {
           optimization: roiAnalysis,
           marketInsights: marketAnalysis,
           compliance: complianceAnalysis,
-          riskAssessment: riskAnalysis
+          riskAssessment: riskAnalysis,
         },
         metadata: {
           model: 'gpt-4-turbo',
-          confidence: this.calculateOverallConfidence([roiAnalysis, marketAnalysis, sustainabilityAnalysis]),
+          confidence: this.calculateOverallConfidence([
+            roiAnalysis,
+            marketAnalysis,
+            sustainabilityAnalysis,
+          ]),
           processingTime,
-          dataPoints: this.countDataPoints(request)
-        }
+          dataPoints: this.countDataPoints(request),
+        },
       };
-      
+
       console.log('✅ [AIIntegrationService] Analisi AI completata in', processingTime, 'ms');
       return response;
-      
     } catch (error) {
       console.error('❌ [AIIntegrationService] Errore analisi AI:', error);
       throw new Error(`Analisi AI fallita: ${error.message}`);
@@ -174,31 +185,42 @@ class AIIntegrationService {
    */
   private async analyzeROI(request: AIAnalysisRequest): Promise<OptimizationResult> {
     const { template, customization, location, budget } = request;
-    
+
     // Calcoli reali basati sui dati del progetto
     const originalROI = this.calculateOriginalROI(customization, budget, location);
-    const optimizationOpportunities = this.identifyOptimizationOpportunities(customization, budget, location);
-    
+    const optimizationOpportunities = this.identifyOptimizationOpportunities(
+      customization,
+      budget,
+      location
+    );
+
     // Applica ottimizzazioni AI
-    const optimizedMetrics = this.applyOptimizations(customization, budget, optimizationOpportunities);
-    
+    const optimizedMetrics = this.applyOptimizations(
+      customization,
+      budget,
+      optimizationOpportunities
+    );
+
     return {
       originalMetrics: {
         roi: originalROI,
         cost: budget.total,
         timeline: this.calculateTimeline(customization),
-        sustainability: this.calculateSustainabilityScore(customization, location)
+        sustainability: this.calculateSustainabilityScore(customization, location),
       },
       optimizedMetrics: {
         roi: optimizedMetrics.roi,
         cost: optimizedMetrics.cost,
         timeline: optimizedMetrics.timeline,
-        sustainability: optimizedMetrics.sustainability
+        sustainability: optimizedMetrics.sustainability,
       },
       improvements: optimizationOpportunities,
       tradeoffs: this.analyzeTradeoffs(optimizationOpportunities),
-      paybackPeriod: this.calculatePaybackPeriod(optimizedMetrics.cost - budget.total, optimizedMetrics.roi - originalROI),
-      riskLevel: this.assessOptimizationRisk(optimizationOpportunities)
+      paybackPeriod: this.calculatePaybackPeriod(
+        optimizedMetrics.cost - budget.total,
+        optimizedMetrics.roi - originalROI
+      ),
+      riskLevel: this.assessOptimizationRisk(optimizationOpportunities),
     };
   }
 
@@ -207,18 +229,14 @@ class AIIntegrationService {
    */
   private async analyzeMarket(request: AIAnalysisRequest): Promise<MarketInsight[]> {
     const { location, template } = request;
-    
+
     // Analisi reali del mercato locale
     const marketData = await this.fetchMarketData(location);
     const trends = this.analyzeMarketTrends(marketData);
     const opportunities = this.identifyMarketOpportunities(location, template);
     const risks = this.assessMarketRisks(location, marketData);
-    
-    return [
-      ...trends,
-      ...opportunities,
-      ...risks
-    ];
+
+    return [...trends, ...opportunities, ...risks];
   }
 
   /**
@@ -226,9 +244,9 @@ class AIIntegrationService {
    */
   private async analyzeSustainability(request: AIAnalysisRequest): Promise<AISuggestion[]> {
     const { customization, location } = request;
-    
+
     const suggestions: AISuggestion[] = [];
-    
+
     // Analisi energetica
     if (customization.energyClass !== 'A') {
       suggestions.push({
@@ -237,21 +255,22 @@ class AIIntegrationService {
         title: 'Miglioramento Classe Energetica',
         description: 'Upgrade alla classe energetica A per massimizzare efficienza e valore',
         reasoning: `La classe energetica attuale (${customization.energyClass}) può essere migliorata per ridurre consumi e aumentare valore`,
-        implementation: 'Installazione isolamento avanzato, finestre ad alta efficienza, sistema HVAC ottimizzato',
+        implementation:
+          'Installazione isolamento avanzato, finestre ad alta efficienza, sistema HVAC ottimizzato',
         priority: 'HIGH',
         estimatedImpact: {
           roi: 18,
           cost: 45000,
           time: 6,
           marketValue: 15,
-          sustainability: 85
+          sustainability: 85,
         },
         confidence: 92,
         dataSources: ['EPBD Database', 'Local Energy Standards'],
-        regulatoryReferences: ['D.Lgs. 192/2005', 'D.M. 26/06/2015']
+        regulatoryReferences: ['D.Lgs. 192/2005', 'D.M. 26/06/2015'],
       });
     }
-    
+
     // Analisi materiali sostenibili
     if (customization.facadeMaterial === 'cemento') {
       suggestions.push({
@@ -259,22 +278,24 @@ class AIIntegrationService {
         category: 'SUSTAINABILITY',
         title: 'Materiali Facciata Sostenibili',
         description: 'Sostituzione cemento con materiali eco-friendly',
-        reasoning: 'Il cemento ha un impatto ambientale elevato. Materiali alternativi possono ridurre l\'impronta carbonica',
-        implementation: 'Utilizzo di legno termotrattato, pietra naturale locale, o materiali compositi sostenibili',
+        reasoning:
+          "Il cemento ha un impatto ambientale elevato. Materiali alternativi possono ridurre l'impronta carbonica",
+        implementation:
+          'Utilizzo di legno termotrattato, pietra naturale locale, o materiali compositi sostenibili',
         priority: 'MEDIUM',
         estimatedImpact: {
           roi: 12,
           cost: 35000,
           time: 4,
           marketValue: 10,
-          sustainability: 75
+          sustainability: 75,
         },
         confidence: 88,
         dataSources: ['Environmental Product Declarations', 'Life Cycle Assessment'],
-        regulatoryReferences: ['CAM Edilizia', 'Criteri Ambientali Minimi']
+        regulatoryReferences: ['CAM Edilizia', 'Criteri Ambientali Minimi'],
       });
     }
-    
+
     // Analisi sistema fotovoltaico
     const solarPotential = this.calculateSolarPotential(location);
     if (solarPotential > 0.7) {
@@ -291,14 +312,14 @@ class AIIntegrationService {
           cost: 55000,
           time: 8,
           marketValue: 18,
-          sustainability: 90
+          sustainability: 90,
         },
         confidence: 95,
         dataSources: ['SolarGIS Database', 'Local Solar Radiation Data'],
-        regulatoryReferences: ['D.Lgs. 28/2011', 'Incentivi FER1']
+        regulatoryReferences: ['D.Lgs. 28/2011', 'Incentivi FER1'],
       });
     }
-    
+
     return suggestions;
   }
 
@@ -307,9 +328,9 @@ class AIIntegrationService {
    */
   private async analyzeCompliance(request: AIAnalysisRequest): Promise<ComplianceCheck[]> {
     const { location, customization } = request;
-    
+
     const complianceChecks: ComplianceCheck[] = [];
-    
+
     // Verifica distanze confini
     const boundaryCompliance = this.checkBoundaryCompliance(customization, location);
     if (!boundaryCompliance.compliant) {
@@ -320,10 +341,10 @@ class AIIntegrationService {
         requirements: ['Distanza minima 10m dal confine', 'Rispetto delle fasce di rispetto'],
         penalties: ['Sanzione amministrativa €500-2000', 'Possibile demolizione'],
         recommendations: ['Ridurre area edificabile', 'Verificare dimensioni terreno'],
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       });
     }
-    
+
     // Verifica altezza massima
     const heightCompliance = this.checkHeightCompliance(customization, location);
     if (!heightCompliance.compliant) {
@@ -334,10 +355,10 @@ class AIIntegrationService {
         requirements: [`Altezza massima ${location.zoning.heightLimit}m`],
         penalties: ['Sanzione amministrativa €1000-5000', 'Riduzione altezza'],
         recommendations: ['Ridurre numero piani', 'Verificare regolamenti zona'],
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       });
     }
-    
+
     // Verifica copertura terreno
     const coverageCompliance = this.checkCoverageCompliance(customization, location);
     if (!coverageCompliance.compliant) {
@@ -348,10 +369,10 @@ class AIIntegrationService {
         requirements: [`Copertura massima ${location.zoning.coverageLimit}%`],
         penalties: ['Sanzione amministrativa €800-3000', 'Riduzione area edificabile'],
         recommendations: ['Ridurre area edificabile', 'Aumentare area verde'],
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       });
     }
-    
+
     return complianceChecks;
   }
 
@@ -360,9 +381,9 @@ class AIIntegrationService {
    */
   private async assessRisks(request: AIAnalysisRequest): Promise<RiskAssessment> {
     const { location, customization, budget } = request;
-    
+
     const riskFactors = [];
-    
+
     // Rischio geologico
     const geologicalRisk = this.assessGeologicalRisk(location);
     if (geologicalRisk.probability > 0.3) {
@@ -370,10 +391,14 @@ class AIIntegrationService {
         factor: 'Rischio Geologico',
         probability: geologicalRisk.probability,
         impact: 'HIGH',
-        mitigation: ['Indagini geotecniche approfondite', 'Fondazioni speciali', 'Monitoraggio continuo']
+        mitigation: [
+          'Indagini geotecniche approfondite',
+          'Fondazioni speciali',
+          'Monitoraggio continuo',
+        ],
       });
     }
-    
+
     // Rischio finanziario
     const financialRisk = this.assessFinancialRisk(budget, customization);
     if (financialRisk.probability > 0.4) {
@@ -381,10 +406,10 @@ class AIIntegrationService {
         factor: 'Rischio Finanziario',
         probability: financialRisk.probability,
         impact: 'MEDIUM',
-        mitigation: ['Buffer di sicurezza 15%', 'Finanziamento misto', 'Piano di exit']
+        mitigation: ['Buffer di sicurezza 15%', 'Finanziamento misto', 'Piano di exit'],
       });
     }
-    
+
     // Rischio normativo
     const regulatoryRisk = this.assessRegulatoryRisk(location);
     if (regulatoryRisk.probability > 0.2) {
@@ -392,32 +417,44 @@ class AIIntegrationService {
         factor: 'Rischio Normativo',
         probability: regulatoryRisk.probability,
         impact: 'HIGH',
-        mitigation: ['Consulenza legale specializzata', 'Monitoraggio normative', 'Piano di compliance']
+        mitigation: [
+          'Consulenza legale specializzata',
+          'Monitoraggio normative',
+          'Piano di compliance',
+        ],
       });
     }
-    
+
     const overallRisk = this.calculateOverallRisk(riskFactors);
-    
+
     return {
       overallRisk,
       riskFactors,
       riskScore: this.calculateRiskScore(riskFactors),
-      recommendations: this.generateRiskRecommendations(riskFactors)
+      recommendations: this.generateRiskRecommendations(riskFactors),
     };
   }
 
   // Metodi di supporto per calcoli reali
-  private calculateOriginalROI(customization: DesignCustomization, budget: BudgetBreakdown, location: GeoLocation): number {
+  private calculateOriginalROI(
+    customization: DesignCustomization,
+    budget: BudgetBreakdown,
+    location: GeoLocation
+  ): number {
     const baseROI = 12; // ROI base di mercato
     const locationMultiplier = this.getLocationMultiplier(location);
     const qualityMultiplier = this.getQualityMultiplier(customization);
-    
+
     return baseROI * locationMultiplier * qualityMultiplier;
   }
 
-  private identifyOptimizationOpportunities(customization: DesignCustomization, budget: BudgetBreakdown, location: GeoLocation): AISuggestion[] {
+  private identifyOptimizationOpportunities(
+    customization: DesignCustomization,
+    budget: BudgetBreakdown,
+    location: GeoLocation
+  ): AISuggestion[] {
     const opportunities: AISuggestion[] = [];
-    
+
     // Ottimizzazione area edificabile
     if (customization.area < 200) {
       opportunities.push({
@@ -433,35 +470,45 @@ class AIIntegrationService {
           cost: 30000,
           time: 3,
           marketValue: 20,
-          sustainability: 60
+          sustainability: 60,
         },
         confidence: 85,
         dataSources: ['Local Building Codes', 'Market Analysis'],
-        regulatoryReferences: ['Regolamento Edilizio Locale']
+        regulatoryReferences: ['Regolamento Edilizio Locale'],
       });
     }
-    
+
     return opportunities;
   }
 
-  private applyOptimizations(customization: DesignCustomization, budget: BudgetBreakdown, opportunities: AISuggestion[]) {
+  private applyOptimizations(
+    customization: DesignCustomization,
+    budget: BudgetBreakdown,
+    opportunities: AISuggestion[]
+  ) {
     let optimizedROI = this.calculateOriginalROI(customization, budget, {} as GeoLocation);
     let optimizedCost = budget.total;
     let optimizedTimeline = this.calculateTimeline(customization);
-    let optimizedSustainability = this.calculateSustainabilityScore(customization, {} as GeoLocation);
-    
+    let optimizedSustainability = this.calculateSustainabilityScore(
+      customization,
+      {} as GeoLocation
+    );
+
     opportunities.forEach(opportunity => {
       optimizedROI += opportunity.estimatedImpact.roi;
       optimizedCost += opportunity.estimatedImpact.cost;
       optimizedTimeline += opportunity.estimatedImpact.time;
-      optimizedSustainability = Math.min(100, optimizedSustainability + opportunity.estimatedImpact.sustainability);
+      optimizedSustainability = Math.min(
+        100,
+        optimizedSustainability + opportunity.estimatedImpact.sustainability
+      );
     });
-    
+
     return {
       roi: optimizedROI,
       cost: optimizedCost,
       timeline: optimizedTimeline,
-      sustainability: optimizedSustainability
+      sustainability: optimizedSustainability,
     };
   }
 
@@ -471,19 +518,19 @@ class AIIntegrationService {
     // - ISTAT per dati demografici
     // - Agenzia delle Entrate per prezzi immobiliari
     // - Comuni per dati urbanistici
-    
+
     return {
       averagePrice: 3500, // €/m²
       priceTrend: '+5.2%',
       demandLevel: 'HIGH',
       supplyLevel: 'MEDIUM',
-      marketStability: 'STABLE'
+      marketStability: 'STABLE',
     };
   }
 
   private analyzeMarketTrends(marketData: any): MarketInsight[] {
     const trends: MarketInsight[] = [];
-    
+
     if (marketData.priceTrend.startsWith('+')) {
       trends.push({
         trend: 'Mercato in crescita',
@@ -492,16 +539,19 @@ class AIIntegrationService {
         timeframe: 'Ultimi 12 mesi',
         impact: 'POSITIVE',
         recommendations: ['Accelerare sviluppo progetto', 'Considerare prezzo premium'],
-        marketScore: 78
+        marketScore: 78,
       });
     }
-    
+
     return trends;
   }
 
-  private identifyMarketOpportunities(location: GeoLocation, template: DesignTemplate): MarketInsight[] {
+  private identifyMarketOpportunities(
+    location: GeoLocation,
+    template: DesignTemplate
+  ): MarketInsight[] {
     const opportunities: MarketInsight[] = [];
-    
+
     // Opportunità basate su zona
     if (location.zoning.density === 'LOW') {
       opportunities.push({
@@ -511,16 +561,16 @@ class AIIntegrationService {
         timeframe: 'Trend continuo',
         impact: 'POSITIVE',
         recommendations: ['Target clientela high-end', 'Focus su esclusività'],
-        marketScore: 85
+        marketScore: 85,
       });
     }
-    
+
     return opportunities;
   }
 
   private assessMarketRisks(location: GeoLocation, marketData: any): MarketInsight[] {
     const risks: MarketInsight[] = [];
-    
+
     if (marketData.supplyLevel === 'HIGH') {
       risks.push({
         trend: 'Alta offerta - Possibile saturazione',
@@ -529,10 +579,10 @@ class AIIntegrationService {
         timeframe: 'Prossimi 6-12 mesi',
         impact: 'NEGATIVE',
         recommendations: ['Differenziazione progetto', 'Timing di lancio strategico'],
-        marketScore: 45
+        marketScore: 45,
       });
     }
-    
+
     return risks;
   }
 
@@ -540,54 +590,65 @@ class AIIntegrationService {
     // Calcolo potenziale solare basato su coordinate e orientamento
     const latitude = location.coordinates.lat;
     const orientation = location.topography.orientation;
-    
+
     // Algoritmo semplificato per calcolo potenziale solare
     let potential = 0.5; // Base
-    
+
     // Aggiusta per latitudine (più sole al sud)
-    if (latitude < 42) potential += 0.2; // Sud Italia
-    else if (latitude < 45) potential += 0.1; // Centro Italia
+    if (latitude < 42)
+      potential += 0.2; // Sud Italia
+    else if (latitude < 45)
+      potential += 0.1; // Centro Italia
     else potential -= 0.1; // Nord Italia
-    
+
     // Aggiusta per orientamento
     if (orientation === 'S') potential += 0.3;
     else if (orientation === 'SE' || orientation === 'SW') potential += 0.2;
     else if (orientation === 'E' || orientation === 'W') potential += 0.1;
     else potential -= 0.1; // Nord
-    
+
     return Math.max(0, Math.min(1, potential));
   }
 
-  private checkBoundaryCompliance(customization: DesignCustomization, location: GeoLocation): { compliant: boolean; distance: number } {
+  private checkBoundaryCompliance(
+    customization: DesignCustomization,
+    location: GeoLocation
+  ): { compliant: boolean; distance: number } {
     const minDistance = 10; // metri
     const area = customization.area;
     const minSide = Math.sqrt(area);
     const actualDistance = minSide / 2;
-    
+
     return {
       compliant: actualDistance >= minDistance,
-      distance: actualDistance
+      distance: actualDistance,
     };
   }
 
-  private checkHeightCompliance(customization: DesignCustomization, location: GeoLocation): { compliant: boolean; height: number } {
+  private checkHeightCompliance(
+    customization: DesignCustomization,
+    location: GeoLocation
+  ): { compliant: boolean; height: number } {
     const maxHeight = location.zoning.heightLimit;
     const actualHeight = customization.floors * 3; // 3m per piano
-    
+
     return {
       compliant: actualHeight <= maxHeight,
-      height: actualHeight
+      height: actualHeight,
     };
   }
 
-  private checkCoverageCompliance(customization: DesignCustomization, location: GeoLocation): { compliant: boolean; coverage: number } {
+  private checkCoverageCompliance(
+    customization: DesignCustomization,
+    location: GeoLocation
+  ): { compliant: boolean; coverage: number } {
     const maxCoverage = location.zoning.coverageLimit;
     const totalArea = customization.area + customization.gardenArea + customization.balconyArea;
     const actualCoverage = (customization.area / totalArea) * 100;
-    
+
     return {
       compliant: actualCoverage <= maxCoverage,
-      coverage: actualCoverage
+      coverage: actualCoverage,
     };
   }
 
@@ -595,33 +656,36 @@ class AIIntegrationService {
     // Valutazione rischio geologico basata su dati reali
     const soilType = location.topography.soilType;
     const waterTable = location.topography.waterTable;
-    
+
     let probability = 0.1; // Base
     let risk = 'LOW';
-    
+
     if (soilType === 'argilloso') probability += 0.3;
     if (waterTable < 3) probability += 0.2;
     if (location.topography.slope > 15) probability += 0.2;
-    
+
     if (probability > 0.5) risk = 'HIGH';
     else if (probability > 0.3) risk = 'MEDIUM';
-    
+
     return { probability, risk };
   }
 
-  private assessFinancialRisk(budget: BudgetBreakdown, customization: DesignCustomization): { probability: number; risk: string } {
+  private assessFinancialRisk(
+    budget: BudgetBreakdown,
+    customization: DesignCustomization
+  ): { probability: number; risk: string } {
     const budgetPerSqm = budget.total / customization.area;
     const marketAverage = 3500; // €/m² medio di mercato
-    
+
     let probability = 0.1;
     let risk = 'LOW';
-    
+
     if (budgetPerSqm > marketAverage * 1.5) probability += 0.4;
     if (budgetPerSqm > marketAverage * 2) probability += 0.3;
-    
+
     if (probability > 0.6) risk = 'HIGH';
     else if (probability > 0.4) risk = 'MEDIUM';
-    
+
     return { probability, risk };
   }
 
@@ -629,22 +693,22 @@ class AIIntegrationService {
     // Valutazione rischio normativo basata su zona e regolamenti
     let probability = 0.1;
     let risk = 'LOW';
-    
+
     if (location.zoning.category === 'misto') probability += 0.2;
     if (location.zoning.density === 'ALTA') probability += 0.2;
-    
+
     if (probability > 0.4) risk = 'HIGH';
     else if (probability > 0.2) risk = 'MEDIUM';
-    
+
     return { probability, risk };
   }
 
   private calculateOverallRisk(riskFactors: any[]): 'LOW' | 'MEDIUM' | 'HIGH' {
     if (riskFactors.length === 0) return 'LOW';
-    
+
     const highRiskFactors = riskFactors.filter(f => f.impact === 'HIGH');
     const mediumRiskFactors = riskFactors.filter(f => f.impact === 'MEDIUM');
-    
+
     if (highRiskFactors.length > 0) return 'HIGH';
     if (mediumRiskFactors.length > 1) return 'MEDIUM';
     return 'LOW';
@@ -652,40 +716,40 @@ class AIIntegrationService {
 
   private calculateRiskScore(riskFactors: any[]): number {
     if (riskFactors.length === 0) return 0;
-    
+
     const totalScore = riskFactors.reduce((sum, factor) => {
       const impactScore = factor.impact === 'HIGH' ? 3 : factor.impact === 'MEDIUM' ? 2 : 1;
-      return sum + (factor.probability * impactScore);
+      return sum + factor.probability * impactScore;
     }, 0);
-    
+
     return Math.min(100, (totalScore / riskFactors.length) * 100);
   }
 
   private generateRiskRecommendations(riskFactors: any[]): string[] {
     const recommendations: string[] = [];
-    
+
     riskFactors.forEach(factor => {
       if (factor.impact === 'HIGH') {
         recommendations.push(`Priorità alta: ${factor.mitigation[0]}`);
       }
     });
-    
+
     if (recommendations.length === 0) {
       recommendations.push('Progetto a basso rischio - Procedere con monitoraggio standard');
     }
-    
+
     return recommendations;
   }
 
   private consolidateSuggestions(analyses: any[]): AISuggestion[] {
     const allSuggestions: AISuggestion[] = [];
-    
+
     analyses.forEach(analysis => {
       if (analysis.suggestions) {
         allSuggestions.push(...analysis.suggestions);
       }
     });
-    
+
     // Rimuovi duplicati e ordina per priorità
     const uniqueSuggestions = this.removeDuplicateSuggestions(allSuggestions);
     return this.sortSuggestionsByPriority(uniqueSuggestions);
@@ -702,8 +766,8 @@ class AIIntegrationService {
   }
 
   private sortSuggestionsByPriority(suggestions: AISuggestion[]): AISuggestion[] {
-    const priorityOrder = { 'CRITICAL': 4, 'HIGH': 3, 'MEDIUM': 2, 'LOW': 1 };
-    
+    const priorityOrder = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
+
     return suggestions.sort((a, b) => {
       const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
       if (priorityDiff !== 0) return priorityDiff;
@@ -713,60 +777,60 @@ class AIIntegrationService {
 
   private calculateOverallConfidence(analyses: any[]): number {
     if (analyses.length === 0) return 0;
-    
+
     const totalConfidence = analyses.reduce((sum, analysis) => {
       if (analysis.confidence) return sum + analysis.confidence;
       return sum + 80; // Default confidence
     }, 0);
-    
+
     return Math.round(totalConfidence / analyses.length);
   }
 
   private countDataPoints(request: AIAnalysisRequest): number {
     let count = 0;
-    
+
     // Conta punti dati dal template
     count += Object.keys(request.template).length;
-    
+
     // Conta punti dati dalla personalizzazione
     count += Object.keys(request.customization).length;
-    
+
     // Conta punti dati dalla localizzazione
     count += Object.keys(request.location).length;
-    
+
     // Conta punti dati dal budget
     count += Object.keys(request.budget).length;
-    
+
     return count;
   }
 
   private analyzeTradeoffs(optimizations: AISuggestion[]): any[] {
     const tradeoffs = [];
-    
+
     optimizations.forEach(opt => {
       if (opt.estimatedImpact.cost > 50000) {
         tradeoffs.push({
           description: `Alto costo per ${opt.title} (€${opt.estimatedImpact.cost.toLocaleString()})`,
           impact: 'NEGATIVE',
-          severity: 'MEDIUM'
+          severity: 'MEDIUM',
         });
       }
-      
+
       if (opt.estimatedImpact.time > 8) {
         tradeoffs.push({
           description: `Timeline estesa per ${opt.title} (+${opt.estimatedImpact.time} settimane)`,
           impact: 'NEGATIVE',
-          severity: 'LOW'
+          severity: 'LOW',
         });
       }
     });
-    
+
     return tradeoffs;
   }
 
   private assessOptimizationRisk(optimizations: AISuggestion[]): 'LOW' | 'MEDIUM' | 'HIGH' {
     const totalCost = optimizations.reduce((sum, opt) => sum + opt.estimatedImpact.cost, 0);
-    
+
     if (totalCost > 150000) return 'HIGH';
     if (totalCost > 75000) return 'MEDIUM';
     return 'LOW';
@@ -774,53 +838,56 @@ class AIIntegrationService {
 
   private calculatePaybackPeriod(costIncrease: number, roiIncrease: number): number {
     if (roiIncrease <= 0) return 999; // Non recuperabile
-    
+
     const monthlyROI = roiIncrease / 12;
     const paybackMonths = costIncrease / monthlyROI;
-    
+
     return Math.min(paybackMonths, 60); // Max 60 mesi
   }
 
   private calculateTimeline(customization: DesignCustomization): number {
     // Calcolo timeline basato su complessità del progetto
     let baseWeeks = 20;
-    
+
     if (customization.floors > 2) baseWeeks += 8;
     if (customization.area > 300) baseWeeks += 6;
     if (customization.customFeatures.length > 5) baseWeeks += 4;
-    
+
     return baseWeeks;
   }
 
-  private calculateSustainabilityScore(customization: DesignCustomization, location: GeoLocation): number {
+  private calculateSustainabilityScore(
+    customization: DesignCustomization,
+    location: GeoLocation
+  ): number {
     let score = 50; // Base
-    
+
     if (customization.energyClass === 'A') score += 20;
     if (customization.facadeMaterial !== 'cemento') score += 15;
     if (customization.gardenArea > 100) score += 10;
     if (location.infrastructure.publicTransport) score += 5;
-    
+
     return Math.min(100, score);
   }
 
   private getLocationMultiplier(location: GeoLocation): number {
     // Moltiplicatore basato su zona e densità
     let multiplier = 1.0;
-    
+
     if (location.zoning.density === 'LOW') multiplier *= 1.2;
     if (location.zoning.density === 'HIGH') multiplier *= 0.9;
-    
+
     return multiplier;
   }
 
   private getQualityMultiplier(customization: DesignCustomization): number {
     // Moltiplicatore basato su qualità e caratteristiche
     let multiplier = 1.0;
-    
+
     if (customization.energyClass === 'A') multiplier *= 1.15;
     if (customization.interiorStyle === 'LUXURY') multiplier *= 1.2;
     if (customization.customFeatures.length > 3) multiplier *= 1.1;
-    
+
     return multiplier;
   }
 

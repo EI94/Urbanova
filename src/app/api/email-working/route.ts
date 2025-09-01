@@ -16,10 +16,7 @@ export async function POST(request: NextRequest) {
     // Validazione email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(to)) {
-      return NextResponse.json(
-        { error: 'Formato email non valido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Formato email non valido' }, { status: 400 });
     }
 
     console.log('📧 Invio email con Resend...', { to, subject });
@@ -55,17 +52,20 @@ export async function POST(request: NextRequest) {
         </body>
         </html>
       `,
-      text: message
+      text: message,
     });
 
     if (error) {
       console.error('❌ Errore Resend:', error);
-      return NextResponse.json({
-        success: false,
-        error: 'Errore invio email',
-        details: error.message,
-        timestamp: new Date().toISOString()
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Errore invio email',
+          details: error.message,
+          timestamp: new Date().toISOString(),
+        },
+        { status: 500 }
+      );
     }
 
     console.log('✅ Email inviata con successo:', data);
@@ -78,18 +78,17 @@ export async function POST(request: NextRequest) {
         subject,
         timestamp: new Date().toISOString(),
         provider: 'Resend',
-        messageId: data?.id
-      }
+        messageId: data?.id,
+      },
     });
-
   } catch (error) {
     console.error('❌ Errore critico:', error);
     return NextResponse.json(
-      { 
+      {
         success: false,
         error: 'Errore interno del server',
         details: error instanceof Error ? error.message : 'Errore sconosciuto',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
       { status: 500 }
     );
@@ -104,8 +103,8 @@ export async function GET() {
       timestamp: new Date().toISOString(),
       instructions: {
         test: 'POST con {"to": "email@example.com", "subject": "Test", "message": "Test message"}',
-        note: 'Servizio email semplice e funzionante con Resend - API Key aggiornata'
-      }
-    }
+        note: 'Servizio email semplice e funzionante con Resend - API Key aggiornata',
+      },
+    },
   });
 }

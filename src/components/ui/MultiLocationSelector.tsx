@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+
 import { SearchIcon, MapIcon, XIcon, PlusIcon, TagIcon } from '@/components/icons';
-
-
 
 interface MultiLocationSelectorProps {
   value: string;
@@ -20,8 +19,8 @@ const ITALIAN_LOCATIONS: Location[] = italianLocationsService.getAllLocations();
 export default function MultiLocationSelector({
   value,
   onChange,
-  placeholder = "Cerca localizzazioni...",
-  className = ""
+  placeholder = 'Cerca localizzazioni...',
+  className = '',
 }: MultiLocationSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -51,7 +50,7 @@ export default function MultiLocationSelector({
     }
 
     setIsLoading(true);
-    
+
     // Debounce per evitare troppe ricerche
     const timeoutId = setTimeout(() => {
       const results = italianLocationsService.searchLocations(searchQuery);
@@ -115,17 +114,33 @@ export default function MultiLocationSelector({
   const getLocationBadge = (location: Location) => {
     switch (location.type) {
       case 'regione':
-        return <span className="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full">Regione</span>;
+        return (
+          <span className="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full">
+            Regione
+          </span>
+        );
       case 'provincia':
-        return <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">Provincia</span>;
+        return (
+          <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+            Provincia
+          </span>
+        );
       case 'comune':
-        return <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">Comune</span>;
+        return (
+          <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">Comune</span>
+        );
       case 'quartiere':
-        return <span className="px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded-full">Quartiere</span>;
+        return (
+          <span className="px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded-full">
+            Quartiere
+          </span>
+        );
       case 'zona':
         return <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">Zona</span>;
       default:
-        return <span className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full">Località</span>;
+        return (
+          <span className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full">Località</span>
+        );
     }
   };
 
@@ -136,17 +151,17 @@ export default function MultiLocationSelector({
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <SearchIcon className="h-5 w-5 text-gray-400" />
         </div>
-        
+
         <input
           ref={inputRef}
           type="text"
           value={searchQuery}
           onChange={handleInputChange}
           onFocus={() => setIsOpen(true)}
-          placeholder={selectedLocations.length > 0 ? "Aggiungi altre località..." : placeholder}
+          placeholder={selectedLocations.length > 0 ? 'Aggiungi altre località...' : placeholder}
           className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
         />
-        
+
         {searchQuery && (
           <button
             onClick={() => setSearchQuery('')}
@@ -160,7 +175,7 @@ export default function MultiLocationSelector({
       {/* Località selezionate */}
       {selectedLocations.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-2">
-          {selectedLocations.map((location) => (
+          {selectedLocations.map(location => (
             <div
               key={location.id}
               className="flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-200 rounded-full text-sm"
@@ -194,22 +209,22 @@ export default function MultiLocationSelector({
             </div>
           ) : suggestions.length > 0 ? (
             <div className="py-1">
-              {suggestions.map((location) => (
+              {suggestions.map(location => (
                 <button
                   key={location.id}
                   onClick={() => handleSuggestionClick(location)}
                   disabled={selectedLocations.find(loc => loc.id === location.id)}
                   className={`w-full px-4 py-2 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none ${
-                    selectedLocations.find(loc => loc.id === location.id) ? 'opacity-50 cursor-not-allowed' : ''
+                    selectedLocations.find(loc => loc.id === location.id)
+                      ? 'opacity-50 cursor-not-allowed'
+                      : ''
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       {getLocationIcon(location)}
                       <div>
-                        <div className="text-sm font-medium text-gray-900">
-                          {location.name}
-                        </div>
+                        <div className="text-sm font-medium text-gray-900">{location.name}</div>
                         <div className="text-xs text-gray-500">
                           {location.parent ? location.parent : location.type}
                         </div>

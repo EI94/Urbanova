@@ -7,15 +7,15 @@ console.log('\n1️⃣ TEST ENDPOINT DEBUG...');
 fetch('/api/debug-project-deletion', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ test: 'connection' })
+  body: JSON.stringify({ test: 'connection' }),
 })
-.then(response => {
-  console.log('✅ Endpoint debug risponde - Status:', response.status);
-  return response.text();
-})
-.catch(error => {
-  console.log('❌ Endpoint debug non risponde:', error.message);
-});
+  .then(response => {
+    console.log('✅ Endpoint debug risponde - Status:', response.status);
+    return response.text();
+  })
+  .catch(error => {
+    console.log('❌ Endpoint debug non risponde:', error.message);
+  });
 
 // Test 2: Verifica se ci sono progetti nella pagina
 console.log('\n2️⃣ VERIFICA PROGETTI NELLA PAGINA...');
@@ -29,18 +29,23 @@ if (projectElements.length > 0) {
     console.log(`  Progetto ${index + 1}:`, {
       element: el,
       text: el.textContent?.substring(0, 100),
-      attributes: Array.from(el.attributes).map(attr => `${attr.name}="${attr.value}"`).join(' ')
+      attributes: Array.from(el.attributes)
+        .map(attr => `${attr.name}="${attr.value}"`)
+        .join(' '),
     });
   });
 } else {
   console.log('⚠️ Nessun elemento progetto trovato con selettori standard');
-  
+
   // Prova selettori alternativi
   const alternativeSelectors = [
-    'tr', 'div[class*="project"]', 'div[class*="card"]', 
-    '[class*="project"]', '[class*="item"]'
+    'tr',
+    'div[class*="project"]',
+    'div[class*="card"]',
+    '[class*="project"]',
+    '[class*="item"]',
   ];
-  
+
   alternativeSelectors.forEach(selector => {
     const elements = document.querySelectorAll(selector);
     if (elements.length > 0) {
@@ -52,14 +57,16 @@ if (projectElements.length > 0) {
 // Test 3: Verifica se ci sono pulsanti di eliminazione
 console.log('\n3️⃣ VERIFICA PULSANTI ELIMINAZIONE...');
 
-const deleteButtons = document.querySelectorAll('button[onclick*="delete"], button[onclick*="elimina"], .delete-btn, .btn-error');
+const deleteButtons = document.querySelectorAll(
+  'button[onclick*="delete"], button[onclick*="elimina"], .delete-btn, .btn-error'
+);
 console.log('🗑️ Pulsanti eliminazione trovati:', deleteButtons.length);
 
 deleteButtons.forEach((btn, index) => {
   console.log(`  Pulsante ${index + 1}:`, {
     text: btn.textContent,
     onclick: btn.getAttribute('onclick'),
-    className: btn.className
+    className: btn.className,
   });
 });
 
@@ -73,7 +80,7 @@ modals.forEach((modal, index) => {
   console.log(`  Modale ${index + 1}:`, {
     visible: modal.style.display !== 'none',
     className: modal.className,
-    text: modal.textContent?.substring(0, 200)
+    text: modal.textContent?.substring(0, 200),
   });
 });
 
@@ -93,26 +100,28 @@ if (typeof firebase !== 'undefined') {
 console.log('\n6️⃣ VERIFICA ERRORI JAVASCRIPT...');
 
 // Aggiungi listener per errori
-window.addEventListener('error', (event) => {
+window.addEventListener('error', event => {
   console.log('🚨 ERRORE JAVASCRIPT CATTURATO:', {
     message: event.message,
     filename: event.filename,
     lineno: event.lineno,
     colno: event.colno,
-    error: event.error
+    error: event.error,
   });
 });
 
 // Test 7: Verifica se ci sono progetti duplicati
 console.log('\n7️⃣ VERIFICA PROGETTI DUPLICATI...');
 
-const projectNames = Array.from(document.querySelectorAll('*')).map(el => {
-  const text = el.textContent || '';
-  if (text.includes('Ciliegie') || text.includes('Progetto')) {
-    return text.trim();
-  }
-  return null;
-}).filter(Boolean);
+const projectNames = Array.from(document.querySelectorAll('*'))
+  .map(el => {
+    const text = el.textContent || '';
+    if (text.includes('Ciliegie') || text.includes('Progetto')) {
+      return text.trim();
+    }
+    return null;
+  })
+  .filter(Boolean);
 
 const uniqueNames = [...new Set(projectNames)];
 console.log('📊 Nomi progetto trovati:', uniqueNames);
@@ -122,7 +131,8 @@ console.log('\n8️⃣ VERIFICA AUTENTICAZIONE...');
 
 // Controlla se ci sono token o cookie di autenticazione
 const cookies = document.cookie;
-const hasAuthCookie = cookies.includes('auth') || cookies.includes('token') || cookies.includes('session');
+const hasAuthCookie =
+  cookies.includes('auth') || cookies.includes('token') || cookies.includes('session');
 console.log('🍪 Cookie autenticazione:', hasAuthCookie ? 'Trovati' : 'Non trovati');
 
 // Test 9: Verifica se ci sono problemi di CORS
@@ -142,4 +152,6 @@ fetch('/api/health')
   });
 
 console.log('\n🏁 TEST COMPLETATI - Controlla i risultati sopra');
-console.log('💡 SUGGERIMENTO: Prova a cliccare su "Elimina" su un progetto e guarda cosa succede nella console');
+console.log(
+  '💡 SUGGERIMENTO: Prova a cliccare su "Elimina" su un progetto e guarda cosa succede nella console'
+);

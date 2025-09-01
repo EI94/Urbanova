@@ -12,13 +12,12 @@ export class RealScreenshotService {
   async generatePDFFromRealScreenshot(options: RealScreenshotOptions): Promise<Buffer> {
     try {
       console.log('📸 Generazione PDF con SCREENSHOT REALE della schermata Vedi Progetto...');
-      
+
       // GENERA SCREENSHOT REALE DELLA SCHERMATA VEDI PROGETTO
       const screenshot = await this.takeRealScreenshot(options);
-      
+
       // INSERISCI SCREENSHOT NEL PDF
       return this.createPDFWithScreenshot(screenshot, options);
-      
     } catch (error) {
       console.error('❌ Errore screenshot reale:', error);
       throw new Error('Impossibile generare screenshot reale. Contatta il supporto tecnico.');
@@ -28,10 +27,10 @@ export class RealScreenshotService {
   private async takeRealScreenshot(options: RealScreenshotOptions): Promise<Buffer> {
     try {
       console.log('🔄 Generazione screenshot reale della schermata Vedi Progetto...');
-      
+
       // GENERA HTML PERFETTO IDENTICO ALLA SCHERMATA VEDI PROGETTO
       const htmlContent = this.generatePerfectVediProgettoHTML(options);
-      
+
       // AVVIA PLAYWRIGHT PER SCREENSHOT REALE
       const browser = await playwright.webkit.launch({
         headless: true,
@@ -42,33 +41,32 @@ export class RealScreenshotService {
           '--disable-gpu',
           '--no-first-run',
           '--no-zygote',
-          '--single-process'
-        ]
+          '--single-process',
+        ],
       });
-      
+
       const page = await browser.newPage();
-      
+
       // IMPOSTA VIEWPORT PER SCHERMATA PERFETTA
       await page.setViewportSize({ width: 1200, height: 1600 });
-      
+
       // CARICA HTML PERFETTO
       await page.setContent(htmlContent, { waitUntil: 'networkidle' });
-      
+
       // ASPETTA RENDERING PERFETTO
       await page.waitForTimeout(3000);
-      
+
       // SCREENSHOT PERFETTO DELLA SCHERMATA VEDI PROGETTO
       const screenshot = await page.screenshot({
         type: 'png',
         fullPage: true,
-        quality: 100
+        quality: 100,
       });
-      
+
       await browser.close();
-      
+
       console.log('✅ Screenshot reale della schermata Vedi Progetto completato');
       return screenshot as Buffer;
-      
     } catch (error) {
       console.error('❌ Errore screenshot reale:', error);
       throw error;
@@ -78,19 +76,19 @@ export class RealScreenshotService {
   private createPDFWithScreenshot(screenshot: Buffer, options: RealScreenshotOptions): Buffer {
     try {
       console.log('🔄 Creazione PDF con screenshot reale...');
-      
+
       // CREA PDF A4
       const doc = new jsPDF('p', 'mm', 'a4');
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
-      
+
       // CONVERTI SCREENSHOT IN BASE64
       const base64Image = screenshot.toString('base64');
-      
+
       // CALCOLA DIMENSIONI PER MANTENERE ASPECT RATIO
       const imgWidth = pageWidth - 20; // 10mm margini
       const imgHeight = (imgWidth * 1600) / 1200; // Mantieni proporzioni originali
-      
+
       // INSERISCI SCREENSHOT REALE NEL PDF
       doc.addImage(
         `data:image/png;base64,${base64Image}`,
@@ -100,10 +98,9 @@ export class RealScreenshotService {
         imgWidth,
         imgHeight
       );
-      
+
       console.log('✅ PDF con screenshot reale generato');
       return Buffer.from(doc.output('arraybuffer'));
-      
     } catch (error) {
       console.error('❌ Errore creazione PDF con screenshot:', error);
       throw error;
@@ -112,7 +109,7 @@ export class RealScreenshotService {
 
   private generatePerfectVediProgettoHTML(options: RealScreenshotOptions): string {
     const { project, calculatedCosts, calculatedRevenues, calculatedResults } = options;
-    
+
     return `
       <!DOCTYPE html>
       <html>

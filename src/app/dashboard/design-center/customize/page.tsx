@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { designCenterService, DesignTemplate } from '@/lib/designCenterService';
-import { 
+import { useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
+
+import {
   ArrowLeftIcon,
   PlusIcon,
   CheckIcon,
@@ -16,17 +15,19 @@ import {
   BuildingIcon,
   EuroIcon,
   ClockIcon,
-  UsersIcon
+  UsersIcon,
 } from '@/components/icons';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { designCenterService, DesignTemplate } from '@/lib/designCenterService';
 
 export default function TemplateCustomizerPage() {
   const searchParams = useSearchParams();
   const templateId = searchParams.get('templateId');
-  
+
   const [template, setTemplate] = useState<DesignTemplate | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Stati per personalizzazioni
   const [customizations, setCustomizations] = useState({
     name: '',
@@ -41,7 +42,7 @@ export default function TemplateCustomizerPage() {
     balconyArea: 0,
     customFeatures: [] as string[],
     location: '',
-    notes: ''
+    notes: '',
   });
 
   useEffect(() => {
@@ -49,21 +50,21 @@ export default function TemplateCustomizerPage() {
       try {
         setLoading(true);
         setError(null);
-        
+
         if (!templateId) {
           throw new Error('ID template non specificato');
         }
-        
+
         // Carica template da Firebase o fallback
         const templates = await designCenterService.getTemplates();
         const foundTemplate = templates.find(t => t.id === templateId);
-        
+
         if (!foundTemplate) {
           throw new Error('Template non trovato');
         }
-        
+
         setTemplate(foundTemplate);
-        
+
         // Inizializza personalizzazioni con valori template
         setCustomizations(prev => ({
           ...prev,
@@ -77,11 +78,10 @@ export default function TemplateCustomizerPage() {
           parkingSpaces: foundTemplate.parkingSpaces,
           gardenArea: foundTemplate.gardenArea,
           balconyArea: foundTemplate.balconyArea,
-          customFeatures: [...foundTemplate.features]
+          customFeatures: [...foundTemplate.features],
         }));
-        
+
         console.log('✅ [TemplateCustomizer] Template caricato:', foundTemplate.name);
-        
       } catch (error) {
         console.error('❌ [TemplateCustomizer] Errore caricamento:', error);
         setError('Impossibile caricare il template selezionato');
@@ -102,7 +102,7 @@ export default function TemplateCustomizerPage() {
     if (feature && feature.trim()) {
       setCustomizations(prev => ({
         ...prev,
-        customFeatures: [...prev.customFeatures, feature.trim()]
+        customFeatures: [...prev.customFeatures, feature.trim()],
       }));
     }
   };
@@ -110,14 +110,14 @@ export default function TemplateCustomizerPage() {
   const removeCustomFeature = (index: number) => {
     setCustomizations(prev => ({
       ...prev,
-      customFeatures: prev.customFeatures.filter((_, i) => i !== index)
+      customFeatures: prev.customFeatures.filter((_, i) => i !== index),
     }));
   };
 
   const saveCustomization = async () => {
     try {
       console.log('💾 [TemplateCustomizer] Salvataggio personalizzazioni...');
-      
+
       // TODO: Salva nel database Firebase
       const customizedProject = {
         id: `custom-${Date.now()}`,
@@ -126,12 +126,11 @@ export default function TemplateCustomizerPage() {
         customizations,
         createdAt: new Date(),
         updatedAt: new Date(),
-        status: 'DRAFT'
+        status: 'DRAFT',
       };
-      
+
       console.log('✅ [TemplateCustomizer] Progetto personalizzato salvato:', customizedProject);
       alert('✅ Personalizzazioni salvate con successo!');
-      
     } catch (error) {
       console.error('❌ [TemplateCustomizer] Errore salvataggio:', error);
       alert('❌ Errore durante il salvataggio. Riprova.');
@@ -141,7 +140,7 @@ export default function TemplateCustomizerPage() {
   const createProject = async () => {
     try {
       console.log('🏗️ [TemplateCustomizer] Creazione progetto personalizzato...');
-      
+
       // TODO: Crea progetto nel database
       const newProject = {
         id: `project-${Date.now()}`,
@@ -152,15 +151,14 @@ export default function TemplateCustomizerPage() {
         status: 'PLANNING',
         createdAt: new Date(),
         updatedAt: new Date(),
-        progress: 0
+        progress: 0,
       };
-      
+
       console.log('✅ [TemplateCustomizer] Progetto creato:', newProject);
       alert('✅ Progetto creato con successo!');
-      
+
       // Reindirizza alla dashboard progetti
       window.location.href = '/dashboard/progetti';
-      
     } catch (error) {
       console.error('❌ [TemplateCustomizer] Errore creazione progetto:', error);
       alert('❌ Errore durante la creazione del progetto. Riprova.');
@@ -214,35 +212,22 @@ export default function TemplateCustomizerPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
-            <Link
-              href="/dashboard/design-center"
-              className="btn btn-outline btn-sm"
-            >
+            <Link href="/dashboard/design-center" className="btn btn-outline btn-sm">
               <ArrowLeftIcon className="h-4 w-4 mr-2" />
               Torna al Design Center
             </Link>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Personalizza: {template.name}
-              </h1>
-              <p className="text-gray-600 mt-1">
-                Adatta il template alle tue esigenze specifiche
-              </p>
+              <h1 className="text-3xl font-bold text-gray-900">Personalizza: {template.name}</h1>
+              <p className="text-gray-600 mt-1">Adatta il template alle tue esigenze specifiche</p>
             </div>
           </div>
-          
+
           <div className="flex space-x-3">
-            <button
-              onClick={saveCustomization}
-              className="btn btn-outline btn-primary"
-            >
+            <button onClick={saveCustomization} className="btn btn-outline btn-primary">
               <SaveIcon className="h-4 w-4 mr-2" />
               Salva Bozza
             </button>
-            <button
-              onClick={createProject}
-              className="btn btn-primary"
-            >
+            <button onClick={createProject} className="btn btn-primary">
               <PlusIcon className="h-4 w-4 mr-2" />
               Crea Progetto
             </button>
@@ -253,14 +238,12 @@ export default function TemplateCustomizerPage() {
           {/* Left Column - Anteprima Template */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-lg p-6 sticky top-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Anteprima Template
-              </h3>
-              
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Anteprima Template</h3>
+
               <div className="bg-gradient-to-br from-blue-50 to-purple-50 h-48 rounded-lg flex items-center justify-center mb-4">
                 <BuildingIcon className="h-20 w-20 text-gray-300" />
               </div>
-              
+
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-600">Categoria:</span>
@@ -268,26 +251,24 @@ export default function TemplateCustomizerPage() {
                     {template.category.toLowerCase()}
                   </span>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-600">Zona:</span>
                   <span className="text-sm text-gray-900 capitalize">
                     {template.zone.toLowerCase()}
                   </span>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-600">ROI Stimato:</span>
                   <span className="text-sm font-medium text-green-600">
                     {template.estimatedROI}%
                   </span>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-600">Tempo Costruzione:</span>
-                  <span className="text-sm text-gray-900">
-                    {template.constructionTime} mesi
-                  </span>
+                  <span className="text-sm text-gray-900">{template.constructionTime} mesi</span>
                 </div>
               </div>
             </div>
@@ -296,10 +277,8 @@ export default function TemplateCustomizerPage() {
           {/* Right Column - Personalizzazioni */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow-lg p-6">
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">
-                Personalizzazioni
-              </h3>
-              
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">Personalizzazioni</h3>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Informazioni Base */}
                 <div className="md:col-span-2">
@@ -312,12 +291,12 @@ export default function TemplateCustomizerPage() {
                       <input
                         type="text"
                         value={customizations.name}
-                        onChange={(e) => handleCustomizationChange('name', e.target.value)}
+                        onChange={e => handleCustomizationChange('name', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Es. Villa Moderna Roma"
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Località
@@ -325,20 +304,20 @@ export default function TemplateCustomizerPage() {
                       <input
                         type="text"
                         value={customizations.location}
-                        onChange={(e) => handleCustomizationChange('location', e.target.value)}
+                        onChange={e => handleCustomizationChange('location', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Es. Roma, Italia"
                       />
                     </div>
                   </div>
-                  
+
                   <div className="mt-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Descrizione
                     </label>
                     <textarea
                       value={customizations.description}
-                      onChange={(e) => handleCustomizationChange('description', e.target.value)}
+                      onChange={e => handleCustomizationChange('description', e.target.value)}
                       rows={3}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Descrivi il tuo progetto personalizzato..."
@@ -357,13 +336,13 @@ export default function TemplateCustomizerPage() {
                       <input
                         type="number"
                         value={customizations.area}
-                        onChange={(e) => handleCustomizationChange('area', Number(e.target.value))}
+                        onChange={e => handleCustomizationChange('area', Number(e.target.value))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         min={template.minArea}
                         max={template.maxArea}
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Budget (€)
@@ -371,28 +350,26 @@ export default function TemplateCustomizerPage() {
                       <input
                         type="number"
                         value={customizations.budget}
-                        onChange={(e) => handleCustomizationChange('budget', Number(e.target.value))}
+                        onChange={e => handleCustomizationChange('budget', Number(e.target.value))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         min={template.minBudget}
                         max={template.maxBudget}
                       />
                     </div>
-                    
+
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Piani
-                      </label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Piani</label>
                       <input
                         type="number"
                         value={customizations.floors}
-                        onChange={(e) => handleCustomizationChange('floors', Number(e.target.value))}
+                        onChange={e => handleCustomizationChange('floors', Number(e.target.value))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         min={1}
                         max={5}
                       />
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -401,27 +378,29 @@ export default function TemplateCustomizerPage() {
                       <input
                         type="number"
                         value={customizations.bedrooms}
-                        onChange={(e) => handleCustomizationChange('bedrooms', Number(e.target.value))}
+                        onChange={e =>
+                          handleCustomizationChange('bedrooms', Number(e.target.value))
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         min={0}
                         max={10}
                       />
                     </div>
-                    
+
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Bagni
-                      </label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Bagni</label>
                       <input
                         type="number"
                         value={customizations.bathrooms}
-                        onChange={(e) => handleCustomizationChange('bathrooms', Number(e.target.value))}
+                        onChange={e =>
+                          handleCustomizationChange('bathrooms', Number(e.target.value))
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         min={1}
                         max={10}
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Posti auto
@@ -429,7 +408,9 @@ export default function TemplateCustomizerPage() {
                       <input
                         type="number"
                         value={customizations.parkingSpaces}
-                        onChange={(e) => handleCustomizationChange('parkingSpaces', Number(e.target.value))}
+                        onChange={e =>
+                          handleCustomizationChange('parkingSpaces', Number(e.target.value))
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         min={0}
                         max={10}
@@ -440,22 +421,21 @@ export default function TemplateCustomizerPage() {
 
                 {/* Caratteristiche Personalizzate */}
                 <div className="md:col-span-2">
-                  <h4 className="text-lg font-medium text-gray-900 mb-4">Caratteristiche Personalizzate</h4>
-                  
+                  <h4 className="text-lg font-medium text-gray-900 mb-4">
+                    Caratteristiche Personalizzate
+                  </h4>
+
                   <div className="mb-4">
                     <div className="flex items-center justify-between mb-2">
                       <label className="block text-sm font-medium text-gray-700">
                         Caratteristiche Aggiuntive
                       </label>
-                      <button
-                        onClick={addCustomFeature}
-                        className="btn btn-sm btn-outline"
-                      >
+                      <button onClick={addCustomFeature} className="btn btn-sm btn-outline">
                         <PlusIcon className="h-4 w-4 mr-1" />
                         Aggiungi
                       </button>
                     </div>
-                    
+
                     <div className="space-y-2">
                       {customizations.customFeatures.map((feature, index) => (
                         <div key={index} className="flex items-center space-x-2">
@@ -472,14 +452,14 @@ export default function TemplateCustomizerPage() {
                       ))}
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Note Aggiuntive
                     </label>
                     <textarea
                       value={customizations.notes}
-                      onChange={(e) => handleCustomizationChange('notes', e.target.value)}
+                      onChange={e => handleCustomizationChange('notes', e.target.value)}
                       rows={3}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Aggiungi note, richieste speciali, preferenze..."

@@ -1,7 +1,7 @@
 'use client';
 
-import DashboardLayout from '@/components/layout/DashboardLayout';
 import { BuildingIcon, SafetyIcon, CheckIcon } from '@/components/icons';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 
 export default function EPCConstructionSitePage() {
   return (
@@ -9,9 +9,11 @@ export default function EPCConstructionSitePage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">🏗️ Cantiere EPC</h1>
-          <p className="text-gray-600 mt-1">Gestisci documentazione e certificazioni del cantiere</p>
+          <p className="text-gray-600 mt-1">
+            Gestisci documentazione e certificazioni del cantiere
+          </p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Documentazione Cantiere */}
           <div className="bg-white rounded-lg shadow-sm p-6">

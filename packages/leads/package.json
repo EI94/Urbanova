@@ -1,0 +1,20 @@
+{
+  "name": "@urbanova/leads",
+  "version": "1.0.0",
+  "description": "Lead management and conversation handling",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@urbanova/types": "workspace:*",
+    "@urbanova/data": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0"
+  }
+}

@@ -1,15 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { 
-  CheckCircle, 
-  Clock, 
-  User, 
-  Users, 
-  Plus, 
-  Edit3, 
-  Trash2, 
+import {
+  CheckCircle,
+  Clock,
+  User,
+  Users,
+  Plus,
+  Edit3,
+  Trash2,
   Eye,
   AlertCircle,
   Calendar,
@@ -24,12 +22,15 @@ import {
   Play,
   Pause,
   Square,
-  RotateCcw
+  RotateCcw,
 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import collaborationService, { 
+
+import { useAuth } from '@/contexts/AuthContext';
+import collaborationService, {
   ApprovalWorkflow as WorkflowType,
-  ApprovalStep 
+  ApprovalStep,
 } from '@/lib/collaborationService';
 
 interface ApprovalWorkflowProps {
@@ -57,7 +58,7 @@ export default function ApprovalWorkflow({
   designId,
   onWorkflowCreate,
   onWorkflowUpdate,
-  onWorkflowComplete
+  onWorkflowComplete,
 }: ApprovalWorkflowProps) {
   const { user } = useAuth();
   const [workflows, setWorkflows] = useState<WorkflowType[]>([]);
@@ -65,7 +66,7 @@ export default function ApprovalWorkflow({
   const [showWorkflowForm, setShowWorkflowForm] = useState(false);
   const [workflowForm, setWorkflowForm] = useState<WorkflowFormData>({
     workflowName: '',
-    steps: []
+    steps: [],
   });
   const [showStepForm, setShowStepForm] = useState(false);
   const [stepForm, setStepForm] = useState<StepFormData>({
@@ -74,7 +75,7 @@ export default function ApprovalWorkflow({
     approverName: '',
     approverRole: '',
     required: true,
-    deadline: ''
+    deadline: '',
   });
   const [editingStepIndex, setEditingStepIndex] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -107,7 +108,7 @@ export default function ApprovalWorkflow({
             approverRole: 'Architetto Senior',
             status: 'approved',
             required: true,
-            completedAt: new Date(Date.now() - 86400000) // 1 day ago
+            completedAt: new Date(Date.now() - 86400000), // 1 day ago
           },
           {
             id: '1-2',
@@ -118,7 +119,7 @@ export default function ApprovalWorkflow({
             approverRole: 'Project Manager',
             status: 'pending',
             required: true,
-            deadline: new Date(Date.now() + 172800000) // 2 days from now
+            deadline: new Date(Date.now() + 172800000), // 2 days from now
           },
           {
             id: '1-3',
@@ -128,15 +129,15 @@ export default function ApprovalWorkflow({
             approverName: 'Luca Verdi',
             approverRole: 'Ingegnere Strutturale',
             status: 'pending',
-            required: true
-          }
+            required: true,
+          },
         ],
         currentStep: 2,
         status: 'active',
         createdAt: new Date(Date.now() - 172800000) as any,
         updatedAt: new Date() as any,
         totalSteps: 3,
-        completedSteps: 1
+        completedSteps: 1,
       },
       {
         id: '2',
@@ -152,7 +153,7 @@ export default function ApprovalWorkflow({
             approverRole: 'Consulente Legale',
             status: 'approved',
             required: true,
-            completedAt: new Date(Date.now() - 43200000) as any // 12 hours ago
+            completedAt: new Date(Date.now() - 43200000) as any, // 12 hours ago
           },
           {
             id: '2-2',
@@ -163,16 +164,16 @@ export default function ApprovalWorkflow({
             approverRole: 'Funzionario',
             status: 'pending',
             required: true,
-            deadline: new Date(Date.now() + 259200000) as any // 3 days from now
-          }
+            deadline: new Date(Date.now() + 259200000) as any, // 3 days from now
+          },
         ],
         currentStep: 2,
         status: 'active',
         createdAt: new Date(Date.now() - 86400000) as any,
         updatedAt: new Date() as any,
         totalSteps: 2,
-        completedSteps: 1
-      }
+        completedSteps: 1,
+      },
     ];
 
     setWorkflows(mockWorkflows);
@@ -191,13 +192,13 @@ export default function ApprovalWorkflow({
           ...step,
           id: `step-${Date.now()}-${index}`,
           stepNumber: index + 1,
-          status: 'pending' as const
-        }))
+          status: 'pending' as const,
+        })),
       };
 
       // In a real implementation, you would call the service
       // const workflowId = await collaborationService.createWorkflow(workflowData);
-      
+
       // For now, create a mock workflow
       const mockWorkflow: WorkflowType = {
         id: `workflow-${Date.now()}`,
@@ -207,20 +208,20 @@ export default function ApprovalWorkflow({
         createdAt: new Date() as any,
         updatedAt: new Date() as any,
         totalSteps: workflowData.steps.length,
-        completedSteps: 0
+        completedSteps: 0,
       };
 
       setWorkflows(prev => [mockWorkflow, ...prev]);
-      
+
       // Reset form
       setWorkflowForm({
         workflowName: '',
-        steps: []
+        steps: [],
       });
-      
+
       setShowWorkflowForm(false);
       toast.success('Workflow creato con successo');
-      
+
       if (onWorkflowCreate) {
         onWorkflowCreate(mockWorkflow);
       }
@@ -242,23 +243,21 @@ export default function ApprovalWorkflow({
       approverName: stepForm.approverName.trim(),
       approverRole: stepForm.approverRole.trim(),
       required: stepForm.required,
-      deadline: stepForm.deadline ? new Date(stepForm.deadline) as any : undefined
+      deadline: stepForm.deadline ? (new Date(stepForm.deadline) as any) : undefined,
     };
 
     if (editingStepIndex !== null) {
       // Edit existing step
       setWorkflowForm(prev => ({
         ...prev,
-        steps: prev.steps.map((step, index) => 
-          index === editingStepIndex ? newStep : step
-        )
+        steps: prev.steps.map((step, index) => (index === editingStepIndex ? newStep : step)),
       }));
       setEditingStepIndex(null);
     } else {
       // Add new step
       setWorkflowForm(prev => ({
         ...prev,
-        steps: [...prev.steps, newStep]
+        steps: [...prev.steps, newStep],
       }));
     }
 
@@ -269,16 +268,16 @@ export default function ApprovalWorkflow({
       approverName: '',
       approverRole: '',
       required: true,
-      deadline: ''
+      deadline: '',
     });
-    
+
     setShowStepForm(false);
   };
 
   const removeStep = (index: number) => {
     setWorkflowForm(prev => ({
       ...prev,
-      steps: prev.steps.filter((_, i) => i !== index)
+      steps: prev.steps.filter((_, i) => i !== index),
     }));
   };
 
@@ -290,13 +289,18 @@ export default function ApprovalWorkflow({
       approverName: step.approverName,
       approverRole: step.approverRole,
       required: step.required,
-      deadline: step.deadline ? new Date(step.deadline.toMillis()).toISOString().split('T')[0] : ''
+      deadline: step.deadline ? new Date(step.deadline.toMillis()).toISOString().split('T')[0] : '',
     });
     setEditingStepIndex(index);
     setShowStepForm(true);
   };
 
-  const handleStepApproval = async (workflowId: string, stepNumber: number, approved: boolean, comments?: string) => {
+  const handleStepApproval = async (
+    workflowId: string,
+    stepNumber: number,
+    approved: boolean,
+    comments?: string
+  ) => {
     if (!user) return;
 
     try {
@@ -308,41 +312,44 @@ export default function ApprovalWorkflow({
       // });
 
       // For now, update the local state
-      setWorkflows(prev => prev.map(workflow => {
-        if (workflow.id === workflowId) {
-          const updatedSteps = workflow.steps.map(step => 
-            step.stepNumber === stepNumber 
-              ? { 
-                  ...step, 
-                  status: approved ? 'approved' : 'rejected',
-                  completedAt: new Date() as any,
-                  comments
-                }
-              : step
-          );
-          
-          const completedSteps = updatedSteps.filter(step => 
-            step.status === 'approved' || step.status === 'skipped'
-          ).length;
-          
-          const currentStep = completedSteps < workflow.totalSteps ? completedSteps + 1 : workflow.totalSteps;
-          const status = completedSteps === workflow.totalSteps ? 'completed' : 'active';
-          
-          return {
-            ...workflow,
-            steps: updatedSteps,
-            completedSteps,
-            currentStep,
-            status,
-            updatedAt: new Date() as any,
-            ...(status === 'completed' && { completedAt: new Date() as any })
-          };
-        }
-        return workflow;
-      }));
+      setWorkflows(prev =>
+        prev.map(workflow => {
+          if (workflow.id === workflowId) {
+            const updatedSteps = workflow.steps.map(step =>
+              step.stepNumber === stepNumber
+                ? {
+                    ...step,
+                    status: approved ? 'approved' : 'rejected',
+                    completedAt: new Date() as any,
+                    comments,
+                  }
+                : step
+            );
+
+            const completedSteps = updatedSteps.filter(
+              step => step.status === 'approved' || step.status === 'skipped'
+            ).length;
+
+            const currentStep =
+              completedSteps < workflow.totalSteps ? completedSteps + 1 : workflow.totalSteps;
+            const status = completedSteps === workflow.totalSteps ? 'completed' : 'active';
+
+            return {
+              ...workflow,
+              steps: updatedSteps,
+              completedSteps,
+              currentStep,
+              status,
+              updatedAt: new Date() as any,
+              ...(status === 'completed' && { completedAt: new Date() as any }),
+            };
+          }
+          return workflow;
+        })
+      );
 
       toast.success(approved ? 'Step approvato' : 'Step rifiutato');
-      
+
       if (onWorkflowUpdate) {
         const updatedWorkflow = workflows.find(w => w.id === workflowId);
         if (updatedWorkflow) {
@@ -351,7 +358,7 @@ export default function ApprovalWorkflow({
       }
     } catch (error) {
       console.error('Error updating workflow step:', error);
-      toast.error('Errore nell\'aggiornamento dello step');
+      toast.error("Errore nell'aggiornamento dello step");
     }
   };
 
@@ -369,36 +376,51 @@ export default function ApprovalWorkflow({
 
   const filteredWorkflows = workflows.filter(workflow => {
     if (filterStatus !== 'all' && workflow.status !== filterStatus) return false;
-    if (searchTerm && !workflow.workflowName.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+    if (searchTerm && !workflow.workflowName.toLowerCase().includes(searchTerm.toLowerCase()))
+      return false;
     return true;
   });
 
   const getStatusColor = (status: WorkflowType['status']) => {
     switch (status) {
-      case 'active': return 'bg-blue-100 text-blue-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'active':
+        return 'bg-blue-100 text-blue-800';
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStepStatusColor = (status: ApprovalStep['status']) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'approved': return 'bg-green-100 text-green-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      case 'skipped': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'approved':
+        return 'bg-green-100 text-green-800';
+      case 'rejected':
+        return 'bg-red-100 text-red-800';
+      case 'skipped':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStepStatusIcon = (status: ApprovalStep['status']) => {
     switch (status) {
-      case 'pending': return <Clock className="w-4 h-4" />;
-      case 'approved': return <CheckCircle className="w-4 h-4" />;
-      case 'rejected': return <XCircle className="w-4 h-4" />;
-      case 'skipped': return <Square className="w-4 h-4" />;
-      default: return <Clock className="w-4 h-4" />;
+      case 'pending':
+        return <Clock className="w-4 h-4" />;
+      case 'approved':
+        return <CheckCircle className="w-4 h-4" />;
+      case 'rejected':
+        return <XCircle className="w-4 h-4" />;
+      case 'skipped':
+        return <Square className="w-4 h-4" />;
+      default:
+        return <Clock className="w-4 h-4" />;
     }
   };
 
@@ -431,11 +453,31 @@ export default function ApprovalWorkflow({
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: 'Attivi', count: workflows.filter(w => w.status === 'active').length, color: 'bg-blue-100 text-blue-600' },
-            { label: 'Completati', count: workflows.filter(w => w.status === 'completed').length, color: 'bg-green-100 text-green-600' },
-            { label: 'In Attesa', count: workflows.filter(w => w.status === 'active').reduce((acc, w) => acc + w.steps.filter(s => s.status === 'pending').length, 0), color: 'bg-yellow-100 text-yellow-600' },
-            { label: 'Scaduti', count: workflows.filter(w => w.status === 'active').reduce((acc, w) => acc + w.steps.filter(s => isStepOverdue(s)).length, 0), color: 'bg-red-100 text-red-600' }
-          ].map((stat) => (
+            {
+              label: 'Attivi',
+              count: workflows.filter(w => w.status === 'active').length,
+              color: 'bg-blue-100 text-blue-600',
+            },
+            {
+              label: 'Completati',
+              count: workflows.filter(w => w.status === 'completed').length,
+              color: 'bg-green-100 text-green-600',
+            },
+            {
+              label: 'In Attesa',
+              count: workflows
+                .filter(w => w.status === 'active')
+                .reduce((acc, w) => acc + w.steps.filter(s => s.status === 'pending').length, 0),
+              color: 'bg-yellow-100 text-yellow-600',
+            },
+            {
+              label: 'Scaduti',
+              count: workflows
+                .filter(w => w.status === 'active')
+                .reduce((acc, w) => acc + w.steps.filter(s => isStepOverdue(s)).length, 0),
+              color: 'bg-red-100 text-red-600',
+            },
+          ].map(stat => (
             <div key={stat.label} className={`text-center p-3 rounded-lg ${stat.color}`}>
               <div className="text-2xl font-bold">{stat.count}</div>
               <div className="text-xs">{stat.label}</div>
@@ -450,7 +492,7 @@ export default function ApprovalWorkflow({
           <div className="flex items-center space-x-4">
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as any)}
+              onChange={e => setFilterStatus(e.target.value as any)}
               className="border border-gray-300 rounded-md px-3 py-2 text-sm"
             >
               <option value="all">Tutti gli stati</option>
@@ -463,7 +505,7 @@ export default function ApprovalWorkflow({
               type="text"
               placeholder="Cerca workflow..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               className="border border-gray-300 rounded-md px-3 py-2 text-sm w-64"
             />
           </div>
@@ -483,7 +525,7 @@ export default function ApprovalWorkflow({
         {showWorkflowForm && (
           <div className="mb-6 bg-gray-50 p-6 rounded-lg border">
             <h4 className="text-lg font-medium text-gray-900 mb-4">Crea Nuovo Workflow</h4>
-            
+
             <form onSubmit={handleWorkflowSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -492,7 +534,9 @@ export default function ApprovalWorkflow({
                 <input
                   type="text"
                   value={workflowForm.workflowName}
-                  onChange={(e) => setWorkflowForm(prev => ({ ...prev, workflowName: e.target.value }))}
+                  onChange={e =>
+                    setWorkflowForm(prev => ({ ...prev, workflowName: e.target.value }))
+                  }
                   placeholder="es. Approvazione Design Finale"
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                   required
@@ -513,17 +557,22 @@ export default function ApprovalWorkflow({
                     Aggiungi Step
                   </button>
                 </div>
-                
+
                 {workflowForm.steps.length === 0 ? (
                   <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
                     <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600">Nessuno step configurato</p>
-                    <p className="text-sm text-gray-500">Aggiungi almeno uno step per creare il workflow</p>
+                    <p className="text-sm text-gray-500">
+                      Aggiungi almeno uno step per creare il workflow
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {workflowForm.steps.map((step, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-white border rounded-lg">
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-3 bg-white border rounded-lg"
+                      >
                         <div className="flex items-center space-x-3">
                           <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                             <span className="text-sm font-medium text-blue-600">{index + 1}</span>
@@ -536,7 +585,7 @@ export default function ApprovalWorkflow({
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center space-x-2">
                           <button
                             type="button"
@@ -569,7 +618,11 @@ export default function ApprovalWorkflow({
                 </button>
                 <button
                   type="submit"
-                  disabled={isLoading || !workflowForm.workflowName.trim() || workflowForm.steps.length === 0}
+                  disabled={
+                    isLoading ||
+                    !workflowForm.workflowName.trim() ||
+                    workflowForm.steps.length === 0
+                  }
                   className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? 'Creazione...' : 'Crea Workflow'}
@@ -586,7 +639,7 @@ export default function ApprovalWorkflow({
               <h4 className="text-lg font-medium text-gray-900 mb-4">
                 {editingStepIndex !== null ? 'Modifica Step' : 'Aggiungi Step'}
               </h4>
-              
+
               <form onSubmit={handleStepSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -595,7 +648,7 @@ export default function ApprovalWorkflow({
                   <input
                     type="text"
                     value={stepForm.stepName}
-                    onChange={(e) => setStepForm(prev => ({ ...prev, stepName: e.target.value }))}
+                    onChange={e => setStepForm(prev => ({ ...prev, stepName: e.target.value }))}
                     placeholder="es. Approvazione Cliente"
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                     required
@@ -609,7 +662,7 @@ export default function ApprovalWorkflow({
                   <input
                     type="text"
                     value={stepForm.approverName}
-                    onChange={(e) => setStepForm(prev => ({ ...prev, approverName: e.target.value }))}
+                    onChange={e => setStepForm(prev => ({ ...prev, approverName: e.target.value }))}
                     placeholder="es. Marco Rossi"
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                     required
@@ -623,7 +676,7 @@ export default function ApprovalWorkflow({
                   <input
                     type="text"
                     value={stepForm.approverRole}
-                    onChange={(e) => setStepForm(prev => ({ ...prev, approverRole: e.target.value }))}
+                    onChange={e => setStepForm(prev => ({ ...prev, approverRole: e.target.value }))}
                     placeholder="es. Project Manager"
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                   />
@@ -631,13 +684,11 @@ export default function ApprovalWorkflow({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Scadenza
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Scadenza</label>
                     <input
                       type="date"
                       value={stepForm.deadline}
-                      onChange={(e) => setStepForm(prev => ({ ...prev, deadline: e.target.value }))}
+                      onChange={e => setStepForm(prev => ({ ...prev, deadline: e.target.value }))}
                       className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                     />
                   </div>
@@ -647,7 +698,7 @@ export default function ApprovalWorkflow({
                       type="checkbox"
                       id="required"
                       checked={stepForm.required}
-                      onChange={(e) => setStepForm(prev => ({ ...prev, required: e.target.checked }))}
+                      onChange={e => setStepForm(prev => ({ ...prev, required: e.target.checked }))}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
                     <label htmlFor="required" className="text-sm text-gray-700">
@@ -668,7 +719,7 @@ export default function ApprovalWorkflow({
                         approverName: '',
                         approverRole: '',
                         required: true,
-                        deadline: ''
+                        deadline: '',
                       });
                     }}
                     className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
@@ -695,7 +746,7 @@ export default function ApprovalWorkflow({
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredWorkflows.map((workflow) => (
+            {filteredWorkflows.map(workflow => (
               <div key={workflow.id} className="border rounded-lg overflow-hidden">
                 {/* Workflow Header */}
                 <div className="p-4 bg-gray-50 border-b">
@@ -711,14 +762,18 @@ export default function ApprovalWorkflow({
                           <ChevronRight className="w-5 h-5 text-gray-600" />
                         )}
                       </button>
-                      
+
                       <div>
                         <h5 className="font-medium text-gray-900">{workflow.workflowName}</h5>
                         <div className="flex items-center space-x-4 text-sm text-gray-500">
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(workflow.status)}`}>
+                          <span
+                            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(workflow.status)}`}
+                          >
                             {workflow.status}
                           </span>
-                          <span>Step {workflow.currentStep} di {workflow.totalSteps}</span>
+                          <span>
+                            Step {workflow.currentStep} di {workflow.totalSteps}
+                          </span>
                           <span>{workflow.completedSteps} completati</span>
                         </div>
                       </div>
@@ -738,12 +793,16 @@ export default function ApprovalWorkflow({
                   <div className="mt-3">
                     <div className="flex justify-between text-xs text-gray-500 mb-1">
                       <span>Progresso</span>
-                      <span>{Math.round((workflow.completedSteps / workflow.totalSteps) * 100)}%</span>
+                      <span>
+                        {Math.round((workflow.completedSteps / workflow.totalSteps) * 100)}%
+                      </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
                         className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${(workflow.completedSteps / workflow.totalSteps) * 100}%` }}
+                        style={{
+                          width: `${(workflow.completedSteps / workflow.totalSteps) * 100}%`,
+                        }}
                       />
                     </div>
                   </div>
@@ -754,20 +813,31 @@ export default function ApprovalWorkflow({
                   <div className="p-4">
                     <div className="space-y-3">
                       {workflow.steps.map((step, index) => (
-                        <div key={step.id} className={`border rounded-lg p-3 ${
-                          step.status === 'approved' ? 'bg-green-50 border-green-200' :
-                          step.status === 'rejected' ? 'bg-red-50 border-red-200' :
-                          isStepOverdue(step) ? 'bg-red-50 border-red-200' :
-                          'bg-white'
-                        }`}>
+                        <div
+                          key={step.id}
+                          className={`border rounded-lg p-3 ${
+                            step.status === 'approved'
+                              ? 'bg-green-50 border-green-200'
+                              : step.status === 'rejected'
+                                ? 'bg-red-50 border-red-200'
+                                : isStepOverdue(step)
+                                  ? 'bg-red-50 border-red-200'
+                                  : 'bg-white'
+                          }`}
+                        >
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center space-x-3">
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                step.status === 'approved' ? 'bg-green-100' :
-                                step.status === 'rejected' ? 'bg-red-100' :
-                                isStepOverdue(step) ? 'bg-red-100' :
-                                'bg-yellow-100'
-                              }`}>
+                              <div
+                                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                  step.status === 'approved'
+                                    ? 'bg-green-100'
+                                    : step.status === 'rejected'
+                                      ? 'bg-red-100'
+                                      : isStepOverdue(step)
+                                        ? 'bg-red-100'
+                                        : 'bg-yellow-100'
+                                }`}
+                              >
                                 {getStepStatusIcon(step.status)}
                               </div>
                               <div>
@@ -780,14 +850,18 @@ export default function ApprovalWorkflow({
                             </div>
 
                             <div className="flex items-center space-x-2">
-                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStepStatusColor(step.status)}`}>
+                              <span
+                                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStepStatusColor(step.status)}`}
+                              >
                                 {step.status}
                               </span>
-                              
+
                               {step.deadline && (
-                                <div className={`flex items-center space-x-1 text-xs ${
-                                  isStepOverdue(step) ? 'text-red-600' : 'text-gray-500'
-                                }`}>
+                                <div
+                                  className={`flex items-center space-x-1 text-xs ${
+                                    isStepOverdue(step) ? 'text-red-600' : 'text-gray-500'
+                                  }`}
+                                >
                                   <Calendar className="w-3 h-3" />
                                   <span>{step.deadline.toDate().toLocaleDateString()}</span>
                                   {isStepOverdue(step) && <AlertCircle className="w-3 h-3" />}
@@ -796,29 +870,37 @@ export default function ApprovalWorkflow({
                             </div>
                           </div>
 
-                          {step.status === 'pending' && workflow.currentStep === step.stepNumber && (
-                            <div className="flex items-center space-x-2 mt-3 pt-3 border-t">
-                              <button
-                                onClick={() => handleStepApproval(workflow.id, step.stepNumber, true)}
-                                className="inline-flex items-center px-3 py-1 text-sm text-green-600 hover:text-green-800 border border-green-300 rounded hover:bg-green-50"
-                              >
-                                <CheckCircle className="w-4 h-4 mr-1" />
-                                Approva
-                              </button>
-                              <button
-                                onClick={() => {
-                                  const reason = prompt('Motivo del rifiuto:');
-                                  if (reason) {
-                                    handleStepApproval(workflow.id, step.stepNumber, false, reason);
+                          {step.status === 'pending' &&
+                            workflow.currentStep === step.stepNumber && (
+                              <div className="flex items-center space-x-2 mt-3 pt-3 border-t">
+                                <button
+                                  onClick={() =>
+                                    handleStepApproval(workflow.id, step.stepNumber, true)
                                   }
-                                }}
-                                className="inline-flex items-center px-3 py-1 text-sm text-red-600 hover:text-red-800 border border-red-300 rounded hover:bg-red-50"
-                              >
-                                <XCircle className="w-4 h-4 mr-1" />
-                                Rifiuta
-                              </button>
-                            </div>
-                          )}
+                                  className="inline-flex items-center px-3 py-1 text-sm text-green-600 hover:text-green-800 border border-green-300 rounded hover:bg-green-50"
+                                >
+                                  <CheckCircle className="w-4 h-4 mr-1" />
+                                  Approva
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    const reason = prompt('Motivo del rifiuto:');
+                                    if (reason) {
+                                      handleStepApproval(
+                                        workflow.id,
+                                        step.stepNumber,
+                                        false,
+                                        reason
+                                      );
+                                    }
+                                  }}
+                                  className="inline-flex items-center px-3 py-1 text-sm text-red-600 hover:text-red-800 border border-red-300 rounded hover:bg-red-50"
+                                >
+                                  <XCircle className="w-4 h-4 mr-1" />
+                                  Rifiuta
+                                </button>
+                              </div>
+                            )}
 
                           {step.comments && (
                             <div className="mt-2 p-2 bg-gray-100 rounded text-sm text-gray-700">

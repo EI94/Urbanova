@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+
 import { realEmailService } from '@/lib/realEmailService';
 
 export async function POST(request: NextRequest) {
@@ -18,10 +19,7 @@ export async function POST(request: NextRequest) {
     // Validazione email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(to)) {
-      return NextResponse.json(
-        { error: 'Formato email non valido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Formato email non valido' }, { status: 400 });
     }
 
     console.log('✅ Validazione completata, invio email con servizio funzionante...');
@@ -122,12 +120,12 @@ export async function POST(request: NextRequest) {
       summary: {
         totalFound: 0,
         averagePrice: 0,
-        bestOpportunities: []
-      }
+        bestOpportunities: [],
+      },
     });
 
     console.log('✅ Email inviata con successo tramite realEmailService (Resend)!');
-    
+
     return NextResponse.json({
       success: true,
       message: 'Email inviata con successo tramite Resend',
@@ -136,18 +134,17 @@ export async function POST(request: NextRequest) {
         subject,
         timestamp: new Date().toISOString(),
         provider: 'Resend (realEmailService)',
-        note: 'Email inviata tramite il servizio funzionante di Land Scraping AI!'
-      }
+        note: 'Email inviata tramite il servizio funzionante di Land Scraping AI!',
+      },
     });
-
   } catch (error) {
     console.error('❌ Errore critico invio email:', error);
     return NextResponse.json(
-      { 
+      {
         success: false,
         error: 'Errore interno del server',
         details: error instanceof Error ? error.message : 'Errore sconosciuto',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
       { status: 500 }
     );

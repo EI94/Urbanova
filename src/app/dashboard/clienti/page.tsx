@@ -1,7 +1,7 @@
 'use client';
 
-import DashboardLayout from '@/components/layout/DashboardLayout';
 import { UserIcon, BuildingIcon, EuroIcon } from '@/components/icons';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 
 export default function ClientiPage() {
   return (
@@ -9,9 +9,11 @@ export default function ClientiPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">👥 Gestione Clienti</h1>
-          <p className="text-gray-600 mt-1">Gestisci la tua base clienti e le relazioni commerciali</p>
+          <p className="text-gray-600 mt-1">
+            Gestisci la tua base clienti e le relazioni commerciali
+          </p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Anagrafica Clienti */}
           <div className="bg-white rounded-lg shadow-sm p-6">

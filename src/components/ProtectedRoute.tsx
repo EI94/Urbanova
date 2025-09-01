@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+
 import { useAuth } from '../contexts/AuthContext';
 
 interface ProtectedRouteProps {
@@ -30,4 +31,4 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   // Se l'utente è autenticato, mostra il contenuto della pagina
   return currentUser ? <>{children}</> : null;
-} 
+}

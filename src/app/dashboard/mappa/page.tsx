@@ -1,7 +1,7 @@
 'use client';
 
-import DashboardLayout from '@/components/layout/DashboardLayout';
 import { MapIcon, LocationIcon, BuildingIcon } from '@/components/icons';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 
 export default function MappaPage() {
   return (
@@ -9,9 +9,11 @@ export default function MappaPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">🗺️ Mappa</h1>
-          <p className="text-gray-600 mt-1">Visualizza progetti e opportunità su mappa interattiva</p>
+          <p className="text-gray-600 mt-1">
+            Visualizza progetti e opportunità su mappa interattiva
+          </p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Mappa Interattiva */}
           <div className="bg-white rounded-lg shadow-sm p-6">

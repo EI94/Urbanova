@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { 
-  MapPinIcon, 
-  TrendingUpIcon, 
-  TrendingDownIcon, 
+
+import {
+  MapPinIcon,
+  TrendingUpIcon,
+  TrendingDownIcon,
   MinusIcon,
   PlusIcon,
   EyeIcon,
@@ -21,7 +22,7 @@ import {
   AlertTriangleIcon,
   CheckCircleIcon,
   ClockIcon,
-  EuroIcon
+  EuroIcon,
 } from '@/components/icons';
 
 interface IntelligentMapViewProps {
@@ -30,48 +31,50 @@ interface IntelligentMapViewProps {
   onZoneAnalysis: (zone: string) => void;
 }
 
-export default function IntelligentMapView({ 
-  projectLocations, 
-  onLocationSelect, 
-  onZoneAnalysis 
+export default function IntelligentMapView({
+  projectLocations,
+  onLocationSelect,
+  onZoneAnalysis,
 }: IntelligentMapViewProps) {
   const [selectedZone, setSelectedZone] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'projects' | 'trends' | 'opportunities' | 'infrastructure'>('projects');
+  const [viewMode, setViewMode] = useState<
+    'projects' | 'trends' | 'opportunities' | 'infrastructure'
+  >('projects');
   const [zoomLevel, setZoomLevel] = useState(8);
   const [showZoneDetails, setShowZoneDetails] = useState(false);
   const [zoneInsights, setZoneInsights] = useState<any>(null);
-  
+
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
   // Simula analisi di zona intelligente
   const getZoneInsights = (zone: string) => {
     const zoneProjects = projectLocations.filter(p => p.zone === zone);
-    
+
     if (zoneProjects.length === 0) return null;
-    
+
     const totalBudget = zoneProjects.reduce((sum, p) => sum + p.budget.estimated, 0);
     const avgROI = zoneProjects.reduce((sum, p) => sum + p.marketData.roi, 0) / zoneProjects.length;
     const projectTypes = [...new Set(zoneProjects.map(p => p.buildingType))];
-    
+
     // Calcola densità progetti (simulata)
     const density = zoneProjects.length * (1 + Math.random() * 2);
-    
+
     // Determina trend di mercato
     let marketTrend = 'STABLE';
     if (avgROI > 15) marketTrend = 'RISING';
     else if (avgROI < 8) marketTrend = 'DECLINING';
-    
+
     // Identifica opportunità
     const opportunities = [];
     if (density < 3) opportunities.push('Bassa densità - Alto potenziale sviluppo');
     if (avgROI > 12) opportunities.push('ROI alto - Investimento redditizio');
     if (projectTypes.length < 3) opportunities.push('Segmenti underserved - Diversificazione');
-    
+
     // Analizza rischi
     const risks = [];
     if (density > 8) risks.push('Alta densità - Possibile saturazione');
     if (avgROI < 8) risks.push('ROI basso - Attenzione ai costi');
-    
+
     return {
       zone,
       metrics: {
@@ -79,7 +82,7 @@ export default function IntelligentMapView({
         totalBudget,
         averageROI: avgROI,
         density,
-        projectTypes
+        projectTypes,
       },
       marketTrend,
       opportunities,
@@ -87,8 +90,8 @@ export default function IntelligentMapView({
       recommendations: [
         'Analizza la concorrenza locale',
         'Valuta i costi di sviluppo',
-        'Considera i tempi di mercato'
-      ]
+        'Considera i tempi di mercato',
+      ],
     };
   };
 
@@ -103,7 +106,7 @@ export default function IntelligentMapView({
   const getZoneColor = (zone: string) => {
     const insights = getZoneInsights(zone);
     if (!insights) return 'bg-gray-200';
-    
+
     if (insights.metrics.averageROI > 15) return 'bg-green-200';
     if (insights.metrics.averageROI > 10) return 'bg-blue-200';
     if (insights.metrics.averageROI > 5) return 'bg-yellow-200';
@@ -113,16 +116,18 @@ export default function IntelligentMapView({
   const getZoneIcon = (zone: string) => {
     const insights = getZoneInsights(zone);
     if (!insights) return <MapPinIcon className="h-4 w-4" />;
-    
-    if (insights.marketTrend === 'RISING') return <TrendingUpIcon className="h-4 w-4 text-green-600" />;
-    if (insights.marketTrend === 'DECLINING') return <TrendingDownIcon className="h-4 w-4 text-red-600" />;
+
+    if (insights.marketTrend === 'RISING')
+      return <TrendingUpIcon className="h-4 w-4 text-green-600" />;
+    if (insights.marketTrend === 'DECLINING')
+      return <TrendingDownIcon className="h-4 w-4 text-red-600" />;
     return <MinusIcon className="h-4 w-4 text-gray-600" />;
   };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('it-IT', {
       style: 'currency',
-      currency: 'EUR'
+      currency: 'EUR',
     }).format(amount);
   };
 
@@ -132,14 +137,14 @@ export default function IntelligentMapView({
       <div className="flex items-center justify-between bg-white rounded-lg shadow p-4">
         <div className="flex items-center space-x-4">
           <h3 className="text-lg font-medium text-gray-900">Mappa Intelligente</h3>
-          
+
           {/* Selettore Modalità */}
           <div className="flex bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => setViewMode('projects')}
               className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                viewMode === 'projects' 
-                  ? 'bg-blue-600 text-white' 
+                viewMode === 'projects'
+                  ? 'bg-blue-600 text-white'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
@@ -148,8 +153,8 @@ export default function IntelligentMapView({
             <button
               onClick={() => setViewMode('trends')}
               className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                viewMode === 'trends' 
-                  ? 'bg-blue-600 text-white' 
+                viewMode === 'trends'
+                  ? 'bg-blue-600 text-white'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
@@ -158,8 +163,8 @@ export default function IntelligentMapView({
             <button
               onClick={() => setViewMode('opportunities')}
               className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                viewMode === 'opportunities' 
-                  ? 'bg-blue-600 text-white' 
+                viewMode === 'opportunities'
+                  ? 'bg-blue-600 text-white'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
@@ -168,8 +173,8 @@ export default function IntelligentMapView({
             <button
               onClick={() => setViewMode('infrastructure')}
               className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                viewMode === 'infrastructure' 
-                  ? 'bg-blue-600 text-white' 
+                viewMode === 'infrastructure'
+                  ? 'bg-blue-600 text-white'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
@@ -177,7 +182,7 @@ export default function IntelligentMapView({
             </button>
           </div>
         </div>
-        
+
         {/* Controlli Zoom */}
         <div className="flex items-center space-x-2">
           <button
@@ -198,7 +203,7 @@ export default function IntelligentMapView({
 
       {/* Container Mappa */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div 
+        <div
           ref={mapContainerRef}
           className="h-96 bg-gradient-to-br from-blue-50 to-indigo-100 relative overflow-hidden"
         >
@@ -207,7 +212,7 @@ export default function IntelligentMapView({
             {/* Zone Principali */}
             <div className="grid grid-cols-3 gap-4 h-full">
               {/* Zona Appio - Roma */}
-              <div 
+              <div
                 onClick={() => handleZoneClick('Appio')}
                 className={`${getZoneColor('Appio')} rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all transform hover:scale-105`}
               >
@@ -232,7 +237,7 @@ export default function IntelligentMapView({
               </div>
 
               {/* Zona Centro - Milano */}
-              <div 
+              <div
                 onClick={() => handleZoneClick('Centro')}
                 className={`${getZoneColor('Centro')} rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all transform hover:scale-105`}
               >
@@ -257,7 +262,7 @@ export default function IntelligentMapView({
               </div>
 
               {/* Zona Centro - Torino */}
-              <div 
+              <div
                 onClick={() => handleZoneClick('Centro')}
                 className={`${getZoneColor('Centro')} rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all transform hover:scale-105`}
               >
@@ -385,7 +390,7 @@ export default function IntelligentMapView({
               <div className="space-y-2 text-xs">
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-green-200 rounded"></div>
-                  <span>ROI > 15%</span>
+                  <span>ROI &gt; 15%</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-blue-200 rounded"></div>
@@ -397,7 +402,7 @@ export default function IntelligentMapView({
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-red-200 rounded"></div>
-                  <span>ROI < 5%</span>
+                  <span>ROI &lt; 5%</span>
                 </div>
               </div>
             </div>
@@ -414,8 +419,7 @@ export default function IntelligentMapView({
               onClick={() => setShowZoneDetails(false)}
               className="text-gray-400 hover:text-gray-600"
             >
-              <span className="sr-only">Chiudi</span>
-              ×
+              <span className="sr-only">Chiudi</span>×
             </button>
           </div>
 
@@ -430,7 +434,9 @@ export default function IntelligentMapView({
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Budget Totale</span>
-                  <span className="font-medium">{formatCurrency(zoneInsights.metrics.totalBudget)}</span>
+                  <span className="font-medium">
+                    {formatCurrency(zoneInsights.metrics.totalBudget)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">ROI Medio</span>

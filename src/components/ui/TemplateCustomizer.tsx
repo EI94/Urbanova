@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  MapPinIcon, 
-  RulerIcon, 
-  EuroIcon, 
+import { toast } from 'react-hot-toast';
+
+import {
+  MapPinIcon,
+  RulerIcon,
+  EuroIcon,
   ClockIcon,
   CheckCircleIcon,
   AlertIcon,
@@ -15,12 +17,17 @@ import {
   SunIcon,
   DropletIcon,
   WifiIcon,
-  BusIcon
+  BusIcon,
 } from '@/components/icons';
-import { DesignTemplate, DesignCustomization, GeoLocation, DesignConstraints } from '@/lib/designCenterService';
-import AIDesignAssistant from './AIDesignAssistant';
 import { DesignOptimization } from '@/lib/aiDesignService';
-import { toast } from 'react-hot-toast';
+import {
+  DesignTemplate,
+  DesignCustomization,
+  GeoLocation,
+  DesignConstraints,
+} from '@/lib/designCenterService';
+
+import AIDesignAssistant from './AIDesignAssistant';
 import TerrainAnalysisAdvanced from './TerrainAnalysisAdvanced';
 
 interface TemplateCustomizerProps {
@@ -29,7 +36,11 @@ interface TemplateCustomizerProps {
   onClose: () => void;
 }
 
-export default function TemplateCustomizer({ template, onCustomize, onClose }: TemplateCustomizerProps) {
+export default function TemplateCustomizer({
+  template,
+  onCustomize,
+  onClose,
+}: TemplateCustomizerProps) {
   // Stati per personalizzazione
   const [customization, setCustomization] = useState<DesignCustomization>({
     area: template.minArea,
@@ -46,9 +57,9 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
     colorScheme: {
       primary: '#3B82F6',
       secondary: '#64748B',
-      accent: '#F59E0B'
+      accent: '#F59E0B',
     },
-    interiorStyle: 'MODERN'
+    interiorStyle: 'MODERN',
   });
 
   // Stati per geolocalizzazione
@@ -58,8 +69,22 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
     cadastral: { sheet: '', parcel: '', subParcel: '' },
     zoning: { category: 'residenziale', density: 'MEDIUM', heightLimit: 12, coverageLimit: 50 },
     topography: { slope: 0, orientation: 'S', soilType: 'argilloso', waterTable: 5 },
-    infrastructure: { water: true, electricity: true, gas: true, sewage: true, internet: true, publicTransport: false },
-    surroundings: { schools: 2, hospitals: 5, shopping: 1, parks: 3, noise: 'LOW', pollution: 'LOW' }
+    infrastructure: {
+      water: true,
+      electricity: true,
+      gas: true,
+      sewage: true,
+      internet: true,
+      publicTransport: false,
+    },
+    surroundings: {
+      schools: 2,
+      hospitals: 5,
+      shopping: 1,
+      parks: 3,
+      noise: 'LOW',
+      pollution: 'LOW',
+    },
   });
 
   // Stati per validazione
@@ -75,7 +100,7 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
     accessibility: true,
     fireSafety: true,
     seismic: 'Zona 2',
-    environmental: []
+    environmental: [],
   });
 
   const [validationResult, setValidationResult] = useState<{
@@ -85,10 +110,12 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
   }>({
     isValid: true,
     violations: [],
-    recommendations: []
+    recommendations: [],
   });
 
-  const [activeStep, setActiveStep] = useState<'location' | 'customization' | 'validation' | 'summary' | 'ai-assistant'>('location');
+  const [activeStep, setActiveStep] = useState<
+    'location' | 'customization' | 'validation' | 'summary' | 'ai-assistant'
+  >('location');
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [showTerrainAnalysis, setShowTerrainAnalysis] = useState(false);
   const [budget, setBudget] = useState({
@@ -97,24 +124,24 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
     materials: 0,
     labor: 0,
     permits: 0,
-    contingency: 0
+    contingency: 0,
   });
 
   // Geolocalizzazione automatica
   useEffect(() => {
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        position => {
           const { latitude, longitude } = position.coords;
           setLocation(prev => ({
             ...prev,
-            coordinates: { lat: latitude, lng: longitude }
+            coordinates: { lat: latitude, lng: longitude },
           }));
-          
+
           // Reverse geocoding per ottenere l'indirizzo
           reverseGeocode(latitude, longitude);
         },
-        (error) => {
+        error => {
           console.log('📍 [TemplateCustomizer] Geolocalizzazione non disponibile:', error);
         }
       );
@@ -128,11 +155,11 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
       );
       const data = await response.json();
-      
+
       if (data.display_name) {
         setLocation(prev => ({
           ...prev,
-          address: data.display_name
+          address: data.display_name,
         }));
       }
     } catch (error) {
@@ -156,7 +183,9 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
     const totalArea = customization.area + customization.gardenArea + customization.balconyArea;
     const coverage = (customization.area / totalArea) * 100;
     if (coverage > constraints.maxCoverage) {
-      violations.push(`Copertura terreno ${coverage.toFixed(1)}% supera il limite ${constraints.maxCoverage}%`);
+      violations.push(
+        `Copertura terreno ${coverage.toFixed(1)}% supera il limite ${constraints.maxCoverage}%`
+      );
       recommendations.push('Ridurre area edificabile o aumentare area verde');
     }
 
@@ -164,7 +193,9 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
     if (customization.area > 0) {
       const minSide = Math.sqrt(customization.area);
       if (minSide / 2 < constraints.boundaryDistance) {
-        violations.push(`Distanza minima dal confine (${constraints.boundaryDistance}m) non rispettata`);
+        violations.push(
+          `Distanza minima dal confine (${constraints.boundaryDistance}m) non rispettata`
+        );
         recommendations.push('Ridurre area edificabile o verificare dimensioni terreno');
       }
     }
@@ -179,7 +210,9 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
     // Validazione posti auto
     const requiredParking = Math.ceil(customization.bedrooms * 1.5) + 1;
     if (customization.parkingSpaces < requiredParking) {
-      violations.push(`Posti auto ${customization.parkingSpaces} insufficienti (richiesti: ${requiredParking})`);
+      violations.push(
+        `Posti auto ${customization.parkingSpaces} insufficienti (richiesti: ${requiredParking})`
+      );
       recommendations.push('Aumentare posti auto o ridurre camere');
     }
 
@@ -187,12 +220,14 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
     const greenArea = customization.gardenArea + customization.balconyArea;
     const minGreenArea = totalArea * (constraints.greenAreaMin / 100);
     if (greenArea < minGreenArea) {
-      violations.push(`Area verde ${greenArea}m² insufficiente (minima: ${minGreenArea.toFixed(0)}m²)`);
+      violations.push(
+        `Area verde ${greenArea}m² insufficiente (minima: ${minGreenArea.toFixed(0)}m²)`
+      );
       recommendations.push('Aumentare area giardino o balconi');
     }
 
     const isValid = violations.length === 0;
-    
+
     if (isValid) {
       recommendations.push('✅ Design conforme a tutti i vincoli');
     }
@@ -208,19 +243,21 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
   const handleAIOptimization = (optimization: DesignOptimization) => {
     // Applica le ottimizzazioni AI al design
     console.log('Applicando ottimizzazioni AI:', optimization);
-    
+
     // Qui potresti aggiornare il customization con le ottimizzazioni
     // Per ora chiudiamo l'assistente e torniamo al riepilogo
     setShowAIAssistant(false);
     setActiveTab('summary');
-    
+
     // Mostra notifica di successo
-    toast.success(`Ottimizzazioni AI applicate! ROI migliorato da ${optimization.originalROI}% a ${optimization.optimizedROI}%`);
+    toast.success(
+      `Ottimizzazioni AI applicate! ROI migliorato da ${optimization.originalROI}% a ${optimization.optimizedROI}%`
+    );
   };
 
   const handleTerrainAnalysisComplete = (analysis: any) => {
     console.log('Analisi terreno completata:', analysis);
-    
+
     // Aggiorna la localizzazione con i dati dell'analisi
     if (analysis.geospatialData) {
       setLocation(prev => ({
@@ -229,11 +266,11 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
           ...prev.topography,
           slope: analysis.geospatialData.slope,
           soilType: analysis.geospatialData.soilType,
-          waterTable: analysis.geospatialData.waterTable
-        }
+          waterTable: analysis.geospatialData.waterTable,
+        },
       }));
     }
-    
+
     // Mostra notifica di successo
     toast.success(`Analisi terreno completata! Fattibilità: ${analysis.analysis.suitability}`);
   };
@@ -268,7 +305,8 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
 
   const getStepStatus = (step: string) => {
     if (activeStep === step) return 'active';
-    if (['customization', 'validation', 'summary'].includes(step) && activeStep !== 'location') return 'completed';
+    if (['customization', 'validation', 'summary'].includes(step) && activeStep !== 'location')
+      return 'completed';
     return 'pending';
   };
 
@@ -288,36 +326,42 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
               ✕
             </button>
           </div>
-          
+
           {/* Progress Steps */}
           <div className="flex items-center mt-6 space-x-4">
             {['location', 'customization', 'validation', 'summary'].map((step, index) => (
               <div key={step} className="flex items-center">
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
-                  getStepStatus(step) === 'active' 
-                    ? 'border-blue-600 bg-blue-600 text-white'
-                    : getStepStatus(step) === 'completed'
-                    ? 'border-green-600 bg-green-600 text-white'
-                    : 'border-gray-300 bg-white text-gray-400'
-                }`}>
+                <div
+                  className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
+                    getStepStatus(step) === 'active'
+                      ? 'border-blue-600 bg-blue-600 text-white'
+                      : getStepStatus(step) === 'completed'
+                        ? 'border-green-600 bg-green-600 text-white'
+                        : 'border-gray-300 bg-white text-gray-400'
+                  }`}
+                >
                   {getStepStatus(step) === 'completed' ? (
                     <CheckCircleIcon className="h-5 w-5" />
                   ) : (
                     index + 1
                   )}
                 </div>
-                <span className={`ml-2 text-sm font-medium ${
-                  getStepStatus(step) === 'active' ? 'text-blue-600' : 'text-gray-500'
-                }`}>
+                <span
+                  className={`ml-2 text-sm font-medium ${
+                    getStepStatus(step) === 'active' ? 'text-blue-600' : 'text-gray-500'
+                  }`}
+                >
                   {step === 'location' && 'Localizzazione'}
                   {step === 'customization' && 'Personalizzazione'}
                   {step === 'validation' && 'Validazione'}
                   {step === 'summary' && 'Riepilogo'}
                 </span>
                 {index < 3 && (
-                  <div className={`w-16 h-0.5 ml-4 ${
-                    getStepStatus(step) === 'completed' ? 'bg-green-600' : 'bg-gray-300'
-                  }`} />
+                  <div
+                    className={`w-16 h-0.5 ml-4 ${
+                      getStepStatus(step) === 'completed' ? 'bg-green-600' : 'bg-gray-300'
+                    }`}
+                  />
                 )}
               </div>
             ))}
@@ -350,7 +394,7 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                       <input
                         type="text"
                         value={location.address}
-                        onChange={(e) => handleLocationChange('address', e.target.value)}
+                        onChange={e => handleLocationChange('address', e.target.value)}
                         placeholder="Via Roma 123, Milano, MI"
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
@@ -359,28 +403,36 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Latitudine</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Latitudine
+                      </label>
                       <input
                         type="number"
                         step="0.000001"
                         value={location.coordinates.lat}
-                        onChange={(e) => handleLocationChange('coordinates', { 
-                          ...location.coordinates, 
-                          lat: parseFloat(e.target.value) 
-                        })}
+                        onChange={e =>
+                          handleLocationChange('coordinates', {
+                            ...location.coordinates,
+                            lat: parseFloat(e.target.value),
+                          })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Longitudine</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Longitudine
+                      </label>
                       <input
                         type="number"
                         step="0.000001"
                         value={location.coordinates.lng}
-                        onChange={(e) => handleLocationChange('coordinates', { 
-                          ...location.coordinates, 
-                          lng: parseFloat(e.target.value) 
-                        })}
+                        onChange={e =>
+                          handleLocationChange('coordinates', {
+                            ...location.coordinates,
+                            lng: parseFloat(e.target.value),
+                          })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -395,30 +447,36 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                         type="text"
                         placeholder="Foglio"
                         value={location.cadastral.sheet}
-                        onChange={(e) => handleLocationChange('cadastral', { 
-                          ...location.cadastral, 
-                          sheet: e.target.value 
-                        })}
+                        onChange={e =>
+                          handleLocationChange('cadastral', {
+                            ...location.cadastral,
+                            sheet: e.target.value,
+                          })
+                        }
                         className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                       <input
                         type="text"
                         placeholder="Particella"
                         value={location.cadastral.parcel}
-                        onChange={(e) => handleLocationChange('cadastral', { 
-                          ...location.cadastral, 
-                          parcel: e.target.value 
-                        })}
+                        onChange={e =>
+                          handleLocationChange('cadastral', {
+                            ...location.cadastral,
+                            parcel: e.target.value,
+                          })
+                        }
                         className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                       <input
                         type="text"
                         placeholder="Subalterno"
                         value={location.cadastral.subParcel}
-                        onChange={(e) => handleLocationChange('cadastral', { 
-                          ...location.cadastral, 
-                          subParcel: e.target.value 
-                        })}
+                        onChange={e =>
+                          handleLocationChange('cadastral', {
+                            ...location.cadastral,
+                            subParcel: e.target.value,
+                          })
+                        }
                         className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -433,10 +491,12 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                     </label>
                     <select
                       value={location.zoning.category}
-                      onChange={(e) => handleLocationChange('zoning', { 
-                        ...location.zoning, 
-                        category: e.target.value 
-                      })}
+                      onChange={e =>
+                        handleLocationChange('zoning', {
+                          ...location.zoning,
+                          category: e.target.value,
+                        })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="residenziale">Residenziale</option>
@@ -452,10 +512,12 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                     </label>
                     <select
                       value={location.zoning.density}
-                      onChange={(e) => handleLocationChange('zoning', { 
-                        ...location.zoning, 
-                        density: e.target.value 
-                      })}
+                      onChange={e =>
+                        handleLocationChange('zoning', {
+                          ...location.zoning,
+                          density: e.target.value,
+                        })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="BASSA">Bassa</option>
@@ -472,10 +534,12 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                       <input
                         type="number"
                         value={location.zoning.heightLimit}
-                        onChange={(e) => handleLocationChange('zoning', { 
-                          ...location.zoning, 
-                          heightLimit: parseInt(e.target.value) 
-                        })}
+                        onChange={e =>
+                          handleLocationChange('zoning', {
+                            ...location.zoning,
+                            heightLimit: parseInt(e.target.value),
+                          })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -486,10 +550,12 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                       <input
                         type="number"
                         value={location.zoning.coverageLimit}
-                        onChange={(e) => handleLocationChange('zoning', { 
-                          ...location.zoning, 
-                          coverageLimit: parseInt(e.target.value) 
-                        })}
+                        onChange={e =>
+                          handleLocationChange('zoning', {
+                            ...location.zoning,
+                            coverageLimit: parseInt(e.target.value),
+                          })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -501,7 +567,7 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                     </label>
                     <select
                       value={constraints.seismic}
-                      onChange={(e) => setConstraints(prev => ({ ...prev, seismic: e.target.value }))}
+                      onChange={e => setConstraints(prev => ({ ...prev, seismic: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="Zona 1">Zona 1 - Alta sismicità</option>
@@ -515,17 +581,21 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
 
               {/* Infrastrutture e servizi */}
               <div>
-                <h4 className="text-md font-medium text-gray-900 mb-3">🏗️ Infrastrutture disponibili</h4>
+                <h4 className="text-md font-medium text-gray-900 mb-3">
+                  🏗️ Infrastrutture disponibili
+                </h4>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {Object.entries(location.infrastructure).map(([key, value]) => (
                     <label key={key} className="flex items-center space-x-2 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={value}
-                        onChange={(e) => handleLocationChange('infrastructure', { 
-                          ...location.infrastructure, 
-                          [key]: e.target.checked 
-                        })}
+                        onChange={e =>
+                          handleLocationChange('infrastructure', {
+                            ...location.infrastructure,
+                            [key]: e.target.checked,
+                          })
+                        }
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
                       <span className="text-sm text-gray-700 capitalize">
@@ -559,7 +629,7 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                 {/* Dimensioni e layout */}
                 <div className="space-y-4">
                   <h4 className="font-medium text-gray-900">📐 Dimensioni e Layout</h4>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Area edificabile (m²)
@@ -569,7 +639,7 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                       min={template.minArea}
                       max={template.maxArea}
                       value={customization.area}
-                      onChange={(e) => handleCustomizationChange('area', parseInt(e.target.value))}
+                      onChange={e => handleCustomizationChange('area', parseInt(e.target.value))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                     <p className="text-xs text-gray-500 mt-1">
@@ -587,7 +657,9 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                         min="1"
                         max="10"
                         value={customization.floors}
-                        onChange={(e) => handleCustomizationChange('floors', parseInt(e.target.value))}
+                        onChange={e =>
+                          handleCustomizationChange('floors', parseInt(e.target.value))
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -600,7 +672,9 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                         min="0"
                         max="20"
                         value={customization.bedrooms}
-                        onChange={(e) => handleCustomizationChange('bedrooms', parseInt(e.target.value))}
+                        onChange={e =>
+                          handleCustomizationChange('bedrooms', parseInt(e.target.value))
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -608,15 +682,15 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Bagni
-                      </label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Bagni</label>
                       <input
                         type="number"
                         min="1"
                         max="10"
                         value={customization.bathrooms}
-                        onChange={(e) => handleCustomizationChange('bathrooms', parseInt(e.target.value))}
+                        onChange={e =>
+                          handleCustomizationChange('bathrooms', parseInt(e.target.value))
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -629,7 +703,9 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                         min="0"
                         max="20"
                         value={customization.parkingSpaces}
-                        onChange={(e) => handleCustomizationChange('parkingSpaces', parseInt(e.target.value))}
+                        onChange={e =>
+                          handleCustomizationChange('parkingSpaces', parseInt(e.target.value))
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -644,7 +720,9 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                         type="number"
                         min="0"
                         value={customization.gardenArea}
-                        onChange={(e) => handleCustomizationChange('gardenArea', parseInt(e.target.value))}
+                        onChange={e =>
+                          handleCustomizationChange('gardenArea', parseInt(e.target.value))
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -656,7 +734,9 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                         type="number"
                         min="0"
                         value={customization.balconyArea}
-                        onChange={(e) => handleCustomizationChange('balconyArea', parseInt(e.target.value))}
+                        onChange={e =>
+                          handleCustomizationChange('balconyArea', parseInt(e.target.value))
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -666,14 +746,14 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                 {/* Materiali e finiture */}
                 <div className="space-y-4">
                   <h4 className="font-medium text-gray-900">🏗️ Materiali e Finiture</h4>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Tipo di tetto
                     </label>
                     <select
                       value={customization.roofType}
-                      onChange={(e) => handleCustomizationChange('roofType', e.target.value)}
+                      onChange={e => handleCustomizationChange('roofType', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="FLAT">Piano</option>
@@ -689,7 +769,7 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                     </label>
                     <select
                       value={customization.facadeMaterial}
-                      onChange={(e) => handleCustomizationChange('facadeMaterial', e.target.value)}
+                      onChange={e => handleCustomizationChange('facadeMaterial', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="BRICK">Mattone</option>
@@ -705,7 +785,7 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                     </label>
                     <select
                       value={customization.energyClass}
-                      onChange={(e) => handleCustomizationChange('energyClass', e.target.value)}
+                      onChange={e => handleCustomizationChange('energyClass', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="A+">A+ (Eccellente)</option>
@@ -725,7 +805,7 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                     </label>
                     <select
                       value={customization.interiorStyle}
-                      onChange={(e) => handleCustomizationChange('interiorStyle', e.target.value)}
+                      onChange={e => handleCustomizationChange('interiorStyle', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="MODERN">Moderno</option>
@@ -746,10 +826,12 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                         <input
                           type="color"
                           value={customization.colorScheme.primary}
-                          onChange={(e) => handleCustomizationChange('colorScheme', { 
-                            ...customization.colorScheme, 
-                            primary: e.target.value 
-                          })}
+                          onChange={e =>
+                            handleCustomizationChange('colorScheme', {
+                              ...customization.colorScheme,
+                              primary: e.target.value,
+                            })
+                          }
                           className="w-full h-10 border border-gray-300 rounded-lg cursor-pointer"
                         />
                       </div>
@@ -758,10 +840,12 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                         <input
                           type="color"
                           value={customization.colorScheme.secondary}
-                          onChange={(e) => handleCustomizationChange('colorScheme', { 
-                            ...customization.colorScheme, 
-                            secondary: e.target.value 
-                          })}
+                          onChange={e =>
+                            handleCustomizationChange('colorScheme', {
+                              ...customization.colorScheme,
+                              secondary: e.target.value,
+                            })
+                          }
                           className="w-full h-10 border border-gray-300 rounded-lg cursor-pointer"
                         />
                       </div>
@@ -770,10 +854,12 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                         <input
                           type="color"
                           value={customization.colorScheme.accent}
-                          onChange={(e) => handleCustomizationChange('colorScheme', { 
-                            ...customization.colorScheme, 
-                            accent: e.target.value 
-                          })}
+                          onChange={e =>
+                            handleCustomizationChange('colorScheme', {
+                              ...customization.colorScheme,
+                              accent: e.target.value,
+                            })
+                          }
                           className="w-full h-10 border border-gray-300 rounded-lg cursor-pointer"
                         />
                       </div>
@@ -788,20 +874,20 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
           {activeStep === 'validation' && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  ✅ Validazione Vincoli
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">✅ Validazione Vincoli</h3>
                 <p className="text-gray-600 mb-6">
                   Verifica che il design rispetti tutti i vincoli urbanistici e normativi
                 </p>
               </div>
 
               {/* Risultato validazione */}
-              <div className={`p-4 rounded-lg border ${
-                validationResult.isValid 
-                  ? 'bg-green-50 border-green-200' 
-                  : 'bg-red-50 border-red-200'
-              }`}>
+              <div
+                className={`p-4 rounded-lg border ${
+                  validationResult.isValid
+                    ? 'bg-green-50 border-green-200'
+                    : 'bg-red-50 border-red-200'
+                }`}
+              >
                 <div className="flex items-start">
                   <div className="flex-shrink-0">
                     {validationResult.isValid ? (
@@ -811,18 +897,21 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                     )}
                   </div>
                   <div className="ml-3">
-                    <h4 className={`text-lg font-medium ${
-                      validationResult.isValid ? 'text-green-800' : 'text-red-800'
-                    }`}>
+                    <h4
+                      className={`text-lg font-medium ${
+                        validationResult.isValid ? 'text-green-800' : 'text-red-800'
+                      }`}
+                    >
                       {validationResult.isValid ? 'Design Valido!' : 'Violazioni Trovate'}
                     </h4>
-                    <p className={`text-sm mt-1 ${
-                      validationResult.isValid ? 'text-green-700' : 'text-red-700'
-                    }`}>
-                      {validationResult.isValid 
+                    <p
+                      className={`text-sm mt-1 ${
+                        validationResult.isValid ? 'text-green-700' : 'text-red-700'
+                      }`}
+                    >
+                      {validationResult.isValid
                         ? 'Il tuo design rispetta tutti i vincoli urbanistici e normativi.'
-                        : 'Sono state identificate alcune violazioni che devono essere corrette.'
-                      }
+                        : 'Sono state identificate alcune violazioni che devono essere corrette.'}
                     </p>
                   </div>
                 </div>
@@ -831,7 +920,9 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
               {/* Violazioni */}
               {validationResult.violations.length > 0 && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <h4 className="text-md font-medium text-red-800 mb-3">❌ Violazioni Identificate</h4>
+                  <h4 className="text-md font-medium text-red-800 mb-3">
+                    ❌ Violazioni Identificate
+                  </h4>
                   <ul className="space-y-2">
                     {validationResult.violations.map((violation, index) => (
                       <li key={index} className="flex items-start">
@@ -860,7 +951,9 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
 
               {/* Riepilogo vincoli */}
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <h4 className="text-md font-medium text-gray-800 mb-3">📋 Riepilogo Vincoli Applicati</h4>
+                <h4 className="text-md font-medium text-gray-800 mb-3">
+                  📋 Riepilogo Vincoli Applicati
+                </h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div>
                     <span className="text-gray-600">Distanza confini:</span>
@@ -887,9 +980,7 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
           {activeStep === 'summary' && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  📋 Riepilogo Progetto
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">📋 Riepilogo Progetto</h3>
                 <p className="text-gray-600 mb-6">
                   Rivedi tutti i dettagli prima di procedere con la creazione
                 </p>
@@ -906,7 +997,9 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                     </div>
                     <div className="flex justify-between">
                       <span className="text-blue-700">Categoria:</span>
-                      <span className="font-medium capitalize">{template.category.toLowerCase()}</span>
+                      <span className="font-medium capitalize">
+                        {template.category.toLowerCase()}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-blue-700">Zona:</span>
@@ -914,7 +1007,9 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                     </div>
                     <div className="flex justify-between">
                       <span className="text-blue-700">Budget:</span>
-                      <span className="font-medium capitalize">{template.budget.toLowerCase()}</span>
+                      <span className="font-medium capitalize">
+                        {template.budget.toLowerCase()}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -949,7 +1044,9 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-purple-700">Indirizzo:</span>
-                    <span className="ml-2 font-medium">{location.address || 'Non specificato'}</span>
+                    <span className="ml-2 font-medium">
+                      {location.address || 'Non specificato'}
+                    </span>
                   </div>
                   <div>
                     <span className="text-purple-700">Coordinate:</span>
@@ -969,23 +1066,28 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
               </div>
 
               {/* Riepilogo validazione */}
-              <div className={`border rounded-lg p-4 ${
-                validationResult.isValid 
-                  ? 'bg-green-50 border-green-200' 
-                  : 'bg-yellow-50 border-yellow-200'
-              }`}>
-                <h4 className={`font-medium mb-3 ${
-                  validationResult.isValid ? 'text-green-800' : 'text-yellow-800'
-                }`}>
+              <div
+                className={`border rounded-lg p-4 ${
+                  validationResult.isValid
+                    ? 'bg-green-50 border-green-200'
+                    : 'bg-yellow-50 border-yellow-200'
+                }`}
+              >
+                <h4
+                  className={`font-medium mb-3 ${
+                    validationResult.isValid ? 'text-green-800' : 'text-yellow-800'
+                  }`}
+                >
                   {validationResult.isValid ? '✅ Validazione Superata' : '⚠️ Validazione Parziale'}
                 </h4>
-                <p className={`text-sm ${
-                  validationResult.isValid ? 'text-green-700' : 'text-yellow-700'
-                }`}>
-                  {validationResult.isValid 
+                <p
+                  className={`text-sm ${
+                    validationResult.isValid ? 'text-green-700' : 'text-yellow-700'
+                  }`}
+                >
+                  {validationResult.isValid
                     ? 'Il progetto rispetta tutti i vincoli urbanistici e normativi.'
-                    : 'Il progetto ha alcune violazioni minori che possono essere gestite.'
-                  }
+                    : 'Il progetto ha alcune violazioni minori che possono essere gestite.'}
                 </p>
               </div>
             </div>
@@ -1016,7 +1118,7 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                   >
                     🗺️ Analisi Terreno
                   </button>
-                  
+
                   <button
                     onClick={() => setShowAIAssistant(true)}
                     className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all transform hover:scale-105"
@@ -1025,7 +1127,7 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                   </button>
                 </>
               )}
-              
+
               {activeStep !== 'summary' ? (
                 <button
                   onClick={nextStep}
@@ -1062,11 +1164,16 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
-            
+
             <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
               <AIDesignAssistant
                 template={template}
@@ -1091,11 +1198,16 @@ export default function TemplateCustomizer({ template, onCustomize, onClose }: T
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
-            
+
             <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
               <TerrainAnalysisAdvanced
                 location={location}

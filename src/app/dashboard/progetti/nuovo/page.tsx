@@ -1,18 +1,19 @@
 'use client';
 
-import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { addProject, NewProjectData } from '@/lib/firestoreService';
+import React, { useState } from 'react';
+
 import { BuildingIcon } from '@/components/icons';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { addProject, NewProjectData } from '@/lib/firestoreService';
 
 export default function NuovoProgettoPage() {
   const { t } = useLanguage();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   const [formData, setFormData] = useState<Partial<NewProjectData>>({
     name: '',
     description: '',
@@ -26,12 +27,14 @@ export default function NuovoProgettoPage() {
     units: undefined,
     propertyType: 'RESIDENZIALE',
     energyClass: '',
-    images: []
+    images: [],
   });
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value, type } = e.target;
-    
+
     if (type === 'number') {
       setFormData(prev => ({ ...prev, [name]: value === '' ? undefined : Number(value) }));
     } else if (name === 'startDate' || name === 'endDate') {
@@ -40,21 +43,21 @@ export default function NuovoProgettoPage() {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
+
     try {
       // Validazione
       if (!formData.name || !formData.description || !formData.location) {
         throw new Error(t('form.validation.requiredFields', 'newProject'));
       }
-      
+
       // Invio dati
       await addProject(formData as NewProjectData);
-      
+
       // Reindirizzamento
       router.push('/dashboard/progetti');
     } catch (err: any) {
@@ -64,7 +67,7 @@ export default function NuovoProgettoPage() {
       setLoading(false);
     }
   };
-  
+
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto">
@@ -73,19 +76,20 @@ export default function NuovoProgettoPage() {
             <BuildingIcon className="h-8 w-8 text-blue-600 mr-3" />
             <h2 className="text-2xl font-semibold text-gray-800">{t('subtitle', 'newProject')}</h2>
           </div>
-          
+
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
               {error}
             </div>
           )}
-          
+
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               {/* Nome progetto */}
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('form.projectName', 'newProject')}<span className="text-red-500">*</span>
+                  {t('form.projectName', 'newProject')}
+                  <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -96,11 +100,12 @@ export default function NuovoProgettoPage() {
                   required
                 />
               </div>
-              
+
               {/* Descrizione */}
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('form.description', 'newProject')}<span className="text-red-500">*</span>
+                  {t('form.description', 'newProject')}
+                  <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   name="description"
@@ -111,11 +116,12 @@ export default function NuovoProgettoPage() {
                   required
                 />
               </div>
-              
+
               {/* Stato */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('form.status', 'newProject')}<span className="text-red-500">*</span>
+                  {t('form.status', 'newProject')}
+                  <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="status"
@@ -130,11 +136,12 @@ export default function NuovoProgettoPage() {
                   <option value="COMPLETATO">{t('statuses.completed', 'newProject')}</option>
                 </select>
               </div>
-              
+
               {/* Tipologia */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('form.type', 'newProject')}<span className="text-red-500">*</span>
+                  {t('form.type', 'newProject')}
+                  <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="propertyType"
@@ -149,11 +156,12 @@ export default function NuovoProgettoPage() {
                   <option value="INDUSTRIALE">{t('types.industrial', 'newProject')}</option>
                 </select>
               </div>
-              
+
               {/* Località */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('form.location', 'newProject')}<span className="text-red-500">*</span>
+                  {t('form.location', 'newProject')}
+                  <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -164,7 +172,7 @@ export default function NuovoProgettoPage() {
                   required
                 />
               </div>
-              
+
               {/* Responsabile */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -178,7 +186,7 @@ export default function NuovoProgettoPage() {
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-              
+
               {/* Data inizio */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -192,7 +200,7 @@ export default function NuovoProgettoPage() {
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-              
+
               {/* Data fine prevista */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -206,7 +214,7 @@ export default function NuovoProgettoPage() {
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-              
+
               {/* Budget */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -222,7 +230,7 @@ export default function NuovoProgettoPage() {
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-              
+
               {/* Superficie */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -238,7 +246,7 @@ export default function NuovoProgettoPage() {
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-              
+
               {/* Numero unità */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -254,7 +262,7 @@ export default function NuovoProgettoPage() {
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-              
+
               {/* Classe energetica */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -270,7 +278,7 @@ export default function NuovoProgettoPage() {
                 />
               </div>
             </div>
-            
+
             <div className="flex justify-end space-x-3">
               <button
                 type="button"
@@ -292,4 +300,4 @@ export default function NuovoProgettoPage() {
       </div>
     </DashboardLayout>
   );
-} 
+}

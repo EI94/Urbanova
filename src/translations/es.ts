@@ -31,7 +31,7 @@ export const es = {
     user: 'Usuario',
     lastUpdate: 'Última actualización',
     selectLanguage: 'Seleccionar idioma',
-    languageSettings: 'Configuración de idioma'
+    languageSettings: 'Configuración de idioma',
   },
   navigation: {
     dashboard: 'Panel de Control',
@@ -57,7 +57,7 @@ export const es = {
     permits: 'Permisos',
     clients: 'Clientes',
     notifications: 'Notificaciones',
-    settings: 'Configuración'
+    settings: 'Configuración',
   },
   navigationSections: {
     dashboard: 'Panel de Control',
@@ -68,7 +68,7 @@ export const es = {
     marketing: 'Marketing y Ventas',
     epc: 'Construcción (EPC)',
     businessPlan: 'Plan de Negocio',
-    other: 'Otros'
+    other: 'Otros',
   },
   dashboard: {
     title: 'Panel de Control',
@@ -93,7 +93,7 @@ export const es = {
     onHold: 'En Espera',
     completed: 'Completado',
     errorLoadingStats: 'Error al cargar estadísticas',
-    loadingStats: 'Cargando estadísticas...'
+    loadingStats: 'Cargando estadísticas...',
   },
   feasibility: {
     title: 'Análisis de Viabilidad',
@@ -106,7 +106,7 @@ export const es = {
       averageMargin: 'Marginalidad Media',
       totalInvestment: 'Inversión Total',
       onTarget: 'En Objetivo',
-      fromMostProfitable: 'Del más rentable'
+      fromMostProfitable: 'Del más rentable',
     },
     emptyRankingTitle: 'No hay proyectos de viabilidad',
     emptyRankingSubtitle: 'Crea tu primer proyecto de viabilidad para empezar',
@@ -124,13 +124,13 @@ export const es = {
       actions: 'Acciones',
       view: 'Ver',
       edit: 'Editar',
-      delete: 'Eliminar'
+      delete: 'Eliminar',
     },
     modal: {
       compareProjects: 'Comparar Proyectos',
       firstProject: 'Primer Proyecto',
       secondProject: 'Segundo Proyecto',
-      selectProject: 'Selecciona proyecto...'
+      selectProject: 'Selecciona proyecto...',
     },
     toasts: {
       loadError: 'Error al cargar datos',
@@ -138,9 +138,9 @@ export const es = {
       deleteError: 'Error al eliminar el proyecto',
       selectTwo: 'Selecciona dos proyectos para comparar',
       compareCreated: 'Comparación creada con éxito',
-      compareError: 'Error al crear la comparación'
+      compareError: 'Error al crear la comparación',
     },
-    confirmDelete: '¿Seguro que quieres eliminar este proyecto?'
+    confirmDelete: '¿Seguro que quieres eliminar este proyecto?',
   },
   landScraping: {
     title: 'Búsqueda AI de Terrenos',
@@ -162,7 +162,7 @@ export const es = {
     analysis: 'Análisis',
     favorites: 'Favoritos',
     scheduledSearches: 'Búsquedas Programadas',
-    searchHistory: 'Búsquedas Recientes'
+    searchHistory: 'Búsquedas Recientes',
   },
   marketIntelligence: {
     title: 'Inteligencia de Mercado',
@@ -179,11 +179,12 @@ export const es = {
     newAISearch: 'Nueva Búsqueda IA',
     noOpportunitiesFound: 'No se encontraron oportunidades',
     startNewSearch: 'Inicia una nueva búsqueda IA para descubrir oportunidades de mercado',
-    startFirstSearch: 'Iniciar Primera Búsqueda'
+    startFirstSearch: 'Iniciar Primera Búsqueda',
   },
   aiLandScraping: {
     title: 'Búsqueda IA de Terrenos',
-    subtitle: 'Descubre automáticamente las mejores oportunidades de terrenos y recibe notificaciones por email',
+    subtitle:
+      'Descubre automáticamente las mejores oportunidades de terrenos y recibe notificaciones por email',
     location: 'Ubicación',
     locationPlaceholder: 'ej. Milán, Roma, Turín...',
     minPrice: 'Precio Mín (€)',
@@ -214,7 +215,7 @@ export const es = {
     resultsCount: 'resultados',
     online: 'En Línea',
     scraping: 'Scraping',
-    ai: 'IA'
+    ai: 'IA',
   },
   newProject: {
     title: 'Nuevo Proyecto',
@@ -236,25 +237,25 @@ export const es = {
       datePlaceholder: 'dd/mm/aaaa',
       validation: {
         requiredFields: 'Completa todos los campos obligatorios',
-        saveError: 'Ocurrió un error al guardar el proyecto'
-      }
+        saveError: 'Ocurrió un error al guardar el proyecto',
+      },
     },
     statuses: {
       planning: 'Planificación',
       inProgress: 'En Progreso',
       onHold: 'En Espera',
-      completed: 'Completado'
+      completed: 'Completado',
     },
     types: {
       residential: 'Residencial',
       commercial: 'Comercial',
       mixed: 'Mixto',
-      industrial: 'Industrial'
+      industrial: 'Industrial',
     },
     buttons: {
       cancel: 'Cancelar',
-      saveProject: 'Guardar Proyecto'
-    }
+      saveProject: 'Guardar Proyecto',
+    },
   },
   permitsCompliance: {
     title: 'Sistema de Permisos Inteligente',
@@ -263,7 +264,7 @@ export const es = {
       overview: 'Resumen',
       permits: 'Permisos',
       timeline: 'Cronograma',
-      alerts: 'Alertas'
+      alerts: 'Alertas',
     },
     stats: {
       totalPermits: 'Total de Permisos',
@@ -271,19 +272,19 @@ export const es = {
       inProgress: 'En Progreso',
       critical: 'Críticos',
       totalCost: 'Costo Total',
-      averageProgress: 'Progreso Promedio'
+      averageProgress: 'Progreso Promedio',
     },
     quickActions: {
       newPermit: 'Nuevo Permiso',
       generateReport: 'Generar Reporte de Cumplimiento',
       scheduleInspection: 'Programar Inspección',
-      updateTimeline: 'Actualizar Cronograma del Proyecto'
+      updateTimeline: 'Actualizar Cronograma del Proyecto',
     },
     categories: {
       urban: 'PLANIFICACIÓN URBANA',
       environmental: 'AMBIENTAL',
       safety: 'SEGURIDAD',
-      energy: 'ENERGÍA'
+      energy: 'ENERGÍA',
     },
     criticalAlerts: {
       title: 'Alertas Críticas',
@@ -291,8 +292,8 @@ export const es = {
       buildingPermitMessage: 'Presentar solicitud de prórroga dentro de 10 días',
       viaDelay: 'Retraso VIA',
       viaMessage: 'Acelerar recolección de documentación faltante',
-      seeAllAlerts: 'Ver todas las alertas →'
-    }
+      seeAllAlerts: 'Ver todas las alertas →',
+    },
   },
   projectTimeline: {
     title: 'Cronograma AI del Proyecto',
@@ -306,14 +307,14 @@ export const es = {
       ganttChart: 'Diagrama Gantt',
       kanbanBoard: 'Tablero Kanban',
       milestoneTimeline: 'Cronograma de Hitos',
-      resources: 'Recursos'
+      resources: 'Recursos',
     },
     filters: {
       all: 'Todas',
       design: 'DISEÑO',
       permits: 'PERMISOS',
       construction: 'CONSTRUCCIÓN',
-      marketing: 'MARKETING'
+      marketing: 'MARKETING',
     },
     months: {
       jan: 'ene',
@@ -327,13 +328,13 @@ export const es = {
       sep: 'sep',
       oct: 'oct',
       nov: 'nov',
-      dec: 'dic'
+      dec: 'dic',
     },
     timelineViews: {
       threeMonths: '3M',
       sixMonths: '6M',
-      oneYear: '1Y'
-    }
+      oneYear: '1Y',
+    },
   },
   notifications: {
     title: 'Notificaciones',
@@ -354,19 +355,19 @@ export const es = {
       permit: 'Permiso',
       task: 'Tarea',
       system: 'Sistema',
-      marketing: 'Marketing'
+      marketing: 'Marketing',
     },
     priorities: {
       low: 'Baja',
       medium: 'Media',
       high: 'Alta',
-      critical: 'Crítica'
+      critical: 'Crítica',
     },
     actions: {
       view: 'Ver',
       dismiss: 'Descartar',
-      snooze: 'Posponer'
-    }
+      snooze: 'Posponer',
+    },
   },
   userProfile: {
     title: 'Perfil de Usuario',
@@ -405,7 +406,7 @@ export const es = {
     enable2FA: 'Habilitar 2FA',
     disable2FA: 'Deshabilitar 2FA',
     backupCodes: 'Códigos de Respaldo',
-    generateBackupCodes: 'Generar Nuevos Códigos'
+    generateBackupCodes: 'Generar Nuevos Códigos',
   },
   projects: {
     title: 'Proyectos',
@@ -423,7 +424,7 @@ export const es = {
     progress: 'Progreso',
     budget: 'Presupuesto',
     units: 'unidades',
-    details: 'Detalles'
+    details: 'Detalles',
   },
   settings: {
     title: 'Configuración',
@@ -433,21 +434,21 @@ export const es = {
       subtitle: 'Gestiona datos personales y preferencias',
       personalData: 'Datos Personales',
       languagePreferences: 'Preferencias de Idioma',
-      timezone: 'Zona Horaria'
+      timezone: 'Zona Horaria',
     },
     security: {
       title: 'Seguridad',
       subtitle: 'Configura seguridad y privacidad',
       password: 'Contraseña',
       twoFactorAuth: 'Autenticación 2FA',
-      privacy: 'Privacidad'
+      privacy: 'Privacidad',
     },
     system: {
       title: 'Sistema',
       subtitle: 'Configuración del sistema y API',
       apiKeys: 'Claves API',
       integrations: 'Integraciones',
-      backup: 'Respaldo'
-    }
-  }
-}; 
+      backup: 'Respaldo',
+    },
+  },
+};

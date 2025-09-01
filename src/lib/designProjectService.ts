@@ -1,20 +1,21 @@
-import { 
-  collection, 
-  doc, 
-  setDoc, 
-  getDocs, 
-  getDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
-  orderBy, 
+import {
+  collection,
+  doc,
+  setDoc,
+  getDocs,
+  getDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
   limit,
   serverTimestamp,
-  Timestamp
+  Timestamp,
 } from 'firebase/firestore';
-import { db } from './firebase';
+
 import { DesignTemplate } from './designCenterService';
+import { db } from './firebase';
 
 export interface DesignProject {
   id: string;
@@ -22,7 +23,16 @@ export interface DesignProject {
   description: string;
   templateId: string;
   template: DesignTemplate;
-  status: 'PLANNING' | 'IN_PROGRESS' | 'COMPLETED' | 'ON_HOLD' | 'DRAFT' | 'IN_REVIEW' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
+  status:
+    | 'PLANNING'
+    | 'IN_PROGRESS'
+    | 'COMPLETED'
+    | 'ON_HOLD'
+    | 'DRAFT'
+    | 'IN_REVIEW'
+    | 'APPROVED'
+    | 'REJECTED'
+    | 'CANCELLED';
   userId: string;
   location: string;
   category?: string;
@@ -106,9 +116,9 @@ export class DesignProjectService {
   async createProject(projectData: CreateProjectData): Promise<string> {
     try {
       console.log('🏗️ [DesignProjectService] Creazione nuovo progetto:', projectData.name);
-      
+
       const projectId = `design-project-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
+
       const newProject: DesignProject = {
         id: projectId,
         ...projectData,
@@ -118,30 +128,29 @@ export class DesignProjectService {
         updatedAt: new Date(),
         budget: {
           ...projectData.budget,
-          actual: 0
+          actual: 0,
         },
         timeline: {
           ...projectData.timeline,
           startDate: undefined,
-          endDate: undefined
+          endDate: undefined,
         },
         tags: projectData.tags || [],
         priority: projectData.priority || 'MEDIUM',
         teamMembers: [],
         documents: [],
-        images: []
+        images: [],
       };
 
       const projectRef = doc(db, this.COLLECTION_NAME, projectId);
       await setDoc(projectRef, {
         ...newProject,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
 
       console.log('✅ [DesignProjectService] Progetto creato con successo:', projectId);
       return projectId;
-
     } catch (error) {
       console.error('❌ [DesignProjectService] Errore creazione progetto:', error);
       throw new Error(`Impossibile creare il progetto: ${error}`);
@@ -154,29 +163,24 @@ export class DesignProjectService {
   async getUserProjects(userId: string): Promise<DesignProject[]> {
     try {
       console.log('📋 [DesignProjectService] Recupero progetti utente:', userId);
-      
+
       const projectsRef = collection(db, this.COLLECTION_NAME);
-      const q = query(
-        projectsRef,
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
-      );
+      const q = query(projectsRef, where('userId', '==', userId), orderBy('createdAt', 'desc'));
 
       const querySnapshot = await getDocs(q);
       const projects: DesignProject[] = [];
 
-      querySnapshot.forEach((doc) => {
+      querySnapshot.forEach(doc => {
         const data = doc.data();
         projects.push({
           ...data,
           createdAt: data.createdAt?.toDate() || new Date(),
-          updatedAt: data.updatedAt?.toDate() || new Date()
+          updatedAt: data.updatedAt?.toDate() || new Date(),
         } as DesignProject);
       });
 
       console.log('✅ [DesignProjectService] Progetti recuperati:', projects.length);
       return projects;
-
     } catch (error) {
       console.error('❌ [DesignProjectService] Errore recupero progetti:', error);
       throw new Error(`Impossibile recuperare i progetti: ${error}`);
@@ -189,7 +193,7 @@ export class DesignProjectService {
   async getProject(projectId: string): Promise<DesignProject | null> {
     try {
       console.log('🔍 [DesignProjectService] Recupero progetto:', projectId);
-      
+
       const projectRef = doc(db, this.COLLECTION_NAME, projectId);
       const projectDoc = await getDoc(projectRef);
 
@@ -202,12 +206,11 @@ export class DesignProjectService {
       const project: DesignProject = {
         ...data,
         createdAt: data.createdAt?.toDate() || new Date(),
-        updatedAt: data.updatedAt?.toDate() || new Date()
+        updatedAt: data.updatedAt?.toDate() || new Date(),
       } as DesignProject;
 
       console.log('✅ [DesignProjectService] Progetto recuperato:', project.name);
       return project;
-
     } catch (error) {
       console.error('❌ [DesignProjectService] Errore recupero progetto:', error);
       throw new Error(`Impossibile recuperare il progetto: ${error}`);
@@ -220,15 +223,14 @@ export class DesignProjectService {
   async updateProject(projectId: string, updates: Partial<DesignProject>): Promise<void> {
     try {
       console.log('✏️ [DesignProjectService] Aggiornamento progetto:', projectId);
-      
+
       const projectRef = doc(db, this.COLLECTION_NAME, projectId);
       await updateDoc(projectRef, {
         ...updates,
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
 
       console.log('✅ [DesignProjectService] Progetto aggiornato con successo');
-
     } catch (error) {
       console.error('❌ [DesignProjectService] Errore aggiornamento progetto:', error);
       throw new Error(`Impossibile aggiornare il progetto: ${error}`);
@@ -241,12 +243,11 @@ export class DesignProjectService {
   async deleteProject(projectId: string): Promise<void> {
     try {
       console.log('🗑️ [DesignProjectService] Eliminazione progetto:', projectId);
-      
+
       const projectRef = doc(db, this.COLLECTION_NAME, projectId);
       await deleteDoc(projectRef);
 
       console.log('✅ [DesignProjectService] Progetto eliminato con successo');
-
     } catch (error) {
       console.error('❌ [DesignProjectService] Errore eliminazione progetto:', error);
       throw new Error(`Impossibile eliminare il progetto: ${error}`);
@@ -259,11 +260,10 @@ export class DesignProjectService {
   async updateProgress(projectId: string, progress: number): Promise<void> {
     try {
       console.log('📊 [DesignProjectService] Aggiornamento progresso:', projectId, progress);
-      
-      await this.updateProject(projectId, { progress });
-      
-      console.log('✅ [DesignProjectService] Progresso aggiornato');
 
+      await this.updateProject(projectId, { progress });
+
+      console.log('✅ [DesignProjectService] Progresso aggiornato');
     } catch (error) {
       console.error('❌ [DesignProjectService] Errore aggiornamento progresso:', error);
       throw new Error(`Impossibile aggiornare il progresso: ${error}`);
@@ -276,11 +276,10 @@ export class DesignProjectService {
   async changeStatus(projectId: string, status: DesignProject['status']): Promise<void> {
     try {
       console.log('🔄 [DesignProjectService] Cambio stato progetto:', projectId, status);
-      
-      await this.updateProject(projectId, { status });
-      
-      console.log('✅ [DesignProjectService] Stato aggiornato');
 
+      await this.updateProject(projectId, { status });
+
+      console.log('✅ [DesignProjectService] Stato aggiornato');
     } catch (error) {
       console.error('❌ [DesignProjectService] Errore cambio stato:', error);
       throw new Error(`Impossibile cambiare lo stato: ${error}`);
@@ -293,7 +292,7 @@ export class DesignProjectService {
   async addTeamMember(projectId: string, memberId: string): Promise<void> {
     try {
       console.log('👥 [DesignProjectService] Aggiunta membro team:', projectId, memberId);
-      
+
       const project = await this.getProject(projectId);
       if (!project) {
         throw new Error('Progetto non trovato');
@@ -301,9 +300,8 @@ export class DesignProjectService {
 
       const updatedMembers = [...(project.teamMembers || []), memberId];
       await this.updateProject(projectId, { teamMembers: updatedMembers });
-      
-      console.log('✅ [DesignProjectService] Membro aggiunto al team');
 
+      console.log('✅ [DesignProjectService] Membro aggiunto al team');
     } catch (error) {
       console.error('❌ [DesignProjectService] Errore aggiunta membro team:', error);
       throw new Error(`Impossibile aggiungere il membro al team: ${error}`);
@@ -322,27 +320,27 @@ export class DesignProjectService {
   }> {
     try {
       console.log('📊 [DesignProjectService] Recupero statistiche progetti');
-      
+
       const projects = await this.getUserProjects(userId);
-      
+
       const stats = {
         total: projects.length,
         byStatus: {} as Record<string, number>,
         byPriority: {} as Record<string, number>,
         totalBudget: 0,
-        averageProgress: 0
+        averageProgress: 0,
       };
 
       projects.forEach(project => {
         // Conta per stato
         stats.byStatus[project.status] = (stats.byStatus[project.status] || 0) + 1;
-        
+
         // Conta per priorità
         stats.byPriority[project.priority] = (stats.byPriority[project.priority] || 0) + 1;
-        
+
         // Somma budget
         stats.totalBudget += project.budget.estimated;
-        
+
         // Somma progresso
         stats.averageProgress += project.progress;
       });
@@ -354,7 +352,6 @@ export class DesignProjectService {
 
       console.log('✅ [DesignProjectService] Statistiche calcolate:', stats);
       return stats;
-
     } catch (error) {
       console.error('❌ [DesignProjectService] Errore calcolo statistiche:', error);
       throw new Error(`Impossibile calcolare le statistiche: ${error}`);

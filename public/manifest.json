@@ -10,11 +10,7 @@
   "scope": "/",
   "lang": "it",
   "dir": "ltr",
-  "categories": [
-    "business",
-    "productivity",
-    "utilities"
-  ],
+  "categories": ["business", "productivity", "utilities"],
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
@@ -188,12 +184,7 @@
       ]
     }
   },
-  "permissions": [
-    "notifications",
-    "geolocation",
-    "camera",
-    "microphone"
-  ],
+  "permissions": ["notifications", "geolocation", "camera", "microphone"],
   "features": [
     "Cross Platform",
     "Offline Support",

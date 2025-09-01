@@ -1,26 +1,27 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { feedbackService, Feedback } from '@/lib/feedbackService';
-import { toast } from 'react-hot-toast';
-import { 
-  Bug, 
-  Lightbulb, 
-  Star, 
-  AlertCircle, 
-  CheckCircle, 
-  Clock, 
-  User, 
+import {
+  Bug,
+  Lightbulb,
+  Star,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  User,
   Calendar,
   Filter,
   Search,
   Eye,
   MessageSquare,
   TrendingUp,
-  BarChart3
+  BarChart3,
 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
+
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { useAuth } from '@/contexts/AuthContext';
+import { feedbackService, Feedback } from '@/lib/feedbackService';
 
 interface Feedback {
   id: string;
@@ -74,8 +75,12 @@ const FeedbackDashboard: React.FC = () => {
     if (filterType !== 'all' && feedback.type !== filterType) return false;
     if (filterPriority !== 'all' && feedback.priority !== filterPriority) return false;
     if (filterStatus !== 'all' && feedback.status !== filterStatus) return false;
-    if (searchTerm && !feedback.title.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !feedback.description.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+    if (
+      searchTerm &&
+      !feedback.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !feedback.description.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+      return false;
     return true;
   });
 
@@ -83,7 +88,7 @@ const FeedbackDashboard: React.FC = () => {
     try {
       await feedbackService.updateFeedbackStatus(feedbackId, status);
       toast('Stato feedback aggiornato', { icon: '✅' });
-      
+
       // Ricarica i feedback per aggiornare l'UI
       const feedbacksData = await feedbackService.getAllFeedback();
       setFeedbacks(feedbacksData);
@@ -95,51 +100,76 @@ const FeedbackDashboard: React.FC = () => {
 
   const getTypeIcon = (type: Feedback['type']) => {
     switch (type) {
-      case 'bug': return <Bug className="w-5 h-5 text-red-600" />;
-      case 'improvement': return <Lightbulb className="w-5 h-5 text-blue-600" />;
-      case 'feature': return <Star className="w-5 h-5 text-green-600" />;
-      case 'other': return <AlertCircle className="w-5 h-5 text-gray-600" />;
-      default: return <AlertCircle className="w-5 h-5 text-gray-600" />;
+      case 'bug':
+        return <Bug className="w-5 h-5 text-red-600" />;
+      case 'improvement':
+        return <Lightbulb className="w-5 h-5 text-blue-600" />;
+      case 'feature':
+        return <Star className="w-5 h-5 text-green-600" />;
+      case 'other':
+        return <AlertCircle className="w-5 h-5 text-gray-600" />;
+      default:
+        return <AlertCircle className="w-5 h-5 text-gray-600" />;
     }
   };
 
   const getPriorityColor = (priority: Feedback['priority']) => {
     switch (priority) {
-      case 'low': return 'bg-green-100 text-green-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'high': return 'bg-orange-100 text-orange-800';
-      case 'critical': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'low':
+        return 'bg-green-100 text-green-800';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'high':
+        return 'bg-orange-100 text-orange-800';
+      case 'critical':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusColor = (status: Feedback['status']) => {
     switch (status) {
-      case 'new': return 'bg-blue-100 text-blue-800';
-      case 'in_progress': return 'bg-yellow-100 text-yellow-800';
-      case 'resolved': return 'bg-green-100 text-green-800';
-      case 'closed': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'new':
+        return 'bg-blue-100 text-blue-800';
+      case 'in_progress':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'resolved':
+        return 'bg-green-100 text-green-800';
+      case 'closed':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusLabel = (status: Feedback['status']) => {
     switch (status) {
-      case 'new': return 'Nuovo';
-      case 'in_progress': return 'In Lavorazione';
-      case 'resolved': return 'Risolto';
-      case 'closed': return 'Chiuso';
-      default: return status;
+      case 'new':
+        return 'Nuovo';
+      case 'in_progress':
+        return 'In Lavorazione';
+      case 'resolved':
+        return 'Risolto';
+      case 'closed':
+        return 'Chiuso';
+      default:
+        return status;
     }
   };
 
   const getPriorityLabel = (priority: Feedback['priority']) => {
     switch (priority) {
-      case 'low': return 'Bassa';
-      case 'medium': return 'Media';
-      case 'high': return 'Alta';
-      case 'critical': return 'Critica';
-      default: return priority;
+      case 'low':
+        return 'Bassa';
+      case 'medium':
+        return 'Media';
+      case 'high':
+        return 'Alta';
+      case 'critical':
+        return 'Critica';
+      default:
+        return priority;
     }
   };
 
@@ -151,7 +181,7 @@ const FeedbackDashboard: React.FC = () => {
     bugs: feedbacks.filter(f => f.type === 'bug').length,
     improvements: feedbacks.filter(f => f.type === 'improvement').length,
     features: feedbacks.filter(f => f.type === 'feature').length,
-    critical: feedbacks.filter(f => f.priority === 'critical').length
+    critical: feedbacks.filter(f => f.priority === 'critical').length,
   };
 
   if (loading) {
@@ -172,7 +202,9 @@ const FeedbackDashboard: React.FC = () => {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">📊 Dashboard Feedback</h1>
-              <p className="text-gray-600 mt-1">Gestisci e analizza tutti i feedback degli utenti</p>
+              <p className="text-gray-600 mt-1">
+                Gestisci e analizza tutti i feedback degli utenti
+              </p>
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <MessageSquare className="w-4 h-4" />
@@ -218,10 +250,10 @@ const FeedbackDashboard: React.FC = () => {
               <Filter className="w-4 h-4 text-gray-500" />
               <span className="text-sm font-medium text-gray-700">Filtri:</span>
             </div>
-            
+
             <select
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
+              onChange={e => setFilterType(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">Tutti i tipi</option>
@@ -233,7 +265,7 @@ const FeedbackDashboard: React.FC = () => {
 
             <select
               value={filterPriority}
-              onChange={(e) => setFilterPriority(e.target.value)}
+              onChange={e => setFilterPriority(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">Tutte le priorità</option>
@@ -245,7 +277,7 @@ const FeedbackDashboard: React.FC = () => {
 
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
+              onChange={e => setFilterStatus(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">Tutti gli stati</option>
@@ -264,7 +296,7 @@ const FeedbackDashboard: React.FC = () => {
                 type="text"
                 placeholder="Cerca nei feedback..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -286,31 +318,31 @@ const FeedbackDashboard: React.FC = () => {
                 <p>Nessun feedback trovato con i filtri selezionati</p>
               </div>
             ) : (
-              filteredFeedbacks.map((feedback) => (
+              filteredFeedbacks.map(feedback => (
                 <div key={feedback.id} className="p-6 hover:bg-gray-50 transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4 flex-1">
-                      <div className="mt-1">
-                        {getTypeIcon(feedback.type)}
-                      </div>
-                      
+                      <div className="mt-1">{getTypeIcon(feedback.type)}</div>
+
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-2">
                           <h3 className="text-lg font-medium text-gray-900 truncate">
                             {feedback.title}
                           </h3>
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(feedback.priority)}`}>
+                          <span
+                            className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(feedback.priority)}`}
+                          >
                             {getPriorityLabel(feedback.priority)}
                           </span>
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(feedback.status)}`}>
+                          <span
+                            className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(feedback.status)}`}
+                          >
                             {getStatusLabel(feedback.status)}
                           </span>
                         </div>
-                        
-                        <p className="text-gray-600 mb-3 line-clamp-2">
-                          {feedback.description}
-                        </p>
-                        
+
+                        <p className="text-gray-600 mb-3 line-clamp-2">{feedback.description}</p>
+
                         <div className="flex items-center gap-4 text-sm text-gray-500">
                           {feedback.screen && (
                             <span className="flex items-center gap-1">
@@ -320,10 +352,9 @@ const FeedbackDashboard: React.FC = () => {
                           )}
                           <span className="flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
-                            {feedback.createdAt?.toDate?.() ? 
-                              feedback.createdAt.toDate().toLocaleDateString('it-IT') : 
-                              new Date(feedback.createdAt).toLocaleDateString('it-IT')
-                            }
+                            {feedback.createdAt?.toDate?.()
+                              ? feedback.createdAt.toDate().toLocaleDateString('it-IT')
+                              : new Date(feedback.createdAt).toLocaleDateString('it-IT')}
                           </span>
                           {feedback.userEmail && (
                             <span className="flex items-center gap-1">
@@ -334,7 +365,7 @@ const FeedbackDashboard: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-2 ml-4">
                       <button
                         onClick={() => {
@@ -346,11 +377,13 @@ const FeedbackDashboard: React.FC = () => {
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      
+
                       {feedback.status === 'new' && (
                         <select
                           value={feedback.status}
-                          onChange={(e) => updateFeedbackStatus(feedback.id, e.target.value as Feedback['status'])}
+                          onChange={e =>
+                            updateFeedbackStatus(feedback.id, e.target.value as Feedback['status'])
+                          }
                           className="px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
                         >
                           <option value="new">Nuovo</option>
@@ -401,19 +434,25 @@ const FeedbackDashboard: React.FC = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Priorità:</span>
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(selectedFeedback.priority)}`}>
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(selectedFeedback.priority)}`}
+                      >
                         {getPriorityLabel(selectedFeedback.priority)}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Stato:</span>
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(selectedFeedback.status)}`}>
+                      <span
+                        className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(selectedFeedback.status)}`}
+                      >
                         {getStatusLabel(selectedFeedback.status)}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Schermata:</span>
-                      <span className="font-medium">{selectedFeedback.screen || 'Non specificata'}</span>
+                      <span className="font-medium">
+                        {selectedFeedback.screen || 'Non specificata'}
+                      </span>
                     </div>
                     {selectedFeedback.userEmail && (
                       <div className="flex justify-between">
@@ -430,20 +469,18 @@ const FeedbackDashboard: React.FC = () => {
                     <div className="flex justify-between">
                       <span className="text-gray-600">Creato:</span>
                       <span className="font-medium">
-                        {selectedFeedback.createdAt?.toDate?.() ? 
-                          selectedFeedback.createdAt.toDate().toLocaleString('it-IT') : 
-                          new Date(selectedFeedback.createdAt).toLocaleString('it-IT')
-                        }
+                        {selectedFeedback.createdAt?.toDate?.()
+                          ? selectedFeedback.createdAt.toDate().toLocaleString('it-IT')
+                          : new Date(selectedFeedback.createdAt).toLocaleString('it-IT')}
                       </span>
                     </div>
                     {selectedFeedback.updatedAt && (
                       <div className="flex justify-between">
                         <span className="text-gray-600">Aggiornato:</span>
                         <span className="font-medium">
-                          {selectedFeedback.updatedAt?.toDate?.() ? 
-                            selectedFeedback.updatedAt.toDate().toLocaleString('it-IT') : 
-                            new Date(selectedFeedback.updatedAt).toLocaleString('it-IT')
-                          }
+                          {selectedFeedback.updatedAt?.toDate?.()
+                            ? selectedFeedback.updatedAt.toDate().toLocaleString('it-IT')
+                            : new Date(selectedFeedback.updatedAt).toLocaleString('it-IT')}
                         </span>
                       </div>
                     )}
@@ -451,10 +488,9 @@ const FeedbackDashboard: React.FC = () => {
                       <div className="flex justify-between">
                         <span className="text-gray-600">Risolto:</span>
                         <span className="font-medium">
-                          {selectedFeedback.resolvedAt?.toDate?.() ? 
-                            selectedFeedback.resolvedAt.toDate().toLocaleString('it-IT') : 
-                            new Date(selectedFeedback.resolvedAt).toLocaleString('it-IT')
-                          }
+                          {selectedFeedback.resolvedAt?.toDate?.()
+                            ? selectedFeedback.resolvedAt.toDate().toLocaleString('it-IT')
+                            : new Date(selectedFeedback.resolvedAt).toLocaleString('it-IT')}
                         </span>
                       </div>
                     )}
@@ -465,7 +501,9 @@ const FeedbackDashboard: React.FC = () => {
               <div className="mt-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">📝 Descrizione</h3>
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-gray-700 whitespace-pre-wrap">{selectedFeedback.description}</p>
+                  <p className="text-gray-700 whitespace-pre-wrap">
+                    {selectedFeedback.description}
+                  </p>
                 </div>
               </div>
 
@@ -503,13 +541,16 @@ const FeedbackDashboard: React.FC = () => {
 
             <div className="px-6 py-4 bg-gray-50 border-t">
               <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-600">
-                  ID: #{selectedFeedback.id}
-                </div>
+                <div className="text-sm text-gray-600">ID: #{selectedFeedback.id}</div>
                 <div className="flex gap-3">
                   <select
                     value={selectedFeedback.status}
-                    onChange={(e) => updateFeedbackStatus(selectedFeedback.id, e.target.value as Feedback['status'])}
+                    onChange={e =>
+                      updateFeedbackStatus(
+                        selectedFeedback.id,
+                        e.target.value as Feedback['status']
+                      )
+                    }
                     className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="new">Nuovo</option>

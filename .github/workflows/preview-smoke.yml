@@ -1,0 +1,255 @@
+name: Preview Smoke Tests
+
+on:
+  deployment_status:
+    types: [success, failure]
+
+env:
+  MAX_RETRIES: 5
+  RETRY_DELAY: 30
+  TIMEOUT: 300
+
+jobs:
+  smoke-test:
+    name: Preview Smoke Tests
+    runs-on: ubuntu-latest
+    if: |
+      github.event.deployment_status.environment == 'Preview' &&
+      github.event.deployment_status.state == 'success'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install curl and jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl jq
+
+      - name: Extract deployment URL
+        id: extract-url
+        run: |
+          DEPLOYMENT_URL="${{ github.event.deployment_status.target_url }}"
+          echo "deployment_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "🔗 Deployment URL: $DEPLOYMENT_URL"
+
+      - name: Wait for deployment to be ready
+        run: |
+          echo "⏳ Waiting for deployment to be ready..."
+          sleep 60
+
+      - name: Health Check with Retry
+        id: health-check
+        run: |
+          DEPLOYMENT_URL="${{ steps.extract-url.outputs.deployment_url }}"
+          HEALTH_ENDPOINT="$DEPLOYMENT_URL/api/health"
+          
+          echo "🏥 Testing health endpoint: $HEALTH_ENDPOINT"
+          
+          for i in $(seq 1 ${{ env.MAX_RETRIES }}); do
+            echo "🔄 Attempt $i/${{ env.MAX_RETRIES }}"
+            
+            if response=$(curl -s -w "\n%{http_code}" -m 30 "$HEALTH_ENDPOINT" 2>/dev/null); then
+              http_code=$(echo "$response" | tail -n1)
+              body=$(echo "$response" | head -n -1)
+              
+              echo "📊 HTTP Status: $http_code"
+              echo "📄 Response: $body"
+              
+              if [ "$http_code" = "200" ]; then
+                echo "✅ Health check passed!"
+                echo "health_status=success" >> $GITHUB_OUTPUT
+                exit 0
+              else
+                echo "❌ Health check failed with status: $http_code"
+              fi
+            else
+              echo "❌ Health check failed - connection error"
+            fi
+            
+            if [ $i -lt ${{ env.MAX_RETRIES }} ]; then
+              echo "⏳ Waiting ${{ env.RETRY_DELAY }}s before retry..."
+              sleep ${{ env.RETRY_DELAY }}
+            fi
+          done
+          
+          echo "❌ Health check failed after ${{ env.MAX_RETRIES }} attempts"
+          echo "health_status=failed" >> $GITHUB_OUTPUT
+          exit 1
+
+      - name: API Endpoints Smoke Test
+        if: steps.health-check.outputs.health_status == 'success'
+        run: |
+          DEPLOYMENT_URL="${{ steps.extract-url.outputs.deployment_url }}"
+          
+          echo "🧪 Running API endpoints smoke tests..."
+          
+          # Test critical API endpoints
+          endpoints=(
+            "/api/health"
+            "/api/tools/list"
+            "/api/dashboard/initialize"
+          )
+          
+          failed_endpoints=()
+          
+          for endpoint in "${endpoints[@]}"; do
+            url="$DEPLOYMENT_URL$endpoint"
+            echo "🔍 Testing: $url"
+            
+            if response=$(curl -s -w "\n%{http_code}" -m 15 "$url" 2>/dev/null); then
+              http_code=$(echo "$response" | tail -n1)
+              body=$(echo "$response" | head -n -1)
+              
+              if [ "$http_code" = "200" ]; then
+                echo "✅ $endpoint - OK"
+              else
+                echo "❌ $endpoint - Failed (HTTP $http_code)"
+                failed_endpoints+=("$endpoint")
+              fi
+            else
+              echo "❌ $endpoint - Connection failed"
+              failed_endpoints+=("$endpoint")
+            fi
+          done
+          
+          if [ ${#failed_endpoints[@]} -gt 0 ]; then
+            echo "❌ Failed endpoints: ${failed_endpoints[*]}"
+            exit 1
+          else
+            echo "✅ All API endpoints passed smoke tests"
+          fi
+
+      - name: Frontend Smoke Test
+        if: steps.health-check.outputs.health_status == 'success'
+        run: |
+          DEPLOYMENT_URL="${{ steps.extract-url.outputs.deployment_url }}"
+          
+          echo "🌐 Running frontend smoke tests..."
+          
+          # Test critical pages
+          pages=(
+            "/"
+            "/auth/login"
+            "/dashboard"
+            "/dashboard/billing"
+          )
+          
+          failed_pages=()
+          
+          for page in "${pages[@]}"; do
+            url="$DEPLOYMENT_URL$page"
+            echo "🔍 Testing: $url"
+            
+            if response=$(curl -s -w "\n%{http_code}" -m 15 "$url" 2>/dev/null); then
+              http_code=$(echo "$response" | tail -n1)
+              
+              if [ "$http_code" = "200" ]; then
+                echo "✅ $page - OK"
+              else
+                echo "❌ $page - Failed (HTTP $http_code)"
+                failed_pages+=("$page")
+              fi
+            else
+              echo "❌ $page - Connection failed"
+              failed_pages+=("$page")
+            fi
+          done
+          
+          if [ ${#failed_pages[@]} -gt 0 ]; then
+            echo "❌ Failed pages: ${failed_pages[*]}"
+            exit 1
+          else
+            echo "✅ All frontend pages passed smoke tests"
+          fi
+
+      - name: Performance Check
+        if: steps.health-check.outputs.health_status == 'success'
+        run: |
+          DEPLOYMENT_URL="${{ steps.extract-url.outputs.deployment_url }}"
+          
+          echo "⚡ Running performance checks..."
+          
+          # Test response times
+          start_time=$(date +%s%3N)
+          
+          if curl -s -m 10 "$DEPLOYMENT_URL/api/health" > /dev/null; then
+            end_time=$(date +%s%3N)
+            response_time=$((end_time - start_time))
+            
+            echo "📊 Response time: ${response_time}ms"
+            
+            if [ $response_time -lt 5000 ]; then
+              echo "✅ Performance check passed (< 5s)"
+            else
+              echo "⚠️ Performance warning (> 5s): ${response_time}ms"
+            fi
+          else
+            echo "❌ Performance check failed - no response"
+            exit 1
+          fi
+
+      - name: Security Headers Check
+        if: steps.health-check.outputs.health_status == 'success'
+        run: |
+          DEPLOYMENT_URL="${{ steps.extract-url.outputs.deployment_url }}"
+          
+          echo "🔒 Checking security headers..."
+          
+          headers=$(curl -s -I -m 10 "$DEPLOYMENT_URL" | grep -i -E "(x-frame-options|x-content-type-options|x-xss-protection|strict-transport-security)")
+          
+          if [ -n "$headers" ]; then
+            echo "✅ Security headers found:"
+            echo "$headers"
+          else
+            echo "⚠️ No security headers detected"
+          fi
+
+      - name: Smoke Test Summary
+        if: always()
+        run: |
+          echo "## 🧪 Preview Smoke Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployment URL:** ${{ steps.extract-url.outputs.deployment_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Test | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Health Check | ${{ steps.health-check.outputs.health_status == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| API Endpoints | ${{ job.status == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend Pages | ${{ job.status == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Performance | ${{ job.status == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Headers | ${{ job.status == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "🎉 **All smoke tests passed!** Preview deployment is ready." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Smoke tests failed!** Please check the deployment." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  notify:
+    name: Notify Results
+    runs-on: ubuntu-latest
+    needs: smoke-test
+    if: always()
+    
+    steps:
+      - name: Notify Success
+        if: needs.smoke-test.result == 'success'
+        run: |
+          echo "🎉 Preview smoke tests passed!"
+          echo "✅ Deployment is ready for review"
+          echo "🔗 URL: ${{ github.event.deployment_status.target_url }}"
+
+      - name: Notify Failure
+        if: needs.smoke-test.result == 'failure'
+        run: |
+          echo "❌ Preview smoke tests failed!"
+          echo "🚨 Deployment has issues that need attention"
+          echo "🔗 URL: ${{ github.event.deployment_status.target_url }}"
+          exit 1
