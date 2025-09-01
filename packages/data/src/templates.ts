@@ -16,7 +16,7 @@ export const LEAD_TEMPLATES: Record<string, Template> = {
   first_response: {
     id: 'first_response',
     name: 'Prima Risposta',
-    description: 'Template automatico per la prima risposta a un nuovo lead',
+    // description: 'Template automatico per la prima risposta a un nuovo lead',
     subject: 'Grazie per il tuo interesse - Urbanova',
     bodyText: `Gentile {{leadName}},
 
@@ -88,13 +88,15 @@ Urbanova</p>`,
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
+    createdBy: 'system',
+    usageCount: 0,
   },
 
   // Template per richiesta documenti
   documents_request: {
     id: 'documents_request',
     name: 'Richiesta Documenti',
-    description: 'Template per richiedere documenti al lead',
+    // description: 'Template per richiedere documenti al lead',
     subject: 'Documentazione richiesta - {{listingId}}',
     bodyText: `Gentile {{leadName}},
 

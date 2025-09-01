@@ -4,7 +4,9 @@ import {
   zMarketSnapshot,
   zMarketTrendReport,
 } from '@urbanova/types';
-import { db } from './firebase';
+import { getFirestoreInstance } from '@urbanova/infra';
+
+const db = getFirestoreInstance();
 
 // ============================================================================
 // MARKET SNAPSHOTS PERSISTENCE
@@ -142,7 +144,7 @@ export async function listMarketSnapshotsByCity(
       .limit(limit)
       .get();
 
-    return snapshot.docs.map(doc => {
+    return snapshot.docs.map((doc: any) => {
       const data = doc.data();
       return {
         ...data,
@@ -177,7 +179,7 @@ export async function listRecentMarketSnapshots(limit: number = 20): Promise<Mar
       .limit(limit)
       .get();
 
-    return snapshot.docs.map(doc => {
+    return snapshot.docs.map((doc: any) => {
       const data = doc.data();
       return {
         ...data,
@@ -276,7 +278,7 @@ export async function listMarketTrendReportsByCity(
       .limit(limit)
       .get();
 
-    return snapshot.docs.map(doc => {
+    return snapshot.docs.map((doc: any) => {
       const data = doc.data();
       return {
         ...data,
@@ -318,7 +320,7 @@ export async function getMarketSnapshotStats(city?: string): Promise<{
     }
 
     const snapshot = await query.get();
-    const snapshots = snapshot.docs.map(doc => doc.data());
+    const snapshots = snapshot.docs.map((doc: any) => doc.data());
 
     const byAsset: Record<string, number> = {};
     const byHorizon: Record<number, number> = {};

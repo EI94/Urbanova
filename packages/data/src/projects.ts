@@ -1,7 +1,46 @@
 // Data persistence service for @urbanova/data package
 
 import { z } from 'zod';
-import type { Deal, FeasibilityResult, Project } from '@urbanova/types';
+// Define types locally since they're not exported from @urbanova/types
+type Deal = {
+  id: string;
+  projectId: string;
+  status: string;
+  type: string;
+  value: number;
+  currency: string;
+  parties: any[];
+  documents: any[];
+  milestones: any[];
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+type FeasibilityResult = {
+  id: string;
+  input: any;
+  analysis: any;
+  recommendations: any[];
+  riskAssessment: any;
+  roi: any;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+type Project = {
+  id: string;
+  name: string;
+  description: string;
+  status: string;
+  type: string;
+  location: any;
+  budget: any;
+  timeline: any;
+  ownerId: string;
+  teamMembers: any[];
+  createdAt: Date;
+  updatedAt: Date;
+};
 import { getFirestoreInstance, serverTimestamp } from '@urbanova/infra';
 
 // Zod schemas for data validation

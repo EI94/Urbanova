@@ -104,7 +104,7 @@ export async function getDealById(dealId: string): Promise<DealNormalized | null
 export async function findDealsByFilter(filter: SearchFilter): Promise<DealNormalized[]> {
   try {
     const db = getFirestoreInstance();
-    let query = db.collection('deals');
+    let query: any = db.collection('deals');
 
     // Apply filters
     if (filter.city) {
@@ -160,7 +160,7 @@ export async function findDealByFingerprint(
       return null;
     }
 
-    return snapshot.docs[0].data() as DealNormalized;
+    return snapshot.docs[0]?.data() as DealNormalized;
   } catch (error) {
     console.error('❌ Error finding deal by fingerprint in Firestore:', error);
     throw error;
