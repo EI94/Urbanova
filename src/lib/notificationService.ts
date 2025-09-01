@@ -407,6 +407,9 @@ export class NotificationService {
         const docRef = await addDoc(collection(db, 'notificationPreferences'), preferenceData);
         return docRef.id;
       }
+      
+      // This should never be reached, but TypeScript requires it
+      throw new Error('Failed to update notification preference');
     } catch (error) {
       console.error('Error updating preference:', error);
       throw new Error('Failed to update notification preference');

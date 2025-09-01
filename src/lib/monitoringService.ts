@@ -824,6 +824,11 @@ export class MonitoringService {
   // Genera messaggio di log realistico
   private generateLogMessage(level: LogLevel, service: string): string {
     const messages = {
+      trace: [
+        'Trace information logged',
+        'Function entry point',
+        'Variable value checked',
+      ],
       debug: [
         'Debug information logged',
         'Trace point reached',
@@ -851,6 +856,13 @@ export class MonitoringService {
         'Failed to process payment',
         'External API call timeout',
         'Validation error in user input',
+      ],
+      fatal: [
+        'Critical system failure',
+        'Database corruption detected',
+        'Service unavailable',
+        'Security breach detected',
+        'Data loss detected',
       ],
     };
 
@@ -936,22 +948,22 @@ export class MonitoringService {
       const logEntry: LogEntry = {
         id: `log-${Date.now()}-${i}`,
         timestamp: new Date(),
-        level,
-        message: this.generateLogMessage(level, service),
-        service,
-        instance: `${service}-${Math.floor(Math.random() * 3) + 1}`,
+        level: level || 'info',
+        message: this.generateLogMessage(level || 'info', service || 'unknown'),
+        service: service || 'unknown',
+        instance: `${service || 'unknown'}-${Math.floor(Math.random() * 3) + 1}`,
         environment: 'production',
         fields: {
           userId: level === 'error' ? undefined : `user-${Math.floor(Math.random() * 1000)}`,
           requestId: `req-${Math.random().toString(36).substr(2, 9)}`,
         },
-        labels: { service, environment: 'production' },
+        labels: { service: service || 'unknown', environment: 'production' },
         source: 'application',
         host: `host-${Math.floor(Math.random() * 5) + 1}`,
         parsed: true,
         parser: 'json',
-        searchable: `${level} ${service}`,
-        tags: [level, service],
+        searchable: `${level || 'info'} ${service || 'unknown'}`,
+        tags: [level || 'info', service || 'unknown'],
       };
 
       this.logs.push(logEntry);

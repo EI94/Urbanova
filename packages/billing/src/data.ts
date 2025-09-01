@@ -7,6 +7,9 @@ import {
 } from '@urbanova/types';
 // Database - defined locally until available in @urbanova/infra
 const db = {
+  FieldValue: {
+    increment: (value: number) => `increment_${value}`,
+  },
   collection: (name: string) => ({
     doc: (id: string) => ({
       set: async (data: any) => console.log(`Setting ${name}/${id}:`, data),

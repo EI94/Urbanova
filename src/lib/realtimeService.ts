@@ -320,19 +320,24 @@ export class RealtimeService {
       throw new Error('Utente non presente nella sessione');
     }
 
-    const comment: LiveComment = {
+    const commentData: Partial<LiveComment> = {
       id: `comment-${Date.now()}`,
       userId,
       userName: participant.userName,
       userAvatar: participant.userAvatar,
       userRole: participant.userRole,
       content,
-      position: position || undefined,
       timestamp: new Date(),
       replies: [],
       isResolved: false,
       reactions: {},
     };
+
+    if (position) {
+      commentData.position = position;
+    }
+
+    const comment: LiveComment = commentData as LiveComment;
 
     // Aggiorna contatori partecipante
     participant.contributions.commentsCount++;

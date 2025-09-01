@@ -229,12 +229,45 @@ export class ProjectMapService {
 
       const newLocation: ProjectLocation = {
         id: locationId,
-        ...locationData,
+        projectId: locationData.projectId || 'unknown',
+        projectName: locationData.projectName || 'Unknown Project',
+        address: locationData.address || '',
         zone: locationData.zone || 'Non specificata',
+        neighborhood: locationData.neighborhood || 'Non specificato',
+        urbanArea: locationData.urbanArea || 'URBAN',
+        zoning: locationData.zoning || 'RESIDENTIAL',
+        landUse: locationData.landUse || 'Residenziale',
+        buildingType: locationData.buildingType || 'VILLA',
+        projectStatus: locationData.projectStatus || 'PLANNING',
+        budget: {
+          estimated: locationData.budget?.estimated || 0,
+          actual: locationData.budget?.actual || 0,
+          currency: locationData.budget?.currency || 'EUR',
+        },
+        area: {
+          landArea: locationData.area?.landArea || 0,
+          buildingArea: locationData.area?.buildingArea || 0,
+          floors: locationData.area?.floors || 1,
+        },
+        timeline: {
+          startDate: locationData.timeline?.startDate || new Date(),
+          estimatedEndDate: locationData.timeline?.estimatedEndDate || new Date(),
+        },
+        marketData: {
+          estimatedValue: locationData.marketData?.estimatedValue || 0,
+          roi: locationData.marketData?.roi || 0,
+          marketTrend: locationData.marketData?.marketTrend || 'STABLE',
+          demandLevel: locationData.marketData?.demandLevel || 'MEDIUM',
+        },
         coordinates: {
           ...coordinates!,
           firestoreGeoPoint: new GeoPoint(coordinates!.latitude, coordinates!.longitude),
         },
+        city: locationData.city || '',
+        province: locationData.province || '',
+        region: locationData.region || '',
+        postalCode: locationData.postalCode || '',
+        country: locationData.country || 'Italia',
         constraints: {
           urbanPlanning: locationData.constraints || [],
           environmental: [],

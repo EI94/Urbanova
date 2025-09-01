@@ -1,5 +1,5 @@
 // Servizio di Caching per AI Land Scraping - Urbanova
-import { LandSearchCriteria } from './realWebScraper';
+import { LandSearchCriteria } from '@/types/land';
 
 interface CacheEntry {
   data: any;
@@ -35,8 +35,8 @@ export class CacheService {
   private generateSearchKey(criteria: LandSearchCriteria): string {
     const key: SearchCacheKey = {
       location: criteria.location || '',
-      priceRange: criteria.priceRange || [0, 1000000],
-      areaRange: criteria.areaRange || [500, 10000],
+      priceRange: [criteria.minPrice || 0, criteria.maxPrice || 1000000],
+      areaRange: [criteria.minArea || 500, criteria.maxArea || 10000],
       hash: this.hashString(JSON.stringify(criteria)),
     };
     return JSON.stringify(key);
@@ -91,12 +91,12 @@ export class CacheService {
     let oldestKey: string | null = null;
     let oldestTime = Date.now();
 
-    for (const [key, entry] of this.cache.entries()) {
+    this.cache.forEach((entry, key) => {
       if (entry.timestamp < oldestTime) {
         oldestTime = entry.timestamp;
         oldestKey = key;
       }
-    }
+    });
 
     if (oldestKey) {
       this.cache.delete(oldestKey);
@@ -108,12 +108,12 @@ export class CacheService {
     const now = Date.now();
     let cleanedCount = 0;
 
-    for (const [key, entry] of this.cache.entries()) {
+    this.cache.forEach((entry, key) => {
       if (now - entry.timestamp > entry.ttl) {
         this.cache.delete(key);
         cleanedCount++;
       }
-    }
+    });
 
     if (cleanedCount > 0) {
       console.log(`🧹 Pulizia cache: rimosse ${cleanedCount} entry scadute`);
@@ -123,7 +123,7 @@ export class CacheService {
   async invalidateByLocation(location: string): Promise<void> {
     let invalidatedCount = 0;
 
-    for (const [key, entry] of this.cache.entries()) {
+    this.cache.forEach((entry, key) => {
       try {
         const searchKey: SearchCacheKey = JSON.parse(key);
         if (searchKey.location.toLowerCase().includes(location.toLowerCase())) {
@@ -133,7 +133,7 @@ export class CacheService {
       } catch (error) {
         // Ignora chiavi non valide
       }
-    }
+    });
 
     if (invalidatedCount > 0) {
       console.log(`🔄 Cache invalidata per ${location}: rimosse ${invalidatedCount} entry`);

@@ -3,7 +3,7 @@
 import type { Watchlist, DealAlert, SearchFilter } from '@urbanova/types';
 // Data functions - defined locally until available in @urbanova/data
 const persistWatchlist = async (data: any) => 'temp-watchlist-id';
-const getWatchlistById = async (id: string) => ({ id, userId: 'temp-user', filter: { city: 'Milano', budgetMax: 1000000, surfaceMin: 100, zoning: ['RESIDENTIAL'] }, lastCheckedAt: new Date(), isActive: true, createdAt: new Date(), notifications: [] });
+const getWatchlistById = async (id: string) => ({ id, userId: 'temp-user', filter: { city: 'Milano', budgetMax: 1000000, surfaceMin: 100, zoning: ['RESIDENTIAL'] }, lastCheckedAt: new Date(), isActive: true, createdAt: new Date(), notifications: { chat: true, email: true, minTrustScore: 0.7 } });
 const listWatchlistsByUser = async (userId: string) => [];
 const updateWatchlist = async (id: string, updates: any) => ({ id, ...updates });
 const deleteWatchlist = async (id: string) => true;

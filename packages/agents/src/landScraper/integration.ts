@@ -115,8 +115,8 @@ export class LandScraperIntegrationService {
       source: scrapedLand.source,
       address: scrapedLand.location,
       city: this.extractCityFromLocation(scrapedLand.location),
-      lat: scrapedLand.coordinates?.[0] ?? undefined,
-      lng: scrapedLand.coordinates?.[1] ?? undefined,
+      lat: scrapedLand.coordinates?.[0] ?? 0,
+      lng: scrapedLand.coordinates?.[1] ?? 0,
       surface: scrapedLand.area,
       priceAsk: scrapedLand.price,
       zoningHint: (scrapedLand.zoning || scrapedLand.buildingRights) ?? undefined,
@@ -173,9 +173,9 @@ export class LandScraperIntegrationService {
       // Convert SearchFilter to LandSearchCriteria
       const criteria: LandSearchCriteria = {
         location: filter.city,
-        maxPrice: filter.budgetMax ?? undefined,
-        minArea: filter.surfaceMin ?? undefined,
-        propertyType: filter.zoning?.[0] ?? undefined,
+        maxPrice: filter.budgetMax ?? 0,
+        minArea: filter.surfaceMin ?? 0,
+        propertyType: filter.zoning?.[0] ?? '',
       };
 
       // Use real scraping agent
@@ -211,7 +211,6 @@ export class LandScraperIntegrationService {
         totalReturned: normalizedDeals.length,
         scanDuration: duration,
         scanTimestamp: new Date(),
-        error: undefined,
       };
     } catch (error) {
       const duration = Math.max(1, Date.now() - startTime);
