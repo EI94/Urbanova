@@ -342,7 +342,7 @@ export default function NewFeasibilityProjectPage() {
   // Funzione per ottenere dati di mercato dal borsino immobiliare
   const fetchMarketData = async () => {
     if (!project.address) {
-      toast.error("Inserisci prima l'indirizzo del progetto");
+      toast("Inserisci prima l'indirizzo del progetto", { icon: '❌' });
       return;
     }
 
@@ -366,14 +366,14 @@ export default function NewFeasibilityProjectPage() {
         // Aggiorna automaticamente il prezzo al mq se disponibile
         if (data.suggestedPricePerSqm) {
           handleInputChange('revenues', 'pricePerSqm', data.suggestedPricePerSqm);
-          toast.success(`✅ Prezzo suggerito: ${data.suggestedPricePerSqm}€/m²`);
+          toast(`✅ Prezzo suggerito: ${data.suggestedPricePerSqm}€/m²`, { icon: '✅' });
         }
       } else {
         throw new Error('Errore nel recupero dati di mercato');
       }
     } catch (error) {
       console.error('Errore fetch market data:', error);
-      toast.error('❌ Errore nel recupero dati di mercato');
+              toast('❌ Errore nel recupero dati di mercato', { icon: '❌' });
     } finally {
       setMarketDataLoading(false);
     }
@@ -409,7 +409,7 @@ export default function NewFeasibilityProjectPage() {
           ? '💾 Nuovo progetto salvato automaticamente'
           : '🔄 Progetto aggiornato automaticamente';
 
-        toast.success(message, {
+        toast(message, {
           duration: 2000,
           position: 'bottom-right',
         });

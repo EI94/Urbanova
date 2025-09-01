@@ -14,7 +14,7 @@ export default function EditFeasibilityProjectPage() {
     const loadAndRedirect = async () => {
       try {
         if (!params.id) {
-          toast.error('❌ ID progetto non valido');
+          toast('❌ ID progetto non valido', { icon: '❌' });
           router.push('/dashboard/feasibility-analysis');
           return;
         }
@@ -23,7 +23,7 @@ export default function EditFeasibilityProjectPage() {
         const project = await feasibilityService.getProjectById(params.id as string);
 
         if (!project) {
-          toast.error('❌ Progetto non trovato');
+          toast('❌ Progetto non trovato', { icon: '❌' });
           router.push('/dashboard/feasibility-analysis');
           return;
         }
@@ -33,7 +33,7 @@ export default function EditFeasibilityProjectPage() {
         router.push(`/dashboard/feasibility-analysis/new?edit=${params.id}`);
       } catch (error) {
         console.error('❌ Errore caricamento progetto per edit:', error);
-        toast.error('❌ Errore nel caricamento del progetto');
+        toast('❌ Errore nel caricamento del progetto', { icon: '❌' });
         router.push('/dashboard/feasibility-analysis');
       }
     };

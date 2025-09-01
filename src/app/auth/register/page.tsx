@@ -3,10 +3,10 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 
 import AuthLayout from '@/components/AuthLayout';
-import { EmailIcon, LockIcon, UserIcon } from '@/components/icons';
+import { MailIcon, LockIcon, UserIcon } from '@/components/icons';
 import Alert from '@/components/ui/Alert';
 import Button from '@/components/ui/Button';
 import FormInput from '@/components/ui/FormInput';
@@ -96,14 +96,13 @@ export default function RegisterPage() {
       title="Richiedi accesso"
       subtitle="Compila il modulo per richiedere l'accesso alla piattaforma"
     >
-      {error && <Alert type="error" message={error} onClose={() => setError('')} />}
+      {error && <Alert type="error" onClose={() => setError('')}>{error}</Alert>}
 
       <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <FormInput
               label="Nome"
-              id="firstName"
               name="firstName"
               type="text"
               autoComplete="given-name"
@@ -116,7 +115,6 @@ export default function RegisterPage() {
 
             <FormInput
               label="Cognome"
-              id="lastName"
               name="lastName"
               type="text"
               autoComplete="family-name"
@@ -129,7 +127,6 @@ export default function RegisterPage() {
 
           <FormInput
             label="Indirizzo Email"
-            id="email"
             name="email"
             type="email"
             autoComplete="email"
@@ -137,12 +134,11 @@ export default function RegisterPage() {
             value={formData.email}
             onChange={handleChange}
             placeholder="mario.rossi@azienda.it"
-            icon={<EmailIcon className="h-5 w-5 text-neutral-400" />}
+            icon={<MailIcon className="h-5 w-5 text-neutral-400" />}
           />
 
           <FormInput
             label="Azienda"
-            id="company"
             name="company"
             type="text"
             required
@@ -153,7 +149,6 @@ export default function RegisterPage() {
 
           <FormInput
             label="Ruolo"
-            id="role"
             name="role"
             type="text"
             required
@@ -164,7 +159,6 @@ export default function RegisterPage() {
 
           <FormInput
             label="Password"
-            id="password"
             name="password"
             type="password"
             autoComplete="new-password"
@@ -177,7 +171,6 @@ export default function RegisterPage() {
 
           <FormInput
             label="Conferma Password"
-            id="passwordConfirm"
             name="passwordConfirm"
             type="password"
             autoComplete="new-password"

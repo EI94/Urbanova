@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 
 import {
   CalculatorIcon,
@@ -43,12 +43,12 @@ export default function FeasibilityProjectDetailPage() {
       if (projectData) {
         setProject(projectData);
       } else {
-        toast.error('❌ Progetto non trovato');
+        toast('❌ Progetto non trovato', { icon: '❌' });
         router.push('/dashboard/feasibility-analysis');
       }
     } catch (error) {
       console.error('Errore caricamento progetto:', error);
-      toast.error('❌ Errore nel caricamento del progetto');
+      toast('❌ Errore nel caricamento del progetto', { icon: '❌' });
       router.push('/dashboard/feasibility-analysis');
     } finally {
       setLoading(false);
@@ -600,7 +600,7 @@ export default function FeasibilityProjectDetailPage() {
                 : new Date().toISOString(),
             }}
             onGenerateReport={() => {
-              toast.success('Report generato con successo! 📊');
+              toast('Report generato con successo! 📊', { icon: '📊' });
             }}
           />
         </div>

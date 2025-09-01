@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 
 import {
   TrashIcon,
@@ -33,13 +33,13 @@ export default function CleanupPage() {
       setResults(result);
 
       if (result.success) {
-        toast.success('✅ ' + result.message);
+        toast('✅ ' + result.message, { icon: '✅' });
       } else {
-        toast.error('❌ ' + result.message);
+        toast('❌ ' + result.message, { icon: '❌' });
       }
     } catch (error) {
       console.error('Errore pulizia:', error);
-      toast.error('❌ Errore durante la pulizia del database');
+      toast('❌ Errore durante la pulizia del database', { icon: '❌' });
     } finally {
       setLoading(false);
     }
@@ -47,7 +47,7 @@ export default function CleanupPage() {
 
   const handleCleanSpecific = async () => {
     if (!selectedCollection) {
-      toast.error('Seleziona una collezione da pulire');
+      toast('Seleziona una collezione da pulire', { icon: '❌' });
       return;
     }
 
@@ -64,7 +64,7 @@ export default function CleanupPage() {
       const result = await cleanupService.cleanSpecificCollection(selectedCollection);
 
       if (result.success) {
-        toast.success('✅ ' + result.message);
+        toast('✅ ' + result.message, { icon: '✅' });
         setResults({
           success: true,
           message: result.message,
@@ -77,11 +77,11 @@ export default function CleanupPage() {
           },
         });
       } else {
-        toast.error('❌ ' + result.message);
+        toast('❌ ' + result.message, { icon: '❌' });
       }
     } catch (error) {
       console.error('Errore pulizia:', error);
-      toast.error('❌ Errore durante la pulizia della collezione');
+      toast('❌ Errore durante la pulizia della collezione', { icon: '❌' });
     } finally {
       setLoading(false);
     }
