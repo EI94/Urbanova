@@ -83,7 +83,7 @@ class FirebaseAuthService {
             firstName: firstName,
             lastName: lastName,
             role: 'USER',
-          },
+          } as any,
           success: true,
         };
       }

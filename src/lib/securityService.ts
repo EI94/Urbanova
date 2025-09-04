@@ -690,7 +690,9 @@ export class SecurityService {
           zero_day: 0,
           botnet: 0,
           cryptojacking: 0,
-        },
+          unauthorized_access: 0,
+          compliance_violation: 0,
+        } as any,
         topThreats: [{ name: 'APT29', category: 'apt', count: 1, trend: 'stable' }],
         mttd: 45,
         mttr: 120,
@@ -757,7 +759,9 @@ export class SecurityService {
           zero_day: 0,
           botnet: 0,
           cryptojacking: 0,
-        },
+          unauthorized_access: 0,
+          compliance_violation: 0,
+        } as any,
         averageResponseTime: 45,
         averageResolutionTime: 240,
         totalCost: 50000,
@@ -969,6 +973,149 @@ export class SecurityService {
 
   getConfiguration(): SecurityConfiguration {
     return this.configuration;
+  }
+
+  // Metodi richiesti da SecurityCompliance
+  generateSecurityStats(): SecurityMetrics {
+    return this.generateSecurityMetrics();
+  }
+
+  getSecurityAlerts(): SecurityAlert[] {
+    return Array.from(this.alerts.values());
+  }
+
+  getSecurityIncidents(): SecurityIncident[] {
+    return Array.from(this.incidents.values());
+  }
+
+  getSecurityPolicies(): SecurityPolicy[] {
+    return Array.from(this.policies.values());
+  }
+
+  getComplianceFrameworks(): Array<{id: string, name: string, compliancePercentage: number, implementedControls: number, totalControls: number, standard: string, certificationStatus: string, description: string, isActive: boolean, version: string, nextAuditDate: Date, domains: Array<{name: string, status: string}>}> {
+    return this.configuration.organization.complianceRequirements.map(framework => ({
+      id: framework,
+      name: framework.toUpperCase(),
+      compliancePercentage: Math.floor(Math.random() * 20) + 80, // 80-100%
+      implementedControls: Math.floor(Math.random() * 20) + 80,
+      totalControls: 100,
+      standard: framework.toUpperCase(),
+      certificationStatus: Math.random() > 0.5 ? 'certified' : 'in_progress',
+      description: `Framework di compliance ${framework.toUpperCase()}`,
+      isActive: true,
+      version: '1.0',
+      nextAuditDate: new Date(Date.now() + Math.random() * 365 * 24 * 60 * 60 * 1000),
+      domains: [
+        { name: 'Access Control', status: 'compliant' },
+        { name: 'Data Protection', status: 'compliant' },
+        { name: 'Incident Response', status: 'in_progress' }
+      ]
+    }));
+  }
+
+  getSecurityTrainings(): any[] {
+    // Mock data per SecurityTraining
+    return [
+      {
+        id: '1',
+        title: 'Security Awareness Training',
+        description: 'Basic security awareness training',
+        type: 'awareness',
+        duration: 60,
+        required: true,
+        targetAudience: ['all'],
+        completionRate: 85,
+        lastUpdated: new Date(),
+        isMandatory: true,
+        validityPeriod: 365,
+        passingScore: 80,
+        hasAssessment: true,
+        maxAttempts: 3,
+        modules: [
+          {
+            id: '1',
+            name: 'module1',
+            title: 'Introduction to Security',
+            content: 'Basic security concepts',
+            duration: 30,
+            completed: false
+          }
+        ]
+      }
+    ];
+  }
+
+  getSecurityThreats(): ThreatIntelligence[] {
+    return Array.from(this.threats.values());
+  }
+
+  createSecurityIncident(incident: Partial<SecurityIncident>): SecurityIncident {
+    const newIncident: SecurityIncident = {
+      id: `incident-${Date.now()}`,
+      title: incident.title || 'New Security Incident',
+      description: incident.description || '',
+      category: incident.category || 'malware',
+      severity: incident.severity || 'medium',
+      priority: incident.priority || 'medium',
+      status: 'new',
+      impact: {
+        confidentiality: 'none',
+        integrity: 'none',
+        availability: 'none',
+        affectedSystems: [],
+        affectedUsers: 0,
+        dataCompromised: false,
+        serviceDisruption: false,
+        reputationalImpact: 'none',
+        complianceViolation: false,
+        regulatoryNotificationRequired: false,
+        affectedRegulations: []
+      },
+      detectedAt: new Date(),
+      reportedAt: new Date(),
+      responseTeam: [],
+      investigation: {
+        attackTimeline: [],
+        iocs: []
+      },
+      actions: [],
+      communications: [],
+      evidence: [],
+      metrics: {
+        detectionTime: 0,
+        responseTime: 0
+      },
+      related: {
+        vulnerabilities: [],
+        threats: [],
+        incidents: [],
+        alerts: []
+      },
+      tags: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      createdBy: 'system',
+      ...incident
+    };
+    
+    this.incidents.set(newIncident.id, newIncident);
+    return newIncident;
+  }
+
+  updateAlertStatus(alertId: string, status: string): void {
+    const alert = this.alerts.get(alertId);
+    if (alert) {
+      alert.response.status = status as any;
+      this.alerts.set(alertId, alert);
+    }
+  }
+
+  updateIncidentStatus(incidentId: string, status: string): void {
+    const incident = this.incidents.get(incidentId);
+    if (incident) {
+      incident.status = status as any;
+      this.incidents.set(incidentId, incident);
+    }
   }
 }
 

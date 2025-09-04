@@ -148,7 +148,7 @@ export default function FeasibilityProjectPage() {
 
   // Controlla se siamo in modalità edit e carica il progetto esistente
   useEffect(() => {
-    if (params.id) {
+    if (params && params.id) {
       setIsEditMode(true);
       setProjectId(params.id as string);
       loadExistingProject(params.id as string);
@@ -156,7 +156,7 @@ export default function FeasibilityProjectPage() {
       // Modalità creazione: inizializza i calcoli
       recalculateAll();
     }
-  }, [params.id]);
+  }, [params?.id]);
 
   const loadExistingProject = async (id: string) => {
     setLoading(true);
@@ -179,12 +179,12 @@ export default function FeasibilityProjectPage() {
         // Ricalcola tutto con i dati caricati
         setTimeout(() => recalculateAll(), 100);
       } else {
-        toast.error('❌ Progetto non trovato');
+        toast('❌ Progetto non trovato', { icon: '❌' });
         router.push('/dashboard/feasibility-analysis');
       }
     } catch (error) {
       console.error('Errore caricamento progetto:', error);
-      toast.error('❌ Errore nel caricamento del progetto');
+      toast('❌ Errore nel caricamento del progetto', { icon: '❌' });
       router.push('/dashboard/feasibility-analysis');
     } finally {
       setLoading(false);
@@ -261,8 +261,10 @@ export default function FeasibilityProjectPage() {
         if (!updated.costs) updated.costs = {} as any;
         if (field.includes('.')) {
           const [subSection, subField] = field.split('.');
-          if (!(updated.costs as any)[subSection]) (updated.costs as any)[subSection] = {};
-          (updated.costs as any)[subSection][subField] = value;
+          if (subSection && subField) {
+            if (!(updated.costs as any)[subSection]) (updated.costs as any)[subSection] = {};
+            (updated.costs as any)[subSection][subField] = value;
+          }
         } else {
           (updated.costs as any)[field] = value;
         }
@@ -310,7 +312,7 @@ export default function FeasibilityProjectPage() {
             ...totalCosts,
           },
         },
-      }));
+      } as Partial<FeasibilityProject>));
     }
 
     // Se si passa da total a perSqm, calcola i costi per mq
@@ -347,7 +349,7 @@ export default function FeasibilityProjectPage() {
             [field]: totalValue,
           },
         },
-      }));
+      } as Partial<FeasibilityProject>));
     }
 
     setTimeout(() => recalculateAll(), 100);
@@ -386,7 +388,7 @@ export default function FeasibilityProjectPage() {
   // Funzione per ottenere dati di mercato dal borsino immobiliare
   const fetchMarketData = async () => {
     if (!project.address) {
-      toast.error("Inserisci prima l'indirizzo del progetto");
+      toast("Inserisci prima l'indirizzo del progetto", { icon: '❌' });
       return;
     }
 
@@ -410,14 +412,14 @@ export default function FeasibilityProjectPage() {
         // Aggiorna automaticamente il prezzo al mq se disponibile
         if (data.suggestedPricePerSqm) {
           handleInputChange('revenues', 'pricePerSqm', data.suggestedPricePerSqm);
-          toast.success(`✅ Prezzo suggerito: ${data.suggestedPricePerSqm}€/m²`);
+          toast(`✅ Prezzo suggerito: ${data.suggestedPricePerSqm}€/m²`, { icon: '✅' });
         }
       } else {
         throw new Error('Errore nel recupero dati di mercato');
       }
     } catch (error) {
       console.error('Errore fetch market data:', error);
-      toast.error('❌ Errore nel recupero dati di mercato');
+      toast('❌ Errore nel recupero dati di mercato', { icon: '❌' });
     } finally {
       setMarketDataLoading(false);
     }
@@ -462,7 +464,8 @@ export default function FeasibilityProjectPage() {
       setAutoSaveExecuted(true); // Marca come già salvato automaticamente
 
       // Toast discreta per il salvataggio automatico
-      toast.success('💾 Progetto salvato automaticamente', {
+      toast('💾 Progetto salvato automaticamente', {
+        icon: '💾',
         duration: 2000,
         position: 'bottom-right',
       });
@@ -476,7 +479,7 @@ export default function FeasibilityProjectPage() {
 
   const handleSave = async () => {
     if (!project.name || !project.address) {
-      toast.error('Compila i campi obbligatori');
+      toast('Compila i campi obbligatori', { icon: '❌' });
       return;
     }
 
@@ -497,7 +500,7 @@ export default function FeasibilityProjectPage() {
 
         await feasibilityService.updateProject(projectId, updatedProject);
 
-        toast.success('✅ Progetto aggiornato con successo!');
+        toast('✅ Progetto aggiornato con successo!', { icon: '✅' });
         console.log('🎉 Progetto aggiornato!');
 
         // Ritorna alla lista progetti
@@ -512,7 +515,7 @@ export default function FeasibilityProjectPage() {
 
         if (diagnostic.overall === 'failed') {
           console.error('❌ Problemi di connessione Firebase rilevati:', diagnostic);
-          toast.error('❌ Problemi di connessione Firebase. Controlla la console per dettagli.');
+          toast('❌ Problemi di connessione Firebase. Controlla la console per dettagli.', { icon: '❌' });
           return;
         }
 
@@ -553,7 +556,7 @@ export default function FeasibilityProjectPage() {
         }
 
         setSavedProjectId(projectId);
-        toast.success('✅ Progetto creato con successo! Ora puoi generare il report.');
+        toast('✅ Progetto creato con successo! Ora puoi generare il report.', { icon: '✅' });
         setShowReportGenerator(true);
       }
     } catch (error: any) {
@@ -576,7 +579,7 @@ export default function FeasibilityProjectPage() {
         errorMessage = `❌ Errore: ${error.message}`;
       }
 
-      toast.error(errorMessage);
+      toast(errorMessage, { icon: '❌' });
     } finally {
       setLoading(false);
     }
@@ -1643,7 +1646,7 @@ export default function FeasibilityProjectPage() {
                     if (savedProjectId) {
                       router.push(`/dashboard/feasibility-analysis/${savedProjectId}`);
                     } else {
-                      toast.error('Compila nome e indirizzo per abilitare la visualizzazione');
+                      toast('Compila nome e indirizzo per abilitare la visualizzazione', { icon: '❌' });
                     }
                   }}
                   disabled={!project.name || !project.address}
@@ -1658,9 +1661,9 @@ export default function FeasibilityProjectPage() {
                       // Condividi link diretto
                       const url = `${window.location.origin}/dashboard/feasibility-analysis/${savedProjectId}`;
                       navigator.clipboard.writeText(url);
-                      toast.success('Link copiato negli appunti! 📋');
+                      toast('Link copiato negli appunti! 📋', { icon: '📋' });
                     } else {
-                      toast.error('Compila nome e indirizzo per abilitare la condivisione');
+                      toast('Compila nome e indirizzo per abilitare la condivisione', { icon: '❌' });
                     }
                   }}
                   disabled={!project.name || !project.address}

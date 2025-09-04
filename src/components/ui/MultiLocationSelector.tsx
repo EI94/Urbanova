@@ -88,7 +88,7 @@ export default function MultiLocationSelector({
     if (locations.length === 0) {
       onChange('');
     } else if (locations.length === 1) {
-      onChange(locations[0].name);
+      onChange(locations[0]?.name || '');
     } else {
       onChange(locations.map(loc => loc.name).join(', '));
     }
@@ -213,7 +213,7 @@ export default function MultiLocationSelector({
                 <button
                   key={location.id}
                   onClick={() => handleSuggestionClick(location)}
-                  disabled={selectedLocations.find(loc => loc.id === location.id)}
+                  disabled={!!selectedLocations.find(loc => loc.id === location.id)}
                   className={`w-full px-4 py-2 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none ${
                     selectedLocations.find(loc => loc.id === location.id)
                       ? 'opacity-50 cursor-not-allowed'

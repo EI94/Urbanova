@@ -43,7 +43,12 @@ export class ICSService {
     const appointment: Appointment = {
       id: request.appointmentId,
       buyerId: 'buyer_123',
-      when: new Date(),
+      projectId: 'project_123',
+      title: 'Appuntamento Fitting',
+      description: 'Appuntamento per finiture appartamento',
+      startTime: new Date(),
+      endTime: new Date(Date.now() + 60 * 60 * 1000), // 1 ora dopo
+      timezone: 'Europe/Rome',
       location: {
         type: 'physical',
         address: 'Via Roma 123, Milano',
@@ -52,25 +57,28 @@ export class ICSService {
       type: 'fitting',
       participants: [
         {
+          id: 'participant_1',
           name: 'Mario Rossi',
           email: 'mario.rossi@email.com',
           phone: '+393331234567',
           role: 'buyer',
+          confirmed: true,
         },
         {
+          id: 'participant_2',
           name: 'Giulia Bianchi',
           email: 'giulia.bianchi@urbanova.com',
           phone: '+393339876543',
           role: 'agent',
+          confirmed: true,
         },
       ],
       status: 'scheduled',
       createdAt: new Date(),
       updatedAt: new Date(),
-      createdBy: 'system',
-      metadata: {},
-      icsFileId: null,
-      googleEventId: null,
+
+
+
       reminders: [],
       notes: 'Appuntamento per finiture appartamento',
       attachments: [],
@@ -86,25 +94,17 @@ export class ICSService {
     // Crea file ICS
     const icsFile: ICSFile = {
       id: `ics_${Date.now()}`,
-      appointmentId: request.appointmentId,
-      fileName: `appointment_${request.appointmentId}.ics`,
+      filename: `appointment_${request.appointmentId}.ics`,
       content: icsContent,
-      size: Buffer.byteLength(icsContent, 'utf8'),
-      mimeType: 'text/calendar',
+      events: [], // Events will be populated from content parsing
       generatedAt: new Date(),
       downloadUrl: `https://api.urbanova.com/ics/${request.appointmentId}/download`,
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 giorni
-      metadata: {
-        timezone: request.timezone || 'Europe/Rome',
-        includeAttachments: request.includeAttachments !== false,
-        includeRecurrence: request.includeRecurrence || false,
-        version: 'RFC 5545',
-      },
     };
 
     this.icsFiles.set(icsFile.id, icsFile);
 
-    console.log(`✅ ICS File Generated - ID: ${icsFile.id}, Size: ${icsFile.size} bytes`);
+    console.log(`✅ ICS File Generated - ID: ${icsFile.id}`);
 
     return icsFile;
   }
@@ -121,42 +121,38 @@ export class ICSService {
     }
   ): string {
     const now = new Date();
-    const startDate = appointment.when;
+    const startDate = appointment.startTime;
     const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // 1 ora di default
 
     // Organizzatore
     const organizer: ICSOrganizer = {
       name: 'Urbanova',
       email: 'noreply@urbanova.com',
-      uri: 'mailto:noreply@urbanova.com',
     };
 
     // Partecipanti
     const attendees: ICSAttendee[] = appointment.participants.map(participant => ({
       name: participant.name,
-      email: participant.email,
+      email: participant.email || '',
       role: participant.role === 'buyer' ? 'REQ-PARTICIPANT' : 'REQ-PARTICIPANT',
-      rsvp: true,
-      status: 'NEEDS-ACTION',
     }));
 
     // Allegati se richiesti
     const attachments: ICSAttachment[] =
-      options.includeAttachments && appointment.attachments.length > 0
+      options.includeAttachments && appointment.attachments && appointment.attachments.length > 0
         ? appointment.attachments.map(attachment => ({
             url: attachment.url,
             mimeType: attachment.type,
-            filename: attachment.name,
+            filename: attachment.filename,
           }))
         : [];
 
     // Ricorrenza se richiesta
     const recurrence: ICSRecurrence | null = options.includeRecurrence
       ? {
-          frequency: 'WEEKLY',
+          freq: 'WEEKLY',
           interval: 1,
-          count: 4,
-          byDay: ['MO', 'WE', 'FR'],
+          until: new Date(Date.now() + 4 * 7 * 24 * 60 * 60 * 1000), // 4 settimane
         }
       : null;
 
@@ -186,7 +182,7 @@ export class ICSService {
     // Aggiungi partecipanti
     attendees.forEach(attendee => {
       icsContent.push(
-        `ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=${attendee.role};PARTSTAT=${attendee.status};RSVP=${attendee.rsvp ? 'TRUE' : 'FALSE'};CN=${attendee.name}:mailto:${attendee.email}`
+        `ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=${attendee.role};PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=${attendee.name}:mailto:${attendee.email}`
       );
     });
 
@@ -198,7 +194,7 @@ export class ICSService {
     // Aggiungi ricorrenza
     if (recurrence) {
       icsContent.push(
-        `RRULE:FREQ=${recurrence.frequency};INTERVAL=${recurrence.interval};COUNT=${recurrence.count};BYDAY=${recurrence.byDay.join(',')}`
+        `RRULE:FREQ=${recurrence.freq};INTERVAL=${recurrence.interval}${recurrence.until ? `;UNTIL=${recurrence.until.toISOString().replace(/[-:]/g, '').split('.')[0]}Z` : ''}`
       );
     }
 
@@ -256,7 +252,7 @@ export class ICSService {
    */
   async getICSFileByAppointment(appointmentId: string): Promise<ICSFile | null> {
     const icsFiles = Array.from(this.icsFiles.values());
-    return icsFiles.find(ics => ics.appointmentId === appointmentId) || null;
+    return icsFiles.find(ics => ics.filename.includes(appointmentId)) || null;
   }
 
   /**
@@ -278,12 +274,12 @@ export class ICSService {
 
     if (updates.content) {
       icsFile.content = updates.content;
-      icsFile.size = Buffer.byteLength(updates.content, 'utf8');
+      // Size calculation removed - not part of ICSFile type
     }
 
     if (updates.downloadUrl) icsFile.downloadUrl = updates.downloadUrl;
     if (updates.expiresAt) icsFile.expiresAt = updates.expiresAt;
-    if (updates.metadata) icsFile.metadata = { ...icsFile.metadata, ...updates.metadata };
+    // Metadata handling removed - not part of ICSFile type
 
     console.log(`🔄 ICS File Updated - ID: ${icsFileId}`);
 
@@ -401,7 +397,7 @@ export class ICSService {
     let icsFiles = Array.from(this.icsFiles.values());
 
     if (filters.appointmentId) {
-      icsFiles = icsFiles.filter(ics => ics.appointmentId === filters.appointmentId);
+      icsFiles = icsFiles.filter(ics => ics.filename.includes(filters.appointmentId!));
     }
 
     if (filters.fromDate) {
@@ -420,7 +416,7 @@ export class ICSService {
    */
   async cleanupExpiredICS(): Promise<number> {
     const now = new Date();
-    const expiredFiles = Array.from(this.icsFiles.values()).filter(ics => ics.expiresAt < now);
+    const expiredFiles = Array.from(this.icsFiles.values()).filter(ics => ics.expiresAt && ics.expiresAt < now);
 
     expiredFiles.forEach(ics => {
       this.icsFiles.delete(ics.id);

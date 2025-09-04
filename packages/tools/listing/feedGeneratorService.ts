@@ -1,4 +1,19 @@
-import { ListingPayload } from '@urbanova/types';
+// Define ListingPayload inline since it doesn't exist
+interface ListingPayload {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  location: string | { address?: string; city?: string; province?: string; postalCode?: string; coordinates?: { lat: number; lng: number }; };
+  features: any[];
+  images: any[];
+  documents: any[];
+  projectId?: string;
+  pricePerSqm?: number;
+  surface?: number;
+  rooms?: number;
+  [key: string]: any; // Allow any additional properties
+}
 
 /**
  * Service per la generazione di feed XML per portali immobiliari
@@ -34,7 +49,7 @@ export class FeedGeneratorService {
     }
 
     // TODO: Salva XML su GCS e restituisci URL
-    const feedUrl = await this.saveFeedToGCS(portal, listingPayload.projectId, xmlContent);
+    const feedUrl = await this.saveFeedToGCS(portal, listingPayload.projectId || 'default', xmlContent);
 
     console.log(`✅ [FeedGeneratorService] Feed XML generato: ${feedUrl}`);
     return feedUrl;
@@ -80,12 +95,12 @@ export class FeedGeneratorService {
     </details>
     
     <location>
-      <address>${this.escapeXml(listingPayload.location.address)}</address>
-      <city>${this.escapeXml(listingPayload.location.city)}</city>
-      <province>${listingPayload.location.province}</province>
-      <postal_code>${listingPayload.location.postalCode}</postal_code>
+      <address>${this.escapeXml(typeof listingPayload.location === 'string' ? listingPayload.location : listingPayload.location.address || '')}</address>
+      <city>${this.escapeXml(typeof listingPayload.location === 'string' ? '' : listingPayload.location.city || '')}</city>
+      <province>${typeof listingPayload.location === 'string' ? '' : listingPayload.location.province || ''}</province>
+      <postal_code>${typeof listingPayload.location === 'string' ? '' : listingPayload.location.postalCode || ''}</postal_code>
       ${
-        listingPayload.location.coordinates
+        typeof listingPayload.location !== 'string' && listingPayload.location.coordinates
           ? `
       <coordinates>
         <lat>${listingPayload.location.coordinates.lat}</lat>
@@ -96,13 +111,13 @@ export class FeedGeneratorService {
     </location>
     
     <features>
-      ${listingPayload.features.map(feature => `<feature>${this.escapeXml(feature)}</feature>`).join('\n      ')}
+      ${listingPayload.features.map((feature: any) => `<feature>${this.escapeXml(feature)}</feature>`).join('\n      ')}
     </features>
     
     <images>
       ${listingPayload.images
         .map(
-          img => `
+          (img: any) => `
       <image>
         <url>${img.url}</url>
         <alt>${this.escapeXml(img.alt)}</alt>
@@ -118,7 +133,7 @@ export class FeedGeneratorService {
     <documents>
       ${listingPayload.documents
         .map(
-          doc => `
+          (doc: any) => `
       <document>
         <name>${this.escapeXml(doc.name)}</name>
         <url>${doc.url}</url>
@@ -187,20 +202,20 @@ export class FeedGeneratorService {
     </details>
     
     <address>
-      <street>${this.escapeXml(listingPayload.location.address)}</street>
-      <city>${this.escapeXml(listingPayload.location.city)}</city>
-      <province>${listingPayload.location.province}</province>
-      <postal_code>${listingPayload.location.postalCode}</postal_code>
+      <street>${this.escapeXml(typeof listingPayload.location === 'string' ? listingPayload.location : listingPayload.location.address || '')}</street>
+      <city>${this.escapeXml(typeof listingPayload.location === 'string' ? '' : listingPayload.location.city || '')}</city>
+      <province>${typeof listingPayload.location === 'string' ? '' : listingPayload.location.province || ''}</province>
+      <postal_code>${typeof listingPayload.location === 'string' ? '' : listingPayload.location.postalCode || ''}</postal_code>
     </address>
     
     <features>
-      ${listingPayload.features.map(feature => `<feature>${this.escapeXml(feature)}</feature>`).join('\n      ')}
+      ${listingPayload.features.map((feature: any) => `<feature>${this.escapeXml(feature)}</feature>`).join('\n      ')}
     </features>
     
     <images>
       ${listingPayload.images
         .map(
-          img => `
+          (img: any) => `
       <image>
         <url>${img.url}</url>
         <alt>${this.escapeXml(img.alt)}</alt>
@@ -251,20 +266,20 @@ export class FeedGeneratorService {
     <condition>${listingPayload.condition}</condition>
     
     <location>
-      <address>${this.escapeXml(listingPayload.location.address)}</address>
-      <city>${this.escapeXml(listingPayload.location.city)}</city>
-      <province>${listingPayload.location.province}</province>
-      <postal_code>${listingPayload.location.postalCode}</postal_code>
+      <address>${this.escapeXml(typeof listingPayload.location === 'string' ? listingPayload.location : listingPayload.location.address || '')}</address>
+      <city>${this.escapeXml(typeof listingPayload.location === 'string' ? '' : listingPayload.location.city || '')}</city>
+      <province>${typeof listingPayload.location === 'string' ? '' : listingPayload.location.province || ''}</province>
+      <postal_code>${typeof listingPayload.location === 'string' ? '' : listingPayload.location.postalCode || ''}</postal_code>
     </location>
     
     <features>
-      ${listingPayload.features.map(feature => `<feature>${this.escapeXml(feature)}</feature>`).join('\n      ')}
+      ${listingPayload.features.map((feature: any) => `<feature>${this.escapeXml(feature)}</feature>`).join('\n      ')}
     </features>
     
     <images>
       ${listingPayload.images
         .map(
-          img => `
+          (img: any) => `
       <image>
         <url>${img.url}</url>
         <alt>${this.escapeXml(img.alt)}</alt>

@@ -217,8 +217,10 @@ export default function NewFeasibilityProjectPage() {
         if (!updated.costs) updated.costs = {} as any;
         if (field.includes('.')) {
           const [subSection, subField] = field.split('.');
-          if (!(updated.costs as any)[subSection]) (updated.costs as any)[subSection] = {};
-          (updated.costs as any)[subSection][subField] = value;
+          if (subSection && subField) {
+            if (!(updated.costs as any)[subSection]) (updated.costs as any)[subSection] = {};
+            (updated.costs as any)[subSection][subField] = value;
+          }
         } else {
           (updated.costs as any)[field] = value;
         }
@@ -266,7 +268,7 @@ export default function NewFeasibilityProjectPage() {
             ...totalCosts,
           },
         },
-      }));
+      } as Partial<FeasibilityProject>));
     }
 
     // Se si passa da total a perSqm, calcola i costi per mq
@@ -303,7 +305,7 @@ export default function NewFeasibilityProjectPage() {
             [field]: totalValue,
           },
         },
-      }));
+      } as Partial<FeasibilityProject>));
     }
 
     setTimeout(() => recalculateAll(), 100);
@@ -426,7 +428,7 @@ export default function NewFeasibilityProjectPage() {
 
   const handleSave = async () => {
     if (!project.name || !project.address) {
-      toast.error('Compila i campi obbligatori');
+      toast('Compila i campi obbligatori', { icon: '❌' });
       return;
     }
 
@@ -440,7 +442,7 @@ export default function NewFeasibilityProjectPage() {
 
       if (diagnostic.overall === 'failed') {
         console.error('❌ Problemi di connessione Firebase rilevati:', diagnostic);
-        toast.error('❌ Problemi di connessione Firebase. Controlla la console per dettagli.');
+        toast('❌ Problemi di connessione Firebase. Controlla la console per dettagli.', { icon: '❌' });
         return;
       }
 
@@ -481,7 +483,7 @@ export default function NewFeasibilityProjectPage() {
       }
 
       setSavedProjectId(projectId);
-      toast.success('✅ Progetto creato con successo! Ora puoi generare il report.');
+      toast('✅ Progetto creato con successo! Ora puoi generare il report.', { icon: '✅' });
       setShowReportGenerator(true);
     } catch (error: any) {
       console.error('❌ Errore creazione progetto:', error);
@@ -503,7 +505,7 @@ export default function NewFeasibilityProjectPage() {
         errorMessage = `❌ Errore: ${error.message}`;
       }
 
-      toast.error(errorMessage);
+      toast(errorMessage, { icon: '❌' });
     } finally {
       setLoading(false);
     }
@@ -590,10 +592,10 @@ export default function NewFeasibilityProjectPage() {
               onClick={async () => {
                 try {
                   await autoSaveProject();
-                  toast.success('✅ Progetto salvato!');
+                  toast('✅ Progetto salvato!', { icon: '✅' });
                   router.push('/dashboard/feasibility-analysis');
                 } catch (error) {
-                  toast.error('❌ Errore nel salvataggio');
+                  toast('❌ Errore nel salvataggio', { icon: '❌' });
                 }
               }}
               className="btn btn-primary btn-sm"
@@ -1593,7 +1595,7 @@ export default function NewFeasibilityProjectPage() {
                     if (savedProjectId) {
                       router.push(`/dashboard/feasibility-analysis/${savedProjectId}`);
                     } else {
-                      toast.error('Compila nome e indirizzo per abilitare la visualizzazione');
+                      toast('Compila nome e indirizzo per abilitare la visualizzazione', { icon: '❌' });
                     }
                   }}
                   disabled={!project.name || !project.address}
@@ -1608,9 +1610,9 @@ export default function NewFeasibilityProjectPage() {
                       // Condividi link diretto
                       const url = `${window.location.origin}/dashboard/feasibility-analysis/${savedProjectId}`;
                       navigator.clipboard.writeText(url);
-                      toast.success('Link copiato negli appunti! 📋');
+                      toast('Link copiato negli appunti! 📋', { icon: '✅' });
                     } else {
-                      toast.error('Compila nome e indirizzo per abilitare la condivisione');
+                      toast('Compila nome e indirizzo per abilitare la condivisione', { icon: '❌' });
                     }
                   }}
                   disabled={!project.name || !project.address}

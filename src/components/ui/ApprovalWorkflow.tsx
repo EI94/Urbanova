@@ -108,7 +108,7 @@ export default function ApprovalWorkflow({
             approverRole: 'Architetto Senior',
             status: 'approved',
             required: true,
-            completedAt: new Date(Date.now() - 86400000), // 1 day ago
+            completedAt: new Date(Date.now() - 86400000) as any, // 1 day ago
           },
           {
             id: '1-2',
@@ -119,7 +119,7 @@ export default function ApprovalWorkflow({
             approverRole: 'Project Manager',
             status: 'pending',
             required: true,
-            deadline: new Date(Date.now() + 172800000), // 2 days from now
+            deadline: new Date(Date.now() + 172800000) as any, // 2 days from now
           },
           {
             id: '1-3',
@@ -220,14 +220,14 @@ export default function ApprovalWorkflow({
       });
 
       setShowWorkflowForm(false);
-      toast.success('Workflow creato con successo');
+      toast('Workflow creato con successo', { icon: '✅' });
 
       if (onWorkflowCreate) {
         onWorkflowCreate(mockWorkflow);
       }
     } catch (error) {
       console.error('Error creating workflow:', error);
-      toast.error('Errore nella creazione del workflow');
+      toast('Errore nella creazione del workflow', { icon: '❌' });
     } finally {
       setIsLoading(false);
     }
@@ -283,6 +283,8 @@ export default function ApprovalWorkflow({
 
   const editStep = (index: number) => {
     const step = workflowForm.steps[index];
+    if (!step) return;
+    
     setStepForm({
       stepName: step.stepName,
       approverId: step.approverId,
@@ -290,7 +292,7 @@ export default function ApprovalWorkflow({
       approverRole: step.approverRole,
       required: step.required,
       deadline: step.deadline ? new Date(step.deadline.toMillis()).toISOString().split('T')[0] : '',
-    });
+    } as any);
     setEditingStepIndex(index);
     setShowStepForm(true);
   };
@@ -312,10 +314,10 @@ export default function ApprovalWorkflow({
       // });
 
       // For now, update the local state
-      setWorkflows(prev =>
-        prev.map(workflow => {
+      setWorkflows((prev: any) =>
+        prev.map((workflow: any) => {
           if (workflow.id === workflowId) {
-            const updatedSteps = workflow.steps.map(step =>
+            const updatedSteps = workflow.steps.map((step: any) =>
               step.stepNumber === stepNumber
                 ? {
                     ...step,
@@ -327,7 +329,7 @@ export default function ApprovalWorkflow({
             );
 
             const completedSteps = updatedSteps.filter(
-              step => step.status === 'approved' || step.status === 'skipped'
+              (step: any) => step.status === 'approved' || step.status === 'skipped'
             ).length;
 
             const currentStep =
@@ -348,7 +350,7 @@ export default function ApprovalWorkflow({
         })
       );
 
-      toast.success(approved ? 'Step approvato' : 'Step rifiutato');
+      (toast as any).success(approved ? 'Step approvato' : 'Step rifiutato');
 
       if (onWorkflowUpdate) {
         const updatedWorkflow = workflows.find(w => w.id === workflowId);
@@ -358,7 +360,7 @@ export default function ApprovalWorkflow({
       }
     } catch (error) {
       console.error('Error updating workflow step:', error);
-      toast.error("Errore nell'aggiornamento dello step");
+      (toast as any).error("Errore nell'aggiornamento dello step");
     }
   };
 

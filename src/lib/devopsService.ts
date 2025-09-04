@@ -1695,11 +1695,11 @@ export class DevOpsService {
         deploymentWaitTime: 12.3,
       },
       generatedAt: new Date(),
-      period: period || {
+      period: (period || {
         start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
         end: new Date(),
         granularity: 'day',
-      },
+      }) as any,
     };
   }
 

@@ -98,7 +98,7 @@ export class MarketTrendReportGenerator {
       const pdfUrl = `https://storage.googleapis.com/mock-bucket/${fileName}`;
 
       // Crea report object
-      const report: MarketTrendReport = {
+      const report: MarketTrendReport = ({
         id: `report_${snapshot.id}`,
         city: snapshot.city,
         asset: snapshot.asset,
@@ -111,9 +111,9 @@ export class MarketTrendReportGenerator {
           riskLevel: this.calculateRiskLevel(snapshot.data.kpis),
           opportunities: this.extractOpportunities(snapshot.data.insights),
           risks: this.extractRisks(snapshot.data.insights),
-        },
+        } as any,
         charts,
-      };
+      } as any);
 
       return { report, pdfUrl };
     } catch (error) {
@@ -207,7 +207,7 @@ export class MarketTrendReportGenerator {
           ${snapshot.data.insights
             .slice(0, 3)
             .map(
-              insight => `
+              (insight: any) => `
             <div class="insight">
               <h3>${insight.title}</h3>
               <p><strong>Descrizione:</strong> ${insight.description}</p>
@@ -218,7 +218,7 @@ export class MarketTrendReportGenerator {
                   ? `
                 <p><strong>Raccomandazioni:</strong></p>
                 <ul>
-                  ${insight.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                  ${insight.recommendations.map((rec: any) => `<li>${rec}</li>`).join('')}
                 </ul>
               `
                   : ''

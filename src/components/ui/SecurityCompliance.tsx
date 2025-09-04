@@ -50,7 +50,7 @@ export default function SecurityCompliance({
   const [alerts, setAlerts] = useState<SecurityAlert[]>([]);
   const [incidents, setIncidents] = useState<SecurityIncident[]>([]);
   const [policies, setPolicies] = useState<SecurityPolicy[]>([]);
-  const [frameworks, setFrameworks] = useState<ComplianceFramework[]>([]);
+  const [frameworks, setFrameworks] = useState<Array<{id: string, name: string, compliancePercentage: number, implementedControls: number, totalControls: number, standard: string, certificationStatus: string, description: string, isActive: boolean, version: string, nextAuditDate: Date, domains: Array<{name: string, status: string}>}>>([]);
   const [trainings, setTrainings] = useState<SecurityTraining[]>([]);
   const [threats, setThreats] = useState<SecurityThreat[]>([]);
 
@@ -61,7 +61,7 @@ export default function SecurityCompliance({
   const [showComplianceDetails, setShowComplianceDetails] = useState(false);
   const [selectedAlert, setSelectedAlert] = useState<SecurityAlert | null>(null);
   const [selectedIncident, setSelectedIncident] = useState<SecurityIncident | null>(null);
-  const [selectedFramework, setSelectedFramework] = useState<ComplianceFramework | null>(null);
+  const [selectedFramework, setSelectedFramework] = useState<{id: string, name: string, compliancePercentage: number, implementedControls: number, totalControls: number, standard: string, certificationStatus: string, description: string, isActive: boolean, version: string, nextAuditDate: Date, domains: Array<{name: string, status: string}>} | null>(null);
 
   // Form states
   const [newIncident, setNewIncident] = useState({
@@ -93,13 +93,13 @@ export default function SecurityCompliance({
 
   const handleCreateIncident = () => {
     try {
-      const incident = securityService.createSecurityIncident(
-        newIncident.title,
-        newIncident.description,
-        newIncident.type,
-        newIncident.severity,
-        currentUserId
-      );
+      const incident = securityService.createSecurityIncident({
+        title: newIncident.title,
+        description: newIncident.description,
+        category: newIncident.type,
+        severity: newIncident.severity,
+        createdBy: currentUserId
+      });
 
       setIncidents(prev => [...prev, incident]);
       setNewIncident({
@@ -120,33 +120,32 @@ export default function SecurityCompliance({
     alertId: string,
     status: 'open' | 'investigating' | 'acknowledged' | 'resolved' | 'false_positive'
   ) => {
-    const success = securityService.updateAlertStatus(alertId, status, currentUserId);
-    if (success) {
-      loadData(); // Ricarica i dati
-      console.log('Status alert aggiornato con successo!');
-    }
+    securityService.updateAlertStatus(alertId, status);
+    loadData(); // Ricarica i dati
+    console.log('Status alert aggiornato con successo!');
   };
 
   const handleUpdateIncidentStatus = (incidentId: string, status: IncidentStatus) => {
-    const success = securityService.updateIncidentStatus(incidentId, status);
-    if (success) {
-      loadData(); // Ricarica i dati
-      console.log('Status incidente aggiornato con successo!');
-    }
+    securityService.updateIncidentStatus(incidentId, status);
+    loadData(); // Ricarica i dati
+    console.log('Status incidente aggiornato con successo!');
   };
 
   const getSeverityColor = (severity: SecurityLevel | IncidentSeverity) => {
-    const colors = {
+    const colors: Record<string, string> = {
+      info: 'bg-blue-100 text-blue-800',
       low: 'bg-green-100 text-green-800',
       medium: 'bg-yellow-100 text-yellow-800',
       high: 'bg-orange-100 text-orange-800',
       critical: 'bg-red-100 text-red-800',
+      emergency: 'bg-red-200 text-red-900',
     };
     return colors[severity] || 'bg-gray-100 text-gray-800';
   };
 
   const getStatusColor = (status: string) => {
-    const colors = {
+    const colors: Record<string, string> = {
+      new: 'bg-blue-100 text-blue-800',
       open: 'bg-red-100 text-red-800',
       investigating: 'bg-yellow-100 text-yellow-800',
       acknowledged: 'bg-blue-100 text-blue-800',
@@ -154,31 +153,42 @@ export default function SecurityCompliance({
       closed: 'bg-gray-100 text-gray-800',
       contained: 'bg-purple-100 text-purple-800',
       false_positive: 'bg-gray-100 text-gray-500',
+      assigned: 'bg-indigo-100 text-indigo-800',
+      analyzing: 'bg-yellow-100 text-yellow-800',
+      containing: 'bg-orange-100 text-orange-800',
+      eradicating: 'bg-red-100 text-red-800',
+      recovering: 'bg-green-100 text-green-800',
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
 
   const getRiskColor = (risk: RiskLevel) => {
-    const colors = {
-      very_low: 'bg-green-100 text-green-800',
+    const colors: Record<RiskLevel, string> = {
+      negligible: 'bg-green-100 text-green-800',
       low: 'bg-green-100 text-green-800',
       medium: 'bg-yellow-100 text-yellow-800',
       high: 'bg-orange-100 text-orange-800',
-      very_high: 'bg-red-100 text-red-800',
       critical: 'bg-red-100 text-red-800',
+      catastrophic: 'bg-red-200 text-red-900',
     };
     return colors[risk] || 'bg-gray-100 text-gray-800';
   };
 
   const getThreatTypeIcon = (type: ThreatType) => {
-    const icons = {
+    const icons: Record<ThreatType, string> = {
       malware: '🦠',
       phishing: '🎣',
-      data_breach: '💥',
-      unauthorized_access: '🚫',
-      ddos: '⚡',
-      social_engineering: '🎭',
+      ransomware: '🔒',
+      apt: '🎯',
       insider_threat: '👤',
+      ddos: '⚡',
+      data_breach: '💥',
+      supply_chain: '🔗',
+      social_engineering: '🎭',
+      zero_day: '💀',
+      botnet: '🤖',
+      cryptojacking: '⛏️',
+      unauthorized_access: '🚫',
       compliance_violation: '⚖️',
     };
     return icons[type] || '⚠️';
@@ -353,7 +363,7 @@ export default function SecurityCompliance({
                 id: 'alerts',
                 label: 'Alert',
                 icon: '🚨',
-                count: alerts.filter(a => a.status === 'open').length,
+                count: alerts.filter(a => a.response.status === 'new').length,
               },
               {
                 id: 'incidents',
@@ -366,7 +376,7 @@ export default function SecurityCompliance({
                 id: 'policies',
                 label: 'Policy',
                 icon: '📋',
-                count: policies.filter(p => p.isActive).length,
+                count: policies.filter(p => p.status === 'active').length,
               },
               { id: 'training', label: 'Training', icon: '🎓', count: trainings.length },
             ].map(tab => (
@@ -462,10 +472,10 @@ export default function SecurityCompliance({
                         className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                       >
                         <div className="flex items-center space-x-3">
-                          <span className="text-xl">{getThreatTypeIcon(threat.type)}</span>
+                          <span className="text-xl">{getThreatTypeIcon(threat.category)}</span>
                           <div>
                             <p className="text-sm font-medium text-gray-900">{threat.name}</p>
-                            <p className="text-xs text-gray-500">{formatDate(threat.detectedAt)}</p>
+                            <p className="text-xs text-gray-500">{formatDate(threat.firstSeen)}</p>
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
@@ -561,10 +571,10 @@ export default function SecurityCompliance({
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
                           <h4 className="font-medium text-gray-900">{alert.title}</h4>
-                          <Badge className={getSeverityColor(alert.severity)}>
+                          <Badge className={getSeverityColor(alert.severity as any)}>
                             {alert.severity}
                           </Badge>
-                          <Badge className={getStatusColor(alert.status)}>{alert.status}</Badge>
+                          <Badge className={getStatusColor(alert.response.status)}>{alert.response.status}</Badge>
                         </div>
                         <p className="text-sm text-gray-600 mb-3">{alert.description}</p>
 
@@ -580,20 +590,20 @@ export default function SecurityCompliance({
                           <div>
                             <span className="text-gray-500">Rilevato:</span>
                             <span className="ml-2 font-medium">
-                              {formatDate(alert.triggeredAt)}
+                              {formatDate(alert.event.timestamp)}
                             </span>
                           </div>
-                          {alert.assignedTo && (
+                          {alert.response.assignedTo && (
                             <div>
                               <span className="text-gray-500">Assegnato a:</span>
-                              <span className="ml-2 font-medium">{alert.assignedTo}</span>
+                              <span className="ml-2 font-medium">{alert.response.assignedTo}</span>
                             </div>
                           )}
                         </div>
                       </div>
 
                       <div className="flex items-center space-x-2 ml-4">
-                        {alert.status === 'open' && (
+                        {alert.response.status === 'new' && (
                           <>
                             <button
                               onClick={() => handleUpdateAlertStatus(alert.id, 'acknowledged')}
@@ -609,7 +619,7 @@ export default function SecurityCompliance({
                             </button>
                           </>
                         )}
-                        {alert.status !== 'resolved' && (
+                        {alert.response.status !== 'resolved' && (
                           <button
                             onClick={() => handleUpdateAlertStatus(alert.id, 'resolved')}
                             className="bg-green-50 hover:bg-green-100 text-green-700 px-3 py-1 rounded text-sm font-medium transition-colors"
@@ -676,7 +686,7 @@ export default function SecurityCompliance({
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
-                          <span className="text-xl">{getThreatTypeIcon(incident.type)}</span>
+                          <span className="text-xl">{getThreatTypeIcon(incident.category)}</span>
                           <h4 className="font-medium text-gray-900">{incident.title}</h4>
                           <Badge className={getSeverityColor(incident.severity)}>
                             {incident.severity}
@@ -690,7 +700,7 @@ export default function SecurityCompliance({
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                           <div>
                             <span className="text-gray-500">Tipo:</span>
-                            <span className="ml-2 font-medium">{incident.type}</span>
+                            <span className="ml-2 font-medium">{incident.category}</span>
                           </div>
                           <div>
                             <span className="text-gray-500">Categoria:</span>
@@ -715,23 +725,21 @@ export default function SecurityCompliance({
                             <div>
                               <span className="text-gray-500">Confidenzialità:</span>
                               <Badge
-                                className={getRiskColor(incident.impact.confidentiality)}
-                                size="sm"
+                                className={getRiskColor(incident.impact.confidentiality === 'none' ? 'negligible' : incident.impact.confidentiality as any)}
                               >
                                 {incident.impact.confidentiality}
                               </Badge>
                             </div>
                             <div>
                               <span className="text-gray-500">Integrità:</span>
-                              <Badge className={getRiskColor(incident.impact.integrity)} size="sm">
+                              <Badge className={getRiskColor(incident.impact.integrity === 'none' ? 'negligible' : incident.impact.integrity as any)}>
                                 {incident.impact.integrity}
                               </Badge>
                             </div>
                             <div>
                               <span className="text-gray-500">Disponibilità:</span>
                               <Badge
-                                className={getRiskColor(incident.impact.availability)}
-                                size="sm"
+                                className={getRiskColor(incident.impact.availability === 'none' ? 'negligible' : incident.impact.availability as any)}
                               >
                                 {incident.impact.availability}
                               </Badge>
@@ -741,7 +749,7 @@ export default function SecurityCompliance({
                       </div>
 
                       <div className="flex flex-col space-y-2 ml-4">
-                        {incident.status === 'open' && (
+                        {incident.status === 'new' && (
                           <button
                             onClick={() => handleUpdateIncidentStatus(incident.id, 'investigating')}
                             className="bg-yellow-50 hover:bg-yellow-100 text-yellow-700 px-3 py-1 rounded text-sm font-medium transition-colors"
@@ -751,13 +759,13 @@ export default function SecurityCompliance({
                         )}
                         {incident.status === 'investigating' && (
                           <button
-                            onClick={() => handleUpdateIncidentStatus(incident.id, 'contained')}
+                            onClick={() => handleUpdateIncidentStatus(incident.id, 'containing')}
                             className="bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 py-1 rounded text-sm font-medium transition-colors"
                           >
                             🛡️ Contieni
                           </button>
                         )}
-                        {['investigating', 'contained'].includes(incident.status) && (
+                        {['investigating', 'containing'].includes(incident.status) && (
                           <button
                             onClick={() => handleUpdateIncidentStatus(incident.id, 'resolved')}
                             className="bg-green-50 hover:bg-green-100 text-green-700 px-3 py-1 rounded text-sm font-medium transition-colors"
@@ -871,9 +879,9 @@ export default function SecurityCompliance({
                           Domini ({framework.domains.length})
                         </h5>
                         <div className="flex flex-wrap gap-2">
-                          {framework.domains.slice(0, 3).map(domain => (
-                            <Badge key={domain.id} className="bg-blue-100 text-blue-800 text-xs">
-                              {domain.name} ({domain.compliancePercentage}%)
+                          {framework.domains.slice(0, 3).map((domain, index) => (
+                            <Badge key={index} className="bg-blue-100 text-blue-800 text-xs">
+                              {domain.name} ({domain.status})
                             </Badge>
                           ))}
                           {framework.domains.length > 3 && (
@@ -908,23 +916,23 @@ export default function SecurityCompliance({
                           <h4 className="font-medium text-gray-900">{policy.name}</h4>
                           <Badge
                             className={
-                              policy.isActive
+                              policy.status === 'active'
                                 ? 'bg-green-100 text-green-800'
                                 : 'bg-gray-100 text-gray-800'
                             }
                           >
-                            {policy.isActive ? 'Attiva' : 'Inattiva'}
+                            {policy.status === 'active' ? 'Attiva' : 'Inattiva'}
                           </Badge>
                           <Badge
                             className={
-                              policy.enforcement === 'strict'
+                              policy.enforcement.mode === 'enforce'
                                 ? 'bg-red-100 text-red-800'
-                                : policy.enforcement === 'enforced'
+                                : policy.enforcement.mode === 'monitor'
                                   ? 'bg-yellow-100 text-yellow-800'
                                   : 'bg-blue-100 text-blue-800'
                             }
                           >
-                            {policy.enforcement}
+                            {policy.enforcement.mode}
                           </Badge>
                         </div>
                         <p className="text-sm text-gray-600 mb-3">{policy.description}</p>
@@ -939,12 +947,12 @@ export default function SecurityCompliance({
                             <span className="ml-2 font-medium">{policy.rules.length}</span>
                           </div>
                           <div>
-                            <span className="text-gray-500">Compliance:</span>
-                            <span className="ml-2 font-medium">{policy.complianceRate}%</span>
+                            <span className="text-gray-500">Versione:</span>
+                            <span className="ml-2 font-medium">{policy.version}</span>
                           </div>
                           <div>
-                            <span className="text-gray-500">Violazioni:</span>
-                            <span className="ml-2 font-medium">{policy.violationCount}</span>
+                            <span className="text-gray-500">Tipo:</span>
+                            <span className="ml-2 font-medium">{policy.type}</span>
                           </div>
                         </div>
 
@@ -953,9 +961,9 @@ export default function SecurityCompliance({
                             Standard di Compliance:
                           </h5>
                           <div className="flex flex-wrap gap-2">
-                            {policy.complianceStandards.map(standard => (
-                              <Badge key={standard} className="bg-blue-100 text-blue-800 text-xs">
-                                {standard.toUpperCase()}
+                            {policy.complianceMapping.map((mapping, index) => (
+                              <Badge key={index} className="bg-blue-100 text-blue-800 text-xs">
+                                {mapping.framework.toUpperCase()}
                               </Badge>
                             ))}
                           </div>
@@ -966,7 +974,7 @@ export default function SecurityCompliance({
                         <div className="text-right text-sm">
                           <p className="text-gray-500">Versione: {policy.version}</p>
                           <p className="text-gray-500">
-                            Prossima review: {formatDate(policy.nextReviewDate)}
+                            Prossima review: {policy.nextReviewDate ? formatDate(policy.nextReviewDate) : 'Non programmata'}
                           </p>
                         </div>
                       </div>

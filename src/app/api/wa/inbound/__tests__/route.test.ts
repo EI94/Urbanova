@@ -27,7 +27,10 @@ jest.mock('@urbanova/agents', () => ({
   },
 }));
 
-import { chatOpsAgent } from '@urbanova/agents';
+// Mock chatOpsAgent
+const chatOpsAgent = {
+  handleInboundMessage: jest.fn(),
+};
 
 import { POST, GET } from '../route';
 

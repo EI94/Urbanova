@@ -4,7 +4,7 @@ import {
   LandSearchCriteria,
   LandAnalysis,
   RealLandScrapingResult,
-} from '@/types/land';
+} from '../../src/types/land';
 
 import { advancedWebScraper } from './advancedWebScraper';
 import { cacheService } from './cacheService';

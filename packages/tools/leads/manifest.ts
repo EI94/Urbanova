@@ -3,6 +3,7 @@ import { ToolManifest } from '@urbanova/types';
 export const leadsManifest: ToolManifest = {
   id: 'leads',
   name: 'Lead/Chat Unifier',
+  category: 'automation',
   description:
     'Sistema unificato per la gestione dei lead da portali immobiliari e conversazioni multi-canale',
   version: '1.0.0',
@@ -20,23 +21,79 @@ export const leadsManifest: ToolManifest = {
   ],
 
   features: [
-    'SendGrid Inbound Parse integration',
-    'Twilio WhatsApp integration',
-    'SendGrid Mail Send integration',
-    'Real-time SLA monitoring',
-    'Automatic lead assignment',
-    'Template-based messaging',
-    'GDPR compliant data handling',
-    'Comprehensive audit trail',
+    {
+      name: 'SendGrid Integration',
+      description: 'SendGrid Inbound Parse integration',
+      enabled: true,
+    },
+    {
+      name: 'WhatsApp Integration',
+      description: 'Twilio WhatsApp integration',
+      enabled: true,
+    },
+    {
+      name: 'Mail Send',
+      description: 'SendGrid Mail Send integration',
+      enabled: true,
+    },
+    {
+      name: 'SLA Monitoring',
+      description: 'Real-time SLA monitoring',
+      enabled: true,
+    },
+    {
+      name: 'Lead Assignment',
+      description: 'Automatic lead assignment',
+      enabled: true,
+    },
+    {
+      name: 'Template System',
+      description: 'Template-based messaging',
+      enabled: true,
+    },
+    {
+      name: 'GDPR Compliance',
+      description: 'GDPR compliant data handling',
+      enabled: true,
+    },
+    {
+      name: 'Audit Trail',
+      description: 'Comprehensive audit trail',
+      enabled: true,
+    },
   ],
 
   integrations: [
-    'Firestore (database)',
-    'Google Cloud Storage (attachments)',
-    'Twilio (WhatsApp/SMS)',
-    'SendGrid (email)',
-    'Gmail API (optional)',
-    'Portal Connectors (Puppeteer)',
+    {
+      name: 'Firestore',
+      description: 'Firestore (database)',
+      status: 'integrated',
+    },
+    {
+      name: 'Google Cloud Storage',
+      description: 'Google Cloud Storage (attachments)',
+      status: 'integrated',
+    },
+    {
+      name: 'Twilio',
+      description: 'Twilio (WhatsApp/SMS)',
+      status: 'integrated',
+    },
+    {
+      name: 'SendGrid',
+      description: 'SendGrid (email)',
+      status: 'integrated',
+    },
+    {
+      name: 'Gmail API',
+      description: 'Gmail API (optional)',
+      status: 'optional',
+    },
+    {
+      name: 'Portal Connectors',
+      description: 'Portal Connectors (Puppeteer)',
+      status: 'integrated',
+    },
   ],
 
   security: {
@@ -44,28 +101,28 @@ export const leadsManifest: ToolManifest = {
     authorization: 'Role-based access control',
     dataEncryption: 'AES-256',
     auditLogging: 'Comprehensive',
-    gdprCompliance: 'Full compliance',
+
   },
 
   compliance: {
     gdpr: true,
     dataRetention: 'Configurable (default: 2 years)',
     consentManagement: true,
-    dataMinimization: true,
-    auditTrail: true,
+
+
   },
 
   performance: {
-    slaTarget: '15 minutes first response',
-    concurrentUsers: 100,
-    messageThroughput: '1000/hour',
-    uptime: '99.9%',
+
+
+
+
   },
 
   documentation: {
-    apiDocs: '/docs/leads-api',
+
     userGuide: '/docs/leads-user-guide',
-    adminGuide: '/docs/leads-admin-guide',
+
   },
 };
 

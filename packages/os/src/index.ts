@@ -22,14 +22,14 @@ capabilityRegistry.register(feasibilitySensitivityCapability);
 
 // Re-export types
 export type {
-  Capability,
-  CapabilitySpec,
-  CapabilityContext,
-  Plan,
-  PlanMode,
-  QnaAnswer,
-  CapabilityExecutionResult,
-  QnaExecutionResult,
+  // Capability,
+  // CapabilitySpec,
+  // CapabilityContext,
+  // Plan,
+  // PlanMode,
+  // QnaAnswer,
+  // CapabilityExecutionResult,
+  // QnaExecutionResult,
 } from '@urbanova/types';
 
 // Main OS class

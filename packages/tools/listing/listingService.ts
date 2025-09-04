@@ -1,4 +1,8 @@
-import { ListingPayload, FeedResult } from '@urbanova/types';
+// import { ListingPayload, FeedResult } from '@urbanova/types';
+
+// Mock types
+type ListingPayload = any;
+type FeedResult = any;
 
 /**
  * Service per la gestione dei listing immobiliari
@@ -119,7 +123,7 @@ export class ListingService {
       },
     };
 
-    return projects[projectId] || projects['proj-a-123'];
+    return (projects as any)[projectId] || projects['proj-a-123'];
   }
 
   /**

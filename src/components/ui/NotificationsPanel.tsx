@@ -18,7 +18,7 @@ interface NotificationsPanelProps {
 
 export default function NotificationsPanel({ isOpen, onClose }: NotificationsPanelProps) {
   const { t } = useLanguage();
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuth() as any;
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [stats, setStats] = useState<NotificationStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -196,8 +196,8 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
 
   const filteredNotifications =
     activeTab === 'unread'
-      ? notifications.filter(n => !n.isRead && !n.isDismissed)
-      : notifications.filter(n => !n.isDismissed);
+      ? notifications.filter(n => !n.isRead && !(n as any).isDismissed)
+      : notifications.filter(n => !(n as any).isDismissed);
 
   if (!isOpen) return null;
 

@@ -103,8 +103,8 @@ export class EmailService {
 
       const doc = snapshot.docs[0];
       return {
-        id: doc.id,
-        ...doc.data(),
+        id: doc?.id || '',
+        ...doc?.data(),
       } as EmailConfig;
     } catch (error) {
       console.error('❌ Errore recupero email config:', error);

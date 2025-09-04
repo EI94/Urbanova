@@ -57,7 +57,7 @@ describe('Deals Types & Zod Schemas', () => {
       trust: 0.85,
       discoveredAt: new Date('2024-01-25'),
       updatedAt: new Date('2024-01-25'),
-      fingerprint: 'hash123',
+      fingerprint: 'hash123' as any,
       metadata: { originalPrice: '500.000€' },
     };
 
@@ -216,7 +216,7 @@ describe('Deals Types & Zod Schemas', () => {
         trust: 0.5,
         discoveredAt: new Date(),
         updatedAt: new Date(),
-        fingerprint: 'test',
+        fingerprint: 'test' as any,
         metadata: {},
       };
       expect(deal.id).toBeDefined();

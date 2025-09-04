@@ -1,6 +1,9 @@
 'use client';
 
-import { DocumentIcon, ImageIcon, VideoIcon } from '@/components/icons';
+import { DocumentIcon, VideoIcon } from '@/components/icons';
+
+// Mock ImageIcon
+const ImageIcon = DocumentIcon;
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
 export default function MarketingMaterialsPage() {

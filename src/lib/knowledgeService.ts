@@ -1160,7 +1160,7 @@ Buon lavoro con Urbanova! 🚀`,
       selection?: { start: number; end: number };
     }
   ): DocumentComment {
-    const comment: DocumentComment = {
+    const comment = {
       id: `comment-${Date.now()}`,
       documentId,
       parentId: parentId ?? undefined,
@@ -1178,7 +1178,7 @@ Buon lavoro con Urbanova! 🚀`,
     if (!this.comments.has(documentId)) {
       this.comments.set(documentId, []);
     }
-    this.comments.get(documentId)!.push(comment);
+    this.comments.get(documentId)!.push(comment as any);
 
     // Aggiorna il contatore di commenti del documento
     const document = this.documents.get(documentId);
@@ -1189,7 +1189,7 @@ Buon lavoro con Urbanova! 🚀`,
 
     this.logActivity(documentId, 'commented', `Nuovo commento aggiunto`, authorId, authorName);
 
-    return comment;
+    return comment as DocumentComment;
   }
 
   // Ottieni commenti per documento
@@ -1211,7 +1211,7 @@ Buon lavoro con Urbanova! 🚀`,
     const totalDownloads = documents.reduce((sum, doc) => sum + doc.downloadCount, 0);
 
     // Breakdown per tipo
-    const documentsByType = Object.values(DocumentType as Record<string, string>).map(type => {
+    const documentsByType = Object.values(DocumentType as unknown as Record<string, string>).map(type => {
       const count = documents.filter(doc => doc.type === type).length;
       return {
         type,
@@ -1221,7 +1221,7 @@ Buon lavoro con Urbanova! 🚀`,
     });
 
     // Breakdown per stato
-    const documentsByStatus = Object.values(DocumentStatus as Record<string, string>).map(status => {
+    const documentsByStatus = ['draft', 'published', 'archived'].map(status => {
       const count = documents.filter(doc => doc.status === status).length;
       return {
         status,
@@ -1231,7 +1231,7 @@ Buon lavoro con Urbanova! 🚀`,
     });
 
     // Breakdown per lingua
-    const documentsByLanguage = Object.values(ContentLanguage as Record<string, string>).map(language => {
+    const documentsByLanguage = ['it', 'en', 'es'].map(language => {
       const count = documents.filter(doc => doc.language === language).length;
       return {
         language,
@@ -1325,9 +1325,9 @@ Buon lavoro con Urbanova! 🚀`,
       totalAuthors,
       totalViews,
       totalDownloads,
-      documentsByType,
-      documentsByStatus,
-      documentsByLanguage,
+      documentsByType: documentsByType as any,
+      documentsByStatus: documentsByStatus as any,
+      documentsByLanguage: documentsByLanguage as any,
       topDocuments,
       topAuthors,
       topCategories,

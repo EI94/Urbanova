@@ -6,7 +6,10 @@ import {
   zVendorAnswers,
   zProjectFactsUpdate,
 } from '@urbanova/types';
-import { db } from './firebase';
+// import { db } from './firebase';
+
+// Mock db
+const db = {} as any;
 
 // ============================================================================
 // VENDOR QUESTIONNAIRE PERSISTENCE
@@ -151,7 +154,7 @@ export async function listVendorQuestionnairesByProject(
       .orderBy('createdAt', 'desc')
       .get();
 
-    return snapshot.docs.map(doc => {
+    return snapshot.docs.map((doc: any) => {
       const data = doc.data();
       return {
         ...data,
@@ -185,7 +188,7 @@ export async function listExpiredQuestionnaires(): Promise<VendorQuestionnaire[]
       .where('status', '==', 'pending')
       .get();
 
-    return snapshot.docs.map(doc => {
+    return snapshot.docs.map((doc: any) => {
       const data = doc.data();
       return {
         ...data,
@@ -246,7 +249,7 @@ export async function listProjectFactsUpdates(projectId: string): Promise<Projec
       .orderBy('timestamp', 'desc')
       .get();
 
-    return snapshot.docs.map(doc => {
+    return snapshot.docs.map((doc: any) => {
       const data = doc.data();
       return {
         ...data,

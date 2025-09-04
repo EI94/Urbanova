@@ -3,7 +3,12 @@ import {
   createProjectDeepLink,
   formatFinancialMetrics,
 } from '../dealMemo';
-import type { Project, Deal, FeasibilityResult } from '@urbanova/types';
+// import type { Project, Deal, FeasibilityResult } from '@urbanova/types';
+
+// Mock types
+type Project = any;
+type Deal = any;
+type FeasibilityResult = any;
 
 // Mock data
 const mockProject: Project = {

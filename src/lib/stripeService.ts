@@ -126,7 +126,7 @@ export class StripeService {
         amount: paymentIntent.amount / 100, // Converti da centesimi
         currency: paymentIntent.currency.toUpperCase(),
         status: paymentIntent.status,
-        receipt_url: paymentIntent.charges?.data[0]?.receipt_url || '',
+        receipt_url: (paymentIntent as any).charges?.data[0]?.receipt_url || '',
       };
     } catch (error) {
       console.error('❌ [StripeService] Errore recupero PaymentIntent:', error);

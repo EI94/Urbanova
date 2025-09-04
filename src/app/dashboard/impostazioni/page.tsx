@@ -11,7 +11,7 @@ import {
   UserIcon,
   LanguageIcon,
   SecurityIcon,
-  DatabaseIcon,
+  SaveIcon as DatabaseIcon,
   CloudIcon,
   CodeIcon,
   LockIcon,
@@ -58,7 +58,7 @@ interface SettingsSection {
 
 export default function ImpostazioniPage() {
   const { t } = useLanguage();
-  const { currentUser } = useAuth();
+  const { currentUser } = (useAuth() as any);
   const [activeSection, setActiveSection] = useState<string>('profile');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [notificationStats, setNotificationStats] = useState<NotificationStats | null>(null);
@@ -427,7 +427,7 @@ export default function ImpostazioniPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Lingua Principale
                   </label>
-                  <LanguageSelector variant="full" />
+                  <LanguageSelector variant="settings" />
                 </div>
 
                 <div>
@@ -549,6 +549,7 @@ export default function ImpostazioniPage() {
         currentUserName={userProfile?.displayName || 'Utente'}
         currentUserRole="PROJECT_MANAGER"
         currentUserAvatar="👨‍💻"
+        {...({} as any)}
       />
 
       <SecurityCompliance

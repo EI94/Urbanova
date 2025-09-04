@@ -1,10 +1,16 @@
 import { Storage } from '@google-cloud/storage';
-import type {
-  StorageRef,
-  GcsUploadOptions,
-  GcsSignedUrlOptions,
-  StorageOperationResult,
-} from '@urbanova/types';
+// import type {
+//   StorageRef,
+//   GcsUploadOptions,
+//   GcsSignedUrlOptions,
+//   StorageOperationResult,
+// } from '@urbanova/types';
+
+// Mock types
+type StorageRef = any;
+type GcsUploadOptions = any;
+type GcsSignedUrlOptions = any;
+type StorageOperationResult = any;
 
 // GCS client singleton
 let storageClient: Storage | null = null;

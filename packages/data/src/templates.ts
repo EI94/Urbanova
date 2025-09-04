@@ -44,6 +44,8 @@ Email: info@urbanova.com</p>`,
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
+    createdBy: 'system',
+    usageCount: 0,
   },
 
   // Template per follow-up
@@ -142,13 +144,15 @@ Urbanova</p>`,
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
+    createdBy: 'system',
+    usageCount: 0,
   },
 
   // Template per prenotazione appuntamento
   appointment_scheduling: {
     id: 'appointment_scheduling',
     name: 'Prenotazione Appuntamento',
-    description: 'Template per programmare una visita guidata',
+    // description: 'Template per programmare una visita guidata',
     subject: 'Prenotazione visita - {{listingId}}',
     bodyText: `Gentile {{leadName}},
 
@@ -206,13 +210,15 @@ Urbanova</p>`,
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
+    createdBy: 'system',
+    usageCount: 0,
   },
 
   // Template per promemoria pagamento
   payment_reminder: {
     id: 'payment_reminder',
     name: 'Promemoria Pagamento',
-    description: 'Template per ricordare scadenze di pagamento',
+    // description: 'Template per ricordare scadenze di pagamento',
     subject: 'Promemoria pagamento - {{listingId}}',
     bodyText: `Gentile {{leadName}},
 
@@ -265,13 +271,15 @@ Urbanova</p>`,
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
+    createdBy: 'system',
+    usageCount: 0,
   },
 
   // Template per WhatsApp (versione breve)
   whatsapp_first_response: {
     id: 'whatsapp_first_response',
     name: 'Prima Risposta WhatsApp',
-    description: 'Template breve per prima risposta WhatsApp',
+    // description: 'Template breve per prima risposta WhatsApp',
     bodyText: `Ciao {{leadName}}! 
 
 Grazie per il tuo interesse nell'appartamento {{listingId}}.
@@ -286,13 +294,15 @@ Team Urbanova`,
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
+    createdBy: 'system',
+    usageCount: 0,
   },
 
   // Template per WhatsApp follow-up
   whatsapp_follow_up: {
     id: 'whatsapp_follow_up',
     name: 'Follow-up WhatsApp',
-    description: 'Template breve per follow-up WhatsApp',
+    // description: 'Template breve per follow-up WhatsApp',
     bodyText: `Ciao {{leadName}}!
 
 Hai avuto modo di valutare l'appartamento {{listingId}}?
@@ -307,6 +317,8 @@ Urbanova`,
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
+    createdBy: 'system',
+    usageCount: 0,
   },
 };
 
@@ -379,7 +391,7 @@ export class TemplateManager {
       subject: renderedSubject ?? undefined,
       bodyText: renderedText,
       bodyHtml: renderedHtml ?? undefined,
-    };
+    } as any;
   }
 
   /**

@@ -498,6 +498,10 @@ class AIDesignService {
       });
 
       // Calcola metriche finali
+      if (!bestCombination) {
+        throw new Error('No optimization combination found');
+      }
+      
       const totalCostIncrease = bestCombination.reduce((sum, s) => sum + s.estimatedImpact.cost, 0);
       const totalTimeIncrease = bestCombination.reduce((sum, s) => sum + s.estimatedImpact.time, 0);
       const paybackPeriod = this.calculatePaybackPeriod(totalCostIncrease, bestROI - originalROI);
@@ -580,6 +584,8 @@ class AIDesignService {
     const combinations: T[][] = [];
     for (let i = 0; i <= arr.length - n; i++) {
       const head = arr[i];
+      if (!head) continue;
+      
       const tailCombinations = this.getCombinations(arr.slice(i + 1), n - 1);
       tailCombinations.forEach(tail => {
         combinations.push([head, ...tail]);

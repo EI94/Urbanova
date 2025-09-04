@@ -13,6 +13,10 @@ import {
   AlertIcon,
   CalendarIcon,
   UsersIcon,
+  LightbulbIcon,
+  ShieldIcon,
+  HeartIcon,
+  MapPinIcon,
 } from '@/components/icons';
 import { DesignTemplate, ProjectDesign } from '@/lib/designCenterService';
 
@@ -91,7 +95,7 @@ export default function DesignAnalyticsDashboard({
       const averageROI =
         rois.length > 0 ? rois.reduce((sum, roi) => sum + roi, 0) / rois.length : 0;
 
-      const timelines = projects.map(p => p.timeline?.totalWeeks || 20).filter(t => t > 0);
+      const timelines = projects.map(p => (p.timeline as any)?.totalWeeks || 20).filter(t => t > 0);
       const averageTimeline =
         timelines.length > 0 ? timelines.reduce((sum, t) => sum + t, 0) / timelines.length : 0;
 
@@ -133,12 +137,12 @@ export default function DesignAnalyticsDashboard({
           template: templates.find(t => t.id === p.templateId)?.name || 'Template Sconosciuto',
           roi: p.estimatedROI || 15,
           budget: p.budget?.total || 0,
-          timeline: p.timeline?.totalWeeks || 20,
+          timeline: (p.timeline as any)?.totalWeeks || 20,
           status: p.status,
           category: p.category || 'residenziale',
         }))
         .sort((a, b) => b.roi - a.roi)
-        .slice(0, 5);
+        .slice(0, 5) as ProjectPerformance[];
 
       // Category breakdown
       const breakdown = projects.reduce(
@@ -219,7 +223,7 @@ export default function DesignAnalyticsDashboard({
       case 'industriale':
         return <LightbulbIcon className="h-4 w-4" />;
       case 'uffici':
-        return <ShieldCheckIcon className="h-4 w-4" />;
+        return <ShieldIcon className="h-4 w-4" />;
       default:
         return <BuildingIcon className="h-4 w-4" />;
     }
@@ -308,7 +312,7 @@ export default function DesignAnalyticsDashboard({
                 </p>
               </div>
               <div className="p-3 bg-orange-200 rounded-lg">
-                <ShieldCheckIcon className="h-6 w-6 text-orange-700" />
+                <ShieldIcon className="h-6 w-6 text-orange-700" />
               </div>
             </div>
           </div>
@@ -333,7 +337,7 @@ export default function DesignAnalyticsDashboard({
           <div className="bg-white border border-gray-200 rounded-lg p-4">
             <div className="flex items-center space-x-3 mb-3">
               <div className="p-2 bg-green-100 rounded-lg">
-                <StarIcon className="h-5 w-5 text-green-600" />
+                <HeartIcon className="h-5 w-5 text-green-600" />
               </div>
               <div>
                 <p className="text-sm text-gray-600">Template Top</p>
@@ -365,7 +369,7 @@ export default function DesignAnalyticsDashboard({
         {/* Top Performing Projects */}
         <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <ShieldCheckIcon className="h-5 w-5 mr-2 text-blue-600" />
+            <ShieldIcon className="h-5 w-5 mr-2 text-blue-600" />
             Top 5 Progetti per ROI
           </h3>
 

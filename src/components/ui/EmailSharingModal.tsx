@@ -103,17 +103,20 @@ Il tuo team Urbanova`;
       const existingIndex = parsedContacts.findIndex(c => c.email === email);
       if (existingIndex >= 0) {
         // Aggiorna contatto esistente
-        parsedContacts[existingIndex].usageCount++;
-        parsedContacts[existingIndex].lastUsed = new Date();
-        if (name) parsedContacts[existingIndex].name = name;
+        const existingContact = parsedContacts[existingIndex];
+        if (existingContact) {
+          existingContact.usageCount++;
+          existingContact.lastUsed = new Date();
+          if (name) existingContact.name = name;
+        }
       } else {
         // Aggiungi nuovo contatto
         parsedContacts.push({
           email,
-          name,
+          name: name || undefined,
           lastUsed: new Date(),
           usageCount: 1,
-        });
+        } as EmailContact);
       }
 
       localStorage.setItem('urbanova_email_contacts', JSON.stringify(parsedContacts));
@@ -125,14 +128,14 @@ Il tuo team Urbanova`;
   const handleContactSuggestion = (contact: EmailContact) => {
     setEmail(contact.email);
     if (contact.name) setName(contact.name);
-    toast.success(`Contatto ${contact.email} selezionato! ✨`);
+    toast(`Contatto ${contact.email} selezionato! ✨`, { icon: '✅' });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email.trim()) {
-      toast.error('Inserisci un indirizzo email valido');
+      toast('Inserisci un indirizzo email valido', { icon: '❌' });
       return;
     }
 
@@ -159,7 +162,7 @@ Il tuo team Urbanova`;
       });
 
       if (response.ok) {
-        toast.success('Report condiviso con successo! 📧✨');
+        toast('Report condiviso con successo! 📧✨', { icon: '✅' });
         onShareSuccess?.();
         onClose();
 
@@ -168,11 +171,11 @@ Il tuo team Urbanova`;
         loadRecentContacts();
       } else {
         const error = await response.json();
-        toast.error(`Errore invio email: ${error.message}`);
+        toast(`Errore invio email: ${error.message}`, { icon: '❌' });
       }
     } catch (error) {
       console.error('Errore invio email:', error);
-      toast.error("Errore nell'invio dell'email");
+      toast("Errore nell'invio dell'email", { icon: '❌' });
     } finally {
       setIsLoading(false);
     }

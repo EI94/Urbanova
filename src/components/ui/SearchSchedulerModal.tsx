@@ -12,7 +12,7 @@ import {
   BuildingIcon,
   CheckIcon,
   SearchIcon,
-  RepeatIcon,
+  RefreshIcon as RepeatIcon,
 } from '@/components/icons';
 import { LandSearchCriteria } from '@/types/land';
 
@@ -281,7 +281,7 @@ export default function SearchSchedulerModal({
                             const now = new Date();
                             const [hours, minutes] = time.split(':');
                             const nextRun = new Date(now);
-                            nextRun.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                            nextRun.setHours(parseInt(hours || '0'), parseInt(minutes || '0'), 0, 0);
 
                             if (nextRun <= now) {
                               switch (frequency) {

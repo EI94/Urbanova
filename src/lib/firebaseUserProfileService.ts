@@ -36,6 +36,7 @@ export interface UserProfile {
   interests?: string[];
   timezone: string;
   language: string;
+  role?: string;
   dateFormat: string;
   currency: string;
   preferences: {
@@ -94,6 +95,7 @@ export interface ProfileUpdate {
   language?: string;
   dateFormat?: string;
   currency?: string;
+  role?: string;
   preferences?: Partial<UserProfile['preferences']>;
   metadata?: Record<string, any>;
 }
@@ -245,7 +247,7 @@ class FirebaseUserProfileService {
       const downloadURL = await getDownloadURL(uploadResult.ref);
 
       // Aggiorna profilo con nuovo URL avatar
-      await this.updateUserProfile(userId, { avatar: downloadURL });
+      await this.updateUserProfile(userId, { avatar: downloadURL } as any);
 
       return downloadURL;
     } catch (error) {
@@ -260,7 +262,7 @@ class FirebaseUserProfileService {
       await deleteObject(avatarRef);
 
       // Rimuovi URL avatar dal profilo
-      await this.updateUserProfile(userId, { avatar: undefined });
+      await this.updateUserProfile(userId, { avatar: undefined } as any);
 
       return true;
     } catch (error) {

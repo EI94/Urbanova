@@ -163,7 +163,7 @@ describe('Interactive Types Zod Schemas', () => {
         updatedAt: new Date(),
       };
 
-      const result = schemas.zPlan.safeParse(validPlan);
+      const result = (schemas as any).zPlan.safeParse(validPlan);
       expect(result.success).toBe(true);
     });
   });

@@ -1,6 +1,9 @@
 'use client';
 
-import { BuildingIcon, SafetyIcon, CheckIcon } from '@/components/icons';
+import { BuildingIcon, CheckIcon } from '@/components/icons';
+
+// Mock SafetyIcon
+const SafetyIcon = CheckIcon;
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
 export default function EPCConstructionSitePage() {

@@ -17,6 +17,60 @@ export interface ToolManifest {
   intents?: string[];
   tags?: string[];
   dependencies?: string[];
+  capabilities?: string[];
+  features?: Array<{
+    name: string;
+    description: string;
+    enabled: boolean;
+  }>;
+  integrations?: Array<{
+    name?: string;
+    service?: string;
+    type?: string;
+    description?: string;
+    status?: string;
+    enabled?: boolean;
+    config?: Record<string, any>;
+  }>;
+  security?: {
+    encryption?: boolean | string;
+    authentication?: boolean | string;
+    authorization?: boolean | string;
+    audit?: boolean | string;
+    dataEncryption?: boolean | string;
+    auditLogging?: boolean | string;
+    privacyCompliance?: boolean | string;
+  };
+  compliance?: {
+    gdpr?: boolean | string;
+    ccpa?: boolean | string;
+    iso27001?: boolean | string;
+    soc2?: boolean | string;
+    dataRetention?: boolean | string;
+    accessControl?: boolean | string;
+    consentManagement?: boolean | string;
+  };
+  performance?: {
+    responseTime?: number | string;
+    throughput?: number | string;
+    scalability?: string;
+    reliability?: string;
+  };
+  documentation?: {
+    api?: string;
+    userGuide?: string;
+    examples?: string;
+    changelog?: string;
+    tutorials?: string;
+  };
+  support?: {
+    email?: string;
+    chat?: string;
+    forum?: string;
+    responseTime?: string;
+    slack?: string;
+    documentation?: string;
+  };
 }
 
 export type ToolCategory =
@@ -55,14 +109,17 @@ export const zToolManifest = z.object({
 // ===========================================
 
 export interface ToolActionSpec {
+  id?: string;
   name: string;
   description: string;
-  zArgs: z.ZodSchema<any>;
-  requiredRole: 'owner' | 'pm' | 'sales' | 'vendor' | 'admin';
+  zArgs?: z.ZodSchema<any>;
+  parameters?: Record<string, any>;
+  requiredRole?: 'owner' | 'pm' | 'sales' | 'vendor' | 'admin';
   confirm?: boolean;
   longRunning?: boolean;
   timeout?: number; // in seconds
   retryPolicy?: RetryPolicy;
+  handler?: (params: any, context: any) => Promise<any>;
 
   // Extended fields for PlanExecutionEngine
   onFailure?: 'stop' | 'continue';

@@ -1253,8 +1253,8 @@ export class AdvancedLocationsService {
 
         // Terzo: priorità per tipo (comune > provincia > regione)
         const typePriority = { comune: 3, provincia: 2, regione: 1 };
-        const aPriority = typePriority[a.type] || 0;
-        const bPriority = typePriority[b.type] || 0;
+        const aPriority = (typePriority as any)[a.type] || 0;
+        const bPriority = (typePriority as any)[b.type] || 0;
         if (aPriority !== bPriority) return bPriority - aPriority;
 
         // Quarto: ordine alfabetico

@@ -3,8 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { PlanCard } from '../plan/PlanCard';
 import { RequirementEditor } from '../plan/RequirementEditor';
-import { InteractivePlan, InteractiveTaskSession } from '@urbanova/types/interactive';
-import { ToolActionSpec } from '@urbanova/types/tools';
+// import { InteractivePlan, InteractiveTaskSession } from '@urbanova/types/interactive';
+// import { ToolActionSpec } from '@urbanova/types/tools';
+
+// Mock types
+type InteractivePlan = any;
+type InteractiveTaskSession = any;
+type ToolActionSpec = any;
 
 interface ProjectPlannerPanelProps {
   projectId: string;

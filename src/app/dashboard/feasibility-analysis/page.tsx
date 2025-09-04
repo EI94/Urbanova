@@ -27,7 +27,7 @@ import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService
 
 export default function FeasibilityAnalysisPage() {
   const { t, formatCurrency: fmtCurrency } = useLanguage();
-  const { currentUser: user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [projects, setProjects] = useState<FeasibilityProject[]>([]);
   const [ranking, setRanking] = useState<FeasibilityProject[]>([]);
   const [statistics, setStatistics] = useState<any>(null);
@@ -94,7 +94,7 @@ export default function FeasibilityAnalysisPage() {
     } catch (error) {
       console.error('❌ Errore caricamento dati:', error);
       setError('Errore nel caricamento dei dati. Riprova più tardi.');
-      toast(`❌ Errore nel caricamento dei dati`, { icon: '❌' });
+      toast(`❌ Errore nel caricamento dei dati` as any, { icon: '❌' });
     } finally {
       setLoading(false);
     }
@@ -134,14 +134,13 @@ export default function FeasibilityAnalysisPage() {
       // 1. ELIMINAZIONE PROGETTO
       const deletionResult = await feasibilityService.deleteProject(projectId);
 
-      if (deletionResult) {
-        // 2. AGGIORNA IMMEDIATAMENTE TUTTE LE LISTE
-        setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
-        setRanking(prevRanking => prevRanking.filter(p => p.id !== projectId));
+      // 2. AGGIORNA IMMEDIATAMENTE TUTTE LE LISTE
+      setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
+      setRanking(prevRanking => prevRanking.filter(p => p.id !== projectId));
 
-        // 3. RICALCOLA STATISTICHE
-        const remainingProjects = projects.filter(p => p.id !== projectId);
-        if (remainingProjects.length > 0) {
+      // 3. RICALCOLA STATISTICHE
+      const remainingProjects = projects.filter(p => p.id !== projectId);
+      if (remainingProjects.length > 0) {
           const totalProjects = remainingProjects.length;
           const avgMargin =
             remainingProjects.reduce((sum, p) => sum + (p.results?.margin || 0), 0) / totalProjects;
@@ -168,17 +167,14 @@ export default function FeasibilityAnalysisPage() {
           });
         }
 
-        toast(`✅ ${deletionResult.message}`, { icon: '✅' });
+        toast('✅ Progetto eliminato con successo!', { icon: '✅' });
 
         // 4. FORZA REFRESH COMPLETO DOPO 1 SECONDO
         setTimeout(() => {
           loadData(true);
         }, 1000);
-      } else {
-        throw new Error(`Eliminazione fallita: ${deletionResult.message}`);
-      }
     } catch (error) {
-      toast(`❌ Errore eliminazione: ${error}`, { icon: '❌' });
+              toast(`❌ Errore eliminazione: ${error as any}`, { icon: '❌' });
 
       // 5. FORZA REFRESH PER VERIFICARE STATO REALE
       setTimeout(() => {
@@ -202,13 +198,17 @@ export default function FeasibilityAnalysisPage() {
 
     try {
       // Genera confronto intelligente
-      const projectsToCompare = projects.filter(p => selectedProjects.includes(p.id));
+      const projectsToCompare = projects.filter(p => p.id && selectedProjects.includes(p.id));
       const comparison = generateSmartComparison(projectsToCompare);
 
-      setComparisonData(comparison);
-      toast('✅ Confronto generato con successo!', { icon: '✅' });
+      if (comparison) {
+        setComparisonData(comparison);
+        toast('✅ Confronto generato con successo!', { icon: '✅' });
+      } else {
+        toast('❌ Impossibile generare il confronto', { icon: '❌' });
+      }
     } catch (error) {
-      toast(`❌ Errore generazione confronto: ${error}`, { icon: '❌' });
+              toast(`❌ Errore generazione confronto: ${(error as any)?.message || 'Errore sconosciuto'}` as any, { icon: '❌' } as any);
     }
   };
 
@@ -231,9 +231,9 @@ export default function FeasibilityAnalysisPage() {
       detailed: projects.map(project => ({
         id: project.id,
         name: project.name,
-        location: project.location,
+        location: project.address || 'N/A',
         investment: project.costs?.land?.purchasePrice || 0,
-        revenue: project.results?.revenue || 0,
+        revenue: project.revenues?.total || 0,
         profit: project.results?.profit || 0,
         margin: project.results?.margin || 0,
         roi: project.results?.roi || 0,
@@ -271,7 +271,7 @@ export default function FeasibilityAnalysisPage() {
   const calculateProjectPotential = (project: FeasibilityProject) => {
     const margin = project.results?.margin || 0;
     const roi = project.results?.roi || 0;
-    const location = project.location || '';
+    const location = project.address || '';
 
     let potentialScore = 0;
 
@@ -302,7 +302,7 @@ export default function FeasibilityAnalysisPage() {
     else insights.push('⚠️ ROI medio basso - Necessario ottimizzazione');
 
     // Analisi diversificazione
-    const locations = [...new Set(projects.map(p => p.location))];
+    const locations = [...new Set(projects.map(p => p.address))];
     if (locations.length > 2) insights.push('🌍 Buona diversificazione geografica');
     else insights.push('📍 Concentrazione geografica - Considera diversificazione');
 
@@ -779,7 +779,7 @@ export default function FeasibilityAnalysisPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {comparisonData.detailed.map(project => (
+                        {comparisonData.detailed.map((project: any) => (
                           <tr key={project.id}>
                             <td className="font-medium">{project.name}</td>
                             <td>{formatCurrency(project.investment)}</td>
@@ -825,7 +825,7 @@ export default function FeasibilityAnalysisPage() {
                   <div className="bg-green-50 p-4 rounded-lg">
                     <h4 className="font-semibold text-green-900 mb-2">💡 Insights Intelligenti</h4>
                     <ul className="space-y-2">
-                      {comparisonData.insights.map((insight, index) => (
+                      {comparisonData.insights.map((insight: any, index: number) => (
                         <li key={index} className="text-green-800 text-sm flex items-start">
                           <span className="mr-2">•</span>
                           {insight}

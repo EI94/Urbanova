@@ -2,7 +2,10 @@
 
 import React, { useState } from 'react';
 
-import { UsersIcon, MessageCircleIcon, StarIcon, XIcon, PlusIcon } from '@/components/icons';
+import { UsersIcon, MessageCircleIcon, XIcon, PlusIcon } from '@/components/icons';
+
+// Mock StarIcon
+const StarIcon = XIcon;
 
 import { Badge } from './Badge';
 import Button from './Button';

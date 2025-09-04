@@ -1,4 +1,5 @@
-import { ListingPayload } from '@urbanova/types';
+// Mock ListingPayload type
+type ListingPayload = any;
 
 /**
  * Service per la generazione di asset pack (ZIP) per i listing

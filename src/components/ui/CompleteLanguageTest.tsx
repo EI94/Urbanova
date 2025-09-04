@@ -217,7 +217,7 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
         for (let i = 0; i < 3; i++) {
           for (const lang of testLanguages) {
             const langStart = Date.now();
-            await testSingleLanguage(lang);
+            await testSingleLanguage(lang as any);
             const langDuration = Date.now() - langStart;
             stressResults.push({
               iteration: i + 1,
@@ -262,6 +262,8 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
         const testSuite = testSuites[i];
         setCompleteProgress((i / testSuites.length) * 100);
 
+        if (!testSuite) continue;
+        
         console.log(`🏆 [CompleteLanguageTest] Esecuzione: ${testSuite.name}`);
 
         try {
@@ -269,7 +271,7 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
 
           const completeResult: CompleteTestResult = {
             testSuite: testSuite.name,
-            status: result.status,
+            status: result.status as any,
             duration: result.duration,
             details: result.details,
             timestamp: new Date(),
@@ -279,7 +281,7 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
           setCompleteResults([...allResults]);
 
           console.log(
-            `🏆 [CompleteLanguageTest] ${testSuite.name}: ${result.status} (${result.duration}ms)`
+            `🏆 [CompleteLanguageTest] ${testSuite?.name}: ${result.status} (${result.duration}ms)`
           );
 
           // Pausa tra i test suite
@@ -287,10 +289,10 @@ export default function CompleteLanguageTest({ onComplete }: CompleteTestProps) 
             await new Promise(resolve => setTimeout(resolve, 500));
           }
         } catch (error) {
-          console.error(`❌ [CompleteLanguageTest] Errore ${testSuite.name}:`, error);
+          console.error(`❌ [CompleteLanguageTest] Errore ${testSuite?.name}:`, error);
 
           const errorResult: CompleteTestResult = {
-            testSuite: testSuite.name,
+            testSuite: testSuite?.name || 'Unknown',
             status: 'fail',
             duration: 0,
             details: { error: error instanceof Error ? error.message : 'Errore sconosciuto' },

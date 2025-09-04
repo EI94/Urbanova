@@ -74,9 +74,8 @@ export async function POST(request: NextRequest) {
       workspaceId: 'default', // In production, resolve from user mapping
       userRole: 'user', // In production, resolve from user permissions
       projectId: ProjectId,
-      now: new Date(),
-      logger: console,
-      db: null, // In production, inject Firestore instance
+      channel: 'whatsapp',
+      channelId: waSenderId,
     };
 
     // Check if message is a plan request
@@ -201,7 +200,7 @@ export async function PUT(request: NextRequest) {
       userId: `wa-${waSenderId}`,
       workspaceId: 'default',
       userRole: 'user',
-      projectId: undefined,
+      projectId: undefined as any,
       channel: 'whatsapp',
       channelId: waSenderId,
     };
@@ -235,6 +234,13 @@ export async function PUT(request: NextRequest) {
     }
 
     // Get active session
+    const getActiveSessionId = (senderId: string) => `session-${senderId}-${Date.now()}`;
+    const formatWhatsAppResponse = (response: any) => ({
+      to: waSenderId,
+      type: 'text',
+      text: response.message || 'Risposta ricevuta',
+    });
+    
     const sessionId = getActiveSessionId(waSenderId);
     if (sessionId) {
       const reply = {

@@ -1,6 +1,9 @@
 'use client';
 
-import { DocumentIcon, ApprovalIcon, CalendarIcon } from '@/components/icons';
+import { DocumentIcon, CalendarIcon } from '@/components/icons';
+
+// Mock ApprovalIcon
+const ApprovalIcon = DocumentIcon;
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
 export default function EPCPermitsPage() {

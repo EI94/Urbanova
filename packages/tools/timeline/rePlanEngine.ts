@@ -545,6 +545,6 @@ export class RePlanEngine {
       approver: requiresConfirmation ? 'project_manager' : undefined,
       deadline: requiresConfirmation ? new Date(Date.now() + 24 * 60 * 60 * 1000) : undefined, // 24 ore
       autoApply: !requiresConfirmation,
-    };
+    } as any;
   }
 }

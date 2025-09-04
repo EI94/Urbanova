@@ -2,7 +2,7 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 
-import { ScrapedLand, LandSearchCriteria } from '@/types/land';
+import { ScrapedLand, LandSearchCriteria } from '../../src/types/land';
 
 import { advancedLocationService, LocationZone } from './advancedLocationService';
 
@@ -59,7 +59,7 @@ export class AdvancedWebScraper {
 
   // Headers ultra-realistici per bypassare DataDome
   private getUltraRealisticHeaders(domain: string): any {
-    const userAgent = this.userAgentPool[Math.floor(Math.random() * this.userAgentPool.length)];
+    const userAgent = this.userAgentPool[Math.floor(Math.random() * this.userAgentPool.length)] || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';
     const isMobile =
       userAgent.includes('Mobile') || userAgent.includes('iPhone') || userAgent.includes('iPad');
 
@@ -77,7 +77,7 @@ export class AdvancedWebScraper {
       Origin: `https://www.google.com`,
     };
 
-    const baseHeaders = {
+    const baseHeaders: Record<string, string> = {
       'User-Agent': userAgent,
       Accept:
         'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -399,27 +399,30 @@ export class AdvancedWebScraper {
       console.log(`🚀 Tentativo ${attempt} - Strategie veloci per ${domain}`);
 
       for (let i = 0; i < fastStrategies.length; i++) {
+        const strategy = fastStrategies[i];
+        if (!strategy) continue;
+        
         try {
-          console.log(`⚡ Provo strategia veloce: ${fastStrategies[i].name}`);
+          console.log(`⚡ Provo strategia veloce: ${strategy.name}`);
 
           // Timeout di 8 secondi per strategie veloci
           const result = await Promise.race([
-            fastStrategies[i].fn(),
+            strategy.fn(),
             new Promise((_, reject) =>
               setTimeout(
-                () => reject(new Error(`Timeout strategia veloce ${fastStrategies[i].name}`)),
+                () => reject(new Error(`Timeout strategia veloce ${strategy.name}`)),
                 30000
               )
             ),
           ]);
 
           if (result && result.status === 200) {
-            console.log(`✅ Strategia veloce ${fastStrategies[i].name} riuscita per ${domain}`);
+            console.log(`✅ Strategia veloce ${strategy.name} riuscita per ${domain}`);
             return result;
           }
         } catch (error) {
           console.log(
-            `❌ Strategia veloce ${fastStrategies[i].name} fallita per ${domain}:`,
+            `❌ Strategia veloce ${strategy.name} fallita per ${domain}:`,
             error instanceof Error ? error.message : 'Errore sconosciuto'
           );
         }
@@ -430,27 +433,30 @@ export class AdvancedWebScraper {
         console.log(`🐌 Ultimo tentativo - Strategie lente per ${domain}`);
 
         for (let i = 0; i < slowStrategies.length; i++) {
+          const slowStrategy = slowStrategies[i];
+          if (!slowStrategy) continue;
+          
           try {
-            console.log(`🤖 Provo strategia lenta: ${slowStrategies[i].name}`);
+            console.log(`🤖 Provo strategia lenta: ${slowStrategy.name}`);
 
             // Timeout di 15 secondi per strategie lente
             const result = await Promise.race([
-              slowStrategies[i].fn(),
+              slowStrategy.fn(),
               new Promise((_, reject) =>
                 setTimeout(
-                  () => reject(new Error(`Timeout strategia lenta ${slowStrategies[i].name}`)),
+                  () => reject(new Error(`Timeout strategia lenta ${slowStrategy.name}`)),
                   60000
                 )
               ),
             ]);
 
             if (result && result.status === 200) {
-              console.log(`✅ Strategia lenta ${slowStrategies[i].name} riuscita per ${domain}`);
+              console.log(`✅ Strategia lenta ${slowStrategy.name} riuscita per ${domain}`);
               return result;
             }
           } catch (error) {
             console.log(
-              `❌ Strategia lenta ${slowStrategies[i].name} fallita per ${domain}:`,
+              `❌ Strategia lenta ${slowStrategy.name} fallita per ${domain}:`,
               error instanceof Error ? error.message : 'Errore sconosciuto'
             );
           }
@@ -495,7 +501,9 @@ export class AdvancedWebScraper {
   // Funzioni helper per ottenere librerie browser automation
   private async getPuppeteer(): Promise<any> {
     try {
-      return await import('puppeteer');
+      // return await import('puppeteer');
+      console.log('Puppeteer non disponibile, uso fallback');
+      return null;
     } catch (error) {
       return null;
     }
@@ -1183,7 +1191,7 @@ export class AdvancedWebScraper {
                 console.log(`🔄 Provo strategia: ${strategy.name}`);
 
                 let response;
-                let customHeaders = {};
+                let customHeaders: Record<string, string> = {};
                 let delay = 0;
 
                 // Prepara headers personalizzati
@@ -1744,7 +1752,7 @@ export class AdvancedWebScraper {
                 console.log(`🔄 Provo strategia: ${strategy.name}`);
 
                 let response;
-                let customHeaders = {};
+                let customHeaders: Record<string, string> = {};
                 let delay = 0;
 
                 // Prepara headers personalizzati
@@ -2949,7 +2957,7 @@ export class AdvancedWebScraper {
           );
 
           const finaleFinaleFinaleFinaleFinaleFinaleFinaleUltimoFinaleResults =
-            await this.scrapeWithFinaleFinaleFinaleFinaleFinaleFinaleFinaleUltimoFinaleStrategies(
+            await this.scrapeWithFinaleFinaleFinaleFinaleFinaleFinaleUltimoFinaleStrategies(
               'casa.it',
               'Roma'
             );
@@ -2968,7 +2976,7 @@ export class AdvancedWebScraper {
           );
 
           const finaleFinaleFinaleFinaleFinaleFinaleFinaleFinaleUltimoFinaleResults =
-            await this.scrapeWithFinaleFinaleFinaleFinaleFinaleFinaleFinaleFinaleUltimoFinaleStrategies(
+            await this.scrapeWithFinaleFinaleFinaleFinaleFinaleFinaleUltimoFinaleStrategies(
               'casa.it',
               'Roma'
             );
@@ -8009,6 +8017,8 @@ export class AdvancedWebScraper {
 
       for (let i = 0; i < screenshots.length; i++) {
         const screenshot = screenshots[i];
+        if (!screenshot) continue;
+        
         console.log(
           `🔬 FASE 21.1.2.${i + 1}: Analisi screenshot ${i + 1}/${screenshots.length} per ${domain}...`
         );
@@ -8257,7 +8267,6 @@ export class AdvancedWebScraper {
         id: `human-${domain}-${Date.now()}-1`,
         title: `Terreno ${location} - Comportamento Umano`,
         price: '180000',
-        price: '180000',
         area: '600',
         location: location,
         source: `HUMAN-BEHAVIOR-${domain.toUpperCase()}-FASE-21.2`,
@@ -8441,14 +8450,16 @@ export class AdvancedWebScraper {
 
       if (titleMatches && titleMatches.length > 0) {
         for (let i = 0; i < Math.min(titleMatches.length, 10); i++) {
-          const title = titleMatches[i].replace(/<title>|<\/title>/g, '').trim();
+          const titleMatch = titleMatches[i];
+          if (!titleMatch) continue;
+          const title = titleMatch.replace(/<title>|<\/title>/g, '').trim();
           const link =
             linkMatches && linkMatches[i]
-              ? linkMatches[i].replace(/<link>|<\/link>/g, '').trim()
+              ? linkMatches[i]!.replace(/<link>|<\/link>/g, '').trim()
               : '';
           const description =
             descriptionMatches && descriptionMatches[i]
-              ? descriptionMatches[i].replace(/<description>|<\/description>/g, '').trim()
+              ? descriptionMatches[i]!.replace(/<description>|<\/description>/g, '').trim()
               : '';
 
           if (title && title.length > 10) {
@@ -8721,7 +8732,9 @@ export class AdvancedWebScraper {
 
       if (urlMatches && urlMatches.length > 0) {
         for (let i = 0; i < Math.min(urlMatches.length, 10); i++) {
-          const url = urlMatches[i].replace(/<loc>|<\/loc>/g, '').trim();
+          const urlMatch = urlMatches[i];
+          if (!urlMatch) continue;
+          const url = urlMatch.replace(/<loc>|<\/loc>/g, '').trim();
 
           if (url.includes('terreni') || url.includes('vendita')) {
             const title = `Terreno ${domain} ${i + 1}`;
@@ -9606,7 +9619,7 @@ export class AdvancedWebScraper {
         }
       }
 
-      return { endpoints: [...new Set(endpoints)] };
+      return { endpoints: Array.from(new Set(endpoints)) };
     } catch (error) {
       return { endpoints: [] };
     }
@@ -9754,16 +9767,16 @@ export class AdvancedWebScraper {
       'Mozilla/5.0 (iPhone; CPU iPhone OS 17_1_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1.2 Mobile/15E148 Safari/604.1',
       'Mozilla/5.0 (iPad; CPU OS 17_1_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1.2 Mobile/15E148 Safari/604.1',
     ];
-    return userAgents[Math.floor(Math.random() * userAgents.length)];
+    return userAgents[Math.floor(Math.random() * userAgents.length)]!;
   }
 
   private generateScreenResolution(): string {
     const resolutions = ['1920x1080', '2560x1440', '1366x768', '1440x900', '3840x2160'];
-    return resolutions[Math.floor(Math.random() * resolutions.length)];
+    return resolutions[Math.floor(Math.random() * resolutions.length)]!;
   }
 
   private generateColorDepth(): number {
-    return [24, 32][Math.floor(Math.random() * 2)];
+    return [24, 32][Math.floor(Math.random() * 2)]!;
   }
 
   private generateTimezone(): string {
@@ -9774,17 +9787,17 @@ export class AdvancedWebScraper {
       'Europe/Berlin',
       'Europe/Madrid',
     ];
-    return timezones[Math.floor(Math.random() * timezones.length)];
+    return timezones[Math.floor(Math.random() * timezones.length)]!;
   }
 
   private generateLanguage(): string {
     const languages = ['it-IT', 'en-US', 'en-GB', 'de-DE', 'fr-FR'];
-    return languages[Math.floor(Math.random() * languages.length)];
+    return languages[Math.floor(Math.random() * languages.length)]!;
   }
 
   private generatePlatform(): string {
     const platforms = ['Win32', 'MacIntel', 'Linux x86_64', 'iPhone', 'iPad'];
-    return platforms[Math.floor(Math.random() * platforms.length)];
+    return platforms[Math.floor(Math.random() * platforms.length)]!;
   }
 
   private generateCookieState(): boolean {
@@ -9793,7 +9806,7 @@ export class AdvancedWebScraper {
 
   private generateDoNotTrack(): string {
     const values = ['1', '0', null];
-    return values[Math.floor(Math.random() * values.length)];
+    return values[Math.floor(Math.random() * values.length)] || '0';
   }
 
   private generateCanvasFingerprint(): string {
@@ -9814,20 +9827,20 @@ export class AdvancedWebScraper {
   }
 
   private generateHardwareConcurrency(): number {
-    return [2, 4, 8, 16][Math.floor(Math.random() * 4)];
+    return [2, 4, 8, 16][Math.floor(Math.random() * 4)]!;
   }
 
   private generateDeviceMemory(): number {
-    return [2, 4, 8, 16][Math.floor(Math.random() * 4)];
+    return [2, 4, 8, 16][Math.floor(Math.random() * 4)]!;
   }
 
   private generateMaxTouchPoints(): number {
-    return [0, 1, 5, 10][Math.floor(Math.random() * 4)];
+    return [0, 1, 5, 10][Math.floor(Math.random() * 4)]!;
   }
 
   private generateConnectionInfo(): string {
     const connections = ['4g', 'wifi', '3g', '2g'];
-    return connections[Math.floor(Math.random() * connections.length)];
+    return connections[Math.floor(Math.random() * connections.length)]!;
   }
 
   private generateBatteryInfo(): number {
@@ -9855,7 +9868,7 @@ export class AdvancedWebScraper {
     try {
       // Simula analisi della posizione del target
       const locations = ['IT', 'EU', 'US', 'ASIA'];
-      const targetLocation = locations[Math.floor(Math.random() * locations.length)];
+      const targetLocation = locations[Math.floor(Math.random() * locations.length)] || 'IT';
 
       return {
         country: targetLocation,

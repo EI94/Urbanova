@@ -60,7 +60,7 @@ describe('ToolRegistry', () => {
         { ...mockActions[0] }, // Same name
       ];
       expect(() => {
-        registry.registerTool(mockManifest, duplicateActions);
+        registry.registerTool(mockManifest, duplicateActions as any);
       }).toThrow("Tool 'test-tool' ha action con nomi duplicati");
     });
   });
@@ -99,7 +99,7 @@ describe('ToolRegistry', () => {
       registry.registerTool(mockManifest, mockActions);
       const tools = registry.listTools();
       expect(tools).toHaveLength(1);
-      expect(tools[0].manifest.id).toBe('test-tool');
+      expect(tools[0]?.manifest.id).toBe('test-tool');
     });
 
     it('should return empty array when no tools registered', () => {
@@ -113,7 +113,7 @@ describe('ToolRegistry', () => {
       registry.registerTool(mockManifest, mockActions);
       const tools = registry.listToolsByCategory('analysis');
       expect(tools).toHaveLength(1);
-      expect(tools[0].manifest.category).toBe('analysis');
+      expect(tools[0]?.manifest.category).toBe('analysis');
     });
 
     it('should return empty array for non-existent category', () => {

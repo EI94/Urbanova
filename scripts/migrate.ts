@@ -177,8 +177,8 @@ const COLLECTIONS_CONFIG = [
 
 class FirestoreMigrator {
   private db: FirebaseFirestore.Firestore;
-  private auth: FirebaseAuth.Auth;
-  private storage: FirebaseStorage.Storage;
+  private auth: any; // FirebaseAuth.Auth;
+  private storage: any; // FirebaseStorage.Storage;
   private dryRun: boolean;
 
   constructor(projectId: string, serviceAccountKey?: string, dryRun: boolean = false) {

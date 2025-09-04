@@ -267,8 +267,8 @@ function generateFeedbackEmail(feedback: any, feedbackId: string, attachmentUrl:
         <div class="content">
           <div class="feedback-card">
             <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
-              <span class="type-badge">${typeLabels[feedback.type] || feedback.type}</span>
-              <span class="priority-badge" style="background-color: ${priorityColors[feedback.priority] || '#6b7280'}">${priorityLabels[feedback.priority] || feedback.priority}</span>
+              <span class="type-badge">${(typeLabels as any)[feedback.type] || feedback.type}</span>
+              <span class="priority-badge" style="background-color: ${(priorityColors as any)[feedback.priority] || '#6b7280'}">${(priorityLabels as any)[feedback.priority] || feedback.priority}</span>
             </div>
             
             <h2 style="margin: 0 0 20px 0; color: #1f2937;">${feedback.title}</h2>

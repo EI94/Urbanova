@@ -350,7 +350,7 @@ export class ExternalIntegrationService {
       if (status) {
         updates.status = status;
         if (status === 'completed' || status === 'failed') {
-          updates.completedAt = serverTimestamp();
+          updates.completedAt = serverTimestamp() as any;
         }
       }
 
@@ -480,6 +480,7 @@ export class ExternalIntegrationService {
       }
 
       const doc = snapshot.docs[0];
+      if (!doc) return null;
       return { id: doc.id, ...doc.data() } as BIMData;
     } catch (error) {
       console.error('Error getting BIM data:', error);
@@ -514,6 +515,7 @@ export class ExternalIntegrationService {
       }
 
       const doc = snapshot.docs[0];
+      if (!doc) return null;
       return { id: doc.id, ...doc.data() } as ExternalTool;
     } catch (error) {
       console.error('Error getting tool by name:', error);

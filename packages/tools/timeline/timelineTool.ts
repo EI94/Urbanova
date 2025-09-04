@@ -185,7 +185,7 @@ export class TimelineTool {
         preview,
         applied,
         appliedAt,
-      };
+      } as RePlanResponse;
     } catch (error) {
       console.error(`❌ [TimelineTool] Errore re-plan:`, error);
 
@@ -196,7 +196,7 @@ export class TimelineTool {
         preview: undefined,
         applied: false,
         appliedAt: undefined,
-      };
+      } as unknown as RePlanResponse;
     }
   }
 
@@ -237,7 +237,7 @@ export class TimelineTool {
       console.error(`❌ [TimelineTool] Errore status timeline:`, error);
       return {
         exists: false,
-        error: error.message,
+        error: (error as Error).message,
       };
     }
   }
@@ -281,7 +281,7 @@ export class TimelineTool {
       console.error(`❌ [TimelineTool] Errore critical path:`, error);
       return {
         exists: false,
-        error: error.message,
+        error: (error as Error).message,
       };
     }
   }
@@ -312,7 +312,7 @@ export class TimelineTool {
       console.error(`❌ [TimelineTool] Errore rilevamento trigger:`, error);
       return {
         success: false,
-        error: error.message,
+        error: (error as Error).message,
       };
     }
   }
@@ -364,7 +364,7 @@ export class TimelineTool {
       console.error(`❌ [TimelineTool] Errore generazione Gantt:`, error);
       return {
         success: false,
-        error: error.message,
+        error: (error as Error).message,
       };
     }
   }
@@ -526,9 +526,11 @@ export class TimelineTool {
     const criticalCount = Math.min(5, sortedTasks.length);
     for (let i = 0; i < criticalCount; i++) {
       const task = sortedTasks[i];
-      task.isCritical = true;
-      task.slack = 0;
-      criticalTasks.push(task);
+      if (task) {
+        task.isCritical = true;
+        task.slack = 0;
+        criticalTasks.push(task);
+      }
     }
 
     return criticalTasks;

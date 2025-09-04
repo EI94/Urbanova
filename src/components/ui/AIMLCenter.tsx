@@ -100,6 +100,7 @@ export default function AIMLCenter({
       const interval = setInterval(loadData, 30000);
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [isOpen]);
 
   const loadData = () => {

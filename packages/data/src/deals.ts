@@ -132,7 +132,7 @@ export async function findDealsByFilter(filter: SearchFilter): Promise<DealNorma
     const snapshot = await query.get();
     const deals: DealNormalized[] = [];
 
-    snapshot.forEach(doc => {
+    snapshot.forEach((doc: any) => {
       deals.push(doc.data() as DealNormalized);
     });
 

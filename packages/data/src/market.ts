@@ -105,7 +105,7 @@ export async function getMarketSnapshotByKey(
       return null;
     }
 
-    const doc = snapshot.docs[0];
+    const doc = snapshot.docs[0]!;
     const data = doc.data();
 
     return {
@@ -313,7 +313,7 @@ export async function getMarketSnapshotStats(city?: string): Promise<{
   averageDataQuality: number;
 }> {
   try {
-    let query = db.collection('market_snapshots');
+    let query: any = db.collection('market_snapshots');
 
     if (city) {
       query = query.where('city', '==', city);

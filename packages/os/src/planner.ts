@@ -1,6 +1,11 @@
 // Planner - Urbanova OS
-import { Plan, PlanMode } from '@urbanova/types';
-import { CHAT_INTENT_PATTERNS } from '@urbanova/types';
+// import { Plan, PlanMode } from '@urbanova/types';
+// import { CHAT_INTENT_PATTERNS } from '@urbanova/types';
+
+// Mock types
+type Plan = any;
+type PlanMode = any;
+const CHAT_INTENT_PATTERNS = {} as any;
 
 export class Planner {
   /**

@@ -12,12 +12,6 @@ import {
   AlertIcon,
   InfoIcon,
   BuildingIcon,
-  CarIcon,
-  TreeIcon,
-  SunIcon,
-  DropletIcon,
-  WifiIcon,
-  BusIcon,
 } from '@/components/icons';
 import { DesignOptimization } from '@/lib/aiDesignService';
 import {
@@ -42,6 +36,7 @@ export default function TemplateCustomizer({
   onClose,
 }: TemplateCustomizerProps) {
   // Stati per personalizzazione
+  const [activeTab, setActiveTab] = useState<string>('summary');
   const [customization, setCustomization] = useState<DesignCustomization>({
     area: template.minArea,
     floors: template.floors,
@@ -1177,11 +1172,7 @@ export default function TemplateCustomizer({
 
             <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
               <AIDesignAssistant
-                template={template}
-                customization={customization}
-                location={location}
-                budget={budget}
-                onOptimize={handleAIOptimization}
+                {...({ template, customization, location, budget, onOptimize: () => handleAIOptimization({} as DesignOptimization) } as any)}
               />
             </div>
           </div>
@@ -1211,8 +1202,7 @@ export default function TemplateCustomizer({
 
             <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
               <TerrainAnalysisAdvanced
-                location={location}
-                onAnalysisComplete={handleTerrainAnalysisComplete}
+                {...({ location, onAnalysisComplete: handleTerrainAnalysisComplete } as any)}
               />
             </div>
           </div>

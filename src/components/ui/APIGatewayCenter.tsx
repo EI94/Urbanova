@@ -140,6 +140,7 @@ export default function APIGatewayCenter({
       const interval = setInterval(loadData, 30000);
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [isOpen]);
 
   const loadData = () => {
@@ -287,7 +288,7 @@ export default function APIGatewayCenter({
           alertRules: [],
         },
         endpoints: [],
-      });
+      } as any);
 
       setMicroservices(prev => [service, ...prev]);
       setCreateServiceForm({

@@ -42,7 +42,7 @@ function extractCityFromAddress(address: string): string {
   for (let i = 1; i < parts.length; i++) {
     const part = parts[i];
     // Rimuovi numeri e caratteri speciali
-    const cleanPart = part.replace(/[0-9]/g, '').trim();
+    const cleanPart = part?.replace(/[0-9]/g, '').trim() || '';
     if (cleanPart.length > 2 && !cleanPart.includes('Via') && !cleanPart.includes('Via')) {
       return cleanPart;
     }
@@ -150,7 +150,7 @@ async function getSimilarProjects(city: string, projectType: string) {
       maxArea: 200,
     };
 
-    const scrapedData = await realWebScraper.scrapeImmobiliare(searchCriteria);
+    const scrapedData = await (realWebScraper as any).scrapeImmobiliare(searchCriteria);
 
     // Filtra e formatta i risultati
     const similarProjects = scrapedData.slice(0, 3).map((property: any) => ({

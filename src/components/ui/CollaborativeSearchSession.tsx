@@ -189,7 +189,7 @@ export default function CollaborativeSearchSession({
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">Sessioni Attive</h3>
-                <Badge variant="success" className="text-sm">
+                <Badge variant="default" className="text-sm">
                   {activeSessions.filter(s => s.status === 'active').length} Attive
                 </Badge>
               </div>

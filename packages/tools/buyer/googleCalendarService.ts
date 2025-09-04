@@ -129,12 +129,14 @@ export class GoogleCalendarService {
     };
 
     // Partecipanti
-    const attendees: GoogleAttendee[] = request.participants.map(participant => ({
-      email: participant.email,
-      displayName: participant.name,
-      responseStatus: 'needsAction',
-      organizer: participant.role === 'agent',
-    }));
+    const attendees: GoogleAttendee[] = request.participants
+      .filter(participant => participant.email)
+      .map(participant => ({
+        email: participant.email!,
+        displayName: participant.name,
+        responseStatus: 'needsAction',
+        organizer: participant.role === 'agent',
+      }));
 
     // Crea evento Google Calendar
     const googleEvent: GoogleEvent = {
@@ -144,13 +146,15 @@ export class GoogleCalendarService {
       description: `Appuntamento Urbanova - ${request.type}`,
       location: request.location.address || request.location.virtualUrl || 'Da definire',
       start: {
-        dateTime: request.when.toISOString(),
+        dateTime: request.when,
         timeZone: 'Europe/Rome',
       },
       end: {
-        dateTime: endTime.toISOString(),
+        dateTime: endTime,
         timeZone: 'Europe/Rome',
       },
+      startTime: request.when,
+      endTime: endTime,
       organizer,
       attendees,
       status: 'confirmed',
@@ -172,7 +176,7 @@ export class GoogleCalendarService {
       created: new Date(),
       updated: new Date(),
       htmlLink: '',
-      hangoutLink: request.location.type === 'virtual' ? request.location.virtualUrl : null,
+
     };
 
     // Invia a Google Calendar
@@ -213,8 +217,8 @@ export class GoogleCalendarService {
     if (updates.summary) googleEvent.summary = updates.summary;
     if (updates.description) googleEvent.description = updates.description;
     if (updates.location) googleEvent.location = updates.location;
-    if (updates.start) googleEvent.start.dateTime = updates.start.toISOString();
-    if (updates.end) googleEvent.end.dateTime = updates.end.toISOString();
+    if (updates.start && googleEvent.start) googleEvent.start.dateTime = updates.start;
+    if (updates.end && googleEvent.end) googleEvent.end.dateTime = updates.end;
     if (updates.attendees) googleEvent.attendees = updates.attendees;
 
     googleEvent.updated = new Date();
@@ -275,16 +279,18 @@ export class GoogleCalendarService {
     }
 
     if (filters.timeMin) {
-      events = events.filter(event => new Date(event.start.dateTime) >= filters.timeMin!);
+      events = events.filter(event => event.start && new Date(event.start.dateTime) >= filters.timeMin!);
     }
 
     if (filters.timeMax) {
-      events = events.filter(event => new Date(event.start.dateTime) <= filters.timeMax!);
+      events = events.filter(event => event.start && new Date(event.start.dateTime) <= filters.timeMax!);
     }
 
-    return events.sort(
-      (a, b) => new Date(a.start.dateTime).getTime() - new Date(b.start.dateTime).getTime()
-    );
+    return events.sort((a, b) => {
+      const aTime = a.start ? new Date(a.start.dateTime).getTime() : 0;
+      const bTime = b.start ? new Date(b.start.dateTime).getTime() : 0;
+      return aTime - bTime;
+    });
   }
 
   /**
@@ -304,7 +310,7 @@ export class GoogleCalendarService {
       created: 0,
       updated: 0,
       deleted: 0,
-      errors: [],
+      errors: [] as string[],
     };
 
     try {
@@ -322,7 +328,7 @@ export class GoogleCalendarService {
       const localEvents = Array.from(this.googleEvents.values());
 
       for (const localEvent of localEvents) {
-        const googleEvent = googleEvents.find(ge => ge.id === localEvent.id);
+        const googleEvent = googleEvents.find((ge: any) => ge.id === localEvent.id);
 
         if (!googleEvent) {
           // Evento locale non esiste su Google, crealo
@@ -334,7 +340,7 @@ export class GoogleCalendarService {
           }
         } else {
           // Evento esiste, controlla se aggiornare
-          if (googleEvent.updated < localEvent.updated) {
+          if (googleEvent.updated && localEvent.updated && googleEvent.updated < localEvent.updated) {
             try {
               await this.googleClient.updateEvent(localEvent.id, localEvent);
               results.updated++;
@@ -390,6 +396,9 @@ export class GoogleCalendarService {
    * Trova eventi sovrapposti
    */
   private async findOverlappingEvents(event: GoogleEvent): Promise<GoogleEvent[]> {
+    if (!event.start?.dateTime || !event.end?.dateTime) {
+      return [];
+    }
     const eventStart = new Date(event.start.dateTime);
     const eventEnd = new Date(event.end.dateTime);
 
@@ -397,6 +406,7 @@ export class GoogleCalendarService {
 
     return allEvents.filter(otherEvent => {
       if (otherEvent.id === event.id) return false;
+      if (!otherEvent.start?.dateTime || !otherEvent.end?.dateTime) return false;
 
       const otherStart = new Date(otherEvent.start.dateTime);
       const otherEnd = new Date(otherEvent.end.dateTime);
@@ -413,6 +423,8 @@ export class GoogleCalendarService {
     conflicts: GoogleEvent[]
   ): Promise<GoogleEvent | null> {
     // Strategia semplice: sposta evento di 1 ora
+    if (!event.start || !event.end) return null;
+    
     const newStart = new Date(event.start.dateTime);
     newStart.setHours(newStart.getHours() + 1);
 
@@ -422,11 +434,11 @@ export class GoogleCalendarService {
     const resolvedEvent: GoogleEvent = {
       ...event,
       start: {
-        dateTime: newStart.toISOString(),
+        dateTime: newStart,
         timeZone: event.start.timeZone,
       },
       end: {
-        dateTime: newEnd.toISOString(),
+        dateTime: newEnd,
         timeZone: event.end.timeZone,
       },
       updated: new Date(),
@@ -492,8 +504,8 @@ export class GoogleCalendarService {
     const events = Array.from(this.googleEvents.values());
     const now = new Date();
 
-    const upcomingEvents = events.filter(event => new Date(event.start.dateTime) > now);
-    const pastEvents = events.filter(event => new Date(event.start.dateTime) <= now);
+    const upcomingEvents = events.filter(event => event.start && new Date(event.start.dateTime) > now);
+    const pastEvents = events.filter(event => event.start && new Date(event.start.dateTime) <= now);
 
     // Conta conflitti
     let conflicts = 0;

@@ -89,7 +89,7 @@ export class ChatOpsAgentImpl implements ChatOpsAgent {
     const renderer = new PlanRenderer();
 
     this.interactivePlanner = new InteractivePlannerFacade(planner, sessionManager, renderer);
-    this.plannerController = new InteractivePlannerController(this.interactivePlanner);
+    this.plannerController = new InteractivePlannerController(this.interactivePlanner, {} as any);
   }
 
   async handleInboundMessage(command: ChatCommand): Promise<ChatResponse> {

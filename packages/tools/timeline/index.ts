@@ -16,6 +16,7 @@ export const timelineManifest: ToolManifest = {
   name: 'Timeline Management',
   description: 'Sistema di timeline reale basato su fatti reali con Auto WBS e Re-Plan automatico',
   version: '1.0.0',
+  category: 'project_management' as any,
 
   capabilities: [
     'auto_wbs_generation',

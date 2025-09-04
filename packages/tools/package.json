@@ -11,8 +11,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@types/pdfkit": "^0.17.2",
+    "@urbanova/toolos": "file:../toolos",
     "@urbanova/types": "file:../types",
-    "@urbanova/toolos": "file:../toolos"
+    "pdfkit": "^0.17.2"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",

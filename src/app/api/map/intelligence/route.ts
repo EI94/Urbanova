@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
         infrastructure,
         summary: {
           totalInsights: marketTrends.length + zoneAnalysis.length + opportunities.length + 2, // +2 per demographics e infrastructure
-          marketTrend: marketTrends.length > 0 ? marketTrends[0].trend : 'UNKNOWN',
+          marketTrend: marketTrends.length > 0 ? marketTrends[0]?.trend : 'UNKNOWN',
           opportunitiesCount: opportunities.length,
           riskLevel: opportunities.length > 2 ? 'LOW' : 'MEDIUM',
         },

@@ -1,7 +1,7 @@
 // Servizio AI Reale per Analisi Terreni - Urbanova AI
 import OpenAI from 'openai';
 
-import { ScrapedLand, LandAnalysis } from '@/types/land';
+import { ScrapedLand, LandAnalysis } from '../../src/types/land';
 
 export class RealAIService {
   private openai: OpenAI | null = null;

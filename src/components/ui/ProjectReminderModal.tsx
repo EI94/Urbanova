@@ -20,7 +20,7 @@ export default function ProjectReminderModal({
   projectId,
   projectName,
 }: ProjectReminderModalProps) {
-  const { currentUser: user } = useAuth();
+  const { currentUser: user } = useAuth() as any;
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);

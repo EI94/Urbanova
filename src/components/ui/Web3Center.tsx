@@ -132,6 +132,7 @@ export default function Web3Center({
       const interval = setInterval(loadData, 30000);
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [isOpen]);
 
   const loadData = () => {
@@ -464,7 +465,7 @@ export default function Web3Center({
                   </div>
                 </div>
                 <p className="text-xs text-purple-600 mt-1">
-                  {formatNumber(web3Stats.transactions.successRate)}% successo
+                  {formatNumber((web3Stats.transactions as any).successRate)}% successo
                 </p>
               </div>
 

@@ -1,5 +1,10 @@
 // Router - Urbanova OS
-import { Plan, CapabilityContext, CapabilityExecutionResult } from '@urbanova/types';
+// import { Plan, CapabilityContext, CapabilityExecutionResult } from '@urbanova/types';
+
+// Mock types
+type Plan = any;
+type CapabilityContext = any;
+type CapabilityExecutionResult = any;
 import { capabilityRegistry } from './registry';
 import { qnaService } from './qna';
 

@@ -71,7 +71,7 @@ describe('SecurityManager', () => {
   describe('checkProjectAccess', () => {
     it('should allow access when no project specified', () => {
       const noProjectContext = { ...mockContext, projectId: undefined };
-      const result = security.checkProjectAccess(noProjectContext);
+      const result = security.checkProjectAccess(noProjectContext as any);
       expect(result).toBe(true);
     });
 
@@ -91,7 +91,7 @@ describe('SecurityManager', () => {
   describe('checkWorkspaceAccess', () => {
     it('should deny access when no workspace specified', () => {
       const noWorkspaceContext = { ...mockContext, workspaceId: undefined };
-      const result = security.checkWorkspaceAccess(noWorkspaceContext);
+      const result = security.checkWorkspaceAccess(noWorkspaceContext as any);
       expect(result).toBe(false);
     });
 
@@ -124,7 +124,7 @@ describe('SecurityManager', () => {
 
     it('should deny when workspace access fails', () => {
       const noWorkspaceContext = { ...mockContext, workspaceId: undefined };
-      const result = security.checkPermissions(mockAction, noWorkspaceContext);
+      const result = security.checkPermissions(mockAction, noWorkspaceContext as any);
       expect(result.allowed).toBe(false);
       expect(result.reason).toContain('Accesso al workspace negato');
     });
@@ -230,7 +230,7 @@ describe('SecurityManager', () => {
       testCases.forEach(({ userRole, requiredRole, expected }) => {
         const testAction = { ...mockAction, requiredRole };
         const testContext = { ...mockContext, userRole };
-        const result = security.checkRole(testAction, testContext);
+        const result = security.checkRole(testAction as any, testContext);
         expect(result).toBe(expected);
       });
     });

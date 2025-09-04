@@ -982,7 +982,7 @@ export class EmailService {
     } catch (error) {
       return {
         status: 'unhealthy',
-        details: { error: error.message },
+        details: { error: (error as any).message },
       };
     }
   }

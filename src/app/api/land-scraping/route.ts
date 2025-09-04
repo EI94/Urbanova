@@ -44,9 +44,9 @@ export async function POST(request: NextRequest) {
     console.log(`✅ Scraping completato: ${lands.length} terreni trovati`);
 
     // Analisi AI avanzata se richiesta
-    let analysis = [];
+    let analysis: any[] = [];
     let marketTrends = '';
-    let aiRecommendations = [];
+    let aiRecommendations: any[] = [];
 
     if (aiAnalysis && lands.length > 0) {
       console.log('🤖 Avvio analisi AI avanzata...');

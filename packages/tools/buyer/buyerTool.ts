@@ -81,6 +81,10 @@ export class BuyerTool {
         ? await this.privacyService.getBuyer(buyerId)
         : await this.privacyService.createBuyer(projectId);
 
+      if (!buyer) {
+        throw new Error('Impossibile creare o recuperare il buyer');
+      }
+
       // 2. Genera JWT link per upload
       const uploadLink = await this.jwtService.generateUploadLink({
         buyerId: buyer.id,
@@ -103,38 +107,40 @@ export class BuyerTool {
       const notifications = [];
 
       if (options.sendEmail !== false) {
-        const emailSent = await this.reminderService.sendEmail({
-          to: buyer.email,
-          template: 'kyc_upload',
-          data: {
-            buyerName: buyer.name,
+        const emailSent = await this.reminderService.sendEmail(
+          buyer.email,
+          'kyc_upload',
+          {
+            buyerName: `${buyer.firstName} ${buyer.lastName}`,
             projectName: projectId,
             uploadLink: uploadLink.url,
             documentTypes,
             expiresIn: options.retentionDays || 7,
-          },
-        });
+          }
+        );
         notifications.push({ channel: 'email', sent: emailSent });
       }
 
       if (options.sendWhatsApp !== false) {
-        const whatsappSent = await this.reminderService.sendWhatsApp({
-          to: buyer.phone,
-          template: 'kyc_upload',
-          data: {
-            buyerName: buyer.name,
+        const whatsappSent = await this.reminderService.sendWhatsApp(
+          buyer.phone,
+          'kyc_upload',
+          {
+            buyerName: `${buyer.firstName} ${buyer.lastName}`,
             projectName: projectId,
             uploadLink: uploadLink.url,
             documentTypes: documentTypes.join(', '),
             expiresIn: options.retentionDays || 7,
-          },
-        });
+          }
+        );
         notifications.push({ channel: 'whatsapp', sent: whatsappSent });
       }
 
       return {
         success: true,
         buyerId: buyer.id,
+        uploadLinks: [uploadLink],
+        kycStatus: 'pending',
         kycRequestId: kycRequest.id,
         uploadLink: uploadLink.url,
         expiresAt: uploadLink.expiresAt,
@@ -145,8 +151,12 @@ export class BuyerTool {
       console.error('❌ Collect KYC error:', error);
       return {
         success: false,
+        buyerId: buyerId || '',
+        uploadLinks: [],
+        kycStatus: 'failed',
         error: error instanceof Error ? error.message : 'Unknown error',
         message: 'Failed to initiate KYC collection',
+        expiresAt: new Date(),
       };
     }
   }
@@ -188,10 +198,12 @@ export class BuyerTool {
         type,
         participants: [
           {
-            name: buyer.name,
+            id: `participant_${Date.now()}`,
+            name: `${buyer.firstName} ${buyer.lastName}`,
             email: buyer.email,
             phone: buyer.phone,
             role: 'buyer',
+            confirmed: false,
           },
           ...participants,
         ],
@@ -231,7 +243,7 @@ export class BuyerTool {
           template: 'appointment_reminder',
           scheduledAt: new Date(when.getTime() - 24 * 60 * 60 * 1000), // 24h prima
           data: {
-            buyerName: buyer.name,
+            buyerName: `${buyer.firstName} ${buyer.lastName}`,
             appointmentType: type,
             when: when.toISOString(),
             location: location.address || location.virtualUrl,
@@ -245,7 +257,7 @@ export class BuyerTool {
           template: 'appointment_reminder',
           scheduledAt: new Date(when.getTime() - 24 * 60 * 60 * 1000), // 24h prima
           data: {
-            buyerName: buyer.name,
+            buyerName: `${buyer.firstName} ${buyer.lastName}`,
             appointmentType: type,
             when: when.toISOString(),
             location: location.address || location.virtualUrl,
@@ -261,7 +273,7 @@ export class BuyerTool {
             appointmentId: appointment.id,
             buyerId,
             ...config,
-          })
+          } as any)
         )
       );
 
@@ -269,44 +281,43 @@ export class BuyerTool {
       const confirmations = [];
       if (options.sendConfirmation !== false) {
         if (reminders.whatsapp !== false) {
-          const whatsappConfirmation = await this.reminderService.sendWhatsApp({
-            to: buyer.phone,
-            template: 'appointment_confirmation',
-            data: {
-              buyerName: buyer.name,
+          const whatsappConfirmation = await this.reminderService.sendWhatsApp(
+            buyer.phone,
+            'appointment_confirmation',
+            {
+              buyerName: `${buyer.firstName} ${buyer.lastName}`,
               appointmentType: type,
               when: when.toISOString(),
               location: location.address || location.virtualUrl,
               icsUrl: icsFile?.downloadUrl,
-            },
-          });
+            }
+          );
           confirmations.push({ channel: 'whatsapp', sent: whatsappConfirmation });
         }
 
         if (reminders.email !== false) {
-          const emailConfirmation = await this.reminderService.sendEmail({
-            to: buyer.email,
-            template: 'appointment_confirmation',
-            data: {
-              buyerName: buyer.name,
+          const emailConfirmation = await this.reminderService.sendEmail(
+            buyer.email,
+            'appointment_confirmation',
+            {
+              buyerName: `${buyer.firstName} ${buyer.lastName}`,
               appointmentType: type,
               when: when.toISOString(),
               location: location.address || location.virtualUrl,
               icsUrl: icsFile?.downloadUrl,
               googleEventUrl: googleEvent?.htmlLink,
-            },
-          });
+            }
+          );
           confirmations.push({ channel: 'email', sent: emailConfirmation });
         }
       }
 
       return {
         success: true,
-        appointmentId: appointment.id,
-        icsFile,
-        googleEvent,
-        reminders: createdReminders,
-        confirmations,
+        appointment,
+        ...(icsFile && { icsFile }),
+        ...(googleEvent && { googleEvent }),
+        confirmationSent: confirmations.length > 0,
         message: 'Appointment scheduled successfully',
       };
     } catch (error) {
@@ -358,46 +369,46 @@ export class BuyerTool {
       const notifications = [];
 
       if (options.sendWhatsApp !== false) {
-        const whatsappSent = await this.reminderService.sendWhatsApp({
-          to: buyer.phone,
-          template: 'payment_reminder',
-          data: {
-            buyerName: buyer.name,
+        const whatsappSent = await this.reminderService.sendWhatsApp(
+          buyer.phone,
+          'payment_reminder',
+          {
+            buyerName: `${buyer.firstName} ${buyer.lastName}`,
             milestone,
             amount: `€${amount.toFixed(2)}`,
             dueDate: dueDate.toISOString(),
             paymentUrl: reminder.paymentUrl,
-          },
-        });
+          }
+        );
         notifications.push({ channel: 'whatsapp', sent: whatsappSent });
       }
 
       if (options.sendEmail !== false) {
-        const emailSent = await this.reminderService.sendEmail({
-          to: buyer.email,
-          template: 'payment_reminder',
-          data: {
-            buyerName: buyer.name,
+        const emailSent = await this.reminderService.sendEmail(
+          buyer.email,
+          'payment_reminder',
+          {
+            buyerName: `${buyer.firstName} ${buyer.lastName}`,
             milestone,
             amount: `€${amount.toFixed(2)}`,
             dueDate: dueDate.toISOString(),
             paymentUrl: reminder.paymentUrl,
-          },
-        });
+          }
+        );
         notifications.push({ channel: 'email', sent: emailSent });
       }
 
       if (options.sendSMS) {
-        const smsSent = await this.reminderService.sendSMS({
-          to: buyer.phone,
-          template: 'payment_reminder_sms',
-          data: {
-            buyerName: buyer.name,
+        const smsSent = await this.reminderService.sendSMS(
+          buyer.phone,
+          'payment_reminder_sms',
+          {
+            buyerName: `${buyer.firstName} ${buyer.lastName}`,
             milestone,
             amount: `€${amount.toFixed(2)}`,
             dueDate: dueDate.toISOString(),
-          },
-        });
+          }
+        );
         notifications.push({ channel: 'sms', sent: smsSent });
       }
 
@@ -465,10 +476,10 @@ export class BuyerTool {
 
     try {
       const appointments = await this.appointmentService.listAppointments({
-        buyerId,
-        status,
-        fromDate,
-        toDate,
+        ...(buyerId && { buyerId }),
+        ...(status && { status }),
+        ...(fromDate && { fromDate }),
+        ...(toDate && { toDate }),
       });
 
       return {
@@ -584,7 +595,7 @@ export class BuyerTool {
 
       return {
         success: true,
-        privacySettings: updatedSettings,
+        privacySettings: updatedSettings as any,
         message: 'Privacy settings updated successfully',
       };
     } catch (error) {

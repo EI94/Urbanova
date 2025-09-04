@@ -6,8 +6,32 @@ import Button from '../ui/Button';
 import { Card } from '../ui/Card';
 import FormInput from '../ui/FormInput';
 import { Badge } from '../ui/Badge';
-import { InteractiveRequirement, InteractivePlan } from '@urbanova/types/interactive';
-import { ToolActionSpec } from '@urbanova/types/tools';
+// Define types inline since modules don't exist
+interface InteractiveRequirement {
+  id: string;
+  type: string;
+  label: string;
+  description?: string;
+  required: boolean;
+  placeholder?: string;
+  options?: any[];
+  validation?: any;
+  field: string;
+  currentValue?: any;
+  [key: string]: any; // Allow any additional properties
+}
+
+interface InteractivePlan {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+interface ToolActionSpec {
+  id: string;
+  name: string;
+  description?: string;
+}
 
 interface RequirementEditorProps {
   requirements: InteractiveRequirement[];
@@ -122,11 +146,14 @@ export const RequirementEditor: React.FC<RequirementEditorProps> = ({
         return (
           <FormInput
             type="text"
+            name={requirement.field}
+            label={requirement.label}
             value={value || ''}
             onChange={e => handleFieldChange(requirement.field, e.target.value)}
             placeholder={requirement.description}
             error={error}
             required={requirement.required}
+            {...({} as any)}
           />
         );
 
@@ -134,11 +161,14 @@ export const RequirementEditor: React.FC<RequirementEditorProps> = ({
         return (
           <FormInput
             type="number"
+            name={requirement.field}
+            label={requirement.label}
             value={value || ''}
             onChange={e => handleFieldChange(requirement.field, e.target.value)}
             placeholder={requirement.description}
             error={error}
             required={requirement.required}
+            {...({} as any)}
           />
         );
 
@@ -154,7 +184,7 @@ export const RequirementEditor: React.FC<RequirementEditorProps> = ({
               required={requirement.required}
             >
               <option value="">Seleziona...</option>
-              {requirement.options?.map(option => (
+              {requirement.options?.map((option: any) => (
                 <option key={option} value={option}>
                   {option}
                 </option>
@@ -168,10 +198,13 @@ export const RequirementEditor: React.FC<RequirementEditorProps> = ({
         return (
           <FormInput
             type="date"
+            name={requirement.field}
+            label={requirement.label}
             value={value || ''}
             onChange={e => handleFieldChange(requirement.field, e.target.value)}
             error={error}
             required={requirement.required}
+            {...({} as any)}
           />
         );
 

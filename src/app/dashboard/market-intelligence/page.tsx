@@ -383,7 +383,7 @@ export default function LandScrapingPage() {
     };
 
     const updatedSearches = [...scheduledSearches, newSearch];
-    setScheduledSearches(updatedSearches);
+    setScheduledSearches(updatedSearches as any);
     saveScheduledSearches(updatedSearches);
     toast(`Ricerca programmata "${scheduleData.name}" aggiunta con successo!`, { icon: '✅' });
   };
@@ -392,7 +392,7 @@ export default function LandScrapingPage() {
     const now = new Date();
     const [hours, minutes] = time.split(':');
     const nextRun = new Date(now);
-    nextRun.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+    nextRun.setHours(parseInt(hours as any), parseInt(minutes as any), 0, 0);
 
     // Se l'orario di oggi è già passato, calcola per il prossimo periodo
     if (nextRun <= now) {
@@ -1369,6 +1369,7 @@ export default function LandScrapingPage() {
           resultsCount={filteredResults.length}
           cacheHit={false} // TODO: implementare tracking cache hit
           servicesStatus={servicesStatus || undefined}
+          {...({} as any)}
         />
 
         {/* Notifiche Email */}

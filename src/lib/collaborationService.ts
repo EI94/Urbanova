@@ -287,8 +287,8 @@ export class CollaborationService {
         return 1;
       }
 
-      const lastVersion = snapshot.docs[0].data() as DesignVersion;
-      return lastVersion.versionNumber + 1;
+      const lastVersion = snapshot.docs[0]?.data() as DesignVersion;
+      return (lastVersion?.versionNumber || 0) + 1;
     } catch (error) {
       console.error('Error getting next version number:', error);
       return 1;

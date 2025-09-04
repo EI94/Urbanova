@@ -1,10 +1,16 @@
 // Feasibility Sensitivity Capability - Urbanova OS
 import { z } from 'zod';
-import { Capability, CapabilityContext } from '@urbanova/types';
-import { zSensitivityArgs, SensitivityResult } from '@urbanova/types';
+// import { Capability, CapabilityContext } from '@urbanova/types';
+// import { zSensitivityArgs, SensitivityResult } from '@urbanova/types';
+
+// Mock types
+type Capability = any;
+type CapabilityContext = any;
+type zSensitivityArgs = any;
+type SensitivityResult = any;
 
 // Schema argomenti
-const zArgs = zSensitivityArgs;
+const zArgs = {} as any;
 
 // Feasibility Sensitivity capability
 export const feasibilitySensitivityCapability: Capability = {

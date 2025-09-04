@@ -1,6 +1,9 @@
 'use client';
 
-import { TrendingUpIcon, TargetIcon, AnalyticsIcon } from '@/components/icons';
+import { TrendingUpIcon, TargetIcon } from '@/components/icons';
+
+// Mock AnalyticsIcon
+const AnalyticsIcon = TrendingUpIcon;
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
 export default function MarketingCampaignsPage() {

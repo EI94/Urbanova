@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { CheckIcon, XIcon, RefreshIcon, SaveIcon, LoadIcon, ClockIcon } from '@/components/icons';
+import { CheckIcon, XIcon, RefreshIcon, SaveIcon, UploadIcon as LoadIcon, ClockIcon } from '@/components/icons';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getSupportedLanguages } from '@/lib/languageConfig';
 import { SupportedLanguage } from '@/types/language';
@@ -112,7 +112,7 @@ export default function PersistenceTest({ onComplete }: PersistenceTestProps) {
 
       for (const lang of testLanguages) {
         const startTime = Date.now();
-        await changeLanguage(lang);
+        await changeLanguage(lang as any);
         const changeTime = Date.now() - startTime;
 
         const saved = localStorage.getItem('urbanova-language');
@@ -193,7 +193,7 @@ export default function PersistenceTest({ onComplete }: PersistenceTestProps) {
         });
       }
 
-      setResults(testResults);
+      setResults(testResults as any);
 
       // Calcola statistiche
       const totalTests = testResults.length;
@@ -235,7 +235,7 @@ export default function PersistenceTest({ onComplete }: PersistenceTestProps) {
         timestamp: new Date(),
       });
 
-      setResults(testResults);
+      setResults(testResults as any);
     } finally {
       setIsRunning(false);
     }

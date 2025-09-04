@@ -101,7 +101,7 @@ export class InteractivePlannerFacade {
     // Create planning context
     const context: PlanningContext = {
       userId: input.userId,
-      projectId: input.projectId,
+      ...(input.projectId && { projectId: input.projectId }),
       workspaceId: input.workspaceId,
       userRole: input.userRole,
       availableTools: [], // TODO: Get from tool registry
@@ -190,7 +190,7 @@ export class InteractivePlannerFacade {
       preview,
       summary,
       ctaText,
-      action,
+      ...(action && { action }),
     };
   }
 

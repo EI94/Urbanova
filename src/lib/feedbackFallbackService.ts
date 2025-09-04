@@ -122,8 +122,8 @@ class FeedbackFallbackService {
           };
 
           // Rimuovi proprietà non Firebase
-          delete firebaseData.id;
-          delete firebaseData.localId;
+          delete (firebaseData as any).id;
+          delete (firebaseData as any).localId;
 
           const docRef = await addDoc(collection(db, 'feedback'), firebaseData);
           syncedIds.push(item.id);

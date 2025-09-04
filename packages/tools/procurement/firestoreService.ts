@@ -48,12 +48,12 @@ export class FirestoreService {
     // Inizializza Firebase se non già fatto
     if (getApps().length === 0) {
       const firebaseConfig = {
-        apiKey: process.env.FIREBASE_API_KEY,
-        authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-        messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-        appId: process.env.FIREBASE_APP_ID,
+        apiKey: process.env.FIREBASE_API_KEY || '',
+        authDomain: process.env.FIREBASE_AUTH_DOMAIN || '',
+        projectId: process.env.FIREBASE_PROJECT_ID || '',
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET || '',
+        messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || '',
+        appId: process.env.FIREBASE_APP_ID || '',
       };
 
       const app = initializeApp(firebaseConfig);
@@ -117,7 +117,7 @@ export class FirestoreService {
       return rdoId;
     } catch (error) {
       console.error('❌ [FirestoreService] Errore creazione RDO:', error);
-      throw new Error(`Errore creazione RDO: ${error.message}`);
+      throw new Error(`Errore creazione RDO: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -143,7 +143,7 @@ export class FirestoreService {
       } as RDO;
     } catch (error) {
       console.error(`❌ [FirestoreService] Errore recupero RDO ${rdoId}:`, error);
-      throw new Error(`Errore recupero RDO: ${error.message}`);
+      throw new Error(`Errore recupero RDO: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -164,7 +164,7 @@ export class FirestoreService {
     } = {}
   ): Promise<RDO[]> {
     try {
-      let q = collection(this.db, this.collections.rdos);
+      let q: any = collection(this.db, this.collections.rdos);
 
       // Applica filtri
       if (filters.status) {
@@ -194,7 +194,7 @@ export class FirestoreService {
       const rdos: RDO[] = [];
 
       querySnapshot.forEach(doc => {
-        const data = doc.data();
+        const data = doc.data() as any;
         rdos.push({
           ...data,
           id: doc.id,
@@ -208,7 +208,7 @@ export class FirestoreService {
       return rdos;
     } catch (error) {
       console.error('❌ [FirestoreService] Errore lista RDO:', error);
-      throw new Error(`Errore lista RDO: ${error.message}`);
+      throw new Error(`Errore lista RDO: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -246,7 +246,7 @@ export class FirestoreService {
       console.log(`✅ [FirestoreService] RDO ${rdoId} aggiornato con successo`);
     } catch (error) {
       console.error(`❌ [FirestoreService] Errore aggiornamento RDO ${rdoId}:`, error);
-      throw new Error(`Errore aggiornamento RDO: ${error.message}`);
+      throw new Error(`Errore aggiornamento RDO: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -282,7 +282,7 @@ export class FirestoreService {
       return offerId;
     } catch (error) {
       console.error('❌ [FirestoreService] Errore creazione offerta:', error);
-      throw new Error(`Errore creazione offerta: ${error.message}`);
+      throw new Error(`Errore creazione offerta: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -312,7 +312,7 @@ export class FirestoreService {
       return offers;
     } catch (error) {
       console.error(`❌ [FirestoreService] Errore recupero offerte per RDO ${rdoId}:`, error);
-      throw new Error(`Errore recupero offerte: ${error.message}`);
+      throw new Error(`Errore recupero offerte: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -341,7 +341,7 @@ export class FirestoreService {
       console.log(`✅ [FirestoreService] Status offerta ${offerId} aggiornato a ${status}`);
     } catch (error) {
       console.error(`❌ [FirestoreService] Errore aggiornamento status offerta ${offerId}:`, error);
-      throw new Error(`Errore aggiornamento status offerta: ${error.message}`);
+      throw new Error(`Errore aggiornamento status offerta: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -373,7 +373,7 @@ export class FirestoreService {
       return comparisonId;
     } catch (error) {
       console.error('❌ [FirestoreService] Errore salvataggio confronto:', error);
-      throw new Error(`Errore salvataggio confronto: ${error.message}`);
+      throw new Error(`Errore salvataggio confronto: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -396,7 +396,11 @@ export class FirestoreService {
       }
 
       const doc = querySnapshot.docs[0];
-      const data = doc.data();
+      if (!doc) {
+        return null;
+      }
+      
+      const data = doc.data() as any;
 
       return {
         ...data,
@@ -405,7 +409,7 @@ export class FirestoreService {
       } as Comparison;
     } catch (error) {
       console.error(`❌ [FirestoreService] Errore recupero confronto per RDO ${rdoId}:`, error);
-      throw new Error(`Errore recupero confronto: ${error.message}`);
+      throw new Error(`Errore recupero confronto: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -433,7 +437,7 @@ export class FirestoreService {
       console.log(`✅ [FirestoreService] Vendor ${vendor.id} salvato con successo`);
     } catch (error) {
       console.error(`❌ [FirestoreService] Errore salvataggio vendor ${vendor.id}:`, error);
-      throw new Error(`Errore salvataggio vendor: ${error.message}`);
+      throw new Error(`Errore salvataggio vendor: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -448,7 +452,7 @@ export class FirestoreService {
     } = {}
   ): Promise<Vendor[]> {
     try {
-      let q = collection(this.db, this.collections.vendors);
+      let q: any = collection(this.db, this.collections.vendors);
 
       if (filters.category) {
         q = query(q, where('category', 'array-contains', filters.category));
@@ -462,7 +466,7 @@ export class FirestoreService {
       const vendors: Vendor[] = [];
 
       querySnapshot.forEach(doc => {
-        const data = doc.data();
+        const data = doc.data() as any;
         vendors.push({
           ...data,
           id: doc.id,
@@ -479,7 +483,7 @@ export class FirestoreService {
       return vendors;
     } catch (error) {
       console.error('❌ [FirestoreService] Errore lista vendor:', error);
-      throw new Error(`Errore lista vendor: ${error.message}`);
+      throw new Error(`Errore lista vendor: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -508,7 +512,7 @@ export class FirestoreService {
       return preCheckId;
     } catch (error) {
       console.error('❌ [FirestoreService] Errore salvataggio pre-check:', error);
-      throw new Error(`Errore salvataggio pre-check: ${error.message}`);
+      throw new Error(`Errore salvataggio pre-check: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -532,7 +536,11 @@ export class FirestoreService {
       }
 
       const doc = querySnapshot.docs[0];
-      const data = doc.data();
+      if (!doc) {
+        return null;
+      }
+      
+      const data = doc.data() as any;
 
       return {
         ...data,
@@ -540,7 +548,7 @@ export class FirestoreService {
       } as PreCheckResult;
     } catch (error) {
       console.error(`❌ [FirestoreService] Errore recupero pre-check:`, error);
-      throw new Error(`Errore recupero pre-check: ${error.message}`);
+      throw new Error(`Errore recupero pre-check: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 

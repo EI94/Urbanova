@@ -11,7 +11,7 @@ describe('DocHunterTool', () => {
       expect(result.success).toBe(true);
       expect(result.data.projectId).toBe('test-project-123');
       expect(result.data.documentType).toBe('CDU');
-      expect(result.data.recipient).toBe('test@example.com');
+      expect((result.data as any).recipient).toBe('test@example.com');
       expect(result.data.summary).toContain('CDU requested successfully');
     });
 

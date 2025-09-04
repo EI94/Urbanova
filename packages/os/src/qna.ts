@@ -1,5 +1,26 @@
 // QNA Service - Urbanova OS
-import { QnaAnswer, QnaExecutionResult, ProjectSemanticIndex } from '@urbanova/types';
+// Define types inline since they don't exist
+interface QnaAnswer {
+  answer: string;
+  confidence: number;
+  sources: string[];
+  citations?: any[];
+  timestamp: Date;
+}
+
+interface QnaExecutionResult {
+  success: boolean;
+  answer?: QnaAnswer;
+  error?: string;
+  executionTime: number;
+}
+
+interface ProjectSemanticIndex {
+  projectId: string;
+  documents: any[];
+  embeddings: any[];
+  metadata: any;
+}
 
 export class QnaService {
   /**
@@ -12,7 +33,10 @@ export class QnaService {
     if (!projectId) {
       return {
         answer: 'Per favore, specifica un progetto per la tua domanda.',
+        confidence: 0,
+        sources: [],
         citations: [],
+        timestamp: new Date(),
       };
     }
 
@@ -22,7 +46,10 @@ export class QnaService {
     if (documents.length === 0) {
       return {
         answer: `Nessun documento trovato per il progetto ${projectId}.`,
+        confidence: 0,
+        sources: [],
         citations: [],
+        timestamp: new Date(),
       };
     }
 
@@ -33,7 +60,7 @@ export class QnaService {
     const answer = this.generateAnswer(query, relevantDocs);
 
     // Crea citations gestendo correttamente i tipi opzionali
-    const citations = relevantDocs.map(doc => {
+    const citations = relevantDocs.map((doc: any) => {
       const citation: any = {
         docId: doc.docId,
       };
@@ -51,7 +78,10 @@ export class QnaService {
 
     return {
       answer,
+      confidence: 0.8,
+      sources: citations.map((c: any) => c.docId || ''),
       citations,
+      timestamp: new Date(),
     };
   }
 
@@ -106,7 +136,7 @@ export class QnaService {
       .filter(word => word.length > 2);
 
     // Calcola score per ogni documento
-    const scoredDocs = documents.map(doc => {
+    const scoredDocs = documents.map((doc: any) => {
       let score = 0;
       const docText = (doc.title + ' ' + doc.textSnippet).toLowerCase();
 
@@ -120,9 +150,9 @@ export class QnaService {
 
     // Ordina per score e prendi i primi maxResults
     return scoredDocs
-      .sort((a, b) => b.score - a.score)
+      .sort((a: any, b: any) => b.score - a.score)
       .slice(0, maxResults)
-      .map(item => item.doc);
+      .map((item: any) => item.doc);
   }
 
   /**

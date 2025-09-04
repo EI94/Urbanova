@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     const sendRequest = validationResult.data;
 
     // Invio SAL
-    const result = await salService.send(sendRequest);
+    const result = await salService.send(sendRequest as any);
 
     if (result.success) {
       console.log('✅ [SAL API] SAL inviato con successo:', sendRequest.salId);

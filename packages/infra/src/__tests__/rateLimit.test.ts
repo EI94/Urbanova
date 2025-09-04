@@ -4,7 +4,11 @@ import {
   checkWhatsAppRateLimit,
   getWhatsAppRateLimitStatus,
 } from '../rateLimit';
-import { RateLimitResult, RateLimitConfig } from '@urbanova/types';
+// import { RateLimitResult, RateLimitConfig } from '@urbanova/types';
+
+// Mock types
+type RateLimitResult = any;
+type RateLimitConfig = any;
 
 // Mock firebase-admin
 const mockFirestore = {

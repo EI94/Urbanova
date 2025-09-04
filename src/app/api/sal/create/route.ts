@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     const salRequest = validationResult.data;
 
     // Creazione SAL
-    const result = await salService.create(salRequest);
+    const result = await salService.create(salRequest as any);
 
     if (result.success) {
       console.log('✅ [SAL API] SAL creato con successo:', result.sal?.id);

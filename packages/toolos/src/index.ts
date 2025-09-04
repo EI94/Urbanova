@@ -55,7 +55,7 @@ export class UrbanovaToolOS {
       if (!verification.success) {
         console.warn(
           '⚠️ Alcuni tool non sono stati registrati correttamente:',
-          verification.verification.missing
+          (verification as any).verification.missing
         );
       }
 

@@ -69,7 +69,7 @@ describe('SAL End-to-End Workflow', () => {
     it('dovrebbe creare un nuovo SAL in stato DRAFT', async () => {
       console.log('📝 Test creazione SAL...');
 
-      const result = await salService.create(testData);
+      const result = await salService.create(testData as any);
 
       expect(result.success).toBe(true);
       expect(result.sal).toBeDefined();
@@ -148,7 +148,7 @@ describe('SAL End-to-End Workflow', () => {
       expect(signResult.sal?.status).toBe('SIGNED_VENDOR');
       expect(signResult.sal?.signatures).toBeDefined();
       expect(signResult.sal?.signatures.length).toBe(1);
-      expect(signResult.sal?.signatures[0].signerRole).toBe('VENDOR');
+      expect(signResult.sal?.signatures?.[0]?.signerRole).toBe('VENDOR');
 
       testSAL = signResult.sal!;
       console.log('✅ Vendor ha firmato il SAL');
@@ -200,9 +200,9 @@ describe('SAL End-to-End Workflow', () => {
 
       const certResult = await docHunterService.verifyVendorCertifications(testData.vendorId);
 
-      expect(certResult.success).toBe(true);
+      expect((certResult as any).success).toBe(true);
       expect(certResult.certifications).toBeDefined();
-      expect(certResult.canReceivePayments).toBe(true);
+      expect((certResult as any).canReceivePayments).toBe(true);
       console.log('✅ Certificazioni vendor verificate');
     });
 
@@ -213,7 +213,7 @@ describe('SAL End-to-End Workflow', () => {
       const mockVendorId = 'vendor-no-certs';
       const certResult = await docHunterService.verifyVendorCertifications(mockVendorId);
 
-      expect(certResult.canReceivePayments).toBe(false);
+      expect((certResult as any).canReceivePayments).toBe(false);
       console.log('✅ Blocco pagamento senza certificazioni funziona');
     });
   });
@@ -339,7 +339,7 @@ describe('SAL End-to-End Workflow', () => {
       const startTime = Date.now();
 
       // Test workflow completo in un unico test
-      const createResult = await salService.create(testData);
+      const createResult = await salService.create(testData as any);
       expect(createResult.success).toBe(true);
 
       const sal = createResult.sal!;

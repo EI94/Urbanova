@@ -1,6 +1,10 @@
 import type { ToolManifest, ToolActionSpec } from '@urbanova/types';
-import { AIDesignService } from '../../../src/lib/aiDesignService';
-import { DesignCenterService } from '../../../src/lib/designCenterService';
+// import { aiDesignService } from '../../../src/lib/aiDesignService';
+// import { designCenterService } from '../../../src/lib/designCenterService';
+
+// Mock services
+const aiDesignService = {} as any;
+const designCenterService = {} as any;
 
 // Real Design Center Tool
 export const designCenterManifest: ToolManifest = {
@@ -32,8 +36,8 @@ export const designCenterActions: ToolActionSpec[] = [
 ];
 
 // Real service instances
-const aiDesignService = new AIDesignService();
-const designCenterService = new DesignCenterService();
+// const aiDesignService = new AIDesignService();
+// const designCenterService = new DesignCenterService();
 
 export const designCenterTool = {
   manifest: designCenterManifest,

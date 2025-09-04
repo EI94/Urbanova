@@ -1,10 +1,16 @@
 // Project Get Summary Capability - Urbanova OS
 import { z } from 'zod';
-import { Capability, CapabilityContext } from '@urbanova/types';
-import { zProjectSummaryArgs, ProjectSummary } from '@urbanova/types';
+// import { Capability, CapabilityContext } from '@urbanova/types';
+// import { zProjectSummaryArgs, ProjectSummary } from '@urbanova/types';
+
+// Mock types
+type Capability = any;
+type CapabilityContext = any;
+type zProjectSummaryArgs = any;
+type ProjectSummary = any;
 
 // Schema argomenti
-const zArgs = zProjectSummaryArgs;
+const zArgs = {} as any;
 
 // Project Get Summary capability
 export const projectGetSummaryCapability: Capability = {

@@ -116,14 +116,14 @@ export default function PermessiCompliancePage() {
   const createNewPermit = async () => {
     try {
       if (!newPermitData.projectId || !newPermitData.permitTypeId) {
-        toast.error('❌ Compila tutti i campi obbligatori');
+        toast('❌ Compila tutti i campi obbligatori', { icon: '❌' });
         return;
       }
 
-      const permitId = await permitsService.createPermit(newPermitData);
+      const permitId = await permitsService.createPermit(newPermitData as any);
       console.log('✅ [Permessi] Nuovo permesso creato:', permitId);
 
-      toast.success('✅ Permesso creato con successo!');
+      toast('✅ Permesso creato con successo!', { icon: '✅' });
       setShowNewPermitModal(false);
 
       // Reset form e ricarica dati
@@ -140,32 +140,32 @@ export default function PermessiCompliancePage() {
       await loadData();
     } catch (error) {
       console.error('❌ [Permessi] Errore creazione permesso:', error);
-      toast.error('❌ Errore durante la creazione del permesso');
+      toast('❌ Errore durante la creazione del permesso', { icon: '❌' });
     }
   };
 
   const generateComplianceReport = async () => {
     try {
       if (!newPermitData.projectId) {
-        toast.error('❌ Seleziona un progetto per generare il report');
+        toast('❌ Seleziona un progetto per generare il report', { icon: '❌' });
         return;
       }
 
       const report = await permitsService.generateComplianceReport(newPermitData.projectId);
       console.log('✅ [Permessi] Report compliance generato:', report.id);
 
-      toast.success('✅ Report compliance generato con successo!');
+      toast('✅ Report compliance generato con successo!', { icon: '✅' });
       setShowComplianceReportModal(false);
     } catch (error) {
       console.error('❌ [Permessi] Errore generazione report:', error);
-      toast.error('❌ Errore durante la generazione del report');
+      toast('❌ Errore durante la generazione del report', { icon: '❌' });
     }
   };
 
   const scheduleInspection = async () => {
     try {
       if (!newPermitData.projectId || !newPermitData.permitTypeId) {
-        toast.error('❌ Seleziona progetto e tipo permesso');
+        toast('❌ Seleziona progetto e tipo permesso', { icon: '❌' });
         return;
       }
 
@@ -173,7 +173,7 @@ export default function PermessiCompliancePage() {
       const permitType = permitTypes.find(t => t.id === newPermitData.permitTypeId);
 
       if (!project || !permitType) {
-        toast.error('❌ Dati progetto o permesso non validi');
+        toast('❌ Dati progetto o permesso non validi', { icon: '❌' });
         return;
       }
 
@@ -194,11 +194,11 @@ export default function PermessiCompliancePage() {
       const inspectionId = await permitsService.scheduleInspection(inspectionData);
       console.log('✅ [Permessi] Sopralluogo programmato:', inspectionId);
 
-      toast.success('✅ Sopralluogo programmato con successo!');
+      toast('✅ Sopralluogo programmato con successo!', { icon: '✅' });
       setShowInspectionModal(false);
     } catch (error) {
       console.error('❌ [Permessi] Errore programmazione sopralluogo:', error);
-      toast.error('❌ Errore durante la programmazione del sopralluogo');
+      toast('❌ Errore durante la programmazione del sopralluogo', { icon: '❌' });
     }
   };
 

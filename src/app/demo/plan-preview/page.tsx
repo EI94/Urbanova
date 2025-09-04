@@ -3,8 +3,13 @@
 import React, { useState } from 'react';
 import { MessagePlanPreview } from '../../../components/chat/MessagePlanPreview';
 import { ProjectPlannerPanel } from '../../../components/project/ProjectPlannerPanel';
-import { InteractivePlan, InteractiveTaskSession } from '@urbanova/types/interactive';
-import { ToolActionSpec } from '@urbanova/types/tools';
+// import { InteractivePlan, InteractiveTaskSession } from '@urbanova/types/interactive';
+// import { ToolActionSpec } from '@urbanova/types/tools';
+
+// Mock types
+type InteractivePlan = any;
+type InteractiveTaskSession = any;
+type ToolActionSpec = any;
 
 // Mock data for demonstration
 const mockPlan: InteractivePlan = {

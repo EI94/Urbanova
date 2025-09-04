@@ -22,13 +22,13 @@ export async function POST(request: NextRequest) {
     }
 
     const searchRequest = validationResult.data;
-    const result = await complianceService.searchDocuments(searchRequest);
+    const result = await complianceService.searchDocuments(searchRequest as any);
 
     if (result.success) {
       console.log('✅ [Compliance API] Ricerca completata');
       return NextResponse.json(result);
     } else {
-      console.error('❌ [Compliance API] Errore ricerca:', result.message);
+      console.error('❌ [Compliance API] Errore ricerca:', (result as any).message);
       return NextResponse.json(result, { status: 400 });
     }
   } catch (error) {

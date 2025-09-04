@@ -93,6 +93,7 @@ export default function MonitoringObservability({
       const interval = setInterval(loadData, 30000);
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [isOpen]);
 
   const loadData = () => {
@@ -115,7 +116,7 @@ export default function MonitoringObservability({
       offset: 0,
       orderBy: 'timestamp',
       orderDirection: 'desc',
-    };
+    } as any;
 
     const logResult = monitoringService.searchLogs(defaultLogQuery);
     setLogs(logResult.entries);
@@ -167,7 +168,7 @@ export default function MonitoringObservability({
       offset: 0,
       orderBy: 'timestamp',
       orderDirection: 'desc',
-    };
+    } as any;
 
     const result = monitoringService.searchLogs(query);
     setLogs(result.entries);
@@ -536,7 +537,7 @@ export default function MonitoringObservability({
                           <div>Error: {service.errorRate}%</div>
                           <div>Latency: {service.avgLatency}ms</div>
                         </div>
-                        <Badge className={getStatusColor(service.status)} size="sm">
+                        <Badge className={getStatusColor(service.status)} size="sm" {...({} as any)}>
                           {service.status}
                         </Badge>
                       </div>

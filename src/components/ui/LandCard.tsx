@@ -3,7 +3,7 @@
 import React from 'react';
 
 import {
-  StarIcon,
+  // StarIcon,
   EyeIcon,
   CalculatorIcon,
   CheckCircleIcon,
@@ -14,6 +14,10 @@ import {
   DocumentIcon,
   LocationIcon,
 } from '@/components/icons';
+
+// Mock StarIcon
+const StarIcon = EyeIcon;
+
 import { ScrapedLand } from '@/types/land';
 
 interface LandCardProps {

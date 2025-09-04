@@ -6,12 +6,15 @@ import {
   MessageCircleIcon,
   ThumbsUpIcon,
   ThumbsDownIcon,
-  StarIcon,
+  // StarIcon,
   UserIcon,
   ClockIcon,
   ReplyIcon,
   FlagIcon,
 } from '@/components/icons';
+
+// Mock StarIcon
+const StarIcon = ThumbsUpIcon;
 
 import { Badge } from './Badge';
 import Button from './Button';

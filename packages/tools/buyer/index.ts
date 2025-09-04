@@ -17,6 +17,7 @@ export const buyerManifest: ToolManifest = {
   description:
     'Sistema completo per gestione acquirente con KYC, appuntamenti ICS e reminder automatici',
   version: '1.0.0',
+  category: 'automation',
 
   capabilities: [
     'kyc_collection',
@@ -182,7 +183,7 @@ export const buyerActions: ToolActionSpec[] = [
         },
       },
     },
-    handler: async (params, context) => {
+    handler: async (params: any, context: any) => {
       const tool = new BuyerTool();
       return await tool.collectKYC(
         params.projectId,
@@ -309,7 +310,7 @@ export const buyerActions: ToolActionSpec[] = [
         },
       },
     },
-    handler: async (params, context) => {
+    handler: async (params: any, context: any) => {
       const tool = new BuyerTool();
       return await tool.scheduleFittings(
         params.buyerId,
@@ -376,7 +377,7 @@ export const buyerActions: ToolActionSpec[] = [
         },
       },
     },
-    handler: async (params, context) => {
+    handler: async (params: any, context: any) => {
       const tool = new BuyerTool();
       return await tool.remindPayment(
         params.buyerId,

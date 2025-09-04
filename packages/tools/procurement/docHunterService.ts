@@ -171,7 +171,7 @@ export class DocHunterService {
       return response;
     } catch (error) {
       console.error(`❌ [DocHunter] Errore pre-check:`, error);
-      throw new Error(`Errore pre-check: ${error.message}`);
+      throw new Error(`Errore pre-check: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -211,7 +211,7 @@ export class DocHunterService {
         confidence: 0.95,
         warnings: data.warnings || [],
         errors: data.errors || [],
-      };
+      } as any;
     } catch (error) {
       // Fallback per errori API
       return {
@@ -307,7 +307,7 @@ export class DocHunterService {
         confidence: 0.9,
         warnings: data.warnings || [],
         errors: data.errors || [],
-      };
+      } as any;
     } catch (error) {
       return {
         type: 'certification',
@@ -354,7 +354,7 @@ export class DocHunterService {
         confidence: 0.85,
         warnings: data.warnings || [],
         errors: data.errors || [],
-      };
+      } as any;
     } catch (error) {
       return {
         type: 'insurance',
@@ -512,14 +512,17 @@ export class DocHunterService {
 
       // Test rapido di ogni servizio
       for (let i = 0; i < services.length; i++) {
+        const service = services[i];
+        if (!service) continue;
+        
         try {
-          await axios.get(`${this.baseUrl}/health/${services[i].name.toLowerCase()}`, {
+          await axios.get(`${this.baseUrl}/health/${service.name.toLowerCase()}`, {
             headers: { Authorization: `Bearer ${this.apiKey}` },
             timeout: 5000,
           });
-          services[i].status = 'healthy';
+          service.status = 'healthy';
         } catch (error) {
-          services[i].status = 'unhealthy';
+          service.status = 'unhealthy';
         }
       }
 

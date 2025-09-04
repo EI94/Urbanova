@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
 
     const checkRequest = validationResult.data;
-    const result = await complianceService.checkCompliance(checkRequest);
+    const result = await complianceService.checkCompliance(checkRequest as any);
 
     if (result.success) {
       console.log('✅ [Compliance API] Controllo compliance completato');

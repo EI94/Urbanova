@@ -50,10 +50,10 @@ export interface DeploymentResult {
 
 export class DeploymentService {
   private config: DeploymentConfig;
-  private firestoreService: FirestoreService;
-  private docHunterService: DocHunterService;
-  private pdfGeneratorService: PDFGeneratorService;
-  private emailService: EmailService;
+  private firestoreService?: FirestoreService;
+  private docHunterService?: DocHunterService;
+  private pdfGeneratorService?: PDFGeneratorService;
+  private emailService?: EmailService;
 
   constructor(config: DeploymentConfig) {
     this.config = config;
@@ -147,7 +147,7 @@ export class DeploymentService {
       return result;
     } catch (error) {
       const duration = Date.now() - startTime;
-      errors.push(error.message);
+      errors.push(error instanceof Error ? error.message : 'Unknown error');
 
       console.error(`❌ [DeploymentService] Deployment ${deploymentId} fallito:`, error);
 
@@ -192,7 +192,7 @@ export class DeploymentService {
       // Lint check
       await execAsync('npm run lint');
     } catch (error) {
-      throw new Error(`Errore build: ${error.message}`);
+      throw new Error(`Errore build: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -215,7 +215,7 @@ export class DeploymentService {
         await execAsync('npm run test:e2e');
       }
     } catch (error) {
-      throw new Error(`Errore test: ${error.message}`);
+      throw new Error(`Errore test: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -264,7 +264,7 @@ export class DeploymentService {
       await this.deployFrontend();
       deployedServices.push('frontend');
     } catch (error) {
-      throw new Error(`Errore deploy servizi: ${error.message}`);
+      throw new Error(`Errore deploy servizi: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 
     return deployedServices;
@@ -286,7 +286,7 @@ export class DeploymentService {
       // Inizializza collezioni se necessario
       await this.initializeFirestoreCollections();
     } catch (error) {
-      throw new Error(`Errore deploy Firestore: ${error.message}`);
+      throw new Error(`Errore deploy Firestore: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -303,7 +303,7 @@ export class DeploymentService {
         console.log(`📁 [DeploymentService] Inizializzazione collezione: ${collection}`);
       }
     } catch (error) {
-      console.warn(`⚠️ [DeploymentService] Errore inizializzazione collezioni: ${error.message}`);
+      console.warn(`⚠️ [DeploymentService] Errore inizializzazione collezioni: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -320,12 +320,14 @@ export class DeploymentService {
       }
 
       // Test connessione API
-      const healthCheck = await this.docHunterService.healthCheck();
-      if (healthCheck.status !== 'healthy') {
-        throw new Error(`Doc Hunter non healthy: ${healthCheck.status}`);
+      if (this.docHunterService) {
+        const healthCheck = await this.docHunterService.healthCheck();
+        if (healthCheck.status !== 'healthy') {
+          throw new Error(`Doc Hunter non healthy: ${healthCheck.status}`);
+        }
       }
     } catch (error) {
-      throw new Error(`Errore deploy Doc Hunter: ${error.message}`);
+      throw new Error(`Errore deploy Doc Hunter: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -340,7 +342,8 @@ export class DeploymentService {
       await execAsync('npm list pdfkit');
 
       // Test generazione PDF
-      const testPDF = await this.pdfGeneratorService.generateComparisonReport(
+      if (this.pdfGeneratorService) {
+        const testPDF = await this.pdfGeneratorService.generateComparisonReport(
         {
           rdoId: 'test',
           rdoTitle: 'Test RDO',
@@ -362,11 +365,12 @@ export class DeploymentService {
         {}
       );
 
-      if (!testPDF || testPDF.length === 0) {
-        throw new Error('Test generazione PDF fallito');
+        if (!testPDF || testPDF.length === 0) {
+          throw new Error('Test generazione PDF fallito');
+        }
       }
     } catch (error) {
-      throw new Error(`Errore deploy PDF Generator: ${error.message}`);
+      throw new Error(`Errore deploy PDF Generator: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -383,12 +387,14 @@ export class DeploymentService {
       }
 
       // Test connessione email
-      const connectionOk = await this.emailService.testConnection();
-      if (!connectionOk) {
-        throw new Error('Test connessione email fallito');
+      if (this.emailService) {
+        const connectionOk = await this.emailService.testConnection();
+        if (!connectionOk) {
+          throw new Error('Test connessione email fallito');
+        }
       }
     } catch (error) {
-      throw new Error(`Errore deploy Email Service: ${error.message}`);
+      throw new Error(`Errore deploy Email Service: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -405,7 +411,7 @@ export class DeploymentService {
       // Configura log rotation
       await execAsync('npm install winston-daily-rotate-file');
     } catch (error) {
-      throw new Error(`Errore deploy Monitoring: ${error.message}`);
+      throw new Error(`Errore deploy Monitoring: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -426,7 +432,7 @@ export class DeploymentService {
         await execAsync('vercel --prod');
       }
     } catch (error) {
-      throw new Error(`Errore deploy API endpoints: ${error.message}`);
+      throw new Error(`Errore deploy API endpoints: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -448,7 +454,7 @@ export class DeploymentService {
       // Deploy su Google Cloud Storage
       await execAsync('gsutil -m rsync -r dist gs://urbanova-web');
     } catch (error) {
-      throw new Error(`Errore deploy frontend: ${error.message}`);
+      throw new Error(`Errore deploy frontend: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -488,7 +494,7 @@ export class DeploymentService {
       healthResults.push({
         service: 'health_check',
         status: 'error',
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
 
@@ -501,6 +507,14 @@ export class DeploymentService {
   private async checkFirestoreHealth(): Promise<any> {
     try {
       // Test connessione Firestore
+      if (!this.firestoreService) {
+        return {
+          service: 'firestore',
+          status: 'disabled',
+          details: { connected: false },
+        };
+      }
+      
       const testDoc = await this.firestoreService.getRDO('test');
 
       return {
@@ -512,7 +526,7 @@ export class DeploymentService {
       return {
         service: 'firestore',
         status: 'unhealthy',
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -522,6 +536,14 @@ export class DeploymentService {
    */
   private async checkDocHunterHealth(): Promise<any> {
     try {
+      if (!this.docHunterService) {
+        return {
+          service: 'doc_hunter',
+          status: 'disabled',
+          details: { connected: false },
+        };
+      }
+      
       const health = await this.docHunterService.healthCheck();
 
       return {
@@ -533,7 +555,7 @@ export class DeploymentService {
       return {
         service: 'doc_hunter',
         status: 'unhealthy',
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -543,6 +565,14 @@ export class DeploymentService {
    */
   private async checkEmailHealth(): Promise<any> {
     try {
+      if (!this.emailService) {
+        return {
+          service: 'email',
+          status: 'disabled',
+          details: { connected: false },
+        };
+      }
+      
       const health = await this.emailService.healthCheck();
 
       return {
@@ -554,7 +584,7 @@ export class DeploymentService {
       return {
         service: 'email',
         status: 'unhealthy',
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -577,7 +607,7 @@ export class DeploymentService {
       return {
         service: 'api',
         status: 'unhealthy',
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -599,7 +629,7 @@ export class DeploymentService {
       return {
         service: 'frontend',
         status: 'unhealthy',
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -619,7 +649,7 @@ export class DeploymentService {
       // Verifica integrazione end-to-end
       await this.verifyEndToEndIntegration();
     } catch (error) {
-      throw new Error(`Errore verifica finale: ${error.message}`);
+      throw new Error(`Errore verifica finale: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -665,7 +695,7 @@ export class DeploymentService {
 
       console.log('✅ [DeploymentService] Integrazione end-to-end verificata');
     } catch (error) {
-      throw new Error(`Errore verifica integrazione: ${error.message}`);
+      throw new Error(`Errore verifica integrazione: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -688,7 +718,7 @@ export class DeploymentService {
 
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -702,7 +732,7 @@ export class DeploymentService {
 
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -716,7 +746,7 @@ export class DeploymentService {
 
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -752,7 +782,7 @@ export class DeploymentService {
 
       console.log(`✅ [DeploymentService] Rollback ${deploymentId} completato`);
     } catch (error) {
-      console.error(`❌ [DeploymentService] Errore rollback: ${error.message}`);
+      console.error(`❌ [DeploymentService] Errore rollback: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
     }
   }
@@ -765,7 +795,7 @@ export class DeploymentService {
       console.log('🔄 [DeploymentService] Rollback Firestore...');
       // Implementa rollback Firestore
     } catch (error) {
-      console.error(`❌ [DeploymentService] Errore rollback Firestore: ${error.message}`);
+      console.error(`❌ [DeploymentService] Errore rollback Firestore: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -777,7 +807,7 @@ export class DeploymentService {
       console.log('🔄 [DeploymentService] Rollback Doc Hunter...');
       // Implementa rollback Doc Hunter
     } catch (error) {
-      console.error(`❌ [DeploymentService] Errore rollback Doc Hunter: ${error.message}`);
+      console.error(`❌ [DeploymentService] Errore rollback Doc Hunter: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -789,7 +819,7 @@ export class DeploymentService {
       console.log('🔄 [DeploymentService] Rollback PDF Generator...');
       // Implementa rollback PDF Generator
     } catch (error) {
-      console.error(`❌ [DeploymentService] Errore rollback PDF Generator: ${error.message}`);
+      console.error(`❌ [DeploymentService] Errore rollback PDF Generator: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -801,7 +831,7 @@ export class DeploymentService {
       console.log('🔄 [DeploymentService] Rollback Email Service...');
       // Implementa rollback Email Service
     } catch (error) {
-      console.error(`❌ [DeploymentService] Errore rollback Email Service: ${error.message}`);
+      console.error(`❌ [DeploymentService] Errore rollback Email Service: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -813,7 +843,7 @@ export class DeploymentService {
       console.log('🔄 [DeploymentService] Rollback API endpoints...');
       // Implementa rollback API endpoints
     } catch (error) {
-      console.error(`❌ [DeploymentService] Errore rollback API endpoints: ${error.message}`);
+      console.error(`❌ [DeploymentService] Errore rollback API endpoints: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -825,7 +855,7 @@ export class DeploymentService {
       console.log('🔄 [DeploymentService] Rollback frontend...');
       // Implementa rollback frontend
     } catch (error) {
-      console.error(`❌ [DeploymentService] Errore rollback frontend: ${error.message}`);
+      console.error(`❌ [DeploymentService] Errore rollback frontend: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 

@@ -3,7 +3,7 @@ import { feasibilityTool } from '../feasibility';
 describe('FeasibilityTool', () => {
   describe('run', () => {
     it('should run feasibility analysis for project', async () => {
-      const result = await feasibilityTool.run(
+      const result = await (feasibilityTool as any).run(
         { userId: 'test-user' },
         { projectId: 'test-project-123' }
       );
@@ -16,7 +16,7 @@ describe('FeasibilityTool', () => {
 
   describe('run_sensitivity', () => {
     it('should run sensitivity analysis with deltas', async () => {
-      const result = await feasibilityTool.run_sensitivity(
+      const result = await (feasibilityTool as any).run_sensitivity(
         { userId: 'test-user' },
         { projectId: 'test-project-123', deltas: [-0.05, 0, 0.05] }
       );
@@ -28,7 +28,7 @@ describe('FeasibilityTool', () => {
     });
 
     it('should handle different delta arrays', async () => {
-      const result = await feasibilityTool.run_sensitivity(
+      const result = await (feasibilityTool as any).run_sensitivity(
         { userId: 'test-user' },
         { projectId: 'test-project-456', deltas: [-0.1, -0.05, 0, 0.05, 0.1] }
       );

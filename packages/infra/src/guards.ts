@@ -281,7 +281,7 @@ class ProductionGuards {
         allowed: false,
         reason: killSwitchCheck.reason,
         requiresConfirmation: false,
-      };
+      } as any;
     }
 
     // 2. Controlla rate limiting IP
@@ -327,8 +327,8 @@ class ProductionGuards {
         ipRemaining: context.ipAddress ? this.checkIPRateLimit(context.ipAddress).remaining : 0,
         senderRemaining: context.senderId ? this.checkSenderRateLimit(context.senderId).remaining : undefined,
         resetTime: context.ipAddress ? this.checkIPRateLimit(context.ipAddress).resetTime : 0,
-      },
-    };
+      } as any,
+    } as any;
   }
 
   // ============================================================================

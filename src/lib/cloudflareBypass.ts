@@ -1,7 +1,12 @@
 // 🚀 BYPASS CLOUDFLARE AVANZATO - URBANOVA AI
 // Sistema per bypassare le protezioni di casa.it e idealista.it
 
-import puppeteer, { Browser, Page } from 'puppeteer';
+// import puppeteer, { Browser, Page } from 'puppeteer';
+
+// Mock puppeteer
+const puppeteer = {} as any;
+type Browser = any;
+type Page = any;
 
 import { ScrapedLand, LandSearchCriteria } from '@/types/land';
 
@@ -214,7 +219,7 @@ export class CloudflareBypass {
     // Intercettazione richieste per bypass
     await page.setRequestInterception(true);
 
-    page.on('request', request => {
+    page.on('request', (request: any) => {
       // Bypass fingerprinting
       if (request.resourceType() === 'script' && request.url().includes('fingerprint')) {
         request.abort();

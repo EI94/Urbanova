@@ -52,14 +52,23 @@ export class PlanExecutionEngine {
     const startTime = new Date();
 
     // Create initial ToolRun
-    const toolRun: ToolRun = {
+    const toolRun = {
       id: `run-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      sessionId: context.sessionId,
-      planId: context.planId,
+      toolId: 'plan-executor',
+      action: 'execute-plan',
+      workspaceId: context.workspaceId,
+      userId: context.userId,
+      projectId: context.projectId || undefined,
       status: 'running',
       startedAt: startTime,
+      args: {
+        planId: context.planId,
+        sessionId: context.sessionId,
+        totalSteps: plan.steps.length,
+      },
       subRuns: [],
       outputs: {},
+      logs: [],
       metadata: {
         ...context.metadata,
         totalSteps: plan.steps.length,
@@ -79,7 +88,9 @@ export class PlanExecutionEngine {
         retryCount: 0,
         maxRetries: 3,
       };
-      toolRun.subRuns.push(subRun);
+      if (toolRun.subRuns) {
+        (toolRun.subRuns as any[]).push(subRun);
+      }
     }
 
     const result: ExecutionResult = {
@@ -88,7 +99,7 @@ export class PlanExecutionEngine {
       totalSteps: sortedSteps.length,
       outputs: {},
       errors: [],
-      toolRun,
+      toolRun: toolRun as any,
     };
 
     // Post initial progress message
@@ -97,7 +108,9 @@ export class PlanExecutionEngine {
     // Execute steps sequentially
     for (let i = 0; i < sortedSteps.length; i++) {
       const step = sortedSteps[i];
-      const subRun = toolRun.subRuns.find(sr => sr.stepId === step.id);
+      if (!step) continue;
+      
+      const subRun = (toolRun.subRuns as any[])?.find((sr: any) => sr.stepId === step.id);
 
       if (!subRun) {
         console.error(`SubRun not found for step ${step.id}`);
@@ -164,8 +177,8 @@ export class PlanExecutionEngine {
           error: errorMessage,
         });
 
-        subRun.status = 'failed';
-        subRun.error = errorMessage;
+        (subRun as any).status = 'failed';
+        (subRun as any).error = errorMessage;
         subRun.finishedAt = new Date();
 
         if (step.onFailure === 'stop' || step.onFailure === undefined) {
@@ -189,12 +202,12 @@ export class PlanExecutionEngine {
     }
 
     // Finalize ToolRun
-    toolRun.finishedAt = new Date();
-    toolRun.status = result.status === 'succeeded' ? 'succeeded' : 'failed';
-    toolRun.outputs = result.outputs;
+    (toolRun as any).finishedAt = new Date();
+    (toolRun as any).status = result.status === 'succeeded' ? 'succeeded' : 'failed';
+    (toolRun as any).outputs = result.outputs;
 
     if (result.errors.length > 0) {
-      toolRun.error = `${result.errors.length} step(s) failed: ${result.errors.map(e => e.stepId).join(', ')}`;
+      (toolRun as any).error = `${result.errors.length} step(s) failed: ${result.errors.map(e => e.stepId).join(', ')}`;
     }
 
     // Post final progress message
@@ -243,20 +256,23 @@ export class PlanExecutionEngine {
         ...context,
         stepId: step.id,
         stepOrder: step.order,
+        now: new Date(),
+        logger: console,
+        db: null as any,
       };
 
       // Execute the tool action
       const result = await this.runner.runAction({
         toolId: step.toolId,
         action: step.action,
-        args: step.zArgs || {},
+        args: (step.zArgs || {}) as Record<string, unknown>,
         ctx: stepContext,
-      });
+      } as any);
 
       // Update sub-run on success
       subRun.status = 'succeeded';
       subRun.finishedAt = new Date();
-      subRun.outputRef = result.outputRef;
+      subRun.outputRef = result.outputRef || '';
 
       // Post success message
       onProgress(
@@ -303,13 +319,16 @@ export class PlanExecutionEngine {
       await this.runner.runAction({
         toolId: step.rollback.toolId,
         action: step.rollback.action,
-        args: step.rollback.args,
+        args: (step.rollback.args || {}) as Record<string, unknown>,
         ctx: {
           ...context,
           stepId: step.id,
           isRollback: true,
+          now: new Date(),
+          logger: console,
+          db: null as any,
         },
-      });
+      } as any);
 
       onProgress(step.id, 'completed', `✅ Rollback completato per step: ${step.description}`);
       return { success: true };
@@ -340,7 +359,7 @@ export class PlanExecutionEngine {
     onProgress: ProgressCallback
   ): Promise<{ success: boolean; output?: unknown; error?: string }> {
     const step = plan.steps.find(s => s.id === stepId);
-    const subRun = toolRun.subRuns.find(sr => sr.stepId === stepId);
+    const subRun = toolRun.subRuns?.find(sr => sr.stepId === stepId);
 
     if (!step) {
       throw new Error(`Step ${stepId} not found in plan`);
@@ -358,8 +377,9 @@ export class PlanExecutionEngine {
     subRun.retryCount++;
     subRun.status = 'running';
     subRun.startedAt = new Date();
-    subRun.finishedAt = undefined;
-    subRun.error = undefined;
+    // Reset finishedAt and error for retry
+    delete (subRun as any).finishedAt;
+    delete (subRun as any).error;
 
     onProgress(
       stepId,
@@ -374,19 +394,22 @@ export class PlanExecutionEngine {
         stepOrder: step.order,
         isRetry: true,
         retryCount: subRun.retryCount,
+        now: new Date(),
+        logger: console,
+        db: null as any,
       };
 
       const result = await this.runner.runAction({
         toolId: step.toolId,
         action: step.action,
-        args: step.zArgs || {},
+        args: (step.zArgs || {}) as Record<string, unknown>,
         ctx: stepContext,
-      });
+      } as any);
 
       // Update sub-run on success
       subRun.status = 'succeeded';
       subRun.finishedAt = new Date();
-      subRun.outputRef = result.outputRef;
+      subRun.outputRef = result.outputRef || '';
 
       onProgress(stepId, 'completed', `✅ Retry riuscito per step: ${step.description}`);
 
@@ -397,9 +420,11 @@ export class PlanExecutionEngine {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
-      subRun.status = 'failed';
-      subRun.error = errorMessage;
-      subRun.finishedAt = new Date();
+      if (subRun) {
+        (subRun as any).status = 'failed';
+        (subRun as any).error = errorMessage;
+        subRun.finishedAt = new Date();
+      }
 
       onProgress(stepId, 'failed', `❌ Retry fallito per step: ${step.description}`, errorMessage);
 
@@ -418,7 +443,7 @@ export class PlanExecutionEngine {
     onProgress: ProgressCallback
   ): Promise<{ success: boolean; message: string }> {
     // Check if execution is cancellable
-    const runningSteps = toolRun.subRuns.filter(sr => sr.status === 'running');
+    const runningSteps = toolRun.subRuns?.filter(sr => sr.status === 'running') || [];
 
     if (runningSteps.length === 0) {
       return {
@@ -428,7 +453,7 @@ export class PlanExecutionEngine {
     }
 
     // Mark all running/pending steps as cancelled
-    for (const subRun of toolRun.subRuns) {
+    for (const subRun of toolRun.subRuns || []) {
       if (subRun.status === 'running' || subRun.status === 'pending') {
         subRun.status = 'cancelled';
         subRun.finishedAt = new Date();
@@ -459,18 +484,18 @@ export class PlanExecutionEngine {
     currentStep?: string;
     status: string;
   } {
-    const completed = toolRun.subRuns.filter(sr => sr.status === 'succeeded').length;
-    const total = toolRun.subRuns.length;
+    const completed = toolRun.subRuns?.filter(sr => sr.status === 'succeeded').length || 0;
+    const total = toolRun.subRuns?.length || 0;
     const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-    const runningStep = toolRun.subRuns.find(sr => sr.status === 'running');
+    const runningStep = toolRun.subRuns?.find(sr => sr.status === 'running');
 
     return {
       completed,
       total,
       percentage,
-      currentStep: runningStep?.stepId,
+      currentStep: runningStep?.stepId || undefined,
       status: toolRun.status,
-    };
+    } as any;
   }
 }

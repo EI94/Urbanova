@@ -76,7 +76,7 @@ export async function createCustomer(email: string, name?: string): Promise<Stri
           status: taxId.verification?.status as any || 'unverified',
         },
       })),
-    } as any;
+    } as any as StripeCustomer;
   } catch (error) {
     console.error('Error creating Stripe customer:', error);
     throw new Error(
@@ -116,7 +116,7 @@ export async function getCustomer(customerId: string): Promise<StripeCustomer> {
           status: taxId.verification?.status as any || 'unverified',
         },
       })),
-    } as any;
+    } as any as StripeCustomer;
   } catch (error) {
     console.error('Error retrieving Stripe customer:', error);
     throw new Error(
@@ -144,24 +144,24 @@ export async function updateCustomer(
       name: customer.name || undefined,
       phone: customer.phone || undefined,
       address: customer.address
-        ? {
+        ? ({
             line1: customer.address.line1,
             line2: customer.address.line2,
             city: customer.address.city,
             state: customer.address.state,
             postal_code: customer.address.postal_code,
             country: customer.address.country,
-          }
+          } as any)
         : undefined,
-      tax_exempt: customer.tax_exempt,
-      tax_ids: customer.tax_ids?.data.map(taxId => ({
+      tax_exempt: customer.tax_exempt as any,
+      tax_ids: customer.tax_ids?.data.map((taxId: any) => ({
         type: taxId.type,
         value: taxId.value,
         verification: {
-          status: taxId.verification.status,
+          status: taxId.verification?.status || 'unverified',
         },
-      })),
-    };
+      })) as any,
+    } as any;
   } catch (error) {
     console.error('Error updating Stripe customer:', error);
     throw new Error(

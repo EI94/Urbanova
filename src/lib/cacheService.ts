@@ -1,5 +1,5 @@
 // Servizio di Caching per AI Land Scraping - Urbanova
-import { LandSearchCriteria } from '@/types/land';
+import { LandSearchCriteria } from '../../src/types/land';
 
 interface CacheEntry {
   data: any;

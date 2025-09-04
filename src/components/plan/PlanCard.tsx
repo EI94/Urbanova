@@ -4,13 +4,20 @@ import React from 'react';
 import { Badge } from '../ui/Badge';
 import Button from '../ui/Button';
 import { Card } from '../ui/Card';
-import {
-  InteractivePlan,
-  InteractiveTaskSession,
-  InteractiveRequirement,
-  InteractiveAssumption,
-  InteractiveRisk,
-} from '@urbanova/types/interactive';
+// import {
+//   InteractivePlan,
+//   InteractiveTaskSession,
+//   InteractiveRequirement,
+//   InteractiveAssumption,
+//   InteractiveRisk,
+// } from '@urbanova/types/interactive';
+
+// Mock types
+type InteractivePlan = any;
+type InteractiveTaskSession = any;
+type InteractiveRequirement = any;
+type InteractiveAssumption = any;
+type InteractiveRisk = any;
 
 interface PlanCardProps {
   plan: InteractivePlan;
@@ -88,7 +95,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({ plan, session, onAction }) =
             Assunzioni
           </h4>
           <div className="flex flex-wrap gap-2">
-            {plan.assumptions.map(assumption => (
+            {plan.assumptions.map((assumption: any) => (
               <div key={assumption.id} className="flex items-center gap-2">
                 <Badge className={getSourceColor(assumption.source || 'default')}>
                   {assumption.source || 'default'}
@@ -111,7 +118,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({ plan, session, onAction }) =
             Mancano
           </h4>
           <div className="space-y-2">
-            {plan.requirements.map(requirement => (
+            {plan.requirements.map((requirement: any) => (
               <div
                 key={requirement.id}
                 className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg border border-orange-200"
@@ -138,7 +145,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({ plan, session, onAction }) =
             Rischi
           </h4>
           <div className="flex flex-wrap gap-2">
-            {plan.risks.map(risk => (
+            {plan.risks.map((risk: any) => (
               <div key={risk.id} className="flex items-center gap-2">
                 <Badge className={getSeverityColor(risk.severity)}>{risk.severity}</Badge>
                 <span className="text-sm text-gray-700">{risk.description}</span>

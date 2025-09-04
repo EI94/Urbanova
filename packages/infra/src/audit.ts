@@ -122,12 +122,12 @@ class AuditSystem {
 
       // Log dell'evento
       logger.info('Audit event', {
-        eventType: validatedEvent.eventType,
-        level: validatedEvent.level,
-        userId: validatedEvent.userId,
-        projectId: validatedEvent.projectId,
-        route: validatedEvent.route,
-        statusCode: validatedEvent.statusCode,
+        // eventType: validatedEvent.eventType,
+        level: validatedEvent.level as any,
+        // userId: validatedEvent.userId,
+        // projectId: validatedEvent.projectId,
+        // route: validatedEvent.route,
+        // statusCode: validatedEvent.statusCode,
       });
 
       // Aggiungi al buffer
@@ -318,7 +318,7 @@ class AuditSystem {
       }
 
       logger.info('Audit buffer flushed', {
-        eventCount: eventsToFlush.length,
+        // eventCount: eventsToFlush.length,
       });
 
     } catch (error) {
@@ -346,7 +346,7 @@ class AuditSystem {
       // await batch.commit();
       
       logger.info('Audit events saved to database', {
-        eventCount: events.length,
+        // eventCount: events.length,
       });
 
     } catch (error) {
@@ -375,7 +375,7 @@ class AuditSystem {
       // await fs.appendFile(filepath, content);
       
       logger.info('Audit events saved to file', {
-        eventCount: events.length,
+        // eventCount: events.length,
       });
 
     } catch (error) {
@@ -419,7 +419,7 @@ export function withAudit<T>(
   route: string,
   method: string,
   handler: () => Promise<T>
-): Promise<T> {
+  ): any {
   return async () => {
     const startTime = Date.now();
     const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;

@@ -225,7 +225,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Aggiorna il run
-    if (status) {
+    if (status && mockToolRuns[runIndex]) {
       mockToolRuns[runIndex].status = status;
 
       if (status === 'cancelled' || status === 'completed' || status === 'failed') {
@@ -237,7 +237,7 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
-    if (progress !== undefined) {
+    if (progress !== undefined && mockToolRuns[runIndex]) {
       mockToolRuns[runIndex].progress = progress;
     }
 
@@ -245,8 +245,8 @@ export async function PATCH(request: NextRequest) {
       success: true,
       data: {
         runId,
-        status: mockToolRuns[runIndex].status,
-        progress: mockToolRuns[runIndex].progress,
+        status: mockToolRuns[runIndex]?.status,
+        progress: mockToolRuns[runIndex]?.progress,
         updatedAt: new Date().toISOString(),
       },
     });

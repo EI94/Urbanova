@@ -177,12 +177,14 @@ export default function HammerTest({
           supportedLanguages[Math.floor(Math.random() * supportedLanguages.length)];
 
         try {
+          if (!randomLanguage) continue;
+          
           const languageResults = await testSingleLanguage(randomLanguage.code);
 
           const iterationResult = {
             iteration: i + 1,
             timestamp: new Date(),
-            language: randomLanguage.code,
+            language: randomLanguage?.code || 'unknown',
             results: languageResults,
             success: languageResults.every(r => r.status === 'pass'),
             duration: Date.now() - iterationStart,
@@ -194,7 +196,7 @@ export default function HammerTest({
           stressResults.push({
             iteration: i + 1,
             timestamp: new Date(),
-            language: randomLanguage.code,
+            language: randomLanguage?.code || 'unknown',
             results: [],
             success: false,
             duration: Date.now() - iterationStart,
@@ -382,8 +384,8 @@ export default function HammerTest({
                     <XIcon className="h-4 w-4 text-red-600" />
                   )}
                   <span className="font-medium text-sm">Iterazione {result.iteration}</span>
-                  {result.language && (
-                    <span className="text-xs bg-gray-200 px-2 py-1 rounded">{result.language}</span>
+                  {(result as any).language && (
+                    <span className="text-xs bg-gray-200 px-2 py-1 rounded">{(result as any).language}</span>
                   )}
                 </div>
                 <p className="text-sm text-gray-600">

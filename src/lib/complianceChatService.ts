@@ -127,7 +127,7 @@ export class ComplianceChatService {
       return {
         type: 'check',
         projectId: match[1]?.trim() || '',
-        municipalityId: match[2]?.trim() || undefined,
+        municipalityId: match[2]?.trim() || '',
       };
     }
 
@@ -172,11 +172,11 @@ export class ComplianceChatService {
       return {
         type: 'search',
         query: category,
-        ruleCategories: categoryMap[category.toLowerCase()]
+        ruleCategories: (categoryMap[category.toLowerCase()]
           ? [categoryMap[category.toLowerCase()]]
-          : undefined,
+          : undefined) as any,
         municipalityId: municipality,
-      };
+      } as any;
     }
 
     return null;
@@ -218,7 +218,7 @@ export class ComplianceChatService {
     try {
       const checkRequest: ComplianceCheckRequest = {
         projectId: command.projectId,
-        municipalityId: command.municipalityId,
+        municipalityId: command.municipalityId || '',
         includeCitations: true,
         includeRecommendations: true,
       };
@@ -279,7 +279,7 @@ export class ComplianceChatService {
       const searchRequest: ComplianceSearchRequest = {
         municipalityId,
         query: command.query,
-        categories: command.ruleCategories,
+        categories: command.ruleCategories as any,
         limit: 5,
         threshold: 0.7,
       };

@@ -169,18 +169,18 @@ export default function SmoothnessTest({ onComplete }: SmoothnessTestProps) {
         setProgress((i / supportedLanguages.length) * 100);
 
         try {
-          const result = await testLanguageSmoothness(language.code);
+          const result = await testLanguageSmoothness((language?.code || 'unknown') as any);
           smoothnessResults.push(result);
           setResults([...smoothnessResults]);
 
           // Pausa tra i test
           await new Promise(resolve => setTimeout(resolve, 300));
         } catch (error) {
-          console.error(`❌ [SmoothnessTest] Errore test ${language.code}:`, error);
+          console.error(`❌ [SmoothnessTest] Errore test ${language?.code || 'unknown'}:`, error);
 
           // Aggiungi risultato di errore
           const errorResult: SmoothnessResult = {
-            language: language.code,
+            language: (language?.code || 'unknown') as any,
             duration: 0,
             smoothness: 'poor',
             visualGlitches: 0,

@@ -39,7 +39,7 @@ export default function ComplianceTab() {
       setMunicipalities(municipalitiesData);
 
       if (municipalitiesData.length > 0) {
-        setSelectedMunicipality(municipalitiesData[0].id);
+        setSelectedMunicipality(municipalitiesData[0]?.id || '');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Errore caricamento dati');

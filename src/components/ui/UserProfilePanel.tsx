@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 
-import { UserIcon, XIcon, ImageIcon, TrashIcon, CheckIcon, EyeIcon } from '@/components/icons';
+import { UserIcon, XIcon, TrashIcon, CheckIcon, EyeIcon } from '@/components/icons';
+import { ImageIcon } from '@/components/icons/index';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
@@ -20,7 +21,8 @@ interface UserProfilePanelProps {
 
 export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelProps) {
   const { t } = useLanguage();
-  const { currentUser } = useAuth();
+  const auth = useAuth();
+  const currentUser = auth.user;
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'preferences'>('profile');
@@ -76,21 +78,23 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
       }
 
       setProfile(userProfile);
-      setProfileUpdate({
-        firstName: userProfile.firstName,
-        lastName: userProfile.lastName,
-        displayName: userProfile.displayName,
-        phone: userProfile.phone,
-        company: userProfile.company,
-        role: userProfile.role,
-        timezone: userProfile.timezone,
-        language: userProfile.language,
-        dateFormat: userProfile.dateFormat,
-        currency: userProfile.currency,
-      });
+      if (userProfile) {
+        setProfileUpdate({
+          firstName: userProfile.firstName,
+          lastName: userProfile.lastName,
+          displayName: userProfile.displayName,
+          ...(userProfile.phone && { phone: userProfile.phone }),
+          ...(userProfile.company && { company: userProfile.company }),
+          ...(userProfile.role && { role: userProfile.role }),
+          timezone: userProfile.timezone,
+          language: userProfile.language,
+          dateFormat: userProfile.dateFormat,
+          currency: userProfile.currency,
+        });
+      }
     } catch (error) {
       console.error('Error loading profile:', error);
-      toast.error(t('errorLoadingProfile', 'userProfile'));
+      toast(t('errorLoadingProfile', 'userProfile'), { icon: '❌' });
     } finally {
       setLoading(false);
     }
@@ -101,7 +105,7 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
         // 5MB limit
-        toast.error("L'immagine deve essere inferiore a 5MB");
+        toast("L'immagine deve essere inferiore a 5MB", { icon: '❌' });
         return;
       }
 
@@ -123,13 +127,13 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
         setAvatarFile(null);
         setAvatarPreview('');
         loadProfile(); // Ricarica il profilo per mostrare il nuovo avatar
-        toast.success(t('avatarUpdated', 'userProfile'));
+        toast(t('avatarUpdated', 'userProfile'), { icon: '✅' });
       } else {
         throw new Error('Upload failed');
       }
     } catch (error) {
       console.error('Error uploading avatar:', error);
-      toast.error(t('avatarUploadError', 'userProfile'));
+      toast(t('avatarUploadError', 'userProfile'), { icon: '❌' });
     }
   };
 
@@ -140,13 +144,13 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
         setAvatarFile(null);
         setAvatarPreview('');
         loadProfile(); // Ricarica il profilo
-        toast.success(t('avatarRemoved', 'userProfile'));
+        toast(t('avatarRemoved', 'userProfile'), { icon: '✅' });
       } else {
         throw new Error('Remove failed');
       }
     } catch (error) {
       console.error('Error removing avatar:', error);
-      toast.error(t('avatarRemoveError', 'userProfile'));
+      toast(t('avatarRemoveError', 'userProfile'), { icon: '❌' });
     }
   };
 
@@ -158,21 +162,21 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
       );
       setProfile(updatedProfile);
       setEditing(false);
-      toast.success(t('changesSaved', 'userProfile'));
+      toast(t('changesSaved', 'userProfile'), { icon: '✅' });
     } catch (error) {
       console.error('Error saving profile:', error);
-      toast.error(t('errorSaving', 'userProfile'));
+      toast(t('errorSaving', 'userProfile'), { icon: '❌' });
     }
   };
 
   const handlePasswordChange = async () => {
     if (passwordChange.newPassword !== passwordChange.confirmPassword) {
-      toast.error('Le password non coincidono');
+      toast('Le password non coincidono', { icon: '❌' });
       return;
     }
 
     if (passwordChange.newPassword.length < 8) {
-      toast.error('La nuova password deve essere di almeno 8 caratteri');
+      toast('La nuova password deve essere di almeno 8 caratteri', { icon: '❌' });
       return;
     }
 
@@ -184,10 +188,10 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
         newPassword: '',
         confirmPassword: '',
       });
-      toast.success(t('passwordChanged', 'userProfile'));
+      toast(t('passwordChanged', 'userProfile'), { icon: '✅' });
     } catch (error) {
       console.error('Error changing password:', error);
-      toast.error(t('passwordError', 'userProfile'));
+      toast(t('passwordError', 'userProfile'), { icon: '❌' });
     }
   };
 
@@ -198,14 +202,17 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
       const newValue = await firebaseUserProfileService.toggleTwoFactor(userId);
       const updatedProfile = await firebaseUserProfileService.getUserProfile(userId);
       setProfile(updatedProfile);
-      toast.success(
-        updatedProfile.security.twoFactorEnabled
-          ? '2FA abilitato con successo'
-          : '2FA disabilitato con successo'
-      );
+      if (updatedProfile) {
+        toast(
+          updatedProfile.security.twoFactorEnabled
+            ? '2FA abilitato con successo'
+            : '2FA disabilitato con successo',
+          { icon: '✅' }
+        );
+      }
     } catch (error) {
       console.error('Error toggling 2FA:', error);
-      toast.error('Errore nella gestione 2FA');
+      toast('Errore nella gestione 2FA', { icon: '❌' });
     }
   };
 

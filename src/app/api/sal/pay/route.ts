@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     const payRequest = validationResult.data;
 
     // Pagamento SAL
-    const result = await salService.pay(payRequest);
+    const result = await salService.pay(payRequest as any);
 
     if (result.success) {
       console.log('✅ [SAL API] SAL pagato con successo:', payRequest.salId);

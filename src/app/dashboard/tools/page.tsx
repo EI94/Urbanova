@@ -215,7 +215,7 @@ interface ToolRun {
 export default function ToolsPage() {
   const [activeTab, setActiveTab] = useState<'installed' | 'catalog'>('installed');
   const [tools, setTools] = useState<Tool[]>(mockTools);
-  const [toolRuns, setToolRuns] = useState<ToolRun[]>(mockToolRuns);
+  const [toolRuns, setToolRuns] = useState<ToolRun[]>(mockToolRuns as any);
   const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
   const [showDetailDrawer, setShowDetailDrawer] = useState(false);
   const [showRunActionModal, setShowRunActionModal] = useState(false);
@@ -319,7 +319,7 @@ export default function ToolsPage() {
       success: undefined,
       output: undefined,
       error: undefined,
-    };
+    } as any;
 
     setToolRuns(prev => [newRun, ...prev]);
   };
@@ -445,7 +445,7 @@ export default function ToolsPage() {
                 </div>
 
                 <button
-                  onClick={() => setToolRuns([...mockToolRuns])}
+                  onClick={() => setToolRuns([...mockToolRuns] as any)}
                   className="flex items-center space-x-2 px-3 py-2 text-gray-600 hover:text-gray-800 transition-colors"
                 >
                   <RefreshCw className="w-4 h-4" />

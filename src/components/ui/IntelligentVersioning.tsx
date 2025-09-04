@@ -18,7 +18,7 @@ import {
   FileText,
   Image,
   Layers,
-  Cube,
+  Box as Cube,
   ArrowUpDown,
   History,
   Tag,
@@ -117,7 +117,7 @@ export default function IntelligentVersioning({
         },
       };
 
-      const versionId = await collaborationService.createVersion(versionData);
+      const versionId = await collaborationService.createVersion(versionData as any);
 
       // Reset form
       setVersionForm({
@@ -132,7 +132,7 @@ export default function IntelligentVersioning({
               toast(`Versione ${nextVersionNumber} creata con successo`, { icon: '✅' });
 
       if (onVersionCreate) {
-        const newVersion = { ...versionData, id: versionId } as DesignVersion;
+        const newVersion = { ...versionData, id: versionId } as any;
         onVersionCreate(newVersion);
       }
     } catch (error) {

@@ -1,5 +1,9 @@
 import { CapabilityRegistry } from '../registry';
-import { Capability, CapabilitySpec } from '@urbanova/types';
+// import { Capability, CapabilitySpec } from '@urbanova/types';
+
+// Mock types
+type Capability = any;
+type CapabilitySpec = any;
 
 // Mock capability per i test
 const createMockCapability = (name: string): Capability => ({

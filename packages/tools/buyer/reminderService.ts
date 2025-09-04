@@ -37,8 +37,13 @@ export class ReminderService {
       id: 'kyc_upload',
       name: 'KYC Upload Reminder',
       description: 'Reminder per upload documenti KYC',
+      type: 'email',
       channels: ['email', 'whatsapp'],
       subject: 'Documenti KYC richiesti - Urbanova',
+      body: 'Reminder per upload documenti KYC',
+      variables: ['buyerName', 'projectName', 'documentTypes', 'uploadLink', 'expiresIn'],
+      language: 'it',
+      isActive: true,
       content: {
         email: {
           subject: 'Documenti KYC richiesti per {{projectName}}',
@@ -74,8 +79,13 @@ Grazie! 🏠`,
       id: 'appointment_reminder',
       name: 'Appointment Reminder',
       description: 'Reminder appuntamento',
+      type: 'email',
       channels: ['email', 'whatsapp'],
       subject: 'Promemoria appuntamento - Urbanova',
+      body: 'Reminder appuntamento',
+      variables: ['buyerName', 'appointmentType', 'when', 'location', 'notes'],
+      language: 'it',
+      isActive: true,
       content: {
         email: {
           subject: 'Promemoria: {{appointmentType}} - {{when}}',
@@ -111,8 +121,13 @@ A presto! 🏠`,
       id: 'appointment_confirmation',
       name: 'Appointment Confirmation',
       description: 'Conferma appuntamento',
+      type: 'email',
       channels: ['email', 'whatsapp'],
       subject: 'Conferma appuntamento - Urbanova',
+      body: 'Conferma appuntamento',
+      variables: ['buyerName', 'appointmentType', 'when', 'location', 'icsUrl', 'googleEventUrl'],
+      language: 'it',
+      isActive: true,
       content: {
         email: {
           subject: 'Confermato: {{appointmentType}} - {{when}}',
@@ -149,8 +164,13 @@ Perfetto! 🏠`,
       id: 'payment_reminder',
       name: 'Payment Reminder',
       description: 'Reminder pagamento',
+      type: 'email',
       channels: ['email', 'whatsapp'],
       subject: 'Promemoria pagamento - Urbanova',
+      body: 'Reminder pagamento',
+      variables: ['buyerName', 'milestone', 'amount', 'dueDate', 'paymentUrl'],
+      language: 'it',
+      isActive: true,
       content: {
         email: {
           subject: 'Promemoria pagamento: {{milestone}} - {{amount}}',
@@ -186,7 +206,13 @@ Grazie! 🏠`,
       id: 'payment_reminder_sms',
       name: 'Payment Reminder SMS',
       description: 'Reminder pagamento SMS',
+      type: 'sms',
       channels: ['sms'],
+      subject: 'Promemoria pagamento SMS',
+      body: 'Reminder pagamento SMS',
+      variables: ['milestone', 'amount', 'dueDate'],
+      language: 'it',
+      isActive: true,
       content: {
         sms: {
           body: `Urbanova: Promemoria pagamento {{milestone}} - {{amount}}. Scadenza: {{dueDate}}.`,
@@ -248,15 +274,14 @@ Grazie! 🏠`,
       id: `rem_${Date.now()}`,
       appointmentId: request.appointmentId,
       buyerId: request.buyerId,
+      type: request.channel,
       channel: request.channel,
       template: request.template,
       scheduledAt: request.scheduledAt,
       data: request.data,
-      status: 'scheduled' as ReminderStatus,
+      status: 'pending',
+      recipient: request.data?.to || request.data?.email || request.data?.phone || '',
       createdAt: new Date(),
-      sentAt: null,
-      deliveryStatus: null,
-      errorMessage: null,
     };
 
     this.reminders.set(reminder.id, reminder);
@@ -292,23 +317,23 @@ Grazie! 🏠`,
         switch (channel) {
           case 'whatsapp':
             sent = await this.sendWhatsApp(
-              reminder.data.to || reminder.data.phone,
+              reminder.data?.to || reminder.data?.phone || reminder.recipient,
               reminder.template,
-              reminder.data
+              reminder.data || {}
             );
             break;
           case 'email':
             sent = await this.sendEmail(
-              reminder.data.to || reminder.data.email,
+              reminder.data?.to || reminder.data?.email || reminder.recipient,
               reminder.template,
-              reminder.data
+              reminder.data || {}
             );
             break;
           case 'sms':
             sent = await this.sendSMS(
-              reminder.data.to || reminder.data.phone,
+              reminder.data?.to || reminder.data?.phone || reminder.recipient,
               reminder.template,
-              reminder.data
+              reminder.data || {}
             );
             break;
         }
@@ -344,7 +369,7 @@ Grazie! 🏠`,
    */
   async sendWhatsApp(to: string, template: string, data: any): Promise<boolean> {
     const templateObj = this.templates.get(template);
-    if (!templateObj || !templateObj.content.whatsapp) {
+    if (!templateObj || !templateObj.content?.whatsapp) {
       throw new Error(`WhatsApp template ${template} not found`);
     }
 
@@ -360,7 +385,7 @@ Grazie! 🏠`,
    */
   async sendEmail(to: string, template: string, data: any): Promise<boolean> {
     const templateObj = this.templates.get(template);
-    if (!templateObj || !templateObj.content.email) {
+    if (!templateObj || !templateObj.content?.email) {
       throw new Error(`Email template ${template} not found`);
     }
 
@@ -377,7 +402,7 @@ Grazie! 🏠`,
    */
   async sendSMS(to: string, template: string, data: any): Promise<boolean> {
     const templateObj = this.templates.get(template);
-    if (!templateObj || !templateObj.content.sms) {
+    if (!templateObj || !templateObj.content?.sms) {
       throw new Error(`SMS template ${template} not found`);
     }
 
@@ -406,11 +431,13 @@ Grazie! 🏠`,
 
     const reminder: AppointmentReminder = {
       id: reminderId,
-      appointmentId: null,
+      appointmentId: '',
       buyerId: request.buyerId,
+      type: 'email',
       channel: 'email',
       template: 'payment_reminder',
       scheduledAt: new Date(),
+      recipient: request.buyerId,
       data: {
         milestone: request.milestone,
         amount: `€${request.amount.toFixed(2)}`,
@@ -418,11 +445,8 @@ Grazie! 🏠`,
         paymentUrl,
         requireConfirmation: request.requireConfirmation !== false,
       },
-      status: 'scheduled',
+      status: 'pending',
       createdAt: new Date(),
-      sentAt: null,
-      deliveryStatus: null,
-      errorMessage: null,
     };
 
     this.reminders.set(reminder.id, reminder);
@@ -471,7 +495,11 @@ Grazie! 🏠`,
       reminders = reminders.filter(rem => rem.channel === filters.channel);
     }
 
-    return reminders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return reminders.sort((a, b) => {
+      const aTime = a.createdAt?.getTime() || 0;
+      const bTime = b.createdAt?.getTime() || 0;
+      return bTime - aTime;
+    });
   }
 
   /**

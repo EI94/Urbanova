@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
         notes: notes || '',
         createdAt: new Date(),
         updatedAt: new Date(),
-      };
+      } as any;
     }
 
     // Calcola tutti i valori del progetto
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     const calculatedResults = feasibilityService.calculateResults(
       project,
       calculatedCosts,
-      calculatedRevenues
+      calculatedRevenues as any
     );
 
     console.log('✅ Dati progetto calcolati:', {

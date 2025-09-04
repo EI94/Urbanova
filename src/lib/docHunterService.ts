@@ -193,7 +193,7 @@ export class DocHunterService {
       .filter(cert => cert.status === 'VALID')
       .map(cert => cert.type);
 
-    return requiredTypes.filter(type => !validTypes.includes(type));
+    return requiredTypes.filter(type => !validTypes.includes(type as any));
   }
 
   /**

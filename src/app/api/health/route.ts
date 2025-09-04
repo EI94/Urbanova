@@ -125,7 +125,7 @@ async function checkExternalAPIs(): Promise<{ status: string; details?: any }> {
       ...(result.status === 'fulfilled'
         ? result.value
         : {
-            name: apis[index].name,
+            name: apis[index]?.name || 'unknown',
             status: 'unhealthy',
             error: result.reason?.message || 'Unknown error',
           }),

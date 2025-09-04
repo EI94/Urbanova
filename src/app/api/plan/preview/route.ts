@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { InteractiveTaskSession, InteractivePlan } from '@urbanova/types/interactive';
+// Mock types
+type InteractiveTaskSession = any;
+type InteractivePlan = any;
 
 // Mock data for demonstration - in production this would come from the database
 const mockSession: InteractiveTaskSession = {

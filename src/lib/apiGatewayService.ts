@@ -1229,7 +1229,7 @@ export class APIGatewayService {
           successful: !isError || Math.random() > 0.5,
           userId: `user-${Math.floor(Math.random() * 1000)}`,
           scopes: endpoint.authentication.scopes || undefined,
-        },
+        } as any,
         rateLimitInfo: {
           limit: endpoint.rateLimiting.limit,
           remaining: Math.floor(Math.random() * endpoint.rateLimiting.limit),
@@ -1247,7 +1247,7 @@ export class APIGatewayService {
           lastFailureAt: isError
             ? new Date(Date.now() - Math.random() * 60 * 60 * 1000)
             : undefined,
-        },
+        } as any,
       };
 
       if (isError) {
@@ -1606,11 +1606,11 @@ export class APIGatewayService {
       filteredRequests.reduce((sum, r) => sum + r.responseTime, 0) / totalRequests || 0;
 
     return {
-      timeRange: timeRange || {
+      timeRange: timeRange || ({
         start: new Date(Date.now() - 24 * 60 * 60 * 1000),
         end: new Date(),
         granularity: 'hour' as const,
-      },
+      } as any),
       overview: {
         totalRequests,
         successfulRequests,

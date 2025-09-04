@@ -95,7 +95,7 @@ export class InteractivePlannerController {
         userId: context.userId,
         workspaceId: context.workspaceId,
         userRole: context.userRole,
-        projectId: context.projectId,
+        projectId: context.projectId as any,
       });
 
       // Store session
@@ -254,7 +254,7 @@ export class InteractivePlannerController {
     const executionContext: ExecutionContext = {
       userId: context.userId,
       workspaceId: context.workspaceId,
-      projectId: context.projectId,
+      projectId: context.projectId as any,
       sessionId: session.id,
       planId: session.plan.id,
       userRole: context.userRole,
@@ -372,7 +372,7 @@ export class InteractivePlannerController {
     const executionContext: ExecutionContext = {
       userId: context.userId,
       workspaceId: context.workspaceId,
-      projectId: context.projectId,
+      projectId: context.projectId as any,
       sessionId: session.id,
       planId: session.plan.id,
       userRole: context.userRole,
@@ -512,8 +512,8 @@ export class InteractivePlannerController {
 
     for (let i = 0; i < editParts.length; i += 2) {
       if (editParts[i]?.startsWith('key:') && editParts[i + 1]?.startsWith('value:')) {
-        const key = editParts[i].substring(4);
-        const valueStr = editParts[i + 1].substring(6);
+        const key = editParts[i]?.substring(4) || '';
+        const valueStr = editParts[i + 1]?.substring(6) || '';
 
         try {
           const value = JSON.parse(valueStr);

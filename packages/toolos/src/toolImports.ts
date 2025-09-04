@@ -41,7 +41,7 @@ export async function importTool(toolName: string): Promise<{
       const leads = await import('../../tools/leads');
       return {
         manifest: leads.leadsManifest,
-        actions: leads.leadsActions,
+        actions: leads.leadsActions as any,
       };
 
     default:

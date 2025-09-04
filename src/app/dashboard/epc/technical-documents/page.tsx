@@ -1,6 +1,11 @@
 'use client';
 
-import { DocumentIcon, EngineeringIcon, CertificateIcon } from '@/components/icons';
+import { DocumentIcon } from '@/components/icons';
+// import { EngineeringIcon, CertificateIcon } from '@/components/icons';
+
+// Mock missing icons
+const EngineeringIcon = DocumentIcon;
+const CertificateIcon = DocumentIcon;
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
 export default function EPCTechnicalDocumentsPage() {

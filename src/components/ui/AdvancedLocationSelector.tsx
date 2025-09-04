@@ -174,7 +174,7 @@ export default function AdvancedLocationSelector({
     if (locations.length === 0) {
       onChange('');
     } else if (locations.length === 1) {
-      onChange(locations[0].name);
+      onChange(locations[0]?.name || '');
     } else {
       // Per selezione multipla, rimuovi duplicati e mantieni solo località uniche
       const uniqueLocations = locations.filter(

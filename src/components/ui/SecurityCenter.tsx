@@ -129,6 +129,7 @@ export default function SecurityCenter({
       const interval = setInterval(loadData, 30000);
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [isOpen]);
 
   const loadData = () => {
@@ -211,7 +212,7 @@ export default function SecurityCenter({
         riskScore: createVulnerabilityForm.cvssScore,
         remediation: {
           effort: 'medium',
-          priority: createVulnerabilityForm.severity,
+          priority: createVulnerabilityForm.severity as any,
           steps: ['Implementare fix di sicurezza', 'Testare la correzione'],
           estimatedTime: 16,
           resources: ['Security Engineer', 'Developer'],
@@ -227,7 +228,7 @@ export default function SecurityCenter({
         scanner: {
           name: 'Manual Report',
           version: '1.0.0',
-          scanType: 'manual',
+          scanType: 'manual' as any,
           scanDate: new Date(),
           confidence: 95,
         },
@@ -258,8 +259,8 @@ export default function SecurityCenter({
         title: createIncidentForm.title,
         description: createIncidentForm.description,
         category: createIncidentForm.category,
-        severity: createIncidentForm.severity,
-        priority: createIncidentForm.priority,
+        severity: createIncidentForm.severity as any,
+        priority: createIncidentForm.priority as any,
         status: 'new',
         impact: {
           confidentiality: 'low',
@@ -369,7 +370,7 @@ export default function SecurityCenter({
       botnet: '🤖',
       cryptojacking: '⛏️',
     };
-    return icons[category] || '⚠️';
+    return (icons as any)[category] || '⚠️';
   };
 
   const formatDate = (date: Date) => {

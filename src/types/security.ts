@@ -2,6 +2,51 @@
 
 export type SecurityThreatLevel = 'info' | 'low' | 'medium' | 'high' | 'critical' | 'emergency';
 
+// Alias per compatibilità
+export type SecurityThreat = ThreatIntelligence;
+export type SecurityLevel = SecurityThreatLevel;
+export type ThreatType = ThreatCategory;
+export type ComplianceStandard = ComplianceFramework;
+export type IncidentSeverity = SecurityThreatLevel;
+
+// Tipi aggiuntivi per SecurityCompliance
+export interface VulnerabilityAssessment {
+  id: string;
+  name: string;
+  description: string;
+  vulnerabilities: SecurityVulnerability[];
+  assessmentDate: Date;
+  assessor: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'reviewed';
+  score: number;
+  recommendations: string[];
+}
+
+export interface SecurityTraining {
+  id: string;
+  title: string;
+  description: string;
+  type: 'awareness' | 'technical' | 'compliance' | 'incident_response';
+  duration: number; // minutes
+  required: boolean;
+  targetAudience: string[];
+  completionRate: number;
+  lastUpdated: Date;
+  isMandatory: boolean;
+  validityPeriod: number; // days
+  passingScore: number; // percentage
+  hasAssessment: boolean;
+  maxAttempts: number;
+  modules: Array<{
+    id: string;
+    name: string;
+    title: string;
+    content: string;
+    duration: number;
+    completed: boolean;
+  }>;
+}
+
 export type VulnerabilityType =
   | 'injection'
   | 'broken_auth'
@@ -95,7 +140,9 @@ export type ThreatCategory =
   | 'social_engineering'
   | 'zero_day'
   | 'botnet'
-  | 'cryptojacking';
+  | 'cryptojacking'
+  | 'unauthorized_access'
+  | 'compliance_violation';
 
 export type SecurityEventType =
   | 'login_attempt'

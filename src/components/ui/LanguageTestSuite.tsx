@@ -210,9 +210,9 @@ export default function LanguageTestSuite({ autoRun = false, onComplete }: Langu
         const language = supportedLanguages[i];
         setProgress((i / totalLanguages) * 100);
 
-        console.log(`🧪 [LanguageTestSuite] Testando lingua: ${language.code}`);
+        console.log(`🧪 [LanguageTestSuite] Testando lingua: ${language?.code || 'unknown'}`);
 
-        const languageResults = await runTestsForLanguage(language.code);
+        const languageResults = await runTestsForLanguage((language?.code || 'unknown') as any);
         allResults.push(...languageResults);
 
         // Aggiorna risultati in tempo reale

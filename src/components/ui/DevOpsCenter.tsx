@@ -140,6 +140,7 @@ export default function DevOpsCenter({
       const interval = setInterval(loadData, 30000);
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [isOpen]);
 
   const loadData = () => {
@@ -366,7 +367,7 @@ export default function DevOpsCenter({
         title: createIncidentForm.title,
         description: createIncidentForm.description,
         severity: createIncidentForm.severity,
-        priority: createIncidentForm.severity,
+        priority: createIncidentForm.severity as any,
         category: createIncidentForm.category,
         status: 'open',
         impact: {

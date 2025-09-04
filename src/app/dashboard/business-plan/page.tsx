@@ -136,7 +136,7 @@ export default function BusinessPlanPage() {
           : 0;
 
         const netCashFlow = cashInflow - cashOutflow;
-        const prevCumulative = year > 1 ? projections[year - 2].cumulativeCashFlow : 0;
+        const prevCumulative: number = year > 1 ? (projections[year - 2] as any)?.cumulativeCashFlow || 0 : 0;
 
         projections.push({
           year,
@@ -150,7 +150,7 @@ export default function BusinessPlanPage() {
       // Calcola breakeven point
       let breakEvenPoint = 0;
       for (let i = 0; i < projections.length; i++) {
-        if (projections[i].cumulativeCashFlow > 0) {
+        if ((projections[i] as any)?.cumulativeCashFlow > 0) {
           breakEvenPoint = i + 1;
           break;
         }
@@ -176,7 +176,7 @@ export default function BusinessPlanPage() {
           debtServiceCoverage: formData.loanAmount
             ? netProfit / ((formData.loanAmount * (formData.interestRate || 0)) / 100)
             : undefined,
-        },
+        } as any,
         riskAnalysis: {
           riskLevel: roi > 15 ? 'LOW' : roi > 8 ? 'MEDIUM' : 'HIGH',
           riskFactors: [

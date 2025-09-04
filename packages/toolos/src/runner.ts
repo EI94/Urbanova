@@ -58,7 +58,7 @@ export class ToolRunner {
       args,
       logs: [],
       progress: 0,
-    };
+    } as any;
 
     // Registra il run attivo
     this.activeRuns.set(runId, toolRun);
@@ -87,7 +87,7 @@ export class ToolRunner {
       this.logRun(toolRun, 'info', `Avvio esecuzione action '${action}' del tool '${toolId}'`);
 
       // Valida argomenti con Zod
-      const validatedArgs = actionSpec.zArgs.parse(args);
+      const validatedArgs = actionSpec.zArgs?.parse(args) || args;
       toolRun.progress = 20;
       this.logRun(toolRun, 'info', 'Argomenti validati con successo');
 
@@ -150,7 +150,7 @@ export class ToolRunner {
         logs: toolRun.logs,
         // Support for PlanExecutionEngine
         outputRef: undefined,
-      };
+      } as any;
     } finally {
       // Rimuovi il run dalla lista attiva
       this.activeRuns.delete(runId);

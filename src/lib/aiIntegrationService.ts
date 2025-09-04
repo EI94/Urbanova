@@ -176,7 +176,7 @@ class AIIntegrationService {
       return response;
     } catch (error) {
       console.error('❌ [AIIntegrationService] Errore analisi AI:', error);
-      throw new Error(`Analisi AI fallita: ${error.message}`);
+      throw new Error(`Analisi AI fallita: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -429,7 +429,7 @@ class AIIntegrationService {
 
     return {
       overallRisk,
-      riskFactors,
+      riskFactors: riskFactors as any,
       riskScore: this.calculateRiskScore(riskFactors),
       recommendations: this.generateRiskRecommendations(riskFactors),
     };
@@ -805,7 +805,7 @@ class AIIntegrationService {
   }
 
   private analyzeTradeoffs(optimizations: AISuggestion[]): any[] {
-    const tradeoffs = [];
+    const tradeoffs: any[] = [];
 
     optimizations.forEach(opt => {
       if (opt.estimatedImpact.cost > 50000) {

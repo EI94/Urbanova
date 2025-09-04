@@ -7,7 +7,11 @@ import {
   ensureBucketExists,
   deleteObject,
 } from '../gcs';
-import { GcsUploadOptions, GcsSignedUrlOptions } from '@urbanova/types';
+// import { GcsUploadOptions, GcsSignedUrlOptions } from '@urbanova/types';
+
+// Mock types
+type GcsUploadOptions = any;
+type GcsSignedUrlOptions = any;
 
 // Mock @google-cloud/storage
 jest.mock('@google-cloud/storage');

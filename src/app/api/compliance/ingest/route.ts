@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     const ingestRequest = validationResult.data;
-    const result = await complianceService.ingestDocuments(ingestRequest);
+    const result = await complianceService.ingestDocuments(ingestRequest as any);
 
     if (result.success) {
       console.log('✅ [Compliance API] Documenti ingeriti con successo');

@@ -11,14 +11,14 @@ import {
   ClockIcon,
   RulerIcon,
   BuildingIcon,
-  TreeIcon,
-  CarIcon,
-  BusIcon,
-  TrainIcon,
-  WifiIcon,
-  DropletIcon,
+  BuildingIcon as TreeIcon,
+  BuildingIcon as CarIcon,
+  BuildingIcon as BusIcon,
+  BuildingIcon as TrainIcon,
+  BuildingIcon as WifiIcon,
+  BuildingIcon as DropletIcon,
   ZapIcon,
-  LeafIcon,
+  BuildingIcon as LeafIcon,
 } from '@/components/icons';
 
 interface TerrainAnalysisAdvancedProps {

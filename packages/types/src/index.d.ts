@@ -9,4 +9,6 @@ export * from './tools';
 export * from './timeline';
 export * from './buyer';
 export * from './leads';
+export * from './procurement';
+export * from './interactive';
 //# sourceMappingURL=index.d.ts.map

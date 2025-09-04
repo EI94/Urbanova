@@ -166,11 +166,11 @@ describe('Type Factories', () => {
     it('should have valid services structure', () => {
       const vendor = createVendor();
 
-      expect(vendor.services).toHaveLength(1);
-      expect(vendor.services[0]).toHaveProperty('name', 'Construction');
-      expect(vendor.services[0]).toHaveProperty('pricing');
-      expect(vendor.services[0].pricing.type).toBe('FIXED');
-      expect(vendor.services[0].pricing.amount).toBe(100000);
+      expect((vendor as any).services).toHaveLength(1);
+      expect((vendor as any).services[0]).toHaveProperty('name', 'Construction');
+      expect((vendor as any).services[0]).toHaveProperty('pricing');
+      expect((vendor as any).services[0].pricing.type).toBe('FIXED');
+      expect((vendor as any).services[0].pricing.amount).toBe(100000);
     });
   });
 

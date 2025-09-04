@@ -473,7 +473,7 @@ export default function DesignCenterPage() {
         const projectId = projectMatch ? projectMatch[1] : 'progetto-123';
 
         const vendorMatch = message.match(/(?:a|per)\s+([^,\n]+)/i);
-        const vendorName = vendorMatch ? vendorMatch[1].trim() : 'Venditore';
+        const vendorName = vendorMatch && vendorMatch[1] ? vendorMatch[1].trim() : 'Venditore';
 
         const emailMatch = message.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
         const vendorEmail = emailMatch ? emailMatch[1] : 'vendor@example.com';
@@ -535,7 +535,7 @@ export default function DesignCenterPage() {
         const cityMatch = message.match(
           /(?:mercato|market)\s+([a-zA-Z\s]+)(?:\s+(\w+))?(?:\s+(\d+)\s+mesi?)?/i
         );
-        const city = cityMatch ? cityMatch[1].trim() : 'Milano';
+        const city = cityMatch && cityMatch[1] ? cityMatch[1].trim() : 'Milano';
         const asset = cityMatch?.[2] || 'residential';
         const months = cityMatch?.[3] ? parseInt(cityMatch[3]) : 12;
 
@@ -571,7 +571,7 @@ export default function DesignCenterPage() {
         const cityMatch = message.match(
           /(?:report|trend)\s+(?:di\s+)?([a-zA-Z\s]+)(?:\s+(\d+)\s+mesi?)?/i
         );
-        const city = cityMatch ? cityMatch[1].trim() : 'Milano';
+        const city = cityMatch && cityMatch[1] ? cityMatch[1].trim() : 'Milano';
         const months = cityMatch?.[2] ? parseInt(cityMatch[2]) : 12;
 
         const runId = await executeToolAction('market-intelligence', 'trend_report', {
@@ -598,7 +598,7 @@ export default function DesignCenterPage() {
         };
       } else if (message.includes('comps') || message.includes('comparabili')) {
         const cityMatch = message.match(/(?:comps|comparabili)\s+(?:di\s+)?([a-zA-Z\s]+)/i);
-        const city = cityMatch ? cityMatch[1].trim() : 'Milano';
+        const city = cityMatch && cityMatch[1] ? cityMatch[1].trim() : 'Milano';
 
         const runId = await executeToolAction('market-intelligence', 'comps_fetch', {
           city,
@@ -650,7 +650,6 @@ export default function DesignCenterPage() {
             `📈 **Status**: Tutto sotto controllo!`,
           timestamp: new Date(),
           metadata: {
-            type: 'usage_report',
           },
         };
       } else if (
@@ -674,8 +673,6 @@ export default function DesignCenterPage() {
             `[Procedi al Checkout →](/dashboard/billing?upgrade=pro)`,
           timestamp: new Date(),
           metadata: {
-            type: 'upgrade_prompt',
-            plan: 'pro',
           },
         };
       } else if (message.includes('report') || message.includes('genera')) {

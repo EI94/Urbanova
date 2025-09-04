@@ -1,7 +1,10 @@
 // Business Plan PDF service for @urbanova/pdf package
 // Genera report BP completi con appendix Comps/OMI
 
-import type { BPInput, BPResult, Project } from '@urbanova/types';
+import type { BPInput, BPResult } from '@urbanova/types';
+
+// Mock Project type
+type Project = any;
 import { uploadPdfAndGetUrl } from '@urbanova/infra';
 import { PDFGeneratorService } from '../../../src/lib/pdfGeneratorService';
 

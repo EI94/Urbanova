@@ -31,10 +31,10 @@ export default function FeasibilityProjectDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (params.id) {
+    if (params?.id) {
       loadProject(params.id as string);
     }
-  }, [params.id]);
+  }, [params?.id]);
 
   const loadProject = async (projectId: string) => {
     setLoading(true);
@@ -566,10 +566,10 @@ export default function FeasibilityProjectDetailPage() {
         <div className="mt-8">
           <FeasibilityReportGenerator
             analysis={{
-              id: project.id,
-              title: project.title || project.name || 'Progetto senza titolo',
-              location: project.location || project.address || 'Località non specificata',
-              propertyType: project.propertyType || 'Non specificato',
+              id: project.id || '',
+              title: project.name || 'Progetto senza titolo',
+              location: project.address || 'Località non specificata',
+              propertyType: 'Non specificato',
               totalInvestment: project.costs.total,
               expectedROI:
                 ((project.revenues.total - project.costs.total) / project.costs.total) * 100,
@@ -586,17 +586,15 @@ export default function FeasibilityProjectDetailPage() {
               recommendations: [
                 `ROI atteso: ${(((project.revenues.total - project.costs.total) / project.costs.total) * 100).toFixed(1)}%`,
                 `Margine di profitto: ${formatCurrency(project.revenues.total - project.costs.total)}`,
-                `Località strategica: ${project.location}`,
-                `Tipo immobile: ${project.propertyType}`,
+                `Località strategica: ${project.address}`,
+                `Tipo immobile: Non specificato`,
               ],
               createdAt: project.createdAt
                 ? typeof project.createdAt === 'string'
                   ? project.createdAt
                   : project.createdAt instanceof Date
                     ? project.createdAt.toISOString()
-                    : project.createdAt.toDate
-                      ? project.createdAt.toDate().toISOString()
-                      : new Date().toISOString()
+                    : new Date().toISOString()
                 : new Date().toISOString(),
             }}
             onGenerateReport={() => {

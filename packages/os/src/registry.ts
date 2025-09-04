@@ -1,5 +1,9 @@
 // Capability Registry - Urbanova OS
-import { Capability, CapabilitySpec } from '@urbanova/types';
+// import { Capability, CapabilitySpec } from '@urbanova/types';
+
+// Mock types
+type Capability = any;
+type CapabilitySpec = any;
 
 export class CapabilityRegistry {
   private capabilities: Map<string, Capability> = new Map();

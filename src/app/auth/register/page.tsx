@@ -57,9 +57,7 @@ export default function RegisterPage() {
       await signup(
         formData.email,
         formData.password,
-        displayName,
-        formData.firstName,
-        formData.lastName
+        displayName
       );
 
       // Mostra messaggio di successo
@@ -111,6 +109,7 @@ export default function RegisterPage() {
               onChange={handleChange}
               placeholder="Mario"
               icon={<UserIcon className="h-5 w-5 text-neutral-400" />}
+              {...({} as any)}
             />
 
             <FormInput
@@ -122,6 +121,7 @@ export default function RegisterPage() {
               value={formData.lastName}
               onChange={handleChange}
               placeholder="Rossi"
+              {...({} as any)}
             />
           </div>
 
@@ -135,6 +135,7 @@ export default function RegisterPage() {
             onChange={handleChange}
             placeholder="mario.rossi@azienda.it"
             icon={<MailIcon className="h-5 w-5 text-neutral-400" />}
+            {...({} as any)}
           />
 
           <FormInput
@@ -145,6 +146,7 @@ export default function RegisterPage() {
             value={formData.company}
             onChange={handleChange}
             placeholder="Nome della tua azienda"
+            {...({} as any)}
           />
 
           <FormInput
@@ -155,6 +157,7 @@ export default function RegisterPage() {
             value={formData.role}
             onChange={handleChange}
             placeholder="Es. Project Manager, Architetto, Imprenditore..."
+            {...({} as any)}
           />
 
           <FormInput
@@ -167,6 +170,7 @@ export default function RegisterPage() {
             onChange={handleChange}
             placeholder="••••••••"
             icon={<LockIcon className="h-5 w-5 text-neutral-400" />}
+            {...({} as any)}
           />
 
           <FormInput
@@ -179,6 +183,7 @@ export default function RegisterPage() {
             onChange={handleChange}
             placeholder="••••••••"
             icon={<LockIcon className="h-5 w-5 text-neutral-400" />}
+            {...({} as any)}
           />
 
           <div className="flex items-start py-2">

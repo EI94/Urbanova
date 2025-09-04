@@ -1,5 +1,9 @@
 import { Planner } from '../planner';
-import { Plan, PlanMode } from '@urbanova/types';
+// import { Plan, PlanMode } from '@urbanova/types';
+
+// Mock types
+type Plan = any;
+type PlanMode = any;
 
 describe('Planner', () => {
   let planner: Planner;

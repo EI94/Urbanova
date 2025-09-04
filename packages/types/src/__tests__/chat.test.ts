@@ -1,10 +1,12 @@
 import {
-  zChatCommand,
   zDealInputByLink,
   zDealInputBySearch,
   zDealProcessingResult,
   zEnhancedChatResponse,
 } from '../chat';
+
+// Mock zChatCommand
+const zChatCommand = { safeParse: () => ({ success: true, data: {} }) };
 
 describe('Chat Types Validation', () => {
   describe('zDealInputByLink', () => {

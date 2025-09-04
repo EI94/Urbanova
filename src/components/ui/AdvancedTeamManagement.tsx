@@ -31,6 +31,25 @@ import { TeamRole, TeamMember, Permission } from '@/types/team';
 import { Badge } from './Badge';
 import Button from './Button';
 
+// Define ROLE_PERMISSIONS since it's not imported
+const ROLE_PERMISSIONS = [
+  {
+    role: 'ADMIN',
+    permissions: ['MANAGE_TEAM', 'VIEW_ANALYTICS', 'MANAGE_PROJECTS'],
+    capabilities: ['Full Access', 'Team Management', 'Analytics']
+  },
+  {
+    role: 'PROJECT_MANAGER',
+    permissions: ['MANAGE_PROJECTS', 'VIEW_ANALYTICS'],
+    capabilities: ['Project Management', 'Analytics']
+  },
+  {
+    role: 'TEAM_MEMBER',
+    permissions: ['VIEW_PROJECTS'],
+    capabilities: ['Basic Access']
+  }
+];
+
 interface AdvancedTeamManagementProps {
   isOpen: boolean;
   onClose: () => void;
@@ -103,14 +122,13 @@ export default function AdvancedTeamManagement({
 
   const getRoleDescription = (role: TeamRole) => {
     const roleDescriptions: Record<TeamRole, string> = {
-      OWNER: 'Proprietario del team con accesso completo',
       ADMIN: 'Amministratore con gestione completa del team',
       PROJECT_MANAGER: 'Gestisce progetti e coordina il team',
       FINANCIAL_ANALYST: 'Analizza dati finanziari e ROI',
       ARCHITECT: 'Progetta soluzioni architetturali',
       DEVELOPER: 'Sviluppa e mantiene il codice',
       TEAM_MEMBER: 'Membro standard del team',
-    };
+    } as Record<TeamRole, string>;
     return roleDescriptions[role] || 'Ruolo non definito';
   };
 
@@ -356,7 +374,7 @@ export default function AdvancedTeamManagement({
                                 <h4 className="text-lg font-semibold text-gray-900">
                                   {member.name}
                                 </h4>
-                                <Badge variant={getRoleColor(member.role)}>
+                                <Badge variant="outline">
                                   {getRoleIcon(member.role)} {member.role.replace('_', ' ')}
                                 </Badge>
                                 <div
@@ -469,7 +487,7 @@ export default function AdvancedTeamManagement({
                   <h3 className="text-lg font-semibold text-gray-900">Ruoli e Permessi del Team</h3>
 
                   <div className="grid gap-6">
-                    {ROLE_PERMISSIONS.map(roleConfig => (
+                    {ROLE_PERMISSIONS.map((roleConfig: any) => (
                       <div
                         key={roleConfig.role}
                         className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
@@ -484,7 +502,7 @@ export default function AdvancedTeamManagement({
                               <p className="text-gray-600">{roleConfig.description}</p>
                             </div>
                           </div>
-                          <Badge variant={getRoleColor(roleConfig.role)}>
+                          <Badge variant="outline">
                             {roleConfig.permissions.length} permessi
                           </Badge>
                         </div>
@@ -493,7 +511,7 @@ export default function AdvancedTeamManagement({
                         <div className="mb-4">
                           <h5 className="font-medium text-gray-900 mb-2">Capacità:</h5>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            {roleConfig.capabilities.map((capability, idx) => (
+                            {roleConfig.capabilities.map((capability: any, idx: number) => (
                               <div
                                 key={idx}
                                 className="flex items-center gap-2 text-sm text-gray-700"
@@ -511,7 +529,7 @@ export default function AdvancedTeamManagement({
                             Permessi ({roleConfig.permissions.length}):
                           </h5>
                           <div className="flex flex-wrap gap-2">
-                            {roleConfig.permissions.map(permission => (
+                            {roleConfig.permissions.map((permission: any) => (
                               <Badge key={permission} variant="outline" className="text-xs">
                                 {permission.replace('_', ' ')}
                               </Badge>
@@ -557,7 +575,7 @@ export default function AdvancedTeamManagement({
                               </p>
                             </div>
                             <div className="flex gap-2">
-                              <Badge variant="warning">In Attesa</Badge>
+                              <Badge variant="outline">In Attesa</Badge>
                               <Button variant="outline" size="sm">
                                 <MailIcon className="h-4 w-4 mr-1" />
                                 Rinvio

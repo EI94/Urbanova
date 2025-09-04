@@ -720,9 +720,6 @@ export class AIMLService {
             coverage: 0.65,
           },
           businessMetrics: {
-            clickThroughRate: 0.15,
-            conversionRate: 0.08,
-            userEngagement: 4.1,
           },
         },
         validationResults: {
@@ -1280,14 +1277,16 @@ export class AIMLService {
     for (let i = 0; i < count; i++) {
       const modelIds = Array.from(this.models.keys());
       const randomModelId = modelIds[Math.floor(Math.random() * modelIds.length)];
+      if (!randomModelId) continue;
+      
       const model = this.models.get(randomModelId);
 
       if (!model || model.status !== 'deployed') continue;
 
       const prediction: Prediction = {
         id: `prediction-${Date.now()}-${i}`,
-        modelId: randomModelId,
-        endpointId: model.endpoints[0]?.id || 'endpoint-001',
+        modelId: randomModelId as string,
+        endpointId: (model.endpoints[0]?.id || 'endpoint-001') as string,
         input: this.generateSampleInput(model.type),
         inputHash: `hash-${Math.random().toString(36).substr(2, 9)}`,
         prediction: this.generateSamplePrediction(model.type),
@@ -1306,7 +1305,9 @@ export class AIMLService {
       // Mantieni solo le ultime 1000 predizioni
       if (this.predictions.size > 1000) {
         const oldestKey = this.predictions.keys().next().value;
-        this.predictions.delete(oldestKey);
+        if (oldestKey) {
+          this.predictions.delete(oldestKey);
+        }
       }
     }
   }
@@ -1510,7 +1511,7 @@ export class AIMLService {
         message: `Epoch ${epoch} completed`,
         epoch,
         metrics: {
-          loss: trainingRun.metrics.training.loss[trainingRun.metrics.training.loss.length - 1],
+          loss: trainingRun.metrics.training.loss[trainingRun.metrics.training.loss.length - 1] || 0,
         },
       });
 
@@ -1521,7 +1522,7 @@ export class AIMLService {
           (trainingRun.completedAt.getTime() - trainingRun.startedAt.getTime()) / 1000
         );
         trainingRun.finalMetrics = {
-          loss: trainingRun.metrics.training.loss[trainingRun.metrics.training.loss.length - 1],
+          loss: trainingRun.metrics.training.loss[trainingRun.metrics.training.loss.length - 1] || 0,
           accuracy: 0.85 + Math.random() * 0.1,
         };
 
@@ -1553,7 +1554,7 @@ export class AIMLService {
       throw new Error(`No endpoints available for model ${modelId}`);
     }
 
-    const prediction: Prediction = {
+    const prediction = {
       id: `prediction-${Date.now()}`,
       modelId,
       endpointId: endpoint.id,
@@ -1563,12 +1564,12 @@ export class AIMLService {
       confidence: 0.7 + Math.random() * 0.25,
       status: 'completed',
       latency: 80 + Math.random() * 40,
-      userId,
+      userId: userId || undefined,
       sessionId: `session-${Math.random().toString(36).substr(2, 9)}`,
       requestId: `req-${Math.random().toString(36).substr(2, 9)}`,
       requestedAt: new Date(),
       completedAt: new Date(Date.now() + 120),
-    };
+    } as any;
 
     this.predictions.set(prediction.id, prediction);
     model.lastPredictionAt = new Date();

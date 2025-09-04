@@ -91,14 +91,14 @@ export default function BillingPage() {
       const summary: UsageSummary[] = Object.entries(mockBillingState.usageMonth)
         .map(([action, used]) => {
           const limits = mockBillingState.entitlements.actionsLimits[action];
-          const percentage = Math.round((used / limits.hard) * 100);
+          const percentage = Math.round((used / (limits?.hard || 1)) * 100);
           const cost = calculateCost(action, used);
 
           return {
             toolAction: action,
             used,
-            soft: limits.soft,
-            hard: limits.hard,
+            soft: limits?.soft || 0,
+            hard: limits?.hard || 0,
             percentage,
             cost,
           };

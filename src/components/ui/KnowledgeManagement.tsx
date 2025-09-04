@@ -108,7 +108,7 @@ export default function KnowledgeManagement({
         categories: searchFilters.categories.length > 0 ? searchFilters.categories : undefined,
         status: searchFilters.status.length > 0 ? searchFilters.status : undefined,
         language: searchFilters.language || undefined,
-      },
+      } as any,
       sortBy: 'relevance',
       sortDirection: 'desc',
       page: 1,

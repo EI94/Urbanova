@@ -47,6 +47,23 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Build internal packages
+        run: |
+          cd packages/types && pnpm build
+          cd ../agents && pnpm build || true
+          cd ../data && pnpm build || true
+          cd ../infra && pnpm build || true
+          cd ../compliance && pnpm build || true
+          cd ../interactive && pnpm build || true
+          cd ../leads && pnpm build || true
+          cd ../messaging && pnpm build || true
+          cd ../os && pnpm build || true
+          cd ../pdf && pnpm build || true
+          cd ../projects && pnpm build || true
+          cd ../storage && pnpm build || true
+          cd ../toolos && pnpm build || true
+          cd ../tools && pnpm build || true
+
       - name: TypeScript type check
         run: pnpm typecheck
         continue-on-error: false

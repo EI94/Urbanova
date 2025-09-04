@@ -37,7 +37,7 @@ interface FeedbackWidgetProps {
 }
 
 const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuth() as any;
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [feedbackData, setFeedbackData] = useState<FeedbackData>({

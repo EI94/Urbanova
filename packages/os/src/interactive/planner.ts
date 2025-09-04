@@ -66,7 +66,7 @@ export class InteractivePlanner {
       const projectId = await this.resolveProjectAlias(inputText);
       if (projectId) {
         context.projectId = projectId;
-        context.projectAlias = this.extractProjectAlias(inputText);
+        context.projectAlias = this.extractProjectAlias(inputText) as any;
 
         // Load latest feasibility inputs for that project if present
         context.latestFeasibilityInputs = await this.loadLatestFeasibilityInputs(projectId);

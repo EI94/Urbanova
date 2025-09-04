@@ -56,7 +56,7 @@ export const docHunterTool = {
       };
 
       // Send notification about document request
-      await notificationService.sendNotification({
+      await (notificationService as any).sendNotification({
         type: 'DOCUMENT_REQUEST',
         title: `Document Request: ${args.kind}`,
         message: `Document ${args.kind} has been requested for project ${args.projectId}`,

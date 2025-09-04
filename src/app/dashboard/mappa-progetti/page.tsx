@@ -13,7 +13,7 @@ import {
   TrashIcon,
   FilterIcon,
   SearchIcon,
-  LocationMarkerIcon,
+  LocationIcon,
   GlobeIcon,
   TrendingUpIcon,
   CalendarIcon,
@@ -169,14 +169,14 @@ export default function MappaProgettiPage() {
   const createNewProjectLocation = async () => {
     try {
       if (!newLocationData.projectName || !newLocationData.address) {
-        toast.error('❌ Compila tutti i campi obbligatori');
+        toast('❌ Compila tutti i campi obbligatori', { icon: '❌' });
         return;
       }
 
       const locationId = await projectMapService.createProjectLocation(newLocationData);
       console.log('✅ [MappaProgetti] Nuova posizione progetto creata:', locationId);
 
-      toast.success('✅ Posizione progetto creata con successo!');
+      toast('✅ Posizione progetto creata con successo!', { icon: '✅' });
       setShowNewLocationModal(false);
 
       // Reset form e ricarica dati
@@ -216,7 +216,7 @@ export default function MappaProgettiPage() {
       await loadData();
     } catch (error) {
       console.error('❌ [MappaProgetti] Errore creazione posizione progetto:', error);
-      toast.error('❌ Errore durante la creazione della posizione progetto');
+      toast('❌ Errore durante la creazione della posizione progetto', { icon: '❌' });
     }
   };
 
@@ -231,10 +231,10 @@ export default function MappaProgettiPage() {
       const mapClusters = await projectMapService.createMapClusters(filtered, mapViewport.zoom);
       setClusters(mapClusters);
 
-      toast.success(`✅ Filtri applicati: ${filtered.length} progetti trovati`);
+      toast(`✅ Filtri applicati: ${filtered.length} progetti trovati`, { icon: '✅' });
     } catch (error) {
       console.error('❌ [MappaProgetti] Errore applicazione filtri:', error);
-      toast.error("❌ Errore durante l'applicazione dei filtri");
+      toast("❌ Errore durante l'applicazione dei filtri", { icon: '❌' });
     }
   };
 
@@ -243,7 +243,7 @@ export default function MappaProgettiPage() {
     setFilteredLocations(projectLocations);
     setClusters([]);
     projectMapService.createMapClusters(projectLocations, mapViewport.zoom).then(setClusters);
-    toast.success('✅ Filtri rimossi');
+    toast('✅ Filtri rimossi', { icon: '✅' });
   };
 
   const handleLocationClick = (location: ProjectLocation) => {
@@ -252,7 +252,7 @@ export default function MappaProgettiPage() {
   };
 
   const handleClusterClick = (cluster: MapCluster) => {
-    if (cluster.projects.length === 1) {
+    if (cluster.projects.length === 1 && cluster.projects[0]) {
       handleLocationClick(cluster.projects[0]);
     } else {
       // Zoom in sul cluster
@@ -473,7 +473,7 @@ export default function MappaProgettiPage() {
                       setActiveFilters(prev => ({
                         ...prev,
                         budgetRange: { ...prev.budgetRange, min: parseInt(e.target.value) || 0 },
-                      }))
+                      } as MapFilter))
                     }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -488,7 +488,7 @@ export default function MappaProgettiPage() {
                           ...prev.budgetRange,
                           max: parseInt(e.target.value) || 999999999,
                         },
-                      }))
+                      } as MapFilter))
                     }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -507,7 +507,7 @@ export default function MappaProgettiPage() {
                       setActiveFilters(prev => ({
                         ...prev,
                         roiRange: { ...prev.roiRange, min: parseInt(e.target.value) || 0 },
-                      }))
+                      } as MapFilter))
                     }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -519,7 +519,7 @@ export default function MappaProgettiPage() {
                       setActiveFilters(prev => ({
                         ...prev,
                         roiRange: { ...prev.roiRange, max: parseInt(e.target.value) || 100 },
-                      }))
+                      } as MapFilter))
                     }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -636,7 +636,7 @@ export default function MappaProgettiPage() {
           onLocationSelect={handleLocationClick}
           onZoneAnalysis={zone => {
             console.log('Analisi zona avanzata richiesta:', zone);
-            toast.success(`Analisi AI zona ${zone} in corso...`);
+            toast(`Analisi AI zona ${zone} in corso...`, { icon: '✅' });
           }}
         />
 

@@ -58,7 +58,7 @@ export const dealCallerActions = {
 
       const result = await questionnaireService.createQuestionnaire(
         validated.projectId,
-        validated.vendorContact,
+        validated.vendorContact as any,
         validated.sentBy
       );
 

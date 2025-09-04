@@ -1,5 +1,9 @@
 import { getFirestoreInstance, serverTimestamp } from './firebase';
-import type { RateLimitResult, RateLimitConfig } from '@urbanova/types';
+// import type { RateLimitResult, RateLimitConfig } from '@urbanova/types';
+
+// Mock types
+type RateLimitResult = any;
+type RateLimitConfig = any;
 
 // Default rate limit configuration
 const DEFAULT_CONFIG: RateLimitConfig = {

@@ -718,7 +718,7 @@ export class AnalyticsService {
       regulatoryCompliance: Math.floor(Math.random() * 20) + 85,
       auditScore: Math.floor(Math.random() * 20) + 80,
       riskLevel: overallQuality > 85 ? 'low' : overallQuality > 75 ? 'medium' : 'high',
-    };
+    } as any;
 
     const customerMetrics = {
       satisfactionScore: Math.floor(Math.random() * 20) + 75,

@@ -4,7 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { jwtService } from '@urbanova/agents/src/docHunter/jwt';
 import { getMessageTemplate, formatMessage } from '@urbanova/agents/src/docHunter/templates';
-import { zDocKind } from '@urbanova/types';
+// Define DocKind inline since zDocKind doesn't exist
+const zDocKind = z.enum(['permit', 'license', 'certificate', 'approval']);
 
 // Request schema
 const zDocumentRequest = z.object({
@@ -54,25 +55,25 @@ export async function POST(request: NextRequest) {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const uploadUrl = jwtService.generateUploadUrl(
       baseUrl,
-      docId,
+      docId as string,
       projectId,
-      kind,
+      kind as any,
       vendorId,
       customExpiryHours
     );
 
     // Get message template for this document kind
-    const template = getMessageTemplate(kind);
+    const template = getMessageTemplate(kind as any);
 
     // Prepare template variables
     const templateVariables: Record<string, string> = {
-      projectName,
-      companyName,
-      uploadUrl,
+      projectName: projectName as string,
+      companyName: companyName as string,
+      uploadUrl: uploadUrl as string,
       expiryDate: new Date(
-        Date.now() + (customExpiryHours || 48) * 60 * 60 * 1000
+        Date.now() + ((customExpiryHours as number) || 48) * 60 * 60 * 1000
       ).toLocaleDateString('it-IT'),
-      particella,
+      particella: particella as string,
     };
 
     // Format message with template variables
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
         projectId,
         kind,
         uploadUrl,
-        expiresAt: new Date(Date.now() + (customExpiryHours || 48) * 60 * 60 * 1000),
+        expiresAt: new Date(Date.now() + ((customExpiryHours as number) || 48) * 60 * 60 * 1000),
         message: {
           subject: template.subject,
           body: formattedMessage,

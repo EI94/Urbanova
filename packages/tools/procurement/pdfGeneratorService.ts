@@ -71,7 +71,7 @@ export class PDFGeneratorService {
         });
 
         const chunks: Buffer[] = [];
-        doc.on('data', chunk => chunks.push(chunk));
+        doc.on('data', (chunk: Buffer) => chunks.push(chunk));
         doc.on('end', () => resolve(Buffer.concat(chunks)));
 
         // Genera contenuto PDF
@@ -95,7 +95,7 @@ export class PDFGeneratorService {
 
         doc.end();
       } catch (error) {
-        reject(new Error(`Errore generazione PDF: ${error.message}`));
+        reject(new Error(`Errore generazione PDF: ${error instanceof Error ? error.message : 'Unknown error'}`));
       }
     });
   }
@@ -109,11 +109,13 @@ export class PDFGeneratorService {
     options: PDFGenerationOptions
   ): void {
     const { primaryColor, fontFamily } = options.customStyling!;
+    const safePrimaryColor = primaryColor || '#2563eb';
+    const safeFontFamily = fontFamily || 'Helvetica';
 
     // Logo Urbanova (placeholder)
     doc
       .rect(50, 50, 100, 40)
-      .fillColor(primaryColor)
+      .fillColor(safePrimaryColor as any)
       .fill()
       .fillColor('white')
       .fontSize(16)
@@ -123,11 +125,11 @@ export class PDFGeneratorService {
     doc
       .fontSize(24)
       .fillColor('black')
-      .font(fontFamily + '-Bold')
+      .font((safeFontFamily + '-Bold') as any)
       .text('Confronto Offerte RDO', 200, 60);
 
     // Sottotitolo
-    doc.fontSize(14).fillColor('gray').font(fontFamily).text(data.rdoTitle, 200, 90);
+    doc.fontSize(14).fillColor('gray').font(safeFontFamily as any).text(data.rdoTitle, 200, 90);
 
     // Metadata
     doc
@@ -138,7 +140,7 @@ export class PDFGeneratorService {
       .text(`Offerte analizzate: ${data.rankedOffers.length}`, 200, 150);
 
     // Linea separatrice
-    doc.moveTo(50, 180).lineTo(550, 180).strokeColor(primaryColor).lineWidth(2).stroke();
+    doc.moveTo(50, 180).lineTo(550, 180).strokeColor(safePrimaryColor as any).lineWidth(2).stroke();
 
     doc.y = 200;
   }
@@ -152,11 +154,13 @@ export class PDFGeneratorService {
     options: PDFGenerationOptions
   ): void {
     const { primaryColor, fontFamily } = options.customStyling!;
+    const safePrimaryColor = primaryColor || '#2563eb';
+    const safeFontFamily = fontFamily || 'Helvetica';
 
     doc
       .fontSize(18)
-      .fillColor(primaryColor)
-      .font(fontFamily + '-Bold')
+      .fillColor(safePrimaryColor as any)
+      .font((safeFontFamily + '-Bold') as any)
       .text('Riepilogo Esecutivo', 50, doc.y);
 
     doc.y += 20;
@@ -165,7 +169,7 @@ export class PDFGeneratorService {
     doc
       .fontSize(14)
       .fillColor('black')
-      .font(fontFamily + '-Bold')
+      .font((safeFontFamily + '-Bold') as any)
       .text('Top 3 Offerte:', 50, doc.y);
 
     doc.y += 20;
@@ -177,13 +181,13 @@ export class PDFGeneratorService {
       doc
         .fontSize(12)
         .fillColor('black')
-        .font(fontFamily + '-Bold')
+        .font((safeFontFamily + '-Bold') as any)
         .text(`${medal} ${rankedOffer.rank}. ${offer.vendorName}`, 70, doc.y);
 
       doc
         .fontSize(10)
         .fillColor('gray')
-        .font(fontFamily)
+        .font(safeFontFamily as any)
         .text(
           `Score: ${Math.round(rankedOffer.score)}/100 | Prezzo: €${offer.totalPrice} | Tempo: ${offer.totalTime} giorni`,
           70,
@@ -197,7 +201,7 @@ export class PDFGeneratorService {
     doc
       .fontSize(14)
       .fillColor('black')
-      .font(fontFamily + '-Bold')
+      .font((safeFontFamily + '-Bold') as any)
       .text('Statistiche Chiave:', 50, doc.y);
 
     doc.y += 20;
@@ -211,7 +215,7 @@ export class PDFGeneratorService {
     ];
 
     stats.forEach(stat => {
-      doc.fontSize(10).fillColor('black').font(fontFamily).text(`• ${stat}`, 70, doc.y);
+      doc.fontSize(10).fillColor('black').font(safeFontFamily as any).text(`• ${stat}`, 70, doc.y);
       doc.y += 15;
     });
 
@@ -227,11 +231,13 @@ export class PDFGeneratorService {
     options: PDFGenerationOptions
   ): void {
     const { primaryColor, fontFamily } = options.customStyling!;
+    const safePrimaryColor = primaryColor || '#2563eb';
+    const safeFontFamily = fontFamily || 'Helvetica';
 
     doc
       .fontSize(18)
-      .fillColor(primaryColor)
-      .font(fontFamily + '-Bold')
+      .fillColor(safePrimaryColor as any)
+      .font((safeFontFamily + '-Bold') as any)
       .text('Confronto Dettagliato', 50, doc.y);
 
     doc.y += 20;
@@ -244,13 +250,14 @@ export class PDFGeneratorService {
     doc
       .fontSize(10)
       .fillColor('white')
-      .font(fontFamily + '-Bold');
+      .font((safeFontFamily + '-Bold') as any);
 
     headers.forEach((header, index) => {
-      doc.rect(x, doc.y, columnWidths[index], 20).fillColor(primaryColor).fill();
+      const colWidth = columnWidths[index] || 0;
+      doc.rect(x, doc.y, colWidth, 20).fillColor(safePrimaryColor as any).fill();
 
-      doc.text(header, x + 5, doc.y + 5, { width: columnWidths[index] - 10, align: 'center' });
-      x += columnWidths[index];
+      doc.text(header, x + 5, doc.y + 5, { width: colWidth - 10, align: 'center' });
+      x += colWidth;
     });
 
     doc.y += 25;
@@ -269,17 +276,17 @@ export class PDFGeneratorService {
       doc
         .fontSize(10)
         .fillColor('black')
-        .font(fontFamily + '-Bold')
+        .font((safeFontFamily + '-Bold') as any)
         .text(rankedOffer.rank.toString(), x + 15, doc.y + 5, { width: 30, align: 'center' });
       x += 40;
 
       // Vendor
-      doc.font(fontFamily).text(offer.vendorName, x + 5, doc.y + 5, { width: 110, align: 'left' });
+      doc.font(safeFontFamily as any).text(offer.vendorName, x + 5, doc.y + 5, { width: 110, align: 'left' });
       x += 120;
 
       // Score
       doc
-        .font(fontFamily + '-Bold')
+        .font((safeFontFamily + '-Bold') as any)
         .text(Math.round(rankedOffer.score).toString(), x + 5, doc.y + 5, {
           width: 40,
           align: 'center',
@@ -288,7 +295,7 @@ export class PDFGeneratorService {
 
       // Prezzo
       doc
-        .font(fontFamily)
+        .font(safeFontFamily as any)
         .text(`€${offer.totalPrice}`, x + 5, doc.y + 5, { width: 70, align: 'right' });
       x += 80;
 
@@ -324,25 +331,27 @@ export class PDFGeneratorService {
     options: PDFGenerationOptions
   ): void {
     const { primaryColor, fontFamily } = options.customStyling!;
+    const safePrimaryColor = primaryColor || '#2563eb';
+    const safeFontFamily = fontFamily || 'Helvetica';
 
     doc
       .fontSize(18)
-      .fillColor(primaryColor)
-      .font(fontFamily + '-Bold')
+      .fillColor(safePrimaryColor as any)
+      .font((safeFontFamily + '-Bold') as any)
       .text('Analisi Grafica', 50, doc.y);
 
     doc.y += 20;
 
     // Grafico a barre per score
-    this.generateBarChart(doc, data, 'Score per Vendor', 'score', primaryColor, fontFamily);
+    this.generateBarChart(doc, data, 'Score per Vendor', 'score', safePrimaryColor as any, safeFontFamily as any);
     doc.y += 150;
 
     // Grafico a barre per prezzi
-    this.generateBarChart(doc, data, 'Confronto Prezzi', 'totalPrice', '#10b981', fontFamily);
+    this.generateBarChart(doc, data, 'Confronto Prezzi', 'totalPrice', '#10b981', safeFontFamily as any);
     doc.y += 150;
 
     // Grafico radar per criteri
-    this.generateRadarChart(doc, data, primaryColor, fontFamily);
+    this.generateRadarChart(doc, data, safePrimaryColor as any, safeFontFamily as any);
     doc.y += 200;
   }
 
@@ -357,10 +366,11 @@ export class PDFGeneratorService {
     color: string,
     fontFamily: string
   ): void {
+    const safeFontFamily = fontFamily || 'Helvetica';
     doc
       .fontSize(14)
       .fillColor('black')
-      .font(fontFamily + '-Bold')
+      .font((safeFontFamily + '-Bold') as any)
       .text(title, 50, doc.y);
 
     doc.y += 20;
@@ -393,12 +403,12 @@ export class PDFGeneratorService {
       doc
         .fontSize(8)
         .fillColor('black')
-        .font(fontFamily)
+        .font(safeFontFamily as any)
         .text(value.toString(), x + barWidth / 2 - 10, y - 15, { width: 20, align: 'center' });
 
       // Label vendor (abbreviata)
-      const vendorName = rankedOffer.offer.vendorName.split(' ')[0];
-      doc.text(vendorName, x + barWidth / 2 - 15, chartY + chartHeight + 5, {
+      const vendorName = (rankedOffer.offer.vendorName || '').split(' ')[0];
+      doc.text(vendorName || '', x + barWidth / 2 - 15, chartY + chartHeight + 5, {
         width: 30,
         align: 'center',
       });
@@ -432,10 +442,11 @@ export class PDFGeneratorService {
     color: string,
     fontFamily: string
   ): void {
+    const safeFontFamily = fontFamily || 'Helvetica';
     doc
       .fontSize(14)
       .fillColor('black')
-      .font(fontFamily + '-Bold')
+      .font((safeFontFamily + '-Bold') as any)
       .text('Analisi Multi-Criterio', 50, doc.y);
 
     doc.y += 20;
@@ -465,7 +476,7 @@ export class PDFGeneratorService {
       doc
         .fontSize(10)
         .fillColor('black')
-        .font(fontFamily)
+        .font(safeFontFamily as any)
         .text(criterion, labelX - 15, labelY - 5, { width: 30, align: 'center' });
     });
 
@@ -473,49 +484,51 @@ export class PDFGeneratorService {
     const topOffer = data.rankedOffers[0];
     const points: [number, number][] = [];
 
-    criteria.forEach((criterion, index) => {
-      const angle = (index * 2 * Math.PI) / criteria.length - Math.PI / 2;
-      let value = 0;
+    if (topOffer) {
+      criteria.forEach((criterion, index) => {
+        const angle = (index * 2 * Math.PI) / criteria.length - Math.PI / 2;
+        let value = 0;
 
-      switch (criterion) {
-        case 'Prezzo':
-          value =
-            100 -
-            ((topOffer.offer.totalPrice - data.statistics.priceRange.min) /
-              (data.statistics.priceRange.max - data.statistics.priceRange.min)) *
-              100;
-          break;
-        case 'Tempo':
-          value =
-            100 -
-            ((topOffer.offer.totalTime - data.statistics.timeRange.min) /
-              (data.statistics.timeRange.max - data.statistics.timeRange.min)) *
-              100;
-          break;
-        case 'Qualità':
-          value = topOffer.offer.qualityScore * 10;
-          break;
-      }
+        switch (criterion) {
+          case 'Prezzo':
+            value =
+              100 -
+              ((topOffer.offer.totalPrice - data.statistics.priceRange.min) /
+                (data.statistics.priceRange.max - data.statistics.priceRange.min)) *
+                100;
+            break;
+          case 'Tempo':
+            value =
+              100 -
+              ((topOffer.offer.totalTime - data.statistics.timeRange.min) /
+                (data.statistics.timeRange.max - data.statistics.timeRange.min)) *
+                100;
+            break;
+          case 'Qualità':
+            value = topOffer.offer.qualityScore * 10;
+            break;
+        }
 
-      const r = (value / 100) * radius;
-      const x = centerX + Math.cos(angle) * r;
-      const y = centerY + Math.sin(angle) * r;
-      points.push([x, y]);
-    });
-
-    // Disegna poligono
-    if (points.length > 0) {
-      doc.moveTo(points[0][0], points[0][1]);
-      points.forEach(point => {
-        doc.lineTo(point[0], point[1]);
+        const r = (value / 100) * radius;
+        const x = centerX + Math.cos(angle) * r;
+        const y = centerY + Math.sin(angle) * r;
+        points.push([x, y]);
       });
-      doc
-        .closePath()
-        .fillColor(color + '40')
-        .fill()
-        .strokeColor(color)
-        .lineWidth(2)
-        .stroke();
+
+      // Disegna poligono
+      if (points.length > 0) {
+        doc.moveTo(points[0]?.[0] || 0, points[0]?.[1] || 0);
+        points.forEach(point => {
+          doc.lineTo(point[0], point[1]);
+        });
+        doc
+          .closePath()
+          .fillColor(color + '40')
+          .fill()
+          .strokeColor(color)
+          .lineWidth(2)
+          .stroke();
+      }
     }
 
     doc.y = centerY + radius + 50;
@@ -530,11 +543,13 @@ export class PDFGeneratorService {
     options: PDFGenerationOptions
   ): void {
     const { primaryColor, fontFamily } = options.customStyling!;
+    const safePrimaryColor = primaryColor || '#2563eb';
+    const safeFontFamily = fontFamily || 'Helvetica';
 
     doc
       .fontSize(18)
-      .fillColor(primaryColor)
-      .font(fontFamily + '-Bold')
+      .fillColor(safePrimaryColor as any)
+      .font((safeFontFamily + '-Bold') as any)
       .text('Analisi Outlier', 50, doc.y);
 
     doc.y += 20;
@@ -543,19 +558,19 @@ export class PDFGeneratorService {
       doc
         .fontSize(12)
         .fillColor('black')
-        .font(fontFamily + '-Bold')
+        .font((safeFontFamily + '-Bold') as any)
         .text(`${index + 1}. ${outlier.vendorName}`, 50, doc.y);
 
       doc
         .fontSize(10)
         .fillColor('gray')
-        .font(fontFamily)
+        .font(safeFontFamily as any)
         .text(outlier.description, 70, doc.y + 15, { width: 450, align: 'left' });
 
       doc
         .fontSize(10)
         .fillColor('orange')
-        .font(fontFamily + '-Bold')
+        .font((safeFontFamily + '-Bold') as any)
         .text(`Raccomandazione: ${outlier.recommendation}`, 70, doc.y + 30, {
           width: 450,
           align: 'left',
@@ -576,11 +591,13 @@ export class PDFGeneratorService {
     options: PDFGenerationOptions
   ): void {
     const { primaryColor, fontFamily } = options.customStyling!;
+    const safePrimaryColor = primaryColor || '#2563eb';
+    const safeFontFamily = fontFamily || 'Helvetica';
 
     doc
       .fontSize(18)
-      .fillColor(primaryColor)
-      .font(fontFamily + '-Bold')
+      .fillColor(safePrimaryColor as any)
+      .font((safeFontFamily + '-Bold') as any)
       .text('Raccomandazioni', 50, doc.y);
 
     doc.y += 20;
@@ -591,7 +608,7 @@ export class PDFGeneratorService {
       doc
         .fontSize(10)
         .fillColor('black')
-        .font(fontFamily)
+        .font(safeFontFamily as any)
         .text(`${index + 1}. ${rec}`, 50, doc.y, { width: 450, align: 'left' });
       doc.y += 15;
     });
@@ -629,7 +646,9 @@ export class PDFGeneratorService {
 
     // Raccomandazione finale
     const topOffer = data.rankedOffers[0];
-    recommendations.push(`Raccomandazione: ${topOffer.offer.vendorName} come vincitore principale`);
+    if (topOffer) {
+      recommendations.push(`Raccomandazione: ${topOffer.offer.vendorName} come vincitore principale`);
+    }
 
     return recommendations;
   }
@@ -639,12 +658,14 @@ export class PDFGeneratorService {
    */
   private generateFooter(doc: PDFKit.PDFDocument, options: PDFGenerationOptions): void {
     const { primaryColor, fontFamily } = options.customStyling!;
+    const safePrimaryColor = primaryColor || '#2563eb';
+    const safeFontFamily = fontFamily || 'Helvetica';
 
     // Linea separatrice
     doc
       .moveTo(50, doc.y + 20)
       .lineTo(550, doc.y + 20)
-      .strokeColor(primaryColor)
+      .strokeColor(safePrimaryColor as any)
       .lineWidth(1)
       .stroke();
 
@@ -654,7 +675,7 @@ export class PDFGeneratorService {
     doc
       .fontSize(8)
       .fillColor('gray')
-      .font(fontFamily)
+      .font(safeFontFamily as any)
       .text('Report generato automaticamente da Urbanova Procurement System', 50, doc.y, {
         width: 500,
         align: 'center',

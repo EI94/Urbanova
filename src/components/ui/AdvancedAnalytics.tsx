@@ -219,7 +219,7 @@ export default function AdvancedAnalytics({
           includeInsights: exportConfig.includeInsights,
           compression: exportConfig.compression,
           password: exportConfig.password || undefined,
-        }
+        } as any
       );
 
       setExports(prev => [...prev, exportData]);
@@ -265,7 +265,7 @@ export default function AdvancedAnalytics({
       failed: 'bg-red-100 text-red-800',
       draft: 'bg-gray-100 text-gray-800',
     };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return (colors as any)[status] || 'bg-gray-100 text-gray-800';
   };
 
   const getPriorityColor = (priority: string) => {
@@ -274,7 +274,7 @@ export default function AdvancedAnalytics({
       medium: 'bg-yellow-100 text-yellow-800',
       low: 'bg-green-100 text-green-800',
     };
-    return colors[priority] || 'bg-gray-100 text-gray-800';
+    return (colors as any)[priority] || 'bg-gray-100 text-gray-800';
   };
 
   const formatDate = (date: Date) => {
@@ -803,7 +803,7 @@ export default function AdvancedAnalytics({
                       value={`${newDashboard.columns}x${newDashboard.rows}`}
                       onChange={e => {
                         const [cols, rows] = e.target.value.split('x').map(Number);
-                        setNewDashboard(prev => ({ ...prev, columns: cols, rows: rows }));
+                        setNewDashboard((prev: any) => ({ ...prev, columns: cols, rows: rows }));
                       }}
                       className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500"
                     >

@@ -21,7 +21,7 @@ import { toast } from 'react-hot-toast';
 
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
-import { feedbackService, Feedback } from '@/lib/feedbackService';
+import { feedbackService } from '@/lib/feedbackService';
 
 interface Feedback {
   id: string;

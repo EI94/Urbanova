@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 
 import {
-  StarIcon,
+  ShareIcon as StarIcon,
   UsersIcon,
   FilterIcon,
   SortAscIcon,
@@ -387,10 +387,10 @@ export default function SharedFavorites({
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-lg font-semibold text-gray-900">{favorite.landTitle}</h3>
-                      <Badge variant={getPriorityColor(favorite.priority)}>
+                      <Badge variant={getPriorityColor(favorite.priority) as any}>
                         Priorità {favorite.priority}
                       </Badge>
-                      <Badge variant={getStatusColor(favorite.status)}>
+                      <Badge variant={getStatusColor(favorite.status) as any}>
                         {getStatusIcon(favorite.status)} {favorite.status}
                       </Badge>
                     </div>
@@ -441,7 +441,7 @@ export default function SharedFavorites({
                         className="flex items-center justify-between bg-white p-3 rounded border"
                       >
                         <div className="flex items-center gap-3">
-                          <Badge variant={getVoteColor(vote.vote)}>{getVoteIcon(vote.vote)}</Badge>
+                          <Badge variant={getVoteColor(vote.vote) as any}>{getVoteIcon(vote.vote)}</Badge>
                           <span className="font-medium text-gray-900">{vote.memberName}</span>
                           {vote.comment && (
                             <span className="text-sm text-gray-600">"{vote.comment}"</span>

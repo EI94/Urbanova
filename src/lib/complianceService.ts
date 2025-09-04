@@ -123,7 +123,7 @@ export class ComplianceService {
             type: docRequest.type,
             title: docRequest.title,
             description: docRequest.description || '',
-            url: docRequest.url,
+            url: docRequest.url || '',
             filePath,
             fileSize: docRequest.file?.size || 0,
             mimeType: docRequest.file?.type || 'application/pdf',
@@ -149,7 +149,7 @@ export class ComplianceService {
           const createdDoc: ComplianceDocument = {
             ...complianceDoc,
             id: docRef.id,
-          };
+          } as ComplianceDocument;
 
           // Processa e indicizza il documento
           const sectionsCount = await this.processDocument(createdDoc);
@@ -157,7 +157,7 @@ export class ComplianceService {
           ingestedDocuments.push({
             id: createdDoc.id,
             title: createdDoc.title,
-            status: 'SUCCESS',
+            status: 'SUCCESS' as const,
             sectionsCount,
             vectorized: true,
           });
@@ -170,7 +170,7 @@ export class ComplianceService {
           ingestedDocuments.push({
             id: `error-${Date.now()}`,
             title: docRequest.title,
-            status: 'ERROR',
+            status: 'ERROR' as const,
             error: errorMessage,
             sectionsCount: 0,
             vectorized: false,
@@ -186,8 +186,8 @@ export class ComplianceService {
           errors.length === 0
             ? 'Tutti i documenti ingeriti con successo'
             : 'Alcuni documenti non sono stati ingeriti',
-        ingestedDocuments,
-        errors: errors.length > 0 ? errors : undefined,
+                 ingestedDocuments,
+        errors: errors.length > 0 ? errors : [],
       };
     } catch (error) {
       console.error('❌ [Compliance] Errore generale ingestione:', error);
@@ -289,7 +289,8 @@ export class ComplianceService {
     let sectionNumber = 1;
 
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
+      const line = lines[i]?.trim();
+      if (!line) continue;
 
       if (line.length > 0) {
         currentSection += line + '\n';
@@ -382,7 +383,7 @@ export class ComplianceService {
       // Determina comune (se non specificato)
       let municipalityId = request.municipalityId;
       if (!municipalityId) {
-        municipalityId = await this.inferMunicipalityFromProject(request.projectId);
+        municipalityId = await this.inferMunicipalityFromProject(request.projectId) || undefined;
       }
 
       if (!municipalityId) {
@@ -477,7 +478,7 @@ export class ComplianceService {
       );
 
       const snapshot = await getDocs(q);
-      let rules = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as PatternRule);
+              let rules = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as PatternRule));
 
       // Filtra per categoria se specificata
       if (categories && categories.length > 0) {
@@ -673,13 +674,13 @@ export class ComplianceService {
         vectorStoreService.getStats(),
       ]);
 
-      return {
-        totalDocuments: documents.size,
-        totalSections: sections.size,
-        totalRules: rules.size,
-        totalReports: reports.size,
-        vectorStoreStats: vectorStats,
-      };
+              return {
+          totalDocuments: documents.docs.length,
+          totalSections: sections.docs.length,
+          totalRules: rules.docs.length,
+          totalReports: reports.docs.length,
+          vectorStoreStats: vectorStats,
+        };
     } catch (error) {
       console.error('❌ [Compliance] Errore recupero statistiche:', error);
       throw error;

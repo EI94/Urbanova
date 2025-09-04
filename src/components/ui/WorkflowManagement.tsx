@@ -6,7 +6,7 @@ import {
   CheckCircleIcon,
   ClockIcon,
   XCircleIcon,
-  ExclamationTriangleIcon,
+  AlertTriangleIcon as ExclamationTriangleIcon,
   PlusIcon,
   EyeIcon,
   EditIcon,
@@ -311,7 +311,7 @@ export default function WorkflowManagement({
                     <select
                       value={filters.status?.[0] || ''}
                       onChange={e =>
-                        setFilters(prev => ({
+                        setFilters((prev: any) => ({
                           ...prev,
                           status: e.target.value ? [e.target.value] : undefined,
                         }))
@@ -328,7 +328,7 @@ export default function WorkflowManagement({
                     <select
                       value={filters.priority?.[0] || ''}
                       onChange={e =>
-                        setFilters(prev => ({
+                        setFilters((prev: any) => ({
                           ...prev,
                           priority: e.target.value ? [e.target.value] : undefined,
                         }))

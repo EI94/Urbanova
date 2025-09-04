@@ -92,7 +92,7 @@ export const procurementActions: ToolActionSpec[] = [
       } catch (error) {
         return {
           success: false,
-          error: `Errore nella creazione RDO: ${error.message}`,
+          error: `Errore nella creazione RDO: ${error instanceof Error ? error.message : 'Unknown error'}`,
         };
       }
     },
@@ -164,7 +164,7 @@ export const procurementActions: ToolActionSpec[] = [
       } catch (error) {
         return {
           success: false,
-          error: `Errore nel confronto offerte: ${error.message}`,
+          error: `Errore nel confronto offerte: ${error instanceof Error ? error.message : 'Unknown error'}`,
         };
       }
     },
@@ -216,7 +216,7 @@ export const procurementActions: ToolActionSpec[] = [
       } catch (error) {
         return {
           success: false,
-          error: `Errore nell'aggiudicazione: ${error.message}`,
+          error: `Errore nell'aggiudicazione: ${error instanceof Error ? error.message : 'Unknown error'}`,
         };
       }
     },
@@ -273,7 +273,7 @@ export const procurementActions: ToolActionSpec[] = [
       } catch (error) {
         return {
           success: false,
-          error: `Errore nel recupero stato RDO: ${error.message}`,
+          error: `Errore nel recupero stato RDO: ${error instanceof Error ? error.message : 'Unknown error'}`,
         };
       }
     },
@@ -339,7 +339,7 @@ export const procurementActions: ToolActionSpec[] = [
       } catch (error) {
         return {
           success: false,
-          error: `Errore nel recupero vendor: ${error.message}`,
+          error: `Errore nel recupero vendor: ${error instanceof Error ? error.message : 'Unknown error'}`,
         };
       }
     },

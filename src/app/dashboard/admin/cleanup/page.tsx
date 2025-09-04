@@ -7,9 +7,11 @@ import {
   TrashIcon,
   CheckCircleIcon,
   AlertIcon,
-  DatabaseIcon,
   RefreshIcon,
 } from '@/components/icons';
+// Mock DatabaseIcon
+const DatabaseIcon = RefreshIcon;
+
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { cleanupService } from '@/lib/cleanupService';
 

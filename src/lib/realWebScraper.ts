@@ -2,7 +2,7 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 
-import { ScrapedLand, LandSearchCriteria } from '@/types/land';
+import { ScrapedLand, LandSearchCriteria } from '../../src/types/land';
 
 export class RealWebScraper {
   public isInitialized = true; // Sempre true per HTTP scraping

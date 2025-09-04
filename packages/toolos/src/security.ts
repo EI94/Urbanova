@@ -18,8 +18,8 @@ export class SecurityManager {
       admin: 5,
     };
 
-    const requiredLevel = roleHierarchy[requiredRole];
-    const userLevel = roleHierarchy[userRole];
+    const requiredLevel = roleHierarchy[requiredRole || ''];
+    const userLevel = roleHierarchy[userRole || ''];
 
     if (requiredLevel === undefined || userLevel === undefined) {
       context.logger.warn(`Ruolo non riconosciuto: required=${requiredRole}, user=${userRole}`);

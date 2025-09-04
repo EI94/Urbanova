@@ -116,7 +116,7 @@ class ExternalAPIService {
       return this.transformISTATData(istatData, location);
     } catch (error) {
       console.error('❌ [ExternalAPIService] Errore recupero dati mercato:', error);
-      throw new Error(`Impossibile recuperare dati mercato: ${error.message}`);
+      throw new Error(`Impossibile recuperare dati mercato: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -146,7 +146,7 @@ class ExternalAPIService {
       };
     } catch (error) {
       console.error('❌ [ExternalAPIService] Errore recupero dati normativi:', error);
-      throw new Error(`Impossibile recuperare dati normativi: ${error.message}`);
+      throw new Error(`Impossibile recuperare dati normativi: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -174,7 +174,7 @@ class ExternalAPIService {
       return this.transformOpenStreetMapData(osmData, location);
     } catch (error) {
       console.error('❌ [ExternalAPIService] Errore recupero dati geospaziali:', error);
-      throw new Error(`Impossibile recuperare dati geospaziali: ${error.message}`);
+      throw new Error(`Impossibile recuperare dati geospaziali: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -189,7 +189,7 @@ class ExternalAPIService {
       return this.transformISTATDemographics(istatData, location);
     } catch (error) {
       console.error('❌ [ExternalAPIService] Errore recupero dati demografici:', error);
-      throw new Error(`Impossibile recuperare dati demografici: ${error.message}`);
+      throw new Error(`Impossibile recuperare dati demografici: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -241,7 +241,7 @@ class ExternalAPIService {
       };
     } catch (error) {
       console.error('❌ [ExternalAPIService] Errore analisi terreno:', error);
-      throw new Error(`Analisi terreno fallita: ${error.message}`);
+      throw new Error(`Analisi terreno fallita: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 

@@ -38,7 +38,7 @@ describe('Tools Types - Zod Schemas', () => {
       const result = zToolManifest.safeParse(invalidManifest);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].path).toEqual(['version']);
+        expect(result.error?.issues[0]?.path).toEqual(['version']);
       }
     });
 

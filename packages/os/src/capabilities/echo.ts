@@ -1,6 +1,10 @@
 // Echo Capability - Example for Urbanova OS
 import { z } from 'zod';
-import { Capability, CapabilityContext } from '@urbanova/types';
+// import { Capability, CapabilityContext } from '@urbanova/types';
+
+// Mock types
+type Capability = any;
+type CapabilityContext = any;
 
 // Schema argomenti
 const zEchoArgs = z.object({

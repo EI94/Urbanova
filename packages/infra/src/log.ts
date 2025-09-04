@@ -79,7 +79,7 @@ interface LoggerConfig {
   version: string;
 }
 
-class StructuredLogger {
+export class StructuredLogger {
   private config: LoggerConfig;
   private logBuffer: LogEvent[] = [];
   private bufferSize = 100;
@@ -96,7 +96,7 @@ class StructuredLogger {
       environment: process.env.NODE_ENV || 'development',
       version: process.env.npm_package_version || '1.0.0',
       ...config,
-    };
+    } as any;
 
     // Avvia flush periodico
     if (this.config.enableAudit) {
@@ -274,12 +274,12 @@ class StructuredLogger {
         if (event.route) contextFields.push({ title: 'Route', value: event.route, short: true });
         if (event.statusCode) contextFields.push({ title: 'Status Code', value: event.statusCode.toString(), short: true });
         
-        slackMessage.attachments[0].fields.push(...contextFields);
+        slackMessage.attachments[0]?.fields?.push(...contextFields);
       }
 
       // Aggiungi stack trace se presente
       if (event.error?.stack) {
-        slackMessage.attachments[0].fields.push({
+        slackMessage.attachments[0]?.fields?.push({
           title: 'Stack Trace',
           value: `\`\`\`${event.error.stack.substring(0, 1000)}\`\`\``,
           short: false,

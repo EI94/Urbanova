@@ -1,6 +1,11 @@
 // Deal Memo PDF service for @urbanova/pdf package
 
-import type { Deal, FeasibilityResult, Project } from '@urbanova/types';
+// import type { Deal, FeasibilityResult, Project } from '@urbanova/types';
+
+// Mock types
+type Deal = any;
+type FeasibilityResult = any;
+type Project = any;
 import { uploadPdfAndGetUrl } from '@urbanova/infra';
 import { PDFGeneratorService } from '../../../src/lib/pdfGeneratorService';
 
@@ -69,7 +74,7 @@ export class RealFeasibilityReportGenerator implements FeasibilityReportGenerato
       internalRateOfReturn: feasibility.analysis?.financial?.irr || 0.15,
       riskLevel: feasibility.riskAssessment?.overall || 'MEDIUM',
       marketTrend: 'POSITIVE' as const, // Default
-      recommendations: feasibility.recommendations?.map(r => r.description) || [
+      recommendations: feasibility.recommendations?.map((r: any) => r.description) || [
         "Procedere con l'analisi dettagliata",
       ],
       createdAt: new Date().toISOString(),
