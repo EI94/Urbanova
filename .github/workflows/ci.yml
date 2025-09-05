@@ -50,29 +50,49 @@ jobs:
       - name: Build essential packages for Next.js module resolution
         run: |
           # Build only essential packages needed for Next.js build
-          echo "Building essential packages for Next.js module resolution..."
+          echo "🚀 Building essential packages for Next.js module resolution..."
           
           # Build types package
+          echo "📦 Building @urbanova/types..."
           cd packages/types
-          pnpm build || echo "Types build failed, continuing..."
+          ls -la
+          cat package.json | grep -A 5 -B 5 "build"
+          pnpm build
+          echo "✅ Types build completed"
+          ls -la dist/ || echo "No dist folder found"
           cd ../..
           
           # Build infra package
+          echo "📦 Building @urbanova/infra..."
           cd packages/infra
-          pnpm build || echo "Infra build failed, continuing..."
+          ls -la
+          cat package.json | grep -A 5 -B 5 "build"
+          pnpm build
+          echo "✅ Infra build completed"
+          ls -la dist/ || echo "No dist folder found"
           cd ../..
           
           # Build data package (needed by some components)
+          echo "📦 Building @urbanova/data..."
           cd packages/data
-          pnpm build || echo "Data build failed, continuing..."
+          ls -la
+          cat package.json | grep -A 5 -B 5 "build"
+          pnpm build
+          echo "✅ Data build completed"
+          ls -la dist/ || echo "No dist folder found"
           cd ../..
           
           # Build os package (needed by some API routes)
+          echo "📦 Building @urbanova/os..."
           cd packages/os
-          pnpm build || echo "OS build failed, continuing..."
+          ls -la
+          cat package.json | grep -A 5 -B 5 "build"
+          pnpm build
+          echo "✅ OS build completed"
+          ls -la dist/ || echo "No dist folder found"
           cd ../..
           
-          echo "Essential packages build completed"
+          echo "🎉 Essential packages build completed"
 
       - name: Build application
         run: pnpm build
