@@ -10,7 +10,11 @@ export interface FeedbackData {
   userAgent?: string;
   timestamp: Date;
   userEmail?: string;
-  attachments?: File[];
+  attachments?: Array<{
+    name: string;
+    size: number;
+    type: string;
+  }>;
   status: 'new' | 'in_progress' | 'resolved' | 'closed';
   assignedTo?: string | null;
   resolvedAt?: Date | null;

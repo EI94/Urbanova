@@ -547,7 +547,12 @@ export interface DocumentImport {
 
   // Configurazione import
   source: {
-    files?: File[];
+    files?: Array<{
+      name: string;
+      size: number;
+      type: string;
+      lastModified: number;
+    }>;
     urls?: string[];
     credentials?: Record<string, string>;
   };
