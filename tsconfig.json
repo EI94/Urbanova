@@ -21,7 +21,15 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@urbanova/types": ["./packages/types/dist"],
+      "@urbanova/infra": ["./packages/infra/dist"],
+      "@urbanova/toolos": ["./packages/toolos/dist"],
+      "@urbanova/data": ["./packages/data/dist"],
+      "@urbanova/os": ["./packages/os/dist"],
+      "@urbanova/pdf": ["./packages/pdf/dist"],
+      "@urbanova/agents": ["./packages/agents/dist"],
+      "@urbanova/tools": ["./packages/tools/dist"]
     },
     "noImplicitAny": true,
     "strictNullChecks": true,
