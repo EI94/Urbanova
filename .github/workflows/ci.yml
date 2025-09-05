@@ -49,39 +49,23 @@ jobs:
 
       - name: Build internal packages
         run: |
-          # Build packages in dependency order to ensure proper linking
-          echo "Building @urbanova/types..."
-          cd packages/types && pnpm build && cd ../..
-          
-          echo "Building @urbanova/infra..."
-          cd packages/infra && pnpm build && cd ../..
-          
-          echo "Building @urbanova/data..."
-          cd packages/data && pnpm build && cd ../..
-          
-          echo "Building @urbanova/toolos..."
-          cd packages/toolos && pnpm build && cd ../..
-          
-          echo "Building @urbanova/os..."
-          cd packages/os && pnpm build && cd ../..
-          
-          echo "Building @urbanova/agents..."
-          cd packages/agents && pnpm build && cd ../..
-          
-          echo "Building @urbanova/pdf..."
-          cd packages/pdf && pnpm build && cd ../..
-          
-          echo "Building @urbanova/tools..."
-          cd packages/tools && pnpm build && cd ../..
-          
-          echo "Building remaining packages..."
-          cd packages/compliance && pnpm build && cd ../..
-          cd packages/interactive && pnpm build && cd ../..
-          cd packages/leads && pnpm build && cd ../..
-          cd packages/messaging && pnpm build && cd ../..
-          cd packages/projects && pnpm build && cd ../..
-          cd packages/storage && pnpm build && cd ../..
-          cd packages/billing && pnpm build && cd ../..
+          # Build packages using pnpm from root directory to ensure proper workspace linking
+          echo "Building all internal packages..."
+          pnpm -r --filter "@urbanova/types" build
+          pnpm -r --filter "@urbanova/infra" build
+          pnpm -r --filter "@urbanova/data" build
+          pnpm -r --filter "@urbanova/toolos" build
+          pnpm -r --filter "@urbanova/os" build
+          pnpm -r --filter "@urbanova/agents" build
+          pnpm -r --filter "@urbanova/pdf" build
+          pnpm -r --filter "@urbanova/tools" build
+          pnpm -r --filter "@urbanova/compliance" build
+          pnpm -r --filter "@urbanova/interactive" build
+          pnpm -r --filter "@urbanova/leads" build
+          pnpm -r --filter "@urbanova/messaging" build
+          pnpm -r --filter "@urbanova/projects" build
+          pnpm -r --filter "@urbanova/storage" build
+          pnpm -r --filter "@urbanova/billing" build
 
       - name: TypeScript type check
         run: pnpm typecheck
