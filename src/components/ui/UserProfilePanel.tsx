@@ -27,7 +27,7 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'preferences'>('profile');
   const [editing, setEditing] = useState(false);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarFile, setAvatarFile] = useState<{ name: string; size: number; type: string } | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);

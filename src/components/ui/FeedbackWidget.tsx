@@ -54,7 +54,7 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFile, setSelectedFile] = useState<{ name: string; size: number; type: string } | null>(null);
 
   // Aggiorna l'email quando l'utente cambia
   useEffect(() => {
