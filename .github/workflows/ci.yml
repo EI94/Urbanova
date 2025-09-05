@@ -44,24 +44,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
-      - name: Debug workspace structure
+      - name: Install dependencies and build packages
         run: |
+          echo "📦 Installing dependencies..."
+          pnpm install --no-frozen-lockfile
+          
           echo "🔍 Debugging workspace structure..."
           pwd
           ls -la
           echo "📁 Packages directory:"
           ls -la packages/
-          echo "📦 Types package:"
-          ls -la packages/types/
-          echo "📦 Infra package:"  
-          ls -la packages/infra/
-
-      - name: Build essential packages for Next.js module resolution
-        run: |
-          # Build packages in dependency order
+          
           echo "🚀 Building essential packages for Next.js module resolution..."
           
           # 1. Build types package first (no dependencies)
@@ -111,10 +104,9 @@ jobs:
           cd ../..
           
           echo "🎉 Essential packages build completed"
-
-      - name: Build application
-        run: SKIP_ENV_VALIDATION=true pnpm build
-        continue-on-error: false
+          
+          echo "🏗️ Building Next.js application..."
+          SKIP_ENV_VALIDATION=true pnpm build
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
