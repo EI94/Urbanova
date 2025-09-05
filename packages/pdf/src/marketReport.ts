@@ -54,7 +54,7 @@ interface MarketInsight {
   type: 'trend' | 'opportunity' | 'risk' | 'balance' | 'volatility';
   confidence: number;
 }
-import { PDFGeneratorService } from '../../../src/lib/pdfGeneratorService';
+import { PDFGeneratorService } from '@urbanova/tools/procurement/pdfGeneratorService';
 import { HeatmapGeneratorService } from '@urbanova/agents/src/market/heatmap';
 
 export class MarketTrendReportGenerator {

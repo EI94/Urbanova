@@ -261,6 +261,9 @@ importers:
       '@types/cheerio':
         specifier: ^0.22.35
         version: 0.22.35
+      '@types/jest':
+        specifier: ^29.5.14
+        version: 29.5.14
       '@types/jsonwebtoken':
         specifier: ^9.0.10
         version: 9.0.10
@@ -333,13 +336,13 @@ importers:
         version: 29.5.14
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@22.18.0)
+        version: 29.7.0(@types/node@20.19.11)
       jest-environment-node:
         specifier: ^29.7.0
         version: 29.7.0
       ts-jest:
         specifier: ^29.4.1
-        version: 29.4.1(@babel/core@7.28.3)(@jest/transform@30.1.2)(@jest/types@30.0.5)(babel-jest@30.1.2(@babel/core@7.28.3))(jest-util@30.0.5)(jest@29.7.0(@types/node@22.18.0))(typescript@5.8.2)
+        version: 29.4.1(@babel/core@7.28.3)(@jest/transform@30.1.2)(@jest/types@30.0.5)(babel-jest@30.1.2(@babel/core@7.28.3))(jest-util@30.0.5)(jest@29.7.0(@types/node@20.19.11))(typescript@5.8.2)
       typescript:
         specifier: ^5.8.2
         version: 5.8.2
@@ -488,6 +491,9 @@ importers:
       '@urbanova/types':
         specifier: file:../types
         version: link:../types
+      uuid:
+        specifier: ^10.0.0
+        version: 10.0.0
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -495,6 +501,9 @@ importers:
       '@types/jest':
         specifier: ^29.5.0
         version: 29.5.14
+      '@types/uuid':
+        specifier: ^10.0.0
+        version: 10.0.0
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@22.18.0)
@@ -586,10 +595,10 @@ importers:
         version: 29.5.14
       jest:
         specifier: ^29.5.0
-        version: 29.7.0(@types/node@20.19.11)
+        version: 29.7.0(@types/node@22.18.0)
       ts-jest:
         specifier: ^29.1.0
-        version: 29.4.1(@babel/core@7.28.3)(@jest/transform@30.1.2)(@jest/types@30.0.5)(babel-jest@30.1.2(@babel/core@7.28.3))(jest-util@30.0.5)(jest@29.7.0(@types/node@20.19.11))(typescript@5.8.2)
+        version: 29.4.1(@babel/core@7.28.3)(@jest/transform@30.1.2)(@jest/types@30.0.5)(babel-jest@30.1.2(@babel/core@7.28.3))(jest-util@30.0.5)(jest@29.7.0(@types/node@22.18.0))(typescript@5.8.2)
       typescript:
         specifier: ^5.0.0
         version: 5.8.2
@@ -3260,6 +3269,9 @@ packages:
 
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
+
+  '@types/uuid@10.0.0':
+    resolution: {integrity: sha512-7gqG38EyHgyP1S+7+xomFtL+ZNHcKv6DwNaCZmJmo1vgMugyF3TCnXVg4t1uk89mLNwnLtnY3TpOpCOyp1/xHQ==}
 
   '@types/uuid@9.0.8':
     resolution: {integrity: sha512-jg+97EGIcY9AGHJJRaaPVgetKDsrTgbRjQ5Msgjh/DQKEFl0DtyRr/VCOyD1T2R1MNeWPK/u7JoGhlDZnKBAfA==}
@@ -10515,6 +10527,8 @@ snapshots:
 
   '@types/trusted-types@2.0.7':
     optional: true
+
+  '@types/uuid@10.0.0': {}
 
   '@types/uuid@9.0.8': {}
 
