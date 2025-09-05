@@ -101,20 +101,27 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
   };
 
   const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
+    const fileInput = event.target.files?.[0];
+    if (fileInput) {
+      if (fileInput.size > 5 * 1024 * 1024) {
         // 5MB limit
         toast("L'immagine deve essere inferiore a 5MB", { icon: '❌' });
         return;
       }
 
-      setAvatarFile(file);
-      const reader = new FileReader();
-      reader.onload = e => {
-        setAvatarPreview(e.target?.result as string);
+      // Create custom file object to avoid File type issues
+      const file = {
+        name: fileInput.name,
+        size: fileInput.size,
+        type: fileInput.type
       };
-      reader.readAsDataURL(file);
+
+      setAvatarFile(file);
+      // Create preview URL only on client side
+      if (typeof window !== 'undefined') {
+        const previewUrl = URL.createObjectURL(fileInput);
+        setAvatarPreview(previewUrl);
+      }
     }
   };
 

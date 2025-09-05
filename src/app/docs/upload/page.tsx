@@ -40,7 +40,8 @@ export default function UploadPage({}: UploadPageProps) {
     }
   };
 
-  const handleFileUpload = async (files: FileList) => {
+  const handleFileUpload = async (files: Array<{ name: string; size: number; type: string }> | null) => {
+    if (!files || files.length === 0) return;
     if (!tokenValid || !tokenInfo) {
       setError('Token non valido');
       return;
