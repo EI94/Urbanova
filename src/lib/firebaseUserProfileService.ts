@@ -66,7 +66,11 @@ export interface LoginAttempt {
 }
 
 export interface AvatarUpload {
-  file: File;
+  file: {
+    name: string;
+    size: number;
+    type: string;
+  };
   preview: string;
   progress: number;
 }
@@ -228,7 +232,7 @@ class FirebaseUserProfileService {
   // GESTIONE AVATAR
   // ========================================
 
-  async uploadAvatar(userId: string, file: File): Promise<string | null> {
+  async uploadAvatar(userId: string, file: { name: string; size: number; type: string }): Promise<string | null> {
     try {
       // Elimina avatar precedente se esiste
       const currentProfile = await this.getUserProfile(userId);

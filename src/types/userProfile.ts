@@ -37,7 +37,11 @@ export interface LoginAttempt {
 }
 
 export interface AvatarUpload {
-  file: File;
+  file: {
+    name: string;
+    size: number;
+    type: string;
+  };
   preview: string;
   progress: number;
 }
