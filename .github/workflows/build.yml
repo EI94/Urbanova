@@ -45,7 +45,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build internal packages
         run: |
@@ -129,7 +129,7 @@ jobs:
           version: '8'
           
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
         
       - name: Install Firebase CLI
         run: pnpm add -g firebase-tools
