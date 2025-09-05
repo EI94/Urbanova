@@ -117,21 +117,21 @@ class OMIService {
         throw new Error(`OMI API error: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as any; // Type assertion for API response
 
       return {
         zone,
         city,
         propertyType,
         priceRange: {
-          min: data.priceRange.min,
-          max: data.priceRange.max,
-          median: data.priceRange.median,
-          mean: data.priceRange.mean,
-          stdDev: data.priceRange.stdDev,
+          min: data.priceRange?.min || 0,
+          max: data.priceRange?.max || 0,
+          median: data.priceRange?.median || 0,
+          mean: data.priceRange?.mean || 0,
+          stdDev: data.priceRange?.stdDev || 0,
           confidence: data.confidence || 0.8,
         } as PriceRange,
-        lastUpdated: new Date(data.lastUpdated),
+        lastUpdated: new Date(data.lastUpdated || Date.now()),
         confidence: data.confidence || 0.8,
         source: 'API' as const,
       };
