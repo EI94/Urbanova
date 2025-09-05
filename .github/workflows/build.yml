@@ -47,11 +47,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Skip internal packages build
+      - name: Build essential packages for type resolution
         run: |
-          # Skip building internal packages - let TypeScript handle type checking
-          echo "Skipping internal packages build for CI..."
-          echo "TypeScript will handle type checking without building packages"
+          # Build only essential packages needed for type resolution
+          echo "Building essential packages for type resolution..."
+          pnpm -r --filter "@urbanova/types" build || echo "Types build failed, continuing..."
+          pnpm -r --filter "@urbanova/infra" build || echo "Infra build failed, continuing..."
 
       - name: TypeScript type check
         run: pnpm typecheck
