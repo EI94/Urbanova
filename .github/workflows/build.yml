@@ -47,6 +47,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
+      - name: Debug workspace structure
+        run: |
+          echo "🔍 Debugging workspace structure..."
+          pwd
+          ls -la
+          echo "📁 Packages directory:"
+          ls -la packages/
+
       - name: Build essential packages for Next.js module resolution
         run: |
           # Build packages in dependency order
@@ -55,6 +63,7 @@ jobs:
           # 1. Build types package first (no dependencies)
           echo "📦 Building @urbanova/types..."
           cd packages/types
+          echo "Current directory: $(pwd)"
           pnpm build
           echo "✅ Types build completed"
           ls -la dist/ || echo "No dist folder found"
@@ -63,6 +72,7 @@ jobs:
           # 2. Build infra package (depends on types)
           echo "📦 Building @urbanova/infra..."
           cd packages/infra
+          echo "Current directory: $(pwd)"
           pnpm build
           echo "✅ Infra build completed"
           ls -la dist/ || echo "No dist folder found"
@@ -71,6 +81,7 @@ jobs:
           # 3. Build toolos package (depends on types)
           echo "📦 Building @urbanova/toolos..."
           cd packages/toolos
+          echo "Current directory: $(pwd)"
           pnpm build
           echo "✅ Toolos build completed"
           ls -la dist/ || echo "No dist folder found"
@@ -79,6 +90,7 @@ jobs:
           # 4. Build data package (depends on types and infra)
           echo "📦 Building @urbanova/data..."
           cd packages/data
+          echo "Current directory: $(pwd)"
           pnpm build
           echo "✅ Data build completed"
           ls -la dist/ || echo "No dist folder found"
@@ -87,6 +99,7 @@ jobs:
           # 5. Build os package (depends on types and toolos)
           echo "📦 Building @urbanova/os..."
           cd packages/os
+          echo "Current directory: $(pwd)"
           pnpm build
           echo "✅ OS build completed"
           ls -la dist/ || echo "No dist folder found"
