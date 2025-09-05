@@ -49,20 +49,39 @@ jobs:
 
       - name: Build internal packages
         run: |
+          # Build packages in dependency order
+          echo "Building @urbanova/types..."
           cd packages/types && pnpm build
-          cd ../agents && pnpm build || true
-          cd ../data && pnpm build || true
-          cd ../infra && pnpm build || true
-          cd ../compliance && pnpm build || true
-          cd ../interactive && pnpm build || true
-          cd ../leads && pnpm build || true
-          cd ../messaging && pnpm build || true
-          cd ../os && pnpm build || true
-          cd ../pdf && pnpm build || true
-          cd ../projects && pnpm build || true
-          cd ../storage && pnpm build || true
-          cd ../toolos && pnpm build || true
-          cd ../tools && pnpm build || true
+          
+          echo "Building @urbanova/infra..."
+          cd ../infra && pnpm build
+          
+          echo "Building @urbanova/data..."
+          cd ../data && pnpm build
+          
+          echo "Building @urbanova/toolos..."
+          cd ../toolos && pnpm build
+          
+          echo "Building @urbanova/os..."
+          cd ../os && pnpm build
+          
+          echo "Building @urbanova/agents..."
+          cd ../agents && pnpm build
+          
+          echo "Building @urbanova/pdf..."
+          cd ../pdf && pnpm build
+          
+          echo "Building @urbanova/tools..."
+          cd ../tools && pnpm build
+          
+          echo "Building remaining packages..."
+          cd ../compliance && pnpm build
+          cd ../interactive && pnpm build
+          cd ../leads && pnpm build
+          cd ../messaging && pnpm build
+          cd ../projects && pnpm build
+          cd ../storage && pnpm build
+          cd ../billing && pnpm build
 
       - name: TypeScript type check
         run: pnpm typecheck
