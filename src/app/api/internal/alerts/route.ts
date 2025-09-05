@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { logger } from '@urbanova/infra';
+// import { logger } from '@urbanova/infra'; // Temporarily disabled for build
 
 /**
  * Endpoint interno per gestione alert Slack
@@ -104,7 +104,7 @@ function incrementAlertCount(ipAddress: string): void {
 
 async function sendSlackAlert(batch: SlackAlertBatch): Promise<boolean> {
   if (!SLACK_WEBHOOK_URL) {
-    logger.warn('SLACK_WEBHOOK_URL non configurato, alert non inviato', '');
+    console.warn('SLACK_WEBHOOK_URL non configurato, alert non inviato');
     return false;
   }
 
@@ -169,12 +169,12 @@ async function sendSlackAlert(batch: SlackAlertBatch): Promise<boolean> {
       throw new Error(`Slack API error: ${response.status} ${response.statusText}`);
     }
 
-    logger.info('Alert Slack inviato con successo', `errorCount: ${batch.count}, timeWindow: ${batch.timeWindow}`);
+    console.info('Alert Slack inviato con successo', `errorCount: ${batch.count}, timeWindow: ${batch.timeWindow}`);
 
     return true;
 
   } catch (error) {
-    logger.error('Errore nell\'invio alert Slack', `error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error('Errore nell\'invio alert Slack', `error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     return false;
   }
 }
@@ -213,7 +213,7 @@ export async function POST(request: NextRequest) {
 
     // Controlla rate limiting
     if (!shouldSendAlert(ipAddress)) {
-      logger.warn('Rate limit raggiunto per alert Slack', `ipAddress: ${ipAddress}`);
+      console.warn('Rate limit raggiunto per alert Slack', `ipAddress: ${ipAddress}`);
       return NextResponse.json(
         { error: 'Rate limit raggiunto' },
         { status: 429 }
@@ -245,7 +245,7 @@ export async function POST(request: NextRequest) {
     errorBuffer.push(alert);
 
     // Log dell'errore
-    logger.error('Errore 5xx rilevato', `route: ${alert.route}, method: ${alert.method}, statusCode: ${alert.statusCode}, error: ${alert.error.message}`);
+    console.error('Errore 5xx rilevato', `route: ${alert.route}, method: ${alert.method}, statusCode: ${alert.statusCode}, error: ${alert.error.message}`);
 
     // Controlla se inviare alert batch
     if (errorBuffer.length >= ALERT_BATCH_SIZE) {
@@ -272,7 +272,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    logger.error('Errore nell\'endpoint alert', `error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error('Errore nell\'endpoint alert', `error: ${error instanceof Error ? error.message : 'Unknown error'}`);
 
     return NextResponse.json(
       { error: 'Errore interno del server' },
@@ -295,7 +295,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(stats);
 
   } catch (error) {
-    logger.error('Errore nel recupero statistiche alert', `error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error('Errore nel recupero statistiche alert', `error: ${error instanceof Error ? error.message : 'Unknown error'}`);
 
     return NextResponse.json(
       { error: 'Errore interno del server' },

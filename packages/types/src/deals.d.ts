@@ -306,7 +306,6 @@ declare const zWatchlist: z.ZodObject<{
         minTrustScore: number;
     }>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     filter: {
         city: string;
         limit?: number | undefined;
@@ -317,6 +316,7 @@ declare const zWatchlist: z.ZodObject<{
         includeOffMarket?: boolean | undefined;
         maxDistance?: number | undefined;
     };
+    id: string;
     createdAt: Date;
     userId: string;
     lastCheckedAt: Date;
@@ -327,7 +327,6 @@ declare const zWatchlist: z.ZodObject<{
         minTrustScore: number;
     };
 }, {
-    id: string;
     filter: {
         city: string;
         limit?: number | undefined;
@@ -338,6 +337,7 @@ declare const zWatchlist: z.ZodObject<{
         includeOffMarket?: boolean | undefined;
         maxDistance?: number | undefined;
     };
+    id: string;
     createdAt: Date;
     userId: string;
     lastCheckedAt: Date;

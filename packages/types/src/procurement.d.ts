@@ -403,6 +403,7 @@ export declare const zRDO: z.ZodObject<{
         requirements: string[];
     }>;
 }, "strip", z.ZodTypeAny, {
+    projectId: string;
     id: string;
     description: string;
     status: "draft" | "open" | "cancelled" | "awarded" | "evaluating";
@@ -413,7 +414,6 @@ export declare const zRDO: z.ZodObject<{
         estimatedValue: number;
         requirements: string[];
     };
-    projectId: string;
     title: string;
     createdAt: Date;
     lines: {
@@ -449,6 +449,7 @@ export declare const zRDO: z.ZodObject<{
     awardedTo?: string | undefined;
     awardedAt?: Date | undefined;
 }, {
+    projectId: string;
     id: string;
     description: string;
     status: "draft" | "open" | "cancelled" | "awarded" | "evaluating";
@@ -459,7 +460,6 @@ export declare const zRDO: z.ZodObject<{
         estimatedValue: number;
         requirements: string[];
     };
-    projectId: string;
     title: string;
     createdAt: Date;
     lines: {
@@ -1049,11 +1049,6 @@ export declare const zVendor: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    category: string[];
-    createdAt: Date;
-    name: string;
-    updatedAt: Date;
     documents: {
         id: string;
         status: "valid" | "expired" | "pending_verification";
@@ -1065,6 +1060,11 @@ export declare const zVendor: z.ZodObject<{
         verifiedAt?: Date | undefined;
         verifiedBy?: string | undefined;
     }[];
+    id: string;
+    category: string[];
+    createdAt: Date;
+    name: string;
+    updatedAt: Date;
     address: {
         province: string;
         city: string;
@@ -1081,11 +1081,6 @@ export declare const zVendor: z.ZodObject<{
     totalValue: number;
     phone?: string | undefined;
 }, {
-    id: string;
-    category: string[];
-    createdAt: Date;
-    name: string;
-    updatedAt: Date;
     documents: {
         id: string;
         status: "valid" | "expired" | "pending_verification";
@@ -1097,6 +1092,11 @@ export declare const zVendor: z.ZodObject<{
         verifiedAt?: Date | undefined;
         verifiedBy?: string | undefined;
     }[];
+    id: string;
+    category: string[];
+    createdAt: Date;
+    name: string;
+    updatedAt: Date;
     address: {
         province: string;
         city: string;

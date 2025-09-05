@@ -359,23 +359,23 @@ declare const zCitation: z.ZodObject<{
     relevance: z.ZodNumber;
     timestamp: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
+    timestamp: Date;
     id: string;
     documentId: string;
     documentTitle: string;
     excerpt: string;
     relevance: number;
-    timestamp: Date;
     url?: string | undefined;
     pageNumber?: number | undefined;
     sectionNumber?: string | undefined;
     subsection?: string | undefined;
 }, {
+    timestamp: Date;
     id: string;
     documentId: string;
     documentTitle: string;
     excerpt: string;
     relevance: number;
-    timestamp: Date;
     url?: string | undefined;
     pageNumber?: number | undefined;
     sectionNumber?: string | undefined;
@@ -399,8 +399,8 @@ declare const zRuleParameter: z.ZodObject<{
     type: "NUMBER" | "STRING" | "BOOLEAN" | "ENUM" | "RANGE";
     name: string;
     required: boolean;
-    unit?: string | undefined;
     value?: any;
+    unit?: string | undefined;
     minValue?: number | undefined;
     maxValue?: number | undefined;
     enumValues?: string[] | undefined;
@@ -411,8 +411,8 @@ declare const zRuleParameter: z.ZodObject<{
     type: "NUMBER" | "STRING" | "BOOLEAN" | "ENUM" | "RANGE";
     name: string;
     required: boolean;
-    unit?: string | undefined;
     value?: any;
+    unit?: string | undefined;
     minValue?: number | undefined;
     maxValue?: number | undefined;
     enumValues?: string[] | undefined;
@@ -467,8 +467,8 @@ declare const zPatternRule: z.ZodObject<{
         type: "NUMBER" | "STRING" | "BOOLEAN" | "ENUM" | "RANGE";
         name: string;
         required: boolean;
-        unit?: string | undefined;
         value?: any;
+        unit?: string | undefined;
         minValue?: number | undefined;
         maxValue?: number | undefined;
         enumValues?: string[] | undefined;
@@ -479,8 +479,8 @@ declare const zPatternRule: z.ZodObject<{
         type: "NUMBER" | "STRING" | "BOOLEAN" | "ENUM" | "RANGE";
         name: string;
         required: boolean;
-        unit?: string | undefined;
         value?: any;
+        unit?: string | undefined;
         minValue?: number | undefined;
         maxValue?: number | undefined;
         enumValues?: string[] | undefined;
@@ -546,8 +546,8 @@ declare const zPatternRule: z.ZodObject<{
         type: "NUMBER" | "STRING" | "BOOLEAN" | "ENUM" | "RANGE";
         name: string;
         required: boolean;
-        unit?: string | undefined;
         value?: any;
+        unit?: string | undefined;
         minValue?: number | undefined;
         maxValue?: number | undefined;
         enumValues?: string[] | undefined;
@@ -582,8 +582,8 @@ declare const zPatternRule: z.ZodObject<{
         type: "NUMBER" | "STRING" | "BOOLEAN" | "ENUM" | "RANGE";
         name: string;
         required: boolean;
-        unit?: string | undefined;
         value?: any;
+        unit?: string | undefined;
         minValue?: number | undefined;
         maxValue?: number | undefined;
         enumValues?: string[] | undefined;
@@ -614,23 +614,23 @@ declare const zComplianceViolation: z.ZodObject<{
         relevance: z.ZodNumber;
         timestamp: z.ZodDate;
     }, "strip", z.ZodTypeAny, {
+        timestamp: Date;
         id: string;
         documentId: string;
         documentTitle: string;
         excerpt: string;
         relevance: number;
-        timestamp: Date;
         url?: string | undefined;
         pageNumber?: number | undefined;
         sectionNumber?: string | undefined;
         subsection?: string | undefined;
     }, {
+        timestamp: Date;
         id: string;
         documentId: string;
         documentTitle: string;
         excerpt: string;
         relevance: number;
-        timestamp: Date;
         url?: string | undefined;
         pageNumber?: number | undefined;
         sectionNumber?: string | undefined;
@@ -640,6 +640,18 @@ declare const zComplianceViolation: z.ZodObject<{
     suggestedFix: z.ZodOptional<z.ZodAny>;
     requiresManualReview: z.ZodBoolean;
 }, "strip", z.ZodTypeAny, {
+    citations: {
+        timestamp: Date;
+        id: string;
+        documentId: string;
+        documentTitle: string;
+        excerpt: string;
+        relevance: number;
+        url?: string | undefined;
+        pageNumber?: number | undefined;
+        sectionNumber?: string | undefined;
+        subsection?: string | undefined;
+    }[];
     id: string;
     description: string;
     type: "DISTANCE" | "HEIGHT" | "AREA" | "VOLUME" | "PARKING" | "OTHER";
@@ -648,23 +660,23 @@ declare const zComplianceViolation: z.ZodObject<{
     requiresManualReview: boolean;
     checkId: string;
     deviation: number;
-    citations: {
-        id: string;
-        documentId: string;
-        documentTitle: string;
-        excerpt: string;
-        relevance: number;
-        timestamp: Date;
-        url?: string | undefined;
-        pageNumber?: number | undefined;
-        sectionNumber?: string | undefined;
-        subsection?: string | undefined;
-    }[];
     autoFixable: boolean;
     actualValue?: any;
     expectedValue?: any;
     suggestedFix?: any;
 }, {
+    citations: {
+        timestamp: Date;
+        id: string;
+        documentId: string;
+        documentTitle: string;
+        excerpt: string;
+        relevance: number;
+        url?: string | undefined;
+        pageNumber?: number | undefined;
+        sectionNumber?: string | undefined;
+        subsection?: string | undefined;
+    }[];
     id: string;
     description: string;
     type: "DISTANCE" | "HEIGHT" | "AREA" | "VOLUME" | "PARKING" | "OTHER";
@@ -673,18 +685,6 @@ declare const zComplianceViolation: z.ZodObject<{
     requiresManualReview: boolean;
     checkId: string;
     deviation: number;
-    citations: {
-        id: string;
-        documentId: string;
-        documentTitle: string;
-        excerpt: string;
-        relevance: number;
-        timestamp: Date;
-        url?: string | undefined;
-        pageNumber?: number | undefined;
-        sectionNumber?: string | undefined;
-        subsection?: string | undefined;
-    }[];
     autoFixable: boolean;
     actualValue?: any;
     expectedValue?: any;
@@ -711,23 +711,23 @@ declare const zComplianceCheck: z.ZodObject<{
         relevance: z.ZodNumber;
         timestamp: z.ZodDate;
     }, "strip", z.ZodTypeAny, {
+        timestamp: Date;
         id: string;
         documentId: string;
         documentTitle: string;
         excerpt: string;
         relevance: number;
-        timestamp: Date;
         url?: string | undefined;
         pageNumber?: number | undefined;
         sectionNumber?: string | undefined;
         subsection?: string | undefined;
     }, {
+        timestamp: Date;
         id: string;
         documentId: string;
         documentTitle: string;
         excerpt: string;
         relevance: number;
-        timestamp: Date;
         url?: string | undefined;
         pageNumber?: number | undefined;
         sectionNumber?: string | undefined;
@@ -755,23 +755,23 @@ declare const zComplianceCheck: z.ZodObject<{
             relevance: z.ZodNumber;
             timestamp: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            timestamp: Date;
             id: string;
             documentId: string;
             documentTitle: string;
             excerpt: string;
             relevance: number;
-            timestamp: Date;
             url?: string | undefined;
             pageNumber?: number | undefined;
             sectionNumber?: string | undefined;
             subsection?: string | undefined;
         }, {
+            timestamp: Date;
             id: string;
             documentId: string;
             documentTitle: string;
             excerpt: string;
             relevance: number;
-            timestamp: Date;
             url?: string | undefined;
             pageNumber?: number | undefined;
             sectionNumber?: string | undefined;
@@ -781,6 +781,18 @@ declare const zComplianceCheck: z.ZodObject<{
         suggestedFix: z.ZodOptional<z.ZodAny>;
         requiresManualReview: z.ZodBoolean;
     }, "strip", z.ZodTypeAny, {
+        citations: {
+            timestamp: Date;
+            id: string;
+            documentId: string;
+            documentTitle: string;
+            excerpt: string;
+            relevance: number;
+            url?: string | undefined;
+            pageNumber?: number | undefined;
+            sectionNumber?: string | undefined;
+            subsection?: string | undefined;
+        }[];
         id: string;
         description: string;
         type: "DISTANCE" | "HEIGHT" | "AREA" | "VOLUME" | "PARKING" | "OTHER";
@@ -789,23 +801,23 @@ declare const zComplianceCheck: z.ZodObject<{
         requiresManualReview: boolean;
         checkId: string;
         deviation: number;
-        citations: {
-            id: string;
-            documentId: string;
-            documentTitle: string;
-            excerpt: string;
-            relevance: number;
-            timestamp: Date;
-            url?: string | undefined;
-            pageNumber?: number | undefined;
-            sectionNumber?: string | undefined;
-            subsection?: string | undefined;
-        }[];
         autoFixable: boolean;
         actualValue?: any;
         expectedValue?: any;
         suggestedFix?: any;
     }, {
+        citations: {
+            timestamp: Date;
+            id: string;
+            documentId: string;
+            documentTitle: string;
+            excerpt: string;
+            relevance: number;
+            url?: string | undefined;
+            pageNumber?: number | undefined;
+            sectionNumber?: string | undefined;
+            subsection?: string | undefined;
+        }[];
         id: string;
         description: string;
         type: "DISTANCE" | "HEIGHT" | "AREA" | "VOLUME" | "PARKING" | "OTHER";
@@ -814,18 +826,6 @@ declare const zComplianceCheck: z.ZodObject<{
         requiresManualReview: boolean;
         checkId: string;
         deviation: number;
-        citations: {
-            id: string;
-            documentId: string;
-            documentTitle: string;
-            excerpt: string;
-            relevance: number;
-            timestamp: Date;
-            url?: string | undefined;
-            pageNumber?: number | undefined;
-            sectionNumber?: string | undefined;
-            subsection?: string | undefined;
-        }[];
         autoFixable: boolean;
         actualValue?: any;
         expectedValue?: any;
@@ -837,25 +837,37 @@ declare const zComplianceCheck: z.ZodObject<{
     checkedBy: z.ZodString;
     notes: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    status: "COMPLIANT" | "NON_COMPLIANT" | "PARTIALLY_COMPLIANT" | "REQUIRES_REVIEW" | "NOT_APPLICABLE";
     projectId: string;
-    municipalityId: string;
-    ruleId: string;
-    deviation: number;
     citations: {
+        timestamp: Date;
         id: string;
         documentId: string;
         documentTitle: string;
         excerpt: string;
         relevance: number;
-        timestamp: Date;
         url?: string | undefined;
         pageNumber?: number | undefined;
         sectionNumber?: string | undefined;
         subsection?: string | undefined;
     }[];
+    id: string;
+    status: "COMPLIANT" | "NON_COMPLIANT" | "PARTIALLY_COMPLIANT" | "REQUIRES_REVIEW" | "NOT_APPLICABLE";
+    municipalityId: string;
+    ruleId: string;
+    deviation: number;
     violations: {
+        citations: {
+            timestamp: Date;
+            id: string;
+            documentId: string;
+            documentTitle: string;
+            excerpt: string;
+            relevance: number;
+            url?: string | undefined;
+            pageNumber?: number | undefined;
+            sectionNumber?: string | undefined;
+            subsection?: string | undefined;
+        }[];
         id: string;
         description: string;
         type: "DISTANCE" | "HEIGHT" | "AREA" | "VOLUME" | "PARKING" | "OTHER";
@@ -864,18 +876,6 @@ declare const zComplianceCheck: z.ZodObject<{
         requiresManualReview: boolean;
         checkId: string;
         deviation: number;
-        citations: {
-            id: string;
-            documentId: string;
-            documentTitle: string;
-            excerpt: string;
-            relevance: number;
-            timestamp: Date;
-            url?: string | undefined;
-            pageNumber?: number | undefined;
-            sectionNumber?: string | undefined;
-            subsection?: string | undefined;
-        }[];
         autoFixable: boolean;
         actualValue?: any;
         expectedValue?: any;
@@ -889,25 +889,37 @@ declare const zComplianceCheck: z.ZodObject<{
     expectedValue?: any;
     notes?: string | undefined;
 }, {
-    id: string;
-    status: "COMPLIANT" | "NON_COMPLIANT" | "PARTIALLY_COMPLIANT" | "REQUIRES_REVIEW" | "NOT_APPLICABLE";
     projectId: string;
-    municipalityId: string;
-    ruleId: string;
-    deviation: number;
     citations: {
+        timestamp: Date;
         id: string;
         documentId: string;
         documentTitle: string;
         excerpt: string;
         relevance: number;
-        timestamp: Date;
         url?: string | undefined;
         pageNumber?: number | undefined;
         sectionNumber?: string | undefined;
         subsection?: string | undefined;
     }[];
+    id: string;
+    status: "COMPLIANT" | "NON_COMPLIANT" | "PARTIALLY_COMPLIANT" | "REQUIRES_REVIEW" | "NOT_APPLICABLE";
+    municipalityId: string;
+    ruleId: string;
+    deviation: number;
     violations: {
+        citations: {
+            timestamp: Date;
+            id: string;
+            documentId: string;
+            documentTitle: string;
+            excerpt: string;
+            relevance: number;
+            url?: string | undefined;
+            pageNumber?: number | undefined;
+            sectionNumber?: string | undefined;
+            subsection?: string | undefined;
+        }[];
         id: string;
         description: string;
         type: "DISTANCE" | "HEIGHT" | "AREA" | "VOLUME" | "PARKING" | "OTHER";
@@ -916,18 +928,6 @@ declare const zComplianceCheck: z.ZodObject<{
         requiresManualReview: boolean;
         checkId: string;
         deviation: number;
-        citations: {
-            id: string;
-            documentId: string;
-            documentTitle: string;
-            excerpt: string;
-            relevance: number;
-            timestamp: Date;
-            url?: string | undefined;
-            pageNumber?: number | undefined;
-            sectionNumber?: string | undefined;
-            subsection?: string | undefined;
-        }[];
         autoFixable: boolean;
         actualValue?: any;
         expectedValue?: any;
@@ -968,23 +968,23 @@ declare const zComplianceReport: z.ZodObject<{
             relevance: z.ZodNumber;
             timestamp: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            timestamp: Date;
             id: string;
             documentId: string;
             documentTitle: string;
             excerpt: string;
             relevance: number;
-            timestamp: Date;
             url?: string | undefined;
             pageNumber?: number | undefined;
             sectionNumber?: string | undefined;
             subsection?: string | undefined;
         }, {
+            timestamp: Date;
             id: string;
             documentId: string;
             documentTitle: string;
             excerpt: string;
             relevance: number;
-            timestamp: Date;
             url?: string | undefined;
             pageNumber?: number | undefined;
             sectionNumber?: string | undefined;
@@ -1012,23 +1012,23 @@ declare const zComplianceReport: z.ZodObject<{
                 relevance: z.ZodNumber;
                 timestamp: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                timestamp: Date;
                 id: string;
                 documentId: string;
                 documentTitle: string;
                 excerpt: string;
                 relevance: number;
-                timestamp: Date;
                 url?: string | undefined;
                 pageNumber?: number | undefined;
                 sectionNumber?: string | undefined;
                 subsection?: string | undefined;
             }, {
+                timestamp: Date;
                 id: string;
                 documentId: string;
                 documentTitle: string;
                 excerpt: string;
                 relevance: number;
-                timestamp: Date;
                 url?: string | undefined;
                 pageNumber?: number | undefined;
                 sectionNumber?: string | undefined;
@@ -1038,6 +1038,18 @@ declare const zComplianceReport: z.ZodObject<{
             suggestedFix: z.ZodOptional<z.ZodAny>;
             requiresManualReview: z.ZodBoolean;
         }, "strip", z.ZodTypeAny, {
+            citations: {
+                timestamp: Date;
+                id: string;
+                documentId: string;
+                documentTitle: string;
+                excerpt: string;
+                relevance: number;
+                url?: string | undefined;
+                pageNumber?: number | undefined;
+                sectionNumber?: string | undefined;
+                subsection?: string | undefined;
+            }[];
             id: string;
             description: string;
             type: "DISTANCE" | "HEIGHT" | "AREA" | "VOLUME" | "PARKING" | "OTHER";
@@ -1046,23 +1058,23 @@ declare const zComplianceReport: z.ZodObject<{
             requiresManualReview: boolean;
             checkId: string;
             deviation: number;
-            citations: {
-                id: string;
-                documentId: string;
-                documentTitle: string;
-                excerpt: string;
-                relevance: number;
-                timestamp: Date;
-                url?: string | undefined;
-                pageNumber?: number | undefined;
-                sectionNumber?: string | undefined;
-                subsection?: string | undefined;
-            }[];
             autoFixable: boolean;
             actualValue?: any;
             expectedValue?: any;
             suggestedFix?: any;
         }, {
+            citations: {
+                timestamp: Date;
+                id: string;
+                documentId: string;
+                documentTitle: string;
+                excerpt: string;
+                relevance: number;
+                url?: string | undefined;
+                pageNumber?: number | undefined;
+                sectionNumber?: string | undefined;
+                subsection?: string | undefined;
+            }[];
             id: string;
             description: string;
             type: "DISTANCE" | "HEIGHT" | "AREA" | "VOLUME" | "PARKING" | "OTHER";
@@ -1071,18 +1083,6 @@ declare const zComplianceReport: z.ZodObject<{
             requiresManualReview: boolean;
             checkId: string;
             deviation: number;
-            citations: {
-                id: string;
-                documentId: string;
-                documentTitle: string;
-                excerpt: string;
-                relevance: number;
-                timestamp: Date;
-                url?: string | undefined;
-                pageNumber?: number | undefined;
-                sectionNumber?: string | undefined;
-                subsection?: string | undefined;
-            }[];
             autoFixable: boolean;
             actualValue?: any;
             expectedValue?: any;
@@ -1094,25 +1094,37 @@ declare const zComplianceReport: z.ZodObject<{
         checkedBy: z.ZodString;
         notes: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
-        status: "COMPLIANT" | "NON_COMPLIANT" | "PARTIALLY_COMPLIANT" | "REQUIRES_REVIEW" | "NOT_APPLICABLE";
         projectId: string;
-        municipalityId: string;
-        ruleId: string;
-        deviation: number;
         citations: {
+            timestamp: Date;
             id: string;
             documentId: string;
             documentTitle: string;
             excerpt: string;
             relevance: number;
-            timestamp: Date;
             url?: string | undefined;
             pageNumber?: number | undefined;
             sectionNumber?: string | undefined;
             subsection?: string | undefined;
         }[];
+        id: string;
+        status: "COMPLIANT" | "NON_COMPLIANT" | "PARTIALLY_COMPLIANT" | "REQUIRES_REVIEW" | "NOT_APPLICABLE";
+        municipalityId: string;
+        ruleId: string;
+        deviation: number;
         violations: {
+            citations: {
+                timestamp: Date;
+                id: string;
+                documentId: string;
+                documentTitle: string;
+                excerpt: string;
+                relevance: number;
+                url?: string | undefined;
+                pageNumber?: number | undefined;
+                sectionNumber?: string | undefined;
+                subsection?: string | undefined;
+            }[];
             id: string;
             description: string;
             type: "DISTANCE" | "HEIGHT" | "AREA" | "VOLUME" | "PARKING" | "OTHER";
@@ -1121,18 +1133,6 @@ declare const zComplianceReport: z.ZodObject<{
             requiresManualReview: boolean;
             checkId: string;
             deviation: number;
-            citations: {
-                id: string;
-                documentId: string;
-                documentTitle: string;
-                excerpt: string;
-                relevance: number;
-                timestamp: Date;
-                url?: string | undefined;
-                pageNumber?: number | undefined;
-                sectionNumber?: string | undefined;
-                subsection?: string | undefined;
-            }[];
             autoFixable: boolean;
             actualValue?: any;
             expectedValue?: any;
@@ -1146,25 +1146,37 @@ declare const zComplianceReport: z.ZodObject<{
         expectedValue?: any;
         notes?: string | undefined;
     }, {
-        id: string;
-        status: "COMPLIANT" | "NON_COMPLIANT" | "PARTIALLY_COMPLIANT" | "REQUIRES_REVIEW" | "NOT_APPLICABLE";
         projectId: string;
-        municipalityId: string;
-        ruleId: string;
-        deviation: number;
         citations: {
+            timestamp: Date;
             id: string;
             documentId: string;
             documentTitle: string;
             excerpt: string;
             relevance: number;
-            timestamp: Date;
             url?: string | undefined;
             pageNumber?: number | undefined;
             sectionNumber?: string | undefined;
             subsection?: string | undefined;
         }[];
+        id: string;
+        status: "COMPLIANT" | "NON_COMPLIANT" | "PARTIALLY_COMPLIANT" | "REQUIRES_REVIEW" | "NOT_APPLICABLE";
+        municipalityId: string;
+        ruleId: string;
+        deviation: number;
         violations: {
+            citations: {
+                timestamp: Date;
+                id: string;
+                documentId: string;
+                documentTitle: string;
+                excerpt: string;
+                relevance: number;
+                url?: string | undefined;
+                pageNumber?: number | undefined;
+                sectionNumber?: string | undefined;
+                subsection?: string | undefined;
+            }[];
             id: string;
             description: string;
             type: "DISTANCE" | "HEIGHT" | "AREA" | "VOLUME" | "PARKING" | "OTHER";
@@ -1173,18 +1185,6 @@ declare const zComplianceReport: z.ZodObject<{
             requiresManualReview: boolean;
             checkId: string;
             deviation: number;
-            citations: {
-                id: string;
-                documentId: string;
-                documentTitle: string;
-                excerpt: string;
-                relevance: number;
-                timestamp: Date;
-                url?: string | undefined;
-                pageNumber?: number | undefined;
-                sectionNumber?: string | undefined;
-                subsection?: string | undefined;
-            }[];
             autoFixable: boolean;
             actualValue?: any;
             expectedValue?: any;
@@ -1220,23 +1220,23 @@ declare const zComplianceReport: z.ZodObject<{
             relevance: z.ZodNumber;
             timestamp: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            timestamp: Date;
             id: string;
             documentId: string;
             documentTitle: string;
             excerpt: string;
             relevance: number;
-            timestamp: Date;
             url?: string | undefined;
             pageNumber?: number | undefined;
             sectionNumber?: string | undefined;
             subsection?: string | undefined;
         }, {
+            timestamp: Date;
             id: string;
             documentId: string;
             documentTitle: string;
             excerpt: string;
             relevance: number;
-            timestamp: Date;
             url?: string | undefined;
             pageNumber?: number | undefined;
             sectionNumber?: string | undefined;
@@ -1246,6 +1246,18 @@ declare const zComplianceReport: z.ZodObject<{
         suggestedFix: z.ZodOptional<z.ZodAny>;
         requiresManualReview: z.ZodBoolean;
     }, "strip", z.ZodTypeAny, {
+        citations: {
+            timestamp: Date;
+            id: string;
+            documentId: string;
+            documentTitle: string;
+            excerpt: string;
+            relevance: number;
+            url?: string | undefined;
+            pageNumber?: number | undefined;
+            sectionNumber?: string | undefined;
+            subsection?: string | undefined;
+        }[];
         id: string;
         description: string;
         type: "DISTANCE" | "HEIGHT" | "AREA" | "VOLUME" | "PARKING" | "OTHER";
@@ -1254,23 +1266,23 @@ declare const zComplianceReport: z.ZodObject<{
         requiresManualReview: boolean;
         checkId: string;
         deviation: number;
-        citations: {
-            id: string;
-            documentId: string;
-            documentTitle: string;
-            excerpt: string;
-            relevance: number;
-            timestamp: Date;
-            url?: string | undefined;
-            pageNumber?: number | undefined;
-            sectionNumber?: string | undefined;
-            subsection?: string | undefined;
-        }[];
         autoFixable: boolean;
         actualValue?: any;
         expectedValue?: any;
         suggestedFix?: any;
     }, {
+        citations: {
+            timestamp: Date;
+            id: string;
+            documentId: string;
+            documentTitle: string;
+            excerpt: string;
+            relevance: number;
+            url?: string | undefined;
+            pageNumber?: number | undefined;
+            sectionNumber?: string | undefined;
+            subsection?: string | undefined;
+        }[];
         id: string;
         description: string;
         type: "DISTANCE" | "HEIGHT" | "AREA" | "VOLUME" | "PARKING" | "OTHER";
@@ -1279,18 +1291,6 @@ declare const zComplianceReport: z.ZodObject<{
         requiresManualReview: boolean;
         checkId: string;
         deviation: number;
-        citations: {
-            id: string;
-            documentId: string;
-            documentTitle: string;
-            excerpt: string;
-            relevance: number;
-            timestamp: Date;
-            url?: string | undefined;
-            pageNumber?: number | undefined;
-            sectionNumber?: string | undefined;
-            subsection?: string | undefined;
-        }[];
         autoFixable: boolean;
         actualValue?: any;
         expectedValue?: any;
@@ -1326,10 +1326,22 @@ declare const zComplianceReport: z.ZodObject<{
     generatedBy: z.ZodString;
     expiresAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     projectId: string;
+    id: string;
     municipalityId: string;
     violations: {
+        citations: {
+            timestamp: Date;
+            id: string;
+            documentId: string;
+            documentTitle: string;
+            excerpt: string;
+            relevance: number;
+            url?: string | undefined;
+            pageNumber?: number | undefined;
+            sectionNumber?: string | undefined;
+            subsection?: string | undefined;
+        }[];
         id: string;
         description: string;
         type: "DISTANCE" | "HEIGHT" | "AREA" | "VOLUME" | "PARKING" | "OTHER";
@@ -1338,18 +1350,6 @@ declare const zComplianceReport: z.ZodObject<{
         requiresManualReview: boolean;
         checkId: string;
         deviation: number;
-        citations: {
-            id: string;
-            documentId: string;
-            documentTitle: string;
-            excerpt: string;
-            relevance: number;
-            timestamp: Date;
-            url?: string | undefined;
-            pageNumber?: number | undefined;
-            sectionNumber?: string | undefined;
-            subsection?: string | undefined;
-        }[];
         autoFixable: boolean;
         actualValue?: any;
         expectedValue?: any;
@@ -1359,25 +1359,37 @@ declare const zComplianceReport: z.ZodObject<{
     overallStatus: "COMPLIANT" | "NON_COMPLIANT" | "PARTIALLY_COMPLIANT" | "REQUIRES_REVIEW" | "NOT_APPLICABLE";
     overallScore: number;
     checks: {
-        id: string;
-        status: "COMPLIANT" | "NON_COMPLIANT" | "PARTIALLY_COMPLIANT" | "REQUIRES_REVIEW" | "NOT_APPLICABLE";
         projectId: string;
-        municipalityId: string;
-        ruleId: string;
-        deviation: number;
         citations: {
+            timestamp: Date;
             id: string;
             documentId: string;
             documentTitle: string;
             excerpt: string;
             relevance: number;
-            timestamp: Date;
             url?: string | undefined;
             pageNumber?: number | undefined;
             sectionNumber?: string | undefined;
             subsection?: string | undefined;
         }[];
+        id: string;
+        status: "COMPLIANT" | "NON_COMPLIANT" | "PARTIALLY_COMPLIANT" | "REQUIRES_REVIEW" | "NOT_APPLICABLE";
+        municipalityId: string;
+        ruleId: string;
+        deviation: number;
         violations: {
+            citations: {
+                timestamp: Date;
+                id: string;
+                documentId: string;
+                documentTitle: string;
+                excerpt: string;
+                relevance: number;
+                url?: string | undefined;
+                pageNumber?: number | undefined;
+                sectionNumber?: string | undefined;
+                subsection?: string | undefined;
+            }[];
             id: string;
             description: string;
             type: "DISTANCE" | "HEIGHT" | "AREA" | "VOLUME" | "PARKING" | "OTHER";
@@ -1386,18 +1398,6 @@ declare const zComplianceReport: z.ZodObject<{
             requiresManualReview: boolean;
             checkId: string;
             deviation: number;
-            citations: {
-                id: string;
-                documentId: string;
-                documentTitle: string;
-                excerpt: string;
-                relevance: number;
-                timestamp: Date;
-                url?: string | undefined;
-                pageNumber?: number | undefined;
-                sectionNumber?: string | undefined;
-                subsection?: string | undefined;
-            }[];
             autoFixable: boolean;
             actualValue?: any;
             expectedValue?: any;
@@ -1424,10 +1424,22 @@ declare const zComplianceReport: z.ZodObject<{
     generatedBy: string;
     expiresAt: Date;
 }, {
-    id: string;
     projectId: string;
+    id: string;
     municipalityId: string;
     violations: {
+        citations: {
+            timestamp: Date;
+            id: string;
+            documentId: string;
+            documentTitle: string;
+            excerpt: string;
+            relevance: number;
+            url?: string | undefined;
+            pageNumber?: number | undefined;
+            sectionNumber?: string | undefined;
+            subsection?: string | undefined;
+        }[];
         id: string;
         description: string;
         type: "DISTANCE" | "HEIGHT" | "AREA" | "VOLUME" | "PARKING" | "OTHER";
@@ -1436,18 +1448,6 @@ declare const zComplianceReport: z.ZodObject<{
         requiresManualReview: boolean;
         checkId: string;
         deviation: number;
-        citations: {
-            id: string;
-            documentId: string;
-            documentTitle: string;
-            excerpt: string;
-            relevance: number;
-            timestamp: Date;
-            url?: string | undefined;
-            pageNumber?: number | undefined;
-            sectionNumber?: string | undefined;
-            subsection?: string | undefined;
-        }[];
         autoFixable: boolean;
         actualValue?: any;
         expectedValue?: any;
@@ -1457,25 +1457,37 @@ declare const zComplianceReport: z.ZodObject<{
     overallStatus: "COMPLIANT" | "NON_COMPLIANT" | "PARTIALLY_COMPLIANT" | "REQUIRES_REVIEW" | "NOT_APPLICABLE";
     overallScore: number;
     checks: {
-        id: string;
-        status: "COMPLIANT" | "NON_COMPLIANT" | "PARTIALLY_COMPLIANT" | "REQUIRES_REVIEW" | "NOT_APPLICABLE";
         projectId: string;
-        municipalityId: string;
-        ruleId: string;
-        deviation: number;
         citations: {
+            timestamp: Date;
             id: string;
             documentId: string;
             documentTitle: string;
             excerpt: string;
             relevance: number;
-            timestamp: Date;
             url?: string | undefined;
             pageNumber?: number | undefined;
             sectionNumber?: string | undefined;
             subsection?: string | undefined;
         }[];
+        id: string;
+        status: "COMPLIANT" | "NON_COMPLIANT" | "PARTIALLY_COMPLIANT" | "REQUIRES_REVIEW" | "NOT_APPLICABLE";
+        municipalityId: string;
+        ruleId: string;
+        deviation: number;
         violations: {
+            citations: {
+                timestamp: Date;
+                id: string;
+                documentId: string;
+                documentTitle: string;
+                excerpt: string;
+                relevance: number;
+                url?: string | undefined;
+                pageNumber?: number | undefined;
+                sectionNumber?: string | undefined;
+                subsection?: string | undefined;
+            }[];
             id: string;
             description: string;
             type: "DISTANCE" | "HEIGHT" | "AREA" | "VOLUME" | "PARKING" | "OTHER";
@@ -1484,18 +1496,6 @@ declare const zComplianceReport: z.ZodObject<{
             requiresManualReview: boolean;
             checkId: string;
             deviation: number;
-            citations: {
-                id: string;
-                documentId: string;
-                documentTitle: string;
-                excerpt: string;
-                relevance: number;
-                timestamp: Date;
-                url?: string | undefined;
-                pageNumber?: number | undefined;
-                sectionNumber?: string | undefined;
-                subsection?: string | undefined;
-            }[];
             autoFixable: boolean;
             actualValue?: any;
             expectedValue?: any;
@@ -1554,7 +1554,6 @@ declare const zComplianceIngestRequest: z.ZodObject<{
     }>, "many">;
     forceUpdate: z.ZodOptional<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
-    municipalityId: string;
     documents: {
         type: "ALTRO" | "REGOLAMENTO_URBANISTICO" | "PIANO_REGOLATORE" | "NORME_TECNICHE" | "VARIANTE" | "DELIBERA";
         title: string;
@@ -1565,9 +1564,9 @@ declare const zComplianceIngestRequest: z.ZodObject<{
         effectiveDate?: string | Date | undefined;
         file?: any;
     }[];
+    municipalityId: string;
     forceUpdate?: boolean | undefined;
 }, {
-    municipalityId: string;
     documents: {
         type: "ALTRO" | "REGOLAMENTO_URBANISTICO" | "PIANO_REGOLATORE" | "NORME_TECNICHE" | "VARIANTE" | "DELIBERA";
         title: string;
@@ -1578,6 +1577,7 @@ declare const zComplianceIngestRequest: z.ZodObject<{
         effectiveDate?: string | Date | undefined;
         file?: any;
     }[];
+    municipalityId: string;
     forceUpdate?: boolean | undefined;
 }>;
 declare const zComplianceCheckRequest: z.ZodObject<{

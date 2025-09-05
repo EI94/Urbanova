@@ -49,44 +49,44 @@ jobs:
 
       - name: Build essential packages for Next.js module resolution
         run: |
-          # Build only essential packages needed for Next.js build
+          # Build packages in dependency order
           echo "🚀 Building essential packages for Next.js module resolution..."
           
-          # Build types package
+          # 1. Build types package first (no dependencies)
           echo "📦 Building @urbanova/types..."
           cd packages/types
-          ls -la
-          cat package.json | grep -A 5 -B 5 "build"
           pnpm build
           echo "✅ Types build completed"
           ls -la dist/ || echo "No dist folder found"
           cd ../..
           
-          # Build infra package
+          # 2. Build infra package (depends on types)
           echo "📦 Building @urbanova/infra..."
           cd packages/infra
-          ls -la
-          cat package.json | grep -A 5 -B 5 "build"
           pnpm build
           echo "✅ Infra build completed"
           ls -la dist/ || echo "No dist folder found"
           cd ../..
           
-          # Build data package (needed by some components)
+          # 3. Build toolos package (depends on types)
+          echo "📦 Building @urbanova/toolos..."
+          cd packages/toolos
+          pnpm build
+          echo "✅ Toolos build completed"
+          ls -la dist/ || echo "No dist folder found"
+          cd ../..
+          
+          # 4. Build data package (depends on types and infra)
           echo "📦 Building @urbanova/data..."
           cd packages/data
-          ls -la
-          cat package.json | grep -A 5 -B 5 "build"
           pnpm build
           echo "✅ Data build completed"
           ls -la dist/ || echo "No dist folder found"
           cd ../..
           
-          # Build os package (needed by some API routes)
+          # 5. Build os package (depends on types and toolos)
           echo "📦 Building @urbanova/os..."
           cd packages/os
-          ls -la
-          cat package.json | grep -A 5 -B 5 "build"
           pnpm build
           echo "✅ OS build completed"
           ls -la dist/ || echo "No dist folder found"
@@ -95,7 +95,7 @@ jobs:
           echo "🎉 Essential packages build completed"
 
       - name: Build application
-        run: pnpm build
+        run: SKIP_ENV_VALIDATION=true pnpm build
         continue-on-error: false
 
       - name: Upload build artifacts

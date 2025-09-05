@@ -99,14 +99,14 @@ export declare const zAssumption: z.ZodObject<{
     confidence: z.ZodEnum<["low", "medium", "high"]>;
     source: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
+    confidence: "low" | "medium" | "high";
     id: string;
     description: string;
-    confidence: "low" | "medium" | "high";
     source?: string | undefined;
 }, {
+    confidence: "low" | "medium" | "high";
     id: string;
     description: string;
-    confidence: "low" | "medium" | "high";
     source?: string | undefined;
 }>;
 export declare const zRisk: z.ZodObject<{
@@ -220,14 +220,14 @@ export declare const zInteractivePlan: z.ZodObject<{
         confidence: z.ZodEnum<["low", "medium", "high"]>;
         source: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
+        confidence: "low" | "medium" | "high";
         id: string;
         description: string;
-        confidence: "low" | "medium" | "high";
         source?: string | undefined;
     }, {
+        confidence: "low" | "medium" | "high";
         id: string;
         description: string;
-        confidence: "low" | "medium" | "high";
         source?: string | undefined;
     }>, "many">;
     risks: z.ZodArray<z.ZodObject<{
@@ -290,9 +290,9 @@ export declare const zInteractivePlan: z.ZodObject<{
         } | undefined;
     }[];
     assumptions: {
+        confidence: "low" | "medium" | "high";
         id: string;
         description: string;
-        confidence: "low" | "medium" | "high";
         source?: string | undefined;
     }[];
     totalCost?: number | undefined;
@@ -337,9 +337,9 @@ export declare const zInteractivePlan: z.ZodObject<{
         } | undefined;
     }[];
     assumptions: {
+        confidence: "low" | "medium" | "high";
         id: string;
         description: string;
-        confidence: "low" | "medium" | "high";
         source?: string | undefined;
     }[];
     totalCost?: number | undefined;
@@ -352,15 +352,15 @@ export declare const zUserReply: z.ZodObject<{
     userId: z.ZodString;
     data: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    type: "confirm" | "edit" | "dryrun" | "cancel" | "provide_value";
     timestamp: Date;
+    id: string;
+    type: "dryrun" | "confirm" | "edit" | "cancel" | "provide_value";
     userId: string;
     data?: Record<string, unknown> | undefined;
 }, {
-    id: string;
-    type: "confirm" | "edit" | "dryrun" | "cancel" | "provide_value";
     timestamp: Date;
+    id: string;
+    type: "dryrun" | "confirm" | "edit" | "cancel" | "provide_value";
     userId: string;
     data?: Record<string, unknown> | undefined;
 }>;
@@ -471,14 +471,14 @@ export declare const zTaskSession: z.ZodObject<{
             confidence: z.ZodEnum<["low", "medium", "high"]>;
             source: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
+            confidence: "low" | "medium" | "high";
             id: string;
             description: string;
-            confidence: "low" | "medium" | "high";
             source?: string | undefined;
         }, {
+            confidence: "low" | "medium" | "high";
             id: string;
             description: string;
-            confidence: "low" | "medium" | "high";
             source?: string | undefined;
         }>, "many">;
         risks: z.ZodArray<z.ZodObject<{
@@ -541,9 +541,9 @@ export declare const zTaskSession: z.ZodObject<{
             } | undefined;
         }[];
         assumptions: {
+            confidence: "low" | "medium" | "high";
             id: string;
             description: string;
-            confidence: "low" | "medium" | "high";
             source?: string | undefined;
         }[];
         totalCost?: number | undefined;
@@ -588,9 +588,9 @@ export declare const zTaskSession: z.ZodObject<{
             } | undefined;
         }[];
         assumptions: {
+            confidence: "low" | "medium" | "high";
             id: string;
             description: string;
-            confidence: "low" | "medium" | "high";
             source?: string | undefined;
         }[];
         totalCost?: number | undefined;
@@ -603,15 +603,15 @@ export declare const zTaskSession: z.ZodObject<{
         userId: z.ZodString;
         data: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
-        type: "confirm" | "edit" | "dryrun" | "cancel" | "provide_value";
         timestamp: Date;
+        id: string;
+        type: "dryrun" | "confirm" | "edit" | "cancel" | "provide_value";
         userId: string;
         data?: Record<string, unknown> | undefined;
     }, {
-        id: string;
-        type: "confirm" | "edit" | "dryrun" | "cancel" | "provide_value";
         timestamp: Date;
+        id: string;
+        type: "dryrun" | "confirm" | "edit" | "cancel" | "provide_value";
         userId: string;
         data?: Record<string, unknown> | undefined;
     }>, "many">;
@@ -667,18 +667,18 @@ export declare const zTaskSession: z.ZodObject<{
             } | undefined;
         }[];
         assumptions: {
+            confidence: "low" | "medium" | "high";
             id: string;
             description: string;
-            confidence: "low" | "medium" | "high";
             source?: string | undefined;
         }[];
         totalCost?: number | undefined;
         estimatedDuration?: number | undefined;
     };
     replies: {
-        id: string;
-        type: "confirm" | "edit" | "dryrun" | "cancel" | "provide_value";
         timestamp: Date;
+        id: string;
+        type: "dryrun" | "confirm" | "edit" | "cancel" | "provide_value";
         userId: string;
         data?: Record<string, unknown> | undefined;
     }[];
@@ -733,18 +733,18 @@ export declare const zTaskSession: z.ZodObject<{
             } | undefined;
         }[];
         assumptions: {
+            confidence: "low" | "medium" | "high";
             id: string;
             description: string;
-            confidence: "low" | "medium" | "high";
             source?: string | undefined;
         }[];
         totalCost?: number | undefined;
         estimatedDuration?: number | undefined;
     };
     replies: {
-        id: string;
-        type: "confirm" | "edit" | "dryrun" | "cancel" | "provide_value";
         timestamp: Date;
+        id: string;
+        type: "dryrun" | "confirm" | "edit" | "cancel" | "provide_value";
         userId: string;
         data?: Record<string, unknown> | undefined;
     }[];
@@ -863,14 +863,14 @@ export declare const zPlanPreview: z.ZodObject<{
         confidence: z.ZodEnum<["low", "medium", "high"]>;
         source: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
+        confidence: "low" | "medium" | "high";
         id: string;
         description: string;
-        confidence: "low" | "medium" | "high";
         source?: string | undefined;
     }, {
+        confidence: "low" | "medium" | "high";
         id: string;
         description: string;
-        confidence: "low" | "medium" | "high";
         source?: string | undefined;
     }>, "many">;
     risks: z.ZodArray<z.ZodObject<{
@@ -918,12 +918,12 @@ export declare const zPlanPreview: z.ZodObject<{
         status?: "pending" | "failed" | "completed" | "running" | "ready" | undefined;
     }[];
     assumptions: {
+        confidence: "low" | "medium" | "high";
         id: string;
         description: string;
-        confidence: "low" | "medium" | "high";
         source?: string | undefined;
     }[];
-    ctas: ("confirm" | "edit" | "dryrun" | "cancel")[];
+    ctas: ("dryrun" | "confirm" | "edit" | "cancel")[];
     totalCost?: number | undefined;
     estimatedDuration?: number | undefined;
 }, {
@@ -952,12 +952,12 @@ export declare const zPlanPreview: z.ZodObject<{
         status?: "pending" | "failed" | "completed" | "running" | "ready" | undefined;
     }[];
     assumptions: {
+        confidence: "low" | "medium" | "high";
         id: string;
         description: string;
-        confidence: "low" | "medium" | "high";
         source?: string | undefined;
     }[];
-    ctas: ("confirm" | "edit" | "dryrun" | "cancel")[];
+    ctas: ("dryrun" | "confirm" | "edit" | "cancel")[];
     totalCost?: number | undefined;
     estimatedDuration?: number | undefined;
 }>;
@@ -1053,14 +1053,14 @@ export declare const schemas: {
         confidence: z.ZodEnum<["low", "medium", "high"]>;
         source: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
+        confidence: "low" | "medium" | "high";
         id: string;
         description: string;
-        confidence: "low" | "medium" | "high";
         source?: string | undefined;
     }, {
+        confidence: "low" | "medium" | "high";
         id: string;
         description: string;
-        confidence: "low" | "medium" | "high";
         source?: string | undefined;
     }>;
     zRisk: z.ZodObject<{
@@ -1174,14 +1174,14 @@ export declare const schemas: {
             confidence: z.ZodEnum<["low", "medium", "high"]>;
             source: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
+            confidence: "low" | "medium" | "high";
             id: string;
             description: string;
-            confidence: "low" | "medium" | "high";
             source?: string | undefined;
         }, {
+            confidence: "low" | "medium" | "high";
             id: string;
             description: string;
-            confidence: "low" | "medium" | "high";
             source?: string | undefined;
         }>, "many">;
         risks: z.ZodArray<z.ZodObject<{
@@ -1244,9 +1244,9 @@ export declare const schemas: {
             } | undefined;
         }[];
         assumptions: {
+            confidence: "low" | "medium" | "high";
             id: string;
             description: string;
-            confidence: "low" | "medium" | "high";
             source?: string | undefined;
         }[];
         totalCost?: number | undefined;
@@ -1291,9 +1291,9 @@ export declare const schemas: {
             } | undefined;
         }[];
         assumptions: {
+            confidence: "low" | "medium" | "high";
             id: string;
             description: string;
-            confidence: "low" | "medium" | "high";
             source?: string | undefined;
         }[];
         totalCost?: number | undefined;
@@ -1306,15 +1306,15 @@ export declare const schemas: {
         userId: z.ZodString;
         data: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
-        type: "confirm" | "edit" | "dryrun" | "cancel" | "provide_value";
         timestamp: Date;
+        id: string;
+        type: "dryrun" | "confirm" | "edit" | "cancel" | "provide_value";
         userId: string;
         data?: Record<string, unknown> | undefined;
     }, {
-        id: string;
-        type: "confirm" | "edit" | "dryrun" | "cancel" | "provide_value";
         timestamp: Date;
+        id: string;
+        type: "dryrun" | "confirm" | "edit" | "cancel" | "provide_value";
         userId: string;
         data?: Record<string, unknown> | undefined;
     }>;
@@ -1425,14 +1425,14 @@ export declare const schemas: {
                 confidence: z.ZodEnum<["low", "medium", "high"]>;
                 source: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
+                confidence: "low" | "medium" | "high";
                 id: string;
                 description: string;
-                confidence: "low" | "medium" | "high";
                 source?: string | undefined;
             }, {
+                confidence: "low" | "medium" | "high";
                 id: string;
                 description: string;
-                confidence: "low" | "medium" | "high";
                 source?: string | undefined;
             }>, "many">;
             risks: z.ZodArray<z.ZodObject<{
@@ -1495,9 +1495,9 @@ export declare const schemas: {
                 } | undefined;
             }[];
             assumptions: {
+                confidence: "low" | "medium" | "high";
                 id: string;
                 description: string;
-                confidence: "low" | "medium" | "high";
                 source?: string | undefined;
             }[];
             totalCost?: number | undefined;
@@ -1542,9 +1542,9 @@ export declare const schemas: {
                 } | undefined;
             }[];
             assumptions: {
+                confidence: "low" | "medium" | "high";
                 id: string;
                 description: string;
-                confidence: "low" | "medium" | "high";
                 source?: string | undefined;
             }[];
             totalCost?: number | undefined;
@@ -1557,15 +1557,15 @@ export declare const schemas: {
             userId: z.ZodString;
             data: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodUnknown>>;
         }, "strip", z.ZodTypeAny, {
-            id: string;
-            type: "confirm" | "edit" | "dryrun" | "cancel" | "provide_value";
             timestamp: Date;
+            id: string;
+            type: "dryrun" | "confirm" | "edit" | "cancel" | "provide_value";
             userId: string;
             data?: Record<string, unknown> | undefined;
         }, {
-            id: string;
-            type: "confirm" | "edit" | "dryrun" | "cancel" | "provide_value";
             timestamp: Date;
+            id: string;
+            type: "dryrun" | "confirm" | "edit" | "cancel" | "provide_value";
             userId: string;
             data?: Record<string, unknown> | undefined;
         }>, "many">;
@@ -1621,18 +1621,18 @@ export declare const schemas: {
                 } | undefined;
             }[];
             assumptions: {
+                confidence: "low" | "medium" | "high";
                 id: string;
                 description: string;
-                confidence: "low" | "medium" | "high";
                 source?: string | undefined;
             }[];
             totalCost?: number | undefined;
             estimatedDuration?: number | undefined;
         };
         replies: {
-            id: string;
-            type: "confirm" | "edit" | "dryrun" | "cancel" | "provide_value";
             timestamp: Date;
+            id: string;
+            type: "dryrun" | "confirm" | "edit" | "cancel" | "provide_value";
             userId: string;
             data?: Record<string, unknown> | undefined;
         }[];
@@ -1687,18 +1687,18 @@ export declare const schemas: {
                 } | undefined;
             }[];
             assumptions: {
+                confidence: "low" | "medium" | "high";
                 id: string;
                 description: string;
-                confidence: "low" | "medium" | "high";
                 source?: string | undefined;
             }[];
             totalCost?: number | undefined;
             estimatedDuration?: number | undefined;
         };
         replies: {
-            id: string;
-            type: "confirm" | "edit" | "dryrun" | "cancel" | "provide_value";
             timestamp: Date;
+            id: string;
+            type: "dryrun" | "confirm" | "edit" | "cancel" | "provide_value";
             userId: string;
             data?: Record<string, unknown> | undefined;
         }[];
@@ -1817,14 +1817,14 @@ export declare const schemas: {
             confidence: z.ZodEnum<["low", "medium", "high"]>;
             source: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
+            confidence: "low" | "medium" | "high";
             id: string;
             description: string;
-            confidence: "low" | "medium" | "high";
             source?: string | undefined;
         }, {
+            confidence: "low" | "medium" | "high";
             id: string;
             description: string;
-            confidence: "low" | "medium" | "high";
             source?: string | undefined;
         }>, "many">;
         risks: z.ZodArray<z.ZodObject<{
@@ -1872,12 +1872,12 @@ export declare const schemas: {
             status?: "pending" | "failed" | "completed" | "running" | "ready" | undefined;
         }[];
         assumptions: {
+            confidence: "low" | "medium" | "high";
             id: string;
             description: string;
-            confidence: "low" | "medium" | "high";
             source?: string | undefined;
         }[];
-        ctas: ("confirm" | "edit" | "dryrun" | "cancel")[];
+        ctas: ("dryrun" | "confirm" | "edit" | "cancel")[];
         totalCost?: number | undefined;
         estimatedDuration?: number | undefined;
     }, {
@@ -1906,12 +1906,12 @@ export declare const schemas: {
             status?: "pending" | "failed" | "completed" | "running" | "ready" | undefined;
         }[];
         assumptions: {
+            confidence: "low" | "medium" | "high";
             id: string;
             description: string;
-            confidence: "low" | "medium" | "high";
             source?: string | undefined;
         }[];
-        ctas: ("confirm" | "edit" | "dryrun" | "cancel")[];
+        ctas: ("dryrun" | "confirm" | "edit" | "cancel")[];
         totalCost?: number | undefined;
         estimatedDuration?: number | undefined;
     }>;

@@ -338,12 +338,12 @@ declare const zSAL: z.ZodObject<{
     metadata: z.ZodRecord<z.ZodString, z.ZodAny>;
     tags: z.ZodArray<z.ZodString, "many">;
 }, "strip", z.ZodTypeAny, {
+    projectId: string;
     id: string;
     description: string;
     status: "DRAFT" | "SENT" | "SIGNED_VENDOR" | "SIGNED_PM" | "READY_TO_PAY" | "PAID";
     currency: string;
     metadata: Record<string, any>;
-    projectId: string;
     vendorId: string;
     vendorName: string;
     vendorEmail: string;
@@ -393,12 +393,12 @@ declare const zSAL: z.ZodObject<{
         failureReason?: string | undefined;
     } | undefined;
 }, {
+    projectId: string;
     id: string;
     description: string;
     status: "DRAFT" | "SENT" | "SIGNED_VENDOR" | "SIGNED_PM" | "READY_TO_PAY" | "PAID";
     currency: string;
     metadata: Record<string, any>;
-    projectId: string;
     vendorId: string;
     vendorName: string;
     vendorEmail: string;
@@ -489,8 +489,8 @@ declare const zSALCreateRequest: z.ZodObject<{
     conditions: z.ZodArray<z.ZodString, "many">;
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
 }, "strip", z.ZodTypeAny, {
-    description: string;
     projectId: string;
+    description: string;
     vendorId: string;
     title: string;
     lines: {
@@ -507,8 +507,8 @@ declare const zSALCreateRequest: z.ZodObject<{
     conditions: string[];
     metadata?: Record<string, any> | undefined;
 }, {
-    description: string;
     projectId: string;
+    description: string;
     vendorId: string;
     title: string;
     lines: {

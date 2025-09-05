@@ -440,6 +440,7 @@ export declare const zVendorQuestionnaire: z.ZodObject<{
         lastReminderAt?: Date | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
+    projectId: string;
     id: string;
     status: "pending" | "completed" | "expired";
     metadata: {
@@ -448,7 +449,6 @@ export declare const zVendorQuestionnaire: z.ZodObject<{
         reminderCount: number;
         lastReminderAt?: Date | undefined;
     };
-    projectId: string;
     createdAt: Date;
     expiresAt: Date;
     vendorContact: {
@@ -495,6 +495,7 @@ export declare const zVendorQuestionnaire: z.ZodObject<{
         };
     } | undefined;
 }, {
+    projectId: string;
     id: string;
     status: "pending" | "completed" | "expired";
     metadata: {
@@ -503,7 +504,6 @@ export declare const zVendorQuestionnaire: z.ZodObject<{
         reminderCount: number;
         lastReminderAt?: Date | undefined;
     };
-    projectId: string;
     createdAt: Date;
     expiresAt: Date;
     vendorContact: {
@@ -561,13 +561,13 @@ export declare const zProjectFactsUpdate: z.ZodObject<{
         newValue: z.ZodAny;
         confidence: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
-        field: string;
         confidence: number;
+        field: string;
         oldValue?: any;
         newValue?: any;
     }, {
-        field: string;
         confidence: number;
+        field: string;
         oldValue?: any;
         newValue?: any;
     }>, "many">;
@@ -612,6 +612,8 @@ export declare const zProjectFactsUpdate: z.ZodObject<{
         questionnaireId: string;
     }>;
 }, "strip", z.ZodTypeAny, {
+    projectId: string;
+    timestamp: Date;
     metadata: {
         vendorContact: {
             name: string;
@@ -622,17 +624,17 @@ export declare const zProjectFactsUpdate: z.ZodObject<{
         };
         questionnaireId: string;
     };
-    projectId: string;
-    timestamp: Date;
     source: "vendor_questionnaire";
     updatedBy: string;
     changes: {
-        field: string;
         confidence: number;
+        field: string;
         oldValue?: any;
         newValue?: any;
     }[];
 }, {
+    projectId: string;
+    timestamp: Date;
     metadata: {
         vendorContact: {
             name: string;
@@ -643,13 +645,11 @@ export declare const zProjectFactsUpdate: z.ZodObject<{
         };
         questionnaireId: string;
     };
-    projectId: string;
-    timestamp: Date;
     source: "vendor_questionnaire";
     updatedBy: string;
     changes: {
-        field: string;
         confidence: number;
+        field: string;
         oldValue?: any;
         newValue?: any;
     }[];

@@ -130,8 +130,32 @@ export type Env = z.infer<typeof zEnv>;
  * 
  * In produzione, se una variabile richiesta è mancante, l'app CRASHERÀ.
  * In sviluppo, verrà mostrato un banner per le variabili opzionali mancanti.
+ * Durante il build, usa valori di default per evitare crash.
  */
-export const env = zEnv.parse(process.env);
+export const env = (() => {
+  // Durante il build, usa valori mock per evitare crash
+  if (process.env.SKIP_ENV_VALIDATION === 'true') {
+    const mockEnv = {
+      NODE_ENV: 'development',
+      FIREBASE_PROJECT_ID: 'urbanova-b623e',
+      FIREBASE_PRIVATE_KEY: 'mock-key',
+      FIREBASE_CLIENT_EMAIL: 'mock@urbanova.com',
+      GCS_BUCKET_MATERIALS: 'mock-bucket',
+      GOOGLE_CLOUD_PROJECT_ID: 'urbanova-b623e',
+      GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY: 'mock-key',
+      TWILIO_ACCOUNT_SID: 'mock-sid',
+      TWILIO_AUTH_TOKEN: 'mock-token',
+      TWILIO_PHONE_NUMBER: '+1234567890',
+      CRON_SECRET: 'mock-secret-32-characters-long-for-validation',
+      DOCUPLOAD_SECRET: 'mock-secret-32-characters-long-for-validation',
+      LEADS_INBOUND_SECRET: 'mock-secret-32-characters-long-for-validation',
+      ...process.env,
+    };
+    return zEnv.parse(mockEnv);
+  }
+  
+  return zEnv.parse(process.env);
+})();
 
 /**
  * Utility per verificare se siamo in produzione

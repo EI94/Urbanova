@@ -35,8 +35,8 @@ export declare const zDocHunterFact: z.ZodObject<{
     issuingAuthority: z.ZodString;
     notes: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    status: "pending" | "valid" | "expired" | "invalid";
     projectId: string;
+    status: "pending" | "valid" | "expired" | "invalid";
     vendorId: string;
     vendorName: string;
     documentType: "DURC" | "visura" | "certification";
@@ -46,8 +46,8 @@ export declare const zDocHunterFact: z.ZodObject<{
     issuingAuthority: string;
     notes?: string | undefined;
 }, {
-    status: "pending" | "valid" | "expired" | "invalid";
     projectId: string;
+    status: "pending" | "valid" | "expired" | "invalid";
     vendorId: string;
     vendorName: string;
     documentType: "DURC" | "visura" | "certification";
@@ -90,9 +90,9 @@ export declare const zProcurementFact: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
+    projectId: string;
     category: string;
     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-    projectId: string;
     createdAt: Date;
     updatedAt: Date;
     location: string;
@@ -104,9 +104,9 @@ export declare const zProcurementFact: z.ZodObject<{
     createdBy: string;
     awardedVendor?: string | undefined;
 }, {
+    projectId: string;
     category: string;
     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-    projectId: string;
     createdAt: Date;
     updatedAt: Date;
     location: string;
@@ -149,10 +149,10 @@ export declare const zSALFact: z.ZodObject<{
     documents: z.ZodArray<z.ZodString, "many">;
     notes: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    description: string;
-    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
     projectId: string;
     documents: string[];
+    description: string;
+    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
     submissionDate: Date;
     expectedResponseDate: Date;
@@ -162,10 +162,10 @@ export declare const zSALFact: z.ZodObject<{
     notes?: string | undefined;
     actualResponseDate?: Date | undefined;
 }, {
-    description: string;
-    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
     projectId: string;
     documents: string[];
+    description: string;
+    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
     submissionDate: Date;
     expectedResponseDate: Date;
@@ -228,9 +228,9 @@ export declare const zListingFact: z.ZodObject<{
         website?: string | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
+    projectId: string;
     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
     currency: string;
-    projectId: string;
     features: string[];
     location: string;
     portalId: string;
@@ -248,9 +248,9 @@ export declare const zListingFact: z.ZodObject<{
         website?: string | undefined;
     };
 }, {
+    projectId: string;
     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
     currency: string;
-    projectId: string;
     features: string[];
     location: string;
     portalId: string;
@@ -284,8 +284,8 @@ export declare const zFact: z.ZodUnion<[z.ZodObject<{
     issuingAuthority: z.ZodString;
     notes: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    status: "pending" | "valid" | "expired" | "invalid";
     projectId: string;
+    status: "pending" | "valid" | "expired" | "invalid";
     vendorId: string;
     vendorName: string;
     documentType: "DURC" | "visura" | "certification";
@@ -295,8 +295,8 @@ export declare const zFact: z.ZodUnion<[z.ZodObject<{
     issuingAuthority: string;
     notes?: string | undefined;
 }, {
-    status: "pending" | "valid" | "expired" | "invalid";
     projectId: string;
+    status: "pending" | "valid" | "expired" | "invalid";
     vendorId: string;
     vendorName: string;
     documentType: "DURC" | "visura" | "certification";
@@ -320,9 +320,9 @@ export declare const zFact: z.ZodUnion<[z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
+    projectId: string;
     category: string;
     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-    projectId: string;
     createdAt: Date;
     updatedAt: Date;
     location: string;
@@ -334,9 +334,9 @@ export declare const zFact: z.ZodUnion<[z.ZodObject<{
     createdBy: string;
     awardedVendor?: string | undefined;
 }, {
+    projectId: string;
     category: string;
     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-    projectId: string;
     createdAt: Date;
     updatedAt: Date;
     location: string;
@@ -361,10 +361,10 @@ export declare const zFact: z.ZodUnion<[z.ZodObject<{
     documents: z.ZodArray<z.ZodString, "many">;
     notes: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    description: string;
-    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
     projectId: string;
     documents: string[];
+    description: string;
+    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
     submissionDate: Date;
     expectedResponseDate: Date;
@@ -374,10 +374,10 @@ export declare const zFact: z.ZodUnion<[z.ZodObject<{
     notes?: string | undefined;
     actualResponseDate?: Date | undefined;
 }, {
-    description: string;
-    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
     projectId: string;
     documents: string[];
+    description: string;
+    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
     submissionDate: Date;
     expectedResponseDate: Date;
@@ -415,9 +415,9 @@ export declare const zFact: z.ZodUnion<[z.ZodObject<{
         website?: string | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
+    projectId: string;
     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
     currency: string;
-    projectId: string;
     features: string[];
     location: string;
     portalId: string;
@@ -435,9 +435,9 @@ export declare const zFact: z.ZodUnion<[z.ZodObject<{
         website?: string | undefined;
     };
 }, {
+    projectId: string;
     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
     currency: string;
-    projectId: string;
     features: string[];
     location: string;
     portalId: string;
@@ -521,8 +521,8 @@ export declare const zWBSTask: z.ZodObject<{
         issuingAuthority: z.ZodString;
         notes: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        status: "pending" | "valid" | "expired" | "invalid";
         projectId: string;
+        status: "pending" | "valid" | "expired" | "invalid";
         vendorId: string;
         vendorName: string;
         documentType: "DURC" | "visura" | "certification";
@@ -532,8 +532,8 @@ export declare const zWBSTask: z.ZodObject<{
         issuingAuthority: string;
         notes?: string | undefined;
     }, {
-        status: "pending" | "valid" | "expired" | "invalid";
         projectId: string;
+        status: "pending" | "valid" | "expired" | "invalid";
         vendorId: string;
         vendorName: string;
         documentType: "DURC" | "visura" | "certification";
@@ -557,9 +557,9 @@ export declare const zWBSTask: z.ZodObject<{
         createdAt: z.ZodDate;
         updatedAt: z.ZodDate;
     }, "strip", z.ZodTypeAny, {
+        projectId: string;
         category: string;
         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         location: string;
@@ -571,9 +571,9 @@ export declare const zWBSTask: z.ZodObject<{
         createdBy: string;
         awardedVendor?: string | undefined;
     }, {
+        projectId: string;
         category: string;
         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         location: string;
@@ -598,10 +598,10 @@ export declare const zWBSTask: z.ZodObject<{
         documents: z.ZodArray<z.ZodString, "many">;
         notes: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        description: string;
-        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         projectId: string;
         documents: string[];
+        description: string;
+        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
         submissionDate: Date;
         expectedResponseDate: Date;
@@ -611,10 +611,10 @@ export declare const zWBSTask: z.ZodObject<{
         notes?: string | undefined;
         actualResponseDate?: Date | undefined;
     }, {
-        description: string;
-        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         projectId: string;
         documents: string[];
+        description: string;
+        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
         submissionDate: Date;
         expectedResponseDate: Date;
@@ -652,9 +652,9 @@ export declare const zWBSTask: z.ZodObject<{
             website?: string | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
+        projectId: string;
         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
         currency: string;
-        projectId: string;
         features: string[];
         location: string;
         portalId: string;
@@ -672,9 +672,9 @@ export declare const zWBSTask: z.ZodObject<{
             website?: string | undefined;
         };
     }, {
+        projectId: string;
         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
         currency: string;
-        projectId: string;
         features: string[];
         location: string;
         portalId: string;
@@ -702,11 +702,11 @@ export declare const zWBSTask: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
+    projectId: string;
     id: string;
     description: string;
     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
     type: "milestone" | "task" | "subtask" | "deliverable";
-    projectId: string;
     createdAt: Date;
     name: string;
     updatedAt: Date;
@@ -729,8 +729,8 @@ export declare const zWBSTask: z.ZodObject<{
     actualEndDate?: Date | undefined;
     assignedTo?: string | undefined;
     sourceFact?: {
-        status: "pending" | "valid" | "expired" | "invalid";
         projectId: string;
+        status: "pending" | "valid" | "expired" | "invalid";
         vendorId: string;
         vendorName: string;
         documentType: "DURC" | "visura" | "certification";
@@ -740,9 +740,9 @@ export declare const zWBSTask: z.ZodObject<{
         issuingAuthority: string;
         notes?: string | undefined;
     } | {
+        projectId: string;
         category: string;
         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         location: string;
@@ -754,10 +754,10 @@ export declare const zWBSTask: z.ZodObject<{
         createdBy: string;
         awardedVendor?: string | undefined;
     } | {
-        description: string;
-        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         projectId: string;
         documents: string[];
+        description: string;
+        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
         submissionDate: Date;
         expectedResponseDate: Date;
@@ -767,9 +767,9 @@ export declare const zWBSTask: z.ZodObject<{
         notes?: string | undefined;
         actualResponseDate?: Date | undefined;
     } | {
+        projectId: string;
         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
         currency: string;
-        projectId: string;
         features: string[];
         location: string;
         portalId: string;
@@ -790,11 +790,11 @@ export declare const zWBSTask: z.ZodObject<{
     factId?: string | undefined;
     parentTaskId?: string | undefined;
 }, {
+    projectId: string;
     id: string;
     description: string;
     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
     type: "milestone" | "task" | "subtask" | "deliverable";
-    projectId: string;
     createdAt: Date;
     name: string;
     updatedAt: Date;
@@ -817,8 +817,8 @@ export declare const zWBSTask: z.ZodObject<{
     actualEndDate?: Date | undefined;
     assignedTo?: string | undefined;
     sourceFact?: {
-        status: "pending" | "valid" | "expired" | "invalid";
         projectId: string;
+        status: "pending" | "valid" | "expired" | "invalid";
         vendorId: string;
         vendorName: string;
         documentType: "DURC" | "visura" | "certification";
@@ -828,9 +828,9 @@ export declare const zWBSTask: z.ZodObject<{
         issuingAuthority: string;
         notes?: string | undefined;
     } | {
+        projectId: string;
         category: string;
         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         location: string;
@@ -842,10 +842,10 @@ export declare const zWBSTask: z.ZodObject<{
         createdBy: string;
         awardedVendor?: string | undefined;
     } | {
-        description: string;
-        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         projectId: string;
         documents: string[];
+        description: string;
+        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
         submissionDate: Date;
         expectedResponseDate: Date;
@@ -855,9 +855,9 @@ export declare const zWBSTask: z.ZodObject<{
         notes?: string | undefined;
         actualResponseDate?: Date | undefined;
     } | {
+        projectId: string;
         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
         currency: string;
-        projectId: string;
         features: string[];
         location: string;
         portalId: string;
@@ -903,9 +903,9 @@ export declare const zWBSDependency: z.ZodObject<{
     isCritical: z.ZodBoolean;
     createdAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
+    projectId: string;
     id: string;
     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-    projectId: string;
     createdAt: Date;
     isCritical: boolean;
     fromTaskId: string;
@@ -913,9 +913,9 @@ export declare const zWBSDependency: z.ZodObject<{
     lag: number;
     description?: string | undefined;
 }, {
+    projectId: string;
     id: string;
     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-    projectId: string;
     createdAt: Date;
     isCritical: boolean;
     fromTaskId: string;
@@ -987,8 +987,8 @@ export declare const zWBS: z.ZodObject<{
             issuingAuthority: z.ZodString;
             notes: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -998,8 +998,8 @@ export declare const zWBS: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         }, {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -1023,9 +1023,9 @@ export declare const zWBS: z.ZodObject<{
             createdAt: z.ZodDate;
             updatedAt: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -1037,9 +1037,9 @@ export declare const zWBS: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         }, {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -1064,10 +1064,10 @@ export declare const zWBS: z.ZodObject<{
             documents: z.ZodArray<z.ZodString, "many">;
             notes: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -1077,10 +1077,10 @@ export declare const zWBS: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         }, {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -1118,9 +1118,9 @@ export declare const zWBS: z.ZodObject<{
                 website?: string | undefined;
             }>;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -1138,9 +1138,9 @@ export declare const zWBS: z.ZodObject<{
                 website?: string | undefined;
             };
         }, {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -1168,11 +1168,11 @@ export declare const zWBS: z.ZodObject<{
         createdAt: z.ZodDate;
         updatedAt: z.ZodDate;
     }, "strip", z.ZodTypeAny, {
+        projectId: string;
         id: string;
         description: string;
         status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
         type: "milestone" | "task" | "subtask" | "deliverable";
-        projectId: string;
         createdAt: Date;
         name: string;
         updatedAt: Date;
@@ -1195,8 +1195,8 @@ export declare const zWBS: z.ZodObject<{
         actualEndDate?: Date | undefined;
         assignedTo?: string | undefined;
         sourceFact?: {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -1206,9 +1206,9 @@ export declare const zWBS: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -1220,10 +1220,10 @@ export declare const zWBS: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -1233,9 +1233,9 @@ export declare const zWBS: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -1256,11 +1256,11 @@ export declare const zWBS: z.ZodObject<{
         factId?: string | undefined;
         parentTaskId?: string | undefined;
     }, {
+        projectId: string;
         id: string;
         description: string;
         status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
         type: "milestone" | "task" | "subtask" | "deliverable";
-        projectId: string;
         createdAt: Date;
         name: string;
         updatedAt: Date;
@@ -1283,8 +1283,8 @@ export declare const zWBS: z.ZodObject<{
         actualEndDate?: Date | undefined;
         assignedTo?: string | undefined;
         sourceFact?: {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -1294,9 +1294,9 @@ export declare const zWBS: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -1308,10 +1308,10 @@ export declare const zWBS: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -1321,9 +1321,9 @@ export declare const zWBS: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -1355,9 +1355,9 @@ export declare const zWBS: z.ZodObject<{
         isCritical: z.ZodBoolean;
         createdAt: z.ZodDate;
     }, "strip", z.ZodTypeAny, {
+        projectId: string;
         id: string;
         type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-        projectId: string;
         createdAt: Date;
         isCritical: boolean;
         fromTaskId: string;
@@ -1365,9 +1365,9 @@ export declare const zWBS: z.ZodObject<{
         lag: number;
         description?: string | undefined;
     }, {
+        projectId: string;
         id: string;
         type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-        projectId: string;
         createdAt: Date;
         isCritical: boolean;
         fromTaskId: string;
@@ -1399,8 +1399,8 @@ export declare const zWBS: z.ZodObject<{
         issuingAuthority: z.ZodString;
         notes: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        status: "pending" | "valid" | "expired" | "invalid";
         projectId: string;
+        status: "pending" | "valid" | "expired" | "invalid";
         vendorId: string;
         vendorName: string;
         documentType: "DURC" | "visura" | "certification";
@@ -1410,8 +1410,8 @@ export declare const zWBS: z.ZodObject<{
         issuingAuthority: string;
         notes?: string | undefined;
     }, {
-        status: "pending" | "valid" | "expired" | "invalid";
         projectId: string;
+        status: "pending" | "valid" | "expired" | "invalid";
         vendorId: string;
         vendorName: string;
         documentType: "DURC" | "visura" | "certification";
@@ -1435,9 +1435,9 @@ export declare const zWBS: z.ZodObject<{
         createdAt: z.ZodDate;
         updatedAt: z.ZodDate;
     }, "strip", z.ZodTypeAny, {
+        projectId: string;
         category: string;
         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         location: string;
@@ -1449,9 +1449,9 @@ export declare const zWBS: z.ZodObject<{
         createdBy: string;
         awardedVendor?: string | undefined;
     }, {
+        projectId: string;
         category: string;
         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         location: string;
@@ -1476,10 +1476,10 @@ export declare const zWBS: z.ZodObject<{
         documents: z.ZodArray<z.ZodString, "many">;
         notes: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        description: string;
-        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         projectId: string;
         documents: string[];
+        description: string;
+        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
         submissionDate: Date;
         expectedResponseDate: Date;
@@ -1489,10 +1489,10 @@ export declare const zWBS: z.ZodObject<{
         notes?: string | undefined;
         actualResponseDate?: Date | undefined;
     }, {
-        description: string;
-        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         projectId: string;
         documents: string[];
+        description: string;
+        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
         submissionDate: Date;
         expectedResponseDate: Date;
@@ -1530,9 +1530,9 @@ export declare const zWBS: z.ZodObject<{
             website?: string | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
+        projectId: string;
         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
         currency: string;
-        projectId: string;
         features: string[];
         location: string;
         portalId: string;
@@ -1550,9 +1550,9 @@ export declare const zWBS: z.ZodObject<{
             website?: string | undefined;
         };
     }, {
+        projectId: string;
         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
         currency: string;
-        projectId: string;
         features: string[];
         location: string;
         portalId: string;
@@ -1574,10 +1574,10 @@ export declare const zWBS: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
+    projectId: string;
     id: string;
     description: string;
     status: "completed" | "active" | "draft" | "archived";
-    projectId: string;
     createdAt: Date;
     name: string;
     version: number;
@@ -1585,9 +1585,9 @@ export declare const zWBS: z.ZodObject<{
     generatedAt: Date;
     generatedBy: string;
     dependencies: {
+        projectId: string;
         id: string;
         type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-        projectId: string;
         createdAt: Date;
         isCritical: boolean;
         fromTaskId: string;
@@ -1598,11 +1598,11 @@ export declare const zWBS: z.ZodObject<{
     startDate: Date;
     endDate: Date;
     tasks: {
+        projectId: string;
         id: string;
         description: string;
         status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
         type: "milestone" | "task" | "subtask" | "deliverable";
-        projectId: string;
         createdAt: Date;
         name: string;
         updatedAt: Date;
@@ -1625,8 +1625,8 @@ export declare const zWBS: z.ZodObject<{
         actualEndDate?: Date | undefined;
         assignedTo?: string | undefined;
         sourceFact?: {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -1636,9 +1636,9 @@ export declare const zWBS: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -1650,10 +1650,10 @@ export declare const zWBS: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -1663,9 +1663,9 @@ export declare const zWBS: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -1692,8 +1692,8 @@ export declare const zWBS: z.ZodObject<{
     completedTasks: number;
     totalTasks: number;
     sourceFacts: ({
-        status: "pending" | "valid" | "expired" | "invalid";
         projectId: string;
+        status: "pending" | "valid" | "expired" | "invalid";
         vendorId: string;
         vendorName: string;
         documentType: "DURC" | "visura" | "certification";
@@ -1703,9 +1703,9 @@ export declare const zWBS: z.ZodObject<{
         issuingAuthority: string;
         notes?: string | undefined;
     } | {
+        projectId: string;
         category: string;
         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         location: string;
@@ -1717,10 +1717,10 @@ export declare const zWBS: z.ZodObject<{
         createdBy: string;
         awardedVendor?: string | undefined;
     } | {
-        description: string;
-        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         projectId: string;
         documents: string[];
+        description: string;
+        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
         submissionDate: Date;
         expectedResponseDate: Date;
@@ -1730,9 +1730,9 @@ export declare const zWBS: z.ZodObject<{
         notes?: string | undefined;
         actualResponseDate?: Date | undefined;
     } | {
+        projectId: string;
         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
         currency: string;
-        projectId: string;
         features: string[];
         location: string;
         portalId: string;
@@ -1753,10 +1753,10 @@ export declare const zWBS: z.ZodObject<{
     actualStartDate?: Date | undefined;
     actualEndDate?: Date | undefined;
 }, {
+    projectId: string;
     id: string;
     description: string;
     status: "completed" | "active" | "draft" | "archived";
-    projectId: string;
     createdAt: Date;
     name: string;
     version: number;
@@ -1764,9 +1764,9 @@ export declare const zWBS: z.ZodObject<{
     generatedAt: Date;
     generatedBy: string;
     dependencies: {
+        projectId: string;
         id: string;
         type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-        projectId: string;
         createdAt: Date;
         isCritical: boolean;
         fromTaskId: string;
@@ -1777,11 +1777,11 @@ export declare const zWBS: z.ZodObject<{
     startDate: Date;
     endDate: Date;
     tasks: {
+        projectId: string;
         id: string;
         description: string;
         status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
         type: "milestone" | "task" | "subtask" | "deliverable";
-        projectId: string;
         createdAt: Date;
         name: string;
         updatedAt: Date;
@@ -1804,8 +1804,8 @@ export declare const zWBS: z.ZodObject<{
         actualEndDate?: Date | undefined;
         assignedTo?: string | undefined;
         sourceFact?: {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -1815,9 +1815,9 @@ export declare const zWBS: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -1829,10 +1829,10 @@ export declare const zWBS: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -1842,9 +1842,9 @@ export declare const zWBS: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -1871,8 +1871,8 @@ export declare const zWBS: z.ZodObject<{
     completedTasks: number;
     totalTasks: number;
     sourceFacts: ({
-        status: "pending" | "valid" | "expired" | "invalid";
         projectId: string;
+        status: "pending" | "valid" | "expired" | "invalid";
         vendorId: string;
         vendorName: string;
         documentType: "DURC" | "visura" | "certification";
@@ -1882,9 +1882,9 @@ export declare const zWBS: z.ZodObject<{
         issuingAuthority: string;
         notes?: string | undefined;
     } | {
+        projectId: string;
         category: string;
         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         location: string;
@@ -1896,10 +1896,10 @@ export declare const zWBS: z.ZodObject<{
         createdBy: string;
         awardedVendor?: string | undefined;
     } | {
-        description: string;
-        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         projectId: string;
         documents: string[];
+        description: string;
+        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
         submissionDate: Date;
         expectedResponseDate: Date;
@@ -1909,9 +1909,9 @@ export declare const zWBS: z.ZodObject<{
         notes?: string | undefined;
         actualResponseDate?: Date | undefined;
     } | {
+        projectId: string;
         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
         currency: string;
-        projectId: string;
         features: string[];
         location: string;
         portalId: string;
@@ -1996,8 +1996,8 @@ export declare const zRePlanTrigger: z.ZodObject<{
         issuingAuthority: z.ZodString;
         notes: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        status: "pending" | "valid" | "expired" | "invalid";
         projectId: string;
+        status: "pending" | "valid" | "expired" | "invalid";
         vendorId: string;
         vendorName: string;
         documentType: "DURC" | "visura" | "certification";
@@ -2007,8 +2007,8 @@ export declare const zRePlanTrigger: z.ZodObject<{
         issuingAuthority: string;
         notes?: string | undefined;
     }, {
-        status: "pending" | "valid" | "expired" | "invalid";
         projectId: string;
+        status: "pending" | "valid" | "expired" | "invalid";
         vendorId: string;
         vendorName: string;
         documentType: "DURC" | "visura" | "certification";
@@ -2032,9 +2032,9 @@ export declare const zRePlanTrigger: z.ZodObject<{
         createdAt: z.ZodDate;
         updatedAt: z.ZodDate;
     }, "strip", z.ZodTypeAny, {
+        projectId: string;
         category: string;
         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         location: string;
@@ -2046,9 +2046,9 @@ export declare const zRePlanTrigger: z.ZodObject<{
         createdBy: string;
         awardedVendor?: string | undefined;
     }, {
+        projectId: string;
         category: string;
         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         location: string;
@@ -2073,10 +2073,10 @@ export declare const zRePlanTrigger: z.ZodObject<{
         documents: z.ZodArray<z.ZodString, "many">;
         notes: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        description: string;
-        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         projectId: string;
         documents: string[];
+        description: string;
+        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
         submissionDate: Date;
         expectedResponseDate: Date;
@@ -2086,10 +2086,10 @@ export declare const zRePlanTrigger: z.ZodObject<{
         notes?: string | undefined;
         actualResponseDate?: Date | undefined;
     }, {
-        description: string;
-        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         projectId: string;
         documents: string[];
+        description: string;
+        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
         submissionDate: Date;
         expectedResponseDate: Date;
@@ -2127,9 +2127,9 @@ export declare const zRePlanTrigger: z.ZodObject<{
             website?: string | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
+        projectId: string;
         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
         currency: string;
-        projectId: string;
         features: string[];
         location: string;
         portalId: string;
@@ -2147,9 +2147,9 @@ export declare const zRePlanTrigger: z.ZodObject<{
             website?: string | undefined;
         };
     }, {
+        projectId: string;
         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
         currency: string;
-        projectId: string;
         features: string[];
         location: string;
         portalId: string;
@@ -2171,10 +2171,10 @@ export declare const zRePlanTrigger: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
+    projectId: string;
     id: string;
     status: "approved" | "rejected" | "detected" | "analyzing" | "proposed" | "applied";
     type: "document_expiry" | "sal_delay" | "procurement_delay" | "resource_conflict" | "scope_change" | "risk_materialized";
-    projectId: string;
     createdAt: Date;
     updatedAt: Date;
     severity: "low" | "medium" | "high" | "critical";
@@ -2189,8 +2189,8 @@ export declare const zRePlanTrigger: z.ZodObject<{
     detectedAt: Date;
     detectedBy: string;
     sourceFact?: {
-        status: "pending" | "valid" | "expired" | "invalid";
         projectId: string;
+        status: "pending" | "valid" | "expired" | "invalid";
         vendorId: string;
         vendorName: string;
         documentType: "DURC" | "visura" | "certification";
@@ -2200,9 +2200,9 @@ export declare const zRePlanTrigger: z.ZodObject<{
         issuingAuthority: string;
         notes?: string | undefined;
     } | {
+        projectId: string;
         category: string;
         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         location: string;
@@ -2214,10 +2214,10 @@ export declare const zRePlanTrigger: z.ZodObject<{
         createdBy: string;
         awardedVendor?: string | undefined;
     } | {
-        description: string;
-        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         projectId: string;
         documents: string[];
+        description: string;
+        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
         submissionDate: Date;
         expectedResponseDate: Date;
@@ -2227,9 +2227,9 @@ export declare const zRePlanTrigger: z.ZodObject<{
         notes?: string | undefined;
         actualResponseDate?: Date | undefined;
     } | {
+        projectId: string;
         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
         currency: string;
-        projectId: string;
         features: string[];
         location: string;
         portalId: string;
@@ -2249,10 +2249,10 @@ export declare const zRePlanTrigger: z.ZodObject<{
     } | undefined;
     details?: any;
 }, {
+    projectId: string;
     id: string;
     status: "approved" | "rejected" | "detected" | "analyzing" | "proposed" | "applied";
     type: "document_expiry" | "sal_delay" | "procurement_delay" | "resource_conflict" | "scope_change" | "risk_materialized";
-    projectId: string;
     createdAt: Date;
     updatedAt: Date;
     severity: "low" | "medium" | "high" | "critical";
@@ -2267,8 +2267,8 @@ export declare const zRePlanTrigger: z.ZodObject<{
     detectedAt: Date;
     detectedBy: string;
     sourceFact?: {
-        status: "pending" | "valid" | "expired" | "invalid";
         projectId: string;
+        status: "pending" | "valid" | "expired" | "invalid";
         vendorId: string;
         vendorName: string;
         documentType: "DURC" | "visura" | "certification";
@@ -2278,9 +2278,9 @@ export declare const zRePlanTrigger: z.ZodObject<{
         issuingAuthority: string;
         notes?: string | undefined;
     } | {
+        projectId: string;
         category: string;
         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         location: string;
@@ -2292,10 +2292,10 @@ export declare const zRePlanTrigger: z.ZodObject<{
         createdBy: string;
         awardedVendor?: string | undefined;
     } | {
-        description: string;
-        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         projectId: string;
         documents: string[];
+        description: string;
+        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
         submissionDate: Date;
         expectedResponseDate: Date;
@@ -2305,9 +2305,9 @@ export declare const zRePlanTrigger: z.ZodObject<{
         notes?: string | undefined;
         actualResponseDate?: Date | undefined;
     } | {
+        projectId: string;
         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
         currency: string;
-        projectId: string;
         features: string[];
         location: string;
         portalId: string;
@@ -2635,8 +2635,8 @@ export declare const zRePlanProposal: z.ZodObject<{
                 issuingAuthority: z.ZodString;
                 notes: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -2646,8 +2646,8 @@ export declare const zRePlanProposal: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             }, {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -2671,9 +2671,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 createdAt: z.ZodDate;
                 updatedAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -2685,9 +2685,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             }, {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -2712,10 +2712,10 @@ export declare const zRePlanProposal: z.ZodObject<{
                 documents: z.ZodArray<z.ZodString, "many">;
                 notes: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -2725,10 +2725,10 @@ export declare const zRePlanProposal: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             }, {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -2766,9 +2766,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                     website?: string | undefined;
                 }>;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -2786,9 +2786,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                     website?: string | undefined;
                 };
             }, {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -2816,11 +2816,11 @@ export declare const zRePlanProposal: z.ZodObject<{
             createdAt: z.ZodDate;
             updatedAt: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             id: string;
             description: string;
             status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
             type: "milestone" | "task" | "subtask" | "deliverable";
-            projectId: string;
             createdAt: Date;
             name: string;
             updatedAt: Date;
@@ -2843,8 +2843,8 @@ export declare const zRePlanProposal: z.ZodObject<{
             actualEndDate?: Date | undefined;
             assignedTo?: string | undefined;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -2854,9 +2854,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -2868,10 +2868,10 @@ export declare const zRePlanProposal: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -2881,9 +2881,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -2904,11 +2904,11 @@ export declare const zRePlanProposal: z.ZodObject<{
             factId?: string | undefined;
             parentTaskId?: string | undefined;
         }, {
+            projectId: string;
             id: string;
             description: string;
             status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
             type: "milestone" | "task" | "subtask" | "deliverable";
-            projectId: string;
             createdAt: Date;
             name: string;
             updatedAt: Date;
@@ -2931,8 +2931,8 @@ export declare const zRePlanProposal: z.ZodObject<{
             actualEndDate?: Date | undefined;
             assignedTo?: string | undefined;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -2942,9 +2942,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -2956,10 +2956,10 @@ export declare const zRePlanProposal: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -2969,9 +2969,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -3003,9 +3003,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             isCritical: z.ZodBoolean;
             createdAt: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -3013,9 +3013,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             lag: number;
             description?: string | undefined;
         }, {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -3047,8 +3047,8 @@ export declare const zRePlanProposal: z.ZodObject<{
             issuingAuthority: z.ZodString;
             notes: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -3058,8 +3058,8 @@ export declare const zRePlanProposal: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         }, {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -3083,9 +3083,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             createdAt: z.ZodDate;
             updatedAt: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -3097,9 +3097,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         }, {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -3124,10 +3124,10 @@ export declare const zRePlanProposal: z.ZodObject<{
             documents: z.ZodArray<z.ZodString, "many">;
             notes: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -3137,10 +3137,10 @@ export declare const zRePlanProposal: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         }, {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -3178,9 +3178,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 website?: string | undefined;
             }>;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -3198,9 +3198,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 website?: string | undefined;
             };
         }, {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -3222,10 +3222,10 @@ export declare const zRePlanProposal: z.ZodObject<{
         createdAt: z.ZodDate;
         updatedAt: z.ZodDate;
     }, "strip", z.ZodTypeAny, {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "active" | "draft" | "archived";
-        projectId: string;
         createdAt: Date;
         name: string;
         version: number;
@@ -3233,9 +3233,9 @@ export declare const zRePlanProposal: z.ZodObject<{
         generatedAt: Date;
         generatedBy: string;
         dependencies: {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -3246,11 +3246,11 @@ export declare const zRePlanProposal: z.ZodObject<{
         startDate: Date;
         endDate: Date;
         tasks: {
+            projectId: string;
             id: string;
             description: string;
             status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
             type: "milestone" | "task" | "subtask" | "deliverable";
-            projectId: string;
             createdAt: Date;
             name: string;
             updatedAt: Date;
@@ -3273,8 +3273,8 @@ export declare const zRePlanProposal: z.ZodObject<{
             actualEndDate?: Date | undefined;
             assignedTo?: string | undefined;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -3284,9 +3284,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -3298,10 +3298,10 @@ export declare const zRePlanProposal: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -3311,9 +3311,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -3340,8 +3340,8 @@ export declare const zRePlanProposal: z.ZodObject<{
         completedTasks: number;
         totalTasks: number;
         sourceFacts: ({
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -3351,9 +3351,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -3365,10 +3365,10 @@ export declare const zRePlanProposal: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -3378,9 +3378,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -3401,10 +3401,10 @@ export declare const zRePlanProposal: z.ZodObject<{
         actualStartDate?: Date | undefined;
         actualEndDate?: Date | undefined;
     }, {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "active" | "draft" | "archived";
-        projectId: string;
         createdAt: Date;
         name: string;
         version: number;
@@ -3412,9 +3412,9 @@ export declare const zRePlanProposal: z.ZodObject<{
         generatedAt: Date;
         generatedBy: string;
         dependencies: {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -3425,11 +3425,11 @@ export declare const zRePlanProposal: z.ZodObject<{
         startDate: Date;
         endDate: Date;
         tasks: {
+            projectId: string;
             id: string;
             description: string;
             status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
             type: "milestone" | "task" | "subtask" | "deliverable";
-            projectId: string;
             createdAt: Date;
             name: string;
             updatedAt: Date;
@@ -3452,8 +3452,8 @@ export declare const zRePlanProposal: z.ZodObject<{
             actualEndDate?: Date | undefined;
             assignedTo?: string | undefined;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -3463,9 +3463,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -3477,10 +3477,10 @@ export declare const zRePlanProposal: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -3490,9 +3490,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -3519,8 +3519,8 @@ export declare const zRePlanProposal: z.ZodObject<{
         completedTasks: number;
         totalTasks: number;
         sourceFacts: ({
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -3530,9 +3530,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -3544,10 +3544,10 @@ export declare const zRePlanProposal: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -3557,9 +3557,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -3617,8 +3617,8 @@ export declare const zRePlanProposal: z.ZodObject<{
                 issuingAuthority: z.ZodString;
                 notes: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -3628,8 +3628,8 @@ export declare const zRePlanProposal: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             }, {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -3653,9 +3653,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 createdAt: z.ZodDate;
                 updatedAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -3667,9 +3667,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             }, {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -3694,10 +3694,10 @@ export declare const zRePlanProposal: z.ZodObject<{
                 documents: z.ZodArray<z.ZodString, "many">;
                 notes: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -3707,10 +3707,10 @@ export declare const zRePlanProposal: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             }, {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -3748,9 +3748,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                     website?: string | undefined;
                 }>;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -3768,9 +3768,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                     website?: string | undefined;
                 };
             }, {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -3798,11 +3798,11 @@ export declare const zRePlanProposal: z.ZodObject<{
             createdAt: z.ZodDate;
             updatedAt: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             id: string;
             description: string;
             status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
             type: "milestone" | "task" | "subtask" | "deliverable";
-            projectId: string;
             createdAt: Date;
             name: string;
             updatedAt: Date;
@@ -3825,8 +3825,8 @@ export declare const zRePlanProposal: z.ZodObject<{
             actualEndDate?: Date | undefined;
             assignedTo?: string | undefined;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -3836,9 +3836,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -3850,10 +3850,10 @@ export declare const zRePlanProposal: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -3863,9 +3863,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -3886,11 +3886,11 @@ export declare const zRePlanProposal: z.ZodObject<{
             factId?: string | undefined;
             parentTaskId?: string | undefined;
         }, {
+            projectId: string;
             id: string;
             description: string;
             status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
             type: "milestone" | "task" | "subtask" | "deliverable";
-            projectId: string;
             createdAt: Date;
             name: string;
             updatedAt: Date;
@@ -3913,8 +3913,8 @@ export declare const zRePlanProposal: z.ZodObject<{
             actualEndDate?: Date | undefined;
             assignedTo?: string | undefined;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -3924,9 +3924,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -3938,10 +3938,10 @@ export declare const zRePlanProposal: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -3951,9 +3951,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -3985,9 +3985,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             isCritical: z.ZodBoolean;
             createdAt: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -3995,9 +3995,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             lag: number;
             description?: string | undefined;
         }, {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -4029,8 +4029,8 @@ export declare const zRePlanProposal: z.ZodObject<{
             issuingAuthority: z.ZodString;
             notes: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -4040,8 +4040,8 @@ export declare const zRePlanProposal: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         }, {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -4065,9 +4065,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             createdAt: z.ZodDate;
             updatedAt: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -4079,9 +4079,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         }, {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -4106,10 +4106,10 @@ export declare const zRePlanProposal: z.ZodObject<{
             documents: z.ZodArray<z.ZodString, "many">;
             notes: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -4119,10 +4119,10 @@ export declare const zRePlanProposal: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         }, {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -4160,9 +4160,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 website?: string | undefined;
             }>;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -4180,9 +4180,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 website?: string | undefined;
             };
         }, {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -4204,10 +4204,10 @@ export declare const zRePlanProposal: z.ZodObject<{
         createdAt: z.ZodDate;
         updatedAt: z.ZodDate;
     }, "strip", z.ZodTypeAny, {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "active" | "draft" | "archived";
-        projectId: string;
         createdAt: Date;
         name: string;
         version: number;
@@ -4215,9 +4215,9 @@ export declare const zRePlanProposal: z.ZodObject<{
         generatedAt: Date;
         generatedBy: string;
         dependencies: {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -4228,11 +4228,11 @@ export declare const zRePlanProposal: z.ZodObject<{
         startDate: Date;
         endDate: Date;
         tasks: {
+            projectId: string;
             id: string;
             description: string;
             status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
             type: "milestone" | "task" | "subtask" | "deliverable";
-            projectId: string;
             createdAt: Date;
             name: string;
             updatedAt: Date;
@@ -4255,8 +4255,8 @@ export declare const zRePlanProposal: z.ZodObject<{
             actualEndDate?: Date | undefined;
             assignedTo?: string | undefined;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -4266,9 +4266,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -4280,10 +4280,10 @@ export declare const zRePlanProposal: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -4293,9 +4293,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -4322,8 +4322,8 @@ export declare const zRePlanProposal: z.ZodObject<{
         completedTasks: number;
         totalTasks: number;
         sourceFacts: ({
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -4333,9 +4333,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -4347,10 +4347,10 @@ export declare const zRePlanProposal: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -4360,9 +4360,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -4383,10 +4383,10 @@ export declare const zRePlanProposal: z.ZodObject<{
         actualStartDate?: Date | undefined;
         actualEndDate?: Date | undefined;
     }, {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "active" | "draft" | "archived";
-        projectId: string;
         createdAt: Date;
         name: string;
         version: number;
@@ -4394,9 +4394,9 @@ export declare const zRePlanProposal: z.ZodObject<{
         generatedAt: Date;
         generatedBy: string;
         dependencies: {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -4407,11 +4407,11 @@ export declare const zRePlanProposal: z.ZodObject<{
         startDate: Date;
         endDate: Date;
         tasks: {
+            projectId: string;
             id: string;
             description: string;
             status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
             type: "milestone" | "task" | "subtask" | "deliverable";
-            projectId: string;
             createdAt: Date;
             name: string;
             updatedAt: Date;
@@ -4434,8 +4434,8 @@ export declare const zRePlanProposal: z.ZodObject<{
             actualEndDate?: Date | undefined;
             assignedTo?: string | undefined;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -4445,9 +4445,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -4459,10 +4459,10 @@ export declare const zRePlanProposal: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -4472,9 +4472,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -4501,8 +4501,8 @@ export declare const zRePlanProposal: z.ZodObject<{
         completedTasks: number;
         totalTasks: number;
         sourceFacts: ({
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -4512,9 +4512,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -4526,10 +4526,10 @@ export declare const zRePlanProposal: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -4539,9 +4539,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -4622,9 +4622,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             isCritical: z.ZodBoolean;
             createdAt: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -4632,9 +4632,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             lag: number;
             description?: string | undefined;
         }, {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -4753,9 +4753,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             shiftDays: number;
         }[];
         newDependencies: {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -4802,9 +4802,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             shiftDays: number;
         }[];
         newDependencies: {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -4924,9 +4924,9 @@ export declare const zRePlanProposal: z.ZodObject<{
     updatedAt: z.ZodDate;
     appliedAt: z.ZodOptional<z.ZodDate>;
 }, "strip", z.ZodTypeAny, {
+    projectId: string;
     id: string;
     status: "approved" | "rejected" | "draft" | "proposed" | "applied";
-    projectId: string;
     createdAt: Date;
     updatedAt: Date;
     changes: {
@@ -4957,9 +4957,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             shiftDays: number;
         }[];
         newDependencies: {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -4998,10 +4998,10 @@ export declare const zRePlanProposal: z.ZodObject<{
     createdBy: string;
     triggerId: string;
     currentTimeline: {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "active" | "draft" | "archived";
-        projectId: string;
         createdAt: Date;
         name: string;
         version: number;
@@ -5009,9 +5009,9 @@ export declare const zRePlanProposal: z.ZodObject<{
         generatedAt: Date;
         generatedBy: string;
         dependencies: {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -5022,11 +5022,11 @@ export declare const zRePlanProposal: z.ZodObject<{
         startDate: Date;
         endDate: Date;
         tasks: {
+            projectId: string;
             id: string;
             description: string;
             status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
             type: "milestone" | "task" | "subtask" | "deliverable";
-            projectId: string;
             createdAt: Date;
             name: string;
             updatedAt: Date;
@@ -5049,8 +5049,8 @@ export declare const zRePlanProposal: z.ZodObject<{
             actualEndDate?: Date | undefined;
             assignedTo?: string | undefined;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -5060,9 +5060,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -5074,10 +5074,10 @@ export declare const zRePlanProposal: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -5087,9 +5087,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -5116,8 +5116,8 @@ export declare const zRePlanProposal: z.ZodObject<{
         completedTasks: number;
         totalTasks: number;
         sourceFacts: ({
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -5127,9 +5127,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -5141,10 +5141,10 @@ export declare const zRePlanProposal: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -5154,9 +5154,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -5178,10 +5178,10 @@ export declare const zRePlanProposal: z.ZodObject<{
         actualEndDate?: Date | undefined;
     };
     proposedTimeline: {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "active" | "draft" | "archived";
-        projectId: string;
         createdAt: Date;
         name: string;
         version: number;
@@ -5189,9 +5189,9 @@ export declare const zRePlanProposal: z.ZodObject<{
         generatedAt: Date;
         generatedBy: string;
         dependencies: {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -5202,11 +5202,11 @@ export declare const zRePlanProposal: z.ZodObject<{
         startDate: Date;
         endDate: Date;
         tasks: {
+            projectId: string;
             id: string;
             description: string;
             status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
             type: "milestone" | "task" | "subtask" | "deliverable";
-            projectId: string;
             createdAt: Date;
             name: string;
             updatedAt: Date;
@@ -5229,8 +5229,8 @@ export declare const zRePlanProposal: z.ZodObject<{
             actualEndDate?: Date | undefined;
             assignedTo?: string | undefined;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -5240,9 +5240,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -5254,10 +5254,10 @@ export declare const zRePlanProposal: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -5267,9 +5267,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -5296,8 +5296,8 @@ export declare const zRePlanProposal: z.ZodObject<{
         completedTasks: number;
         totalTasks: number;
         sourceFacts: ({
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -5307,9 +5307,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -5321,10 +5321,10 @@ export declare const zRePlanProposal: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -5334,9 +5334,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -5365,9 +5365,9 @@ export declare const zRePlanProposal: z.ZodObject<{
     };
     appliedAt?: Date | undefined;
 }, {
+    projectId: string;
     id: string;
     status: "approved" | "rejected" | "draft" | "proposed" | "applied";
-    projectId: string;
     createdAt: Date;
     updatedAt: Date;
     changes: {
@@ -5398,9 +5398,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             shiftDays: number;
         }[];
         newDependencies: {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -5439,10 +5439,10 @@ export declare const zRePlanProposal: z.ZodObject<{
     createdBy: string;
     triggerId: string;
     currentTimeline: {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "active" | "draft" | "archived";
-        projectId: string;
         createdAt: Date;
         name: string;
         version: number;
@@ -5450,9 +5450,9 @@ export declare const zRePlanProposal: z.ZodObject<{
         generatedAt: Date;
         generatedBy: string;
         dependencies: {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -5463,11 +5463,11 @@ export declare const zRePlanProposal: z.ZodObject<{
         startDate: Date;
         endDate: Date;
         tasks: {
+            projectId: string;
             id: string;
             description: string;
             status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
             type: "milestone" | "task" | "subtask" | "deliverable";
-            projectId: string;
             createdAt: Date;
             name: string;
             updatedAt: Date;
@@ -5490,8 +5490,8 @@ export declare const zRePlanProposal: z.ZodObject<{
             actualEndDate?: Date | undefined;
             assignedTo?: string | undefined;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -5501,9 +5501,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -5515,10 +5515,10 @@ export declare const zRePlanProposal: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -5528,9 +5528,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -5557,8 +5557,8 @@ export declare const zRePlanProposal: z.ZodObject<{
         completedTasks: number;
         totalTasks: number;
         sourceFacts: ({
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -5568,9 +5568,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -5582,10 +5582,10 @@ export declare const zRePlanProposal: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -5595,9 +5595,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -5619,10 +5619,10 @@ export declare const zRePlanProposal: z.ZodObject<{
         actualEndDate?: Date | undefined;
     };
     proposedTimeline: {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "active" | "draft" | "archived";
-        projectId: string;
         createdAt: Date;
         name: string;
         version: number;
@@ -5630,9 +5630,9 @@ export declare const zRePlanProposal: z.ZodObject<{
         generatedAt: Date;
         generatedBy: string;
         dependencies: {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -5643,11 +5643,11 @@ export declare const zRePlanProposal: z.ZodObject<{
         startDate: Date;
         endDate: Date;
         tasks: {
+            projectId: string;
             id: string;
             description: string;
             status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
             type: "milestone" | "task" | "subtask" | "deliverable";
-            projectId: string;
             createdAt: Date;
             name: string;
             updatedAt: Date;
@@ -5670,8 +5670,8 @@ export declare const zRePlanProposal: z.ZodObject<{
             actualEndDate?: Date | undefined;
             assignedTo?: string | undefined;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -5681,9 +5681,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -5695,10 +5695,10 @@ export declare const zRePlanProposal: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -5708,9 +5708,9 @@ export declare const zRePlanProposal: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -5737,8 +5737,8 @@ export declare const zRePlanProposal: z.ZodObject<{
         completedTasks: number;
         totalTasks: number;
         sourceFacts: ({
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -5748,9 +5748,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -5762,10 +5762,10 @@ export declare const zRePlanProposal: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -5775,9 +5775,9 @@ export declare const zRePlanProposal: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -5891,14 +5891,14 @@ export declare const zRePlanPreview: z.ZodObject<{
         modify: z.ZodBoolean;
         autoApply: z.ZodBoolean;
     }, "strip", z.ZodTypeAny, {
-        autoApply: boolean;
         approve: boolean;
         reject: boolean;
+        autoApply: boolean;
         modify: boolean;
     }, {
-        autoApply: boolean;
         approve: boolean;
         reject: boolean;
+        autoApply: boolean;
         modify: boolean;
     }>;
     createdAt: z.ZodDate;
@@ -5919,9 +5919,9 @@ export declare const zRePlanPreview: z.ZodObject<{
         benefits: string[];
     };
     actions: {
-        autoApply: boolean;
         approve: boolean;
         reject: boolean;
+        autoApply: boolean;
         modify: boolean;
     };
     proposalId: string;
@@ -5946,9 +5946,9 @@ export declare const zRePlanPreview: z.ZodObject<{
         benefits: string[];
     };
     actions: {
-        autoApply: boolean;
         approve: boolean;
         reject: boolean;
+        autoApply: boolean;
         modify: boolean;
     };
     proposalId: string;
@@ -6017,8 +6017,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: z.ZodString;
                 notes: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -6028,8 +6028,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             }, {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -6053,9 +6053,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdAt: z.ZodDate;
                 updatedAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -6067,9 +6067,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             }, {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -6094,10 +6094,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 documents: z.ZodArray<z.ZodString, "many">;
                 notes: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -6107,10 +6107,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             }, {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -6148,9 +6148,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     website?: string | undefined;
                 }>;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -6168,9 +6168,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     website?: string | undefined;
                 };
             }, {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -6198,11 +6198,11 @@ export declare const zProjectTimeline: z.ZodObject<{
             createdAt: z.ZodDate;
             updatedAt: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             id: string;
             description: string;
             status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
             type: "milestone" | "task" | "subtask" | "deliverable";
-            projectId: string;
             createdAt: Date;
             name: string;
             updatedAt: Date;
@@ -6225,8 +6225,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             actualEndDate?: Date | undefined;
             assignedTo?: string | undefined;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -6236,9 +6236,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -6250,10 +6250,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -6263,9 +6263,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -6286,11 +6286,11 @@ export declare const zProjectTimeline: z.ZodObject<{
             factId?: string | undefined;
             parentTaskId?: string | undefined;
         }, {
+            projectId: string;
             id: string;
             description: string;
             status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
             type: "milestone" | "task" | "subtask" | "deliverable";
-            projectId: string;
             createdAt: Date;
             name: string;
             updatedAt: Date;
@@ -6313,8 +6313,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             actualEndDate?: Date | undefined;
             assignedTo?: string | undefined;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -6324,9 +6324,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -6338,10 +6338,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -6351,9 +6351,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -6385,9 +6385,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             isCritical: z.ZodBoolean;
             createdAt: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -6395,9 +6395,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             lag: number;
             description?: string | undefined;
         }, {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -6429,8 +6429,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             issuingAuthority: z.ZodString;
             notes: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -6440,8 +6440,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         }, {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -6465,9 +6465,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             createdAt: z.ZodDate;
             updatedAt: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -6479,9 +6479,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         }, {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -6506,10 +6506,10 @@ export declare const zProjectTimeline: z.ZodObject<{
             documents: z.ZodArray<z.ZodString, "many">;
             notes: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -6519,10 +6519,10 @@ export declare const zProjectTimeline: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         }, {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -6560,9 +6560,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 website?: string | undefined;
             }>;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -6580,9 +6580,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 website?: string | undefined;
             };
         }, {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -6604,10 +6604,10 @@ export declare const zProjectTimeline: z.ZodObject<{
         createdAt: z.ZodDate;
         updatedAt: z.ZodDate;
     }, "strip", z.ZodTypeAny, {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "active" | "draft" | "archived";
-        projectId: string;
         createdAt: Date;
         name: string;
         version: number;
@@ -6615,9 +6615,9 @@ export declare const zProjectTimeline: z.ZodObject<{
         generatedAt: Date;
         generatedBy: string;
         dependencies: {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -6628,11 +6628,11 @@ export declare const zProjectTimeline: z.ZodObject<{
         startDate: Date;
         endDate: Date;
         tasks: {
+            projectId: string;
             id: string;
             description: string;
             status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
             type: "milestone" | "task" | "subtask" | "deliverable";
-            projectId: string;
             createdAt: Date;
             name: string;
             updatedAt: Date;
@@ -6655,8 +6655,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             actualEndDate?: Date | undefined;
             assignedTo?: string | undefined;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -6666,9 +6666,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -6680,10 +6680,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -6693,9 +6693,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -6722,8 +6722,8 @@ export declare const zProjectTimeline: z.ZodObject<{
         completedTasks: number;
         totalTasks: number;
         sourceFacts: ({
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -6733,9 +6733,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -6747,10 +6747,10 @@ export declare const zProjectTimeline: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -6760,9 +6760,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -6783,10 +6783,10 @@ export declare const zProjectTimeline: z.ZodObject<{
         actualStartDate?: Date | undefined;
         actualEndDate?: Date | undefined;
     }, {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "active" | "draft" | "archived";
-        projectId: string;
         createdAt: Date;
         name: string;
         version: number;
@@ -6794,9 +6794,9 @@ export declare const zProjectTimeline: z.ZodObject<{
         generatedAt: Date;
         generatedBy: string;
         dependencies: {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -6807,11 +6807,11 @@ export declare const zProjectTimeline: z.ZodObject<{
         startDate: Date;
         endDate: Date;
         tasks: {
+            projectId: string;
             id: string;
             description: string;
             status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
             type: "milestone" | "task" | "subtask" | "deliverable";
-            projectId: string;
             createdAt: Date;
             name: string;
             updatedAt: Date;
@@ -6834,8 +6834,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             actualEndDate?: Date | undefined;
             assignedTo?: string | undefined;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -6845,9 +6845,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -6859,10 +6859,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -6872,9 +6872,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -6901,8 +6901,8 @@ export declare const zProjectTimeline: z.ZodObject<{
         completedTasks: number;
         totalTasks: number;
         sourceFacts: ({
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -6912,9 +6912,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -6926,10 +6926,10 @@ export declare const zProjectTimeline: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -6939,9 +6939,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -7003,8 +7003,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                     issuingAuthority: z.ZodString;
                     notes: z.ZodOptional<z.ZodString>;
                 }, "strip", z.ZodTypeAny, {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -7014,8 +7014,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 }, {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -7039,9 +7039,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     createdAt: z.ZodDate;
                     updatedAt: z.ZodDate;
                 }, "strip", z.ZodTypeAny, {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -7053,9 +7053,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 }, {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -7080,10 +7080,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                     documents: z.ZodArray<z.ZodString, "many">;
                     notes: z.ZodOptional<z.ZodString>;
                 }, "strip", z.ZodTypeAny, {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -7093,10 +7093,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 }, {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -7134,9 +7134,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                         website?: string | undefined;
                     }>;
                 }, "strip", z.ZodTypeAny, {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -7154,9 +7154,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                         website?: string | undefined;
                     };
                 }, {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -7184,11 +7184,11 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdAt: z.ZodDate;
                 updatedAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -7211,8 +7211,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -7222,9 +7222,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -7236,10 +7236,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -7249,9 +7249,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -7272,11 +7272,11 @@ export declare const zProjectTimeline: z.ZodObject<{
                 factId?: string | undefined;
                 parentTaskId?: string | undefined;
             }, {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -7299,8 +7299,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -7310,9 +7310,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -7324,10 +7324,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -7337,9 +7337,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -7371,9 +7371,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 isCritical: z.ZodBoolean;
                 createdAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -7381,9 +7381,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 lag: number;
                 description?: string | undefined;
             }, {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -7415,8 +7415,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: z.ZodString;
                 notes: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -7426,8 +7426,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             }, {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -7451,9 +7451,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdAt: z.ZodDate;
                 updatedAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -7465,9 +7465,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             }, {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -7492,10 +7492,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 documents: z.ZodArray<z.ZodString, "many">;
                 notes: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -7505,10 +7505,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             }, {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -7546,9 +7546,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     website?: string | undefined;
                 }>;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -7566,9 +7566,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     website?: string | undefined;
                 };
             }, {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -7590,10 +7590,10 @@ export declare const zProjectTimeline: z.ZodObject<{
             createdAt: z.ZodDate;
             updatedAt: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -7601,9 +7601,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -7614,11 +7614,11 @@ export declare const zProjectTimeline: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -7641,8 +7641,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -7652,9 +7652,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -7666,10 +7666,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -7679,9 +7679,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -7708,8 +7708,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -7719,9 +7719,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -7733,10 +7733,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -7746,9 +7746,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -7769,10 +7769,10 @@ export declare const zProjectTimeline: z.ZodObject<{
             actualStartDate?: Date | undefined;
             actualEndDate?: Date | undefined;
         }, {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -7780,9 +7780,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -7793,11 +7793,11 @@ export declare const zProjectTimeline: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -7820,8 +7820,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -7831,9 +7831,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -7845,10 +7845,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -7858,9 +7858,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -7887,8 +7887,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -7898,9 +7898,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -7912,10 +7912,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -7925,9 +7925,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -7985,8 +7985,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                     issuingAuthority: z.ZodString;
                     notes: z.ZodOptional<z.ZodString>;
                 }, "strip", z.ZodTypeAny, {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -7996,8 +7996,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 }, {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -8021,9 +8021,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     createdAt: z.ZodDate;
                     updatedAt: z.ZodDate;
                 }, "strip", z.ZodTypeAny, {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -8035,9 +8035,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 }, {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -8062,10 +8062,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                     documents: z.ZodArray<z.ZodString, "many">;
                     notes: z.ZodOptional<z.ZodString>;
                 }, "strip", z.ZodTypeAny, {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -8075,10 +8075,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 }, {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -8116,9 +8116,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                         website?: string | undefined;
                     }>;
                 }, "strip", z.ZodTypeAny, {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -8136,9 +8136,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                         website?: string | undefined;
                     };
                 }, {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -8166,11 +8166,11 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdAt: z.ZodDate;
                 updatedAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -8193,8 +8193,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -8204,9 +8204,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -8218,10 +8218,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -8231,9 +8231,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -8254,11 +8254,11 @@ export declare const zProjectTimeline: z.ZodObject<{
                 factId?: string | undefined;
                 parentTaskId?: string | undefined;
             }, {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -8281,8 +8281,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -8292,9 +8292,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -8306,10 +8306,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -8319,9 +8319,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -8353,9 +8353,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 isCritical: z.ZodBoolean;
                 createdAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -8363,9 +8363,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 lag: number;
                 description?: string | undefined;
             }, {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -8397,8 +8397,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: z.ZodString;
                 notes: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -8408,8 +8408,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             }, {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -8433,9 +8433,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdAt: z.ZodDate;
                 updatedAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -8447,9 +8447,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             }, {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -8474,10 +8474,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 documents: z.ZodArray<z.ZodString, "many">;
                 notes: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -8487,10 +8487,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             }, {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -8528,9 +8528,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     website?: string | undefined;
                 }>;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -8548,9 +8548,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     website?: string | undefined;
                 };
             }, {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -8572,10 +8572,10 @@ export declare const zProjectTimeline: z.ZodObject<{
             createdAt: z.ZodDate;
             updatedAt: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -8583,9 +8583,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -8596,11 +8596,11 @@ export declare const zProjectTimeline: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -8623,8 +8623,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -8634,9 +8634,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -8648,10 +8648,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -8661,9 +8661,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -8690,8 +8690,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -8701,9 +8701,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -8715,10 +8715,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -8728,9 +8728,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -8751,10 +8751,10 @@ export declare const zProjectTimeline: z.ZodObject<{
             actualStartDate?: Date | undefined;
             actualEndDate?: Date | undefined;
         }, {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -8762,9 +8762,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -8775,11 +8775,11 @@ export declare const zProjectTimeline: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -8802,8 +8802,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -8813,9 +8813,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -8827,10 +8827,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -8840,9 +8840,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -8869,8 +8869,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -8880,9 +8880,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -8894,10 +8894,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -8907,9 +8907,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -8990,9 +8990,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 isCritical: z.ZodBoolean;
                 createdAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -9000,9 +9000,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 lag: number;
                 description?: string | undefined;
             }, {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -9121,9 +9121,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 shiftDays: number;
             }[];
             newDependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -9170,9 +9170,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 shiftDays: number;
             }[];
             newDependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -9292,9 +9292,9 @@ export declare const zProjectTimeline: z.ZodObject<{
         updatedAt: z.ZodDate;
         appliedAt: z.ZodOptional<z.ZodDate>;
     }, "strip", z.ZodTypeAny, {
+        projectId: string;
         id: string;
         status: "approved" | "rejected" | "draft" | "proposed" | "applied";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         changes: {
@@ -9325,9 +9325,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 shiftDays: number;
             }[];
             newDependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -9366,10 +9366,10 @@ export declare const zProjectTimeline: z.ZodObject<{
         createdBy: string;
         triggerId: string;
         currentTimeline: {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -9377,9 +9377,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -9390,11 +9390,11 @@ export declare const zProjectTimeline: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -9417,8 +9417,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -9428,9 +9428,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -9442,10 +9442,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -9455,9 +9455,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -9484,8 +9484,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -9495,9 +9495,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -9509,10 +9509,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -9522,9 +9522,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -9546,10 +9546,10 @@ export declare const zProjectTimeline: z.ZodObject<{
             actualEndDate?: Date | undefined;
         };
         proposedTimeline: {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -9557,9 +9557,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -9570,11 +9570,11 @@ export declare const zProjectTimeline: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -9597,8 +9597,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -9608,9 +9608,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -9622,10 +9622,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -9635,9 +9635,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -9664,8 +9664,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -9675,9 +9675,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -9689,10 +9689,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -9702,9 +9702,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -9733,9 +9733,9 @@ export declare const zProjectTimeline: z.ZodObject<{
         };
         appliedAt?: Date | undefined;
     }, {
+        projectId: string;
         id: string;
         status: "approved" | "rejected" | "draft" | "proposed" | "applied";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         changes: {
@@ -9766,9 +9766,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 shiftDays: number;
             }[];
             newDependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -9807,10 +9807,10 @@ export declare const zProjectTimeline: z.ZodObject<{
         createdBy: string;
         triggerId: string;
         currentTimeline: {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -9818,9 +9818,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -9831,11 +9831,11 @@ export declare const zProjectTimeline: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -9858,8 +9858,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -9869,9 +9869,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -9883,10 +9883,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -9896,9 +9896,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -9925,8 +9925,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -9936,9 +9936,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -9950,10 +9950,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -9963,9 +9963,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -9987,10 +9987,10 @@ export declare const zProjectTimeline: z.ZodObject<{
             actualEndDate?: Date | undefined;
         };
         proposedTimeline: {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -9998,9 +9998,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -10011,11 +10011,11 @@ export declare const zProjectTimeline: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -10038,8 +10038,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -10049,9 +10049,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -10063,10 +10063,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -10076,9 +10076,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -10105,8 +10105,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -10116,9 +10116,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -10130,10 +10130,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -10143,9 +10143,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -10214,8 +10214,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             issuingAuthority: z.ZodString;
             notes: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -10225,8 +10225,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         }, {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -10250,9 +10250,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             createdAt: z.ZodDate;
             updatedAt: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -10264,9 +10264,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         }, {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -10291,10 +10291,10 @@ export declare const zProjectTimeline: z.ZodObject<{
             documents: z.ZodArray<z.ZodString, "many">;
             notes: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -10304,10 +10304,10 @@ export declare const zProjectTimeline: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         }, {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -10345,9 +10345,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 website?: string | undefined;
             }>;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -10365,9 +10365,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 website?: string | undefined;
             };
         }, {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -10389,10 +10389,10 @@ export declare const zProjectTimeline: z.ZodObject<{
         createdAt: z.ZodDate;
         updatedAt: z.ZodDate;
     }, "strip", z.ZodTypeAny, {
+        projectId: string;
         id: string;
         status: "approved" | "rejected" | "detected" | "analyzing" | "proposed" | "applied";
         type: "document_expiry" | "sal_delay" | "procurement_delay" | "resource_conflict" | "scope_change" | "risk_materialized";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         severity: "low" | "medium" | "high" | "critical";
@@ -10407,8 +10407,8 @@ export declare const zProjectTimeline: z.ZodObject<{
         detectedAt: Date;
         detectedBy: string;
         sourceFact?: {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -10418,9 +10418,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -10432,10 +10432,10 @@ export declare const zProjectTimeline: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -10445,9 +10445,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -10467,10 +10467,10 @@ export declare const zProjectTimeline: z.ZodObject<{
         } | undefined;
         details?: any;
     }, {
+        projectId: string;
         id: string;
         status: "approved" | "rejected" | "detected" | "analyzing" | "proposed" | "applied";
         type: "document_expiry" | "sal_delay" | "procurement_delay" | "resource_conflict" | "scope_change" | "risk_materialized";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         severity: "low" | "medium" | "high" | "critical";
@@ -10485,8 +10485,8 @@ export declare const zProjectTimeline: z.ZodObject<{
         detectedAt: Date;
         detectedBy: string;
         sourceFact?: {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -10496,9 +10496,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -10510,10 +10510,10 @@ export declare const zProjectTimeline: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -10523,9 +10523,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -10552,20 +10552,20 @@ export declare const zProjectTimeline: z.ZodObject<{
     updatedAt: z.ZodDate;
     lastRegeneratedAt: z.ZodOptional<z.ZodDate>;
 }, "strip", z.ZodTypeAny, {
+    projectId: string;
     id: string;
     description: string;
     status: "completed" | "active" | "draft" | "archived";
-    projectId: string;
     createdAt: Date;
     name: string;
     version: number;
     updatedAt: Date;
     createdBy: string;
     wbs: {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "active" | "draft" | "archived";
-        projectId: string;
         createdAt: Date;
         name: string;
         version: number;
@@ -10573,9 +10573,9 @@ export declare const zProjectTimeline: z.ZodObject<{
         generatedAt: Date;
         generatedBy: string;
         dependencies: {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -10586,11 +10586,11 @@ export declare const zProjectTimeline: z.ZodObject<{
         startDate: Date;
         endDate: Date;
         tasks: {
+            projectId: string;
             id: string;
             description: string;
             status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
             type: "milestone" | "task" | "subtask" | "deliverable";
-            projectId: string;
             createdAt: Date;
             name: string;
             updatedAt: Date;
@@ -10613,8 +10613,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             actualEndDate?: Date | undefined;
             assignedTo?: string | undefined;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -10624,9 +10624,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -10638,10 +10638,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -10651,9 +10651,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -10680,8 +10680,8 @@ export declare const zProjectTimeline: z.ZodObject<{
         completedTasks: number;
         totalTasks: number;
         sourceFacts: ({
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -10691,9 +10691,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -10705,10 +10705,10 @@ export declare const zProjectTimeline: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -10718,9 +10718,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -10742,9 +10742,9 @@ export declare const zProjectTimeline: z.ZodObject<{
         actualEndDate?: Date | undefined;
     };
     rePlanHistory: {
+        projectId: string;
         id: string;
         status: "approved" | "rejected" | "draft" | "proposed" | "applied";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         changes: {
@@ -10775,9 +10775,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 shiftDays: number;
             }[];
             newDependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -10816,10 +10816,10 @@ export declare const zProjectTimeline: z.ZodObject<{
         createdBy: string;
         triggerId: string;
         currentTimeline: {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -10827,9 +10827,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -10840,11 +10840,11 @@ export declare const zProjectTimeline: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -10867,8 +10867,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -10878,9 +10878,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -10892,10 +10892,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -10905,9 +10905,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -10934,8 +10934,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -10945,9 +10945,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -10959,10 +10959,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -10972,9 +10972,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -10996,10 +10996,10 @@ export declare const zProjectTimeline: z.ZodObject<{
             actualEndDate?: Date | undefined;
         };
         proposedTimeline: {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -11007,9 +11007,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -11020,11 +11020,11 @@ export declare const zProjectTimeline: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -11047,8 +11047,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -11058,9 +11058,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -11072,10 +11072,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -11085,9 +11085,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -11114,8 +11114,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -11125,9 +11125,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -11139,10 +11139,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -11152,9 +11152,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -11184,10 +11184,10 @@ export declare const zProjectTimeline: z.ZodObject<{
         appliedAt?: Date | undefined;
     }[];
     activeTriggers: {
+        projectId: string;
         id: string;
         status: "approved" | "rejected" | "detected" | "analyzing" | "proposed" | "applied";
         type: "document_expiry" | "sal_delay" | "procurement_delay" | "resource_conflict" | "scope_change" | "risk_materialized";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         severity: "low" | "medium" | "high" | "critical";
@@ -11202,8 +11202,8 @@ export declare const zProjectTimeline: z.ZodObject<{
         detectedAt: Date;
         detectedBy: string;
         sourceFact?: {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -11213,9 +11213,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -11227,10 +11227,10 @@ export declare const zProjectTimeline: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -11240,9 +11240,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -11264,20 +11264,20 @@ export declare const zProjectTimeline: z.ZodObject<{
     }[];
     lastRegeneratedAt?: Date | undefined;
 }, {
+    projectId: string;
     id: string;
     description: string;
     status: "completed" | "active" | "draft" | "archived";
-    projectId: string;
     createdAt: Date;
     name: string;
     version: number;
     updatedAt: Date;
     createdBy: string;
     wbs: {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "active" | "draft" | "archived";
-        projectId: string;
         createdAt: Date;
         name: string;
         version: number;
@@ -11285,9 +11285,9 @@ export declare const zProjectTimeline: z.ZodObject<{
         generatedAt: Date;
         generatedBy: string;
         dependencies: {
+            projectId: string;
             id: string;
             type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-            projectId: string;
             createdAt: Date;
             isCritical: boolean;
             fromTaskId: string;
@@ -11298,11 +11298,11 @@ export declare const zProjectTimeline: z.ZodObject<{
         startDate: Date;
         endDate: Date;
         tasks: {
+            projectId: string;
             id: string;
             description: string;
             status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
             type: "milestone" | "task" | "subtask" | "deliverable";
-            projectId: string;
             createdAt: Date;
             name: string;
             updatedAt: Date;
@@ -11325,8 +11325,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             actualEndDate?: Date | undefined;
             assignedTo?: string | undefined;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -11336,9 +11336,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -11350,10 +11350,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -11363,9 +11363,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -11392,8 +11392,8 @@ export declare const zProjectTimeline: z.ZodObject<{
         completedTasks: number;
         totalTasks: number;
         sourceFacts: ({
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -11403,9 +11403,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -11417,10 +11417,10 @@ export declare const zProjectTimeline: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -11430,9 +11430,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -11454,9 +11454,9 @@ export declare const zProjectTimeline: z.ZodObject<{
         actualEndDate?: Date | undefined;
     };
     rePlanHistory: {
+        projectId: string;
         id: string;
         status: "approved" | "rejected" | "draft" | "proposed" | "applied";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         changes: {
@@ -11487,9 +11487,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 shiftDays: number;
             }[];
             newDependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -11528,10 +11528,10 @@ export declare const zProjectTimeline: z.ZodObject<{
         createdBy: string;
         triggerId: string;
         currentTimeline: {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -11539,9 +11539,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -11552,11 +11552,11 @@ export declare const zProjectTimeline: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -11579,8 +11579,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -11590,9 +11590,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -11604,10 +11604,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -11617,9 +11617,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -11646,8 +11646,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -11657,9 +11657,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -11671,10 +11671,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -11684,9 +11684,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -11708,10 +11708,10 @@ export declare const zProjectTimeline: z.ZodObject<{
             actualEndDate?: Date | undefined;
         };
         proposedTimeline: {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -11719,9 +11719,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -11732,11 +11732,11 @@ export declare const zProjectTimeline: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -11759,8 +11759,8 @@ export declare const zProjectTimeline: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -11770,9 +11770,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -11784,10 +11784,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -11797,9 +11797,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -11826,8 +11826,8 @@ export declare const zProjectTimeline: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -11837,9 +11837,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -11851,10 +11851,10 @@ export declare const zProjectTimeline: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -11864,9 +11864,9 @@ export declare const zProjectTimeline: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -11896,10 +11896,10 @@ export declare const zProjectTimeline: z.ZodObject<{
         appliedAt?: Date | undefined;
     }[];
     activeTriggers: {
+        projectId: string;
         id: string;
         status: "approved" | "rejected" | "detected" | "analyzing" | "proposed" | "applied";
         type: "document_expiry" | "sal_delay" | "procurement_delay" | "resource_conflict" | "scope_change" | "risk_materialized";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         severity: "low" | "medium" | "high" | "critical";
@@ -11914,8 +11914,8 @@ export declare const zProjectTimeline: z.ZodObject<{
         detectedAt: Date;
         detectedBy: string;
         sourceFact?: {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -11925,9 +11925,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -11939,10 +11939,10 @@ export declare const zProjectTimeline: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -11952,9 +11952,9 @@ export declare const zProjectTimeline: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -12073,8 +12073,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: z.ZodString;
                     notes: z.ZodOptional<z.ZodString>;
                 }, "strip", z.ZodTypeAny, {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -12084,8 +12084,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 }, {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -12109,9 +12109,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdAt: z.ZodDate;
                     updatedAt: z.ZodDate;
                 }, "strip", z.ZodTypeAny, {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -12123,9 +12123,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 }, {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -12150,10 +12150,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     documents: z.ZodArray<z.ZodString, "many">;
                     notes: z.ZodOptional<z.ZodString>;
                 }, "strip", z.ZodTypeAny, {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -12163,10 +12163,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 }, {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -12204,9 +12204,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         website?: string | undefined;
                     }>;
                 }, "strip", z.ZodTypeAny, {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -12224,9 +12224,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         website?: string | undefined;
                     };
                 }, {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -12254,11 +12254,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 createdAt: z.ZodDate;
                 updatedAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -12281,8 +12281,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -12292,9 +12292,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -12306,10 +12306,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -12319,9 +12319,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -12342,11 +12342,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 factId?: string | undefined;
                 parentTaskId?: string | undefined;
             }, {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -12369,8 +12369,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -12380,9 +12380,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -12394,10 +12394,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -12407,9 +12407,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -12441,9 +12441,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 isCritical: z.ZodBoolean;
                 createdAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -12451,9 +12451,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 lag: number;
                 description?: string | undefined;
             }, {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -12485,8 +12485,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 issuingAuthority: z.ZodString;
                 notes: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -12496,8 +12496,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             }, {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -12521,9 +12521,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 createdAt: z.ZodDate;
                 updatedAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -12535,9 +12535,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             }, {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -12562,10 +12562,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 documents: z.ZodArray<z.ZodString, "many">;
                 notes: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -12575,10 +12575,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             }, {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -12616,9 +12616,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     website?: string | undefined;
                 }>;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -12636,9 +12636,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     website?: string | undefined;
                 };
             }, {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -12660,10 +12660,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             createdAt: z.ZodDate;
             updatedAt: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -12671,9 +12671,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -12684,11 +12684,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -12711,8 +12711,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -12722,9 +12722,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -12736,10 +12736,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -12749,9 +12749,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -12778,8 +12778,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -12789,9 +12789,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -12803,10 +12803,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -12816,9 +12816,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -12839,10 +12839,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             actualStartDate?: Date | undefined;
             actualEndDate?: Date | undefined;
         }, {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -12850,9 +12850,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -12863,11 +12863,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -12890,8 +12890,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -12901,9 +12901,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -12915,10 +12915,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -12928,9 +12928,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -12957,8 +12957,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -12968,9 +12968,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -12982,10 +12982,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -12995,9 +12995,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -13059,8 +13059,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: z.ZodString;
                         notes: z.ZodOptional<z.ZodString>;
                     }, "strip", z.ZodTypeAny, {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -13070,8 +13070,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     }, {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -13095,9 +13095,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdAt: z.ZodDate;
                         updatedAt: z.ZodDate;
                     }, "strip", z.ZodTypeAny, {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -13109,9 +13109,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     }, {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -13136,10 +13136,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         documents: z.ZodArray<z.ZodString, "many">;
                         notes: z.ZodOptional<z.ZodString>;
                     }, "strip", z.ZodTypeAny, {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -13149,10 +13149,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     }, {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -13190,9 +13190,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                             website?: string | undefined;
                         }>;
                     }, "strip", z.ZodTypeAny, {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -13210,9 +13210,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                             website?: string | undefined;
                         };
                     }, {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -13240,11 +13240,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdAt: z.ZodDate;
                     updatedAt: z.ZodDate;
                 }, "strip", z.ZodTypeAny, {
+                    projectId: string;
                     id: string;
                     description: string;
                     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                     type: "milestone" | "task" | "subtask" | "deliverable";
-                    projectId: string;
                     createdAt: Date;
                     name: string;
                     updatedAt: Date;
@@ -13267,8 +13267,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     actualEndDate?: Date | undefined;
                     assignedTo?: string | undefined;
                     sourceFact?: {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -13278,9 +13278,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     } | {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -13292,10 +13292,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     } | {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -13305,9 +13305,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     } | {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -13328,11 +13328,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     factId?: string | undefined;
                     parentTaskId?: string | undefined;
                 }, {
+                    projectId: string;
                     id: string;
                     description: string;
                     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                     type: "milestone" | "task" | "subtask" | "deliverable";
-                    projectId: string;
                     createdAt: Date;
                     name: string;
                     updatedAt: Date;
@@ -13355,8 +13355,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     actualEndDate?: Date | undefined;
                     assignedTo?: string | undefined;
                     sourceFact?: {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -13366,9 +13366,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     } | {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -13380,10 +13380,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     } | {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -13393,9 +13393,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     } | {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -13427,9 +13427,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     isCritical: z.ZodBoolean;
                     createdAt: z.ZodDate;
                 }, "strip", z.ZodTypeAny, {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -13437,9 +13437,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     lag: number;
                     description?: string | undefined;
                 }, {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -13471,8 +13471,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: z.ZodString;
                     notes: z.ZodOptional<z.ZodString>;
                 }, "strip", z.ZodTypeAny, {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -13482,8 +13482,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 }, {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -13507,9 +13507,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdAt: z.ZodDate;
                     updatedAt: z.ZodDate;
                 }, "strip", z.ZodTypeAny, {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -13521,9 +13521,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 }, {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -13548,10 +13548,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     documents: z.ZodArray<z.ZodString, "many">;
                     notes: z.ZodOptional<z.ZodString>;
                 }, "strip", z.ZodTypeAny, {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -13561,10 +13561,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 }, {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -13602,9 +13602,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         website?: string | undefined;
                     }>;
                 }, "strip", z.ZodTypeAny, {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -13622,9 +13622,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         website?: string | undefined;
                     };
                 }, {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -13646,10 +13646,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 createdAt: z.ZodDate;
                 updatedAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "completed" | "active" | "draft" | "archived";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 version: number;
@@ -13657,9 +13657,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 generatedAt: Date;
                 generatedBy: string;
                 dependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -13670,11 +13670,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 startDate: Date;
                 endDate: Date;
                 tasks: {
+                    projectId: string;
                     id: string;
                     description: string;
                     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                     type: "milestone" | "task" | "subtask" | "deliverable";
-                    projectId: string;
                     createdAt: Date;
                     name: string;
                     updatedAt: Date;
@@ -13697,8 +13697,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     actualEndDate?: Date | undefined;
                     assignedTo?: string | undefined;
                     sourceFact?: {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -13708,9 +13708,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     } | {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -13722,10 +13722,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     } | {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -13735,9 +13735,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     } | {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -13764,8 +13764,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 completedTasks: number;
                 totalTasks: number;
                 sourceFacts: ({
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -13775,9 +13775,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -13789,10 +13789,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -13802,9 +13802,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -13825,10 +13825,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 actualStartDate?: Date | undefined;
                 actualEndDate?: Date | undefined;
             }, {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "completed" | "active" | "draft" | "archived";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 version: number;
@@ -13836,9 +13836,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 generatedAt: Date;
                 generatedBy: string;
                 dependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -13849,11 +13849,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 startDate: Date;
                 endDate: Date;
                 tasks: {
+                    projectId: string;
                     id: string;
                     description: string;
                     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                     type: "milestone" | "task" | "subtask" | "deliverable";
-                    projectId: string;
                     createdAt: Date;
                     name: string;
                     updatedAt: Date;
@@ -13876,8 +13876,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     actualEndDate?: Date | undefined;
                     assignedTo?: string | undefined;
                     sourceFact?: {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -13887,9 +13887,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     } | {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -13901,10 +13901,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     } | {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -13914,9 +13914,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     } | {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -13943,8 +13943,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 completedTasks: number;
                 totalTasks: number;
                 sourceFacts: ({
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -13954,9 +13954,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -13968,10 +13968,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -13981,9 +13981,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -14041,8 +14041,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: z.ZodString;
                         notes: z.ZodOptional<z.ZodString>;
                     }, "strip", z.ZodTypeAny, {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -14052,8 +14052,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     }, {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -14077,9 +14077,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdAt: z.ZodDate;
                         updatedAt: z.ZodDate;
                     }, "strip", z.ZodTypeAny, {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -14091,9 +14091,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     }, {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -14118,10 +14118,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         documents: z.ZodArray<z.ZodString, "many">;
                         notes: z.ZodOptional<z.ZodString>;
                     }, "strip", z.ZodTypeAny, {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -14131,10 +14131,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     }, {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -14172,9 +14172,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                             website?: string | undefined;
                         }>;
                     }, "strip", z.ZodTypeAny, {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -14192,9 +14192,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                             website?: string | undefined;
                         };
                     }, {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -14222,11 +14222,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdAt: z.ZodDate;
                     updatedAt: z.ZodDate;
                 }, "strip", z.ZodTypeAny, {
+                    projectId: string;
                     id: string;
                     description: string;
                     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                     type: "milestone" | "task" | "subtask" | "deliverable";
-                    projectId: string;
                     createdAt: Date;
                     name: string;
                     updatedAt: Date;
@@ -14249,8 +14249,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     actualEndDate?: Date | undefined;
                     assignedTo?: string | undefined;
                     sourceFact?: {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -14260,9 +14260,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     } | {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -14274,10 +14274,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     } | {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -14287,9 +14287,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     } | {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -14310,11 +14310,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     factId?: string | undefined;
                     parentTaskId?: string | undefined;
                 }, {
+                    projectId: string;
                     id: string;
                     description: string;
                     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                     type: "milestone" | "task" | "subtask" | "deliverable";
-                    projectId: string;
                     createdAt: Date;
                     name: string;
                     updatedAt: Date;
@@ -14337,8 +14337,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     actualEndDate?: Date | undefined;
                     assignedTo?: string | undefined;
                     sourceFact?: {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -14348,9 +14348,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     } | {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -14362,10 +14362,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     } | {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -14375,9 +14375,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     } | {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -14409,9 +14409,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     isCritical: z.ZodBoolean;
                     createdAt: z.ZodDate;
                 }, "strip", z.ZodTypeAny, {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -14419,9 +14419,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     lag: number;
                     description?: string | undefined;
                 }, {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -14453,8 +14453,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: z.ZodString;
                     notes: z.ZodOptional<z.ZodString>;
                 }, "strip", z.ZodTypeAny, {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -14464,8 +14464,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 }, {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -14489,9 +14489,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdAt: z.ZodDate;
                     updatedAt: z.ZodDate;
                 }, "strip", z.ZodTypeAny, {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -14503,9 +14503,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 }, {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -14530,10 +14530,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     documents: z.ZodArray<z.ZodString, "many">;
                     notes: z.ZodOptional<z.ZodString>;
                 }, "strip", z.ZodTypeAny, {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -14543,10 +14543,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 }, {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -14584,9 +14584,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         website?: string | undefined;
                     }>;
                 }, "strip", z.ZodTypeAny, {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -14604,9 +14604,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         website?: string | undefined;
                     };
                 }, {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -14628,10 +14628,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 createdAt: z.ZodDate;
                 updatedAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "completed" | "active" | "draft" | "archived";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 version: number;
@@ -14639,9 +14639,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 generatedAt: Date;
                 generatedBy: string;
                 dependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -14652,11 +14652,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 startDate: Date;
                 endDate: Date;
                 tasks: {
+                    projectId: string;
                     id: string;
                     description: string;
                     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                     type: "milestone" | "task" | "subtask" | "deliverable";
-                    projectId: string;
                     createdAt: Date;
                     name: string;
                     updatedAt: Date;
@@ -14679,8 +14679,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     actualEndDate?: Date | undefined;
                     assignedTo?: string | undefined;
                     sourceFact?: {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -14690,9 +14690,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     } | {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -14704,10 +14704,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     } | {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -14717,9 +14717,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     } | {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -14746,8 +14746,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 completedTasks: number;
                 totalTasks: number;
                 sourceFacts: ({
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -14757,9 +14757,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -14771,10 +14771,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -14784,9 +14784,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -14807,10 +14807,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 actualStartDate?: Date | undefined;
                 actualEndDate?: Date | undefined;
             }, {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "completed" | "active" | "draft" | "archived";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 version: number;
@@ -14818,9 +14818,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 generatedAt: Date;
                 generatedBy: string;
                 dependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -14831,11 +14831,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 startDate: Date;
                 endDate: Date;
                 tasks: {
+                    projectId: string;
                     id: string;
                     description: string;
                     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                     type: "milestone" | "task" | "subtask" | "deliverable";
-                    projectId: string;
                     createdAt: Date;
                     name: string;
                     updatedAt: Date;
@@ -14858,8 +14858,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     actualEndDate?: Date | undefined;
                     assignedTo?: string | undefined;
                     sourceFact?: {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -14869,9 +14869,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     } | {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -14883,10 +14883,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     } | {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -14896,9 +14896,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     } | {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -14925,8 +14925,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 completedTasks: number;
                 totalTasks: number;
                 sourceFacts: ({
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -14936,9 +14936,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -14950,10 +14950,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -14963,9 +14963,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -15046,9 +15046,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     isCritical: z.ZodBoolean;
                     createdAt: z.ZodDate;
                 }, "strip", z.ZodTypeAny, {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -15056,9 +15056,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     lag: number;
                     description?: string | undefined;
                 }, {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -15177,9 +15177,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     shiftDays: number;
                 }[];
                 newDependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -15226,9 +15226,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     shiftDays: number;
                 }[];
                 newDependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -15348,9 +15348,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             updatedAt: z.ZodDate;
             appliedAt: z.ZodOptional<z.ZodDate>;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             id: string;
             status: "approved" | "rejected" | "draft" | "proposed" | "applied";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             changes: {
@@ -15381,9 +15381,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     shiftDays: number;
                 }[];
                 newDependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -15422,10 +15422,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             createdBy: string;
             triggerId: string;
             currentTimeline: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "completed" | "active" | "draft" | "archived";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 version: number;
@@ -15433,9 +15433,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 generatedAt: Date;
                 generatedBy: string;
                 dependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -15446,11 +15446,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 startDate: Date;
                 endDate: Date;
                 tasks: {
+                    projectId: string;
                     id: string;
                     description: string;
                     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                     type: "milestone" | "task" | "subtask" | "deliverable";
-                    projectId: string;
                     createdAt: Date;
                     name: string;
                     updatedAt: Date;
@@ -15473,8 +15473,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     actualEndDate?: Date | undefined;
                     assignedTo?: string | undefined;
                     sourceFact?: {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -15484,9 +15484,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     } | {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -15498,10 +15498,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     } | {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -15511,9 +15511,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     } | {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -15540,8 +15540,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 completedTasks: number;
                 totalTasks: number;
                 sourceFacts: ({
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -15551,9 +15551,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -15565,10 +15565,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -15578,9 +15578,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -15602,10 +15602,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
             };
             proposedTimeline: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "completed" | "active" | "draft" | "archived";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 version: number;
@@ -15613,9 +15613,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 generatedAt: Date;
                 generatedBy: string;
                 dependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -15626,11 +15626,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 startDate: Date;
                 endDate: Date;
                 tasks: {
+                    projectId: string;
                     id: string;
                     description: string;
                     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                     type: "milestone" | "task" | "subtask" | "deliverable";
-                    projectId: string;
                     createdAt: Date;
                     name: string;
                     updatedAt: Date;
@@ -15653,8 +15653,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     actualEndDate?: Date | undefined;
                     assignedTo?: string | undefined;
                     sourceFact?: {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -15664,9 +15664,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     } | {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -15678,10 +15678,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     } | {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -15691,9 +15691,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     } | {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -15720,8 +15720,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 completedTasks: number;
                 totalTasks: number;
                 sourceFacts: ({
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -15731,9 +15731,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -15745,10 +15745,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -15758,9 +15758,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -15789,9 +15789,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             };
             appliedAt?: Date | undefined;
         }, {
+            projectId: string;
             id: string;
             status: "approved" | "rejected" | "draft" | "proposed" | "applied";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             changes: {
@@ -15822,9 +15822,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     shiftDays: number;
                 }[];
                 newDependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -15863,10 +15863,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             createdBy: string;
             triggerId: string;
             currentTimeline: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "completed" | "active" | "draft" | "archived";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 version: number;
@@ -15874,9 +15874,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 generatedAt: Date;
                 generatedBy: string;
                 dependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -15887,11 +15887,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 startDate: Date;
                 endDate: Date;
                 tasks: {
+                    projectId: string;
                     id: string;
                     description: string;
                     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                     type: "milestone" | "task" | "subtask" | "deliverable";
-                    projectId: string;
                     createdAt: Date;
                     name: string;
                     updatedAt: Date;
@@ -15914,8 +15914,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     actualEndDate?: Date | undefined;
                     assignedTo?: string | undefined;
                     sourceFact?: {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -15925,9 +15925,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     } | {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -15939,10 +15939,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     } | {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -15952,9 +15952,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     } | {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -15981,8 +15981,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 completedTasks: number;
                 totalTasks: number;
                 sourceFacts: ({
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -15992,9 +15992,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -16006,10 +16006,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -16019,9 +16019,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -16043,10 +16043,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
             };
             proposedTimeline: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "completed" | "active" | "draft" | "archived";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 version: number;
@@ -16054,9 +16054,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 generatedAt: Date;
                 generatedBy: string;
                 dependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -16067,11 +16067,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 startDate: Date;
                 endDate: Date;
                 tasks: {
+                    projectId: string;
                     id: string;
                     description: string;
                     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                     type: "milestone" | "task" | "subtask" | "deliverable";
-                    projectId: string;
                     createdAt: Date;
                     name: string;
                     updatedAt: Date;
@@ -16094,8 +16094,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     actualEndDate?: Date | undefined;
                     assignedTo?: string | undefined;
                     sourceFact?: {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -16105,9 +16105,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     } | {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -16119,10 +16119,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     } | {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -16132,9 +16132,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     } | {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -16161,8 +16161,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 completedTasks: number;
                 totalTasks: number;
                 sourceFacts: ({
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -16172,9 +16172,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -16186,10 +16186,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -16199,9 +16199,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -16270,8 +16270,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 issuingAuthority: z.ZodString;
                 notes: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -16281,8 +16281,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             }, {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -16306,9 +16306,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 createdAt: z.ZodDate;
                 updatedAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -16320,9 +16320,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             }, {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -16347,10 +16347,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 documents: z.ZodArray<z.ZodString, "many">;
                 notes: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -16360,10 +16360,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             }, {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -16401,9 +16401,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     website?: string | undefined;
                 }>;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -16421,9 +16421,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     website?: string | undefined;
                 };
             }, {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -16445,10 +16445,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             createdAt: z.ZodDate;
             updatedAt: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             id: string;
             status: "approved" | "rejected" | "detected" | "analyzing" | "proposed" | "applied";
             type: "document_expiry" | "sal_delay" | "procurement_delay" | "resource_conflict" | "scope_change" | "risk_materialized";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             severity: "low" | "medium" | "high" | "critical";
@@ -16463,8 +16463,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             detectedAt: Date;
             detectedBy: string;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -16474,9 +16474,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -16488,10 +16488,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -16501,9 +16501,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -16523,10 +16523,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             } | undefined;
             details?: any;
         }, {
+            projectId: string;
             id: string;
             status: "approved" | "rejected" | "detected" | "analyzing" | "proposed" | "applied";
             type: "document_expiry" | "sal_delay" | "procurement_delay" | "resource_conflict" | "scope_change" | "risk_materialized";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             severity: "low" | "medium" | "high" | "critical";
@@ -16541,8 +16541,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             detectedAt: Date;
             detectedBy: string;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -16552,9 +16552,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -16566,10 +16566,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -16579,9 +16579,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -16608,20 +16608,20 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
         updatedAt: z.ZodDate;
         lastRegeneratedAt: z.ZodOptional<z.ZodDate>;
     }, "strip", z.ZodTypeAny, {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "active" | "draft" | "archived";
-        projectId: string;
         createdAt: Date;
         name: string;
         version: number;
         updatedAt: Date;
         createdBy: string;
         wbs: {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -16629,9 +16629,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -16642,11 +16642,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -16669,8 +16669,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -16680,9 +16680,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -16694,10 +16694,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -16707,9 +16707,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -16736,8 +16736,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -16747,9 +16747,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -16761,10 +16761,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -16774,9 +16774,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -16798,9 +16798,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             actualEndDate?: Date | undefined;
         };
         rePlanHistory: {
+            projectId: string;
             id: string;
             status: "approved" | "rejected" | "draft" | "proposed" | "applied";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             changes: {
@@ -16831,9 +16831,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     shiftDays: number;
                 }[];
                 newDependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -16872,10 +16872,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             createdBy: string;
             triggerId: string;
             currentTimeline: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "completed" | "active" | "draft" | "archived";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 version: number;
@@ -16883,9 +16883,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 generatedAt: Date;
                 generatedBy: string;
                 dependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -16896,11 +16896,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 startDate: Date;
                 endDate: Date;
                 tasks: {
+                    projectId: string;
                     id: string;
                     description: string;
                     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                     type: "milestone" | "task" | "subtask" | "deliverable";
-                    projectId: string;
                     createdAt: Date;
                     name: string;
                     updatedAt: Date;
@@ -16923,8 +16923,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     actualEndDate?: Date | undefined;
                     assignedTo?: string | undefined;
                     sourceFact?: {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -16934,9 +16934,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     } | {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -16948,10 +16948,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     } | {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -16961,9 +16961,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     } | {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -16990,8 +16990,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 completedTasks: number;
                 totalTasks: number;
                 sourceFacts: ({
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -17001,9 +17001,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -17015,10 +17015,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -17028,9 +17028,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -17052,10 +17052,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
             };
             proposedTimeline: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "completed" | "active" | "draft" | "archived";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 version: number;
@@ -17063,9 +17063,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 generatedAt: Date;
                 generatedBy: string;
                 dependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -17076,11 +17076,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 startDate: Date;
                 endDate: Date;
                 tasks: {
+                    projectId: string;
                     id: string;
                     description: string;
                     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                     type: "milestone" | "task" | "subtask" | "deliverable";
-                    projectId: string;
                     createdAt: Date;
                     name: string;
                     updatedAt: Date;
@@ -17103,8 +17103,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     actualEndDate?: Date | undefined;
                     assignedTo?: string | undefined;
                     sourceFact?: {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -17114,9 +17114,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     } | {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -17128,10 +17128,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     } | {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -17141,9 +17141,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     } | {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -17170,8 +17170,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 completedTasks: number;
                 totalTasks: number;
                 sourceFacts: ({
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -17181,9 +17181,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -17195,10 +17195,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -17208,9 +17208,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -17240,10 +17240,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             appliedAt?: Date | undefined;
         }[];
         activeTriggers: {
+            projectId: string;
             id: string;
             status: "approved" | "rejected" | "detected" | "analyzing" | "proposed" | "applied";
             type: "document_expiry" | "sal_delay" | "procurement_delay" | "resource_conflict" | "scope_change" | "risk_materialized";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             severity: "low" | "medium" | "high" | "critical";
@@ -17258,8 +17258,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             detectedAt: Date;
             detectedBy: string;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -17269,9 +17269,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -17283,10 +17283,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -17296,9 +17296,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -17320,20 +17320,20 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
         }[];
         lastRegeneratedAt?: Date | undefined;
     }, {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "active" | "draft" | "archived";
-        projectId: string;
         createdAt: Date;
         name: string;
         version: number;
         updatedAt: Date;
         createdBy: string;
         wbs: {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -17341,9 +17341,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -17354,11 +17354,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -17381,8 +17381,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -17392,9 +17392,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -17406,10 +17406,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -17419,9 +17419,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -17448,8 +17448,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -17459,9 +17459,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -17473,10 +17473,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -17486,9 +17486,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -17510,9 +17510,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             actualEndDate?: Date | undefined;
         };
         rePlanHistory: {
+            projectId: string;
             id: string;
             status: "approved" | "rejected" | "draft" | "proposed" | "applied";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             changes: {
@@ -17543,9 +17543,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     shiftDays: number;
                 }[];
                 newDependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -17584,10 +17584,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             createdBy: string;
             triggerId: string;
             currentTimeline: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "completed" | "active" | "draft" | "archived";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 version: number;
@@ -17595,9 +17595,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 generatedAt: Date;
                 generatedBy: string;
                 dependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -17608,11 +17608,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 startDate: Date;
                 endDate: Date;
                 tasks: {
+                    projectId: string;
                     id: string;
                     description: string;
                     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                     type: "milestone" | "task" | "subtask" | "deliverable";
-                    projectId: string;
                     createdAt: Date;
                     name: string;
                     updatedAt: Date;
@@ -17635,8 +17635,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     actualEndDate?: Date | undefined;
                     assignedTo?: string | undefined;
                     sourceFact?: {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -17646,9 +17646,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     } | {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -17660,10 +17660,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     } | {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -17673,9 +17673,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     } | {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -17702,8 +17702,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 completedTasks: number;
                 totalTasks: number;
                 sourceFacts: ({
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -17713,9 +17713,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -17727,10 +17727,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -17740,9 +17740,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -17764,10 +17764,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
             };
             proposedTimeline: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "completed" | "active" | "draft" | "archived";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 version: number;
@@ -17775,9 +17775,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 generatedAt: Date;
                 generatedBy: string;
                 dependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -17788,11 +17788,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 startDate: Date;
                 endDate: Date;
                 tasks: {
+                    projectId: string;
                     id: string;
                     description: string;
                     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                     type: "milestone" | "task" | "subtask" | "deliverable";
-                    projectId: string;
                     createdAt: Date;
                     name: string;
                     updatedAt: Date;
@@ -17815,8 +17815,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     actualEndDate?: Date | undefined;
                     assignedTo?: string | undefined;
                     sourceFact?: {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -17826,9 +17826,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     } | {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -17840,10 +17840,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     } | {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -17853,9 +17853,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     } | {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -17882,8 +17882,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 completedTasks: number;
                 totalTasks: number;
                 sourceFacts: ({
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -17893,9 +17893,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -17907,10 +17907,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -17920,9 +17920,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -17952,10 +17952,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             appliedAt?: Date | undefined;
         }[];
         activeTriggers: {
+            projectId: string;
             id: string;
             status: "approved" | "rejected" | "detected" | "analyzing" | "proposed" | "applied";
             type: "document_expiry" | "sal_delay" | "procurement_delay" | "resource_conflict" | "scope_change" | "risk_materialized";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             severity: "low" | "medium" | "high" | "critical";
@@ -17970,8 +17970,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             detectedAt: Date;
             detectedBy: string;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -17981,9 +17981,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -17995,10 +17995,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -18008,9 +18008,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -18038,22 +18038,21 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
     tasksGenerated: z.ZodNumber;
     criticalPathLength: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
-    generatedAt: Date;
     timeline: {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "active" | "draft" | "archived";
-        projectId: string;
         createdAt: Date;
         name: string;
         version: number;
         updatedAt: Date;
         createdBy: string;
         wbs: {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -18061,9 +18060,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -18074,11 +18073,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -18101,8 +18100,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -18112,9 +18111,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -18126,10 +18125,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -18139,9 +18138,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -18168,8 +18167,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -18179,9 +18178,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -18193,10 +18192,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -18206,9 +18205,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -18230,9 +18229,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             actualEndDate?: Date | undefined;
         };
         rePlanHistory: {
+            projectId: string;
             id: string;
             status: "approved" | "rejected" | "draft" | "proposed" | "applied";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             changes: {
@@ -18263,9 +18262,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     shiftDays: number;
                 }[];
                 newDependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -18304,10 +18303,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             createdBy: string;
             triggerId: string;
             currentTimeline: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "completed" | "active" | "draft" | "archived";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 version: number;
@@ -18315,9 +18314,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 generatedAt: Date;
                 generatedBy: string;
                 dependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -18328,11 +18327,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 startDate: Date;
                 endDate: Date;
                 tasks: {
+                    projectId: string;
                     id: string;
                     description: string;
                     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                     type: "milestone" | "task" | "subtask" | "deliverable";
-                    projectId: string;
                     createdAt: Date;
                     name: string;
                     updatedAt: Date;
@@ -18355,8 +18354,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     actualEndDate?: Date | undefined;
                     assignedTo?: string | undefined;
                     sourceFact?: {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -18366,9 +18365,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     } | {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -18380,10 +18379,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     } | {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -18393,9 +18392,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     } | {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -18422,8 +18421,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 completedTasks: number;
                 totalTasks: number;
                 sourceFacts: ({
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -18433,9 +18432,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -18447,10 +18446,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -18460,9 +18459,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -18484,10 +18483,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
             };
             proposedTimeline: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "completed" | "active" | "draft" | "archived";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 version: number;
@@ -18495,9 +18494,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 generatedAt: Date;
                 generatedBy: string;
                 dependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -18508,11 +18507,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 startDate: Date;
                 endDate: Date;
                 tasks: {
+                    projectId: string;
                     id: string;
                     description: string;
                     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                     type: "milestone" | "task" | "subtask" | "deliverable";
-                    projectId: string;
                     createdAt: Date;
                     name: string;
                     updatedAt: Date;
@@ -18535,8 +18534,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     actualEndDate?: Date | undefined;
                     assignedTo?: string | undefined;
                     sourceFact?: {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -18546,9 +18545,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     } | {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -18560,10 +18559,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     } | {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -18573,9 +18572,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     } | {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -18602,8 +18601,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 completedTasks: number;
                 totalTasks: number;
                 sourceFacts: ({
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -18613,9 +18612,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -18627,10 +18626,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -18640,9 +18639,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -18672,10 +18671,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             appliedAt?: Date | undefined;
         }[];
         activeTriggers: {
+            projectId: string;
             id: string;
             status: "approved" | "rejected" | "detected" | "analyzing" | "proposed" | "applied";
             type: "document_expiry" | "sal_delay" | "procurement_delay" | "resource_conflict" | "scope_change" | "risk_materialized";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             severity: "low" | "medium" | "high" | "critical";
@@ -18690,8 +18689,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             detectedAt: Date;
             detectedBy: string;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -18701,9 +18700,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -18715,10 +18714,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -18728,9 +18727,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -18752,28 +18751,28 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
         }[];
         lastRegeneratedAt?: Date | undefined;
     };
+    generatedAt: Date;
     success: boolean;
     duration: number;
     factsUsed: number;
     tasksGenerated: number;
     criticalPathLength: number;
 }, {
-    generatedAt: Date;
     timeline: {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "active" | "draft" | "archived";
-        projectId: string;
         createdAt: Date;
         name: string;
         version: number;
         updatedAt: Date;
         createdBy: string;
         wbs: {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -18781,9 +18780,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -18794,11 +18793,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -18821,8 +18820,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -18832,9 +18831,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -18846,10 +18845,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -18859,9 +18858,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -18888,8 +18887,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -18899,9 +18898,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -18913,10 +18912,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -18926,9 +18925,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -18950,9 +18949,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             actualEndDate?: Date | undefined;
         };
         rePlanHistory: {
+            projectId: string;
             id: string;
             status: "approved" | "rejected" | "draft" | "proposed" | "applied";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             changes: {
@@ -18983,9 +18982,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     shiftDays: number;
                 }[];
                 newDependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -19024,10 +19023,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             createdBy: string;
             triggerId: string;
             currentTimeline: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "completed" | "active" | "draft" | "archived";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 version: number;
@@ -19035,9 +19034,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 generatedAt: Date;
                 generatedBy: string;
                 dependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -19048,11 +19047,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 startDate: Date;
                 endDate: Date;
                 tasks: {
+                    projectId: string;
                     id: string;
                     description: string;
                     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                     type: "milestone" | "task" | "subtask" | "deliverable";
-                    projectId: string;
                     createdAt: Date;
                     name: string;
                     updatedAt: Date;
@@ -19075,8 +19074,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     actualEndDate?: Date | undefined;
                     assignedTo?: string | undefined;
                     sourceFact?: {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -19086,9 +19085,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     } | {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -19100,10 +19099,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     } | {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -19113,9 +19112,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     } | {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -19142,8 +19141,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 completedTasks: number;
                 totalTasks: number;
                 sourceFacts: ({
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -19153,9 +19152,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -19167,10 +19166,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -19180,9 +19179,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -19204,10 +19203,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
             };
             proposedTimeline: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "completed" | "active" | "draft" | "archived";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 version: number;
@@ -19215,9 +19214,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 generatedAt: Date;
                 generatedBy: string;
                 dependencies: {
+                    projectId: string;
                     id: string;
                     type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                    projectId: string;
                     createdAt: Date;
                     isCritical: boolean;
                     fromTaskId: string;
@@ -19228,11 +19227,11 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 startDate: Date;
                 endDate: Date;
                 tasks: {
+                    projectId: string;
                     id: string;
                     description: string;
                     status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                     type: "milestone" | "task" | "subtask" | "deliverable";
-                    projectId: string;
                     createdAt: Date;
                     name: string;
                     updatedAt: Date;
@@ -19255,8 +19254,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     actualEndDate?: Date | undefined;
                     assignedTo?: string | undefined;
                     sourceFact?: {
-                        status: "pending" | "valid" | "expired" | "invalid";
                         projectId: string;
+                        status: "pending" | "valid" | "expired" | "invalid";
                         vendorId: string;
                         vendorName: string;
                         documentType: "DURC" | "visura" | "certification";
@@ -19266,9 +19265,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         issuingAuthority: string;
                         notes?: string | undefined;
                     } | {
+                        projectId: string;
                         category: string;
                         status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                        projectId: string;
                         createdAt: Date;
                         updatedAt: Date;
                         location: string;
@@ -19280,10 +19279,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         createdBy: string;
                         awardedVendor?: string | undefined;
                     } | {
-                        description: string;
-                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         projectId: string;
                         documents: string[];
+                        description: string;
+                        status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                         authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                         submissionDate: Date;
                         expectedResponseDate: Date;
@@ -19293,9 +19292,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                         notes?: string | undefined;
                         actualResponseDate?: Date | undefined;
                     } | {
+                        projectId: string;
                         status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                         currency: string;
-                        projectId: string;
                         features: string[];
                         location: string;
                         portalId: string;
@@ -19322,8 +19321,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 completedTasks: number;
                 totalTasks: number;
                 sourceFacts: ({
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -19333,9 +19332,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -19347,10 +19346,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -19360,9 +19359,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -19392,10 +19391,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             appliedAt?: Date | undefined;
         }[];
         activeTriggers: {
+            projectId: string;
             id: string;
             status: "approved" | "rejected" | "detected" | "analyzing" | "proposed" | "applied";
             type: "document_expiry" | "sal_delay" | "procurement_delay" | "resource_conflict" | "scope_change" | "risk_materialized";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             severity: "low" | "medium" | "high" | "critical";
@@ -19410,8 +19409,8 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
             detectedAt: Date;
             detectedBy: string;
             sourceFact?: {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -19421,9 +19420,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -19435,10 +19434,10 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -19448,9 +19447,9 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -19472,6 +19471,7 @@ export declare const zGenerateTimelineResponse: z.ZodObject<{
         }[];
         lastRegeneratedAt?: Date | undefined;
     };
+    generatedAt: Date;
     success: boolean;
     duration: number;
     factsUsed: number;
@@ -19580,8 +19580,8 @@ export declare const zRePlanResponse: z.ZodObject<{
             issuingAuthority: z.ZodString;
             notes: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -19591,8 +19591,8 @@ export declare const zRePlanResponse: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         }, {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -19616,9 +19616,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             createdAt: z.ZodDate;
             updatedAt: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -19630,9 +19630,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         }, {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -19657,10 +19657,10 @@ export declare const zRePlanResponse: z.ZodObject<{
             documents: z.ZodArray<z.ZodString, "many">;
             notes: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -19670,10 +19670,10 @@ export declare const zRePlanResponse: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         }, {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -19711,9 +19711,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 website?: string | undefined;
             }>;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -19731,9 +19731,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 website?: string | undefined;
             };
         }, {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -19755,10 +19755,10 @@ export declare const zRePlanResponse: z.ZodObject<{
         createdAt: z.ZodDate;
         updatedAt: z.ZodDate;
     }, "strip", z.ZodTypeAny, {
+        projectId: string;
         id: string;
         status: "approved" | "rejected" | "detected" | "analyzing" | "proposed" | "applied";
         type: "document_expiry" | "sal_delay" | "procurement_delay" | "resource_conflict" | "scope_change" | "risk_materialized";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         severity: "low" | "medium" | "high" | "critical";
@@ -19773,8 +19773,8 @@ export declare const zRePlanResponse: z.ZodObject<{
         detectedAt: Date;
         detectedBy: string;
         sourceFact?: {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -19784,9 +19784,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -19798,10 +19798,10 @@ export declare const zRePlanResponse: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -19811,9 +19811,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -19833,10 +19833,10 @@ export declare const zRePlanResponse: z.ZodObject<{
         } | undefined;
         details?: any;
     }, {
+        projectId: string;
         id: string;
         status: "approved" | "rejected" | "detected" | "analyzing" | "proposed" | "applied";
         type: "document_expiry" | "sal_delay" | "procurement_delay" | "resource_conflict" | "scope_change" | "risk_materialized";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         severity: "low" | "medium" | "high" | "critical";
@@ -19851,8 +19851,8 @@ export declare const zRePlanResponse: z.ZodObject<{
         detectedAt: Date;
         detectedBy: string;
         sourceFact?: {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -19862,9 +19862,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -19876,10 +19876,10 @@ export declare const zRePlanResponse: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -19889,9 +19889,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -19952,8 +19952,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                     issuingAuthority: z.ZodString;
                     notes: z.ZodOptional<z.ZodString>;
                 }, "strip", z.ZodTypeAny, {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -19963,8 +19963,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 }, {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -19988,9 +19988,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     createdAt: z.ZodDate;
                     updatedAt: z.ZodDate;
                 }, "strip", z.ZodTypeAny, {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -20002,9 +20002,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 }, {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -20029,10 +20029,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                     documents: z.ZodArray<z.ZodString, "many">;
                     notes: z.ZodOptional<z.ZodString>;
                 }, "strip", z.ZodTypeAny, {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -20042,10 +20042,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 }, {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -20083,9 +20083,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                         website?: string | undefined;
                     }>;
                 }, "strip", z.ZodTypeAny, {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -20103,9 +20103,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                         website?: string | undefined;
                     };
                 }, {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -20133,11 +20133,11 @@ export declare const zRePlanResponse: z.ZodObject<{
                 createdAt: z.ZodDate;
                 updatedAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -20160,8 +20160,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -20171,9 +20171,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -20185,10 +20185,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -20198,9 +20198,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -20221,11 +20221,11 @@ export declare const zRePlanResponse: z.ZodObject<{
                 factId?: string | undefined;
                 parentTaskId?: string | undefined;
             }, {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -20248,8 +20248,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -20259,9 +20259,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -20273,10 +20273,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -20286,9 +20286,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -20320,9 +20320,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 isCritical: z.ZodBoolean;
                 createdAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -20330,9 +20330,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 lag: number;
                 description?: string | undefined;
             }, {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -20364,8 +20364,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                 issuingAuthority: z.ZodString;
                 notes: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -20375,8 +20375,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             }, {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -20400,9 +20400,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 createdAt: z.ZodDate;
                 updatedAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -20414,9 +20414,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             }, {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -20441,10 +20441,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                 documents: z.ZodArray<z.ZodString, "many">;
                 notes: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -20454,10 +20454,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             }, {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -20495,9 +20495,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     website?: string | undefined;
                 }>;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -20515,9 +20515,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     website?: string | undefined;
                 };
             }, {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -20539,10 +20539,10 @@ export declare const zRePlanResponse: z.ZodObject<{
             createdAt: z.ZodDate;
             updatedAt: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -20550,9 +20550,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -20563,11 +20563,11 @@ export declare const zRePlanResponse: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -20590,8 +20590,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -20601,9 +20601,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -20615,10 +20615,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -20628,9 +20628,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -20657,8 +20657,8 @@ export declare const zRePlanResponse: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -20668,9 +20668,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -20682,10 +20682,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -20695,9 +20695,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -20718,10 +20718,10 @@ export declare const zRePlanResponse: z.ZodObject<{
             actualStartDate?: Date | undefined;
             actualEndDate?: Date | undefined;
         }, {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -20729,9 +20729,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -20742,11 +20742,11 @@ export declare const zRePlanResponse: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -20769,8 +20769,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -20780,9 +20780,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -20794,10 +20794,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -20807,9 +20807,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -20836,8 +20836,8 @@ export declare const zRePlanResponse: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -20847,9 +20847,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -20861,10 +20861,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -20874,9 +20874,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -20934,8 +20934,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                     issuingAuthority: z.ZodString;
                     notes: z.ZodOptional<z.ZodString>;
                 }, "strip", z.ZodTypeAny, {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -20945,8 +20945,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 }, {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -20970,9 +20970,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     createdAt: z.ZodDate;
                     updatedAt: z.ZodDate;
                 }, "strip", z.ZodTypeAny, {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -20984,9 +20984,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 }, {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -21011,10 +21011,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                     documents: z.ZodArray<z.ZodString, "many">;
                     notes: z.ZodOptional<z.ZodString>;
                 }, "strip", z.ZodTypeAny, {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -21024,10 +21024,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 }, {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -21065,9 +21065,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                         website?: string | undefined;
                     }>;
                 }, "strip", z.ZodTypeAny, {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -21085,9 +21085,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                         website?: string | undefined;
                     };
                 }, {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -21115,11 +21115,11 @@ export declare const zRePlanResponse: z.ZodObject<{
                 createdAt: z.ZodDate;
                 updatedAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -21142,8 +21142,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -21153,9 +21153,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -21167,10 +21167,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -21180,9 +21180,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -21203,11 +21203,11 @@ export declare const zRePlanResponse: z.ZodObject<{
                 factId?: string | undefined;
                 parentTaskId?: string | undefined;
             }, {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -21230,8 +21230,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -21241,9 +21241,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -21255,10 +21255,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -21268,9 +21268,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -21302,9 +21302,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 isCritical: z.ZodBoolean;
                 createdAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -21312,9 +21312,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 lag: number;
                 description?: string | undefined;
             }, {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -21346,8 +21346,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                 issuingAuthority: z.ZodString;
                 notes: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -21357,8 +21357,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             }, {
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -21382,9 +21382,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 createdAt: z.ZodDate;
                 updatedAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -21396,9 +21396,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             }, {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -21423,10 +21423,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                 documents: z.ZodArray<z.ZodString, "many">;
                 notes: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -21436,10 +21436,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             }, {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -21477,9 +21477,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     website?: string | undefined;
                 }>;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -21497,9 +21497,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     website?: string | undefined;
                 };
             }, {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -21521,10 +21521,10 @@ export declare const zRePlanResponse: z.ZodObject<{
             createdAt: z.ZodDate;
             updatedAt: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -21532,9 +21532,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -21545,11 +21545,11 @@ export declare const zRePlanResponse: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -21572,8 +21572,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -21583,9 +21583,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -21597,10 +21597,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -21610,9 +21610,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -21639,8 +21639,8 @@ export declare const zRePlanResponse: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -21650,9 +21650,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -21664,10 +21664,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -21677,9 +21677,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -21700,10 +21700,10 @@ export declare const zRePlanResponse: z.ZodObject<{
             actualStartDate?: Date | undefined;
             actualEndDate?: Date | undefined;
         }, {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -21711,9 +21711,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -21724,11 +21724,11 @@ export declare const zRePlanResponse: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -21751,8 +21751,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -21762,9 +21762,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -21776,10 +21776,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -21789,9 +21789,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -21818,8 +21818,8 @@ export declare const zRePlanResponse: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -21829,9 +21829,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -21843,10 +21843,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -21856,9 +21856,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -21939,9 +21939,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 isCritical: z.ZodBoolean;
                 createdAt: z.ZodDate;
             }, "strip", z.ZodTypeAny, {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -21949,9 +21949,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 lag: number;
                 description?: string | undefined;
             }, {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -22070,9 +22070,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 shiftDays: number;
             }[];
             newDependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -22119,9 +22119,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 shiftDays: number;
             }[];
             newDependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -22241,9 +22241,9 @@ export declare const zRePlanResponse: z.ZodObject<{
         updatedAt: z.ZodDate;
         appliedAt: z.ZodOptional<z.ZodDate>;
     }, "strip", z.ZodTypeAny, {
+        projectId: string;
         id: string;
         status: "approved" | "rejected" | "draft" | "proposed" | "applied";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         changes: {
@@ -22274,9 +22274,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 shiftDays: number;
             }[];
             newDependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -22315,10 +22315,10 @@ export declare const zRePlanResponse: z.ZodObject<{
         createdBy: string;
         triggerId: string;
         currentTimeline: {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -22326,9 +22326,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -22339,11 +22339,11 @@ export declare const zRePlanResponse: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -22366,8 +22366,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -22377,9 +22377,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -22391,10 +22391,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -22404,9 +22404,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -22433,8 +22433,8 @@ export declare const zRePlanResponse: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -22444,9 +22444,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -22458,10 +22458,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -22471,9 +22471,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -22495,10 +22495,10 @@ export declare const zRePlanResponse: z.ZodObject<{
             actualEndDate?: Date | undefined;
         };
         proposedTimeline: {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -22506,9 +22506,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -22519,11 +22519,11 @@ export declare const zRePlanResponse: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -22546,8 +22546,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -22557,9 +22557,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -22571,10 +22571,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -22584,9 +22584,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -22613,8 +22613,8 @@ export declare const zRePlanResponse: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -22624,9 +22624,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -22638,10 +22638,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -22651,9 +22651,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -22682,9 +22682,9 @@ export declare const zRePlanResponse: z.ZodObject<{
         };
         appliedAt?: Date | undefined;
     }, {
+        projectId: string;
         id: string;
         status: "approved" | "rejected" | "draft" | "proposed" | "applied";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         changes: {
@@ -22715,9 +22715,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 shiftDays: number;
             }[];
             newDependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -22756,10 +22756,10 @@ export declare const zRePlanResponse: z.ZodObject<{
         createdBy: string;
         triggerId: string;
         currentTimeline: {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -22767,9 +22767,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -22780,11 +22780,11 @@ export declare const zRePlanResponse: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -22807,8 +22807,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -22818,9 +22818,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -22832,10 +22832,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -22845,9 +22845,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -22874,8 +22874,8 @@ export declare const zRePlanResponse: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -22885,9 +22885,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -22899,10 +22899,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -22912,9 +22912,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -22936,10 +22936,10 @@ export declare const zRePlanResponse: z.ZodObject<{
             actualEndDate?: Date | undefined;
         };
         proposedTimeline: {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -22947,9 +22947,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -22960,11 +22960,11 @@ export declare const zRePlanResponse: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -22987,8 +22987,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -22998,9 +22998,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -23012,10 +23012,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -23025,9 +23025,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -23054,8 +23054,8 @@ export declare const zRePlanResponse: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -23065,9 +23065,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -23079,10 +23079,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -23092,9 +23092,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -23177,14 +23177,14 @@ export declare const zRePlanResponse: z.ZodObject<{
             modify: z.ZodBoolean;
             autoApply: z.ZodBoolean;
         }, "strip", z.ZodTypeAny, {
-            autoApply: boolean;
             approve: boolean;
             reject: boolean;
+            autoApply: boolean;
             modify: boolean;
         }, {
-            autoApply: boolean;
             approve: boolean;
             reject: boolean;
+            autoApply: boolean;
             modify: boolean;
         }>;
         createdAt: z.ZodDate;
@@ -23205,9 +23205,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             benefits: string[];
         };
         actions: {
-            autoApply: boolean;
             approve: boolean;
             reject: boolean;
+            autoApply: boolean;
             modify: boolean;
         };
         proposalId: string;
@@ -23232,9 +23232,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             benefits: string[];
         };
         actions: {
-            autoApply: boolean;
             approve: boolean;
             reject: boolean;
+            autoApply: boolean;
             modify: boolean;
         };
         proposalId: string;
@@ -23249,10 +23249,10 @@ export declare const zRePlanResponse: z.ZodObject<{
     success: boolean;
     applied: boolean;
     trigger: {
+        projectId: string;
         id: string;
         status: "approved" | "rejected" | "detected" | "analyzing" | "proposed" | "applied";
         type: "document_expiry" | "sal_delay" | "procurement_delay" | "resource_conflict" | "scope_change" | "risk_materialized";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         severity: "low" | "medium" | "high" | "critical";
@@ -23267,8 +23267,8 @@ export declare const zRePlanResponse: z.ZodObject<{
         detectedAt: Date;
         detectedBy: string;
         sourceFact?: {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -23278,9 +23278,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -23292,10 +23292,10 @@ export declare const zRePlanResponse: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -23305,9 +23305,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -23328,9 +23328,9 @@ export declare const zRePlanResponse: z.ZodObject<{
         details?: any;
     };
     proposal: {
+        projectId: string;
         id: string;
         status: "approved" | "rejected" | "draft" | "proposed" | "applied";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         changes: {
@@ -23361,9 +23361,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 shiftDays: number;
             }[];
             newDependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -23402,10 +23402,10 @@ export declare const zRePlanResponse: z.ZodObject<{
         createdBy: string;
         triggerId: string;
         currentTimeline: {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -23413,9 +23413,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -23426,11 +23426,11 @@ export declare const zRePlanResponse: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -23453,8 +23453,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -23464,9 +23464,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -23478,10 +23478,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -23491,9 +23491,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -23520,8 +23520,8 @@ export declare const zRePlanResponse: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -23531,9 +23531,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -23545,10 +23545,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -23558,9 +23558,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -23582,10 +23582,10 @@ export declare const zRePlanResponse: z.ZodObject<{
             actualEndDate?: Date | undefined;
         };
         proposedTimeline: {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -23593,9 +23593,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -23606,11 +23606,11 @@ export declare const zRePlanResponse: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -23633,8 +23633,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -23644,9 +23644,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -23658,10 +23658,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -23671,9 +23671,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -23700,8 +23700,8 @@ export declare const zRePlanResponse: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -23711,9 +23711,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -23725,10 +23725,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -23738,9 +23738,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -23787,9 +23787,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             benefits: string[];
         };
         actions: {
-            autoApply: boolean;
             approve: boolean;
             reject: boolean;
+            autoApply: boolean;
             modify: boolean;
         };
         proposalId: string;
@@ -23802,10 +23802,10 @@ export declare const zRePlanResponse: z.ZodObject<{
     success: boolean;
     applied: boolean;
     trigger: {
+        projectId: string;
         id: string;
         status: "approved" | "rejected" | "detected" | "analyzing" | "proposed" | "applied";
         type: "document_expiry" | "sal_delay" | "procurement_delay" | "resource_conflict" | "scope_change" | "risk_materialized";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         severity: "low" | "medium" | "high" | "critical";
@@ -23820,8 +23820,8 @@ export declare const zRePlanResponse: z.ZodObject<{
         detectedAt: Date;
         detectedBy: string;
         sourceFact?: {
-            status: "pending" | "valid" | "expired" | "invalid";
             projectId: string;
+            status: "pending" | "valid" | "expired" | "invalid";
             vendorId: string;
             vendorName: string;
             documentType: "DURC" | "visura" | "certification";
@@ -23831,9 +23831,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             issuingAuthority: string;
             notes?: string | undefined;
         } | {
+            projectId: string;
             category: string;
             status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-            projectId: string;
             createdAt: Date;
             updatedAt: Date;
             location: string;
@@ -23845,10 +23845,10 @@ export declare const zRePlanResponse: z.ZodObject<{
             createdBy: string;
             awardedVendor?: string | undefined;
         } | {
-            description: string;
-            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             projectId: string;
             documents: string[];
+            description: string;
+            status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
             authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
             submissionDate: Date;
             expectedResponseDate: Date;
@@ -23858,9 +23858,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             notes?: string | undefined;
             actualResponseDate?: Date | undefined;
         } | {
+            projectId: string;
             status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
             currency: string;
-            projectId: string;
             features: string[];
             location: string;
             portalId: string;
@@ -23881,9 +23881,9 @@ export declare const zRePlanResponse: z.ZodObject<{
         details?: any;
     };
     proposal: {
+        projectId: string;
         id: string;
         status: "approved" | "rejected" | "draft" | "proposed" | "applied";
-        projectId: string;
         createdAt: Date;
         updatedAt: Date;
         changes: {
@@ -23914,9 +23914,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 shiftDays: number;
             }[];
             newDependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -23955,10 +23955,10 @@ export declare const zRePlanResponse: z.ZodObject<{
         createdBy: string;
         triggerId: string;
         currentTimeline: {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -23966,9 +23966,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -23979,11 +23979,11 @@ export declare const zRePlanResponse: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -24006,8 +24006,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -24017,9 +24017,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -24031,10 +24031,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -24044,9 +24044,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -24073,8 +24073,8 @@ export declare const zRePlanResponse: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -24084,9 +24084,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -24098,10 +24098,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -24111,9 +24111,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -24135,10 +24135,10 @@ export declare const zRePlanResponse: z.ZodObject<{
             actualEndDate?: Date | undefined;
         };
         proposedTimeline: {
+            projectId: string;
             id: string;
             description: string;
             status: "completed" | "active" | "draft" | "archived";
-            projectId: string;
             createdAt: Date;
             name: string;
             version: number;
@@ -24146,9 +24146,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             generatedAt: Date;
             generatedBy: string;
             dependencies: {
+                projectId: string;
                 id: string;
                 type: "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-                projectId: string;
                 createdAt: Date;
                 isCritical: boolean;
                 fromTaskId: string;
@@ -24159,11 +24159,11 @@ export declare const zRePlanResponse: z.ZodObject<{
             startDate: Date;
             endDate: Date;
             tasks: {
+                projectId: string;
                 id: string;
                 description: string;
                 status: "blocked" | "completed" | "cancelled" | "not_started" | "in_progress";
                 type: "milestone" | "task" | "subtask" | "deliverable";
-                projectId: string;
                 createdAt: Date;
                 name: string;
                 updatedAt: Date;
@@ -24186,8 +24186,8 @@ export declare const zRePlanResponse: z.ZodObject<{
                 actualEndDate?: Date | undefined;
                 assignedTo?: string | undefined;
                 sourceFact?: {
-                    status: "pending" | "valid" | "expired" | "invalid";
                     projectId: string;
+                    status: "pending" | "valid" | "expired" | "invalid";
                     vendorId: string;
                     vendorName: string;
                     documentType: "DURC" | "visura" | "certification";
@@ -24197,9 +24197,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     issuingAuthority: string;
                     notes?: string | undefined;
                 } | {
+                    projectId: string;
                     category: string;
                     status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                    projectId: string;
                     createdAt: Date;
                     updatedAt: Date;
                     location: string;
@@ -24211,10 +24211,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                     createdBy: string;
                     awardedVendor?: string | undefined;
                 } | {
-                    description: string;
-                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     projectId: string;
                     documents: string[];
+                    description: string;
+                    status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                     authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                     submissionDate: Date;
                     expectedResponseDate: Date;
@@ -24224,9 +24224,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                     notes?: string | undefined;
                     actualResponseDate?: Date | undefined;
                 } | {
+                    projectId: string;
                     status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                     currency: string;
-                    projectId: string;
                     features: string[];
                     location: string;
                     portalId: string;
@@ -24253,8 +24253,8 @@ export declare const zRePlanResponse: z.ZodObject<{
             completedTasks: number;
             totalTasks: number;
             sourceFacts: ({
-                status: "pending" | "valid" | "expired" | "invalid";
                 projectId: string;
+                status: "pending" | "valid" | "expired" | "invalid";
                 vendorId: string;
                 vendorName: string;
                 documentType: "DURC" | "visura" | "certification";
@@ -24264,9 +24264,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 issuingAuthority: string;
                 notes?: string | undefined;
             } | {
+                projectId: string;
                 category: string;
                 status: "draft" | "cancelled" | "published" | "offers_received" | "comparing" | "awarded";
-                projectId: string;
                 createdAt: Date;
                 updatedAt: Date;
                 location: string;
@@ -24278,10 +24278,10 @@ export declare const zRePlanResponse: z.ZodObject<{
                 createdBy: string;
                 awardedVendor?: string | undefined;
             } | {
-                description: string;
-                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 projectId: string;
                 documents: string[];
+                description: string;
+                status: "pending" | "expired" | "approved" | "rejected" | "submitted" | "under_review";
                 authorizationType: "permits" | "CDU" | "SCIA" | "building_permit" | "environmental_clearance";
                 submissionDate: Date;
                 expectedResponseDate: Date;
@@ -24291,9 +24291,9 @@ export declare const zRePlanResponse: z.ZodObject<{
                 notes?: string | undefined;
                 actualResponseDate?: Date | undefined;
             } | {
+                projectId: string;
                 status: "expired" | "published" | "preparing" | "pushed" | "monitoring" | "removed";
                 currency: string;
-                projectId: string;
                 features: string[];
                 location: string;
                 portalId: string;
@@ -24340,9 +24340,9 @@ export declare const zRePlanResponse: z.ZodObject<{
             benefits: string[];
         };
         actions: {
-            autoApply: boolean;
             approve: boolean;
             reject: boolean;
+            autoApply: boolean;
             modify: boolean;
         };
         proposalId: string;

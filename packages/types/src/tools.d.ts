@@ -365,8 +365,8 @@ export declare const zToolRun: z.ZodObject<{
     args: Record<string, unknown>;
     startedAt: Date;
     logs: string[];
-    metadata?: Record<string, unknown> | undefined;
     projectId?: string | undefined;
+    metadata?: Record<string, unknown> | undefined;
     finishedAt?: Date | undefined;
     error?: string | undefined;
     output?: unknown;
@@ -396,8 +396,8 @@ export declare const zToolRun: z.ZodObject<{
     args: Record<string, unknown>;
     startedAt: Date;
     logs: string[];
-    metadata?: Record<string, unknown> | undefined;
     projectId?: string | undefined;
+    metadata?: Record<string, unknown> | undefined;
     finishedAt?: Date | undefined;
     error?: string | undefined;
     output?: unknown;

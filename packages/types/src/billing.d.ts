@@ -75,9 +75,9 @@ export declare const zUsageEvent: z.ZodObject<{
     retryCount: z.ZodNumber;
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
 }, "strip", z.ZodTypeAny, {
+    timestamp: Date;
     id: string;
     status: "pending" | "failed" | "sent";
-    timestamp: Date;
     workspaceId: string;
     toolId: string;
     action: string;
@@ -87,9 +87,9 @@ export declare const zUsageEvent: z.ZodObject<{
     metadata?: Record<string, any> | undefined;
     stripeItemId?: string | undefined;
 }, {
+    timestamp: Date;
     id: string;
     status: "pending" | "failed" | "sent";
-    timestamp: Date;
     workspaceId: string;
     toolId: string;
     action: string;

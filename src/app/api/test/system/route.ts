@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { logger } from '@urbanova/infra';
+// import { logger } from '@urbanova/infra'; // Temporarily disabled for build
 
 // Define functions inline since they don't exist
 const guards = {
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
 
     // Test 1: Logging strutturato
     if (testType === 'all' || testType === 'logging') {
-      (logger.info as any)('Test logging strutturato', {
+      console.info('Test logging strutturato', {
         userId: 'test-user-123',
         projectId: 'test-project-456',
         sessionId: 'test-session-789',
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
         ipAddress,
       });
 
-      (logger.warn as any)('Test warning log', {
+      console.warn('Test warning log', {
         userId: 'test-user-123',
         metadata: { testWarning: true },
       });
@@ -136,7 +136,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    (logger.error as any)('Errore nel test sistema', {
+    console.error('Errore nel test sistema', {
       error: {
         name: error instanceof Error ? error.name : 'Unknown',
         message: error instanceof Error ? error.message : 'Unknown error',
@@ -178,7 +178,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    (logger.error as any)('Errore nel test POST', {
+    console.error('Errore nel test POST', {
       error: {
         name: error instanceof Error ? error.name : 'Unknown',
         message: error instanceof Error ? error.message : 'Unknown error',

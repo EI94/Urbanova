@@ -138,10 +138,7 @@ export declare const zBuyer: z.ZodObject<{
     updatedAt: z.ZodDate;
     lastActivityAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     projectId: string;
-    createdAt: Date;
-    updatedAt: Date;
     documents: {
         id: string;
         status: "pending" | "rejected" | "validated";
@@ -151,6 +148,9 @@ export declare const zBuyer: z.ZodObject<{
         uploadedAt: Date;
         validatedAt?: Date | undefined;
     }[];
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
     email: string;
     phone: string;
     firstName: string;
@@ -183,10 +183,7 @@ export declare const zBuyer: z.ZodObject<{
         language: string;
     } | undefined;
 }, {
-    id: string;
     projectId: string;
-    createdAt: Date;
-    updatedAt: Date;
     documents: {
         id: string;
         status: "pending" | "rejected" | "validated";
@@ -196,6 +193,9 @@ export declare const zBuyer: z.ZodObject<{
         uploadedAt: Date;
         validatedAt?: Date | undefined;
     }[];
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
     email: string;
     phone: string;
     firstName: string;
@@ -416,8 +416,8 @@ export declare const zBuyerJWTLink: z.ZodObject<{
     userAgent: z.ZodOptional<z.ZodString>;
     metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     projectId: string;
+    id: string;
     url: string;
     expiresAt: Date;
     token: string;
@@ -433,10 +433,10 @@ export declare const zBuyerJWTLink: z.ZodObject<{
     usedAt?: Date | undefined;
     usedCount?: number | undefined;
     maxUses?: number | undefined;
-    permissions?: ("upload" | "download" | "view" | "edit" | "delete")[] | undefined;
+    permissions?: ("delete" | "download" | "upload" | "view" | "edit")[] | undefined;
 }, {
-    id: string;
     projectId: string;
+    id: string;
     url: string;
     expiresAt: Date;
     token: string;
@@ -452,7 +452,7 @@ export declare const zBuyerJWTLink: z.ZodObject<{
     usedAt?: Date | undefined;
     usedCount?: number | undefined;
     maxUses?: number | undefined;
-    permissions?: ("upload" | "download" | "view" | "edit" | "delete")[] | undefined;
+    permissions?: ("delete" | "download" | "upload" | "view" | "edit")[] | undefined;
 }>;
 /**
  * Appuntamento
@@ -613,11 +613,11 @@ export declare const zAppointment: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
+    projectId: string;
     id: string;
     description: string;
     status: "completed" | "cancelled" | "scheduled" | "confirmed";
     type: "payment" | "fitting" | "visit" | "consultation" | "delivery";
-    projectId: string;
     title: string;
     createdAt: Date;
     timezone: string;
@@ -669,11 +669,11 @@ export declare const zAppointment: z.ZodObject<{
     } | undefined;
     googleEventId?: string | undefined;
 }, {
+    projectId: string;
     id: string;
     description: string;
     status: "completed" | "cancelled" | "scheduled" | "confirmed";
     type: "payment" | "fitting" | "visit" | "consultation" | "delivery";
-    projectId: string;
     title: string;
     createdAt: Date;
     timezone: string;
@@ -1568,15 +1568,15 @@ export declare const zGoogleEvent: z.ZodObject<{
         self?: boolean | undefined;
     };
     htmlLink: string;
+    start?: {
+        dateTime: Date;
+        timeZone: string;
+    } | undefined;
     status?: string | undefined;
     reminders?: any;
     appointmentId?: string | undefined;
     created?: Date | undefined;
     updated?: Date | undefined;
-    start?: {
-        dateTime: Date;
-        timeZone: string;
-    } | undefined;
     end?: {
         dateTime: Date;
         timeZone: string;
@@ -1601,15 +1601,15 @@ export declare const zGoogleEvent: z.ZodObject<{
         self?: boolean | undefined;
     };
     htmlLink: string;
+    start?: {
+        dateTime: Date;
+        timeZone: string;
+    } | undefined;
     status?: string | undefined;
     reminders?: any;
     appointmentId?: string | undefined;
     created?: Date | undefined;
     updated?: Date | undefined;
-    start?: {
-        dateTime: Date;
-        timeZone: string;
-    } | undefined;
     end?: {
         dateTime: Date;
         timeZone: string;
@@ -1753,8 +1753,8 @@ export declare const zCollectKYCResponse: z.ZodObject<{
         userAgent: z.ZodOptional<z.ZodString>;
         metadata: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         projectId: string;
+        id: string;
         url: string;
         expiresAt: Date;
         token: string;
@@ -1770,10 +1770,10 @@ export declare const zCollectKYCResponse: z.ZodObject<{
         usedAt?: Date | undefined;
         usedCount?: number | undefined;
         maxUses?: number | undefined;
-        permissions?: ("upload" | "download" | "view" | "edit" | "delete")[] | undefined;
+        permissions?: ("delete" | "download" | "upload" | "view" | "edit")[] | undefined;
     }, {
-        id: string;
         projectId: string;
+        id: string;
         url: string;
         expiresAt: Date;
         token: string;
@@ -1789,7 +1789,7 @@ export declare const zCollectKYCResponse: z.ZodObject<{
         usedAt?: Date | undefined;
         usedCount?: number | undefined;
         maxUses?: number | undefined;
-        permissions?: ("upload" | "download" | "view" | "edit" | "delete")[] | undefined;
+        permissions?: ("delete" | "download" | "upload" | "view" | "edit")[] | undefined;
     }>, "many">;
     kycStatus: z.ZodString;
     expiresAt: z.ZodDate;
@@ -1813,8 +1813,8 @@ export declare const zCollectKYCResponse: z.ZodObject<{
     kycStatus: string;
     buyerId: string;
     uploadLinks: {
-        id: string;
         projectId: string;
+        id: string;
         url: string;
         expiresAt: Date;
         token: string;
@@ -1830,7 +1830,7 @@ export declare const zCollectKYCResponse: z.ZodObject<{
         usedAt?: Date | undefined;
         usedCount?: number | undefined;
         maxUses?: number | undefined;
-        permissions?: ("upload" | "download" | "view" | "edit" | "delete")[] | undefined;
+        permissions?: ("delete" | "download" | "upload" | "view" | "edit")[] | undefined;
     }[];
     message?: string | undefined;
     notifications?: {
@@ -1846,8 +1846,8 @@ export declare const zCollectKYCResponse: z.ZodObject<{
     kycStatus: string;
     buyerId: string;
     uploadLinks: {
-        id: string;
         projectId: string;
+        id: string;
         url: string;
         expiresAt: Date;
         token: string;
@@ -1863,7 +1863,7 @@ export declare const zCollectKYCResponse: z.ZodObject<{
         usedAt?: Date | undefined;
         usedCount?: number | undefined;
         maxUses?: number | undefined;
-        permissions?: ("upload" | "download" | "view" | "edit" | "delete")[] | undefined;
+        permissions?: ("delete" | "download" | "upload" | "view" | "edit")[] | undefined;
     }[];
     message?: string | undefined;
     notifications?: {
@@ -2194,11 +2194,11 @@ export declare const zScheduleFittingsResponse: z.ZodObject<{
         createdAt: z.ZodDate;
         updatedAt: z.ZodDate;
     }, "strip", z.ZodTypeAny, {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "cancelled" | "scheduled" | "confirmed";
         type: "payment" | "fitting" | "visit" | "consultation" | "delivery";
-        projectId: string;
         title: string;
         createdAt: Date;
         timezone: string;
@@ -2250,11 +2250,11 @@ export declare const zScheduleFittingsResponse: z.ZodObject<{
         } | undefined;
         googleEventId?: string | undefined;
     }, {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "cancelled" | "scheduled" | "confirmed";
         type: "payment" | "fitting" | "visit" | "consultation" | "delivery";
-        projectId: string;
         title: string;
         createdAt: Date;
         timezone: string;
@@ -2575,15 +2575,15 @@ export declare const zScheduleFittingsResponse: z.ZodObject<{
             self?: boolean | undefined;
         };
         htmlLink: string;
+        start?: {
+            dateTime: Date;
+            timeZone: string;
+        } | undefined;
         status?: string | undefined;
         reminders?: any;
         appointmentId?: string | undefined;
         created?: Date | undefined;
         updated?: Date | undefined;
-        start?: {
-            dateTime: Date;
-            timeZone: string;
-        } | undefined;
         end?: {
             dateTime: Date;
             timeZone: string;
@@ -2608,15 +2608,15 @@ export declare const zScheduleFittingsResponse: z.ZodObject<{
             self?: boolean | undefined;
         };
         htmlLink: string;
+        start?: {
+            dateTime: Date;
+            timeZone: string;
+        } | undefined;
         status?: string | undefined;
         reminders?: any;
         appointmentId?: string | undefined;
         created?: Date | undefined;
         updated?: Date | undefined;
-        start?: {
-            dateTime: Date;
-            timeZone: string;
-        } | undefined;
         end?: {
             dateTime: Date;
             timeZone: string;
@@ -2632,11 +2632,11 @@ export declare const zScheduleFittingsResponse: z.ZodObject<{
     message?: string | undefined;
     error?: string | undefined;
     appointment?: {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "cancelled" | "scheduled" | "confirmed";
         type: "payment" | "fitting" | "visit" | "consultation" | "delivery";
-        projectId: string;
         title: string;
         createdAt: Date;
         timezone: string;
@@ -2742,15 +2742,15 @@ export declare const zScheduleFittingsResponse: z.ZodObject<{
             self?: boolean | undefined;
         };
         htmlLink: string;
+        start?: {
+            dateTime: Date;
+            timeZone: string;
+        } | undefined;
         status?: string | undefined;
         reminders?: any;
         appointmentId?: string | undefined;
         created?: Date | undefined;
         updated?: Date | undefined;
-        start?: {
-            dateTime: Date;
-            timeZone: string;
-        } | undefined;
         end?: {
             dateTime: Date;
             timeZone: string;
@@ -2764,11 +2764,11 @@ export declare const zScheduleFittingsResponse: z.ZodObject<{
     message?: string | undefined;
     error?: string | undefined;
     appointment?: {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "cancelled" | "scheduled" | "confirmed";
         type: "payment" | "fitting" | "visit" | "consultation" | "delivery";
-        projectId: string;
         title: string;
         createdAt: Date;
         timezone: string;
@@ -2874,15 +2874,15 @@ export declare const zScheduleFittingsResponse: z.ZodObject<{
             self?: boolean | undefined;
         };
         htmlLink: string;
+        start?: {
+            dateTime: Date;
+            timeZone: string;
+        } | undefined;
         status?: string | undefined;
         reminders?: any;
         appointmentId?: string | undefined;
         created?: Date | undefined;
         updated?: Date | undefined;
-        start?: {
-            dateTime: Date;
-            timeZone: string;
-        } | undefined;
         end?: {
             dateTime: Date;
             timeZone: string;
@@ -3137,10 +3137,7 @@ export declare const zGetBuyerInfoResponse: z.ZodObject<{
         updatedAt: z.ZodDate;
         lastActivityAt: z.ZodDate;
     }, "strip", z.ZodTypeAny, {
-        id: string;
         projectId: string;
-        createdAt: Date;
-        updatedAt: Date;
         documents: {
             id: string;
             status: "pending" | "rejected" | "validated";
@@ -3150,6 +3147,9 @@ export declare const zGetBuyerInfoResponse: z.ZodObject<{
             uploadedAt: Date;
             validatedAt?: Date | undefined;
         }[];
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
         email: string;
         phone: string;
         firstName: string;
@@ -3182,10 +3182,7 @@ export declare const zGetBuyerInfoResponse: z.ZodObject<{
             language: string;
         } | undefined;
     }, {
-        id: string;
         projectId: string;
-        createdAt: Date;
-        updatedAt: Date;
         documents: {
             id: string;
             status: "pending" | "rejected" | "validated";
@@ -3195,6 +3192,9 @@ export declare const zGetBuyerInfoResponse: z.ZodObject<{
             uploadedAt: Date;
             validatedAt?: Date | undefined;
         }[];
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
         email: string;
         phone: string;
         firstName: string;
@@ -3394,11 +3394,11 @@ export declare const zGetBuyerInfoResponse: z.ZodObject<{
         createdAt: z.ZodDate;
         updatedAt: z.ZodDate;
     }, "strip", z.ZodTypeAny, {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "cancelled" | "scheduled" | "confirmed";
         type: "payment" | "fitting" | "visit" | "consultation" | "delivery";
-        projectId: string;
         title: string;
         createdAt: Date;
         timezone: string;
@@ -3450,11 +3450,11 @@ export declare const zGetBuyerInfoResponse: z.ZodObject<{
         } | undefined;
         googleEventId?: string | undefined;
     }, {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "cancelled" | "scheduled" | "confirmed";
         type: "payment" | "fitting" | "visit" | "consultation" | "delivery";
-        projectId: string;
         title: string;
         createdAt: Date;
         timezone: string;
@@ -3511,7 +3511,6 @@ export declare const zGetBuyerInfoResponse: z.ZodObject<{
     message: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     success: boolean;
-    message?: string | undefined;
     documents?: {
         id: string;
         status: "pending" | "rejected" | "validated";
@@ -3523,13 +3522,11 @@ export declare const zGetBuyerInfoResponse: z.ZodObject<{
         docHunterId?: string | undefined;
         validationNotes?: string | undefined;
     }[] | undefined;
+    message?: string | undefined;
     error?: string | undefined;
     kycStatus?: string | undefined;
     buyer?: {
-        id: string;
         projectId: string;
-        createdAt: Date;
-        updatedAt: Date;
         documents: {
             id: string;
             status: "pending" | "rejected" | "validated";
@@ -3539,6 +3536,9 @@ export declare const zGetBuyerInfoResponse: z.ZodObject<{
             uploadedAt: Date;
             validatedAt?: Date | undefined;
         }[];
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
         email: string;
         phone: string;
         firstName: string;
@@ -3572,11 +3572,11 @@ export declare const zGetBuyerInfoResponse: z.ZodObject<{
         } | undefined;
     } | undefined;
     appointments?: {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "cancelled" | "scheduled" | "confirmed";
         type: "payment" | "fitting" | "visit" | "consultation" | "delivery";
-        projectId: string;
         title: string;
         createdAt: Date;
         timezone: string;
@@ -3631,7 +3631,6 @@ export declare const zGetBuyerInfoResponse: z.ZodObject<{
     privacySettings?: any;
 }, {
     success: boolean;
-    message?: string | undefined;
     documents?: {
         id: string;
         status: "pending" | "rejected" | "validated";
@@ -3643,13 +3642,11 @@ export declare const zGetBuyerInfoResponse: z.ZodObject<{
         docHunterId?: string | undefined;
         validationNotes?: string | undefined;
     }[] | undefined;
+    message?: string | undefined;
     error?: string | undefined;
     kycStatus?: string | undefined;
     buyer?: {
-        id: string;
         projectId: string;
-        createdAt: Date;
-        updatedAt: Date;
         documents: {
             id: string;
             status: "pending" | "rejected" | "validated";
@@ -3659,6 +3656,9 @@ export declare const zGetBuyerInfoResponse: z.ZodObject<{
             uploadedAt: Date;
             validatedAt?: Date | undefined;
         }[];
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
         email: string;
         phone: string;
         firstName: string;
@@ -3692,11 +3692,11 @@ export declare const zGetBuyerInfoResponse: z.ZodObject<{
         } | undefined;
     } | undefined;
     appointments?: {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "cancelled" | "scheduled" | "confirmed";
         type: "payment" | "fitting" | "visit" | "consultation" | "delivery";
-        projectId: string;
         title: string;
         createdAt: Date;
         timezone: string;
@@ -3900,11 +3900,11 @@ export declare const zListAppointmentsResponse: z.ZodObject<{
         createdAt: z.ZodDate;
         updatedAt: z.ZodDate;
     }, "strip", z.ZodTypeAny, {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "cancelled" | "scheduled" | "confirmed";
         type: "payment" | "fitting" | "visit" | "consultation" | "delivery";
-        projectId: string;
         title: string;
         createdAt: Date;
         timezone: string;
@@ -3956,11 +3956,11 @@ export declare const zListAppointmentsResponse: z.ZodObject<{
         } | undefined;
         googleEventId?: string | undefined;
     }, {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "cancelled" | "scheduled" | "confirmed";
         type: "payment" | "fitting" | "visit" | "consultation" | "delivery";
-        projectId: string;
         title: string;
         createdAt: Date;
         timezone: string;
@@ -4025,11 +4025,11 @@ export declare const zListAppointmentsResponse: z.ZodObject<{
     total?: number | undefined;
     error?: string | undefined;
     appointments?: {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "cancelled" | "scheduled" | "confirmed";
         type: "payment" | "fitting" | "visit" | "consultation" | "delivery";
-        projectId: string;
         title: string;
         createdAt: Date;
         timezone: string;
@@ -4090,11 +4090,11 @@ export declare const zListAppointmentsResponse: z.ZodObject<{
     total?: number | undefined;
     error?: string | undefined;
     appointments?: {
+        projectId: string;
         id: string;
         description: string;
         status: "completed" | "cancelled" | "scheduled" | "confirmed";
         type: "payment" | "fitting" | "visit" | "consultation" | "delivery";
-        projectId: string;
         title: string;
         createdAt: Date;
         timezone: string;

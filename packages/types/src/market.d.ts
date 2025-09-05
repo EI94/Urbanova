@@ -344,41 +344,41 @@ export declare const zMarketInsight: z.ZodObject<{
         change: z.ZodNumber;
         unit: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        unit: string;
         value: number;
+        unit: string;
         metric: string;
         change: number;
     }, {
-        unit: string;
         value: number;
+        unit: string;
         metric: string;
         change: number;
     }>, "many">;
     recommendations: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
+    confidence: number;
     id: string;
     description: string;
     type: "trend" | "opportunity" | "risk" | "comparison";
     title: string;
-    confidence: number;
     impact: "low" | "medium" | "high";
     dataPoints: {
-        unit: string;
         value: number;
+        unit: string;
         metric: string;
         change: number;
     }[];
     recommendations?: string[] | undefined;
 }, {
+    confidence: number;
     id: string;
     description: string;
     type: "trend" | "opportunity" | "risk" | "comparison";
     title: string;
-    confidence: number;
     impact: "low" | "medium" | "high";
     dataPoints: {
-        unit: string;
         value: number;
+        unit: string;
         metric: string;
         change: number;
     }[];
@@ -783,41 +783,41 @@ export declare const zMarketSnapshot: z.ZodObject<{
                 change: z.ZodNumber;
                 unit: z.ZodString;
             }, "strip", z.ZodTypeAny, {
-                unit: string;
                 value: number;
+                unit: string;
                 metric: string;
                 change: number;
             }, {
-                unit: string;
                 value: number;
+                unit: string;
                 metric: string;
                 change: number;
             }>, "many">;
             recommendations: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
         }, "strip", z.ZodTypeAny, {
+            confidence: number;
             id: string;
             description: string;
             type: "trend" | "opportunity" | "risk" | "comparison";
             title: string;
-            confidence: number;
             impact: "low" | "medium" | "high";
             dataPoints: {
-                unit: string;
                 value: number;
+                unit: string;
                 metric: string;
                 change: number;
             }[];
             recommendations?: string[] | undefined;
         }, {
+            confidence: number;
             id: string;
             description: string;
             type: "trend" | "opportunity" | "risk" | "comparison";
             title: string;
-            confidence: number;
             impact: "low" | "medium" | "high";
             dataPoints: {
-                unit: string;
                 value: number;
+                unit: string;
                 metric: string;
                 change: number;
             }[];
@@ -848,14 +848,14 @@ export declare const zMarketSnapshot: z.ZodObject<{
             confidence: z.ZodNumber;
             lastUpdate: z.ZodDate;
         }, "strip", z.ZodTypeAny, {
+            confidence: number;
             lastUpdate: Date;
             zone: string;
-            confidence: number;
             range: [number, number];
         }, {
+            confidence: number;
             lastUpdate: Date;
             zone: string;
-            confidence: number;
             range: [number, number];
         }>;
     }, "strip", z.ZodTypeAny, {
@@ -917,15 +917,15 @@ export declare const zMarketSnapshot: z.ZodObject<{
             }[];
         };
         insights: {
+            confidence: number;
             id: string;
             description: string;
             type: "trend" | "opportunity" | "risk" | "comparison";
             title: string;
-            confidence: number;
             impact: "low" | "medium" | "high";
             dataPoints: {
-                unit: string;
                 value: number;
+                unit: string;
                 metric: string;
                 change: number;
             }[];
@@ -939,9 +939,9 @@ export declare const zMarketSnapshot: z.ZodObject<{
             quartiles: [number, number, number, number];
         };
         omi: {
+            confidence: number;
             lastUpdate: Date;
             zone: string;
-            confidence: number;
             range: [number, number];
         };
     }, {
@@ -1003,15 +1003,15 @@ export declare const zMarketSnapshot: z.ZodObject<{
             }[];
         };
         insights: {
+            confidence: number;
             id: string;
             description: string;
             type: "trend" | "opportunity" | "risk" | "comparison";
             title: string;
-            confidence: number;
             impact: "low" | "medium" | "high";
             dataPoints: {
-                unit: string;
                 value: number;
+                unit: string;
                 metric: string;
                 change: number;
             }[];
@@ -1025,9 +1025,9 @@ export declare const zMarketSnapshot: z.ZodObject<{
             quartiles: [number, number, number, number];
         };
         omi: {
+            confidence: number;
             lastUpdate: Date;
             zone: string;
-            confidence: number;
             range: [number, number];
         };
     }>;
@@ -1051,6 +1051,7 @@ export declare const zMarketSnapshot: z.ZodObject<{
         coverage: number;
     }>;
 }, "strip", z.ZodTypeAny, {
+    timestamp: Date;
     id: string;
     metadata: {
         dataQuality: number;
@@ -1059,7 +1060,6 @@ export declare const zMarketSnapshot: z.ZodObject<{
         generationTime: number;
         coverage: number;
     };
-    timestamp: Date;
     city: string;
     asset: "residential" | "commercial" | "industrial";
     horizonMonths: number;
@@ -1122,15 +1122,15 @@ export declare const zMarketSnapshot: z.ZodObject<{
             }[];
         };
         insights: {
+            confidence: number;
             id: string;
             description: string;
             type: "trend" | "opportunity" | "risk" | "comparison";
             title: string;
-            confidence: number;
             impact: "low" | "medium" | "high";
             dataPoints: {
-                unit: string;
                 value: number;
+                unit: string;
                 metric: string;
                 change: number;
             }[];
@@ -1144,13 +1144,14 @@ export declare const zMarketSnapshot: z.ZodObject<{
             quartiles: [number, number, number, number];
         };
         omi: {
+            confidence: number;
             lastUpdate: Date;
             zone: string;
-            confidence: number;
             range: [number, number];
         };
     };
 }, {
+    timestamp: Date;
     id: string;
     metadata: {
         dataQuality: number;
@@ -1159,7 +1160,6 @@ export declare const zMarketSnapshot: z.ZodObject<{
         generationTime: number;
         coverage: number;
     };
-    timestamp: Date;
     city: string;
     asset: "residential" | "commercial" | "industrial";
     horizonMonths: number;
@@ -1222,15 +1222,15 @@ export declare const zMarketSnapshot: z.ZodObject<{
             }[];
         };
         insights: {
+            confidence: number;
             id: string;
             description: string;
             type: "trend" | "opportunity" | "risk" | "comparison";
             title: string;
-            confidence: number;
             impact: "low" | "medium" | "high";
             dataPoints: {
-                unit: string;
                 value: number;
+                unit: string;
                 metric: string;
                 change: number;
             }[];
@@ -1244,9 +1244,9 @@ export declare const zMarketSnapshot: z.ZodObject<{
             quartiles: [number, number, number, number];
         };
         omi: {
+            confidence: number;
             lastUpdate: Date;
             zone: string;
-            confidence: number;
             range: [number, number];
         };
     };
@@ -1272,41 +1272,41 @@ export declare const zMarketTrendReport: z.ZodObject<{
                 change: z.ZodNumber;
                 unit: z.ZodString;
             }, "strip", z.ZodTypeAny, {
-                unit: string;
                 value: number;
+                unit: string;
                 metric: string;
                 change: number;
             }, {
-                unit: string;
                 value: number;
+                unit: string;
                 metric: string;
                 change: number;
             }>, "many">;
             recommendations: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
         }, "strip", z.ZodTypeAny, {
+            confidence: number;
             id: string;
             description: string;
             type: "trend" | "opportunity" | "risk" | "comparison";
             title: string;
-            confidence: number;
             impact: "low" | "medium" | "high";
             dataPoints: {
-                unit: string;
                 value: number;
+                unit: string;
                 metric: string;
                 change: number;
             }[];
             recommendations?: string[] | undefined;
         }, {
+            confidence: number;
             id: string;
             description: string;
             type: "trend" | "opportunity" | "risk" | "comparison";
             title: string;
-            confidence: number;
             impact: "low" | "medium" | "high";
             dataPoints: {
-                unit: string;
                 value: number;
+                unit: string;
                 metric: string;
                 change: number;
             }[];
@@ -1318,15 +1318,15 @@ export declare const zMarketTrendReport: z.ZodObject<{
         risks: z.ZodArray<z.ZodString, "many">;
     }, "strip", z.ZodTypeAny, {
         keyInsights: {
+            confidence: number;
             id: string;
             description: string;
             type: "trend" | "opportunity" | "risk" | "comparison";
             title: string;
-            confidence: number;
             impact: "low" | "medium" | "high";
             dataPoints: {
-                unit: string;
                 value: number;
+                unit: string;
                 metric: string;
                 change: number;
             }[];
@@ -1338,15 +1338,15 @@ export declare const zMarketTrendReport: z.ZodObject<{
         risks: string[];
     }, {
         keyInsights: {
+            confidence: number;
             id: string;
             description: string;
             type: "trend" | "opportunity" | "risk" | "comparison";
             title: string;
-            confidence: number;
             impact: "low" | "medium" | "high";
             dataPoints: {
-                unit: string;
                 value: number;
+                unit: string;
                 metric: string;
                 change: number;
             }[];
@@ -1377,15 +1377,15 @@ export declare const zMarketTrendReport: z.ZodObject<{
     id: string;
     summary: {
         keyInsights: {
+            confidence: number;
             id: string;
             description: string;
             type: "trend" | "opportunity" | "risk" | "comparison";
             title: string;
-            confidence: number;
             impact: "low" | "medium" | "high";
             dataPoints: {
-                unit: string;
                 value: number;
+                unit: string;
                 metric: string;
                 change: number;
             }[];
@@ -1411,15 +1411,15 @@ export declare const zMarketTrendReport: z.ZodObject<{
     id: string;
     summary: {
         keyInsights: {
+            confidence: number;
             id: string;
             description: string;
             type: "trend" | "opportunity" | "risk" | "comparison";
             title: string;
-            confidence: number;
             impact: "low" | "medium" | "high";
             dataPoints: {
-                unit: string;
                 value: number;
+                unit: string;
                 metric: string;
                 change: number;
             }[];

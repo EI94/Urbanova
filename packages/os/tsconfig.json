@@ -5,7 +5,11 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "outDir": "./dist",
-    "rootDir": "./src",
+    "baseUrl": ".",
+    "paths": {
+      "@urbanova/types": ["../types/src"],
+      "@urbanova/toolos": ["../toolos/src"]
+    },
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

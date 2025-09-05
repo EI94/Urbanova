@@ -74,6 +74,7 @@ export declare const LeadSchema: z.ZodObject<{
     priority: "low" | "medium" | "high" | "urgent";
     source: "unknown" | "email" | "whatsapp" | "immobiliare" | "idealista" | "casa" | "portal";
     slaStatus: "on_track" | "at_risk" | "breached";
+    projectId?: string | undefined;
     message?: string | undefined;
     metadata?: {
         ipAddress?: string | undefined;
@@ -86,7 +87,6 @@ export declare const LeadSchema: z.ZodObject<{
         listingUrl?: string | undefined;
         extractedData?: Record<string, unknown> | undefined;
     } | undefined;
-    projectId?: string | undefined;
     name?: string | undefined;
     notes?: string | undefined;
     email?: string | undefined;
@@ -104,6 +104,7 @@ export declare const LeadSchema: z.ZodObject<{
     createdAt: Date;
     updatedAt: Date;
     source: "unknown" | "email" | "whatsapp" | "immobiliare" | "idealista" | "casa" | "portal";
+    projectId?: string | undefined;
     message?: string | undefined;
     metadata?: {
         ipAddress?: string | undefined;
@@ -116,7 +117,6 @@ export declare const LeadSchema: z.ZodObject<{
         listingUrl?: string | undefined;
         extractedData?: Record<string, unknown> | undefined;
     } | undefined;
-    projectId?: string | undefined;
     tags?: string[] | undefined;
     name?: string | undefined;
     priority?: "low" | "medium" | "high" | "urgent" | undefined;
@@ -191,6 +191,7 @@ export declare const ConversationSchema: z.ZodObject<{
     leadId: string;
     lastMsgAt: Date;
     unreadCount: number;
+    projectId?: string | undefined;
     metadata?: {
         tags: string[];
         messageCount: number;
@@ -199,7 +200,6 @@ export declare const ConversationSchema: z.ZodObject<{
         responseTime?: number | undefined;
         customerSatisfaction?: number | undefined;
     } | undefined;
-    projectId?: string | undefined;
     assigneeUserId?: string | undefined;
     slaDeadline?: Date | undefined;
 }, {
@@ -209,6 +209,7 @@ export declare const ConversationSchema: z.ZodObject<{
     channel: "email" | "whatsapp" | "portal:immobiliare" | "portal:idealista" | "portal:casa" | "portal:generic";
     leadId: string;
     lastMsgAt: Date;
+    projectId?: string | undefined;
     status?: "active" | "archived" | "closed" | "spam" | undefined;
     metadata?: {
         tags?: string[] | undefined;
@@ -218,7 +219,6 @@ export declare const ConversationSchema: z.ZodObject<{
         responseTime?: number | undefined;
         customerSatisfaction?: number | undefined;
     } | undefined;
-    projectId?: string | undefined;
     slaStatus?: "on_track" | "at_risk" | "breached" | undefined;
     assigneeUserId?: string | undefined;
     unreadCount?: number | undefined;
@@ -480,13 +480,13 @@ export declare const TemplateSchema: z.ZodObject<{
     variables: string[];
     bodyText: string;
     usageCount: number;
+    projectId?: string | undefined;
     metadata?: {
         tags: string[];
         language: string;
         channel?: "email" | "whatsapp" | "portal:immobiliare" | "portal:idealista" | "portal:casa" | "portal:generic" | undefined;
         slaTarget?: number | undefined;
     } | undefined;
-    projectId?: string | undefined;
     subject?: string | undefined;
     bodyHtml?: string | undefined;
     lastUsedAt?: Date | undefined;
@@ -498,13 +498,13 @@ export declare const TemplateSchema: z.ZodObject<{
     updatedAt: Date;
     createdBy: string;
     bodyText: string;
+    projectId?: string | undefined;
     metadata?: {
         tags?: string[] | undefined;
         language?: string | undefined;
         channel?: "email" | "whatsapp" | "portal:immobiliare" | "portal:idealista" | "portal:casa" | "portal:generic" | undefined;
         slaTarget?: number | undefined;
     } | undefined;
-    projectId?: string | undefined;
     isActive?: boolean | undefined;
     subject?: string | undefined;
     variables?: string[] | undefined;
@@ -525,8 +525,8 @@ export declare const SLAConfigSchema: z.ZodObject<{
         timezone: z.ZodDefault<z.ZodString>;
         daysOfWeek: z.ZodDefault<z.ZodArray<z.ZodNumber, "many">>;
     }, "strip", z.ZodTypeAny, {
-        timezone: string;
         start: string;
+        timezone: string;
         end: string;
         daysOfWeek: number[];
     }, {
@@ -561,8 +561,8 @@ export declare const SLAConfigSchema: z.ZodObject<{
     isActive: boolean;
     firstResponseMinutes: number;
     businessHours: {
-        timezone: string;
         start: string;
+        timezone: string;
         end: string;
         daysOfWeek: number[];
     };
@@ -706,8 +706,8 @@ export declare const AssignmentRuleSchema: z.ZodObject<{
     createdAt: z.ZodDate;
     updatedAt: z.ZodDate;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     projectId: string;
+    id: string;
     createdAt: Date;
     conditions: {
         leadSource?: ("unknown" | "email" | "whatsapp" | "immobiliare" | "idealista" | "casa" | "portal")[] | undefined;
@@ -725,8 +725,8 @@ export declare const AssignmentRuleSchema: z.ZodObject<{
         fallbackUserId?: string | undefined;
     };
 }, {
-    id: string;
     projectId: string;
+    id: string;
     createdAt: Date;
     conditions: {
         leadSource?: ("unknown" | "email" | "whatsapp" | "immobiliare" | "idealista" | "casa" | "portal")[] | undefined;
@@ -766,27 +766,27 @@ export declare const AuditLogSchema: z.ZodObject<{
     userAgent: z.ZodOptional<z.ZodString>;
     sessionId: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     timestamp: Date;
+    id: string;
     eventType: "lead_created" | "lead_updated" | "lead_assigned" | "message_sent" | "message_received" | "sla_breached" | "escalation_triggered" | "template_used" | "conversation_closed" | "data_exported" | "data_deleted";
     entityType: "message" | "template" | "lead" | "conversation" | "sla";
     entityId: string;
+    projectId?: string | undefined;
     ipAddress?: string | undefined;
     userAgent?: string | undefined;
     metadata?: Record<string, unknown> | undefined;
-    projectId?: string | undefined;
     userId?: string | undefined;
     sessionId?: string | undefined;
 }, {
-    id: string;
     timestamp: Date;
+    id: string;
     eventType: "lead_created" | "lead_updated" | "lead_assigned" | "message_sent" | "message_received" | "sla_breached" | "escalation_triggered" | "template_used" | "conversation_closed" | "data_exported" | "data_deleted";
     entityType: "message" | "template" | "lead" | "conversation" | "sla";
     entityId: string;
+    projectId?: string | undefined;
     ipAddress?: string | undefined;
     userAgent?: string | undefined;
     metadata?: Record<string, unknown> | undefined;
-    projectId?: string | undefined;
     userId?: string | undefined;
     sessionId?: string | undefined;
 }>;

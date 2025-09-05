@@ -197,6 +197,10 @@ declare const zBPInput: z.ZodObject<{
     }>;
 }, "strip", z.ZodTypeAny, {
     projectId: string;
+    timeline: {
+        constructionMonths: number;
+        sellingMonths: number;
+    };
     land: {
         surface: number;
         priceAsk: number;
@@ -220,13 +224,13 @@ declare const zBPInput: z.ZodObject<{
         units: number;
         averageArea: number;
         pricePerSqm: number;
-    };
-    timeline: {
-        constructionMonths: number;
-        sellingMonths: number;
     };
 }, {
     projectId: string;
+    timeline: {
+        constructionMonths: number;
+        sellingMonths: number;
+    };
     land: {
         surface: number;
         priceAsk: number;
@@ -250,10 +254,6 @@ declare const zBPInput: z.ZodObject<{
         units: number;
         averageArea: number;
         pricePerSqm: number;
-    };
-    timeline: {
-        constructionMonths: number;
-        sellingMonths: number;
     };
 }>;
 /**
