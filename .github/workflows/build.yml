@@ -49,39 +49,9 @@ jobs:
 
       - name: Build internal packages
         run: |
-          # Build packages in dependency order
-          echo "Building @urbanova/types..."
-          cd packages/types && pnpm build
-          
-          echo "Building @urbanova/infra..."
-          cd ../infra && pnpm build
-          
-          echo "Building @urbanova/data..."
-          cd ../data && pnpm build
-          
-          echo "Building @urbanova/toolos..."
-          cd ../toolos && pnpm build
-          
-          echo "Building @urbanova/os..."
-          cd ../os && pnpm build
-          
-          echo "Building @urbanova/agents..."
-          cd ../agents && pnpm build
-          
-          echo "Building @urbanova/pdf..."
-          cd ../pdf && pnpm build
-          
-          echo "Building @urbanova/tools..."
-          cd ../tools && pnpm build
-          
-          echo "Building remaining packages..."
-          cd ../compliance && pnpm build
-          cd ../interactive && pnpm build
-          cd ../leads && pnpm build
-          cd ../messaging && pnpm build
-          cd ../projects && pnpm build
-          cd ../storage && pnpm build
-          cd ../billing && pnpm build
+          # Build all packages using pnpm recursive to handle dependencies automatically
+          echo "Building all internal packages with dependency resolution..."
+          pnpm -r --filter "./packages/*" build
 
       - name: TypeScript type check
         run: pnpm typecheck
