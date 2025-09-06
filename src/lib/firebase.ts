@@ -24,6 +24,16 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
+// Verifica di sicurezza per l'inizializzazione di Firebase
+if (typeof window !== 'undefined') {
+  // Solo nel browser, verifica che db sia inizializzato
+  if (!db) {
+    console.error('❌ Firebase Firestore non inizializzato correttamente');
+  } else {
+    console.log('✅ Firebase Firestore inizializzato correttamente');
+  }
+}
+
 // Configurazione per gestire errori di connessione
 if (typeof window !== 'undefined') {
   // Gestione errori di connessione Firebase

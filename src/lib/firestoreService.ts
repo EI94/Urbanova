@@ -1,5 +1,4 @@
 import {
-  collection,
   getDocs,
   getDoc,
   doc,
@@ -16,6 +15,7 @@ import {
 } from 'firebase/firestore';
 
 import { db } from './firebase';
+import { safeCollection } from './firebaseUtils';
 
 // Collezioni Firestore
 export const COLLECTIONS = {
@@ -56,7 +56,7 @@ export async function getProjects(): Promise<RealEstateProject[]> {
   console.log('🔄 Caricamento progetti da Firestore...');
 
   try {
-    const projectsRef = collection(db, COLLECTIONS.PROJECTS);
+    const projectsRef = safeCollection(COLLECTIONS.PROJECTS);
     const q = query(projectsRef, orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
 
@@ -109,7 +109,7 @@ export const addProject = async (projectData: NewProjectData): Promise<string> =
       throw new Error('Nome e descrizione sono obbligatori');
     }
 
-    const projectRef = await addDoc(collection(db, COLLECTIONS.PROJECTS), {
+    const projectRef = await addDoc(safeCollection(COLLECTIONS.PROJECTS), {
       ...projectData,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -177,7 +177,7 @@ export const getProjectsByUser = async (userId: string): Promise<RealEstateProje
   try {
     console.log(`🔄 Caricamento progetti per utente: ${userId}`);
 
-    const projectsRef = collection(db, COLLECTIONS.PROJECTS);
+    const projectsRef = safeCollection(COLLECTIONS.PROJECTS);
     const q = query(projectsRef, where('createdBy', '==', userId), orderBy('createdAt', 'desc'));
 
     const snapshot = await getDocs(q);
@@ -201,7 +201,7 @@ export const getProjectsByStatus = async (
   try {
     console.log(`🔄 Caricamento progetti per status: ${status}`);
 
-    const projectsRef = collection(db, COLLECTIONS.PROJECTS);
+    const projectsRef = safeCollection(COLLECTIONS.PROJECTS);
     const q = query(projectsRef, where('status', '==', status), orderBy('createdAt', 'desc'));
 
     const snapshot = await getDocs(q);
@@ -223,7 +223,7 @@ export const searchProjects = async (searchTerm: string): Promise<RealEstateProj
   try {
     console.log(`🔄 Ricerca progetti: ${searchTerm}`);
 
-    const projectsRef = collection(db, COLLECTIONS.PROJECTS);
+    const projectsRef = safeCollection(COLLECTIONS.PROJECTS);
     const q = query(projectsRef, orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
 
@@ -262,7 +262,7 @@ export const createProjectWithTransaction = async (
       }
 
       // Crea il documento
-      const projectRef = doc(collection(db, COLLECTIONS.PROJECTS));
+      const projectRef = doc(safeCollection(COLLECTIONS.PROJECTS));
 
       transaction.set(projectRef, {
         ...projectData,
@@ -294,7 +294,7 @@ export const createProjectWithBatch = async (projectData: NewProjectData): Promi
     }
 
     // Crea il documento
-    const projectRef = doc(collection(db, COLLECTIONS.PROJECTS));
+    const projectRef = doc(safeCollection(COLLECTIONS.PROJECTS));
 
     batch.set(projectRef, {
       ...projectData,
@@ -355,7 +355,7 @@ export const getProjectStats = async (): Promise<{
   try {
     console.log('🔄 Caricamento statistiche progetti...');
 
-    const projectsRef = collection(db, COLLECTIONS.PROJECTS);
+    const projectsRef = safeCollection(COLLECTIONS.PROJECTS);
     const snapshot = await getDocs(projectsRef);
 
     const projects = snapshot.docs.map(doc => doc.data()) as RealEstateProject[];
