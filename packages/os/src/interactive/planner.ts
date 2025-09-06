@@ -8,8 +8,8 @@ import {
   InteractiveRisk as Risk,
   InteractivePlanValidation as PlanValidation,
   SessionStatus,
-} from '../../../types/dist/interactive';
-import { ToolActionSpec } from '../../../types/dist/tools';
+} from '@urbanova/types';
+import { ToolActionSpec } from '@urbanova/types';
 
 export interface PlanningContext {
   userId: string;

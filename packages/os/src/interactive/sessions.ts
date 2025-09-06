@@ -4,7 +4,7 @@ import {
   SessionStatus,
   zTaskSession,
   zUserReply,
-} from '../../../types/dist/interactive';
+} from '@urbanova/types';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface SessionFilter {

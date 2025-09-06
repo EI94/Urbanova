@@ -3,7 +3,7 @@ import {
   InteractivePlanPreview as PlanPreview,
   SessionStatus,
   zPlanPreview,
-} from '../../../types/dist/interactive';
+} from '@urbanova/types';
 
 export interface RenderOptions {
   includeAssumptions?: boolean;
