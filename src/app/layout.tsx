@@ -66,6 +66,49 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/site.webmanifest" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // GLOBAL FIREBASE ERROR CATCHER - CARICATO PRIMA DI TUTTO
+              console.log('🔥 [GLOBAL ERROR CATCHER] Inizializzato');
+              
+              window.addEventListener('error', function(event) {
+                if (event.error && event.error.message) {
+                  if (event.error.message.includes('collection') || 
+                      event.error.message.includes('Firebase') ||
+                      event.error.message.includes('firestore')) {
+                    console.error('🚨🚨🚨 [GLOBAL FIREBASE ERROR] CATTURATO ERRORE FIREBASE!');
+                    console.error('🚨 [ERROR] Message:', event.error.message);
+                    console.error('🚨 [ERROR] Stack:', event.error.stack);
+                    console.error('🚨 [ERROR] Source:', event.filename + ':' + event.lineno + ':' + event.colno);
+                    console.error('🚨 [ERROR] Full Event:', event);
+                    
+                    // Prova a capire da dove viene
+                    if (event.error.stack) {
+                      const stackLines = event.error.stack.split('\\n');
+                      console.error('🚨 [STACK ANALYSIS] Analisi stack trace:');
+                      stackLines.forEach((line, index) => {
+                        console.error('🚨 [STACK ' + index + ']', line);
+                      });
+                    }
+                  }
+                }
+              });
+              
+              window.addEventListener('unhandledrejection', function(event) {
+                if (event.reason && event.reason.message) {
+                  if (event.reason.message.includes('collection') || 
+                      event.reason.message.includes('Firebase') ||
+                      event.reason.message.includes('firestore')) {
+                    console.error('🚨🚨🚨 [GLOBAL FIREBASE PROMISE ERROR] CATTURATO PROMISE REJECTION!');
+                    console.error('🚨 [PROMISE ERROR] Reason:', event.reason);
+                    console.error('🚨 [PROMISE ERROR] Stack:', event.reason.stack);
+                  }
+                }
+              });
+            `,
+          }}
+        />
       </head>
       <body className={inter.className}>
         <LanguageProvider>
