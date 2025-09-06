@@ -3,7 +3,6 @@
   "buildCommand": "pnpm run build",
   "installCommand": "pnpm install --no-frozen-lockfile",
   "outputDirectory": ".next",
-  "packageManager": "pnpm",
   "functions": {
     "app/api/**/route.js": { 
       "memory": 1024, 
