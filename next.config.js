@@ -21,21 +21,30 @@ const nextConfig = {
   // Configurazione per gestire Puppeteer e dipendenze problematiche
   webpack: (config, { isServer }) => {
     if (isServer) {
-      // Polyfill per File nel server-side per evitare ReferenceError
+      // ULTRA NUCLEAR APPROACH: Inietta polyfill direttamente nel bundle
       const webpack = require('webpack');
       config.plugins = config.plugins || [];
+      
+      // Definisce File come funzione globale che funziona veramente
       config.plugins.push(
-        new webpack.DefinePlugin({
-          'global.File': `class File {
-            constructor(name, size, type) {
-              this.name = name || '';
-              this.size = size || 0;
-              this.type = type || '';
-              this.lastModified = Date.now();
-            }
-          }`,
-          'globalThis.File': 'global.File',
-          'window.File': 'undefined',
+        new webpack.BannerPlugin({
+          banner: `
+if (typeof global !== 'undefined' && typeof global.File === 'undefined') {
+  global.File = class File {
+    constructor(name, size, type) {
+      this.name = name || '';
+      this.size = size || 0;
+      this.type = type || '';
+      this.lastModified = Date.now();
+    }
+  };
+}
+if (typeof globalThis !== 'undefined' && typeof globalThis.File === 'undefined') {
+  globalThis.File = global.File;
+}
+          `,
+          raw: true,
+          entryOnly: false
         })
       );
     }
