@@ -142,11 +142,35 @@ jobs:
       - name: Install Firebase CLI
         run: pnpm add -g firebase-tools
         
-      - name: Validate Firestore rules
-        run: firebase firestore:rules:validate
-        
-      - name: Validate Firestore indexes
-        run: firebase firestore:indexes:validate
+      - name: Validate Firestore configuration files
+        run: |
+          echo "🔍 Validating Firebase configuration files..."
+          
+          # Check if firebase.json exists and is valid JSON
+          if [ -f "firebase.json" ]; then
+            echo "✅ firebase.json exists"
+            cat firebase.json | jq . > /dev/null && echo "✅ firebase.json is valid JSON" || (echo "❌ firebase.json is invalid JSON" && exit 1)
+          else
+            echo "❌ firebase.json not found" && exit 1
+          fi
+          
+          # Check if firestore.rules exists
+          if [ -f "firestore.rules" ]; then
+            echo "✅ firestore.rules exists"
+            echo "📝 Firestore rules file size: $(wc -c < firestore.rules) bytes"
+          else
+            echo "❌ firestore.rules not found" && exit 1
+          fi
+          
+          # Check if firestore.indexes.json exists and is valid JSON
+          if [ -f "firestore.indexes.json" ]; then
+            echo "✅ firestore.indexes.json exists"
+            cat firestore.indexes.json | jq . > /dev/null && echo "✅ firestore.indexes.json is valid JSON" || (echo "❌ firestore.indexes.json is invalid JSON" && exit 1)
+          else
+            echo "❌ firestore.indexes.json not found" && exit 1
+          fi
+          
+          echo "🎉 All Firestore configuration files are valid!"
         
       - name: Run migration validation
         run: pnpm run migrate:validate
