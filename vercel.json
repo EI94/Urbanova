@@ -12,11 +12,11 @@
   "crons": [
     { 
       "path": "/api/cron/watchlists-runner", 
-      "schedule": "*/30 * * * *" 
+      "schedule": "0 8 * * *" 
     },
     { 
       "path": "/api/cron/docs-reminders", 
-      "schedule": "0 * * * *" 
+      "schedule": "0 12 * * *" 
     },
     { 
       "path": "/api/cron/usage-aggregate", 
