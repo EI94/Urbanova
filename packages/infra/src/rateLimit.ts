@@ -1,4 +1,5 @@
 import { getFirestoreInstance, serverTimestamp } from './firebase';
+import { safeCollection } from './firebaseUtils';
 // import type { RateLimitResult, RateLimitConfig } from '@urbanova/types';
 
 // Mock types
@@ -34,7 +35,7 @@ export class TokenBucketRateLimiter {
   ): Promise<RateLimitResult> {
     try {
       const firestore = getFirestoreInstance();
-      const docRef = firestore.collection('rateLimits').doc(key);
+      const docRef = safeCollection('rateLimits').doc(key);
       const docSnap = await docRef.get();
 
       const now = Date.now();
@@ -124,7 +125,7 @@ export class TokenBucketRateLimiter {
   ): Promise<RateLimitResult> {
     try {
       const firestore = getFirestoreInstance();
-      const docRef = firestore.collection('rateLimits').doc(key);
+      const docRef = safeCollection('rateLimits').doc(key);
       const docSnap = await docRef.get();
 
       const now = Date.now();

@@ -7,6 +7,10 @@ import { db } from './firebase';
  * "Expected first argument to collection() to be a CollectionReference, a DocumentReference or FirebaseFirestore"
  */
 export function safeCollection(collectionName: string) {
+  console.log('🔍 [safeCollection] Tentativo accesso collezione:', collectionName);
+  console.log('🔍 [safeCollection] db type:', typeof db);
+  console.log('🔍 [safeCollection] db value:', db);
+  
   if (!db) {
     console.error('❌ Firebase Firestore non inizializzato - impossibile accedere alla collezione:', collectionName);
     throw new Error('Firebase Firestore non inizializzato');
@@ -19,9 +23,13 @@ export function safeCollection(collectionName: string) {
   }
   
   try {
-    return collection(db, collectionName);
+    console.log('🔍 [safeCollection] Calling collection() for:', collectionName);
+    const result = collection(db, collectionName);
+    console.log('✅ [safeCollection] Collection created successfully for:', collectionName);
+    return result;
   } catch (error) {
-    console.error('❌ Errore nella creazione del riferimento alla collezione:', collectionName, error);
+    console.error('❌ [safeCollection] Errore nella creazione del riferimento alla collezione:', collectionName, error);
+    console.error('❌ [safeCollection] Stack trace:', error.stack);
     throw error;
   }
 }
