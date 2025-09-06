@@ -17,5 +17,5 @@ if (typeof globalThis !== 'undefined' && typeof globalThis.File === 'undefined')
   globalThis.File = global.File;
 }
 
-// Esporta per eventuali import espliciti
-export const FilePolyfill = global.File;
+// Esporta per eventuali import espliciti (CommonJS)
+module.exports = { FilePolyfill: global.File };
