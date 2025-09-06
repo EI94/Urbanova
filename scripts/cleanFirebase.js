@@ -21,11 +21,11 @@ const db = getFirestore(app);
 
 // Helper function per evitare errori Firebase
 function safeCollection(collectionName) {
-  const { collection } = require('firebase/firestore');
   if (!db) {
     throw new Error('Firebase non inizializzato');
   }
-  return collection(db, collectionName);
+  // Usa db.collection() per Firebase Client SDK
+  return db.collection(collectionName);
 }
 
 // Collezioni da pulire

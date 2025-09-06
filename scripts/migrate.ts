@@ -215,6 +215,13 @@ class FirestoreMigrator {
     }
   }
 
+  private safeCollection(collectionName: string) {
+    if (!this.db) {
+      throw new Error('Firebase non inizializzato');
+    }
+    return this.db.collection(collectionName);
+  }
+
   async migrate(): Promise<void> {
     console.log(`🚀 Avvio migrazione Firestore${this.dryRun ? ' (DRY RUN)' : ''}`);
     console.log(`📁 Progetto: ${process.env.FIREBASE_PROJECT_ID || 'urbanova-dev'}`);
@@ -253,7 +260,7 @@ class FirestoreMigrator {
 
     try {
       // Prova a leggere un documento per verificare la connessione
-      const testDoc = await this.db.collection('_migration_test').doc('connection').get();
+      const testDoc = await this.safeCollection('_migration_test').doc('connection').get();
       console.log('  ✅ Connessione Firestore verificata');
     } catch (error) {
       console.error('  ❌ Errore connessione Firestore:', error);
@@ -276,7 +283,7 @@ class FirestoreMigrator {
       try {
         // Crea un documento di esempio per la collezione
         const exampleDoc = this.createExampleDocument(collectionConfig);
-        const docRef = this.db.collection(collectionConfig.name).doc('_example');
+        const docRef = this.safeCollection(collectionConfig.name).doc('_example');
         
         await docRef.set(exampleDoc);
         console.log(`    ✅ Collezione ${collectionConfig.name} creata con documento di esempio`);
@@ -358,7 +365,7 @@ class FirestoreMigrator {
         dryRun: false
       };
 
-      await this.db.collection('_schema').doc('version').set(schemaVersion);
+      await this.safeCollection('_schema').doc('version').set(schemaVersion);
       console.log('  ✅ Versione schema aggiornata: 1.0.0');
       
     } catch (error) {
