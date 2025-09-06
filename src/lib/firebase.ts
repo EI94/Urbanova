@@ -36,6 +36,16 @@ if (typeof window !== 'undefined') {
 
 // Configurazione per gestire errori di connessione
 if (typeof window !== 'undefined') {
+  // MEGA DEBUG: Cattura TUTTI gli errori Firebase
+  window.addEventListener('error', (event) => {
+    if (event.error && event.error.message && event.error.message.includes('collection')) {
+      console.error('🚨 [FIREBASE ERROR CAUGHT] Firebase collection error detected!');
+      console.error('🚨 [FIREBASE ERROR] Error:', event.error);
+      console.error('🚨 [FIREBASE ERROR] Stack:', event.error.stack);
+      console.error('🚨 [FIREBASE ERROR] Source:', event.filename, event.lineno, event.colno);
+    }
+  });
+
   // Gestione errori di connessione Firebase
   const handleFirebaseError = (error: any) => {
     console.warn('⚠️ Firebase connection issue:', error);
