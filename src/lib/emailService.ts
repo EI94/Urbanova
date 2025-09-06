@@ -1,17 +1,15 @@
 // Servizio Email per Urbanova AI Land Scraping
-import {
-  collection,
-  addDoc,
+import {addDoc,
   getDocs,
   updateDoc,
   doc,
   query,
   where,
-  orderBy,
-} from 'firebase/firestore';
+  orderBy } from 'firebase/firestore';
 import { Resend } from 'resend';
 
 import { db } from './firebase';
+import { safeCollection } from './firebaseUtils';
 
 // Inizializza Resend solo se la chiave API è disponibile
 let resend: Resend | null = null;
@@ -77,7 +75,7 @@ export class EmailService {
         },
       };
 
-      const docRef = await addDoc(collection(db, this.COLLECTION), config);
+      const docRef = await addDoc(safeCollection(this.COLLECTION), config);
       console.log(`✅ Email config salvata: ${email}`);
       return docRef.id;
     } catch (error) {
@@ -90,7 +88,7 @@ export class EmailService {
   async getEmailConfig(email: string): Promise<EmailConfig | null> {
     try {
       const q = query(
-        collection(db, this.COLLECTION),
+        safeCollection(this.COLLECTION),
         where('email', '==', email),
         orderBy('createdAt', 'desc')
       );
@@ -161,7 +159,7 @@ export class EmailService {
 
   private async saveEmailLog(notification: EmailNotification): Promise<void> {
     try {
-      await addDoc(collection(db, 'emailLogs'), {
+      await addDoc(safeCollection('emailLogs'), {
         to: notification.to,
         subject: notification.subject,
         landsCount: notification.lands.length,
@@ -182,7 +180,7 @@ export class EmailService {
   // Ottieni tutte le email configurate
   async getAllEmailConfigs(): Promise<EmailConfig[]> {
     try {
-      const snapshot = await getDocs(collection(db, this.COLLECTION));
+      const snapshot = await getDocs(safeCollection(this.COLLECTION));
       return snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),

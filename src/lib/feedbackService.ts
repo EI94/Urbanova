@@ -1,16 +1,14 @@
-import {
-  collection,
-  query,
+import {query,
   orderBy,
   onSnapshot,
   doc,
   updateDoc,
   serverTimestamp,
   getDocs,
-  where,
-} from 'firebase/firestore';
+  where } from 'firebase/firestore';
 
 import { db } from '@/lib/firebase';
+import { safeCollection } from './firebaseUtils';
 
 export interface Feedback {
   id: string;
@@ -36,7 +34,7 @@ export class FeedbackService {
   // Ottieni tutti i feedback (solo per admin)
   async getAllFeedback(): Promise<Feedback[]> {
     try {
-      const feedbacksRef = collection(db, this.COLLECTION);
+      const feedbacksRef = safeCollection(this.COLLECTION);
       const q = query(feedbacksRef, orderBy('createdAt', 'desc'));
 
       const snapshot = await getDocs(q);
@@ -53,7 +51,7 @@ export class FeedbackService {
   // Ottieni feedback per stato
   async getFeedbackByStatus(status: Feedback['status']): Promise<Feedback[]> {
     try {
-      const feedbacksRef = collection(db, this.COLLECTION);
+      const feedbacksRef = safeCollection(this.COLLECTION);
       const q = query(feedbacksRef, where('status', '==', status), orderBy('createdAt', 'desc'));
 
       const snapshot = await getDocs(q);
@@ -70,7 +68,7 @@ export class FeedbackService {
   // Ottieni feedback per priorità
   async getFeedbackByPriority(priority: Feedback['priority']): Promise<Feedback[]> {
     try {
-      const feedbacksRef = collection(db, this.COLLECTION);
+      const feedbacksRef = safeCollection(this.COLLECTION);
       const q = query(
         feedbacksRef,
         where('priority', '==', priority),

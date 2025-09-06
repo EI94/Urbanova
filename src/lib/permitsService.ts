@@ -1,6 +1,4 @@
-import {
-  collection,
-  doc,
+import {doc,
   setDoc,
   getDocs,
   getDoc,
@@ -12,10 +10,10 @@ import {
   limit,
   serverTimestamp,
   Timestamp,
-  addDoc,
-} from 'firebase/firestore';
+  addDoc } from 'firebase/firestore';
 
 import { db } from './firebase';
+import { safeCollection } from './firebaseUtils';
 
 export interface PermitType {
   id: string;
@@ -383,7 +381,7 @@ export class PermitsService {
     try {
       console.log('📋 [PermitsService] Recupero permessi progetto:', projectId);
 
-      const permitsRef = collection(db, this.PERMITS_COLLECTION);
+      const permitsRef = safeCollection(this.PERMITS_COLLECTION);
       const q = query(
         permitsRef,
         where('projectId', '==', projectId),
@@ -420,7 +418,7 @@ export class PermitsService {
     try {
       console.log('📋 [PermitsService] Recupero permessi utente:', userId);
 
-      const permitsRef = collection(db, this.PERMITS_COLLECTION);
+      const permitsRef = safeCollection(this.PERMITS_COLLECTION);
       const q = query(permitsRef, where('createdBy', '==', userId), orderBy('createdAt', 'desc'));
 
       const querySnapshot = await getDocs(q);
@@ -510,7 +508,7 @@ export class PermitsService {
     try {
       console.log('📋 [PermitsService] Recupero tutti i tipi permesso');
 
-      const typesRef = collection(db, this.PERMIT_TYPES_COLLECTION);
+      const typesRef = safeCollection(this.PERMIT_TYPES_COLLECTION);
       const querySnapshot = await getDocs(typesRef);
 
       const types: PermitType[] = [];
@@ -875,7 +873,7 @@ export class PermitsService {
    */
   private async getAllPermits(): Promise<Permit[]> {
     try {
-      const permitsRef = collection(db, this.PERMITS_COLLECTION);
+      const permitsRef = safeCollection(this.PERMITS_COLLECTION);
       const q = query(permitsRef, orderBy('createdAt', 'desc'));
 
       const querySnapshot = await getDocs(q);

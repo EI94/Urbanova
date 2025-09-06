@@ -1,6 +1,4 @@
-import {
-  collection,
-  doc,
+import {doc,
   getDocs,
   getDoc,
   setDoc,
@@ -11,10 +9,10 @@ import {
   limit,
   onSnapshot,
   serverTimestamp,
-  Timestamp,
-} from 'firebase/firestore';
+  Timestamp } from 'firebase/firestore';
 
 import { db } from './firebase';
+import { safeCollection } from './firebaseUtils';
 
 // Fallback data per quando Firebase non è disponibile
 const FALLBACK_TEMPLATES = [
@@ -271,7 +269,7 @@ class DesignCenterService {
     try {
       console.log('🎨 [DesignCenter] Recupero template con filtri:', filters);
 
-      const templatesRef = collection(db, this.TEMPLATES_COLLECTION);
+      const templatesRef = safeCollection(this.TEMPLATES_COLLECTION);
       let q = query(templatesRef, orderBy('popularity', 'desc'));
 
       // Applica filtri se specificati
@@ -407,7 +405,7 @@ class DesignCenterService {
     try {
       console.log('🎨 [DesignCenter] Creazione progetto design:', projectData.projectId);
 
-      const projectRef = doc(collection(db, this.PROJECTS_COLLECTION));
+      const projectRef = doc(safeCollection(this.PROJECTS_COLLECTION));
       await setDoc(projectRef, {
         ...projectData,
         createdAt: serverTimestamp(),
@@ -445,7 +443,7 @@ class DesignCenterService {
    */
   async getProjectDesigns(projectId: string): Promise<ProjectDesign[]> {
     try {
-      const projectsRef = collection(db, this.PROJECTS_COLLECTION);
+      const projectsRef = safeCollection(this.PROJECTS_COLLECTION);
       const q = query(
         projectsRef,
         where('projectId', '==', projectId),
@@ -485,7 +483,7 @@ class DesignCenterService {
    */
   async getAllProjectDesigns(): Promise<ProjectDesign[]> {
     try {
-      const projectsRef = collection(db, this.PROJECTS_COLLECTION);
+      const projectsRef = safeCollection(this.PROJECTS_COLLECTION);
       const q = query(projectsRef, orderBy('updatedAt', 'desc'));
 
       const snapshot = await getDocs(q);
@@ -1037,7 +1035,7 @@ class DesignCenterService {
 
       // Salva i template
       for (const template of sampleTemplates) {
-        const templateRef = doc(collection(db, this.TEMPLATES_COLLECTION));
+        const templateRef = doc(safeCollection(this.TEMPLATES_COLLECTION));
         await setDoc(templateRef, {
           ...template,
           createdAt: serverTimestamp(),

@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
     try {
       // Import dinamico per evitare errori di build
       const { db } = await import('@/lib/firebase');
-      const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+      const { addDoc, serverTimestamp } = await import('firebase/firestore');
 
       const feedbackData = {
         ...feedback,
@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
       };
 
       console.log('💾 [Feedback] Tentativo salvataggio su Firebase...');
-      const feedbackRef = await addDoc(collection(db, 'feedback'), feedbackData);
+      const feedbackRef = await addDoc(safeCollection('feedback'), feedbackData);
       firebaseSuccess = true;
       console.log('✅ [Feedback] Feedback salvato su Firebase con ID:', feedbackRef.id);
     } catch (firebaseError) {

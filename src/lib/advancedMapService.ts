@@ -1,6 +1,4 @@
-import {
-  collection,
-  doc,
+import {doc,
   setDoc,
   getDocs,
   getDoc,
@@ -10,10 +8,10 @@ import {
   orderBy,
   limit,
   serverTimestamp,
-  GeoPoint,
-} from 'firebase/firestore';
+  GeoPoint } from 'firebase/firestore';
 
 import { db } from './firebase';
+import { safeCollection } from './firebaseUtils';
 
 export interface RealMapData {
   id: string;
@@ -526,7 +524,7 @@ export class AdvancedMapService {
    */
   async getAIPredictionsByZone(zone: string, city?: string): Promise<AIPrediction[]> {
     try {
-      const predictionsRef = collection(db, this.AI_PREDICTIONS_COLLECTION);
+      const predictionsRef = safeCollection(this.AI_PREDICTIONS_COLLECTION);
       let q = query(predictionsRef, where('zone', '==', zone));
 
       if (city) {

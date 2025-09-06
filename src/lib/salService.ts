@@ -1,7 +1,5 @@
 // SAL Service - Urbanova AI
-import {
-  collection,
-  addDoc,
+import {addDoc,
   getDocs,
   updateDoc,
   deleteDoc,
@@ -13,10 +11,10 @@ import {
   DocumentData,
   getDoc,
   writeBatch,
-  runTransaction,
-} from 'firebase/firestore';
+  runTransaction } from 'firebase/firestore';
 
 import { db } from './firebase';
+import { safeCollection } from './firebaseUtils';
 import {
   SAL,
   SALStatus,
@@ -101,7 +99,7 @@ export class SALService {
         tags: ['draft', 'pending'],
       };
 
-      const docRef = await addDoc(collection(db, this.COLLECTION), {
+      const docRef = await addDoc(safeCollection(this.COLLECTION), {
         ...sal,
         createdAt: serverTimestamp(),
       });
@@ -453,7 +451,7 @@ export class SALService {
   async getProjectSALs(projectId: string): Promise<SAL[]> {
     try {
       const q = query(
-        collection(db, this.COLLECTION),
+        safeCollection(this.COLLECTION),
         where('projectId', '==', projectId),
         orderBy('createdAt', 'desc')
       );

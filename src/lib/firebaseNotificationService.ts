@@ -1,6 +1,4 @@
-import {
-  collection,
-  doc,
+import {doc,
   addDoc,
   updateDoc,
   deleteDoc,
@@ -11,10 +9,10 @@ import {
   orderBy,
   limit as firestoreLimit,
   serverTimestamp,
-  Timestamp,
-} from 'firebase/firestore';
+  Timestamp } from 'firebase/firestore';
 
 import { db } from './firebase';
+import { safeCollection } from './firebaseUtils';
 
 // Tipi per le notifiche
 export interface Notification {
@@ -105,7 +103,7 @@ class FirebaseNotificationService {
         updatedAt: serverTimestamp(),
       };
 
-      const docRef = await addDoc(collection(db, 'notifications'), notificationData);
+      const docRef = await addDoc(safeCollection('notifications'), notificationData);
 
       const notification: Notification = {
         id: docRef.id,
@@ -134,7 +132,7 @@ class FirebaseNotificationService {
       const { limit = 50, unreadOnly = false, type, priority } = options;
 
       let q = query(
-        collection(db, 'notifications'),
+        safeCollection('notifications'),
         where('userId', '==', userId),
         orderBy('createdAt', 'desc')
       );
@@ -192,7 +190,7 @@ class FirebaseNotificationService {
   async markAllAsRead(userId: string): Promise<void> {
     try {
       const q = query(
-        collection(db, 'notifications'),
+        safeCollection('notifications'),
         where('userId', '==', userId),
         where('isRead', '==', false)
       );
@@ -242,13 +240,13 @@ class FirebaseNotificationService {
   async getNotificationStats(userId: string): Promise<NotificationStats> {
     try {
       // Total count
-      const totalQuery = query(collection(db, 'notifications'), where('userId', '==', userId));
+      const totalQuery = query(safeCollection('notifications'), where('userId', '==', userId));
       const totalSnapshot = await getDocs(totalQuery);
       const total = totalSnapshot.size;
 
       // Unread count
       const unreadQuery = query(
-        collection(db, 'notifications'),
+        safeCollection('notifications'),
         where('userId', '==', userId),
         where('isRead', '==', false)
       );
@@ -257,7 +255,7 @@ class FirebaseNotificationService {
 
       // Read count
       const readQuery = query(
-        collection(db, 'notifications'),
+        safeCollection('notifications'),
         where('userId', '==', userId),
         where('isRead', '==', true)
       );
@@ -266,7 +264,7 @@ class FirebaseNotificationService {
 
       // Dismissed count
       const dismissedQuery = query(
-        collection(db, 'notifications'),
+        safeCollection('notifications'),
         where('userId', '==', userId),
         where('isDismissed', '==', true)
       );
@@ -274,7 +272,7 @@ class FirebaseNotificationService {
       const dismissed = dismissedSnapshot.size;
 
       // Count by type
-      const typeQuery = query(collection(db, 'notifications'), where('userId', '==', userId));
+      const typeQuery = query(safeCollection('notifications'), where('userId', '==', userId));
       const typeSnapshot = await getDocs(typeQuery);
       const byType: Record<string, number> = {};
       typeSnapshot.docs.forEach(doc => {
@@ -284,7 +282,7 @@ class FirebaseNotificationService {
       });
 
       // Count by priority
-      const priorityQuery = query(collection(db, 'notifications'), where('userId', '==', userId));
+      const priorityQuery = query(safeCollection('notifications'), where('userId', '==', userId));
       const prioritySnapshot = await getDocs(priorityQuery);
       const byPriority: Record<string, number> = {};
       prioritySnapshot.docs.forEach(doc => {

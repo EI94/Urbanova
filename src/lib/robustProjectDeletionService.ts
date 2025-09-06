@@ -4,16 +4,14 @@
 import {
   doc,
   deleteDoc,
-  getDoc,
-  collection,
-  getDocs,
+  getDoc,getDocs,
   query,
   where,
   orderBy,
-  serverTimestamp,
-} from 'firebase/firestore';
+  serverTimestamp } from 'firebase/firestore';
 
 import { db } from './firebase';
+import { safeCollection } from './firebaseUtils';
 
 export interface DeletionResult {
   success: boolean;
@@ -135,7 +133,7 @@ export class RobustProjectDeletionService {
       }
 
       // Verifica 2: Query collezione completa
-      const allProjectsQuery = query(collection(db, this.COLLECTION), orderBy('createdAt', 'desc'));
+      const allProjectsQuery = query(safeCollection(this.COLLECTION), orderBy('createdAt', 'desc'));
       const allProjectsSnap = await getDocs(allProjectsQuery);
 
       const projectStillExists = allProjectsSnap.docs.some(doc => doc.id === projectId);
@@ -147,7 +145,7 @@ export class RobustProjectDeletionService {
       // Verifica 3: Query per utente specifico (se applicabile)
       try {
         const userProjectsQuery = query(
-          collection(db, this.COLLECTION),
+          safeCollection(this.COLLECTION),
           where('createdBy', '==', 'test-user'), // Placeholder
           orderBy('createdAt', 'desc')
         );
@@ -211,7 +209,7 @@ export class RobustProjectDeletionService {
 
     try {
       // 1. Recupera tutti i progetti
-      const allProjectsQuery = query(collection(db, this.COLLECTION), orderBy('createdAt', 'desc'));
+      const allProjectsQuery = query(safeCollection(this.COLLECTION), orderBy('createdAt', 'desc'));
       const allProjectsSnap = await getDocs(allProjectsQuery);
 
       if (allProjectsSnap.empty) {
@@ -263,7 +261,7 @@ export class RobustProjectDeletionService {
    */
   private async verifyDatabaseEmpty(): Promise<boolean> {
     try {
-      const allProjectsQuery = query(collection(db, this.COLLECTION), orderBy('createdAt', 'desc'));
+      const allProjectsQuery = query(safeCollection(this.COLLECTION), orderBy('createdAt', 'desc'));
       const allProjectsSnap = await getDocs(allProjectsQuery);
 
       const isEmpty = allProjectsSnap.empty;

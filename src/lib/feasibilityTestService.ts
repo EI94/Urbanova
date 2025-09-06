@@ -1,15 +1,13 @@
-import {
-  collection,
-  addDoc,
+import {addDoc,
   getDocs,
   doc,
   getDoc,
   serverTimestamp,
   writeBatch,
-  runTransaction,
-} from 'firebase/firestore';
+  runTransaction } from 'firebase/firestore';
 
 import { db } from './firebase';
+import { safeCollection } from './firebaseUtils';
 
 export interface TestProject {
   name: string;
@@ -136,7 +134,7 @@ export class FeasibilityTestService {
         notes: 'Progetto di test per verifica creazione',
       };
 
-      const docRef = await addDoc(collection(db, this.COLLECTION), {
+      const docRef = await addDoc(safeCollection(this.COLLECTION), {
         ...testProject,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -220,7 +218,7 @@ export class FeasibilityTestService {
       };
 
       const projectId = await runTransaction(db, async transaction => {
-        const docRef = doc(collection(db, this.COLLECTION));
+        const docRef = doc(safeCollection(this.COLLECTION));
         transaction.set(docRef, {
           ...testProject,
           createdAt: serverTimestamp(),
@@ -307,7 +305,7 @@ export class FeasibilityTestService {
       };
 
       const batch = writeBatch(db);
-      const docRef = doc(collection(db, this.COLLECTION));
+      const docRef = doc(safeCollection(this.COLLECTION));
 
       batch.set(docRef, {
         ...testProject,
@@ -399,7 +397,7 @@ export class FeasibilityTestService {
     try {
       console.log('🧹 Pulizia progetti di test...');
 
-      const q = collection(db, this.COLLECTION);
+      const q = safeCollection(this.COLLECTION);
       const snapshot = await getDocs(q);
 
       const testProjects = snapshot.docs.filter(doc =>

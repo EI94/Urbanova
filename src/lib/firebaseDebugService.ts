@@ -1,5 +1,5 @@
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { collection, addDoc, getDocs, doc, getDoc, serverTimestamp } from 'firebase/firestore';
+import {addDoc, getDocs, doc, getDoc, serverTimestamp } from 'firebase/firestore';
 
 import { db, auth } from './firebase';
 
@@ -25,12 +25,12 @@ export class FirebaseDebugService {
       console.log('🔍 Test connessione Firestore...');
 
       // Test 1: Lettura collezione
-      const testCollection = collection(db, 'test');
+      const testCollection = safeCollection('test');
       const snapshot = await getDocs(testCollection);
       console.log('✅ Test lettura collezione OK');
 
       // Test 2: Scrittura documento
-      const testDoc = await addDoc(collection(db, 'test'), {
+      const testDoc = await addDoc(safeCollection('test'), {
         test: true,
         timestamp: serverTimestamp(),
         message: 'Test connessione Firestore',
@@ -243,7 +243,7 @@ export class FirebaseDebugService {
         notes: 'Progetto di test per diagnostica',
       };
 
-      const docRef = await addDoc(collection(db, 'feasibilityProjects'), {
+      const docRef = await addDoc(safeCollection('feasibilityProjects'), {
         ...testProject,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),

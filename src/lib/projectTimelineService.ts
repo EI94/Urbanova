@@ -1,6 +1,4 @@
-import {
-  collection,
-  doc,
+import {doc,
   setDoc,
   getDocs,
   getDoc,
@@ -12,10 +10,10 @@ import {
   limit,
   serverTimestamp,
   Timestamp,
-  addDoc,
-} from 'firebase/firestore';
+  addDoc } from 'firebase/firestore';
 
 import { db } from './firebase';
+import { safeCollection } from './firebaseUtils';
 
 export interface ProjectTask {
   id: string;
@@ -308,7 +306,7 @@ export class ProjectTimelineService {
     try {
       console.log('📋 [ProjectTimelineService] Recupero task progetto:', projectId);
 
-      const tasksRef = collection(db, this.TASKS_COLLECTION);
+      const tasksRef = safeCollection(this.TASKS_COLLECTION);
       const q = query(tasksRef, where('projectId', '==', projectId), orderBy('startDate', 'asc'));
 
       const querySnapshot = await getDocs(q);
@@ -340,7 +338,7 @@ export class ProjectTimelineService {
     try {
       console.log('🎯 [ProjectTimelineService] Recupero milestone progetto:', projectId);
 
-      const milestonesRef = collection(db, this.MILESTONES_COLLECTION);
+      const milestonesRef = safeCollection(this.MILESTONES_COLLECTION);
       const q = query(milestonesRef, where('projectId', '==', projectId), orderBy('date', 'asc'));
 
       const querySnapshot = await getDocs(q);
@@ -372,7 +370,7 @@ export class ProjectTimelineService {
     try {
       console.log('📋 [ProjectTimelineService] Recupero task utente:', userId);
 
-      const tasksRef = collection(db, this.TASKS_COLLECTION);
+      const tasksRef = safeCollection(this.TASKS_COLLECTION);
       const q = query(tasksRef, where('assignedTo.id', '==', userId), orderBy('startDate', 'asc'));
 
       const querySnapshot = await getDocs(q);

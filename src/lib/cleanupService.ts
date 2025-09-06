@@ -1,7 +1,8 @@
 // Servizio di Pulizia Database - Urbanova AI
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import {getDocs, deleteDoc, doc } from 'firebase/firestore';
 
 import { db } from './firebase';
+import { safeCollection } from './firebaseUtils';
 
 export class CleanupService {
   private readonly COLLECTIONS_TO_CLEAN = [
@@ -31,7 +32,7 @@ export class CleanupService {
       for (const collectionName of this.COLLECTIONS_TO_CLEAN) {
         console.log(`📁 Pulendo collezione: ${collectionName}`);
 
-        const collectionRef = collection(db, collectionName);
+        const collectionRef = safeCollection(collectionName);
         const snapshot = await getDocs(collectionRef);
 
         if (snapshot.empty) {
@@ -98,7 +99,7 @@ export class CleanupService {
     console.log(`🧹 Pulendo collezione specifica: ${collectionName}`);
 
     try {
-      const collectionRef = collection(db, collectionName);
+      const collectionRef = safeCollection(collectionName);
       const snapshot = await getDocs(collectionRef);
 
       if (snapshot.empty) {
@@ -168,7 +169,7 @@ export class CleanupService {
       for (const collectionName of collectionsToClean) {
         console.log(`📁 Pulendo collezione: ${collectionName}`);
 
-        const collectionRef = collection(db, collectionName);
+        const collectionRef = safeCollection(collectionName);
         const snapshot = await getDocs(collectionRef);
 
         if (snapshot.empty) {
@@ -246,7 +247,7 @@ export class CleanupService {
 
     try {
       for (const collectionName of this.COLLECTIONS_TO_CLEAN) {
-        const collectionRef = collection(db, collectionName);
+        const collectionRef = safeCollection(collectionName);
         const snapshot = await getDocs(collectionRef);
 
         const count = snapshot.size;

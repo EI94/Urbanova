@@ -1,6 +1,4 @@
-import {
-  collection,
-  doc,
+import {doc,
   addDoc,
   updateDoc,
   deleteDoc,
@@ -12,10 +10,10 @@ import {
   Timestamp,
   getDoc,
   getDocs,
-  limit,
-} from 'firebase/firestore';
+  limit } from 'firebase/firestore';
 
 import { db } from '@/lib/firebase';
+import { safeCollection } from './firebaseUtils';
 
 // ===== INTERFACES =====
 export interface ExternalTool {
@@ -183,7 +181,7 @@ export class ExternalIntegrationService {
         syncStatus: 'idle',
       };
 
-      const docRef = await addDoc(collection(db, 'externalTools'), toolData);
+      const docRef = await addDoc(safeCollection('externalTools'), toolData);
       return docRef.id;
     } catch (error) {
       console.error('Error registering tool:', error);
@@ -212,7 +210,7 @@ export class ExternalIntegrationService {
 
   async getTools(): Promise<ExternalTool[]> {
     try {
-      const snapshot = await getDocs(collection(db, 'externalTools'));
+      const snapshot = await getDocs(safeCollection('externalTools'));
       const tools: ExternalTool[] = [];
       snapshot.forEach(doc => {
         tools.push({ id: doc.id, ...doc.data() } as ExternalTool);
@@ -225,7 +223,7 @@ export class ExternalIntegrationService {
   }
 
   getToolsRealtime(callback: (tools: ExternalTool[]) => void): () => void {
-    const q = query(collection(db, 'externalTools'), orderBy('name'));
+    const q = query(safeCollection('externalTools'), orderBy('name'));
 
     const unsubscribe = onSnapshot(q, snapshot => {
       const tools: ExternalTool[] = [];
@@ -250,7 +248,7 @@ export class ExternalIntegrationService {
         status: 'imported',
       };
 
-      const docRef = await addDoc(collection(db, 'designFiles'), fileData);
+      const docRef = await addDoc(safeCollection('designFiles'), fileData);
       return docRef.id;
     } catch (error) {
       console.error('Error importing file:', error);
@@ -283,7 +281,7 @@ export class ExternalIntegrationService {
   async getDesignFiles(designId: string): Promise<DesignFile[]> {
     try {
       const q = query(
-        collection(db, 'designFiles'),
+        safeCollection('designFiles'),
         where('designId', '==', designId),
         orderBy('importDate', 'desc')
       );
@@ -302,7 +300,7 @@ export class ExternalIntegrationService {
 
   getDesignFilesRealtime(designId: string, callback: (files: DesignFile[]) => void): () => void {
     const q = query(
-      collection(db, 'designFiles'),
+      safeCollection('designFiles'),
       where('designId', '==', designId),
       orderBy('importDate', 'desc')
     );
@@ -330,7 +328,7 @@ export class ExternalIntegrationService {
         progress: 0,
       };
 
-      const docRef = await addDoc(collection(db, 'fileConversions'), conversionData);
+      const docRef = await addDoc(safeCollection('fileConversions'), conversionData);
       return docRef.id;
     } catch (error) {
       console.error('Error starting conversion:', error);
@@ -364,7 +362,7 @@ export class ExternalIntegrationService {
   async getConversions(fileId: string): Promise<FileConversion[]> {
     try {
       const q = query(
-        collection(db, 'fileConversions'),
+        safeCollection('fileConversions'),
         where('sourceFileId', '==', fileId),
         orderBy('startedAt', 'desc')
       );
@@ -398,7 +396,7 @@ export class ExternalIntegrationService {
         errorLog: [],
       };
 
-      const docRef = await addDoc(collection(db, 'toolSyncs'), syncData);
+      const docRef = await addDoc(safeCollection('toolSyncs'), syncData);
       return docRef.id;
     } catch (error) {
       console.error('Error creating sync:', error);
@@ -419,7 +417,7 @@ export class ExternalIntegrationService {
   async getActiveSyncs(designId: string): Promise<ToolSync[]> {
     try {
       const q = query(
-        collection(db, 'toolSyncs'),
+        safeCollection('toolSyncs'),
         where('designId', '==', designId),
         where('status', 'in', ['pending', 'syncing'])
       );
@@ -444,7 +442,7 @@ export class ExternalIntegrationService {
         lastUpdated: serverTimestamp(),
       };
 
-      const docRef = await addDoc(collection(db, 'bimData'), bimDataDoc);
+      const docRef = await addDoc(safeCollection('bimData'), bimDataDoc);
       return docRef.id;
     } catch (error) {
       console.error('Error creating BIM data:', error);
@@ -468,7 +466,7 @@ export class ExternalIntegrationService {
   async getBIMData(designId: string): Promise<BIMData | null> {
     try {
       const q = query(
-        collection(db, 'bIMData'),
+        safeCollection('bIMData'),
         where('designId', '==', designId),
         orderBy('lastUpdated', 'desc'),
         limit(1)
@@ -507,7 +505,7 @@ export class ExternalIntegrationService {
 
   async getToolByName(name: string): Promise<ExternalTool | null> {
     try {
-      const q = query(collection(db, 'externalTools'), where('name', '==', name), limit(1));
+      const q = query(safeCollection('externalTools'), where('name', '==', name), limit(1));
 
       const snapshot = await getDocs(q);
       if (snapshot.empty) {

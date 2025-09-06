@@ -1,16 +1,14 @@
-import {
-  collection,
-  doc,
+import {doc,
   getDoc,
   deleteDoc,
   getDocs,
   query,
   where,
-  orderBy,
-} from 'firebase/firestore';
+  orderBy } from 'firebase/firestore';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { db } from '@/lib/firebase';
+import { safeCollection } from '@/lib/firebaseUtils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,7 +24,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const collectionRef = collection(db, 'feasibilityProjects');
+    const collectionRef = safeCollection('feasibilityProjects');
     const projectRef = doc(collectionRef, projectId);
 
     // 1. VERIFICA SE IL PROGETTO ESISTE PRIMA

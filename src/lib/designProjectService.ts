@@ -1,6 +1,4 @@
-import {
-  collection,
-  doc,
+import {doc,
   setDoc,
   getDocs,
   getDoc,
@@ -11,11 +9,11 @@ import {
   orderBy,
   limit,
   serverTimestamp,
-  Timestamp,
-} from 'firebase/firestore';
+  Timestamp } from 'firebase/firestore';
 
 import { DesignTemplate } from './designCenterService';
 import { db } from './firebase';
+import { safeCollection } from './firebaseUtils';
 
 export interface DesignProject {
   id: string;
@@ -162,7 +160,7 @@ export class DesignProjectService {
     try {
       console.log('📋 [DesignProjectService] Recupero progetti utente:', userId);
 
-      const projectsRef = collection(db, this.COLLECTION_NAME);
+      const projectsRef = safeCollection(this.COLLECTION_NAME);
       const q = query(projectsRef, where('userId', '==', userId), orderBy('createdAt', 'desc'));
 
       const querySnapshot = await getDocs(q);

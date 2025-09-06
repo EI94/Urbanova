@@ -1,6 +1,4 @@
-import {
-  collection,
-  doc,
+import {doc,
   addDoc,
   updateDoc,
   deleteDoc,
@@ -16,10 +14,10 @@ import {
   limit,
   startAfter,
   DocumentData,
-  QueryDocumentSnapshot,
-} from 'firebase/firestore';
+  QueryDocumentSnapshot } from 'firebase/firestore';
 
 import { db } from '@/lib/firebase';
+import { safeCollection } from './firebaseUtils';
 
 // ===== INTERFACES =====
 export interface DesignComment {
@@ -138,7 +136,7 @@ export class CollaborationService {
         updatedAt: serverTimestamp(),
       };
 
-      const docRef = await addDoc(collection(db, 'designComments'), commentData);
+      const docRef = await addDoc(safeCollection('designComments'), commentData);
       return docRef.id;
     } catch (error) {
       console.error('Error adding comment:', error);
@@ -185,7 +183,7 @@ export class CollaborationService {
 
   getCommentsRealtime(designId: string, callback: (comments: DesignComment[]) => void): () => void {
     const q = query(
-      collection(db, 'designComments'),
+      safeCollection('designComments'),
       where('designId', '==', designId),
       orderBy('createdAt', 'desc')
     );
@@ -209,7 +207,7 @@ export class CollaborationService {
         createdAt: serverTimestamp(),
       };
 
-      const docRef = await addDoc(collection(db, 'designVersions'), versionData);
+      const docRef = await addDoc(safeCollection('designVersions'), versionData);
       return docRef.id;
     } catch (error) {
       console.error('Error creating version:', error);
@@ -257,7 +255,7 @@ export class CollaborationService {
 
   getVersionsRealtime(designId: string, callback: (versions: DesignVersion[]) => void): () => void {
     const q = query(
-      collection(db, 'designVersions'),
+      safeCollection('designVersions'),
       where('designId', '==', designId),
       orderBy('versionNumber', 'desc')
     );
@@ -276,7 +274,7 @@ export class CollaborationService {
   async getNextVersionNumber(designId: string): Promise<number> {
     try {
       const q = query(
-        collection(db, 'designVersions'),
+        safeCollection('designVersions'),
         where('designId', '==', designId),
         orderBy('versionNumber', 'desc'),
         limit(1)
@@ -311,7 +309,7 @@ export class CollaborationService {
         updatedAt: serverTimestamp(),
       };
 
-      const docRef = await addDoc(collection(db, 'approvalWorkflows'), workflowData);
+      const docRef = await addDoc(safeCollection('approvalWorkflows'), workflowData);
       return docRef.id;
     } catch (error) {
       console.error('Error creating workflow:', error);
@@ -388,7 +386,7 @@ export class CollaborationService {
         duration: 0,
       };
 
-      const docRef = await addDoc(collection(db, 'collaborationSessions'), sessionData);
+      const docRef = await addDoc(safeCollection('collaborationSessions'), sessionData);
       return docRef.id;
     } catch (error) {
       console.error('Error starting session:', error);
@@ -443,7 +441,7 @@ export class CollaborationService {
     callback: (sessions: CollaborationSession[]) => void
   ): () => void {
     const q = query(
-      collection(db, 'collaborationSessions'),
+      safeCollection('collaborationSessions'),
       where('designId', '==', designId),
       orderBy('startedAt', 'desc')
     );
@@ -470,18 +468,18 @@ export class CollaborationService {
     try {
       const [commentsSnapshot, versionsSnapshot, workflowsSnapshot, sessionsSnapshot] =
         await Promise.all([
-          getDocs(query(collection(db, 'designComments'), where('designId', '==', designId))),
-          getDocs(query(collection(db, 'designVersions'), where('designId', '==', designId))),
+          getDocs(query(safeCollection('designComments'), where('designId', '==', designId))),
+          getDocs(query(safeCollection('designVersions'), where('designId', '==', designId))),
           getDocs(
             query(
-              collection(db, 'approvalWorkflows'),
+              safeCollection('approvalWorkflows'),
               where('designId', '==', designId),
               where('status', '==', 'active')
             )
           ),
           getDocs(
             query(
-              collection(db, 'collaborationSessions'),
+              safeCollection('collaborationSessions'),
               where('designId', '==', designId),
               where('status', '==', 'active')
             )
@@ -514,7 +512,7 @@ export class CollaborationService {
   async searchComments(designId: string, searchTerm: string): Promise<DesignComment[]> {
     try {
       const q = query(
-        collection(db, 'designComments'),
+        safeCollection('designComments'),
         where('designId', '==', designId),
         orderBy('createdAt', 'desc')
       );
