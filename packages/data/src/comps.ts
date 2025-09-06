@@ -261,8 +261,7 @@ class InternalCompsService {
     const db = getFirestoreInstance();
 
     // Query per comps nella città specificata
-    let query = db
-      .collection('comps')
+    let query = safeCollection('comps')
       .where('city', '==', city)
       .where('confidence', '>=', minConfidence)
       .orderBy('confidence', 'desc')
@@ -489,8 +488,7 @@ export class CompsOMIFacade {
   async updateComp(compId: string, updates: Partial<InternalComp>): Promise<void> {
     const db = getFirestoreInstance();
 
-    await db
-      .collection('comps')
+    await safeCollection('comps')
       .doc(compId)
       .update({
         ...updates,

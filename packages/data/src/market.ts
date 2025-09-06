@@ -19,8 +19,7 @@ export async function persistMarketSnapshot(snapshot: MarketSnapshot): Promise<v
   try {
     const validated = zMarketSnapshot.parse(snapshot);
 
-    await db
-      .collection('market_snapshots')
+    await safeCollection('market_snapshots')
       .doc(validated.id)
       .set({
         ...validated,
@@ -92,8 +91,7 @@ export async function getMarketSnapshotByKey(
   horizonMonths: number
 ): Promise<MarketSnapshot | null> {
   try {
-    const snapshot = await db
-      .collection('market_snapshots')
+    const snapshot = await safeCollection('market_snapshots')
       .where('city', '==', city)
       .where('asset', '==', asset)
       .where('horizonMonths', '==', horizonMonths)
@@ -137,8 +135,7 @@ export async function listMarketSnapshotsByCity(
   limit: number = 50
 ): Promise<MarketSnapshot[]> {
   try {
-    const snapshot = await db
-      .collection('market_snapshots')
+    const snapshot = await safeCollection('market_snapshots')
       .where('city', '==', city)
       .orderBy('timestamp', 'desc')
       .limit(limit)
@@ -173,8 +170,7 @@ export async function listMarketSnapshotsByCity(
  */
 export async function listRecentMarketSnapshots(limit: number = 20): Promise<MarketSnapshot[]> {
   try {
-    const snapshot = await db
-      .collection('market_snapshots')
+    const snapshot = await safeCollection('market_snapshots')
       .orderBy('timestamp', 'desc')
       .limit(limit)
       .get();
@@ -214,8 +210,7 @@ export async function persistMarketTrendReport(report: MarketTrendReport): Promi
   try {
     const validated = zMarketTrendReport.parse(report);
 
-    await db
-      .collection('market_trend_reports')
+    await safeCollection('market_trend_reports')
       .doc(validated.id)
       .set({
         ...validated,
@@ -271,8 +266,7 @@ export async function listMarketTrendReportsByCity(
   limit: number = 20
 ): Promise<MarketTrendReport[]> {
   try {
-    const snapshot = await db
-      .collection('market_trend_reports')
+    const snapshot = await safeCollection('market_trend_reports')
       .where('city', '==', city)
       .orderBy('generatedAt', 'desc')
       .limit(limit)
@@ -368,8 +362,7 @@ export async function cleanupOldMarketSnapshots(
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - daysOld);
 
-    const snapshot = await db
-      .collection('market_snapshots')
+    const snapshot = await safeCollection('market_snapshots')
       .where('timestamp', '<', cutoffDate.toISOString())
       .get();
 

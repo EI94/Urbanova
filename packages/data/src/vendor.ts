@@ -24,8 +24,7 @@ export async function persistVendorQuestionnaire(
   try {
     const validated = zVendorQuestionnaire.parse(questionnaire);
 
-    await db
-      .collection('vendor_questionnaires')
+    await safeCollection('vendor_questionnaires')
       .doc(validated.id)
       .set({
         ...validated,
@@ -82,8 +81,7 @@ export async function getVendorQuestionnaireByToken(
   token: string
 ): Promise<VendorQuestionnaire | null> {
   try {
-    const snapshot = await db
-      .collection('vendor_questionnaires')
+    const snapshot = await safeCollection('vendor_questionnaires')
       .where('token', '==', token)
       .limit(1)
       .get();
@@ -121,8 +119,7 @@ export async function updateVendorQuestionnaire(questionnaire: VendorQuestionnai
   try {
     const validated = zVendorQuestionnaire.parse(questionnaire);
 
-    await db
-      .collection('vendor_questionnaires')
+    await safeCollection('vendor_questionnaires')
       .doc(validated.id)
       .update({
         ...validated,
@@ -148,8 +145,7 @@ export async function listVendorQuestionnairesByProject(
   projectId: string
 ): Promise<VendorQuestionnaire[]> {
   try {
-    const snapshot = await db
-      .collection('vendor_questionnaires')
+    const snapshot = await safeCollection('vendor_questionnaires')
       .where('projectId', '==', projectId)
       .orderBy('createdAt', 'desc')
       .get();
@@ -182,8 +178,7 @@ export async function listVendorQuestionnairesByProject(
 export async function listExpiredQuestionnaires(): Promise<VendorQuestionnaire[]> {
   try {
     const now = new Date();
-    const snapshot = await db
-      .collection('vendor_questionnaires')
+    const snapshot = await safeCollection('vendor_questionnaires')
       .where('expiresAt', '<', now.toISOString())
       .where('status', '==', 'pending')
       .get();
@@ -221,8 +216,7 @@ export async function persistProjectFactsUpdate(update: ProjectFactsUpdate): Pro
   try {
     const validated = zProjectFactsUpdate.parse(update);
 
-    await db
-      .collection('project_facts_updates')
+    await safeCollection('project_facts_updates')
       .doc(`${validated.projectId}_${validated.timestamp.getTime()}`)
       .set({
         ...validated,
@@ -243,8 +237,7 @@ export async function persistProjectFactsUpdate(update: ProjectFactsUpdate): Pro
  */
 export async function listProjectFactsUpdates(projectId: string): Promise<ProjectFactsUpdate[]> {
   try {
-    const snapshot = await db
-      .collection('project_facts_updates')
+    const snapshot = await safeCollection('project_facts_updates')
       .where('projectId', '==', projectId)
       .orderBy('timestamp', 'desc')
       .get();

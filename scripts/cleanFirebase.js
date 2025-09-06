@@ -2,7 +2,7 @@
 // Esegui con: node scripts/cleanFirebase.js
 
 const { initializeApp } = require('firebase/app');
-const { getFirestore, collection, getDocs, deleteDoc, doc } = require('firebase/firestore');
+const { getFirestore, getDocs, deleteDoc, doc } = require('firebase/firestore');
 
 // Configurazione Firebase
 const firebaseConfig = {
@@ -18,6 +18,15 @@ const firebaseConfig = {
 // Inizializza Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+// Helper function per evitare errori Firebase
+function safeCollection(collectionName) {
+  const { collection } = require('firebase/firestore');
+  if (!db) {
+    throw new Error('Firebase non inizializzato');
+  }
+  return collection(db, collectionName);
+}
 
 // Collezioni da pulire
 const collectionsToClean = [
@@ -43,7 +52,7 @@ async function cleanFirebase() {
     for (const collectionName of collectionsToClean) {
       console.log(`\n📁 Pulendo collezione: ${collectionName}`);
 
-      const collectionRef = collection(db, collectionName);
+      const collectionRef = safeCollection(collectionName);
       const snapshot = await getDocs(collectionRef);
 
       if (snapshot.empty) {

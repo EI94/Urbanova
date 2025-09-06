@@ -148,8 +148,7 @@ export async function findDealByFingerprint(
 ): Promise<DealNormalized | null> {
   try {
     const db = getFirestoreInstance();
-    const snapshot = await db
-      .collection('deals')
+    const snapshot = await safeCollection('deals')
       .where('fingerprint.addressHash', '==', fingerprint.addressHash)
       .where('fingerprint.surfaceRange', '==', fingerprint.surfaceRange)
       .where('fingerprint.priceRange', '==', fingerprint.priceRange)
@@ -170,8 +169,7 @@ export async function findDealByFingerprint(
 export async function updateDeal(dealId: string, updates: Partial<DealNormalized>): Promise<void> {
   try {
     const db = getFirestoreInstance();
-    await db
-      .collection('deals')
+    await safeCollection('deals')
       .doc(dealId)
       .update({
         ...updates,
@@ -226,8 +224,7 @@ export async function getWatchlistById(watchlistId: string): Promise<Watchlist |
 export async function listWatchlistsByUser(userId: string): Promise<Watchlist[]> {
   try {
     const db = getFirestoreInstance();
-    const snapshot = await db
-      .collection('watchlists')
+    const snapshot = await safeCollection('watchlists')
       .where('userId', '==', userId)
       .where('isActive', '==', true)
       .orderBy('createdAt', 'desc')
@@ -309,8 +306,7 @@ export async function persistDealAlert(alertData: CreateDealAlertData): Promise<
 export async function getDealAlertsByWatchlist(watchlistId: string): Promise<DealAlert[]> {
   try {
     const db = getFirestoreInstance();
-    const snapshot = await db
-      .collection('dealAlerts')
+    const snapshot = await safeCollection('dealAlerts')
       .where('watchlistId', '==', watchlistId)
       .orderBy('createdAt', 'desc')
       .get();
@@ -355,8 +351,7 @@ export async function getUnreadAlertsCount(userId: string): Promise<number> {
     }
 
     // Count unread alerts for all user's watchlists
-    const snapshot = await db
-      .collection('dealAlerts')
+    const snapshot = await safeCollection('dealAlerts')
       .where('watchlistId', 'in', watchlistIds)
       .where('isRead', '==', false)
       .get();
