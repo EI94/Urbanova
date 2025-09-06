@@ -9,7 +9,7 @@ import type {
   DealSearchResult,
   DealFingerprint,
 } from '@urbanova/types';
-import { getFirestoreInstance, serverTimestamp } from '@urbanova/infra';
+import { getFirestoreInstance, serverTimestamp, safeCollection } from '@urbanova/infra';
 
 // Zod schemas for data validation
 export const zCreateDealData = z.object({
@@ -70,7 +70,7 @@ export async function persistDeal(dealData: CreateDealData): Promise<string> {
     const db = getFirestoreInstance();
     const dealId = dealData.id;
 
-    const dealRef = db.collection('deals').doc(dealId);
+    const dealRef = safeCollection('deals').doc(dealId);
     await dealRef.set({
       ...dealData,
       createdAt: serverTimestamp(),
@@ -88,7 +88,7 @@ export async function persistDeal(dealData: CreateDealData): Promise<string> {
 export async function getDealById(dealId: string): Promise<DealNormalized | null> {
   try {
     const db = getFirestoreInstance();
-    const dealDoc = await db.collection('deals').doc(dealId).get();
+    const dealDoc = await safeCollection('deals').doc(dealId).get();
 
     if (!dealDoc.exists) {
       return null;
@@ -104,7 +104,7 @@ export async function getDealById(dealId: string): Promise<DealNormalized | null
 export async function findDealsByFilter(filter: SearchFilter): Promise<DealNormalized[]> {
   try {
     const db = getFirestoreInstance();
-    let query: any = db.collection('deals');
+    let query: any = safeCollection('deals');
 
     // Apply filters
     if (filter.city) {
@@ -191,7 +191,7 @@ export async function persistWatchlist(watchlistData: CreateWatchlistData): Prom
     const db = getFirestoreInstance();
     const watchlistId = `watchlist-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-    const watchlistRef = db.collection('watchlists').doc(watchlistId);
+    const watchlistRef = safeCollection('watchlists').doc(watchlistId);
     await watchlistRef.set({
       ...watchlistData,
       id: watchlistId,
@@ -210,7 +210,7 @@ export async function persistWatchlist(watchlistData: CreateWatchlistData): Prom
 export async function getWatchlistById(watchlistId: string): Promise<Watchlist | null> {
   try {
     const db = getFirestoreInstance();
-    const watchlistDoc = await db.collection('watchlists').doc(watchlistId).get();
+    const watchlistDoc = await safeCollection('watchlists').doc(watchlistId).get();
 
     if (!watchlistDoc.exists) {
       return null;
@@ -251,7 +251,7 @@ export async function updateWatchlist(
 ): Promise<Watchlist | null> {
   try {
     const db = getFirestoreInstance();
-    const watchlistRef = db.collection('watchlists').doc(watchlistId);
+    const watchlistRef = safeCollection('watchlists').doc(watchlistId);
 
     await watchlistRef.update({
       ...updates,
@@ -275,7 +275,7 @@ export async function updateWatchlist(
 export async function deleteWatchlist(watchlistId: string): Promise<boolean> {
   try {
     const db = getFirestoreInstance();
-    await db.collection('watchlists').doc(watchlistId).delete();
+    await safeCollection('watchlists').doc(watchlistId).delete();
 
     console.log(`✅ Watchlist deleted from Firestore: ${watchlistId}`);
     return true;
@@ -291,7 +291,7 @@ export async function persistDealAlert(alertData: CreateDealAlertData): Promise<
     const db = getFirestoreInstance();
     const alertId = `alert-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-    const alertRef = db.collection('dealAlerts').doc(alertId);
+    const alertRef = safeCollection('dealAlerts').doc(alertId);
     await alertRef.set({
       ...alertData,
       id: alertId,
@@ -330,7 +330,7 @@ export async function getDealAlertsByWatchlist(watchlistId: string): Promise<Dea
 export async function markAlertAsRead(alertId: string): Promise<void> {
   try {
     const db = getFirestoreInstance();
-    await db.collection('dealAlerts').doc(alertId).update({
+    await safeCollection('dealAlerts').doc(alertId).update({
       isRead: true,
       updatedAt: serverTimestamp(),
     });

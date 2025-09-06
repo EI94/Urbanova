@@ -164,7 +164,7 @@ export class FirestoreService {
     } = {}
   ): Promise<RDO[]> {
     try {
-      let q: any = collection(this.db, this.collections.rdos);
+      let q: any = safeCollection(this.collections.rdos);
 
       // Applica filtri
       if (filters.status) {
@@ -292,7 +292,7 @@ export class FirestoreService {
   async getOffersForRDO(rdoId: string): Promise<Offer[]> {
     try {
       const q = query(
-        collection(this.db, this.collections.offers),
+        safeCollection(this.collections.offers),
         where('rdoId', '==', rdoId),
         orderBy('submittedAt', 'desc')
       );
@@ -383,7 +383,7 @@ export class FirestoreService {
   async getComparisonForRDO(rdoId: string): Promise<Comparison | null> {
     try {
       const q = query(
-        collection(this.db, this.collections.comparisons),
+        safeCollection(this.collections.comparisons),
         where('rdoId', '==', rdoId),
         orderBy('generatedAt', 'desc'),
         limit(1)
@@ -452,7 +452,7 @@ export class FirestoreService {
     } = {}
   ): Promise<Vendor[]> {
     try {
-      let q: any = collection(this.db, this.collections.vendors);
+      let q: any = safeCollection(this.collections.vendors);
 
       if (filters.category) {
         q = query(q, where('category', 'array-contains', filters.category));
@@ -522,7 +522,7 @@ export class FirestoreService {
   async getPreCheckResult(vendorId: string, rdoId: string): Promise<PreCheckResult | null> {
     try {
       const q = query(
-        collection(this.db, this.collections.preChecks),
+        safeCollection(this.collections.preChecks),
         where('vendorId', '==', vendorId),
         where('rdoId', '==', rdoId),
         orderBy('checkedAt', 'desc'),
@@ -626,7 +626,7 @@ export class FirestoreService {
    */
   onOffersUpdate(rdoId: string, callback: (offers: Offer[]) => void): () => void {
     const q = query(
-      collection(this.db, this.collections.offers),
+      safeCollection(this.collections.offers),
       where('rdoId', '==', rdoId),
       orderBy('submittedAt', 'desc')
     );
@@ -654,7 +654,7 @@ export class FirestoreService {
 
       // Backup RDO
       const rdos = await this.listRDOs();
-      const offers = await getDocs(collection(this.db, this.collections.offers));
+      const offers = await getDocs(safeCollection(this.collections.offers));
       const vendors = await this.listVendors();
 
       const backup = {
@@ -691,7 +691,7 @@ export class FirestoreService {
 
       // Cleanup audit logs vecchi
       const oldAuditQuery = query(
-        collection(this.db, this.collections.auditLogs),
+        safeCollection(this.collections.auditLogs),
         where('timestamp', '<', cutoffTimestamp)
       );
 

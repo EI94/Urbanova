@@ -6,6 +6,7 @@ import {
   zVendorAnswers,
   zProjectFactsUpdate,
 } from '@urbanova/types';
+import { getFirestoreInstance, serverTimestamp, safeCollection } from '@urbanova/infra';
 // import { db } from './firebase';
 
 // Mock db
@@ -49,7 +50,7 @@ export async function persistVendorQuestionnaire(
  */
 export async function getVendorQuestionnaireById(id: string): Promise<VendorQuestionnaire | null> {
   try {
-    const doc = await db.collection('vendor_questionnaires').doc(id).get();
+    const doc = await safeCollection('vendor_questionnaires').doc(id).get();
 
     if (!doc.exists) {
       return null;

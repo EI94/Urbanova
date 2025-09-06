@@ -88,7 +88,7 @@ export async function persistBillingState(billingState: BillingState): Promise<v
 
 export async function getBillingState(workspaceId: string): Promise<BillingState | null> {
   try {
-    const doc = await db.collection('billing_states').doc(workspaceId).get();
+    const doc = await safeCollection('billing_states').doc(workspaceId).get();
 
     if (!doc.exists) {
       return null;
@@ -139,7 +139,7 @@ export async function updateBillingState(
 
 export async function listBillingStates(): Promise<BillingState[]> {
   try {
-    const snapshot = await db.collection('billing_states').get();
+    const snapshot = await safeCollection('billing_states').get();
 
     const billingStates: BillingState[] = [];
 
@@ -195,7 +195,7 @@ export async function persistUsageEvent(usageEvent: UsageEvent): Promise<void> {
 
 export async function getUsageEvent(eventId: string): Promise<UsageEvent | null> {
   try {
-    const doc = await db.collection('usage_events').doc(eventId).get();
+    const doc = await safeCollection('usage_events').doc(eventId).get();
 
     if (!doc.exists) {
       return null;
@@ -223,7 +223,7 @@ export async function listUsageEventsByWorkspace(
   endDate?: Date
 ): Promise<UsageEvent[]> {
   try {
-    let query: any = db.collection('usage_events').where('workspaceId', '==', workspaceId);
+    let query: any = safeCollection('usage_events').where('workspaceId', '==', workspaceId);
 
     if (startDate) {
       query = query.where('timestamp', '>=', startDate.toISOString());
@@ -266,7 +266,7 @@ export async function updateUsageEventStatus(
   status: 'pending' | 'sent' | 'failed'
 ): Promise<void> {
   try {
-    await db.collection('usage_events').doc(eventId).update({
+    await safeCollection('usage_events').doc(eventId).update({
       status,
       updatedAt: new Date().toISOString(),
     });

@@ -2,7 +2,7 @@
 // Facade per l'integrazione di dati di mercato reali
 
 import type { PriceRange, CompsStats, DataProvenance } from '@urbanova/types';
-import { getFirestoreInstance, serverTimestamp } from '@urbanova/infra';
+import { getFirestoreInstance, serverTimestamp, safeCollection } from '@urbanova/infra';
 
 // ============================================================================
 // OMI INTEGRATION
@@ -474,7 +474,7 @@ export class CompsOMIFacade {
       updatedAt: serverTimestamp(),
     };
 
-    const docRef = await db.collection('comps').add(compData);
+    const docRef = await safeCollection('comps').add(compData);
 
     // Invalida cache
     (this.internalCompsService as any).cache.clear();
@@ -509,7 +509,7 @@ export class CompsOMIFacade {
   async deleteComp(compId: string): Promise<void> {
     const db = getFirestoreInstance();
 
-    await db.collection('comps').doc(compId).delete();
+    await safeCollection('comps').doc(compId).delete();
 
     // Invalida cache
     (this.internalCompsService as any).cache.clear();

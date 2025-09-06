@@ -4,7 +4,7 @@ import {
   zMarketSnapshot,
   zMarketTrendReport,
 } from '@urbanova/types';
-import { getFirestoreInstance } from '@urbanova/infra';
+import { getFirestoreInstance, serverTimestamp, safeCollection } from '@urbanova/infra';
 
 const db = getFirestoreInstance();
 
@@ -55,7 +55,7 @@ export async function persistMarketSnapshot(snapshot: MarketSnapshot): Promise<v
  */
 export async function getMarketSnapshot(id: string): Promise<MarketSnapshot | null> {
   try {
-    const doc = await db.collection('market_snapshots').doc(id).get();
+    const doc = await safeCollection('market_snapshots').doc(id).get();
 
     if (!doc.exists) {
       return null;
@@ -239,7 +239,7 @@ export async function persistMarketTrendReport(report: MarketTrendReport): Promi
  */
 export async function getMarketTrendReport(id: string): Promise<MarketTrendReport | null> {
   try {
-    const doc = await db.collection('market_trend_reports').doc(id).get();
+    const doc = await safeCollection('market_trend_reports').doc(id).get();
 
     if (!doc.exists) {
       return null;
@@ -313,7 +313,7 @@ export async function getMarketSnapshotStats(city?: string): Promise<{
   averageDataQuality: number;
 }> {
   try {
-    let query: any = db.collection('market_snapshots');
+    let query: any = safeCollection('market_snapshots');
 
     if (city) {
       query = query.where('city', '==', city);
@@ -398,7 +398,7 @@ export async function cleanupOldMarketSnapshots(
  */
 export async function updateSnapshotCacheHit(snapshotId: string, cacheHit: boolean): Promise<void> {
   try {
-    await db.collection('market_snapshots').doc(snapshotId).update({
+    await safeCollection('market_snapshots').doc(snapshotId).update({
       'metadata.cacheHit': cacheHit,
       'metadata.lastAccessed': new Date().toISOString(),
     });

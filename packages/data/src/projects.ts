@@ -41,7 +41,7 @@ type Project = {
   createdAt: Date;
   updatedAt: Date;
 };
-import { getFirestoreInstance, serverTimestamp } from '@urbanova/infra';
+import { getFirestoreInstance, serverTimestamp, safeCollection } from '@urbanova/infra';
 
 // Zod schemas for data validation
 export const zCreateProjectData = z.object({
@@ -266,7 +266,7 @@ export async function persistProject(projectData: CreateProjectData): Promise<st
     const db = getFirestoreInstance();
     const projectId = `project-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-    const projectRef = db.collection('projects').doc(projectId);
+    const projectRef = safeCollection('projects').doc(projectId);
     await projectRef.set({
       ...projectData,
       id: projectId,
@@ -287,7 +287,7 @@ export async function persistDeal(dealData: CreateDealData): Promise<string> {
     const db = getFirestoreInstance();
     const dealId = `deal-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-    const dealRef = db.collection('deals').doc(dealId);
+    const dealRef = safeCollection('deals').doc(dealId);
     await dealRef.set({
       ...dealData,
       id: dealId,
@@ -308,7 +308,7 @@ export async function persistFeasibility(feasibilityData: CreateFeasibilityData)
     const db = getFirestoreInstance();
     const feasibilityId = `feasibility-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-    const feasibilityRef = db.collection('feasibility').doc(feasibilityId);
+    const feasibilityRef = safeCollection('feasibility').doc(feasibilityId);
     await feasibilityRef.set({
       ...feasibilityData,
       id: feasibilityId,
