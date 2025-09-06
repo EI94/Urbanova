@@ -1,10 +1,22 @@
 import { getFirestoreInstance, serverTimestamp } from './firebase';
 import { safeCollection } from './firebaseUtils';
-// import type { RateLimitResult, RateLimitConfig } from '@urbanova/types';
 
-// Mock types
-type RateLimitResult = any;
-type RateLimitConfig = any;
+// REAL types - NO MORE MOCKS!
+export interface RateLimitResult {
+  allowed: boolean;
+  tokensRemaining: number;
+  resetTime: Date;
+  retryAfter?: number;
+  limit?: number;
+  window?: number;
+}
+
+export interface RateLimitConfig {
+  capacity: number;
+  refillRate: number;
+  windowSeconds: number;
+  burstSize: number;
+}
 
 // Default rate limit configuration
 const DEFAULT_CONFIG: RateLimitConfig = {
@@ -66,7 +78,7 @@ export class TokenBucketRateLimiter {
 
         return {
           allowed: false,
-          remaining: 0,
+          tokensRemaining: 0,
           resetTime,
           retryAfter,
           limit: config.capacity,
@@ -95,7 +107,7 @@ export class TokenBucketRateLimiter {
 
       return {
         allowed: true,
-        remaining,
+        tokensRemaining: remaining,
         resetTime: new Date(now + config.windowSeconds * 1000),
         retryAfter: 0,
         limit: config.capacity,
@@ -107,7 +119,7 @@ export class TokenBucketRateLimiter {
       // On error, deny request
       return {
         allowed: false,
-        remaining: 0,
+        tokensRemaining: 0,
         resetTime: new Date(Date.now() + config.windowSeconds * 1000),
         retryAfter: Math.ceil(config.windowSeconds),
         limit: config.capacity,
@@ -148,7 +160,7 @@ export class TokenBucketRateLimiter {
 
       return {
         allowed: tokens > 0,
-        remaining: tokens,
+        tokensRemaining: tokens,
         resetTime: new Date(now + config.windowSeconds * 1000),
         retryAfter: tokens > 0 ? 0 : Math.ceil(config.windowSeconds),
         limit: config.capacity,
@@ -158,7 +170,7 @@ export class TokenBucketRateLimiter {
       console.error('Rate limit status check failed:', error);
       return {
         allowed: false,
-        remaining: 0,
+        tokensRemaining: 0,
         resetTime: new Date(Date.now() + config.windowSeconds * 1000),
         retryAfter: Math.ceil(config.windowSeconds),
         limit: config.capacity,

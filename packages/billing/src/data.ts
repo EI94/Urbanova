@@ -5,59 +5,16 @@ import {
   zUsageEvent,
   PLAN_ENTITLEMENTS,
 } from '@urbanova/types';
-// Database - defined locally until available in @urbanova/infra
-const db = {
-  FieldValue: {
-    increment: (value: number) => `increment_${value}`,
+import { getFirestoreInstance, serverTimestamp, safeCollection } from '@urbanova/infra';
+
+// REAL Firebase instance - NO MORE MOCKS!
+const db = getFirestoreInstance();
+const FieldValue = {
+  increment: (value: number) => {
+    const { FieldValue } = require('firebase-admin/firestore');
+    return FieldValue.increment(value);
   },
-  collection: (name: string) => ({
-    doc: (id: string) => ({
-      set: async (data: any) => console.log(`Setting ${name}/${id}:`, data),
-      get: async () => ({ 
-        exists: false, 
-        data: () => ({
-          lastBillingDate: new Date().toISOString(),
-          nextBillingDate: new Date().toISOString(),
-          trialEndsAt: new Date().toISOString(),
-          timestamp: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
-          stripeSubId: 'temp-sub-id',
-          action: 'unknown' as any,
-        })
-      }),
-      update: async (data: any) => console.log(`Updating ${name}/${id}:`, data),
-    }),
-    get: async () => ({ 
-      forEach: (callback: any) => {
-        callback({
-          id: 'temp-id',
-          data: () => ({
-            lastBillingDate: new Date().toISOString(),
-            nextBillingDate: new Date().toISOString(),
-            trialEndsAt: new Date().toISOString(),
-            timestamp: new Date().toISOString(),
-            createdAt: new Date().toISOString(),
-            stripeSubId: 'temp-sub-id',
-          })
-        });
-      } 
-    }),
-    where: (field: string, op: string, value: any) => ({
-      get: async () => ({ forEach: (callback: any) => {} }),
-      where: (field2: string, op2: string, value2: any) => ({
-        get: async () => ({ forEach: (callback: any) => {} }),
-        orderBy: (field: string, direction: string) => ({
-          get: async () => ({ forEach: (callback: any) => {} })
-        })
-      }),
-      orderBy: (field: string, direction: string) => ({
-        get: async () => ({ forEach: (callback: any) => {} })
-      })
-    }),
-    orderBy: (field: string, direction: string) => ({
-      get: async () => ({ forEach: (callback: any) => {} })
-    }),
-  }),
+  serverTimestamp: () => serverTimestamp(),
 };
 
 // ============================================================================
@@ -68,8 +25,7 @@ export async function persistBillingState(billingState: BillingState): Promise<v
   try {
     const validated = zBillingState.parse(billingState);
 
-    await db
-      .collection('billing_states')
+    await safeCollection('billing_states')
       .doc(validated.workspaceId)
       .set({
         ...validated,
@@ -177,8 +133,7 @@ export async function persistUsageEvent(usageEvent: UsageEvent): Promise<void> {
   try {
     const validated = zUsageEvent.parse(usageEvent);
 
-    await db
-      .collection('usage_events')
+    await safeCollection('usage_events')
       .doc(validated.id)
       .set({
         ...validated,
@@ -280,11 +235,10 @@ export async function updateUsageEventStatus(
 
 export async function incrementRetryCount(eventId: string): Promise<void> {
   try {
-    await db
-      .collection('usage_events')
+    await safeCollection('usage_events')
       .doc(eventId)
       .update({
-        retryCount: db.FieldValue.increment(1),
+        retryCount: FieldValue.increment(1),
         updatedAt: new Date().toISOString(),
       });
   } catch (error) {
@@ -400,8 +354,7 @@ export async function resetMonthlyUsage(workspaceId: string): Promise<void> {
 
 export async function getPendingUsageEvents(): Promise<UsageEvent[]> {
   try {
-    const snapshot = await db
-      .collection('usage_events')
+    const snapshot = await safeCollection('usage_events')
       .where('status', '==', 'pending')
       .where('retryCount', '<', 3)
       .get();

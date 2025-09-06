@@ -7,10 +7,9 @@ import {
   zProjectFactsUpdate,
 } from '@urbanova/types';
 import { getFirestoreInstance, serverTimestamp, safeCollection } from '@urbanova/infra';
-// import { db } from './firebase';
 
-// Mock db
-const db = {} as any;
+// REAL Firebase instance - NO MORE MOCKS!
+const db = getFirestoreInstance();
 
 // ============================================================================
 // VENDOR QUESTIONNAIRE PERSISTENCE
