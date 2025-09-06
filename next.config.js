@@ -26,8 +26,15 @@ const nextConfig = {
       config.plugins = config.plugins || [];
       config.plugins.push(
         new webpack.DefinePlugin({
-          'global.File': 'undefined',
-          'globalThis.File': 'undefined',
+          'global.File': `class File {
+            constructor(name, size, type) {
+              this.name = name || '';
+              this.size = size || 0;
+              this.type = type || '';
+              this.lastModified = Date.now();
+            }
+          }`,
+          'globalThis.File': 'global.File',
           'window.File': 'undefined',
         })
       );
