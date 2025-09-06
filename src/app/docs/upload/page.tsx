@@ -87,12 +87,26 @@ export default function UploadPage({}: UploadPageProps) {
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    handleFileUpload(e.dataTransfer.files);
+    // Convert FileList to custom array to avoid File type issues
+    if (e.dataTransfer.files) {
+      const filesArray = Array.from(e.dataTransfer.files).map(file => ({
+        name: file.name,
+        size: file.size,
+        type: file.type
+      }));
+      handleFileUpload(filesArray);
+    }
   };
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      handleFileUpload(e.target.files);
+      // Convert FileList to custom array to avoid File type issues
+      const filesArray = Array.from(e.target.files).map(file => ({
+        name: file.name,
+        size: file.size,
+        type: file.type
+      }));
+      handleFileUpload(filesArray);
     }
   };
 
