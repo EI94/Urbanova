@@ -1,3 +1,6 @@
+// Import polyfills per File API
+require('./src/polyfills.js');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
@@ -17,6 +20,19 @@ const nextConfig = {
   },
   // Configurazione per gestire Puppeteer e dipendenze problematiche
   webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Polyfill per File nel server-side per evitare ReferenceError
+      const webpack = require('webpack');
+      config.plugins = config.plugins || [];
+      config.plugins.push(
+        new webpack.DefinePlugin({
+          'global.File': 'undefined',
+          'globalThis.File': 'undefined',
+          'window.File': 'undefined',
+        })
+      );
+    }
+    
     if (!isServer) {
       // Lato client - escludi moduli Node.js
       config.resolve.fallback = {
