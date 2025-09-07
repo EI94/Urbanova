@@ -133,6 +133,32 @@ service cloud.firestore {
     }
     
     // ============================================================================
+    // DASHBOARD ACTIVITIES COLLECTION
+    // ============================================================================
+    
+    match /dashboard_activities/{activityId} {
+      // TEMPORANEO: Permetti lettura per tutti per debugging dashboard
+      // TODO: Rimuovere in produzione e implementare autenticazione corretta
+      allow read: if true;
+      
+      // Scrittura: solo server (App Check o service account)
+      allow create, update, delete: if isServerRequest();
+    }
+    
+    // ============================================================================
+    // PROJECT METRICS COLLECTION
+    // ============================================================================
+    
+    match /project_metrics/{metricId} {
+      // TEMPORANEO: Permetti lettura per tutti per debugging dashboard
+      // TODO: Rimuovere in produzione e implementare autenticazione corretta
+      allow read: if true;
+      
+      // Scrittura: solo server (App Check o service account)
+      allow create, update, delete: if isServerRequest();
+    }
+    
+    // ============================================================================
     // DOCUMENTS COLLECTION (Doc Hunter uploads)
     // ============================================================================
     
