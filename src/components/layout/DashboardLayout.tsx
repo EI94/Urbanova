@@ -287,6 +287,13 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
         text: t('settings', 'navigation'),
       },
     ],
+    aiAssistant: [
+      {
+        href: '/dashboard/unified',
+        icon: <MessageSquare className="w-5 h-5" />,
+        text: 'Urbanova OS',
+      },
+    ],
   };
 
   return (
@@ -469,6 +476,20 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
               collapsed={sidebarCollapsed}
             >
               {navigation.businessPlan.map(item => (
+                <NavItem
+                  key={item.href}
+                  href={item.href}
+                  icon={item.icon}
+                  text={item.text}
+                  isActive={pathname === item.href}
+                  collapsed={sidebarCollapsed}
+                />
+              ))}
+            </NavSection>
+
+            {/* AI Assistant */}
+            <NavSection title="AI ASSISTANT" collapsed={sidebarCollapsed}>
+              {navigation.aiAssistant.map(item => (
                 <NavItem
                   key={item.href}
                   href={item.href}

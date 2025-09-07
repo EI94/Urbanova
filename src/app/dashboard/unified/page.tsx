@@ -31,13 +31,7 @@ import {
   EuroIcon,
   TrendingUpIcon,
   CalendarIcon,
-  AlertIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  UsersIcon,
-  PlusIcon,
-  SearchIcon,
-  ChartIcon,
+  Users,
 } from 'lucide-react';
 
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -383,6 +377,7 @@ export default function UnifiedDashboardPage() {
 
         response = {
           id: (Date.now() + 1).toString(),
+          type: 'assistant',
           content:
             `🎨 **Design Center** avviato!\n\n` +
             `📍 Zona: Roma EUR\n` +
