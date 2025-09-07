@@ -46,6 +46,52 @@ if (typeof window !== 'undefined') {
     }
   });
 
+  // APPROCCIO NUCLEARE: Intercetta TUTTE le chiamate a collection() globalmente
+  console.log('🔥 [NUCLEAR APPROACH] Implementando intercettazione globale collection()...');
+  
+  // Importa la funzione collection originale in modo dinamico
+  import('firebase/firestore').then((firestore) => {
+    console.log('🔥 [NUCLEAR APPROACH] Firebase/firestore importato:', firestore);
+    
+    const originalCollection = firestore.collection;
+    console.log('🔥 [NUCLEAR APPROACH] Funzione collection originale:', originalCollection);
+    
+    // Salva la funzione originale
+    (window as any).originalFirebaseCollection = originalCollection;
+    
+    // Crea un wrapper che forza sempre l'uso sicuro
+    const safeCollectionWrapper = (db: any, collectionName: string) => {
+      console.log('🔥 [NUCLEAR WRAPPER] Intercettata chiamata collection() per:', collectionName);
+      console.log('🔥 [NUCLEAR WRAPPER] db type:', typeof db);
+      console.log('🔥 [NUCLEAR WRAPPER] db value:', db);
+      
+      if (!db) {
+        console.error('❌ [NUCLEAR WRAPPER] Firebase Firestore non inizializzato!');
+        throw new Error('Firebase Firestore non inizializzato');
+      }
+      
+      try {
+        console.log('🔥 [NUCLEAR WRAPPER] Chiamando collection() originale...');
+        const result = originalCollection(db, collectionName);
+        console.log('✅ [NUCLEAR WRAPPER] Collection creata con successo per:', collectionName);
+        return result;
+      } catch (error) {
+        console.error('❌ [NUCLEAR WRAPPER] Errore nella creazione collezione:', error);
+        throw error;
+      }
+    };
+    
+    // Sostituisci la funzione originale nel modulo
+    firestore.collection = safeCollectionWrapper;
+    
+    // Sostituisci anche globalmente
+    (window as any).collection = safeCollectionWrapper;
+    
+    console.log('✅ [NUCLEAR APPROACH] Intercettazione globale collection() attivata!');
+  }).catch((error) => {
+    console.error('❌ [NUCLEAR APPROACH] Errore nell\'importazione Firebase:', error);
+  });
+
   // Gestione errori di connessione Firebase
   const handleFirebaseError = (error: any) => {
     console.warn('⚠️ Firebase connection issue:', error);
