@@ -113,7 +113,8 @@ if (typeof window !== 'undefined') {
 }
           `,
           raw: true,
-          entryOnly: false
+          entryOnly: false,
+          test: /\.js$/
         })
       );
       
