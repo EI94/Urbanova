@@ -25,7 +25,7 @@ import {
   CreditCard,
   Search,
 } from 'lucide-react';
-import FeedbackWidget from '@/components/ui/FeedbackWidget';
+// import FeedbackWidget from '@/components/ui/FeedbackWidget';
 
 // ============================================================================
 // TYPES
@@ -491,8 +491,8 @@ export default function FeasibilityAnalysisPage() {
         </div>
       </div>
       
-      {/* Feedback Widget */}
-      <FeedbackWidget className="" />
+      {/* Feedback Widget - Temporaneamente disabilitato per debug */}
+      {/* <FeedbackWidget className="" /> */}
     </div>
   );
 }
