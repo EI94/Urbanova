@@ -15,8 +15,10 @@ export function safeCollection(collectionName: string) {
   console.log('🚀🚀🚀 [safeCollection] db === undefined:', db === undefined);
   console.log('🚀🚀🚀 [safeCollection] Stack trace chiamata:', new Error().stack);
   
-  if (!db) {
+  if (!db || db === undefined || db === null) {
     console.warn('⚠️⚠️⚠️ [safeCollection] Firebase Firestore non inizializzato - tentativo di reinizializzazione...');
+    console.warn('⚠️⚠️⚠️ [safeCollection] db value:', db);
+    console.warn('⚠️⚠️⚠️ [safeCollection] db type:', typeof db);
     
     try {
       // Import dinamico per evitare problemi di inizializzazione
@@ -34,21 +36,32 @@ export function safeCollection(collectionName: string) {
         measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-QHNDTK9P3L',
       };
       
+      console.log('🚀🚀🚀 [safeCollection] Inizializzando Firebase con config:', firebaseConfig);
+      
       // Reinizializza Firebase
       const app = initializeApp(firebaseConfig);
       const newDb = getFirestore(app);
       
       console.log('✅✅✅ [safeCollection] Firebase reinizializzato con successo!');
-      console.log('✅✅✅ [safeCollection] newDb:', newDb);
+      console.log('✅✅✅ [safeCollection] newDb type:', typeof newDb);
+      console.log('✅✅✅ [safeCollection] newDb constructor:', newDb?.constructor?.name);
+      console.log('✅✅✅ [safeCollection] newDb value:', newDb);
+      
+      // Verifica che newDb sia valido
+      if (!newDb || typeof newDb !== 'object') {
+        throw new Error('newDb non è un oggetto valido dopo reinizializzazione');
+      }
       
       // Usa il nuovo db
       const collectionRef = collection(newDb, collectionName);
       console.log('✅✅✅ [safeCollection] Collezione creata con successo dopo reinizializzazione:', collectionName);
       return collectionRef;
       
-    } catch (reinitError) {
+    } catch (reinitError: any) {
       console.error('❌❌❌ [safeCollection] Errore durante la reinizializzazione Firebase:', reinitError);
-      throw new Error(`Firebase Firestore non inizializzato e reinizializzazione fallita per ${collectionName}`);
+      console.error('❌❌❌ [safeCollection] reinitError message:', reinitError.message);
+      console.error('❌❌❌ [safeCollection] reinitError stack:', reinitError.stack);
+      throw new Error(`Firebase Firestore non inizializzato e reinizializzazione fallita per ${collectionName}: ${reinitError.message}`);
     }
   }
   
