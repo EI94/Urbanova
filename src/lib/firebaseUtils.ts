@@ -10,6 +10,9 @@ export function safeCollection(collectionName: string) {
   console.log('🚀🚀🚀 [safeCollection] CHIAMATA RICEVUTA per collezione:', collectionName);
   console.log('🚀🚀🚀 [safeCollection] db type:', typeof db);
   console.log('🚀🚀🚀 [safeCollection] db value:', db);
+  console.log('🚀🚀🚀 [safeCollection] db constructor:', db?.constructor?.name);
+  console.log('🚀🚀🚀 [safeCollection] db === null:', db === null);
+  console.log('🚀🚀🚀 [safeCollection] db === undefined:', db === undefined);
   console.log('🚀🚀🚀 [safeCollection] Stack trace chiamata:', new Error().stack);
   
   if (!db) {

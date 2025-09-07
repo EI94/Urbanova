@@ -20,9 +20,19 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase services
+console.log('🔥 [FIREBASE INIT] Inizializzando Firebase services...');
+console.log('🔥 [FIREBASE INIT] app:', app);
+
 export const auth = getAuth(app);
+console.log('🔥 [FIREBASE INIT] auth:', auth);
+
 export const db = getFirestore(app);
+console.log('🔥 [FIREBASE INIT] db:', db);
+console.log('🔥 [FIREBASE INIT] db type:', typeof db);
+console.log('🔥 [FIREBASE INIT] db constructor:', db?.constructor?.name);
+
 export const storage = getStorage(app);
+console.log('🔥 [FIREBASE INIT] storage:', storage);
 
 // Verifica di sicurezza per l'inizializzazione di Firebase
 if (typeof window !== 'undefined') {
