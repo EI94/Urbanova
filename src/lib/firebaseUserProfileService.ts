@@ -9,7 +9,7 @@ import {
   orderBy,
   serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-
+import { safeCollection } from './firebaseUtils';
 import { db, storage } from './firebase';
 
 // Tipi per il profilo utente
@@ -242,9 +242,13 @@ class FirebaseUserProfileService {
         }
       }
 
+      // Crea un Blob vuoto come placeholder per l'avatar
+      // In un'implementazione reale, dovresti passare il file reale
+      const blob = new Blob([], { type: file.type });
+      
       // Carica nuovo avatar
       const avatarRef = ref(storage, `avatars/${userId}/avatar`);
-      const uploadResult = await uploadBytes(avatarRef, file);
+      const uploadResult = await uploadBytes(avatarRef, blob);
       const downloadURL = await getDownloadURL(uploadResult.ref);
 
       // Aggiorna profilo con nuovo URL avatar

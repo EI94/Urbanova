@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-
+import { addDoc } from 'firebase/firestore';
+import { safeCollection } from '@/lib/firebaseUtils';
 import { realEmailService } from '@/lib/realEmailService';
 
 export async function POST(request: NextRequest) {

@@ -1,6 +1,6 @@
 import { onAuthStateChanged, User } from 'firebase/auth';
 import {addDoc, getDocs, doc, getDoc, serverTimestamp } from 'firebase/firestore';
-
+import { safeCollection } from './firebaseUtils';
 import { db, auth } from './firebase';
 
 export class FirebaseDebugService {

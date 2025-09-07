@@ -1,4 +1,7 @@
 // Servizio di Fallback per Feedback - Funziona anche offline
+import { addDoc } from 'firebase/firestore';
+import { safeCollection } from '@/lib/firebaseUtils';
+
 export interface FeedbackData {
   id: string;
   type: 'bug' | 'feature' | 'improvement' | 'question' | 'other';

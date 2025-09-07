@@ -3,37 +3,19 @@
  * Gestisce la verifica di conformità urbanistica con documenti municipali reali
  */
 
-// Mock Firebase functions for development
-const mockFirebase = {
-  collection: (db: any, collectionName: string) => ({
-    add: async (data: any) => ({ id: `mock-${Date.now()}` }),
-    get: async () => ({ docs: [] }),
-    where: () => ({ get: async () => ({ docs: [] }) }),
-    orderBy: () => ({ get: async () => ({ docs: [] }) }),
-  }),
-  addDoc: async (collectionRef: any, data: any) => ({ id: `mock-${Date.now()}` }),
-  getDocs: async (collectionRef: any) => ({ docs: [] }),
-  updateDoc: async (docRef: any, data: any) => ({}),
-  doc: (db: any, collectionName: string, docId: string) => ({}),
-  query: (collectionRef: any, ...constraints: any[]) => ({}),
-  where: (field: string, op: string, value: any) => ({}),
-  orderBy: (field: string, direction?: string) => ({}),
-  serverTimestamp: () => new Date(),
-  getDoc: async (docRef: any) => ({ data: () => null, exists: false }),
-};
-
-// Use mock Firebase for now
-const db = mockFirebase;
-const collection = mockFirebase.collection;
-const addDoc = mockFirebase.addDoc;
-const getDocs = mockFirebase.getDocs;
-const updateDoc = mockFirebase.updateDoc;
-const doc = mockFirebase.doc;
-const query = mockFirebase.query;
-const where = mockFirebase.where;
-const orderBy = mockFirebase.orderBy;
-const serverTimestamp = mockFirebase.serverTimestamp;
-const getDoc = mockFirebase.getDoc;
+import { 
+  addDoc, 
+  getDocs, 
+  updateDoc, 
+  doc, 
+  query, 
+  where, 
+  orderBy, 
+  serverTimestamp, 
+  getDoc 
+} from 'firebase/firestore';
+import { db } from './firebase';
+import { safeCollection } from './firebaseUtils';
 import {
   Municipality,
   ComplianceDocument,
