@@ -7,30 +7,34 @@ import { db } from './firebase';
  * "Expected first argument to collection() to be a CollectionReference, a DocumentReference or FirebaseFirestore"
  */
 export function safeCollection(collectionName: string) {
-  console.log('🔍 [safeCollection] Tentativo accesso collezione:', collectionName);
-  console.log('🔍 [safeCollection] db type:', typeof db);
-  console.log('🔍 [safeCollection] db value:', db);
+  console.log('🚀🚀🚀 [safeCollection] CHIAMATA RICEVUTA per collezione:', collectionName);
+  console.log('🚀🚀🚀 [safeCollection] db type:', typeof db);
+  console.log('🚀🚀🚀 [safeCollection] db value:', db);
+  console.log('🚀🚀🚀 [safeCollection] Stack trace chiamata:', new Error().stack);
   
   if (!db) {
-    console.error('❌ Firebase Firestore non inizializzato - impossibile accedere alla collezione:', collectionName);
+    console.error('❌❌❌ [safeCollection] Firebase Firestore non inizializzato - impossibile accedere alla collezione:', collectionName);
     throw new Error('Firebase Firestore non inizializzato');
   }
   
   // Verifica che db sia effettivamente un'istanza di Firestore
   if (typeof db !== 'object' || !db) {
-    console.error('❌ Firebase Firestore non è un oggetto valido:', typeof db, db);
+    console.error('❌❌❌ [safeCollection] Firebase Firestore non è un oggetto valido:', typeof db, db);
     throw new Error('Firebase Firestore non è valido');
   }
   
   try {
-    console.log('🔍 [safeCollection] Calling collection() for:', collectionName);
+    console.log('🚀🚀🚀 [safeCollection] Chiamando collection() Firebase per:', collectionName);
     const result = collection(db, collectionName);
-    console.log('✅ [safeCollection] Collection created successfully for:', collectionName);
+    console.log('✅✅✅ [safeCollection] Collection REALE creata con successo per:', collectionName);
     return result;
-  } catch (error) {
-    console.error('❌ [safeCollection] Errore nella creazione del riferimento alla collezione:', collectionName, error);
-    console.error('❌ [safeCollection] Stack trace:', error.stack);
-    throw error;
+  } catch (error: any) {
+    console.error('❌❌❌ [safeCollection] ERRORE nella creazione del riferimento alla collezione:', collectionName, error);
+    console.error('❌❌❌ [safeCollection] Error message:', error.message);
+    console.error('❌❌❌ [safeCollection] Stack trace:', error.stack);
+    
+    // RILANCIA l'errore per debugging
+    throw new Error(`safeCollection fallita per ${collectionName}: ${error.message}`);
   }
 }
 

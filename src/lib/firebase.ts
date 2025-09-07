@@ -53,75 +53,9 @@ if (typeof window !== 'undefined') {
     }
   });
 
-  // APPROCCIO NUCLEARE + SUPER-NUCLEARE + MEGA-SUPER-NUCLEARE: Intercetta TUTTE le chiamate a collection() globalmente
-  console.log('🔥 [NUCLEAR APPROACH] Implementando intercettazione globale collection()...');
-  
-  // Verifica se l'intercettazione webpack è attiva
-  if ((window as any).__FIREBASE_COLLECTION_INTERCEPTOR__) {
-    console.log('🔥🔥🔥 [SUPER-NUCLEAR DETECTED] Intercettazione webpack attiva!');
-  }
-  
-  // Verifica se l'intercettazione mega-super-nucleare è attiva
-  if ((window as any).__megaSafeCollectionWrapper) {
-    console.log('🔥🔥🔥🔥 [MEGA-SUPER-NUCLEAR DETECTED] Intercettazione mega-super-nucleare attiva!');
-  }
-  
-  // Importa la funzione collection originale in modo dinamico
-  import('firebase/firestore').then((firestore) => {
-    console.log('🔥 [NUCLEAR APPROACH] Firebase/firestore importato:', firestore);
-    
-    const originalCollection = firestore.collection;
-    console.log('🔥 [NUCLEAR APPROACH] Funzione collection originale:', originalCollection);
-    
-    // Salva la funzione originale per l'intercettazione webpack
-    (window as any).__originalFirebaseCollection = originalCollection;
-    console.log('🔥🔥🔥 [SUPER-NUCLEAR BRIDGE] Funzione originale salvata per webpack!');
-    
-    // Crea un wrapper che forza sempre l'uso sicuro
-    const safeCollectionWrapper = (db: any, collectionName: string) => {
-      console.log('🔥 [NUCLEAR WRAPPER] Intercettata chiamata collection() per:', collectionName);
-      console.log('🔥 [NUCLEAR WRAPPER] db type:', typeof db);
-      console.log('🔥 [NUCLEAR WRAPPER] db value:', db);
-      
-      if (!db) {
-        console.error('❌ [NUCLEAR WRAPPER] Firebase Firestore non inizializzato!');
-        throw new Error('Firebase Firestore non inizializzato');
-      }
-      
-      try {
-        console.log('🔥 [NUCLEAR WRAPPER] Chiamando collection() originale...');
-        const result = originalCollection(db, collectionName);
-        console.log('✅ [NUCLEAR WRAPPER] Collection creata con successo per:', collectionName);
-        return result;
-      } catch (error) {
-        console.error('❌ [NUCLEAR WRAPPER] Errore nella creazione collezione:', error);
-        throw error;
-      }
-    };
-    
-    // Sostituisci la funzione originale nel modulo
-    firestore.collection = safeCollectionWrapper;
-    
-    // Sostituisci anche globalmente
-    (window as any).collection = safeCollectionWrapper;
-    
-    // Se l'intercettazione mega-super-nucleare è attiva, usa quella (priorità massima)
-    if ((window as any).__megaSafeCollectionWrapper) {
-      console.log('🔥🔥🔥🔥 [MEGA-SUPER-NUCLEAR BRIDGE] Usando wrapper mega-super-nucleare!');
-      firestore.collection = (window as any).__megaSafeCollectionWrapper;
-      (window as any).collection = (window as any).__megaSafeCollectionWrapper;
-    }
-    // Altrimenti se l'intercettazione webpack è attiva, usa quella
-    else if ((window as any).__safeCollectionWrapper) {
-      console.log('🔥🔥🔥 [SUPER-NUCLEAR BRIDGE] Usando wrapper webpack!');
-      firestore.collection = (window as any).__safeCollectionWrapper;
-      (window as any).collection = (window as any).__safeCollectionWrapper;
-    }
-    
-    console.log('✅ [NUCLEAR APPROACH] Intercettazione globale collection() attivata!');
-  }).catch((error) => {
-    console.error('❌ [NUCLEAR APPROACH] Errore nell\'importazione Firebase:', error);
-  });
+  // APPROCCIO NUCLEARE DISABILITATO: Non funziona, causa solo confusione
+  // Torniamo al semplice approccio con safeCollection() nei file sorgente
+  console.log('🔥 [SIMPLE APPROACH] Approccio nucleare disabilitato, usando solo safeCollection()');
 
   // Gestione errori di connessione Firebase
   const handleFirebaseError = (error: any) => {
