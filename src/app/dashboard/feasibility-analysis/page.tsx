@@ -526,7 +526,7 @@ export default function FeasibilityAnalysisPage() {
       </div>
       
       {/* Feedback Widget */}
-      <FeedbackWidget />
+      <FeedbackWidget className="" />
     </div>
   );
 }
