@@ -112,7 +112,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className={inter.className}>
-        <FirebaseInterceptorLoader />
         <LanguageProvider>
           <AuthProvider>
             <EnvironmentBanner />
