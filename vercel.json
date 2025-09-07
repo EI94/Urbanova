@@ -4,10 +4,10 @@
   "installCommand": "pnpm install --no-frozen-lockfile",
   "outputDirectory": ".next",
   "functions": {
-    "runtime": "nodejs20.x",
     "app/api/**/route.js": { 
       "memory": 1024, 
-      "maxDuration": 30 
+      "maxDuration": 30,
+      "runtime": "nodejs20.x"
     }
   },
   "crons": [
