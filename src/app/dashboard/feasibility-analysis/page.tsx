@@ -23,6 +23,7 @@ import {
   Bot,
   Sparkles,
   CreditCard,
+  Search,
 } from 'lucide-react';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
 
