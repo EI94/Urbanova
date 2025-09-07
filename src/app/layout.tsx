@@ -2,14 +2,12 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 
-// MEGA-SUPER-NUCLEAR: Carica l'interceptor Firebase PRIMA di tutto
-import '../lib/firebaseInterceptor.js';
-
 import Toaster from '@/components/ui/Toaster';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import CommandPaletteWrapper from '@/components/CommandPaletteWrapper';
 import { EnvironmentBanner } from '@/components/ui/EnvironmentBanner';
+import FirebaseInterceptorLoader from '@/components/FirebaseInterceptorLoader';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -114,6 +112,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className={inter.className}>
+        <FirebaseInterceptorLoader />
         <LanguageProvider>
           <AuthProvider>
             <EnvironmentBanner />

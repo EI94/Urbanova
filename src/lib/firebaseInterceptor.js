@@ -1,10 +1,9 @@
 // MEGA-SUPER-NUCLEAR FIREBASE INTERCEPTOR
 // Questo file deve essere caricato PRIMA di qualsiasi altro codice Firebase
 
-console.log('🔥🔥🔥🔥 [MEGA-SUPER-NUCLEAR] Inizializzando intercettore Firebase globale...');
-
-// Verifica se siamo nel browser
-if (typeof window !== 'undefined') {
+// Verifica tripla che siamo nel browser
+if (typeof window !== 'undefined' && typeof document !== 'undefined' && typeof navigator !== 'undefined') {
+  console.log('🔥🔥🔥🔥 [MEGA-SUPER-NUCLEAR] Inizializzando intercettore Firebase globale...');
   console.log('🔥🔥🔥🔥 [MEGA-SUPER-NUCLEAR] Browser rilevato, implementando intercettazione globale...');
   
   // Salva le funzioni originali
@@ -98,9 +97,11 @@ if (typeof window !== 'undefined') {
   }
   
   console.log('✅✅✅✅ [MEGA-SUPER-NUCLEAR] Intercettore globale Firebase installato!');
+} else {
+  console.log('🔥🔥🔥🔥 [MEGA-SUPER-NUCLEAR] Ambiente server-side rilevato, interceptor non installato');
 }
 
-// Esporta per eventuali import
-if (typeof module !== 'undefined' && module.exports) {
+// Esporta per eventuali import (solo se siamo nel browser)
+if (typeof module !== 'undefined' && module.exports && typeof window !== 'undefined') {
   module.exports = { megaSafeCollectionWrapper: window.__megaSafeCollectionWrapper };
 }
