@@ -80,93 +80,59 @@ if (typeof globalThis !== 'undefined' && typeof globalThis.File === 'undefined')
           window.__firebaseOriginals = {};
         }
 
-        // Crea il wrapper ultra-sicuro IMMEDIATO che NON LANCIA MAI ERRORI
+        // Crea il wrapper REALE che FORZA l'inizializzazione corretta di Firebase
         const ultraSafeCollectionWrapper = function(db, collectionName) {
           console.log('🔥 [ULTRA-NUCLEAR] Chiamata collection() per:', collectionName, 'db:', typeof db);
           
-          // STRATEGIA: NON LANCIARE MAI ERRORI, sempre restituire un oggetto valido
+          // STRATEGIA: FORZARE l'inizializzazione corretta di Firebase, NO MOCK!
           if (!db || typeof db !== 'object') {
-            console.warn('⚠️ [ULTRA-NUCLEAR] DB non valido, creando mock collection per:', collectionName);
+            console.error('❌ [ULTRA-NUCLEAR] DB non inizializzato, FORZANDO inizializzazione Firebase per:', collectionName);
             
-            // Restituisci un mock collection reference invece di lanciare errore
-            return {
-              id: collectionName,
-              path: collectionName,
-              parent: null,
-              firestore: db || {},
-              // Metodi mock per evitare errori
-              add: () => Promise.resolve({ id: 'mock-doc-id' }),
-              doc: (id) => ({
-                id: id || 'mock-doc-id',
-                path: collectionName + '/' + (id || 'mock-doc-id'),
-                get: () => Promise.resolve({ exists: false, data: () => ({}) }),
-                set: () => Promise.resolve(),
-                update: () => Promise.resolve(),
-                delete: () => Promise.resolve()
-              }),
-              get: () => Promise.resolve({ empty: true, docs: [], forEach: () => {} }),
-              where: () => ({ get: () => Promise.resolve({ empty: true, docs: [], forEach: () => {} }) }),
-              orderBy: () => ({ get: () => Promise.resolve({ empty: true, docs: [], forEach: () => {} }) }),
-              limit: () => ({ get: () => Promise.resolve({ empty: true, docs: [], forEach: () => {} }) }),
-              onSnapshot: () => () => {} // Unsubscribe function
-            };
+            // FORZA l'inizializzazione di Firebase invece di usare mock
+            try {
+              // Prova a ottenere l'istanza Firebase dal global
+              if (window.__firebaseApp && window.__firebaseDb) {
+                console.log('🔥 [ULTRA-NUCLEAR] Trovata istanza Firebase globale, usando quella');
+                return window.__firebaseOriginals.collection(window.__firebaseDb, collectionName);
+              }
+              
+              // Prova a importare e inizializzare Firebase
+              if (typeof window.firebase !== 'undefined' && window.firebase.firestore) {
+                console.log('🔥 [ULTRA-NUCLEAR] Trovato Firebase globale, inizializzando Firestore');
+                const firestore = window.firebase.firestore();
+                return window.__firebaseOriginals.collection(firestore, collectionName);
+              }
+              
+              // Fallback: prova a usare getFirestore se disponibile
+              if (typeof window.getFirestore !== 'undefined') {
+                console.log('🔥 [ULTRA-NUCLEAR] Usando getFirestore() per inizializzazione');
+                const firestore = window.getFirestore();
+                return window.__firebaseOriginals.collection(firestore, collectionName);
+              }
+              
+              console.error('❌ [ULTRA-NUCLEAR] Impossibile inizializzare Firebase, lanciando errore REALE');
+              throw new Error('Firebase Firestore non può essere inizializzato - configurazione mancante');
+              
+            } catch (initError) {
+              console.error('❌ [ULTRA-NUCLEAR] Errore nell\\'inizializzazione Firebase:', initError);
+              throw new Error('Firebase Firestore inizializzazione fallita: ' + initError.message);
+            }
           }
 
+          // Se DB è valido, usa la funzione originale
           try {
-            // Se abbiamo la funzione originale, usala
             if (window.__firebaseOriginals.collection) {
               const result = window.__firebaseOriginals.collection(db, collectionName);
-              console.log('✅ [ULTRA-NUCLEAR] Collection OK:', collectionName);
+              console.log('✅ [ULTRA-NUCLEAR] Collection REALE creata:', collectionName);
               return result;
             } else {
-              console.warn('⚠️ [ULTRA-NUCLEAR] Funzione originale non trovata, usando mock per:', collectionName);
-              
-              // Restituisci mock invece di errore
-              return {
-                id: collectionName,
-                path: collectionName,
-                parent: null,
-                firestore: db,
-                add: () => Promise.resolve({ id: 'mock-doc-id' }),
-                doc: (id) => ({
-                  id: id || 'mock-doc-id',
-                  path: collectionName + '/' + (id || 'mock-doc-id'),
-                  get: () => Promise.resolve({ exists: false, data: () => ({}) }),
-                  set: () => Promise.resolve(),
-                  update: () => Promise.resolve(),
-                  delete: () => Promise.resolve()
-                }),
-                get: () => Promise.resolve({ empty: true, docs: [], forEach: () => {} }),
-                where: () => ({ get: () => Promise.resolve({ empty: true, docs: [], forEach: () => {} }) }),
-                orderBy: () => ({ get: () => Promise.resolve({ empty: true, docs: [], forEach: () => {} }) }),
-                limit: () => ({ get: () => Promise.resolve({ empty: true, docs: [], forEach: () => {} }) }),
-                onSnapshot: () => () => {}
-              };
+              console.error('❌ [ULTRA-NUCLEAR] Funzione collection originale non trovata');
+              throw new Error('Funzione Firebase collection non disponibile');
             }
           } catch (error) {
-            console.warn('⚠️ [ULTRA-NUCLEAR] Errore catturato, usando mock per:', collectionName, error.message);
-            
-            // ANCHE IN CASO DI ERRORE, restituisci mock invece di rilanciare
-            return {
-              id: collectionName,
-              path: collectionName,
-              parent: null,
-              firestore: db,
-              add: () => Promise.resolve({ id: 'mock-doc-id' }),
-              doc: (id) => ({
-                id: id || 'mock-doc-id',
-                path: collectionName + '/' + (id || 'mock-doc-id'),
-                get: () => Promise.resolve({ exists: false, data: () => ({}) }),
-                set: () => Promise.resolve(),
-                update: () => Promise.resolve(),
-                delete: () => Promise.resolve()
-              }),
-              get: () => Promise.resolve({ empty: true, docs: [], forEach: () => {} }),
-              where: () => ({ get: () => Promise.resolve({ empty: true, docs: [], forEach: () => {} }) }),
-              orderBy: () => ({ get: () => Promise.resolve({ empty: true, docs: [], forEach: () => {} }) }),
-              limit: () => ({ get: () => Promise.resolve({ empty: true, docs: [], forEach: () => {} }) }),
-              onSnapshot: () => () => {}
-            };
+            console.error('❌ [ULTRA-NUCLEAR] Errore nella creazione collection REALE:', collectionName, error);
+            // RILANCIA l'errore invece di nasconderlo - Firebase deve funzionare!
+            throw error;
           }
         };
 

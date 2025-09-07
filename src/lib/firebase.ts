@@ -31,6 +31,13 @@ if (typeof window !== 'undefined') {
     console.error('❌ Firebase Firestore non inizializzato correttamente');
   } else {
     console.log('✅ Firebase Firestore inizializzato correttamente');
+    
+    // ESPORTA istanze Firebase globalmente per il wrapper ultra-nucleare
+    (window as any).__firebaseApp = app;
+    (window as any).__firebaseDb = db;
+    (window as any).__firebaseAuth = auth;
+    (window as any).__firebaseStorage = storage;
+    console.log('🔥 [FIREBASE GLOBAL] Istanze Firebase esportate globalmente per wrapper ultra-nucleare');
   }
 }
 
