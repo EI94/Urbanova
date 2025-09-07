@@ -128,8 +128,7 @@ export default function UnifiedDashboardPage() {
     {
       id: '1',
       type: 'assistant',
-      content:
-        '🚀 **Urbanova Tool OS** attivato!\n\nSono il tuo assistente intelligente per la gestione immobiliare. Posso eseguire:\n\n🔧 **Tool Actions:**\n• Business Plan completo con Comps/OMI\n• Analisi di fattibilità e ROI\n• Scansione terreni e annunci\n• Gestione documenti e compliance\n• Market Intelligence\n• Design Center\n• Project Timeline AI\n\n💬 **Esempi di comandi:**\n• "Fai BP di Progetto A con ±5/±10"\n• "Business Plan Progetto B"\n• "Sensitivity Progetto C ±15%"\n• "Scansiona questo annuncio immobiliare"\n• "Analisi Market Intelligence per Milano"\n• "Crea design per terreno Roma EUR"\n\nCome posso aiutarti oggi?',
+      content: 'Ciao! Sono Urbanova, il tuo assistente intelligente per la gestione immobiliare. Come posso aiutarti oggi?',
       timestamp: new Date(),
     },
   ]);
@@ -141,6 +140,17 @@ export default function UnifiedDashboardPage() {
     'overview' | 'projects' | 'analytics' | 'tools' | 'business-plan' | 'market-intelligence' | 'feasibility-analysis' | 'design-center' | 'permits-compliance' | 'project-timeline' | 'project-management' | 'marketing' | 'epc'
   >('overview');
   const [showToolPanel, setShowToolPanel] = useState(false);
+  
+  // Chat history e quick actions
+  const [chatHistory, setChatHistory] = useState<Array<{
+    id: string;
+    title: string;
+    preview: string;
+    timestamp: Date;
+    messages: ChatMessage[];
+  }>>([]);
+  const [showChatHistory, setShowChatHistory] = useState(false);
+  const [showQuickActions, setShowQuickActions] = useState(true);
 
   // Stato per i dati della dashboard
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -279,7 +289,8 @@ export default function UnifiedDashboardPage() {
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
     setInputValue('');
     setIsLoading(true);
 
@@ -404,8 +415,25 @@ export default function UnifiedDashboardPage() {
         };
       }
 
-      setMessages(prev => [...prev, response]);
+      const finalMessages = [...newMessages, response];
+      setMessages(finalMessages);
       setIsLoading(false);
+
+      // Salva nella chat history se è una conversazione significativa
+      if (finalMessages.length > 2) {
+        const chatTitle = inputValue.length > 30 ? inputValue.substring(0, 30) + '...' : inputValue;
+        const chatPreview = response.content.substring(0, 100) + '...';
+        
+        const newChat = {
+          id: Date.now().toString(),
+          title: chatTitle,
+          preview: chatPreview,
+          timestamp: new Date(),
+          messages: finalMessages,
+        };
+
+        setChatHistory(prev => [newChat, ...prev.slice(0, 9)]); // Mantieni solo le ultime 10 chat
+      }
     }, 1000);
   };
 
@@ -755,16 +783,34 @@ export default function UnifiedDashboardPage() {
           <div className="flex-1 p-6">
             {activeTab === 'overview' && (
               <div className="space-y-6">
-                {/* OS Interface - ChatGPT Style */}
+                {/* Urbanova Interface - ChatGPT/Cursor Style */}
                 <div className="bg-white rounded-lg shadow border border-gray-200 h-[600px] flex flex-col">
                   <div className="p-4 border-b border-gray-200">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <Bot className="w-5 h-5 text-white" />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                          <Bot className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <h2 className="text-lg font-semibold text-gray-900">Urbanova</h2>
+                          <p className="text-sm text-gray-500">Assistente Intelligente per la Gestione Immobiliare</p>
+                        </div>
                       </div>
-                      <div>
-                        <h2 className="text-lg font-semibold text-gray-900">Urbanova OS</h2>
-                        <p className="text-sm text-gray-500">Assistente Intelligente per la Gestione Immobiliare</p>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => setShowChatHistory(!showChatHistory)}
+                          className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                          title="Chat History"
+                        >
+                          <Clock className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setShowQuickActions(!showQuickActions)}
+                          className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                          title="Quick Actions"
+                        >
+                          <Zap className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -806,6 +852,42 @@ export default function UnifiedDashboardPage() {
                     <div ref={messagesEndRef} />
                   </div>
                   
+                  {/* Quick Actions */}
+                  {showQuickActions && (
+                    <div className="p-4 border-t border-gray-200">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+                        <button
+                          onClick={() => setInputValue('Analisi di fattibilità per progetto residenziale a Milano')}
+                          className="flex items-center space-x-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors text-sm"
+                        >
+                          <TrendingUp className="w-4 h-4 text-blue-600" />
+                          <span className="text-blue-700">Analisi Fattibilità</span>
+                        </button>
+                        <button
+                          onClick={() => setInputValue('Market Intelligence per zona Porta Nuova Milano')}
+                          className="flex items-center space-x-2 px-3 py-2 bg-green-50 hover:bg-green-100 rounded-lg transition-colors text-sm"
+                        >
+                          <Search className="w-4 h-4 text-green-600" />
+                          <span className="text-green-700">Market Intelligence</span>
+                        </button>
+                        <button
+                          onClick={() => setInputValue('Crea design per terreno residenziale Roma EUR')}
+                          className="flex items-center space-x-2 px-3 py-2 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors text-sm"
+                        >
+                          <Sparkles className="w-4 h-4 text-orange-600" />
+                          <span className="text-orange-700">Design Center</span>
+                        </button>
+                        <button
+                          onClick={() => setInputValue('Business Plan completo con Comps/OMI')}
+                          className="flex items-center space-x-2 px-3 py-2 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors text-sm"
+                        >
+                          <FileText className="w-4 h-4 text-purple-600" />
+                          <span className="text-purple-700">Business Plan</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
                   <div className="p-4 border-t border-gray-200">
                     <div className="flex space-x-2">
                       <input
@@ -813,7 +895,7 @@ export default function UnifiedDashboardPage() {
                         value={inputValue}
                         onChange={e => setInputValue(e.target.value)}
                         onKeyPress={handleKeyPress}
-                        placeholder="Chiedi qualcosa a Urbanova OS..."
+                        placeholder="Chiedi qualcosa a Urbanova..."
                         className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                         disabled={isLoading}
                       />
@@ -1186,6 +1268,51 @@ export default function UnifiedDashboardPage() {
               </div>
             )}
           </div>
+
+          {/* Chat History Panel */}
+          {showChatHistory && (
+            <div className="w-80 bg-white shadow-lg border-l border-gray-200">
+              <div className="p-4 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium text-gray-900">Chat History</h3>
+                  <button
+                    onClick={() => setShowChatHistory(false)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <Square className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              <div className="p-4 space-y-3">
+                {chatHistory.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Clock className="w-6 h-6 text-gray-400" />
+                    </div>
+                    <h4 className="font-medium text-gray-900 mb-1">Nessuna chat precedente</h4>
+                    <p className="text-sm text-gray-500">
+                      Le tue conversazioni con Urbanova appariranno qui
+                    </p>
+                  </div>
+                ) : (
+                  chatHistory.map(chat => (
+                    <div
+                      key={chat.id}
+                      className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                      onClick={() => {
+                        setMessages(chat.messages);
+                        setShowChatHistory(false);
+                      }}
+                    >
+                      <h4 className="font-medium text-gray-900 text-sm mb-1">{chat.title}</h4>
+                      <p className="text-xs text-gray-500 mb-2">{chat.preview}</p>
+                      <p className="text-xs text-gray-400">{chat.timestamp.toLocaleDateString()}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Tool Panel */}
           {showToolPanel && (
