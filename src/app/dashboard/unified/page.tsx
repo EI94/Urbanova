@@ -546,39 +546,27 @@ export default function UnifiedDashboardPage() {
                 <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   DISCOVERY
                 </h3>
-                <button
-                  onClick={() => setActiveTab('market-intelligence')}
-                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    activeTab === 'market-intelligence'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                <Link
+                  href="/dashboard/market-intelligence"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
                 >
                   <Search className="w-4 h-4 mr-3" />
                   Market Intelligence
-                </button>
-                <button
-                  onClick={() => setActiveTab('feasibility-analysis')}
-                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    activeTab === 'feasibility-analysis'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                </Link>
+                <Link
+                  href="/dashboard/feasibility-analysis"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
                 >
                   <TrendingUp className="w-4 h-4 mr-3" />
                   Analisi Fattibilità
-                </button>
-                <button
-                  onClick={() => setActiveTab('design-center')}
-                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    activeTab === 'design-center'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                </Link>
+                <Link
+                  href="/dashboard/design-center"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
                 >
                   <Sparkles className="w-4 h-4 mr-3" />
                   Design Center
-                </button>
+                </Link>
               </div>
 
               {/* Planning & Compliance */}
@@ -586,39 +574,27 @@ export default function UnifiedDashboardPage() {
                 <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   PLANNING/COMPLIANCE
                 </h3>
-                <button
-                  onClick={() => setActiveTab('business-plan')}
-                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    activeTab === 'business-plan'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                <Link
+                  href="/dashboard/business-plan"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
                 >
                   <FileText className="w-4 h-4 mr-3" />
                   Business Plan
-                </button>
-                <button
-                  onClick={() => setActiveTab('permits-compliance')}
-                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    activeTab === 'permits-compliance'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                </Link>
+                <Link
+                  href="/dashboard/permits-compliance"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
                 >
                   <Shield className="w-4 h-4 mr-3" />
                   Permessi & Compliance
-                </button>
-                <button
-                  onClick={() => setActiveTab('project-timeline')}
-                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    activeTab === 'project-timeline'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                </Link>
+                <Link
+                  href="/dashboard/project-timeline"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
                 >
                   <Calendar className="w-4 h-4 mr-3" />
                   Project Timeline AI
-                </button>
+                </Link>
               </div>
 
               {/* Progetti */}
@@ -626,17 +602,13 @@ export default function UnifiedDashboardPage() {
                 <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   PROGETTI
                 </h3>
-                <button
-                  onClick={() => setActiveTab('projects')}
-                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    activeTab === 'projects'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                <Link
+                  href="/dashboard/progetti"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
                 >
                   <Building2 className="w-4 h-4 mr-3" />
                   Progetti
-                </button>
+                </Link>
                 <Link
                   href="/dashboard/progetti/nuovo"
                   className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
@@ -658,17 +630,13 @@ export default function UnifiedDashboardPage() {
                 <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   GESTIONE PROGETTI
                 </h3>
-                <button
-                  onClick={() => setActiveTab('project-management')}
-                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    activeTab === 'project-management'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                <Link
+                  href="/dashboard/project-management"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
                 >
                   <Building2 className="w-4 h-4 mr-3" />
                   Gestione Progetti
-                </button>
+                </Link>
                 <Link
                   href="/dashboard/project-management/documents"
                   className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
@@ -690,17 +658,13 @@ export default function UnifiedDashboardPage() {
                 <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   MARKETING/SALES
                 </h3>
-                <button
-                  onClick={() => setActiveTab('marketing')}
-                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    activeTab === 'marketing'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                <Link
+                  href="/dashboard/marketing"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
                 >
                   <TrendingUp className="w-4 h-4 mr-3" />
                   Marketing
-                </button>
+                </Link>
                 <Link
                   href="/dashboard/marketing/campaigns"
                   className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
@@ -722,17 +686,13 @@ export default function UnifiedDashboardPage() {
                 <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   CONSTRUCTION/EPC
                 </h3>
-                <button
-                  onClick={() => setActiveTab('epc')}
-                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    activeTab === 'epc'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                <Link
+                  href="/dashboard/epc"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
                 >
                   <Building2 className="w-4 h-4 mr-3" />
                   EPC
-                </button>
+                </Link>
                 <Link
                   href="/dashboard/epc/construction-site"
                   className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
@@ -770,7 +730,7 @@ export default function UnifiedDashboardPage() {
                   }`}
                 >
                   <Bot className="w-4 h-4 mr-3" />
-                  Tool OS
+                  Urbanova OS
                 </button>
               </div>
             </nav>
@@ -1084,184 +1044,32 @@ export default function UnifiedDashboardPage() {
               </div>
             )}
 
-            {/* Market Intelligence */}
-            {activeTab === 'market-intelligence' && (
+            {/* Solo Overview e Tools sono disponibili nella dashboard unificata */}
+            {activeTab !== 'overview' && activeTab !== 'tools' && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Market Intelligence</h1>
-                    <p className="text-gray-600 mt-1">Analisi di mercato e trend immobiliari</p>
+                    <h1 className="text-3xl font-bold text-gray-900">Dashboard Unificata</h1>
+                    <p className="text-gray-600 mt-1">Interfaccia principale con Urbanova OS</p>
                   </div>
-                  <button
-                    onClick={() => setActiveTab('tools')}
-                    className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg"
-                  >
-                    <Bot className="w-4 h-4 inline mr-2" />
-                    Chiedi all'OS
-                  </button>
-                </div>
-
-                <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Search className="w-8 h-8 text-green-600" />
-                    </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Market Intelligence
-                    </h3>
-                    <p className="text-gray-500 mb-4">
-                      Analizza mercati immobiliari, trend prezzi e opportunità di investimento.
-                    </p>
-                    <div className="space-x-3">
-                      <button
-                        onClick={() => setActiveTab('tools')}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                      >
-                        Analizza Mercato
-                      </button>
-                      <button
-                        onClick={() => setActiveTab('tools')}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                      >
-                        Genera Report
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Analisi Fattibilità */}
-            {activeTab === 'feasibility-analysis' && (
-              <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Analisi Fattibilità</h1>
-                    <p className="text-gray-600 mt-1">Valutazione economica e finanziaria dei progetti</p>
-                  </div>
-                  <button
-                    onClick={() => setActiveTab('tools')}
-                    className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg"
-                  >
-                    <Bot className="w-4 h-4 inline mr-2" />
-                    Chiedi all'OS
-                  </button>
-                </div>
-
-                <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <TrendingUp className="w-8 h-8 text-purple-600" />
-                    </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Analisi Fattibilità
-                    </h3>
-                    <p className="text-gray-500 mb-4">
-                      Calcola ROI, payback period e analisi di sensibilità per i tuoi progetti.
-                    </p>
-                    <div className="space-x-3">
-                      <button
-                        onClick={() => setActiveTab('tools')}
-                        className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                      >
-                        Nuova Analisi
-                      </button>
-                      <button
-                        onClick={() => setActiveTab('tools')}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                      >
-                        Analisi Sensibilità
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Design Center */}
-            {activeTab === 'design-center' && (
-              <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Design Center</h1>
-                    <p className="text-gray-600 mt-1">Progettazione AI-powered e analisi terreni</p>
-                  </div>
-                  <button
-                    onClick={() => setActiveTab('tools')}
-                    className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg"
-                  >
-                    <Bot className="w-4 h-4 inline mr-2" />
-                    Chiedi all'OS
-                  </button>
-                </div>
-
-                <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Sparkles className="w-8 h-8 text-orange-600" />
-                    </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Design Center
-                    </h3>
-                    <p className="text-gray-500 mb-4">
-                      Crea design AI-powered, analizza terreni e genera progetti ottimizzati.
-                    </p>
-                    <div className="space-x-3">
-                      <button
-                        onClick={() => setActiveTab('tools')}
-                        className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
-                      >
-                        Analizza Terreno
-                      </button>
-                      <button
-                        onClick={() => setActiveTab('tools')}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                      >
-                        Crea Design
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Placeholder per altre sezioni */}
-            {activeTab !== 'overview' && activeTab !== 'tools' && activeTab !== 'market-intelligence' && activeTab !== 'feasibility-analysis' && activeTab !== 'design-center' && (
-              <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h1 className="text-3xl font-bold text-gray-900 capitalize">
-                      {activeTab.replace('-', ' ')}
-                    </h1>
-                    <p className="text-gray-600 mt-1">
-                      Sezione {activeTab.replace('-', ' ')} - In sviluppo
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setActiveTab('tools')}
-                    className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg"
-                  >
-                    <Bot className="w-4 h-4 inline mr-2" />
-                    Chiedi all'OS
-                  </button>
                 </div>
 
                 <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
                   <div className="text-center py-12">
                     <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Building2 className="w-8 h-8 text-blue-600" />
+                      <Bot className="w-8 h-8 text-blue-600" />
                     </div>
                     <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Sezione in Sviluppo
+                      Benvenuto nella Dashboard Unificata
                     </h3>
                     <p className="text-gray-500 mb-4">
-                      Questa sezione è in fase di sviluppo e sarà disponibile presto.
+                      Usa la sidebar per navigare alle funzionalità specifiche o interagisci con Urbanova OS.
                     </p>
                     <button
                       onClick={() => setActiveTab('tools')}
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
-                      Usa Tool OS per questa funzionalità
+                      Interagisci con Urbanova OS
                     </button>
                   </div>
                 </div>
