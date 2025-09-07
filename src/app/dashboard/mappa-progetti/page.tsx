@@ -24,7 +24,6 @@ import {
   CheckCircleIcon,
   AlertTriangleIcon,
 } from '@/components/icons';
-import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdvancedMapView from '@/components/ui/AdvancedMapView';
 import { useAuth } from '@/contexts/AuthContext';
 import { projectMapService, ProjectLocation, MapFilter, MapCluster } from '@/lib/projectMapService';
@@ -347,30 +346,26 @@ export default function MappaProgettiPage() {
 
   if (loading) {
     return (
-      <DashboardLayout title="Mappa Progetti">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Caricamento mappa progetti...</p>
-          </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Caricamento mappa progetti...</p>
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <DashboardLayout title="Mappa Progetti">
-        <div className="flex flex-col items-center justify-center h-64 space-y-4">
-          <div className="text-red-600 text-xl">❌ {error}</div>
-          <button
-            onClick={loadData}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            🔄 Riprova
-          </button>
-        </div>
-      </DashboardLayout>
+      <div className="flex flex-col items-center justify-center min-h-screen space-y-4">
+        <div className="text-red-600 text-xl">❌ {error}</div>
+        <button
+          onClick={loadData}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          🔄 Riprova
+        </button>
+      </div>
     );
   }
 

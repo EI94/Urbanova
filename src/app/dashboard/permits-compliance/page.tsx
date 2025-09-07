@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-import DashboardLayout from '@/components/layout/DashboardLayout';
 import Button from '@/components/ui/Button';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -271,11 +270,9 @@ export default function PermitsCompliancePage() {
 
   if (loading) {
     return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="loading loading-spinner loading-lg"></div>
-        </div>
-      </DashboardLayout>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="loading loading-spinner loading-lg"></div>
+      </div>
     );
   }
 

@@ -20,7 +20,6 @@ import {
   KeyIcon,
   GlobeIcon,
 } from '@/components/icons';
-import DashboardLayout from '@/components/layout/DashboardLayout';
 
 // Componenti UI
 import UserProfilePanel from '@/components/ui/UserProfilePanel';
@@ -485,14 +484,12 @@ export default function ImpostazioniPage() {
 
   if (loading) {
     return (
-      <DashboardLayout title="Impostazioni">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Caricamento impostazioni...</p>
-          </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Caricamento impostazioni...</p>
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 
@@ -753,10 +750,10 @@ export default function ImpostazioniPage() {
 
         {/* Main Content */}
         <div className="flex-1 p-6">
-          <div className="flex gap-6">
-            {/* Sidebar Impostazioni */}
-            <div className="w-64 flex-shrink-0">
-              <div className="bg-white rounded-lg shadow-sm border p-4">
+      <div className="flex gap-6">
+        {/* Sidebar Impostazioni */}
+        <div className="w-64 flex-shrink-0">
+          <div className="bg-white rounded-lg shadow-sm border p-4">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Impostazioni</h3>
             <nav className="space-y-1">
               {settingsSections.map(section => (
