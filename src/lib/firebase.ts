@@ -46,12 +46,17 @@ if (typeof window !== 'undefined') {
     }
   });
 
-  // APPROCCIO NUCLEARE + SUPER-NUCLEARE: Intercetta TUTTE le chiamate a collection() globalmente
+  // APPROCCIO NUCLEARE + SUPER-NUCLEARE + MEGA-SUPER-NUCLEARE: Intercetta TUTTE le chiamate a collection() globalmente
   console.log('🔥 [NUCLEAR APPROACH] Implementando intercettazione globale collection()...');
   
   // Verifica se l'intercettazione webpack è attiva
   if ((window as any).__FIREBASE_COLLECTION_INTERCEPTOR__) {
     console.log('🔥🔥🔥 [SUPER-NUCLEAR DETECTED] Intercettazione webpack attiva!');
+  }
+  
+  // Verifica se l'intercettazione mega-super-nucleare è attiva
+  if ((window as any).__megaSafeCollectionWrapper) {
+    console.log('🔥🔥🔥🔥 [MEGA-SUPER-NUCLEAR DETECTED] Intercettazione mega-super-nucleare attiva!');
   }
   
   // Importa la funzione collection originale in modo dinamico
@@ -93,8 +98,14 @@ if (typeof window !== 'undefined') {
     // Sostituisci anche globalmente
     (window as any).collection = safeCollectionWrapper;
     
-    // Se l'intercettazione webpack è attiva, usa quella
-    if ((window as any).__safeCollectionWrapper) {
+    // Se l'intercettazione mega-super-nucleare è attiva, usa quella (priorità massima)
+    if ((window as any).__megaSafeCollectionWrapper) {
+      console.log('🔥🔥🔥🔥 [MEGA-SUPER-NUCLEAR BRIDGE] Usando wrapper mega-super-nucleare!');
+      firestore.collection = (window as any).__megaSafeCollectionWrapper;
+      (window as any).collection = (window as any).__megaSafeCollectionWrapper;
+    }
+    // Altrimenti se l'intercettazione webpack è attiva, usa quella
+    else if ((window as any).__safeCollectionWrapper) {
       console.log('🔥🔥🔥 [SUPER-NUCLEAR BRIDGE] Usando wrapper webpack!');
       firestore.collection = (window as any).__safeCollectionWrapper;
       (window as any).collection = (window as any).__safeCollectionWrapper;

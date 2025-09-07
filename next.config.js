@@ -114,7 +114,8 @@ if (typeof window !== 'undefined') {
           `,
           raw: true,
           entryOnly: false,
-          test: /\.js$/
+          include: /\.(js|mjs|jsx|ts|tsx)$/,
+          exclude: /\.(css|scss|sass|less|styl)$/
         })
       );
       

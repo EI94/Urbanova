@@ -2,6 +2,9 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 
+// MEGA-SUPER-NUCLEAR: Carica l'interceptor Firebase PRIMA di tutto
+import '../lib/firebaseInterceptor.js';
+
 import Toaster from '@/components/ui/Toaster';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
