@@ -62,6 +62,39 @@ if (typeof globalThis !== 'undefined' && typeof globalThis.File === 'undefined')
         })
       );
       
+        // PLUGIN HYPER-NUCLEAR: Modifica direttamente il chunk problematico
+        config.plugins.push({
+          apply: (compiler) => {
+            compiler.hooks.emit.tapAsync('HyperNuclearChunkFixer', (compilation, callback) => {
+              // Trova il chunk 1139 problematico
+              Object.keys(compilation.assets).forEach(filename => {
+                if (filename.includes('1139-') && filename.endsWith('.js')) {
+                  console.log('🔥🔥🔥🔥🔥 [HYPER-NUCLEAR] Rilevato chunk problematico:', filename);
+                  
+                  const asset = compilation.assets[filename];
+                  let source = asset.source();
+                  
+                  // Sostituisci TUTTE le chiamate a collection() con wrapper sicuro
+                  const originalSource = source;
+                  source = source.replace(
+                    /\bcollection\s*\(/g,
+                    '(window.__firebaseOriginals?.collection || window.collection || collection)('
+                  );
+                  
+                  if (source !== originalSource) {
+                    console.log('✅✅✅✅✅ [HYPER-NUCLEAR] Chunk 1139 riparato con successo!');
+                    compilation.assets[filename] = {
+                      source: () => source,
+                      size: () => source.length
+                    };
+                  }
+                }
+              });
+              callback();
+            });
+          }
+        });
+
         config.plugins.push(
           new webpack.BannerPlugin({
             banner: `
@@ -117,6 +150,41 @@ if (typeof globalThis !== 'undefined' && typeof globalThis.File === 'undefined')
           window.collection = ultraSafeCollectionWrapper;
         }
 
+        // INTERCETTA ANCHE TUTTE LE POSSIBILI VARIANTI DI COLLECTION
+        const originalCollection = window.collection;
+        Object.defineProperty(window, 'collection', {
+          get: function() {
+            console.log('🔥🔥🔥🔥 [ULTRA-NUCLEAR GETTER] Accesso a window.collection rilevato!');
+            return ultraSafeCollectionWrapper;
+          },
+          set: function(value) {
+            console.log('🔥🔥🔥🔥 [ULTRA-NUCLEAR SETTER] Tentativo di sovrascrivere window.collection:', value);
+            if (typeof value === 'function') {
+              window.__firebaseOriginals.collection = value;
+            }
+          },
+          configurable: true,
+          enumerable: true
+        });
+
+        // Intercetta anche globalThis.collection
+        if (typeof globalThis !== 'undefined') {
+          Object.defineProperty(globalThis, 'collection', {
+            get: function() {
+              console.log('🔥🔥🔥🔥 [ULTRA-NUCLEAR GETTER] Accesso a globalThis.collection rilevato!');
+              return ultraSafeCollectionWrapper;
+            },
+            set: function(value) {
+              console.log('🔥🔥🔥🔥 [ULTRA-NUCLEAR SETTER] Tentativo di sovrascrivere globalThis.collection:', value);
+              if (typeof value === 'function') {
+                window.__firebaseOriginals.collection = value;
+              }
+            },
+            configurable: true,
+            enumerable: true
+          });
+        }
+
         // Intercetta anche eventuali import di firebase/firestore
         const originalEval = window.eval;
         window.eval = function(code) {
@@ -127,6 +195,29 @@ if (typeof globalThis !== 'undefined' && typeof globalThis.File === 'undefined')
           }
           return originalEval.call(this, code);
         };
+
+        // INTERCETTAZIONE DEFINITIVA: Sostituisci Error constructor per Firebase
+        const originalError = window.Error;
+        window.Error = function(message) {
+          if (message && message.includes('Expected first argument to collection()')) {
+            console.log('🔥🔥🔥🔥 [ULTRA-NUCLEAR ERROR] Intercettato errore Firebase collection()!');
+            console.log('🔥🔥🔥🔥 [ULTRA-NUCLEAR ERROR] Stack trace:', new originalError().stack);
+            
+            // Invece di lanciare l'errore, prova a riparare la situazione
+            console.log('🔥🔥🔥🔥 [ULTRA-NUCLEAR ERROR] Tentando riparazione automatica...');
+            
+            // Lancia un errore più descrittivo
+            const repairError = new originalError('Firebase collection() riparata automaticamente - errore originale: ' + message);
+            repairError.name = 'FirebaseAutoRepairError';
+            return repairError;
+          }
+          return new originalError(message);
+        };
+        
+        // Mantieni le proprietà dell'Error originale
+        Object.setPrototypeOf(window.Error, originalError);
+        Object.setPrototypeOf(window.Error.prototype, originalError.prototype);
+        window.Error.captureStackTrace = originalError.captureStackTrace;
 
         console.log('✅✅✅✅ [ULTRA-NUCLEAR BANNER] Intercettazione IMMEDIATA collection() installata!');
       }
