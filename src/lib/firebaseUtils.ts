@@ -1,30 +1,31 @@
-import { Firestore, collection } from 'firebase/firestore';
-import { db } from './firebase';
+import { Firestore, collection, getFirestore } from 'firebase/firestore';
+import { initializeApp } from 'firebase/app';
 
 /**
  * Funzione helper per verificare che Firebase sia inizializzato correttamente
  * prima di chiamare collection() per evitare l'errore:
  * "Expected first argument to collection() to be a CollectionReference, a DocumentReference or FirebaseFirestore"
  */
+// Cache globale per l'istanza Firebase
+let cachedDb: Firestore | null = null;
+let cachedApp: any = null;
+
 export function safeCollection(collectionName: string) {
   console.log('🚀🚀🚀 [safeCollection] CHIAMATA RICEVUTA per collezione:', collectionName);
-  console.log('🚀🚀🚀 [safeCollection] db type:', typeof db);
-  console.log('🚀🚀🚀 [safeCollection] db value:', db);
-  console.log('🚀🚀🚀 [safeCollection] db constructor:', db?.constructor?.name);
-  console.log('🚀🚀🚀 [safeCollection] db === null:', db === null);
-  console.log('🚀🚀🚀 [safeCollection] db === undefined:', db === undefined);
+  console.log('🚀🚀🚀 [safeCollection] cachedDb type:', typeof cachedDb);
+  console.log('🚀🚀🚀 [safeCollection] cachedDb value:', cachedDb);
+  console.log('🚀🚀🚀 [safeCollection] cachedDb constructor:', cachedDb?.constructor?.name);
+  console.log('🚀🚀🚀 [safeCollection] cachedDb === null:', cachedDb === null);
+  console.log('🚀🚀🚀 [safeCollection] cachedDb === undefined:', cachedDb === undefined);
   console.log('🚀🚀🚀 [safeCollection] Stack trace chiamata:', new Error().stack);
   
-  if (!db || db === undefined || db === null) {
-    console.warn('⚠️⚠️⚠️ [safeCollection] Firebase Firestore non inizializzato - tentativo di reinizializzazione...');
-    console.warn('⚠️⚠️⚠️ [safeCollection] db value:', db);
-    console.warn('⚠️⚠️⚠️ [safeCollection] db type:', typeof db);
+  // Se non abbiamo un db cached, inizializziamo Firebase
+  if (!cachedDb || cachedDb === undefined || cachedDb === null) {
+    console.warn('⚠️⚠️⚠️ [safeCollection] Firebase Firestore non cached - inizializzazione completa...');
+    console.warn('⚠️⚠️⚠️ [safeCollection] cachedDb value:', cachedDb);
+    console.warn('⚠️⚠️⚠️ [safeCollection] cachedDb type:', typeof cachedDb);
     
     try {
-      // Import dinamico per evitare problemi di inizializzazione
-      const { getFirestore } = require('firebase/firestore');
-      const { initializeApp } = require('firebase/app');
-      
       // Configurazione Firebase
       const firebaseConfig = {
         apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyAxex9T9insV0Y5-puRZc6y-QQhn1KLXD8',
@@ -38,42 +39,37 @@ export function safeCollection(collectionName: string) {
       
       console.log('🚀🚀🚀 [safeCollection] Inizializzando Firebase con config:', firebaseConfig);
       
-      // Reinizializza Firebase
-      const app = initializeApp(firebaseConfig);
-      const newDb = getFirestore(app);
+      // Inizializza Firebase completamente
+      cachedApp = initializeApp(firebaseConfig);
+      cachedDb = getFirestore(cachedApp);
       
-      console.log('✅✅✅ [safeCollection] Firebase reinizializzato con successo!');
-      console.log('✅✅✅ [safeCollection] newDb type:', typeof newDb);
-      console.log('✅✅✅ [safeCollection] newDb constructor:', newDb?.constructor?.name);
-      console.log('✅✅✅ [safeCollection] newDb value:', newDb);
+      console.log('✅✅✅ [safeCollection] Firebase inizializzato con successo!');
+      console.log('✅✅✅ [safeCollection] cachedDb type:', typeof cachedDb);
+      console.log('✅✅✅ [safeCollection] cachedDb constructor:', cachedDb?.constructor?.name);
+      console.log('✅✅✅ [safeCollection] cachedDb value:', cachedDb);
       
-      // Verifica che newDb sia valido
-      if (!newDb || typeof newDb !== 'object') {
-        throw new Error('newDb non è un oggetto valido dopo reinizializzazione');
+      // Verifica che cachedDb sia valido
+      if (!cachedDb || typeof cachedDb !== 'object') {
+        throw new Error('cachedDb non è un oggetto valido dopo inizializzazione');
       }
       
-      // Usa il nuovo db
-      const collectionRef = collection(newDb, collectionName);
-      console.log('✅✅✅ [safeCollection] Collezione creata con successo dopo reinizializzazione:', collectionName);
-      return collectionRef;
-      
-    } catch (reinitError: any) {
-      console.error('❌❌❌ [safeCollection] Errore durante la reinizializzazione Firebase:', reinitError);
-      console.error('❌❌❌ [safeCollection] reinitError message:', reinitError.message);
-      console.error('❌❌❌ [safeCollection] reinitError stack:', reinitError.stack);
-      throw new Error(`Firebase Firestore non inizializzato e reinizializzazione fallita per ${collectionName}: ${reinitError.message}`);
+    } catch (initError: any) {
+      console.error('❌❌❌ [safeCollection] Errore durante l\'inizializzazione Firebase:', initError);
+      console.error('❌❌❌ [safeCollection] initError message:', initError.message);
+      console.error('❌❌❌ [safeCollection] initError stack:', initError.stack);
+      throw new Error(`Firebase Firestore non inizializzato per ${collectionName}: ${initError.message}`);
     }
   }
   
-  // Verifica che db sia effettivamente un'istanza di Firestore
-  if (typeof db !== 'object' || !db) {
-    console.error('❌❌❌ [safeCollection] Firebase Firestore non è un oggetto valido:', typeof db, db);
-    throw new Error('Firebase Firestore non è valido');
+  // Verifica che cachedDb sia effettivamente un'istanza di Firestore
+  if (typeof cachedDb !== 'object' || !cachedDb) {
+    console.error('❌❌❌ [safeCollection] Firebase Firestore cached non è un oggetto valido:', typeof cachedDb, cachedDb);
+    throw new Error('Firebase Firestore cached non è valido');
   }
   
   try {
     console.log('🚀🚀🚀 [safeCollection] Chiamando collection() Firebase per:', collectionName);
-    const result = collection(db, collectionName);
+    const result = collection(cachedDb, collectionName);
     console.log('✅✅✅ [safeCollection] Collection REALE creata con successo per:', collectionName);
     return result;
   } catch (error: any) {
@@ -90,7 +86,7 @@ export function safeCollection(collectionName: string) {
  * Verifica che Firebase sia completamente inizializzato
  */
 export function isFirebaseReady(): boolean {
-  return !!db && typeof db === 'object';
+  return !!cachedDb && typeof cachedDb === 'object';
 }
 
 /**
