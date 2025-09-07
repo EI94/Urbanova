@@ -1,99 +1,225 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { toast } from 'react-hot-toast';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-
 import {
-  BuildingIcon,
-  TrendingUpIcon,
-  ClockIcon,
-  EyeIcon,
-  EditIcon,
-  TrashIcon,
-  PlusIcon,
-} from '@/components/icons';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { useAuth } from '@/contexts/AuthContext';
-import { designProjectService, DesignProject } from '@/lib/designProjectService';
-import FeedbackWidget from '@/components/ui/FeedbackWidget';
-import {
-  BarChart3,
-  FileText,
-  Shield,
-  Calendar,
+  Building,
   Plus,
+  Search,
+  Filter,
+  Eye,
+  Edit,
+  Trash2,
+  Download,
+  Share,
+  Calendar,
+  Users,
+  DollarSign,
+  BarChart3,
+  TrendingUp,
+  FileText,
+  CreditCard,
+  Shield,
   Target,
   Bot,
   Sparkles,
-  MessageCircle,
-  Search,
-  TrendingUp,
 } from 'lucide-react';
+import FeedbackWidget from '@/components/ui/FeedbackWidget';
 
-export default function ProjectsPage() {
-  const { user } = useAuth();
-  const [projects, setProjects] = useState<DesignProject[]>([]);
+// ============================================================================
+// TYPES
+// ============================================================================
+
+interface Project {
+  id: string;
+  name: string;
+  description: string;
+  status: 'planning' | 'in_progress' | 'completed' | 'on_hold' | 'cancelled';
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  budget: number;
+  spent: number;
+  progress: number;
+  startDate: string;
+  endDate?: string;
+  team: string[];
+  location: string;
+  tags: string[];
+  lastModified: string;
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
+export default function ProgettiPage() {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
-    loadProjects();
-  }, [user]);
+    loadData();
+  }, []);
 
-  const loadProjects = async () => {
-    if (!user?.uid) {
-      setError('Utente non autenticato');
-      setLoading(false);
-      return;
-    }
+  useEffect(() => {
+    filterProjects();
+  }, [projects, searchTerm, selectedStatus]);
 
+  const loadData = async () => {
     try {
-      setLoading(true);
-      setError(null);
+      // Mock projects data
+      const mockProjects: Project[] = [
+        {
+          id: '1',
+          name: 'Villa Moderna Roma',
+          description: 'Progetto di villa moderna con design contemporaneo e tecnologie sostenibili',
+          status: 'in_progress',
+          priority: 'high',
+          budget: 850000,
+          spent: 552500,
+          progress: 65,
+          startDate: '2024-01-15',
+          endDate: '2024-06-15',
+          team: ['Pierpaolo Laurito', 'Mario Rossi', 'Giulia Bianchi'],
+          location: 'Roma, RM',
+          tags: ['residenziale', 'moderno', 'sostenibile'],
+          lastModified: '2024-01-20',
+        },
+        {
+          id: '2',
+          name: 'Condominio Sostenibile Milano',
+          description: 'Complesso residenziale eco-sostenibile con certificazione LEED',
+          status: 'planning',
+          priority: 'critical',
+          budget: 2500000,
+          spent: 125000,
+          progress: 25,
+          startDate: '2024-02-01',
+          endDate: '2024-12-31',
+          team: ['Luca Verdi', 'Anna Neri', 'Marco Blu'],
+          location: 'Milano, MI',
+          tags: ['condominio', 'sostenibile', 'leed'],
+          lastModified: '2024-01-18',
+        },
+        {
+          id: '3',
+          name: 'Centro Commerciale Napoli',
+          description: 'Centro commerciale moderno con focus su retail e intrattenimento',
+          status: 'completed',
+          priority: 'medium',
+          budget: 5200000,
+          spent: 5200000,
+          progress: 100,
+          startDate: '2023-06-01',
+          endDate: '2024-01-15',
+          team: ['Sara Rossi', 'Paolo Bianchi', 'Elena Verde'],
+          location: 'Napoli, NA',
+          tags: ['commerciale', 'retail', 'intrattenimento'],
+          lastModified: '2024-01-15',
+        },
+        {
+          id: '4',
+          name: 'Residenze Torino',
+          description: 'Ristrutturazione di edificio storico per uso residenziale',
+          status: 'on_hold',
+          priority: 'low',
+          budget: 1800000,
+          spent: 720000,
+          progress: 40,
+          startDate: '2023-09-01',
+          team: ['Francesco Nero', 'Laura Gialla'],
+          location: 'Torino, TO',
+          tags: ['ristrutturazione', 'storico', 'residenziale'],
+          lastModified: '2024-01-10',
+        },
+        {
+          id: '5',
+          name: 'Uffici Firenze',
+          description: 'Edificio per uffici con certificazione energetica A+',
+          status: 'cancelled',
+          priority: 'medium',
+          budget: 3200000,
+          spent: 320000,
+          progress: 10,
+          startDate: '2023-11-01',
+          team: ['Roberto Viola', 'Michela Rosa'],
+          location: 'Firenze, FI',
+          tags: ['uffici', 'energetico', 'certificazione'],
+          lastModified: '2024-01-05',
+        },
+      ];
 
-      const userProjects = await designProjectService.getUserProjects(user.uid);
-      setProjects(userProjects);
-
-      console.log('✅ [Progetti] Progetti caricati:', userProjects.length);
+      setProjects(mockProjects);
     } catch (error) {
-      console.error('❌ [Progetti] Errore caricamento progetti:', error);
-      setError('Impossibile caricare i progetti');
+      console.error('Error loading projects:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'PLANNING':
-        return 'bg-blue-100 text-blue-800';
-      case 'IN_PROGRESS':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'COMPLETED':
-        return 'bg-green-100 text-green-800';
-      case 'ON_HOLD':
-        return 'bg-gray-100 text-gray-800';
-      case 'CANCELLED':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+  const filterProjects = () => {
+    let filtered = projects;
+
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(project =>
+        project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
     }
+
+    // Filter by status
+    if (selectedStatus !== 'all') {
+      filtered = filtered.filter(project => project.status === selectedStatus);
+    }
+
+    setFilteredProjects(filtered);
+  };
+
+  const getStatusColor = (status: string) => {
+    const colors = {
+      planning: 'text-blue-600 bg-blue-100',
+      in_progress: 'text-green-600 bg-green-100',
+      completed: 'text-gray-600 bg-gray-100',
+      on_hold: 'text-yellow-600 bg-yellow-100',
+      cancelled: 'text-red-600 bg-red-100',
+    };
+    return colors[status as keyof typeof colors] || 'text-gray-600 bg-gray-100';
+  };
+
+  const getStatusLabel = (status: string) => {
+    const labels = {
+      planning: 'Pianificazione',
+      in_progress: 'In Corso',
+      completed: 'Completato',
+      on_hold: 'In Pausa',
+      cancelled: 'Cancellato',
+    };
+    return labels[status as keyof typeof labels] || status;
   };
 
   const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'LOW':
-        return 'bg-gray-100 text-gray-800';
-      case 'MEDIUM':
-        return 'bg-blue-100 text-blue-800';
-      case 'HIGH':
-        return 'bg-orange-100 text-orange-800';
-      case 'URGENT':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+    const colors = {
+      low: 'text-gray-600 bg-gray-100',
+      medium: 'text-blue-600 bg-blue-100',
+      high: 'text-orange-600 bg-orange-100',
+      critical: 'text-red-600 bg-red-100',
+    };
+    return colors[priority as keyof typeof colors] || 'text-gray-600 bg-gray-100';
+  };
+
+  const getPriorityLabel = (priority: string) => {
+    const labels = {
+      low: 'Bassa',
+      medium: 'Media',
+      high: 'Alta',
+      critical: 'Critica',
+    };
+    return labels[priority as keyof typeof labels] || priority;
   };
 
   const formatCurrency = (amount: number) => {
@@ -103,32 +229,15 @@ export default function ProjectsPage() {
     }).format(amount);
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('it-IT');
+  };
+
   if (loading) {
     return (
-      <DashboardLayout title="Progetti">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Caricamento progetti...</p>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  if (error) {
-    return (
-      <DashboardLayout title="Progetti">
-        <div className="flex flex-col items-center justify-center h-64 space-y-4">
-          <div className="text-red-600 text-xl">❌ {error}</div>
-          <button
-            onClick={loadProjects}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            🔄 Riprova
-          </button>
-        </div>
-      </DashboardLayout>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
     );
   }
 
@@ -140,427 +249,332 @@ export default function ProjectsPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                  <BuildingIcon className="w-5 h-5 text-white" />
+                <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
+                  <Building className="w-5 h-5 text-white" />
                 </div>
                 <div>
                   <h1 className="text-xl font-semibold text-gray-900">Progetti</h1>
-                  <p className="text-sm text-gray-500">Gestisci tutti i tuoi progetti immobiliari</p>
+                  <p className="text-sm text-gray-600">Gestisci tutti i tuoi progetti immobiliari</p>
                 </div>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => (window.location.href = '/dashboard/design-center')}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-              >
-                <PlusIcon className="h-4 w-4 mr-2 inline" />
-                Nuovo Progetto
-              </button>
-            </div>
+            <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <Plus className="w-4 h-4" />
+              <span>Nuovo Progetto</span>
+            </button>
           </div>
         </div>
       </div>
 
       <div className="flex">
         {/* Sidebar */}
-        <div className="w-64 bg-white shadow-sm border-r min-h-screen">
-          <div className="p-4">
+        <div className="w-64 bg-white border-r border-gray-200 min-h-screen">
+          <div className="p-6">
             <nav className="space-y-2">
-              {/* Sezione principale */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  DASHBOARD
-                </h3>
-                <Link
-                  href="/dashboard/unified"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <BarChart3 className="w-4 h-4 mr-3" />
-                  Overview
-                </Link>
-              </div>
-
-              {/* Discovery */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  DISCOVERY
-                </h3>
-                <Link
-                  href="/dashboard/market-intelligence"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Search className="w-4 h-4 mr-3" />
-                  Market Intelligence
-                </Link>
-                <Link
-                  href="/dashboard/feasibility-analysis"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <TrendingUp className="w-4 h-4 mr-3" />
-                  Analisi Fattibilità
-                </Link>
-                <Link
-                  href="/dashboard/design-center"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Sparkles className="w-4 h-4 mr-3" />
-                  Design Center
-                </Link>
-              </div>
-
-              {/* Planning & Compliance */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  PLANNING/COMPLIANCE
-                </h3>
-                <Link
-                  href="/dashboard/business-plan"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <FileText className="w-4 h-4 mr-3" />
-                  Business Plan
-                </Link>
-                <Link
-                  href="/dashboard/permits-compliance"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Shield className="w-4 h-4 mr-3" />
-                  Permessi & Compliance
-                </Link>
-                <Link
-                  href="/dashboard/project-timeline"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Calendar className="w-4 h-4 mr-3" />
-                  Project Timeline AI
-                </Link>
-              </div>
-
-              {/* Progetti */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  PROGETTI
-                </h3>
-                <button
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors bg-indigo-100 text-indigo-700"
-                >
-                  <BuildingIcon className="w-4 h-4 mr-3" />
-                  Progetti
-                </button>
-                <Link
-                  href="/dashboard/progetti/nuovo"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Plus className="w-4 h-4 mr-3" />
-                  Nuovo Progetto
-                </Link>
-                <Link
-                  href="/dashboard/mappa-progetti"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Target className="w-4 h-4 mr-3" />
-                  Mappa Progetti
-                </Link>
-              </div>
-
-              {/* Gestione Progetti */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  GESTIONE PROGETTI
-                </h3>
-                <Link
-                  href="/dashboard/project-management"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <BuildingIcon className="w-4 h-4 mr-3" />
-                  Gestione Progetti
-                </Link>
-                <Link
-                  href="/dashboard/project-management/documents"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <FileText className="w-4 h-4 mr-3" />
-                  Documenti
-                </Link>
-                <Link
-                  href="/dashboard/project-management/meetings"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Calendar className="w-4 h-4 mr-3" />
-                  Riunioni
-                </Link>
-              </div>
-
-              {/* Marketing/Sales */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  MARKETING/SALES
-                </h3>
-                <Link
-                  href="/dashboard/marketing"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <TrendingUp className="w-4 h-4 mr-3" />
-                  Marketing
-                </Link>
-                <Link
-                  href="/dashboard/marketing/campaigns"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Target className="w-4 h-4 mr-3" />
-                  Campagne
-                </Link>
-                <Link
-                  href="/dashboard/marketing/materials"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <FileText className="w-4 h-4 mr-3" />
-                  Materiali
-                </Link>
-              </div>
-
-              {/* Construction/EPC */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  CONSTRUCTION/EPC
-                </h3>
-                <Link
-                  href="/dashboard/epc"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <BuildingIcon className="w-4 h-4 mr-3" />
-                  EPC
-                </Link>
-                <Link
-                  href="/dashboard/epc/construction-site"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <BuildingIcon className="w-4 h-4 mr-3" />
-                  Construction Site
-                </Link>
-                <Link
-                  href="/dashboard/epc/technical-documents"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <FileText className="w-4 h-4 mr-3" />
-                  Technical Documents
-                </Link>
-                <Link
-                  href="/dashboard/epc/permits"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Shield className="w-4 h-4 mr-3" />
-                  Permits
-                </Link>
-              </div>
-
-              {/* AI Assistant */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  AI ASSISTANT
-                </h3>
-                <Link
-                  href="/dashboard/unified"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Bot className="w-4 h-4 mr-3" />
-                  Urbanova OS
-                </Link>
-              </div>
-
-              {/* Feedback */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  SUPPORTO
-                </h3>
-                <Link
-                  href="/dashboard/feedback"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <MessageCircle className="w-4 h-4 mr-3" />
-                  Feedback
-                </Link>
-              </div>
+              <Link href="/dashboard/unified" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <BarChart3 className="w-5 h-5" />
+                <span>Dashboard</span>
+              </Link>
+              <Link href="/dashboard/market-intelligence" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <TrendingUp className="w-5 h-5" />
+                <span>Market Intelligence</span>
+              </Link>
+              <Link href="/dashboard/feasibility-analysis" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <FileText className="w-5 h-5" />
+                <span>Analisi Fattibilità</span>
+              </Link>
+              <Link href="/dashboard/design-center" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <Building className="w-5 h-5" />
+                <span>Design Center</span>
+              </Link>
+              <Link href="/dashboard/business-plan" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <Target className="w-5 h-5" />
+                <span>Business Plan</span>
+              </Link>
+              <Link href="/dashboard/permits-compliance" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <Shield className="w-5 h-5" />
+                <span>Permessi & Compliance</span>
+              </Link>
+              <Link href="/dashboard/project-timeline" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <Calendar className="w-5 h-5" />
+                <span>Project Timeline AI</span>
+              </Link>
+              <Link href="/dashboard/progetti" className="flex items-center space-x-3 px-3 py-2 text-purple-600 bg-purple-50 rounded-lg transition-colors">
+                <Building className="w-5 h-5" />
+                <span>Progetti</span>
+              </Link>
+              <Link href="/dashboard/billing" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <CreditCard className="w-5 h-5" />
+                <span>Billing & Usage</span>
+              </Link>
             </nav>
           </div>
         </div>
 
         {/* Main Content */}
         <div className="flex-1 p-6">
-          <div className="space-y-6">
+          {/* Search and Filters */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Cerca progetti..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="all">Tutti gli Stati</option>
+                <option value="planning">Pianificazione</option>
+                <option value="in_progress">In Corso</option>
+                <option value="completed">Completato</option>
+                <option value="on_hold">In Pausa</option>
+                <option value="cancelled">Cancellato</option>
+              </select>
+            </div>
 
-        {/* Statistiche */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <BuildingIcon className="h-5 w-5 text-blue-600" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Progetti Totali</p>
-                <p className="text-2xl font-bold text-gray-900">{projects.length}</p>
-              </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded-lg transition-colors ${
+                  viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <Building className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded-lg transition-colors ${
+                  viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <BarChart3 className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <TrendingUpIcon className="h-5 w-5 text-green-600" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">In Corso</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {projects.filter(p => p.status === 'IN_PROGRESS').length}
-                </p>
-              </div>
+          {/* Grid View */}
+          {viewMode === 'grid' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProjects.map(project => (
+                <div key={project.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                  <div className="aspect-video bg-gray-100 relative">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Building className="w-12 h-12 text-gray-400" />
+                    </div>
+                    <div className="absolute top-2 right-2 flex space-x-1">
+                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(project.status)}`}>
+                        {getStatusLabel(project.status)}
+                      </span>
+                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(project.priority)}`}>
+                        {getPriorityLabel(project.priority)}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4">
+                    <div className="mb-2">
+                      <h3 className="font-semibold text-gray-900">{project.name}</h3>
+                      <p className="text-sm text-gray-600">{project.location}</p>
+                    </div>
+                    
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{project.description}</p>
+                    
+                    <div className="space-y-2 mb-3">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Budget:</span>
+                        <span className="font-medium">{formatCurrency(project.budget)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Speso:</span>
+                        <span className="font-medium">{formatCurrency(project.spent)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Progresso:</span>
+                        <span className="font-medium">{project.progress}%</span>
+                      </div>
+                    </div>
+                    
+                    <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${project.progress}%` }}
+                      ></div>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {project.tags.map(tag => (
+                        <span key={tag} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2 text-sm text-gray-600">
+                        <Users className="w-4 h-4" />
+                        <span>{project.team.length}</span>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                          <Share className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+          )}
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <ClockIcon className="h-5 w-5 text-yellow-600" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">In Pianificazione</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {projects.filter(p => p.status === 'PLANNING').length}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <BuildingIcon className="h-5 w-5 text-purple-600" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Budget Totale</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(projects.reduce((total, p) => total + p.budget.estimated, 0))}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Lista Progetti */}
-        {projects.length === 0 ? (
-          <div className="text-center py-12">
-            <BuildingIcon className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-700 mb-2">Nessun progetto trovato</h3>
-            <p className="text-gray-500 mb-4">Crea il tuo primo progetto dal Design Center</p>
-            <button
-              onClick={() => (window.location.href = '/dashboard/design-center')}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <PlusIcon className="h-4 w-4 mr-2 inline" />
-              Crea Primo Progetto
-            </button>
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">I Tuoi Progetti</h3>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Progetto
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Stato
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Priorità
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Budget
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Progresso
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Azioni
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {projects.map(project => (
-                    <tr key={project.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10">
-                            <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                              <BuildingIcon className="h-5 w-5 text-blue-600" />
-                            </div>
-                          </div>
-                          <div className="ml-4">
+          {/* List View */}
+          {viewMode === 'list' && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Progetto
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Stato
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Budget
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Progresso
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Team
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Azioni
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredProjects.map(project => (
+                      <tr key={project.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div>
                             <div className="text-sm font-medium text-gray-900">{project.name}</div>
                             <div className="text-sm text-gray-500">{project.location}</div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(project.status)}`}
-                        >
-                          {project.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(project.priority)}`}
-                        >
-                          {project.priority}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatCurrency(project.budget.estimated)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div
-                              className="bg-blue-600 h-2 rounded-full"
-                              style={{ width: `${project.progress}%` }}
-                            ></div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(project.status)}`}>
+                            {getStatusLabel(project.status)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{formatCurrency(project.budget)}</div>
+                          <div className="text-sm text-gray-500">Speso: {formatCurrency(project.spent)}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                              <div 
+                                className="bg-blue-600 h-2 rounded-full"
+                                style={{ width: `${project.progress}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-sm text-gray-900">{project.progress}%</span>
                           </div>
-                          <span className="ml-2 text-sm text-gray-600">{project.progress}%</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex items-center space-x-2">
-                          <button className="text-blue-600 hover:text-blue-900">
-                            <EyeIcon className="h-4 w-4" />
-                          </button>
-                          <button className="text-gray-600 hover:text-gray-900">
-                            <EditIcon className="h-4 w-4" />
-                          </button>
-                          <button className="text-red-600 hover:text-red-900">
-                            <TrashIcon className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {project.team.length} membri
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex items-center space-x-2">
+                            <button className="text-blue-600 hover:text-blue-900">
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            <button className="text-green-600 hover:text-green-900">
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button className="text-gray-600 hover:text-gray-900">
+                              <Download className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {/* Statistics */}
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Progetti Totali</p>
+                  <p className="text-2xl font-bold text-gray-900">{projects.length}</p>
+                </div>
+                <Building className="w-8 h-8 text-blue-600" />
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">In Corso</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {projects.filter(p => p.status === 'in_progress').length}
+                  </p>
+                </div>
+                <Calendar className="w-8 h-8 text-green-600" />
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Completati</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {projects.filter(p => p.status === 'completed').length}
+                  </p>
+                </div>
+                <Target className="w-8 h-8 text-gray-600" />
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Budget Totale</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {formatCurrency(projects.reduce((sum, p) => sum + p.budget, 0))}
+                  </p>
+                </div>
+                <DollarSign className="w-8 h-8 text-purple-600" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
+      
+      {/* Feedback Widget */}
+      <FeedbackWidget />
     </div>
-    
-    {/* Feedback Widget */}
-    <FeedbackWidget />
   );
 }
