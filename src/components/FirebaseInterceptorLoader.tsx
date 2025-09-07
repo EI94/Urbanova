@@ -4,17 +4,23 @@ import { useEffect } from 'react';
 
 export default function FirebaseInterceptorLoader() {
   useEffect(() => {
-    // Carica l'interceptor solo nel browser
+    // Carica gli interceptor solo nel browser
     if (typeof window !== 'undefined') {
-      console.log('🔥🔥🔥🔥 [MEGA-SUPER-NUCLEAR] Caricando interceptor Firebase nel browser...');
+      console.log('🔥🔥🔥🔥🔥 [ULTRA-NUCLEAR] Caricando polyfill e interceptor Firebase nel browser...');
       
-      // Import dinamico dell'interceptor
-      import('../lib/firebaseInterceptor.js')
+      // Prima carica il polyfill ultra-nucleare
+      import('../lib/firebaseCollectionPolyfill.js')
+        .then(() => {
+          console.log('✅✅✅✅✅ [ULTRA-NUCLEAR] Polyfill Firebase caricato con successo!');
+          
+          // Poi carica l'interceptor mega-super-nucleare
+          return import('../lib/firebaseInterceptor.js');
+        })
         .then(() => {
           console.log('✅✅✅✅ [MEGA-SUPER-NUCLEAR] Interceptor Firebase caricato con successo!');
         })
         .catch((error) => {
-          console.error('❌❌❌❌ [MEGA-SUPER-NUCLEAR] Errore nel caricamento interceptor:', error);
+          console.error('❌❌❌❌❌ [ULTRA-NUCLEAR] Errore nel caricamento polyfill/interceptor:', error);
         });
     }
   }, []);

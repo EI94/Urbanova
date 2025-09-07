@@ -62,62 +62,81 @@ if (typeof globalThis !== 'undefined' && typeof globalThis.File === 'undefined')
         })
       );
       
-      config.plugins.push(
-        new webpack.BannerPlugin({
-          banner: `
-console.log('🔥🔥🔥 [SUPER-NUCLEAR BANNER] Inizializzando intercettazione collection()...');
+        config.plugins.push(
+          new webpack.BannerPlugin({
+            banner: `
+      console.log('🔥🔥🔥🔥 [ULTRA-NUCLEAR BANNER] Inizializzando intercettazione IMMEDIATA collection()...');
 
-// Intercetta collection() immediatamente nel chunk
-if (typeof window !== 'undefined') {
-  console.log('🔥🔥🔥 [SUPER-NUCLEAR BANNER] Window disponibile, implementando intercettazione...');
-  
-  // Salva la funzione originale se esiste
-  window.__originalFirebaseCollection = null;
-  
-  // Crea il wrapper super-sicuro
-  window.__safeCollectionWrapper = function(db, collectionName) {
-    console.log('🔥🔥🔥 [SUPER-NUCLEAR WRAPPER] Intercettata chiamata collection() per:', collectionName);
-    console.log('🔥🔥🔥 [SUPER-NUCLEAR WRAPPER] db type:', typeof db);
-    console.log('🔥🔥🔥 [SUPER-NUCLEAR WRAPPER] db value:', db);
-    
-    if (!db) {
-      console.error('❌❌❌ [SUPER-NUCLEAR WRAPPER] Firebase Firestore non inizializzato!');
-      throw new Error('Firebase Firestore non inizializzato');
-    }
-    
-    if (typeof db !== 'object' || !db) {
-      console.error('❌❌❌ [SUPER-NUCLEAR WRAPPER] Firebase Firestore non è un oggetto valido!');
-      throw new Error('Firebase Firestore non è valido');
-    }
-    
-    try {
-      console.log('🔥🔥🔥 [SUPER-NUCLEAR WRAPPER] Chiamando funzione collection originale...');
-      
-      // Se abbiamo la funzione originale, usala
-      if (window.__originalFirebaseCollection) {
-        const result = window.__originalFirebaseCollection(db, collectionName);
-        console.log('✅✅✅ [SUPER-NUCLEAR WRAPPER] Collection creata con successo per:', collectionName);
-        return result;
-      } else {
-        // Fallback: usa il metodo interno di Firebase
-        console.error('❌❌❌ [SUPER-NUCLEAR WRAPPER] Funzione collection originale non trovata!');
-        throw new Error('Funzione collection originale non trovata');
+      // INTERCETTAZIONE ULTRA-NUCLEARE: Sostituisci collection() IMMEDIATAMENTE
+      if (typeof window !== 'undefined') {
+        console.log('🔥🔥🔥🔥 [ULTRA-NUCLEAR BANNER] Window disponibile, implementando intercettazione IMMEDIATA...');
+
+        // Se non esiste ancora, crea il container per le funzioni originali
+        if (!window.__firebaseOriginals) {
+          window.__firebaseOriginals = {};
+        }
+
+        // Crea il wrapper ultra-sicuro IMMEDIATO
+        const ultraSafeCollectionWrapper = function(db, collectionName) {
+          console.log('🔥🔥🔥🔥 [ULTRA-NUCLEAR WRAPPER] Intercettata chiamata collection() per:', collectionName);
+          console.log('🔥🔥🔥🔥 [ULTRA-NUCLEAR WRAPPER] db type:', typeof db);
+          console.log('🔥🔥🔥🔥 [ULTRA-NUCLEAR WRAPPER] db value:', db);
+
+          if (!db) {
+            console.error('❌❌❌❌ [ULTRA-NUCLEAR WRAPPER] Firebase Firestore non inizializzato!');
+            throw new Error('Firebase Firestore non inizializzato');
+          }
+
+          if (typeof db !== 'object' || !db) {
+            console.error('❌❌❌❌ [ULTRA-NUCLEAR WRAPPER] Firebase Firestore non è un oggetto valido!');
+            throw new Error('Firebase Firestore non è valido');
+          }
+
+          try {
+            console.log('🔥🔥🔥🔥 [ULTRA-NUCLEAR WRAPPER] Chiamando funzione collection originale...');
+
+            // Se abbiamo la funzione originale, usala
+            if (window.__firebaseOriginals.collection) {
+              const result = window.__firebaseOriginals.collection(db, collectionName);
+              console.log('✅✅✅✅ [ULTRA-NUCLEAR WRAPPER] Collection creata con successo per:', collectionName);
+              return result;
+            } else {
+              console.error('❌❌❌❌ [ULTRA-NUCLEAR WRAPPER] Funzione collection originale non trovata!');
+              throw new Error('Funzione collection originale non trovata');
+            }
+          } catch (error) {
+            console.error('❌❌❌❌ [ULTRA-NUCLEAR WRAPPER] Errore nella creazione collezione:', error);
+            throw error;
+          }
+        };
+
+        // SOSTITUISCI IMMEDIATAMENTE la funzione collection globalmente
+        if (typeof collection !== 'undefined') {
+          console.log('🔥🔥🔥🔥 [ULTRA-NUCLEAR BANNER] Funzione collection trovata, sostituendo...');
+          window.__firebaseOriginals.collection = collection;
+          window.collection = ultraSafeCollectionWrapper;
+        }
+
+        // Intercetta anche eventuali import di firebase/firestore
+        const originalEval = window.eval;
+        window.eval = function(code) {
+          if (code && code.includes('collection')) {
+            console.log('🔥🔥🔥🔥 [ULTRA-NUCLEAR EVAL] Intercettato eval con collection:', code.substring(0, 100));
+            // Sostituisci collection nel codice
+            code = code.replace(/\\bcollection\\b/g, 'window.collection || collection');
+          }
+          return originalEval.call(this, code);
+        };
+
+        console.log('✅✅✅✅ [ULTRA-NUCLEAR BANNER] Intercettazione IMMEDIATA collection() installata!');
       }
-    } catch (error) {
-      console.error('❌❌❌ [SUPER-NUCLEAR WRAPPER] Errore nella creazione collezione:', error);
-      throw error;
-    }
-  };
-  
-  console.log('✅✅✅ [SUPER-NUCLEAR BANNER] Wrapper collection() installato globalmente!');
-}
-          `,
-          raw: true,
-          entryOnly: false,
-          include: /\.(js|mjs|jsx|ts|tsx)$/,
-          exclude: /\.(css|scss|sass|less|styl)$/
-        })
-      );
+            `,
+            raw: true,
+            entryOnly: false,
+            include: /\.(js|mjs|jsx|ts|tsx)$/,
+            exclude: /\.(css|scss|sass|less|styl)$/
+          })
+        );
       
       // Lato client - escludi moduli Node.js
       config.resolve.fallback = {
