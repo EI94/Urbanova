@@ -755,128 +755,131 @@ export default function UnifiedDashboardPage() {
           <div className="flex-1 p-6">
             {activeTab === 'overview' && (
               <div className="space-y-6">
-                {/* Header */}
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-                    <p className="text-gray-600 mt-1">Panoramica generale dei tuoi progetti immobiliari</p>
+                {/* OS Interface - ChatGPT Style */}
+                <div className="bg-white rounded-lg shadow border border-gray-200 h-[600px] flex flex-col">
+                  <div className="p-4 border-b border-gray-200">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <Bot className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-semibold text-gray-900">Urbanova OS</h2>
+                        <p className="text-sm text-gray-500">Assistente Intelligente per la Gestione Immobiliare</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-500">Ultimo aggiornamento</p>
-                    <p className="text-sm font-medium">{new Date().toLocaleString()}</p>
+                  
+                  <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                    {messages.map(message => (
+                      <div
+                        key={message.id}
+                        className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div
+                          className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl ${
+                            message.type === 'user'
+                              ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+                              : 'bg-gray-100 text-gray-900'
+                          }`}
+                        >
+                          <div className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</div>
+                          <div className={`text-xs mt-2 ${
+                            message.type === 'user' ? 'text-blue-100' : 'text-gray-500'
+                          }`}>
+                            {message.timestamp.toLocaleTimeString()}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {isLoading && (
+                      <div className="flex justify-start">
+                        <div className="bg-gray-100 text-gray-900 px-4 py-3 rounded-2xl">
+                          <div className="flex items-center space-x-2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                            <span className="text-sm">Urbanova sta pensando...</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div ref={messagesEndRef} />
+                  </div>
+                  
+                  <div className="p-4 border-t border-gray-200">
+                    <div className="flex space-x-2">
+                      <input
+                        type="text"
+                        value={inputValue}
+                        onChange={e => setInputValue(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Chiedi qualcosa a Urbanova OS..."
+                        className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        disabled={isLoading}
+                      />
+                      <button
+                        onClick={handleSendMessage}
+                        disabled={!inputValue.trim() || isLoading}
+                        className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg"
+                      >
+                        <Send className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                {/* Statistiche Principali */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+                {/* Quick Stats - Minimized */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
                     <div className="flex items-center">
                       <div className="p-2 bg-blue-100 rounded-lg">
-                        <BuildingIcon className="h-6 w-6 text-blue-600" />
+                        <BuildingIcon className="h-5 w-5 text-blue-600" />
                       </div>
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Progetti Totali</p>
-                        <p className="text-2xl font-bold text-gray-900">{stats?.totalProjects || mockMetrics.totalProjects}</p>
+                      <div className="ml-3">
+                        <p className="text-xs font-medium text-gray-600">Progetti</p>
+                        <p className="text-lg font-bold text-gray-900">{stats?.totalProjects || mockMetrics.totalProjects}</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+                  <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
                     <div className="flex items-center">
                       <div className="p-2 bg-green-100 rounded-lg">
-                        <TrendingUpIcon className="h-6 w-6 text-green-600" />
+                        <TrendingUpIcon className="h-5 w-5 text-green-600" />
                       </div>
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Progetti Attivi</p>
-                        <p className="text-2xl font-bold text-gray-900">{stats?.activeProjects || mockMetrics.activeProjects}</p>
+                      <div className="ml-3">
+                        <p className="text-xs font-medium text-gray-600">Attivi</p>
+                        <p className="text-lg font-bold text-gray-900">{stats?.activeProjects || mockMetrics.activeProjects}</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+                  <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
                     <div className="flex items-center">
                       <div className="p-2 bg-yellow-100 rounded-lg">
-                        <EuroIcon className="h-6 w-6 text-yellow-600" />
+                        <EuroIcon className="h-5 w-5 text-yellow-600" />
                       </div>
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Budget Totale</p>
-                        <p className="text-2xl font-bold text-gray-900">
+                      <div className="ml-3">
+                        <p className="text-xs font-medium text-gray-600">Budget</p>
+                        <p className="text-lg font-bold text-gray-900">
                           €{((stats?.totalBudget || 0) / 1000000).toFixed(1)}M
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+                  <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
                     <div className="flex items-center">
                       <div className="p-2 bg-purple-100 rounded-lg">
-                        <TrendingUpIcon className="h-6 w-6 text-purple-600" />
+                        <TrendingUpIcon className="h-5 w-5 text-purple-600" />
                       </div>
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">ROI Medio</p>
-                        <p className="text-2xl font-bold text-gray-900">
+                      <div className="ml-3">
+                        <p className="text-xs font-medium text-gray-600">ROI</p>
+                        <p className="text-lg font-bold text-gray-900">
                           {stats?.averageROI?.toFixed(1) || mockMetrics.totalROI}%
                         </p>
                       </div>
                     </div>
-                  </div>
-                </div>
-
-                {/* Progetti Recenti */}
-                <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Progetti Recenti</h3>
-                  <div className="space-y-4">
-                    {mockProjects.map(project => (
-                      <div key={project.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <Building2 className="w-5 h-5 text-purple-600" />
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-gray-900">{project.name}</h4>
-                            <p className="text-sm text-gray-500">{project.location}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-4">
-                          <div className="text-right">
-                            <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}>
-                              {getStatusIcon(project.status)}
-                              <span className="ml-1">{project.status}</span>
-                            </div>
-                            <p className="text-sm text-gray-500 mt-1">ROI: {project.roi}%</p>
-                          </div>
-                          <ChevronRight className="w-5 h-5 text-gray-400" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Quick Actions */}
-                <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Azioni Rapide</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <button
-                      onClick={() => setActiveTab('projects')}
-                      className="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-                    >
-                      <BuildingIcon className="h-5 w-5 text-blue-600 mr-3" />
-                      <span className="text-sm font-medium text-blue-900">Nuovo Progetto</span>
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('market-intelligence')}
-                      className="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
-                    >
-                      <TrendingUpIcon className="h-5 w-5 text-green-600 mr-3" />
-                      <span className="text-sm font-medium text-green-900">Market Intelligence</span>
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('feasibility-analysis')}
-                      className="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
-                    >
-                      <EuroIcon className="h-5 w-5 text-purple-600 mr-3" />
-                      <span className="text-sm font-medium text-purple-900">Analisi Fattibilità</span>
-                    </button>
                   </div>
                 </div>
               </div>
@@ -999,8 +1002,149 @@ export default function UnifiedDashboardPage() {
               </div>
             )}
 
+            {/* Market Intelligence */}
+            {activeTab === 'market-intelligence' && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Market Intelligence</h1>
+                    <p className="text-gray-600 mt-1">Analisi di mercato e trend immobiliari</p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('tools')}
+                    className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg"
+                  >
+                    <Bot className="w-4 h-4 inline mr-2" />
+                    Chiedi all'OS
+                  </button>
+                </div>
+
+                <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Search className="w-8 h-8 text-green-600" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Market Intelligence
+                    </h3>
+                    <p className="text-gray-500 mb-4">
+                      Analizza mercati immobiliari, trend prezzi e opportunità di investimento.
+                    </p>
+                    <div className="space-x-3">
+                      <button
+                        onClick={() => setActiveTab('tools')}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      >
+                        Analizza Mercato
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('tools')}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Genera Report
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Analisi Fattibilità */}
+            {activeTab === 'feasibility-analysis' && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Analisi Fattibilità</h1>
+                    <p className="text-gray-600 mt-1">Valutazione economica e finanziaria dei progetti</p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('tools')}
+                    className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg"
+                  >
+                    <Bot className="w-4 h-4 inline mr-2" />
+                    Chiedi all'OS
+                  </button>
+                </div>
+
+                <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <TrendingUp className="w-8 h-8 text-purple-600" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Analisi Fattibilità
+                    </h3>
+                    <p className="text-gray-500 mb-4">
+                      Calcola ROI, payback period e analisi di sensibilità per i tuoi progetti.
+                    </p>
+                    <div className="space-x-3">
+                      <button
+                        onClick={() => setActiveTab('tools')}
+                        className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                      >
+                        Nuova Analisi
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('tools')}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Analisi Sensibilità
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Design Center */}
+            {activeTab === 'design-center' && (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Design Center</h1>
+                    <p className="text-gray-600 mt-1">Progettazione AI-powered e analisi terreni</p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('tools')}
+                    className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg"
+                  >
+                    <Bot className="w-4 h-4 inline mr-2" />
+                    Chiedi all'OS
+                  </button>
+                </div>
+
+                <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Sparkles className="w-8 h-8 text-orange-600" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Design Center
+                    </h3>
+                    <p className="text-gray-500 mb-4">
+                      Crea design AI-powered, analizza terreni e genera progetti ottimizzati.
+                    </p>
+                    <div className="space-x-3">
+                      <button
+                        onClick={() => setActiveTab('tools')}
+                        className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                      >
+                        Analizza Terreno
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('tools')}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Crea Design
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Placeholder per altre sezioni */}
-            {activeTab !== 'overview' && activeTab !== 'tools' && (
+            {activeTab !== 'overview' && activeTab !== 'tools' && activeTab !== 'market-intelligence' && activeTab !== 'feasibility-analysis' && activeTab !== 'design-center' && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
                   <div>
@@ -1011,6 +1155,13 @@ export default function UnifiedDashboardPage() {
                       Sezione {activeTab.replace('-', ' ')} - In sviluppo
                     </p>
                   </div>
+                  <button
+                    onClick={() => setActiveTab('tools')}
+                    className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg"
+                  >
+                    <Bot className="w-4 h-4 inline mr-2" />
+                    Chiedi all'OS
+                  </button>
                 </div>
 
                 <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
@@ -1026,7 +1177,7 @@ export default function UnifiedDashboardPage() {
                     </p>
                     <button
                       onClick={() => setActiveTab('tools')}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
                       Usa Tool OS per questa funzionalità
                     </button>
