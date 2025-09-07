@@ -7,7 +7,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import CommandPaletteWrapper from '@/components/CommandPaletteWrapper';
 import { EnvironmentBanner } from '@/components/ui/EnvironmentBanner';
-import FirebaseInterceptorLoader from '@/components/FirebaseInterceptorLoader';
+// FirebaseInterceptorLoader rimosso - approccio semplice con safeCollection()
 
 const inter = Inter({ subsets: ['latin'] });
 

@@ -50,25 +50,8 @@ if (typeof globalThis !== 'undefined' && typeof globalThis.File === 'undefined')
     }
     
     if (!isServer) {
-      // SUPER-NUCLEAR APPROACH: Intercetta collection() a livello di webpack per il client
-      console.log('🔥🔥🔥 [SUPER-NUCLEAR] Implementando intercettazione collection() a livello webpack...');
-      
-      const webpack = require('webpack');
-      config.plugins = config.plugins || [];
-      
-      config.plugins.push(
-        new webpack.DefinePlugin({
-          '__FIREBASE_COLLECTION_INTERCEPTOR__': JSON.stringify(true)
-        })
-      );
-      
-        // PLUGIN HYPER-NUCLEAR DISABILITATO: Causava SyntaxError
-        // Il plugin modificava troppo aggressivamente il codice JavaScript
-        // L'intercettazione ultra-nucleare runtime è sufficiente
-
-        // APPROCCIO ULTRA-NUCLEAR DISABILITATO: Non funziona, torniamo al semplice safeCollection()
-        // Il problema è che l'intercettazione webpack non cattura tutte le chiamate collection()
-        console.log('🔥 [SIMPLE APPROACH] Usando solo safeCollection() senza intercettazione webpack');
+      // APPROCCIO SEMPLICE: Nessuna intercettazione webpack, solo safeCollection() nei file sorgente
+      console.log('🔥 [SIMPLE APPROACH] Usando solo safeCollection() senza intercettazione webpack');
       
       // Lato client - escludi moduli Node.js
       config.resolve.fallback = {
