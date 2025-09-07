@@ -36,6 +36,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
+import FeedbackWidget from '@/components/ui/FeedbackWidget';
 
 export default function FeasibilityAnalysisPage() {
   const { t, formatCurrency: fmtCurrency } = useLanguage();
@@ -430,13 +431,6 @@ export default function FeasibilityAnalysisPage() {
               >
                 <CompareIcon className="h-4 w-4 inline mr-2" />
                 {t('compare', 'feasibility')}
-              </button>
-              <button 
-                onClick={() => window.open('/dashboard/feedback', '_blank')}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                title="Invia Feedback"
-              >
-                <MessageCircle className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -1122,6 +1116,9 @@ export default function FeasibilityAnalysisPage() {
           </div>
         </div>
       </div>
+      
+      {/* Feedback Widget */}
+      <FeedbackWidget />
     </div>
   );
 }

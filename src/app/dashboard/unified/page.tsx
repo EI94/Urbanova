@@ -36,6 +36,7 @@ import {
 
 import { useLanguage } from '@/contexts/LanguageContext';
 import { dashboardService, DashboardStats } from '@/lib/dashboardService';
+import FeedbackWidget from '@/components/ui/FeedbackWidget';
 
 // Mock data per i progetti (in produzione verrà da API)
 const mockProjects = [
@@ -504,13 +505,6 @@ export default function UnifiedDashboardPage() {
               >
                 <Zap className="w-4 h-4 inline mr-2" />
                 Tool Panel
-              </button>
-              <button 
-                onClick={() => window.open('/dashboard/feedback', '_blank')}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                title="Invia Feedback"
-              >
-                <MessageCircle className="w-5 h-5" />
               </button>
               <button className="p-2 text-gray-400 hover:text-gray-600">
                 <Settings className="w-5 h-5" />
@@ -1167,6 +1161,9 @@ export default function UnifiedDashboardPage() {
           )}
         </div>
       </div>
+      
+      {/* Feedback Widget */}
+      <FeedbackWidget />
     </div>
   );
 }

@@ -52,6 +52,7 @@ import TeamCommentsVoting from '@/components/ui/TeamCommentsVoting';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { emailService, EmailConfig } from '@/lib/emailService';
 import { LandSearchCriteria, RealLandScrapingResult } from '@/types/land';
+import FeedbackWidget from '@/components/ui/FeedbackWidget';
 
 // Gestione Team spostata nelle Impostazioni
 
@@ -884,13 +885,6 @@ export default function LandScrapingPage() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <button 
-                onClick={() => window.open('/dashboard/feedback', '_blank')}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                title="Invia Feedback"
-              >
-                <MessageCircle className="w-5 h-5" />
-              </button>
               <button className="p-2 text-gray-400 hover:text-gray-600">
                 <SettingsIcon className="w-5 h-5" />
               </button>
@@ -1125,7 +1119,7 @@ export default function LandScrapingPage() {
 
         {/* Main Content */}
         <div className="flex-1 p-6">
-          <div className="space-y-6">
+      <div className="space-y-6">
         {/* Header con stato servizi */}
         <div className="flex justify-between items-start">
           <div>
@@ -1799,9 +1793,12 @@ export default function LandScrapingPage() {
         />
 
         {/* Gestione Avanzata Team spostata nelle Impostazioni */}
-          </div>
+      </div>
         </div>
       </div>
+      
+      {/* Feedback Widget */}
+      <FeedbackWidget />
     </div>
   );
 }

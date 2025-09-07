@@ -28,6 +28,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { designCenterService, DesignTemplate, ProjectDesign } from '@/lib/designCenterService';
+import FeedbackWidget from '@/components/ui/FeedbackWidget';
 
 export default function DesignCenterPage() {
   const { t } = useLanguage();
@@ -86,7 +87,7 @@ export default function DesignCenterPage() {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Caricamento Design Center...</p>
         </div>
-      </div>
+        </div>
     );
   }
 
@@ -100,28 +101,21 @@ export default function DesignCenterPage() {
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
                   <SparklesIcon className="w-5 h-5 text-white" />
-                </div>
+        </div>
                 <div>
                   <h1 className="text-xl font-semibold text-gray-900">Design Center</h1>
                   <p className="text-sm text-gray-500">Crea progetti immobiliari con AI e design intelligente</p>
                 </div>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <button 
+          <div className="flex items-center space-x-4">
+            <button
                 onClick={() => setShowCreateModal(true)}
                 className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
               >
                 <PlusIcon className="h-4 w-4 inline mr-2" />
                 Nuovo Progetto
-              </button>
-              <button 
-                onClick={() => window.open('/dashboard/feedback', '_blank')}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                title="Invia Feedback"
-              >
-                <MessageCircle className="w-5 h-5" />
-              </button>
+            </button>
             </div>
           </div>
         </div>
@@ -165,12 +159,12 @@ export default function DesignCenterPage() {
                   <TrendingUp className="w-4 h-4 mr-3" />
                   Analisi Fattibilità
                 </Link>
-                <button
+            <button
                   className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors bg-purple-100 text-purple-700"
                 >
                   <Sparkles className="w-4 h-4 mr-3" />
                   Design Center
-                </button>
+            </button>
               </div>
 
               {/* Planning & Compliance */}
@@ -199,7 +193,7 @@ export default function DesignCenterPage() {
                   <Calendar className="w-4 h-4 mr-3" />
                   Project Timeline AI
                 </Link>
-              </div>
+          </div>
 
               {/* Progetti */}
               <div className="space-y-1">
@@ -227,7 +221,7 @@ export default function DesignCenterPage() {
                   <Target className="w-4 h-4 mr-3" />
                   Mappa Progetti
                 </Link>
-              </div>
+        </div>
 
               {/* Gestione Progetti */}
               <div className="space-y-1">
@@ -255,7 +249,7 @@ export default function DesignCenterPage() {
                   <Calendar className="w-4 h-4 mr-3" />
                   Riunioni
                 </Link>
-              </div>
+            </div>
 
               {/* Marketing/Sales */}
               <div className="space-y-1">
@@ -283,7 +277,7 @@ export default function DesignCenterPage() {
                   <FileText className="w-4 h-4 mr-3" />
                   Materiali
                 </Link>
-              </div>
+          </div>
 
               {/* Construction/EPC */}
               <div className="space-y-1">
@@ -318,7 +312,7 @@ export default function DesignCenterPage() {
                   <Shield className="w-4 h-4 mr-3" />
                   Permits
                 </Link>
-              </div>
+            </div>
 
               {/* AI Assistant */}
               <div className="space-y-1">
@@ -332,7 +326,7 @@ export default function DesignCenterPage() {
                   <Bot className="w-4 h-4 mr-3" />
                   Urbanova OS
                 </Link>
-              </div>
+          </div>
 
               {/* Feedback */}
               <div className="space-y-1">
@@ -348,8 +342,8 @@ export default function DesignCenterPage() {
                 </Link>
               </div>
             </nav>
+            </div>
           </div>
-        </div>
 
         {/* Main Content */}
         <div className="flex-1 p-6">
@@ -360,37 +354,37 @@ export default function DesignCenterPage() {
                 <div className="flex items-center">
                   <div className="p-2 bg-purple-100 rounded-lg">
                     <SparklesIcon className="w-6 h-6 text-purple-600" />
-                  </div>
+              </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-500">Template Disponibili</p>
                     <p className="text-2xl font-semibold text-gray-900">{templates.length}</p>
-                  </div>
-                </div>
+            </div>
               </div>
+            </div>
 
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <div className="flex items-center">
                   <div className="p-2 bg-blue-100 rounded-lg">
                     <BuildingIcon className="w-6 h-6 text-blue-600" />
-                  </div>
+          </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-500">Progetti Creati</p>
                     <p className="text-2xl font-semibold text-gray-900">{projects.length}</p>
-                  </div>
-                </div>
               </div>
+            </div>
+          </div>
 
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <div className="flex items-center">
                   <div className="p-2 bg-green-100 rounded-lg">
                     <EuroIcon className="w-6 h-6 text-green-600" />
-                  </div>
+              </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-500">Valore Totale</p>
                     <p className="text-2xl font-semibold text-gray-900">
                       €{projects.reduce((sum, p) => sum + (p.estimatedCost || 0), 0).toLocaleString()}
                     </p>
-                  </div>
+              </div>
                 </div>
               </div>
 
@@ -398,46 +392,46 @@ export default function DesignCenterPage() {
                 <div className="flex items-center">
                   <div className="p-2 bg-orange-100 rounded-lg">
                     <UsersIcon className="w-6 h-6 text-orange-600" />
-                  </div>
+              </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-500">Progetti Attivi</p>
                     <p className="text-2xl font-semibold text-gray-900">
                       {projects.filter(p => p.status === 'active').length}
                     </p>
-                  </div>
-                </div>
-              </div>
             </div>
+          </div>
+          </div>
+                </div>
 
             {/* Template Gallery */}
             <div className="bg-white rounded-lg shadow-sm">
               <div className="p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-gray-900">Template Disponibili</h2>
-                  <button 
+                    <button
                     onClick={() => setShowCreateModal(true)}
                     className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                  >
+                    >
                     <PlusIcon className="h-4 w-4 inline mr-2" />
                     Nuovo Progetto
-                  </button>
-                </div>
-              </div>
+                    </button>
+                  </div>
+                    </div>
               <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {templates.map((template) => (
                     <div key={template.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                       <div className="aspect-w-16 aspect-h-9 bg-gray-100 rounded-lg mb-4 flex items-center justify-center">
                         <BuildingIcon className="w-12 h-12 text-gray-400" />
-                      </div>
+                    </div>
                       <h3 className="font-semibold text-gray-900 mb-2">{template.name}</h3>
                       <p className="text-sm text-gray-600 mb-4">{template.description}</p>
                       <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                         <span>Area: {template.area}m²</span>
                         <span>€{template.estimatedCost?.toLocaleString()}</span>
-                      </div>
-                      <div className="flex space-x-2">
-                        <button 
+                    </div>
+                  <div className="flex space-x-2">
+                    <button
                           onClick={() => {
                             setSelectedTemplate(template);
                             setShowCreateModal(true);
@@ -445,18 +439,18 @@ export default function DesignCenterPage() {
                           className="flex-1 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
                         >
                           Usa Template
-                        </button>
+                    </button>
                         <Link href={`/dashboard/design-center/customize?templateId=${template.id}`}>
                           <button className="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm">
                             <EyeIcon className="w-4 h-4" />
-                          </button>
+                    </button>
                         </Link>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               </div>
-            </div>
+            ))}
+          </div>
+                </div>
+                    </div>
 
             {/* Progetti Recenti */}
             <div className="bg-white rounded-lg shadow-sm">
@@ -464,18 +458,18 @@ export default function DesignCenterPage() {
                 <h2 className="text-lg font-semibold text-gray-900">Progetti Recenti</h2>
               </div>
               <div className="p-6">
-                <div className="space-y-4">
+                    <div className="space-y-4">
                   {projects.slice(0, 5).map((project) => (
                     <div key={project.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                       <div className="flex items-center space-x-4">
                         <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                           <BuildingIcon className="w-5 h-5 text-purple-600" />
-                        </div>
-                        <div>
+                      </div>
+                      <div>
                           <h3 className="font-medium text-gray-900">{project.name}</h3>
                           <p className="text-sm text-gray-500">{project.location}</p>
-                        </div>
-                      </div>
+                          </div>
+                          </div>
                       <div className="flex items-center space-x-4">
                         <span className="text-sm text-gray-500">{project.area}m²</span>
                         <span className="text-sm font-medium text-gray-900">€{project.estimatedCost?.toLocaleString()}</span>
@@ -485,16 +479,16 @@ export default function DesignCenterPage() {
                           'bg-gray-100 text-gray-800'
                         }`}>
                           {project.status}
-                        </span>
+                            </span>
+                          </div>
+                          </div>
+                  ))}
+                        </div>
+                      </div>
+                        </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+                  </div>
 
       {/* Modal Creazione Progetto */}
       {showCreateModal && (
@@ -508,22 +502,25 @@ export default function DesignCenterPage() {
               </div>
             )}
             <div className="flex space-x-3">
-              <button
+                        <button
                 onClick={() => setShowCreateModal(false)}
                 className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-              >
+                        >
                 Annulla
-              </button>
-              <button
+                        </button>
+                        <button
                 onClick={() => selectedTemplate && handleCreateProject(selectedTemplate.id)}
                 className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
               >
                 Crea Progetto
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+                        </button>
+                      </div>
+                        </div>
+                      </div>
+                    )}
+                      </div>
+    
+    {/* Feedback Widget */}
+    <FeedbackWidget />
   );
 }

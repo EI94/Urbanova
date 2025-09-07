@@ -5,6 +5,7 @@ import Link from 'next/link';
 
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import Button from '@/components/ui/Button';
+import FeedbackWidget from '@/components/ui/FeedbackWidget';
 import { useLanguage } from '@/contexts/LanguageContext';
 import ComplianceTab from '@/components/ui/ComplianceTab';
 import {
@@ -298,13 +299,6 @@ export default function PermitsCompliancePage() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <button 
-                onClick={() => window.open('/dashboard/feedback', '_blank')}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                title="Invia Feedback"
-              >
-                <MessageCircle className="w-5 h-5" />
-              </button>
             </div>
           </div>
         </div>
@@ -998,10 +992,12 @@ export default function PermitsCompliancePage() {
               <ComplianceTab />
             </div>
           )}
-        </div>
           </div>
         </div>
       </div>
+      
+      {/* Feedback Widget */}
+      <FeedbackWidget />
     </div>
   );
 }

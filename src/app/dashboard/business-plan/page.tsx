@@ -18,6 +18,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import FeedbackWidget from '@/components/ui/FeedbackWidget';
 
 interface BusinessPlanData {
   projectName: string;
@@ -334,13 +335,6 @@ export default function BusinessPlanPage() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <button 
-                onClick={() => window.open('/dashboard/feedback', '_blank')}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                title="Invia Feedback"
-              >
-                <MessageCircle className="w-5 h-5" />
-              </button>
             </div>
           </div>
         </div>
@@ -1228,5 +1222,8 @@ export default function BusinessPlanPage() {
         </div>
       </div>
     </div>
+    
+    {/* Feedback Widget */}
+    <FeedbackWidget />
   );
 }

@@ -7,6 +7,7 @@ import { BuildingIcon } from '@/components/icons';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import Button from '@/components/ui/Button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import FeedbackWidget from '@/components/ui/FeedbackWidget';
 import {
   BarChart3,
   FileText,
@@ -346,7 +347,7 @@ export default function ProjectTimelinePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+        {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
@@ -355,20 +356,13 @@ export default function ProjectTimelinePage() {
                 <div className="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center">
                   <Calendar className="w-5 h-5 text-white" />
                 </div>
-                <div>
+          <div>
                   <h1 className="text-xl font-semibold text-gray-900">📅 {t('title', 'projectTimeline')}</h1>
                   <p className="text-sm text-gray-500">{t('subtitle', 'projectTimeline')}</p>
                 </div>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <button 
-                onClick={() => window.open('/dashboard/feedback', '_blank')}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                title="Invia Feedback"
-              >
-                <MessageCircle className="w-5 h-5" />
-              </button>
             </div>
           </div>
         </div>
@@ -966,9 +960,12 @@ export default function ProjectTimelinePage() {
             </div>
           </div>
         )}
-          </div>
+      </div>
         </div>
       </div>
     </div>
+    
+    {/* Feedback Widget */}
+    <FeedbackWidget />
   );
 }

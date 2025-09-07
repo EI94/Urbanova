@@ -16,6 +16,7 @@ import {
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { designProjectService, DesignProject } from '@/lib/designProjectService';
+import FeedbackWidget from '@/components/ui/FeedbackWidget';
 import {
   BarChart3,
   FileText,
@@ -155,13 +156,6 @@ export default function ProjectsPage() {
               >
                 <PlusIcon className="h-4 w-4 mr-2 inline" />
                 Nuovo Progetto
-              </button>
-              <button 
-                onClick={() => window.open('/dashboard/feedback', '_blank')}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                title="Invia Feedback"
-              >
-                <MessageCircle className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -565,5 +559,8 @@ export default function ProjectsPage() {
         </div>
       </div>
     </div>
+    
+    {/* Feedback Widget */}
+    <FeedbackWidget />
   );
 }
