@@ -505,6 +505,13 @@ export default function UnifiedDashboardPage() {
                 <Zap className="w-4 h-4 inline mr-2" />
                 Tool Panel
               </button>
+              <button 
+                onClick={() => window.open('/dashboard/feedback', '_blank')}
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                title="Invia Feedback"
+              >
+                <MessageCircle className="w-5 h-5" />
+              </button>
               <button className="p-2 text-gray-400 hover:text-gray-600">
                 <Settings className="w-5 h-5" />
               </button>
@@ -727,6 +734,20 @@ export default function UnifiedDashboardPage() {
                   <Bot className="w-4 h-4 mr-3" />
                   Urbanova OS
                 </button>
+              </div>
+
+              {/* Feedback */}
+              <div className="space-y-1">
+                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  SUPPORTO
+                </h3>
+                <Link
+                  href="/dashboard/feedback"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                >
+                  <MessageCircle className="w-4 h-4 mr-3" />
+                  Feedback
+                </Link>
               </div>
             </nav>
           </div>
