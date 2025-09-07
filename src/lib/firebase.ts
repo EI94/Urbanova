@@ -46,8 +46,13 @@ if (typeof window !== 'undefined') {
     }
   });
 
-  // APPROCCIO NUCLEARE: Intercetta TUTTE le chiamate a collection() globalmente
+  // APPROCCIO NUCLEARE + SUPER-NUCLEARE: Intercetta TUTTE le chiamate a collection() globalmente
   console.log('🔥 [NUCLEAR APPROACH] Implementando intercettazione globale collection()...');
+  
+  // Verifica se l'intercettazione webpack è attiva
+  if ((window as any).__FIREBASE_COLLECTION_INTERCEPTOR__) {
+    console.log('🔥🔥🔥 [SUPER-NUCLEAR DETECTED] Intercettazione webpack attiva!');
+  }
   
   // Importa la funzione collection originale in modo dinamico
   import('firebase/firestore').then((firestore) => {
@@ -56,8 +61,9 @@ if (typeof window !== 'undefined') {
     const originalCollection = firestore.collection;
     console.log('🔥 [NUCLEAR APPROACH] Funzione collection originale:', originalCollection);
     
-    // Salva la funzione originale
-    (window as any).originalFirebaseCollection = originalCollection;
+    // Salva la funzione originale per l'intercettazione webpack
+    (window as any).__originalFirebaseCollection = originalCollection;
+    console.log('🔥🔥🔥 [SUPER-NUCLEAR BRIDGE] Funzione originale salvata per webpack!');
     
     // Crea un wrapper che forza sempre l'uso sicuro
     const safeCollectionWrapper = (db: any, collectionName: string) => {
@@ -86,6 +92,13 @@ if (typeof window !== 'undefined') {
     
     // Sostituisci anche globalmente
     (window as any).collection = safeCollectionWrapper;
+    
+    // Se l'intercettazione webpack è attiva, usa quella
+    if ((window as any).__safeCollectionWrapper) {
+      console.log('🔥🔥🔥 [SUPER-NUCLEAR BRIDGE] Usando wrapper webpack!');
+      firestore.collection = (window as any).__safeCollectionWrapper;
+      (window as any).collection = (window as any).__safeCollectionWrapper;
+    }
     
     console.log('✅ [NUCLEAR APPROACH] Intercettazione globale collection() attivata!');
   }).catch((error) => {
