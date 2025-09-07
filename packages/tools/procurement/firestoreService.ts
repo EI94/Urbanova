@@ -20,6 +20,7 @@ import {
   DocumentData,
 } from 'firebase/firestore';
 import { RDO, Offer, Comparison, Vendor, PreCheckResult } from '@urbanova/types';
+import { safeCollection } from '@urbanova/infra';
 
 /**
  * Servizio Firestore per Sistema Procurement Urbanova
