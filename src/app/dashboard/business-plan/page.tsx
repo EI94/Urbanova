@@ -1221,9 +1221,9 @@ export default function BusinessPlanPage() {
           </div>
         </div>
       </div>
+      
+      {/* Feedback Widget */}
+      <FeedbackWidget />
     </div>
-    
-    {/* Feedback Widget */}
-    <FeedbackWidget />
   );
 }

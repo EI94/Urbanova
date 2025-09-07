@@ -519,8 +519,9 @@ export default function DesignCenterPage() {
                       </div>
                     )}
                       </div>
-    
-    {/* Feedback Widget */}
-    <FeedbackWidget />
+      
+      {/* Feedback Widget */}
+      <FeedbackWidget />
+    </div>
   );
 }
