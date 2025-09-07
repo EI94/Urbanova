@@ -3,7 +3,6 @@
   "buildCommand": "pnpm -r --filter '@urbanova/types' build && pnpm -r --filter '@urbanova/infra' build && pnpm -r --filter '@urbanova/toolos' build && pnpm -r --filter '@urbanova/data' build && pnpm -r --filter '@urbanova/os' build && pnpm run build",
   "installCommand": "pnpm install --no-frozen-lockfile",
   "outputDirectory": ".next",
-  "nodeVersion": "20.x",
   "functions": {
     "app/api/**/route.js": { 
       "memory": 1024, 
