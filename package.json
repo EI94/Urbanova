@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=20.18.0"
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   },
   "scripts": {
     "dev": "npx next dev -p 3112",
@@ -65,9 +66,9 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tailwindcss/forms": "^0.5.10",
     "@urbanova/agents": "file:packages/agents",
+    "@urbanova/compliance": "file:packages/compliance",
     "@urbanova/data": "file:packages/data",
     "@urbanova/infra": "file:packages/infra",
-    "@urbanova/compliance": "file:packages/compliance",
     "@urbanova/interactive": "file:packages/interactive",
     "@urbanova/leads": "file:packages/leads",
     "@urbanova/messaging": "file:packages/messaging",
@@ -91,7 +92,7 @@
     "jspdf": "^3.0.2",
     "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.539.0",
-    "next": "15.2.4",
+    "next": "15.5.2",
     "next-auth": "^4.24.11",
     "nodemailer": "^6.10.1",
     "openai": "^5.16.0",
@@ -144,8 +145,9 @@
   "workspaces": [
     "packages/*"
   ],
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=8.0.0"
+  "pnpm": {
+    "overrides": {
+      "debug": "4.3.4"
+    }
   }
 }
