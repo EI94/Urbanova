@@ -29,7 +29,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
 
 export default function FeasibilityAnalysisPage() {
-  const { t, formatCurrency: fmtCurrency } = useLanguage();
+  const languageContext = useLanguage();
+  const t = languageContext?.t || ((key: string) => key);
+  const fmtCurrency = languageContext?.formatCurrency || ((amount: number) => `€${amount.toLocaleString('it-IT')}`);
   const [projects, setProjects] = useState<FeasibilityProject[]>([]);
   const [ranking, setRanking] = useState<FeasibilityProject[]>([]);
   const [statistics, setStatistics] = useState<any>(null);
@@ -42,24 +44,28 @@ export default function FeasibilityAnalysisPage() {
   const [recalculating, setRecalculating] = useState(false);
 
   useEffect(() => {
-    loadData();
+      loadData();
   }, []);
 
   const loadData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const [allProjects, projectsRanking, stats] = await Promise.all([
-        feasibilityService.getAllProjects(),
-        feasibilityService.getProjectsRanking(),
-        feasibilityService.getStatistics()
+        const [allProjects, projectsRanking, stats] = await Promise.all([
+        feasibilityService.getAllProjects().catch(() => []),
+        feasibilityService.getProjectsRanking().catch(() => []),
+        feasibilityService.getStatistics().catch(() => null)
       ]);
-      setProjects(allProjects);
-      setRanking(projectsRanking);
-      setStatistics(stats);
+      setProjects(Array.isArray(allProjects) ? allProjects : []);
+      setRanking(Array.isArray(projectsRanking) ? projectsRanking : []);
+      setStatistics(stats || null);
     } catch (err) {
       console.error('Error loading feasibility data:', err);
       setError('Errore nel caricamento dei dati');
+      // Fallback data
+      setProjects([]);
+      setRanking([]);
+      setStatistics(null);
     } finally {
       setLoading(false);
     }
@@ -70,11 +76,15 @@ export default function FeasibilityAnalysisPage() {
     
     try {
       await feasibilityService.deleteProject(projectId);
-      toast.success('Progetto eliminato con successo');
+      if (typeof toast !== 'undefined' && toast.success) {
+        toast.success('Progetto eliminato con successo');
+      }
       loadData();
     } catch (err) {
       console.error('Error deleting project:', err);
-      toast.error('Errore nell\'eliminazione del progetto');
+      if (typeof toast !== 'undefined' && toast.error) {
+        toast.error('Errore nell\'eliminazione del progetto');
+      }
     }
   };
 
@@ -82,11 +92,15 @@ export default function FeasibilityAnalysisPage() {
     setRecalculating(true);
     try {
       await feasibilityService.recalculateAllProjects();
-      toast.success('Ricalcolo completato');
+      if (typeof toast !== 'undefined' && toast.success) {
+        toast.success('Ricalcolo completato');
+      }
       loadData();
     } catch (err) {
       console.error('Error recalculating projects:', err);
-      toast.error('Errore nel ricalcolo');
+      if (typeof toast !== 'undefined' && toast.error) {
+        toast.error('Errore nel ricalcolo');
+      }
     } finally {
       setRecalculating(false);
     }
@@ -161,39 +175,39 @@ export default function FeasibilityAnalysisPage() {
           <div className="w-64 bg-white border-r border-gray-200 min-h-screen">
             <div className="p-6">
               <nav className="space-y-2">
-                <Link href="/dashboard/unified" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <Link href="/dashboard/unified" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                   <BarChart3 className="w-5 h-5" />
                   <span>Dashboard</span>
                 </Link>
-                <Link href="/dashboard/market-intelligence" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <Link href="/dashboard/market-intelligence" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                   <TrendingUp className="w-5 h-5" />
                   <span>Market Intelligence</span>
                 </Link>
-                <Link href="/dashboard/feasibility-analysis" className="flex items-center space-x-3 px-3 py-2 text-green-600 bg-green-50 rounded-lg transition-colors">
+                <Link href="/dashboard/feasibility-analysis" className="flex items-center space-x-3 px-3 py-2 text-green-600 bg-green-50 rounded-lg transition-colors" passHref>
                   <FileText className="w-5 h-5" />
                   <span>Analisi Fattibilità</span>
                 </Link>
-                <Link href="/dashboard/design-center" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <Link href="/dashboard/design-center" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                   <Building className="w-5 h-5" />
                   <span>Design Center</span>
                 </Link>
-                <Link href="/dashboard/business-plan" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <Link href="/dashboard/business-plan" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                   <Target className="w-5 h-5" />
                   <span>Business Plan</span>
                 </Link>
-                <Link href="/dashboard/permits-compliance" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <Link href="/dashboard/permits-compliance" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                   <Shield className="w-5 h-5" />
                   <span>Permessi & Compliance</span>
                 </Link>
-                <Link href="/dashboard/project-timeline" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <Link href="/dashboard/project-timeline" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                   <Calendar className="w-5 h-5" />
                   <span>Project Timeline AI</span>
                 </Link>
-                <Link href="/dashboard/progetti" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <Link href="/dashboard/progetti" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                   <Building className="w-5 h-5" />
                   <span>Progetti</span>
                 </Link>
-                <Link href="/dashboard/billing" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <Link href="/dashboard/billing" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                   <CreditCard className="w-5 h-5" />
                   <span>Billing & Usage</span>
                 </Link>
@@ -238,39 +252,39 @@ export default function FeasibilityAnalysisPage() {
           <div className="w-64 bg-white border-r border-gray-200 min-h-screen">
             <div className="p-6">
               <nav className="space-y-2">
-                <Link href="/dashboard/unified" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <Link href="/dashboard/unified" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                   <BarChart3 className="w-5 h-5" />
                   <span>Dashboard</span>
                 </Link>
-                <Link href="/dashboard/market-intelligence" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <Link href="/dashboard/market-intelligence" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                   <TrendingUp className="w-5 h-5" />
                   <span>Market Intelligence</span>
                 </Link>
-                <Link href="/dashboard/feasibility-analysis" className="flex items-center space-x-3 px-3 py-2 text-green-600 bg-green-50 rounded-lg transition-colors">
+                <Link href="/dashboard/feasibility-analysis" className="flex items-center space-x-3 px-3 py-2 text-green-600 bg-green-50 rounded-lg transition-colors" passHref>
                   <FileText className="w-5 h-5" />
                   <span>Analisi Fattibilità</span>
                 </Link>
-                <Link href="/dashboard/design-center" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <Link href="/dashboard/design-center" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                   <Building className="w-5 h-5" />
                   <span>Design Center</span>
                 </Link>
-                <Link href="/dashboard/business-plan" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <Link href="/dashboard/business-plan" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                   <Target className="w-5 h-5" />
                   <span>Business Plan</span>
                 </Link>
-                <Link href="/dashboard/permits-compliance" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <Link href="/dashboard/permits-compliance" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                   <Shield className="w-5 h-5" />
                   <span>Permessi & Compliance</span>
                 </Link>
-                <Link href="/dashboard/project-timeline" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <Link href="/dashboard/project-timeline" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                   <Calendar className="w-5 h-5" />
                   <span>Project Timeline AI</span>
                 </Link>
-                <Link href="/dashboard/progetti" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <Link href="/dashboard/progetti" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                   <Building className="w-5 h-5" />
                   <span>Progetti</span>
                 </Link>
-                <Link href="/dashboard/billing" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <Link href="/dashboard/billing" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                   <CreditCard className="w-5 h-5" />
                   <span>Billing & Usage</span>
                 </Link>
@@ -280,13 +294,13 @@ export default function FeasibilityAnalysisPage() {
 
           <div className="flex-1 p-6">
             <div className="flex flex-col items-center justify-center min-h-96 space-y-4">
-              <div className="text-red-600 text-xl">❌ {error}</div>
+          <div className="text-red-600 text-xl">❌ {error}</div>
               <button
                 onClick={loadData}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                🔄 Riprova
-              </button>
+            🔄 Riprova
+          </button>
             </div>
           </div>
         </div>
@@ -296,7 +310,7 @@ export default function FeasibilityAnalysisPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+        {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
@@ -305,16 +319,17 @@ export default function FeasibilityAnalysisPage() {
                 <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
                   <FileText className="w-5 h-5 text-white" />
                 </div>
-                <div>
+          <div>
                   <h1 className="text-xl font-semibold text-gray-900">Analisi Fattibilità</h1>
                   <p className="text-sm text-gray-600">Valuta la fattibilità economica dei tuoi progetti</p>
                 </div>
               </div>
-            </div>
+          </div>
             <div className="flex items-center space-x-3">
               <Link
                 href="/dashboard/feasibility-analysis/new"
                 className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                passHref
               >
                 <Plus className="w-4 h-4" />
                 <span>Nuovo Progetto</span>
@@ -337,42 +352,42 @@ export default function FeasibilityAnalysisPage() {
         <div className="w-64 bg-white border-r border-gray-200 min-h-screen">
           <div className="p-6">
             <nav className="space-y-2">
-              <Link href="/dashboard/unified" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+              <Link href="/dashboard/unified" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                 <BarChart3 className="w-5 h-5" />
                 <span>Dashboard</span>
               </Link>
-              <Link href="/dashboard/market-intelligence" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+              <Link href="/dashboard/market-intelligence" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                 <TrendingUp className="w-5 h-5" />
                 <span>Market Intelligence</span>
               </Link>
-              <Link href="/dashboard/feasibility-analysis" className="flex items-center space-x-3 px-3 py-2 text-green-600 bg-green-50 rounded-lg transition-colors">
+              <Link href="/dashboard/feasibility-analysis" className="flex items-center space-x-3 px-3 py-2 text-green-600 bg-green-50 rounded-lg transition-colors" passHref>
                 <FileText className="w-5 h-5" />
                 <span>Analisi Fattibilità</span>
               </Link>
-              <Link href="/dashboard/design-center" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+              <Link href="/dashboard/design-center" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                 <Building className="w-5 h-5" />
                 <span>Design Center</span>
               </Link>
-              <Link href="/dashboard/business-plan" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+              <Link href="/dashboard/business-plan" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                 <Target className="w-5 h-5" />
                 <span>Business Plan</span>
               </Link>
-              <Link href="/dashboard/permits-compliance" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+              <Link href="/dashboard/permits-compliance" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                 <Shield className="w-5 h-5" />
                 <span>Permessi & Compliance</span>
               </Link>
-              <Link href="/dashboard/project-timeline" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+              <Link href="/dashboard/project-timeline" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                 <Calendar className="w-5 h-5" />
                 <span>Project Timeline AI</span>
               </Link>
-              <Link href="/dashboard/progetti" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+              <Link href="/dashboard/progetti" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                 <Building className="w-5 h-5" />
                 <span>Progetti</span>
               </Link>
-              <Link href="/dashboard/billing" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+              <Link href="/dashboard/billing" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" passHref>
                 <CreditCard className="w-5 h-5" />
                 <span>Billing & Usage</span>
-              </Link>
+            </Link>
             </nav>
           </div>
         </div>
@@ -380,36 +395,36 @@ export default function FeasibilityAnalysisPage() {
         {/* Main Content */}
         <div className="flex-1 p-6">
           {/* Statistics Cards */}
-          {statistics && (
+        {statistics && (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Progetti Totali</p>
                     <p className="text-2xl font-bold text-gray-900">{statistics.totalProjects}</p>
-                  </div>
-                  <Building className="w-8 h-8 text-blue-600" />
-                </div>
               </div>
-              
+                  <Building className="w-8 h-8 text-blue-600" />
+              </div>
+            </div>
+
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Investimento Totale</p>
                     <p className="text-2xl font-bold text-gray-900">{fmtCurrency(statistics.totalInvestment)}</p>
-                  </div>
-                  <Euro className="w-8 h-8 text-green-600" />
-                </div>
               </div>
-              
+                  <Euro className="w-8 h-8 text-green-600" />
+              </div>
+            </div>
+
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Rendimento Medio</p>
                     <p className="text-2xl font-bold text-gray-900">{statistics.averageYield?.toFixed(2) || 0}%</p>
-                  </div>
+              </div>
                   <TrendingUp className="w-8 h-8 text-purple-600" />
-                </div>
+              </div>
               </div>
               
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -417,12 +432,12 @@ export default function FeasibilityAnalysisPage() {
                   <div>
                     <p className="text-sm font-medium text-gray-600">ROI Medio</p>
                     <p className="text-2xl font-bold text-gray-900">{statistics.averageROI?.toFixed(1) || 0}%</p>
-                  </div>
+            </div>
                   <Trophy className="w-8 h-8 text-yellow-600" />
-                </div>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
           {/* Projects List */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -438,7 +453,7 @@ export default function FeasibilityAnalysisPage() {
                       className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
-                </div>
+          </div>
               </div>
               
               {projects.length === 0 ? (
@@ -449,26 +464,27 @@ export default function FeasibilityAnalysisPage() {
                   <Link
                     href="/dashboard/feasibility-analysis/new"
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    passHref
                   >
                     <Plus className="w-4 h-4 inline mr-2" />
                     Crea Nuovo Progetto
                   </Link>
-                </div>
-              ) : (
-                <div className="space-y-4">
+            </div>
+          ) : (
+            <div className="space-y-4">
                   {projects.map((project) => (
                     <div key={project.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                       <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-4">
                           <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
                             <Building className="w-6 h-6 text-gray-600" />
-                          </div>
-                          <div>
-                            <h3 className="font-medium text-gray-900">{project.name}</h3>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900">{project.name}</h3>
                             <p className="text-sm text-gray-600">{project.location} • {project.propertyType}</p>
-                          </div>
-                        </div>
-                        
+                    </div>
+                  </div>
+
                         <div className="flex items-center space-x-2">
                           <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(project.status)}`}>
                             {getStatusLabel(project.status)}
@@ -476,37 +492,37 @@ export default function FeasibilityAnalysisPage() {
                           <span className={`px-2 py-1 text-xs font-medium rounded-full ${getRiskColor(project.riskLevel)}`}>
                             {getRiskLabel(project.riskLevel)}
                           </span>
-                        </div>
                       </div>
-                      
+                    </div>
+
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                         <div className="flex items-center space-x-2">
                           <Euro className="w-4 h-4 text-gray-400" />
                           <div>
                             <p className="text-sm text-gray-600">Investimento</p>
                             <p className="font-medium text-gray-900">{fmtCurrency(project.totalInvestment)}</p>
-                          </div>
-                        </div>
-                        
+                      </div>
+                    </div>
+
                         <div className="flex items-center space-x-2">
                           <TrendingUp className="w-4 h-4 text-gray-400" />
                           <div>
                             <p className="text-sm text-gray-600">Rendimento Annuo</p>
                             <p className="font-medium text-gray-900">{project.annualYield}%</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
                           <Trophy className="w-4 h-4 text-gray-400" />
                           <div>
                             <p className="text-sm text-gray-600">ROI</p>
                             <p className="font-medium text-gray-900">{project.roi}%</p>
-                          </div>
-                        </div>
-                        
+                  </div>
+        </div>
+
                         <div className="flex items-center space-x-2">
                           <Calendar className="w-4 h-4 text-gray-400" />
-                          <div>
+                        <div>
                             <p className="text-sm text-gray-600">Payback</p>
                             <p className="font-medium text-gray-900">{project.paybackPeriod} anni</p>
                           </div>
@@ -523,6 +539,7 @@ export default function FeasibilityAnalysisPage() {
                             href={`/dashboard/feasibility-analysis/${project.id}`}
                             className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                             title="Visualizza"
+                            passHref
                           >
                             <Eye className="w-4 h-4" />
                           </Link>
@@ -530,6 +547,7 @@ export default function FeasibilityAnalysisPage() {
                             href={`/dashboard/feasibility-analysis/${project.id}/edit`}
                             className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                             title="Modifica"
+                            passHref
                           >
                             <Edit className="w-4 h-4" />
                           </Link>
@@ -541,13 +559,13 @@ export default function FeasibilityAnalysisPage() {
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
-                      </div>
-                    </div>
+            </div>
+        </div>
                   ))}
                 </div>
               )}
-            </div>
-          </div>
+                </div>
+              </div>
 
           {/* Quick Actions */}
           <div className="mt-6">
@@ -556,6 +574,7 @@ export default function FeasibilityAnalysisPage() {
               <Link
                 href="/dashboard/feasibility-analysis/new"
                 className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                passHref
               >
                 <Calculator className="w-5 h-5 text-blue-600" />
                 <div className="text-left">
@@ -564,7 +583,7 @@ export default function FeasibilityAnalysisPage() {
                 </div>
               </Link>
 
-              <button
+                <button
                 onClick={() => setShowComparison(!showComparison)}
                 className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
               >
@@ -573,9 +592,9 @@ export default function FeasibilityAnalysisPage() {
                   <h3 className="font-medium text-gray-900">Confronta Progetti</h3>
                   <p className="text-sm text-gray-600">Confronta più progetti tra loro</p>
                 </div>
-              </button>
+                </button>
 
-              <button
+                <button
                 onClick={handleRecalculateAll}
                 disabled={recalculating}
                 className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
@@ -585,14 +604,14 @@ export default function FeasibilityAnalysisPage() {
                   <h3 className="font-medium text-gray-900">Ricalcola Tutto</h3>
                   <p className="text-sm text-gray-600">Ricalcola tutti i progetti</p>
                 </div>
-              </button>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
       </div>
       
       {/* Feedback Widget */}
-      <FeedbackWidget className="" />
+      {typeof window !== 'undefined' && <FeedbackWidget className="" />}
     </div>
   );
 }
