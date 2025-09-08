@@ -42,20 +42,50 @@ export default function FeasibilityAnalysisPage() {
   const [project1Id, setProject1Id] = useState('');
   const [project2Id, setProject2Id] = useState('');
   const [recalculating, setRecalculating] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    // Inizializza il componente dopo che è montato
+    const initializeComponent = async () => {
+      try {
+        // Aspetta che il DOM sia pronto
+        await new Promise(resolve => setTimeout(resolve, 100));
+        setIsReady(true);
       loadData();
+      } catch (err) {
+        console.error('Error initializing component:', err);
+        setError('Errore nell\'inizializzazione del componente');
+        setIsReady(true);
+      }
+    };
+    
+    initializeComponent();
   }, []);
 
   const loadData = async () => {
     setLoading(true);
     setError(null);
     try {
+      // Verifica che feasibilityService esista
+      if (!feasibilityService) {
+        throw new Error('FeasibilityService non disponibile');
+      }
+
         const [allProjects, projectsRanking, stats] = await Promise.all([
-        feasibilityService.getAllProjects().catch(() => []),
-        feasibilityService.getProjectsRanking().catch(() => []),
-        feasibilityService.getStatistics().catch(() => null)
+        feasibilityService.getAllProjects().catch((err) => {
+          console.warn('Error loading projects:', err);
+          return [];
+        }),
+        feasibilityService.getProjectsRanking().catch((err) => {
+          console.warn('Error loading ranking:', err);
+          return [];
+        }),
+        feasibilityService.getStatistics().catch((err) => {
+          console.warn('Error loading statistics:', err);
+          return null;
+        })
       ]);
+      
       setProjects(Array.isArray(allProjects) ? allProjects : []);
       setRanking(Array.isArray(projectsRanking) ? projectsRanking : []);
       setStatistics(stats || null);
@@ -75,6 +105,10 @@ export default function FeasibilityAnalysisPage() {
     if (!confirm('Sei sicuro di voler eliminare questo progetto?')) return;
     
     try {
+      if (!feasibilityService) {
+        throw new Error('FeasibilityService non disponibile');
+      }
+      
       await feasibilityService.deleteProject(projectId);
       if (typeof toast !== 'undefined' && toast.success) {
         toast.success('Progetto eliminato con successo');
@@ -91,6 +125,10 @@ export default function FeasibilityAnalysisPage() {
   const handleRecalculateAll = async () => {
     setRecalculating(true);
     try {
+      if (!feasibilityService) {
+        throw new Error('FeasibilityService non disponibile');
+      }
+      
       await feasibilityService.recalculateAllProjects();
       if (typeof toast !== 'undefined' && toast.success) {
         toast.success('Ricalcolo completato');
@@ -147,6 +185,17 @@ export default function FeasibilityAnalysisPage() {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('it-IT');
   };
+
+  if (!isReady) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Inizializzazione...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
