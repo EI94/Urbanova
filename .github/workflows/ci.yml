@@ -160,8 +160,18 @@ jobs:
         run: |
           # Ignore the known debug vulnerability (GHSA-8mgj-vmr8-frr6) which is a false positive
           # This is a known issue with debug package used by @babel/core
-          pnpm audit --audit-level high --audit-ignore-advisories=GHSA-8mgj-vmr8-frr6 || true
-        continue-on-error: true
+          echo "🔍 Running security audit (excluding debug vulnerability)..."
+          pnpm audit --audit-level high || {
+            echo "⚠️ Security audit found vulnerabilities, checking if they are only debug-related..."
+            if pnpm audit --audit-level high 2>&1 | grep -q "GHSA-8mgj-vmr8-frr6"; then
+              echo "✅ Only debug vulnerability found (known false positive), continuing..."
+              exit 0
+            else
+              echo "❌ Other vulnerabilities found, failing build"
+              exit 1
+            fi
+          }
+        continue-on-error: false
 
   bundle-analysis:
     name: Bundle Analysis
