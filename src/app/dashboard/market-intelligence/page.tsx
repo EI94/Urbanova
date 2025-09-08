@@ -879,8 +879,8 @@ export default function LandScrapingPage() {
                   <SearchIcon className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-semibold text-gray-900">Market Intelligence</h1>
-                  <p className="text-sm text-gray-500">Scopri automaticamente le migliori opportunità di terreni</p>
+                  <h1 className="text-xl font-semibold text-gray-900">Urbanova Dashboard</h1>
+                  <p className="text-sm text-gray-500">Design Center & Project Management</p>
                 </div>
               </div>
             </div>

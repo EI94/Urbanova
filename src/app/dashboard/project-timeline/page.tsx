@@ -24,6 +24,7 @@ import {
   Building,
   Bot,
   Sparkles,
+  Settings,
 } from 'lucide-react';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
 
@@ -279,60 +280,164 @@ export default function ProjectTimelinePage() {
                   <Calendar className="w-5 h-5 text-white" />
                 </div>
           <div>
-                  <h1 className="text-xl font-semibold text-gray-900">Project Timeline AI</h1>
-                  <p className="text-sm text-gray-600">Gestisci timeline e scadenze dei progetti</p>
+                  <h1 className="text-xl font-semibold text-gray-900">Urbanova Dashboard</h1>
+                  <p className="text-sm text-gray-500">Design Center & Project Management</p>
               </div>
               </div>
             </div>
-            <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              <Plus className="w-4 h-4" />
-              <span>Nuovo Evento</span>
-            </button>
+            <div className="flex items-center space-x-4">
+              <button className="p-2 text-gray-400 hover:text-gray-600">
+                <Settings className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
           </div>
         </div>
-      </div>
 
       <div className="flex">
         {/* Sidebar */}
-        <div className="w-64 bg-white border-r border-gray-200 min-h-screen">
-          <div className="p-6">
+        <div className="w-64 bg-white shadow-sm border-r min-h-screen">
+          <div className="p-4">
             <nav className="space-y-2">
-              <Link href="/dashboard/unified" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <BarChart3 className="w-5 h-5" />
-                <span>Dashboard</span>
-              </Link>
-              <Link href="/dashboard/market-intelligence" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <TrendingUp className="w-5 h-5" />
-                <span>Market Intelligence</span>
-              </Link>
-              <Link href="/dashboard/feasibility-analysis" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <FileText className="w-5 h-5" />
-                <span>Analisi Fattibilità</span>
-              </Link>
-              <Link href="/dashboard/design-center" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <Building className="w-5 h-5" />
-                <span>Design Center</span>
-              </Link>
-              <Link href="/dashboard/business-plan" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <Target className="w-5 h-5" />
-                <span>Business Plan</span>
-              </Link>
-              <Link href="/dashboard/permits-compliance" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <Shield className="w-5 h-5" />
-                <span>Permessi & Compliance</span>
-              </Link>
-              <Link href="/dashboard/project-timeline" className="flex items-center space-x-3 px-3 py-2 text-blue-600 bg-blue-50 rounded-lg transition-colors">
-                <Calendar className="w-5 h-5" />
-                <span>Project Timeline AI</span>
-              </Link>
-              <Link href="/dashboard/progetti" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <Building className="w-5 h-5" />
-                <span>Progetti</span>
-              </Link>
-              <Link href="/dashboard/billing" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <CreditCard className="w-5 h-5" />
-                <span>Billing & Usage</span>
-              </Link>
+              {/* Sezione principale */}
+              <div className="space-y-1">
+                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  DASHBOARD
+                </h3>
+                <Link
+                  href="/dashboard"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                >
+                  <BarChart3 className="w-4 h-4 mr-3" />
+                  Dashboard
+                </Link>
+              </div>
+
+              {/* Discovery */}
+              <div className="space-y-1">
+                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  DISCOVERY
+                </h3>
+                <Link
+                  href="/dashboard/market-intelligence"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                >
+                  <Search className="w-4 h-4 mr-3" />
+                  Market Intelligence
+                </Link>
+                <Link
+                  href="/dashboard/feasibility-analysis"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                >
+                  <FileText className="w-4 h-4 mr-3" />
+                  Analisi Fattibilità
+                </Link>
+                <Link
+                  href="/dashboard/design-center"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                >
+                  <Target className="w-4 h-4 mr-3" />
+                  Design Center
+                </Link>
+              </div>
+
+              {/* Planning & Compliance */}
+              <div className="space-y-1">
+                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  PLANNING/COMPLIANCE
+                </h3>
+                <Link
+                  href="/dashboard/business-plan"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                >
+                  <FileText className="w-4 h-4 mr-3" />
+                  Business Plan
+                </Link>
+                <Link
+                  href="/dashboard/permits-compliance"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                >
+                  <Shield className="w-4 h-4 mr-3" />
+                  Permessi & Compliance
+                </Link>
+                <Link
+                  href="/dashboard/project-timeline"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors bg-blue-100 text-blue-700"
+                >
+                  <Calendar className="w-4 h-4 mr-3" />
+                  Project Timeline AI
+                </Link>
+              </div>
+
+              {/* Progetti */}
+              <div className="space-y-1">
+                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  PROGETTI
+                </h3>
+                <Link
+                  href="/dashboard/progetti"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                >
+                  <Building className="w-4 h-4 mr-3" />
+                  Progetti
+                </Link>
+                <Link
+                  href="/dashboard/progetti/nuovo"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                >
+                  <Plus className="w-4 h-4 mr-3" />
+                  Nuovo Progetto
+                </Link>
+                <Link
+                  href="/dashboard/mappa-progetti"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                >
+                  <Target className="w-4 h-4 mr-3" />
+                  Mappa Progetti
+                </Link>
+              </div>
+
+              {/* Gestione Progetti */}
+              <div className="space-y-1">
+                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  GESTIONE PROGETTI
+                </h3>
+                <Link
+                  href="/dashboard/project-management"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                >
+                  <FileText className="w-4 h-4 mr-3" />
+                  Gestione Progetti
+                </Link>
+                <Link
+                  href="/dashboard/project-management/documents"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                >
+                  <FileText className="w-4 h-4 mr-3" />
+                  Documenti
+                </Link>
+                <Link
+                  href="/dashboard/project-management/meetings"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                >
+                  <Calendar className="w-4 h-4 mr-3" />
+                  Riunioni
+                </Link>
+          </div>
+
+              {/* Marketing/Sales */}
+              <div className="space-y-1">
+                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  MARKETING/SALES
+                </h3>
+                <Link
+                  href="/dashboard/marketing"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                >
+                  <BarChart3 className="w-4 h-4 mr-3" />
+                  Marketing
+                </Link>
+              </div>
             </nav>
           </div>
           </div>
