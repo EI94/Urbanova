@@ -23,13 +23,20 @@ import {
   CreditCard,
   Search
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+// import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import { useLanguage } from '@/contexts/LanguageContext';
-import FeedbackWidget from '@/components/ui/FeedbackWidget';
+// import FeedbackWidget from '@/components/ui/FeedbackWidget';
 
 export default function FeasibilityAnalysisPage() {
-  const languageContext = useLanguage();
+  // Gestione robusta del context language
+  let languageContext = null;
+  try {
+    languageContext = useLanguage();
+  } catch (err) {
+    console.warn('Language context not available:', err);
+  }
+  
   const t = languageContext?.t || ((key: string) => key);
   const fmtCurrency = languageContext?.formatCurrency || ((amount: number) => `€${amount.toLocaleString('it-IT')}`);
   const [projects, setProjects] = useState<FeasibilityProject[]>([]);
@@ -110,15 +117,17 @@ export default function FeasibilityAnalysisPage() {
       }
       
       await feasibilityService.deleteProject(projectId);
-      if (typeof toast !== 'undefined' && toast.success) {
-        toast.success('Progetto eliminato con successo');
-      }
+      // Toast temporaneamente disabilitato per debug
+      // if (typeof toast !== 'undefined' && toast.success) {
+      //   toast.success('Progetto eliminato con successo');
+      // }
       loadData();
     } catch (err) {
       console.error('Error deleting project:', err);
-      if (typeof toast !== 'undefined' && toast.error) {
-        toast.error('Errore nell\'eliminazione del progetto');
-      }
+      // Toast temporaneamente disabilitato per debug
+      // if (typeof toast !== 'undefined' && toast.error) {
+      //   toast.error('Errore nell\'eliminazione del progetto');
+      // }
     }
   };
 
@@ -130,15 +139,17 @@ export default function FeasibilityAnalysisPage() {
       }
       
       await feasibilityService.recalculateAllProjects();
-      if (typeof toast !== 'undefined' && toast.success) {
-        toast.success('Ricalcolo completato');
-      }
+      // Toast temporaneamente disabilitato per debug
+      // if (typeof toast !== 'undefined' && toast.success) {
+      //   toast.success('Ricalcolo completato');
+      // }
       loadData();
     } catch (err) {
       console.error('Error recalculating projects:', err);
-      if (typeof toast !== 'undefined' && toast.error) {
-        toast.error('Errore nel ricalcolo');
-      }
+      // Toast temporaneamente disabilitato per debug
+      // if (typeof toast !== 'undefined' && toast.error) {
+      //   toast.error('Errore nel ricalcolo');
+      // }
     } finally {
       setRecalculating(false);
     }
@@ -659,8 +670,8 @@ export default function FeasibilityAnalysisPage() {
           </div>
       </div>
       
-      {/* Feedback Widget */}
-      {typeof window !== 'undefined' && <FeedbackWidget className="" />}
+      {/* Feedback Widget - Temporaneamente disabilitato per debug */}
+      {/* {typeof window !== 'undefined' && <FeedbackWidget className="" />} */}
     </div>
   );
 }
