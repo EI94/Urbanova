@@ -147,7 +147,8 @@
   ],
   "pnpm": {
     "overrides": {
-      "debug": "4.3.4"
+      "debug": "4.3.4",
+      "simple-swizzle": "0.2.2"
     }
   }
 }
