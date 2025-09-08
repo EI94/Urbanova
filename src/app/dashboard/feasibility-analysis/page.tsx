@@ -1,164 +1,213 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useFeasibilityProjects } from '../../../hooks/useFeasibilityProjects';
-import DashboardLayout from '@/components/layout/DashboardLayout';
+import { useState, useEffect } from 'react';
+import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
 import { 
-  FileText, 
-  Building, 
-  Plus, 
-  BarChart3, 
+  Calculator, 
   TrendingUp, 
   Euro, 
-  Trophy, 
-  Target, 
-  Shield, 
-  Calendar, 
-  CreditCard, 
-  Search, 
-  Calculator, 
-  GitCompare
+  Building,
+  Plus,
+  BarChart3,
+  GitCompare,
+  CheckCircle,
+  Calendar,
+  MapPin,
+  Edit,
+  Trash2,
+  Eye,
+  Trophy,
+  FileText,
+  Target,
+  Shield,
+  CreditCard,
+  Search
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import Link from 'next/link';
+import { useLanguage } from '@/contexts/LanguageContext';
+import FeedbackWidget from '@/components/ui/FeedbackWidget';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 
 export default function FeasibilityAnalysisPage() {
-  const [isReady, setIsReady] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedProject, setSelectedProject] = useState<any>(null);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newProject, setNewProject] = useState({
-    name: '',
-    location: '',
-    type: 'residential',
-    budget: '',
-    description: ''
-  });
-
-  // Usa l'hook per caricare i progetti esistenti
-  const { projects, loading, error, addProject } = useFeasibilityProjects();
+  const { t, formatCurrency: fmtCurrency } = useLanguage();
+  const [projects, setProjects] = useState<FeasibilityProject[]>([]);
+  const [ranking, setRanking] = useState<FeasibilityProject[]>([]);
+  const [statistics, setStatistics] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedProject, setSelectedProject] = useState<FeasibilityProject | null>(null);
+  const [showComparison, setShowComparison] = useState(false);
+  const [project1Id, setProject1Id] = useState('');
+  const [project2Id, setProject2Id] = useState('');
+  const [recalculating, setRecalculating] = useState(false);
 
   useEffect(() => {
-    // Inizializzazione ultra-semplice
-    const initializeComponent = async () => {
-      try {
-        // Aspetta che il DOM sia pronto
-        await new Promise(resolve => setTimeout(resolve, 500));
-        setIsReady(true);
-      } catch (err) {
-        console.error('Error initializing component:', err);
-        setIsReady(true);
-      }
-    };
-
-    initializeComponent();
+      loadData();
   }, []);
 
-  const handleCreateProject = () => {
-    if (newProject.name && newProject.location && newProject.budget) {
-      const investment = parseFloat(newProject.budget) || 0;
-      const revenue = investment * 1.5; // Stima del 50% di margine
-      const roi = ((revenue - investment) / investment) * 100;
-      const margin = ((revenue - investment) / revenue) * 100;
-
-      addProject({
-        name: newProject.name,
-        location: newProject.location,
-        type: newProject.type,
-        status: 'draft',
-        investment,
-        revenue,
-        roi,
-        margin,
-        description: newProject.description
-      });
-
-      setNewProject({ name: '', location: '', type: 'residential', budget: '', description: '' });
-      setShowCreateModal(false);
+  const loadData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+        const [allProjects, projectsRanking, stats] = await Promise.all([
+          feasibilityService.getAllProjects(),
+          feasibilityService.getProjectsRanking(),
+        feasibilityService.getStatistics()
+      ]);
+      setProjects(allProjects);
+      setRanking(projectsRanking);
+      setStatistics(stats);
+    } catch (err) {
+      console.error('Error loading feasibility data:', err);
+      setError('Errore nel caricamento dei dati');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const filteredProjects = projects.filter(project =>
-    project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    project.location.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleDeleteProject = async (projectId: string) => {
+    if (!confirm('Sei sicuro di voler eliminare questo progetto?')) return;
+    
+    try {
+      await feasibilityService.deleteProject(projectId);
+      toast('Progetto eliminato con successo', { icon: '✅' });
+      loadData();
+    } catch (err) {
+      console.error('Error deleting project:', err);
+      toast('Errore nell\'eliminazione del progetto', { icon: '❌' });
+    }
+  };
 
-  const totalInvestment = projects.reduce((sum, project) => sum + project.investment, 0);
-  const averageROI = projects.length > 0 ? projects.reduce((sum, project) => sum + project.roi, 0) / projects.length : 0;
+  const handleRecalculateAll = async () => {
+    setRecalculating(true);
+    try {
+      await feasibilityService.recalculateAllProjects();
+      toast('Ricalcolo completato', { icon: '✅' });
+      loadData();
+    } catch (err) {
+      console.error('Error recalculating projects:', err);
+      toast('Errore nel ricalcolo', { icon: '❌' });
+    } finally {
+      setRecalculating(false);
+    }
+  };
 
-  if (!isReady) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Inizializzazione...</p>
-        </div>
-      </div>
-    );
-  }
+  const getStatusColor = (status: string) => {
+    const colors = {
+      draft: 'text-gray-600 bg-gray-100',
+      analyzed: 'text-blue-600 bg-blue-100',
+      approved: 'text-green-600 bg-green-100',
+      rejected: 'text-red-600 bg-red-100',
+    };
+    return colors[status as keyof typeof colors] || 'text-gray-600 bg-gray-100';
+  };
+
+  const getStatusLabel = (status: string) => {
+    const labels = {
+      draft: 'Bozza',
+      analyzed: 'Analizzato',
+      approved: 'Approvato',
+      rejected: 'Rifiutato',
+    };
+    return labels[status as keyof typeof labels] || status;
+  };
+
+  const getRiskColor = (risk: string) => {
+    const colors = {
+      low: 'text-green-600 bg-green-100',
+      medium: 'text-yellow-600 bg-yellow-100',
+      high: 'text-red-600 bg-red-100',
+    };
+    return colors[risk as keyof typeof colors] || 'text-gray-600 bg-gray-100';
+  };
+
+  const getRiskLabel = (risk: string) => {
+    const labels = {
+      low: 'Basso',
+      medium: 'Medio',
+      high: 'Alto',
+    };
+    return labels[risk as keyof typeof labels] || risk;
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('it-IT');
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Caricamento...</p>
+      <DashboardLayout title="Analisi Fattibilità">
+        <div className="flex items-center justify-center min-h-96">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-600 text-xl mb-4">❌ {error}</div>
+      <DashboardLayout title="Analisi Fattibilità">
+        <div className="flex flex-col items-center justify-center min-h-96 space-y-4">
+          <div className="text-red-600 text-xl">❌ {error}</div>
           <button
-            onClick={() => window.location.reload()}
+            onClick={loadData}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             🔄 Riprova
           </button>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <>
-      <DashboardLayout title="Analisi Fattibilità">
+    <DashboardLayout title="Analisi Fattibilità">
       <div className="space-y-6">
         {/* Header */}
-          <div className="bg-white shadow-sm border-b border-gray-200 rounded-lg">
-            <div className="px-6 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                      <FileText className="w-5 h-5 text-white" />
-                    </div>
-          <div>
-                      <h1 className="text-xl font-semibold text-gray-900">Analisi Fattibilità</h1>
-                      <p className="text-sm text-gray-600">Valuta la fattibilità economica dei tuoi progetti</p>
-                    </div>
+        <div className="bg-white shadow-sm border-b border-gray-200 rounded-lg">
+          <div className="px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-white" />
                   </div>
+          <div>
+                    <h1 className="text-xl font-semibold text-gray-900">Analisi Fattibilità</h1>
+                    <p className="text-sm text-gray-600">Valuta la fattibilità economica dei tuoi progetti</p>
+                  </div>
+                </div>
           </div>
-                <button 
-                  onClick={() => setShowCreateModal(true)}
+              <div className="flex items-center space-x-3">
+                <Link
+                  href="/dashboard/feasibility-analysis/new"
                   className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Nuovo Progetto</span>
+            </Link>
+                <button
+                  onClick={handleRecalculateAll}
+                  disabled={recalculating}
+                  className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                >
+                  <Calculator className="w-4 h-4" />
+                  <span>{recalculating ? 'Ricalcolando...' : 'Ricalcola Tutto'}</span>
             </button>
+              </div>
+            </div>
           </div>
         </div>
-          </div>
-          {/* Statistics Cards */}
+
+        {/* Statistics Cards */}
+        {statistics && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Progetti Totali</p>
-                  <p className="text-2xl font-bold text-gray-900">{projects.length}</p>
+                  <p className="text-2xl font-bold text-gray-900">{statistics.totalProjects}</p>
               </div>
                 <Building className="w-8 h-8 text-blue-600" />
               </div>
@@ -168,7 +217,7 @@ export default function FeasibilityAnalysisPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Investimento Totale</p>
-                  <p className="text-2xl font-bold text-gray-900">€{totalInvestment.toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-gray-900">{fmtCurrency(statistics.totalInvestment)}</p>
               </div>
                 <Euro className="w-8 h-8 text-green-600" />
               </div>
@@ -178,7 +227,7 @@ export default function FeasibilityAnalysisPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Rendimento Medio</p>
-                  <p className="text-2xl font-bold text-gray-900">{averageROI.toFixed(1)}%</p>
+                  <p className="text-2xl font-bold text-gray-900">{statistics.averageYield?.toFixed(2) || 0}%</p>
               </div>
                 <TrendingUp className="w-8 h-8 text-purple-600" />
               </div>
@@ -188,211 +237,179 @@ export default function FeasibilityAnalysisPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">ROI Medio</p>
-                  <p className="text-2xl font-bold text-gray-900">{averageROI.toFixed(1)}%</p>
+                  <p className="text-2xl font-bold text-gray-900">{statistics.averageROI?.toFixed(1) || 0}%</p>
               </div>
                 <Trophy className="w-8 h-8 text-yellow-600" />
               </div>
             </div>
           </div>
+        )}
 
-          {/* Projects List */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">Progetti di Fattibilità</h2>
-                <div className="flex items-center space-x-3">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <input
-                      type="text"
-                      placeholder="Cerca progetti..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-          </div>
-                  <button 
-                    onClick={() => setShowCreateModal(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    <Plus className="w-4 h-4 inline mr-2" />
-                    Nuovo Progetto
-                  </button>
+        {/* Projects List */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Progetti di Fattibilità</h2>
+              <div className="flex items-center space-x-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Cerca progetti..."
+                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
                 </div>
               </div>
+          </div>
 
-              {filteredProjects.length === 0 ? (
-                <div className="text-center py-12">
-                  <Building className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    {searchTerm ? 'Nessun progetto trovato' : 'Nessun progetto trovato'}
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    {searchTerm ? 'Prova a modificare i termini di ricerca.' : 'Inizia creando il tuo primo progetto di fattibilità.'}
-                  </p>
-                  {!searchTerm && (
-                            <button
-                      onClick={() => setShowCreateModal(true)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      <Plus className="w-4 h-4 inline mr-2" />
-                      Crea Nuovo Progetto
-                            </button>
-                  )}
+            {projects.length === 0 ? (
+            <div className="text-center py-12">
+                <Building className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Nessun progetto trovato</h3>
+                <p className="text-gray-600 mb-4">Inizia creando il tuo primo progetto di fattibilità.</p>
+                <Link
+                  href="/dashboard/feasibility-analysis/new"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Plus className="w-4 h-4 inline mr-2" />
+                  Crea Nuovo Progetto
+                </Link>
             </div>
           ) : (
-                <div className="space-y-4">
-                  {filteredProjects.map((project) => (
-                    <div key={project.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-medium text-gray-900">{project.name}</h3>
-                          <p className="text-sm text-gray-600">{project.location}</p>
-                          <div className="flex items-center space-x-4 mt-2">
-                            <span className="text-sm text-gray-500">Tipo: {project.type}</span>
-                            <span className="text-sm text-gray-500">Investimento: €{project.investment.toLocaleString()}</span>
-                            <span className="text-sm text-gray-500">Ricavi: €{project.revenue.toLocaleString()}</span>
-                            <span className="text-sm text-gray-500">ROI: {project.roi.toFixed(1)}%</span>
-                            <span className="text-sm text-gray-500">Margine: {project.margin.toFixed(1)}%</span>
-                          </div>
-                          {project.description && (
-                            <p className="text-xs text-gray-400 mt-1">{project.description}</p>
-                          )}
+            <div className="space-y-4">
+                {projects.map((project) => (
+                  <div key={project.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-4">
+                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <Building className="w-6 h-6 text-gray-600" />
+                    </div>
+                        <div>
+                          <h3 className="font-medium text-gray-900">{project.name}</h3>
+                          <p className="text-sm text-gray-600">{project.address}</p>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <button className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors">
-                            Visualizza
-                            </button>
-                          <button className="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors">
-                            Analizza
-                          </button>
+                  </div>
+
+                      <div className="flex items-center space-x-2">
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(project.status)}`}>
+                          {getStatusLabel(project.status)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                      <div className="flex items-center space-x-2">
+                        <Euro className="w-4 h-4 text-gray-400" />
+                        <div>
+                          <p className="text-sm text-gray-600">Investimento</p>
+                          <p className="font-medium text-gray-900">{fmtCurrency(project.costs.total)}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <TrendingUp className="w-4 h-4 text-gray-400" />
+                        <div>
+                          <p className="text-sm text-gray-600">Margine</p>
+                          <p className="font-medium text-gray-900">{project.results.margin}%</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Trophy className="w-4 h-4 text-gray-400" />
+                        <div>
+                          <p className="text-sm text-gray-600">ROI</p>
+                          <p className="font-medium text-gray-900">{project.results.roi}%</p>
+                        </div>
+                    </div>
+
+                      <div className="flex items-center space-x-2">
+                        <Calendar className="w-4 h-4 text-gray-400" />
+                        <div>
+                          <p className="text-sm text-gray-600">Payback</p>
+                          <p className="font-medium text-gray-900">{Math.round(project.results.paybackPeriod / 12)} anni</p>
                         </div>
                       </div>
                     </div>
-                  ))}
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-gray-500">
+                        Creato il {formatDate(project.createdAt.toString())} • Aggiornato il {formatDate(project.updatedAt.toString())}
+                      </div>
+
+                    <div className="flex items-center space-x-2">
+                        <Link
+                          href={`/dashboard/feasibility-analysis/${project.id}`}
+                          className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                          title="Visualizza"
+                        >
+                          <Eye className="w-4 h-4" />
+                            </Link>
+                        <Link
+                          href={`/dashboard/feasibility-analysis/${project.id}/edit`}
+                          className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                          title="Modifica"
+                        >
+                          <Edit className="w-4 h-4" />
+                            </Link>
+                            <button
+                              onClick={() => handleDeleteProject(project.id!)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Elimina"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                            </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
-            </div>
+        </div>
         </div>
 
-          {/* Quick Actions */}
-          <div className="mt-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Azioni Rapide</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button 
-                onClick={() => setShowCreateModal(true)}
-                className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <Calculator className="w-5 h-5 text-blue-600" />
-                <div className="text-left">
-                  <h3 className="font-medium text-gray-900">Nuova Analisi</h3>
-                  <p className="text-sm text-gray-600">Crea una nuova analisi di fattibilità</p>
-                </div>
-                  </button>
+        {/* Quick Actions */}
+        <div className="mt-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Azioni Rapide</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Link
+              href="/dashboard/feasibility-analysis/new"
+              className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <Calculator className="w-5 h-5 text-blue-600" />
+              <div className="text-left">
+                <h3 className="font-medium text-gray-900">Nuova Analisi</h3>
+                <p className="text-sm text-gray-600">Crea una nuova analisi di fattibilità</p>
+              </div>
+            </Link>
 
-                  <button
-                onClick={() => alert('Funzionalità di confronto in arrivo!')}
-                className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <GitCompare className="w-5 h-5 text-green-600" />
-                <div className="text-left">
-                  <h3 className="font-medium text-gray-900">Confronta Progetti</h3>
-                  <p className="text-sm text-gray-600">Confronta più progetti tra loro</p>
-                </div>
-                  </button>
+            <button
+              onClick={() => setShowComparison(!showComparison)}
+              className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <GitCompare className="w-5 h-5 text-green-600" />
+              <div className="text-left">
+                <h3 className="font-medium text-gray-900">Confronta Progetti</h3>
+                <p className="text-sm text-gray-600">Confronta più progetti tra loro</p>
+              </div>
+            </button>
 
-                  <button
-                onClick={() => alert('Funzionalità di report in arrivo!')}
-                className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <BarChart3 className="w-5 h-5 text-purple-600" />
-                <div className="text-left">
-                  <h3 className="font-medium text-gray-900">Report Completo</h3>
-                  <p className="text-sm text-gray-600">Genera report dettagliato</p>
-                </div>
-              </button>
-            </div>
+                <button
+              onClick={handleRecalculateAll}
+              disabled={recalculating}
+              className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            >
+              <BarChart3 className="w-5 h-5 text-purple-600" />
+              <div className="text-left">
+                <h3 className="font-medium text-gray-900">Ricalcola Tutto</h3>
+                <p className="text-sm text-gray-600">Ricalcola tutti i progetti</p>
+              </div>
+            </button>
           </div>
         </div>
-      </DashboardLayout>
-
-      {/* Create Project Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Crea Nuovo Progetto</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nome Progetto</label>
-                <input
-                  type="text"
-                  value={newProject.name}
-                  onChange={(e) => setNewProject({...newProject, name: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Es. Residenziale Milano Centro"
-                />
-              </div>
-                      <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Località</label>
-                <input
-                  type="text"
-                  value={newProject.location}
-                  onChange={(e) => setNewProject({...newProject, location: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Es. Milano, Italia"
-                />
-                      </div>
-                      <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo Progetto</label>
-                <select
-                  value={newProject.type}
-                  onChange={(e) => setNewProject({...newProject, type: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="residential">Residenziale</option>
-                  <option value="commercial">Commerciale</option>
-                  <option value="industrial">Industriale</option>
-                  <option value="mixed">Misto</option>
-                </select>
-                      </div>
-                      <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Budget (€)</label>
-                <input
-                  type="number"
-                  value={newProject.budget}
-                  onChange={(e) => setNewProject({...newProject, budget: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="1000000"
-                />
-                      </div>
-                      <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Descrizione</label>
-                <textarea
-                  value={newProject.description}
-                  onChange={(e) => setNewProject({...newProject, description: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={3}
-                  placeholder="Descrizione del progetto..."
-                />
-                      </div>
-                    </div>
-            <div className="flex items-center justify-end space-x-3 mt-6">
-                <button
-                onClick={() => setShowCreateModal(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
-              >
-                Annulla
-                </button>
-                <button
-                onClick={handleCreateProject}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                Crea Progetto
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-    </>
+      </div>
+      
+      {/* Feedback Widget */}
+      <FeedbackWidget className="" />
+    </DashboardLayout>
   );
 }
