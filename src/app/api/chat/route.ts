@@ -95,10 +95,20 @@ Se l'utente chiede qualcosa di non relativo all'immobiliare, riporta gentilmente
   } catch (error) {
     console.error('❌ [Chat API] Errore:', error);
     
+    // Se è un errore di autenticazione OpenAI, usa fallback
+    if (error instanceof Error && error.message.includes('401')) {
+      console.warn('⚠️ [Chat API] Chiave OpenAI non valida, usando fallback');
+      return NextResponse.json({
+        success: true,
+        response: getFallbackResponse(message),
+        timestamp: new Date().toISOString(),
+      });
+    }
+    
     return NextResponse.json({
       success: false,
       error: 'Errore interno del server',
-      response: getFallbackResponse(''),
+      response: getFallbackResponse(message),
       timestamp: new Date().toISOString(),
     }, { status: 500 });
   }
