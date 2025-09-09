@@ -45,14 +45,10 @@ export default function FeasibilityAnalysisPage() {
   const [recalculating, setRecalculating] = useState(false);
 
   useEffect(() => {
-    if (!authLoading && currentUser) {
-      loadData();
-    } else if (!authLoading && !currentUser) {
-      // TEMPORANEO: Carica dati anche senza autenticazione per test
-      console.log('⚠️ Modalità test: caricamento dati senza autenticazione');
-      loadDataForTest();
-    }
-  }, [currentUser, authLoading]);
+    // TEMPORANEO: Carica sempre i dati per test
+    console.log('⚠️ Modalità test: caricamento dati sempre attivo');
+    loadDataForTest();
+  }, []);
 
   const loadData = async () => {
     if (!currentUser) {
