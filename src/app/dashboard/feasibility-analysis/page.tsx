@@ -48,8 +48,9 @@ export default function FeasibilityAnalysisPage() {
     if (!authLoading && currentUser) {
       loadData();
     } else if (!authLoading && !currentUser) {
-      setLoading(false);
-      setError('Utente non autenticato');
+      // TEMPORANEO: Carica dati anche senza autenticazione per test
+      console.log('⚠️ Modalità test: caricamento dati senza autenticazione');
+      loadDataForTest();
     }
   }, [currentUser, authLoading]);
 
@@ -68,7 +69,7 @@ export default function FeasibilityAnalysisPage() {
       
       const [projectsData, rankingData, statisticsData] = await Promise.all([
         feasibilityService.getProjectsByUser(currentUser.uid),
-          feasibilityService.getProjectsRanking(),
+        feasibilityService.getProjectsRanking(),
         feasibilityService.getStatistics()
       ]);
       
@@ -79,6 +80,51 @@ export default function FeasibilityAnalysisPage() {
     } catch (err) {
       console.error('Errore caricamento dati:', err);
       setError('Errore nel caricamento dei dati');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // TEMPORANEO: Funzione per test senza autenticazione
+  const loadDataForTest = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      console.log('🔄 [TEST] Caricamento tutti i progetti per test...');
+      
+      const [projectsData, rankingData, statisticsData] = await Promise.all([
+        feasibilityService.getAllProjects(),
+        feasibilityService.getProjectsRanking(),
+        feasibilityService.getStatistics()
+      ]);
+      
+      console.log('✅ [TEST] Progetti caricati:', projectsData.length);
+      
+      // Filtra progetti per pierpaolo.laurito@gmail.com
+      const userProjects = projectsData.filter(project => 
+        project.createdBy === 'pierpaolo.laurito@gmail.com'
+      );
+      
+      console.log('👤 [TEST] Progetti per pierpaolo.laurito@gmail.com:', userProjects.length);
+      
+      // Cerca specificamente "Ciliegie"
+      const ciliegieProject = projectsData.find(project => 
+        project.name && project.name.toLowerCase().includes('ciliegie')
+      );
+      
+      if (ciliegieProject) {
+        console.log('🍒 [TEST] TROVATO PROGETTO CILIEGIE!', ciliegieProject);
+      } else {
+        console.log('❌ [TEST] Progetto Ciliegie non trovato');
+      }
+      
+      setProjects(userProjects);
+      setRanking(rankingData);
+      setStatistics(statisticsData);
+    } catch (err) {
+      console.error('❌ [TEST] Errore caricamento dati:', err);
+      setError('Errore nel caricamento dei dati di test');
     } finally {
       setLoading(false);
     }
