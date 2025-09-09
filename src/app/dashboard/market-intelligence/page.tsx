@@ -117,6 +117,21 @@ export default function MarketIntelligencePage() {
   const [servicesStatus, setServicesStatus] = useState<ServicesStatus | null>(null);
   const [isOnline, setIsOnline] = useState(true);
 
+  // Inizializzazione pagina
+  useEffect(() => {
+    const initializePage = async () => {
+      try {
+        await initializeServices();
+        setLoading(false);
+      } catch (error) {
+        console.error('❌ Errore inizializzazione pagina:', error);
+        setLoading(false); // Imposta comunque loading a false per evitare caricamento infinito
+      }
+    };
+
+    initializePage();
+  }, []);
+
   // Gestione stato online/offline
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
