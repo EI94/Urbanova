@@ -35,9 +35,12 @@ import {
 } from 'lucide-react';
 
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { dashboardService, DashboardStats } from '@/lib/dashboardService';
 import { chatHistoryService, ChatSession, ChatMessage } from '@/lib/chatHistoryService';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
+import WorkspaceManager from '@/components/workspace/WorkspaceManager';
+import { Workspace } from '@/types/workspace';
 
 // Mock data per i progetti (in produzione verrà da API)
 const mockProjects = [
@@ -109,6 +112,7 @@ interface ToolExecution {
 
 export default function UnifiedDashboardPage() {
   const { t } = useLanguage();
+  const { currentUser } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
@@ -131,6 +135,10 @@ export default function UnifiedDashboardPage() {
   const [showChatHistory, setShowChatHistory] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(true);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  
+  // Workspace management
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [showWorkspaceManager, setShowWorkspaceManager] = useState(false);
 
   // Stato per i dati della dashboard
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -163,6 +171,11 @@ export default function UnifiedDashboardPage() {
         const savedChatHistory = chatHistoryService.getChatSessions();
         setChatHistory(savedChatHistory);
         console.log('✅ [Chat History] Caricate sessioni salvate:', savedChatHistory.length);
+
+        // Carica workspace dell'utente
+        if (currentUser) {
+          await loadWorkspaces();
+        }
 
         console.log('✅ [Unified Dashboard] Statistiche iniziali caricate:', initialStats);
       } catch (error) {
@@ -391,6 +404,23 @@ export default function UnifiedDashboardPage() {
     }
   };
 
+  // Carica workspace dell'utente
+  const loadWorkspaces = async () => {
+    try {
+      if (!currentUser) return;
+      
+      const response = await fetch(`/api/workspace/user/${currentUser.uid}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setWorkspaces(data.workspaces);
+        console.log('✅ [Workspace] Workspace caricati:', data.workspaces.length);
+      }
+    } catch (error) {
+      console.error('❌ [Workspace] Errore caricamento workspace:', error);
+    }
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'IN_PROGRESS':
@@ -456,6 +486,13 @@ export default function UnifiedDashboardPage() {
               >
                 <Zap className="w-4 h-4 inline mr-2" />
                 Tool Panel
+              </button>
+              <button 
+                onClick={() => setShowWorkspaceManager(true)}
+                className="p-2 text-gray-400 hover:text-gray-600"
+                title="Gestione Workspace"
+              >
+                <Users className="w-5 h-5" />
               </button>
               <button className="p-2 text-gray-400 hover:text-gray-600">
                 <Settings className="w-5 h-5" />
@@ -1135,6 +1172,20 @@ export default function UnifiedDashboardPage() {
       
       {/* Feedback Widget */}
       <FeedbackWidget />
+      
+      {/* Workspace Manager Modal */}
+      <WorkspaceManager
+        isOpen={showWorkspaceManager}
+        onClose={() => setShowWorkspaceManager(false)}
+        workspaces={workspaces}
+        onWorkspaceCreated={(workspace) => {
+          setWorkspaces(prev => [workspace, ...prev]);
+        }}
+        onMemberInvited={() => {
+          // Ricarica i workspace per aggiornare i membri
+          loadWorkspaces();
+        }}
+      />
     </div>
   );
 }

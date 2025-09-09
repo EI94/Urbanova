@@ -23,12 +23,16 @@ import {
   Shield,
   CreditCard,
   Search,
-  Settings
+  Settings,
+  Share2,
+  Users
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import { useLanguage } from '@/contexts/LanguageContext';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
+import ShareProjectModal from '@/components/workspace/ShareProjectModal';
+import { Workspace } from '@/types/workspace';
 
 export default function FeasibilityAnalysisPage() {
   const { t, formatCurrency: fmtCurrency } = useLanguage();
@@ -43,12 +47,79 @@ export default function FeasibilityAnalysisPage() {
   const [project1Id, setProject1Id] = useState('');
   const [project2Id, setProject2Id] = useState('');
   const [recalculating, setRecalculating] = useState(false);
+  
+  // Workspace e condivisione
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [selectedProjectForShare, setSelectedProjectForShare] = useState<FeasibilityProject | null>(null);
 
   useEffect(() => {
     // SEMPRE carica i dati reali, indipendentemente dall'autenticazione
     console.log('🔄 Caricamento dati reali da Firebase...');
     loadDataForTest();
+    loadWorkspaces();
   }, []);
+
+  // Carica workspace dell'utente
+  const loadWorkspaces = async () => {
+    try {
+      if (!currentUser) return;
+      
+      const response = await fetch(`/api/workspace/user/${currentUser.uid}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setWorkspaces(data.workspaces);
+        console.log('✅ [Workspace] Workspace caricati:', data.workspaces.length);
+      }
+    } catch (error) {
+      console.error('❌ [Workspace] Errore caricamento workspace:', error);
+    }
+  };
+
+  // Gestisce la condivisione di un progetto
+  const handleShareProject = async (workspaceId: string, permissions: any) => {
+    if (!selectedProjectForShare) return;
+
+    try {
+      const response = await fetch('/api/workspace/share-project', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          workspaceId,
+          projectId: selectedProjectForShare.id,
+          projectType: 'feasibility',
+          permissions,
+          sharedBy: currentUser?.uid
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        toast('Progetto condiviso con successo!', { icon: '✅' });
+        console.log('✅ [Workspace] Progetto condiviso:', data.sharedProjectId);
+      } else {
+        toast(data.error || 'Errore nella condivisione', { icon: '❌' });
+      }
+    } catch (error) {
+      console.error('❌ [Workspace] Errore condivisione:', error);
+      toast('Errore nella condivisione del progetto', { icon: '❌' });
+    }
+  };
+
+  // Apre il modal di condivisione
+  const openShareModal = (project: FeasibilityProject) => {
+    if (workspaces.length === 0) {
+      toast('Nessun workspace disponibile. Crea un workspace per condividere progetti.', { icon: '⚠️' });
+      return;
+    }
+
+    setSelectedProjectForShare(project);
+    setShowShareModal(true);
+  };
 
   const loadData = async () => {
     if (!currentUser) {
@@ -112,7 +183,7 @@ export default function FeasibilityAnalysisPage() {
       
       if (ciliegieProject) {
         console.log('🍒 [TEST] TROVATO PROGETTO CILIEGIE!', ciliegieProject);
-      } else {
+        } else {
         console.log('❌ [TEST] Progetto Ciliegie non trovato');
       }
       
@@ -371,11 +442,11 @@ export default function FeasibilityAnalysisPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
+          <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Caricamento analisi fattibilità...</p>
+          </div>
         </div>
-      </div>
     );
   }
 
@@ -409,7 +480,7 @@ export default function FeasibilityAnalysisPage() {
           <div>
                   <h1 className="text-xl font-semibold text-gray-900">Urbanova Dashboard</h1>
                   <p className="text-sm text-gray-500">Design Center & Project Management</p>
-                </div>
+          </div>
               </div>
           </div>
             <div className="flex items-center space-x-4">
@@ -437,7 +508,7 @@ export default function FeasibilityAnalysisPage() {
                 >
                   <BarChart3 className="w-4 h-4 mr-3" />
                   Dashboard
-                </Link>
+            </Link>
               </div>
 
               {/* Discovery */}
@@ -605,14 +676,14 @@ export default function FeasibilityAnalysisPage() {
                       >
                         <Calculator className="w-5 h-5" />
                         <span className="font-medium">{recalculating ? 'Ricalcolando...' : 'Ricalcola Tutto'}</span>
-                      </button>
+            </button>
                     </div>
                   </div>
-                </div>
-              </div>
+          </div>
+        </div>
 
               {/* Modern Statistics Cards */}
-              {statistics && (
+        {statistics && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                   <div className="group relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-blue-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -620,12 +691,12 @@ export default function FeasibilityAnalysisPage() {
                     <div>
                         <p className="text-sm font-medium text-blue-700 mb-1">Progetti Totali</p>
                         <p className="text-3xl font-bold text-blue-900">{statistics.totalProjects}</p>
-                      </div>
+              </div>
                       <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                         <Building className="w-6 h-6 text-white" />
-                      </div>
+              </div>
                     </div>
-                  </div>
+            </div>
 
                   <div className="group relative overflow-hidden bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl border border-green-200 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                     <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -633,12 +704,12 @@ export default function FeasibilityAnalysisPage() {
                       <div>
                         <p className="text-sm font-medium text-green-700 mb-1">Investimento Totale</p>
                         <p className="text-3xl font-bold text-green-900">{fmtCurrency(statistics.totalInvestment)}</p>
-                      </div>
+              </div>
                       <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                         <Euro className="w-6 h-6 text-white" />
-                      </div>
-                    </div>
-                    </div>
+              </div>
+              </div>
+            </div>
 
                   <div className="group relative overflow-hidden bg-gradient-to-br from-purple-50 to-violet-100 rounded-2xl border border-purple-200 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                     <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-violet-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -646,12 +717,12 @@ export default function FeasibilityAnalysisPage() {
                       <div>
                         <p className="text-sm font-medium text-purple-700 mb-1">Rendimento Medio</p>
                         <p className="text-3xl font-bold text-purple-900">{statistics.averageYield?.toFixed(2) || 0}%</p>
-                      </div>
+              </div>
                       <div className="p-3 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                         <TrendingUp className="w-6 h-6 text-white" />
-                      </div>
-                    </div>
-                    </div>
+              </div>
+              </div>
+            </div>
 
                   <div className="group relative overflow-hidden bg-gradient-to-br from-yellow-50 to-amber-100 rounded-2xl border border-yellow-200 p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                     <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-amber-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -659,14 +730,14 @@ export default function FeasibilityAnalysisPage() {
                       <div>
                         <p className="text-sm font-medium text-yellow-700 mb-1">ROI Medio</p>
                         <p className="text-3xl font-bold text-yellow-900">{statistics.averageROI?.toFixed(1) || 0}%</p>
-                      </div>
+              </div>
                       <div className="p-3 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                         <Trophy className="w-6 h-6 text-white" />
                       </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+              </div>
+            </div>
+          </div>
+        )}
 
               {/* Modern Projects List */}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -686,7 +757,7 @@ export default function FeasibilityAnalysisPage() {
                         />
                       </div>
             </div>
-        </div>
+          </div>
 
           {projects.length === 0 ? (
                     <div className="text-center py-16">
@@ -701,47 +772,47 @@ export default function FeasibilityAnalysisPage() {
                       >
                         <Plus className="w-5 h-5" />
                         <span className="font-medium">Crea Nuovo Progetto</span>
-                      </Link>
+                </Link>
             </div>
           ) : (
-                    <div className="space-y-4">
+            <div className="space-y-4">
                       {projects.map((project) => (
                         <div key={project.id} className="group relative overflow-hidden bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg hover:border-gray-300 transition-all duration-300 hover:-translate-y-1">
                           <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                           <div className="relative flex items-center justify-between mb-4">
-                            <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-4">
                               <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                                 <Building className="w-7 h-7 text-blue-600" />
-                              </div>
-                        <div>
-                                <h3 className="font-medium text-gray-900">{project.name}</h3>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900">{project.name}</h3>
                                 <p className="text-sm text-gray-600">{project.address}</p>
-                              </div>
-                            </div>
+                    </div>
+                  </div>
                             <div className="flex items-center space-x-4">
-                              <div className="text-right">
+                    <div className="text-right">
                                 <p className="text-sm text-gray-500">Investimento</p>
                                 <p className="font-semibold text-gray-900">{fmtCurrency(project.costs.total)}</p>
-                              </div>
+                      </div>
                               <div className="text-right">
                                 <p className="text-sm text-gray-500">Margine</p>
                                 <p className="font-semibold text-gray-900">{project.results.margin?.toFixed(1) || 0}%</p>
-                              </div>
-                              <div className="text-right">
+                    </div>
+                    <div className="text-right">
                                 <p className="text-sm text-gray-500">ROI</p>
                                 <p className="font-semibold text-gray-900">{project.results.roi?.toFixed(1) || 0}%</p>
-                              </div>
-                              <div className="text-right">
+                      </div>
+                    <div className="text-right">
                                 <p className="text-sm text-gray-500">Payback</p>
                                 <p className="font-semibold text-gray-900">{project.results.paybackPeriod?.toFixed(1) || 0} anni</p>
-                              </div>
-                            </div>
-                          </div>
-                          
+                      </div>
+                    </div>
+        </div>
+
                           <div className="flex items-center justify-between">
-                            <div className="text-sm text-gray-500">
+                          <div className="text-sm text-gray-500">
                               Creato il {formatDate(project.createdAt.toString())} • Aggiornato il {formatDate(project.updatedAt.toString())}
-                        </div>
+                          </div>
 
                         <div className="flex items-center space-x-2">
                           <Link
@@ -759,20 +830,27 @@ export default function FeasibilityAnalysisPage() {
                                 <Edit className="w-5 h-5" />
                           </Link>
                           <button
+                                onClick={() => openShareModal(project)}
+                                className="p-3 text-purple-600 hover:bg-purple-50 rounded-xl transition-all duration-200 hover:scale-110"
+                                title="Condividi con colleghi"
+                          >
+                                <Share2 className="w-5 h-5" />
+                          </button>
+                          <button
                                 onClick={() => handleDeleteProject(project.id!)}
                                 className="p-3 text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 hover:scale-110"
                                 title="Elimina"
-                              >
+                          >
                                 <Trash2 className="w-5 h-5" />
                           </button>
-                            </div>
+                        </div>
                           </div>
                         </div>
                   ))}
             </div>
           )}
                 </div>
-              </div>
+        </div>
 
               {/* Modern Quick Actions */}
               <div className="mt-8">
@@ -789,7 +867,7 @@ export default function FeasibilityAnalysisPage() {
                     <div className="relative flex items-center space-x-4">
                       <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                         <Calculator className="w-6 h-6 text-white" />
-                      </div>
+              </div>
                       <div className="text-left">
                         <h3 className="font-semibold text-gray-900 mb-1">Nuova Analisi</h3>
                         <p className="text-sm text-gray-600">Crea una nuova analisi di fattibilità</p>
@@ -822,22 +900,38 @@ export default function FeasibilityAnalysisPage() {
                     <div className="relative flex items-center space-x-4">
                       <div className="p-3 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                         <BarChart3 className="w-6 h-6 text-white" />
-                      </div>
+                </div>
                       <div className="text-left">
                         <h3 className="font-semibold text-gray-900 mb-1">Ricalcola Tutto</h3>
                         <p className="text-sm text-gray-600">Ricalcola tutti i progetti</p>
+              </div>
+                      </div>
+                  </button>
+                      </div>
+                      </div>
                       </div>
                     </div>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
+                  </div>
+                  </div>
+
       {/* Feedback Widget */}
       <FeedbackWidget className="" />
-    </div>
+      
+      {/* Modal Condivisione Progetto */}
+      {selectedProjectForShare && (
+        <ShareProjectModal
+          isOpen={showShareModal}
+          onClose={() => {
+            setShowShareModal(false);
+            setSelectedProjectForShare(null);
+          }}
+          projectId={selectedProjectForShare.id!}
+          projectType="feasibility"
+          projectName={selectedProjectForShare.name}
+          workspaces={workspaces}
+          onShare={handleShareProject}
+        />
+        )}
+      </div>
   );
 }
