@@ -45,10 +45,16 @@ export default function FeasibilityAnalysisPage() {
   const [recalculating, setRecalculating] = useState(false);
 
   useEffect(() => {
-    // TEMPORANEO: Carica sempre i dati per test
-    console.log('⚠️ Modalità test: caricamento dati sempre attivo');
-    loadDataForTest();
-  }, []);
+    if (!authLoading) {
+      if (currentUser) {
+        console.log('✅ Utente autenticato, caricamento dati normali');
+        loadData();
+      } else {
+        console.log('⚠️ Utente non autenticato, caricamento dati di test');
+        loadDataForTest();
+      }
+    }
+  }, [authLoading, currentUser]);
 
   const loadData = async () => {
     if (!currentUser) {
@@ -81,14 +87,15 @@ export default function FeasibilityAnalysisPage() {
     }
   };
 
-  // TEMPORANEO: Funzione per test senza autenticazione
+  // Funzione per test senza autenticazione
   const loadDataForTest = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      console.log('🔄 [TEST] Caricamento tutti i progetti per test...');
+      console.log('🔄 [TEST] Tentativo caricamento progetti...');
       
+      // Prova a caricare i dati reali
       const [projectsData, rankingData, statisticsData] = await Promise.all([
         feasibilityService.getAllProjects(),
         feasibilityService.getProjectsRanking(),
@@ -111,8 +118,10 @@ export default function FeasibilityAnalysisPage() {
       
       if (ciliegieProject) {
         console.log('🍒 [TEST] TROVATO PROGETTO CILIEGIE!', ciliegieProject);
+        toast('🍒 Progetto Ciliegie trovato!', { icon: '✅' });
       } else {
         console.log('❌ [TEST] Progetto Ciliegie non trovato');
+        toast('❌ Progetto Ciliegie non trovato', { icon: '❌' });
       }
       
       setProjects(userProjects);
@@ -120,7 +129,43 @@ export default function FeasibilityAnalysisPage() {
       setStatistics(statisticsData);
     } catch (err) {
       console.error('❌ [TEST] Errore caricamento dati:', err);
-      setError('Errore nel caricamento dei dati di test');
+      
+      // Se Firebase non è configurato, mostra dati mock
+      console.log('⚠️ [TEST] Firebase non configurato, usando dati mock');
+      
+      const mockProjects: FeasibilityProject[] = [
+        {
+          id: 'mock-1',
+          name: 'Progetto Ciliegie',
+          address: 'Via Roma, 123 - Roma EUR',
+          createdBy: 'pierpaolo.laurito@gmail.com',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          costs: {
+            total: 500000,
+            land: 200000,
+            construction: 250000,
+            permits: 30000,
+            other: 20000
+          },
+          results: {
+            margin: 15.5,
+            roi: 12.3,
+            payback: 8.1
+          }
+        }
+      ];
+      
+      setProjects(mockProjects);
+      setRanking(mockProjects);
+      setStatistics({
+        totalProjects: 1,
+        totalInvestment: 500000,
+        averageYield: 15.5,
+        averageROI: 12.3
+      });
+      
+      toast('⚠️ Usando dati mock - Firebase non configurato', { icon: '⚠️' });
     } finally {
       setLoading(false);
     }

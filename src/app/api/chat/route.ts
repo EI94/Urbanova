@@ -4,9 +4,17 @@ import OpenAI from 'openai';
 // Inizializza OpenAI solo se la chiave è disponibile
 let openai: OpenAI | null = null;
 if (process.env.OPENAI_API_KEY) {
-  openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
+  try {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+    console.log('✅ [Chat API] OpenAI configurato correttamente');
+  } catch (error) {
+    console.error('❌ [Chat API] Errore configurazione OpenAI:', error);
+    openai = null;
+  }
+} else {
+  console.warn('⚠️ [Chat API] OPENAI_API_KEY non configurata. Il chatbot funzionerà in modalità fallback.');
 }
 
 export async function POST(request: NextRequest) {
