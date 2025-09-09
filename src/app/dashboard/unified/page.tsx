@@ -36,6 +36,7 @@ import {
 
 import { useLanguage } from '@/contexts/LanguageContext';
 import { dashboardService, DashboardStats } from '@/lib/dashboardService';
+import { chatHistoryService, ChatSession, ChatMessage } from '@/lib/chatHistoryService';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
 
 // Mock data per i progetti (in produzione verrà da API)
@@ -91,18 +92,7 @@ const mockMetrics = {
   nextDeadlines: 3,
 };
 
-// Interfaccia per i messaggi chat
-interface ChatMessage {
-  id: string;
-  type: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-  metadata?: {
-    toolId?: string;
-    actionName?: string;
-    runId?: string;
-  };
-}
+// Le interfacce ChatMessage e ChatSession sono ora importate da chatHistoryService
 
 // Interfaccia per le esecuzioni tool
 interface ToolExecution {
@@ -137,15 +127,10 @@ export default function UnifiedDashboardPage() {
   const [showToolPanel, setShowToolPanel] = useState(false);
   
   // Chat history e quick actions
-  const [chatHistory, setChatHistory] = useState<Array<{
-    id: string;
-    title: string;
-    preview: string;
-    timestamp: Date;
-    messages: ChatMessage[];
-  }>>([]);
+  const [chatHistory, setChatHistory] = useState<ChatSession[]>([]);
   const [showChatHistory, setShowChatHistory] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(true);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 
   // Stato per i dati della dashboard
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -160,7 +145,7 @@ export default function UnifiedDashboardPage() {
     scrollToBottom();
   }, [messages]);
 
-  // Carica dati dashboard
+  // Carica dati dashboard e chat history
   useEffect(() => {
     const initializeDashboard = async () => {
       try {
@@ -173,6 +158,11 @@ export default function UnifiedDashboardPage() {
         // Carica le statistiche iniziali
         const initialStats = await dashboardService.getDashboardStats();
         setStats(initialStats);
+
+        // Carica la chat history persistente
+        const savedChatHistory = chatHistoryService.getChatSessions();
+        setChatHistory(savedChatHistory);
+        console.log('✅ [Chat History] Caricate sessioni salvate:', savedChatHistory.length);
 
         console.log('✅ [Unified Dashboard] Statistiche iniziali caricate:', initialStats);
       } catch (error) {
@@ -318,20 +308,32 @@ export default function UnifiedDashboardPage() {
       const finalMessages = [...newMessages, aiResponse];
       setMessages(finalMessages);
 
-      // Salva nella chat history se è una conversazione significativa
+      // Salva nella chat history persistente se è una conversazione significativa
       if (finalMessages.length > 2) {
-        const chatTitle = inputValue.length > 30 ? inputValue.substring(0, 30) + '...' : inputValue;
-        const chatPreview = aiResponse.content.substring(0, 100) + '...';
+        let sessionToUpdate: ChatSession | null = null;
         
-        const newChat = {
-          id: Date.now().toString(),
-          title: chatTitle,
-          preview: chatPreview,
-          timestamp: new Date(),
-          messages: finalMessages,
-        };
-
-        setChatHistory(prev => [newChat, ...prev.slice(0, 9)]); // Mantieni solo le ultime 10 chat
+        // Se abbiamo una sessione corrente, aggiornala
+        if (currentSessionId) {
+          sessionToUpdate = chatHistoryService.getChatSession(currentSessionId);
+        }
+        
+        if (sessionToUpdate) {
+          // Aggiorna sessione esistente
+          sessionToUpdate.messages = finalMessages;
+          sessionToUpdate.preview = aiResponse.content.substring(0, 100) + '...';
+          chatHistoryService.saveChatSession(sessionToUpdate);
+          console.log('✅ [Chat History] Sessione aggiornata:', sessionToUpdate.title);
+        } else {
+          // Crea nuova sessione
+          const newSession = chatHistoryService.createSessionFromMessages(finalMessages);
+          chatHistoryService.saveChatSession(newSession);
+          setCurrentSessionId(newSession.id);
+          console.log('✅ [Chat History] Nuova sessione creata:', newSession.title);
+        }
+        
+        // Ricarica la chat history
+        const updatedHistory = chatHistoryService.getChatSessions();
+        setChatHistory(updatedHistory);
       }
     } catch (error) {
       console.error('❌ [Chatbot] Errore chiamata API:', error);
@@ -355,6 +357,28 @@ export default function UnifiedDashboardPage() {
 
       const finalMessages = [...newMessages, fallbackResponse];
       setMessages(finalMessages);
+
+      // Salva anche il fallback nella chat history
+      if (finalMessages.length > 2) {
+        let sessionToUpdate: ChatSession | null = null;
+        
+        if (currentSessionId) {
+          sessionToUpdate = chatHistoryService.getChatSession(currentSessionId);
+        }
+        
+        if (sessionToUpdate) {
+          sessionToUpdate.messages = finalMessages;
+          sessionToUpdate.preview = fallbackResponse.content.substring(0, 100) + '...';
+          chatHistoryService.saveChatSession(sessionToUpdate);
+        } else {
+          const newSession = chatHistoryService.createSessionFromMessages(finalMessages);
+          chatHistoryService.saveChatSession(newSession);
+          setCurrentSessionId(newSession.id);
+        }
+        
+        const updatedHistory = chatHistoryService.getChatSessions();
+        setChatHistory(updatedHistory);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -1043,15 +1067,35 @@ export default function UnifiedDashboardPage() {
                   chatHistory.map(chat => (
                     <div
                       key={chat.id}
-                      className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
-                      onClick={() => {
-                        setMessages(chat.messages);
-                        setShowChatHistory(false);
-                      }}
+                      className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group"
                     >
-                      <h4 className="font-medium text-gray-900 text-sm mb-1">{chat.title}</h4>
-                      <p className="text-xs text-gray-500 mb-2">{chat.preview}</p>
-                      <p className="text-xs text-gray-400">{chat.timestamp.toLocaleDateString()}</p>
+                      <div 
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setMessages(chat.messages);
+                          setCurrentSessionId(chat.id);
+                          setShowChatHistory(false);
+                          console.log('✅ [Chat History] Sessione caricata:', chat.title);
+                        }}
+                      >
+                        <h4 className="font-medium text-gray-900 text-sm mb-1">{chat.title}</h4>
+                        <p className="text-xs text-gray-500 mb-2">{chat.preview}</p>
+                        <p className="text-xs text-gray-400">{chat.timestamp.toLocaleDateString()}</p>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm('Sei sicuro di voler eliminare questa chat?')) {
+                            chatHistoryService.deleteChatSession(chat.id);
+                            const updatedHistory = chatHistoryService.getChatSessions();
+                            setChatHistory(updatedHistory);
+                            console.log('✅ [Chat History] Sessione eliminata:', chat.title);
+                          }
+                        }}
+                        className="opacity-0 group-hover:opacity-100 mt-2 text-red-500 hover:text-red-700 text-xs transition-opacity"
+                      >
+                        Elimina
+                      </button>
                     </div>
                   ))
                 )}
