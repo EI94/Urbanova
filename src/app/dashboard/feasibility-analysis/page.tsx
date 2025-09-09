@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   Calculator, 
   TrendingUp, 
@@ -31,6 +32,7 @@ import FeedbackWidget from '@/components/ui/FeedbackWidget';
 
 export default function FeasibilityAnalysisPage() {
   const { t, formatCurrency: fmtCurrency } = useLanguage();
+  const { currentUser, loading: authLoading } = useAuth();
   const [projects, setProjects] = useState<FeasibilityProject[]>([]);
   const [ranking, setRanking] = useState<FeasibilityProject[]>([]);
   const [statistics, setStatistics] = useState<any>(null);
@@ -43,24 +45,39 @@ export default function FeasibilityAnalysisPage() {
   const [recalculating, setRecalculating] = useState(false);
 
   useEffect(() => {
+    if (!authLoading && currentUser) {
       loadData();
-  }, []);
+    } else if (!authLoading && !currentUser) {
+      setLoading(false);
+      setError('Utente non autenticato');
+    }
+  }, [currentUser, authLoading]);
 
   const loadData = async () => {
+    if (!currentUser) {
+      setError('Utente non autenticato');
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
+    setError(null);
+    
     try {
+      console.log('🔄 Caricamento progetti per utente:', currentUser.email);
+      
       const [projectsData, rankingData, statisticsData] = await Promise.all([
-          feasibilityService.getAllProjects(),
+        feasibilityService.getProjectsByUser(currentUser.uid),
           feasibilityService.getProjectsRanking(),
         feasibilityService.getStatistics()
       ]);
       
+      console.log('✅ Progetti caricati:', projectsData.length);
       setProjects(projectsData);
       setRanking(rankingData);
       setStatistics(statisticsData);
-      setError(null);
     } catch (err) {
-      console.error('Error loading data:', err);
+      console.error('Errore caricamento dati:', err);
       setError('Errore nel caricamento dei dati');
     } finally {
       setLoading(false);

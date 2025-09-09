@@ -207,7 +207,7 @@ declare module '@/lib/firebase' {
 
 declare module '@/contexts/AuthContext' {
   export function useAuth(): {
-    user: any;
+    currentUser: any;
     login: (email: string, password: string) => Promise<void>;
     signup: (email: string, password: string, userData: any) => Promise<void>;
     logout: () => Promise<void>;
