@@ -1,28 +1,55 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   MapPin,
   Search,
   Filter,
   Plus,
-  Eye,
-  Edit,
   Trash2,
-  Download,
   Share,
   BarChart3,
   TrendingUp,
   FileText,
-  CreditCard,
   Shield,
-  Calendar,
-  Target,
-  Building,
   Bot,
   Sparkles,
+  SettingsIcon,
+  DashboardIcon,
+  SearchIcon,
+  FileTextIcon,
+  BuildingIcon,
+  TargetIcon,
+  ShieldIcon,
+  CalendarIcon,
+  PlusIcon,
+  MapIcon,
+  EuroIcon,
+  CheckCircleIcon,
+  EditIcon,
+  CalculatorIcon,
+  ClockIcon,
+  FilterIcon,
+  EyeIcon,
+} from '@/components/icons';
+import {
+  BarChart3 as BarChart3Lucide,
+  FileText as FileTextLucide,
+  Shield as ShieldLucide,
+  Calendar as CalendarLucide,
+  Plus as PlusLucide,
+  Target as TargetLucide,
+  Bot as BotLucide,
+  Sparkles as SparklesLucide,
+  MessageCircle as MessageCircleLucide,
+  Eye,
+  Edit,
+  Download,
+  Building,
+  CreditCard,
 } from 'lucide-react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
 
 // ============================================================================
@@ -65,14 +92,26 @@ export default function MappaProgettiPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<ProjectLocation | null>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const googleMapRef = useRef<google.maps.Map | null>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
 
   useEffect(() => {
       loadData();
+    loadGoogleMaps();
   }, []);
 
   useEffect(() => {
     filterProjects();
   }, [projects, searchTerm, selectedStatus]);
+
+  useEffect(() => {
+    if (mapLoaded && filteredProjects.length > 0) {
+      updateMapMarkers();
+    }
+  }, [mapLoaded, filteredProjects]);
 
   const loadData = async () => {
     try {
@@ -140,6 +179,132 @@ export default function MappaProgettiPage() {
     }
   };
 
+  const loadGoogleMaps = () => {
+    if (typeof window === 'undefined') return;
+
+    const script = document.createElement('script');
+    // Usa una chiave API temporanea per il test
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyBvOkBw7cG6hY7v8x9z0a1b2c3d4e5f6g7h8';
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      initializeMap();
+    };
+    script.onerror = () => {
+      console.warn('Google Maps non caricato. Usando mappa mock.');
+      setMapLoaded(true);
+    };
+    document.head.appendChild(script);
+  };
+
+  const initializeMap = () => {
+    if (!mapRef.current) return;
+
+    const map = new google.maps.Map(mapRef.current, {
+      zoom: 6,
+      center: { lat: 41.9028, lng: 12.4964 }, // Centro Italia
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      styles: [
+        {
+          featureType: 'poi',
+          elementType: 'labels',
+          stylers: [{ visibility: 'off' }]
+        }
+      ]
+    });
+
+    googleMapRef.current = map;
+    setMapLoaded(true);
+  };
+
+  const updateMapMarkers = () => {
+    if (!googleMapRef.current) return;
+
+    // Rimuovi marcatori esistenti
+    markersRef.current.forEach(marker => marker.setMap(null));
+    markersRef.current = [];
+
+    // Aggiungi nuovi marcatori
+    filteredProjects.forEach(project => {
+      const marker = new google.maps.Marker({
+        position: project.coordinates,
+        map: googleMapRef.current,
+        title: project.name,
+        icon: {
+          url: getMarkerIcon(project.status),
+          scaledSize: new google.maps.Size(32, 32),
+        }
+      });
+
+      const infoWindow = new google.maps.InfoWindow({
+        content: createInfoWindowContent(project)
+      });
+
+      marker.addListener('click', () => {
+        setSelectedProject(project);
+        infoWindow.open(googleMapRef.current, marker);
+      });
+
+      markersRef.current.push(marker);
+    });
+
+    // Centra la mappa sui progetti
+    if (filteredProjects.length > 0) {
+      const bounds = new google.maps.LatLngBounds();
+      filteredProjects.forEach(project => {
+        bounds.extend(project.coordinates);
+      });
+      googleMapRef.current.fitBounds(bounds);
+    }
+  };
+
+  const getMarkerIcon = (status: string) => {
+    const colors = {
+      planning: '#3B82F6', // blue
+      in_progress: '#10B981', // green
+      completed: '#6B7280', // gray
+      on_hold: '#F59E0B', // yellow
+    };
+    
+    const color = colors[status as keyof typeof colors] || '#6B7280';
+    
+    return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+      <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="12" fill="${color}" stroke="white" stroke-width="2"/>
+        <path d="M16 8l4 8-4 8-4-8z" fill="white"/>
+      </svg>
+    `)}`;
+  };
+
+  const createInfoWindowContent = (project: ProjectLocation) => {
+    return `
+      <div class="p-4 max-w-xs">
+        <h3 class="font-semibold text-gray-900 mb-2">${project.name}</h3>
+        <p class="text-sm text-gray-600 mb-2">${project.address}</p>
+        <div class="space-y-1 text-sm">
+          <div class="flex justify-between">
+            <span class="text-gray-600">Stato:</span>
+            <span class="font-medium">${getStatusLabel(project.status)}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">Budget:</span>
+            <span class="font-medium">${formatCurrency(project.budget)}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">Progresso:</span>
+            <span class="font-medium">${project.progress}%</span>
+          </div>
+        </div>
+        <div class="mt-3">
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-blue-600 h-2 rounded-full" style="width: ${project.progress}%"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  };
+
   const filterProjects = () => {
     let filtered = projects;
 
@@ -193,15 +358,21 @@ export default function MappaProgettiPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Caricamento mappa...</p>
+          </div>
         </div>
+      </DashboardLayout>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen space-y-4">
+      <DashboardLayout>
+        <div className="flex flex-col items-center justify-center h-64 space-y-4">
           <div className="text-red-600 text-xl">❌ {error}</div>
           <button
             onClick={loadData}
@@ -210,210 +381,157 @@ export default function MappaProgettiPage() {
             🔄 Riprova
           </button>
         </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <DashboardLayout>
+      <div className="flex-1 p-6">
         {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
-                  <MapPin className="w-5 h-5 text-white" />
-                </div>
+        <div className="flex items-center justify-between mb-6">
           <div>
-                  <h1 className="text-xl font-semibold text-gray-900">Mappa Progetti</h1>
-                  <p className="text-sm text-gray-600">Visualizza e gestisci i tuoi progetti sulla mappa</p>
-                </div>
-              </div>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <MapIcon className="w-8 h-8 text-red-600" />
+              Mappa Progetti
+            </h1>
+            <p className="text-gray-600 mt-2">
+              Visualizza e gestisci i tuoi progetti sulla mappa interattiva
+            </p>
           </div>
-            <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              <Plus className="w-4 h-4" />
-              <span>Nuovo Progetto</span>
+          <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <PlusIcon className="w-4 h-4" />
+            <span>Nuovo Progetto</span>
+            </button>
+        </div>
+
+        {/* Search and Filters */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Cerca progetti..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
+              />
+            </div>
+
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">Tutti gli Stati</option>
+              <option value="planning">Pianificazione</option>
+              <option value="in_progress">In Corso</option>
+              <option value="completed">Completato</option>
+              <option value="on_hold">In Pausa</option>
+            </select>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setViewMode('map')}
+              className={`p-2 rounded-lg transition-colors ${
+                viewMode === 'map' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <MapIcon className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-lg transition-colors ${
+                viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <BarChart3Lucide className="w-4 h-4" />
             </button>
           </div>
         </div>
-              </div>
 
-      <div className="flex">
-        {/* Sidebar */}
-        <div className="w-64 bg-white border-r border-gray-200 min-h-screen">
-          <div className="p-6">
-            <nav className="space-y-2">
-              <Link href="/dashboard/unified" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <BarChart3 className="w-5 h-5" />
-                <span>Dashboard</span>
-              </Link>
-              <Link href="/dashboard/market-intelligence" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <TrendingUp className="w-5 h-5" />
-                <span>Market Intelligence</span>
-              </Link>
-              <Link href="/dashboard/feasibility-analysis" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <FileText className="w-5 h-5" />
-                <span>Analisi Fattibilità</span>
-              </Link>
-              <Link href="/dashboard/design-center" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <Building className="w-5 h-5" />
-                <span>Design Center</span>
-              </Link>
-              <Link href="/dashboard/business-plan" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <Target className="w-5 h-5" />
-                <span>Business Plan</span>
-              </Link>
-              <Link href="/dashboard/permits-compliance" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <Shield className="w-5 h-5" />
-                <span>Permessi & Compliance</span>
-              </Link>
-              <Link href="/dashboard/project-timeline" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <Calendar className="w-5 h-5" />
-                <span>Project Timeline AI</span>
-              </Link>
-              <Link href="/dashboard/progetti" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <Building className="w-5 h-5" />
-                <span>Progetti</span>
-              </Link>
-              <Link href="/dashboard/billing" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <CreditCard className="w-5 h-5" />
-                <span>Billing & Usage</span>
-              </Link>
-              <Link href="/dashboard/mappa-progetti" className="flex items-center space-x-3 px-3 py-2 text-red-600 bg-red-50 rounded-lg transition-colors">
-                <MapPin className="w-5 h-5" />
-                <span>Mappa Progetti</span>
-              </Link>
-            </nav>
+        {/* Map View */}
+        {viewMode === 'map' && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="h-96 relative">
+              {!mapLoaded ? (
+                <div className="flex items-center justify-center h-full bg-gray-100">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Caricamento Google Maps...</p>
+                  </div>
+                </div>
+              ) : typeof google !== 'undefined' && google.maps ? (
+                <div ref={mapRef} className="w-full h-full" />
+              ) : (
+                <div className="flex items-center justify-center h-full bg-gradient-to-br from-blue-50 to-indigo-100">
+                  <div className="text-center">
+                    <MapIcon className="w-16 h-16 text-blue-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Mappa Interattiva</h3>
+                    <p className="text-gray-600 mb-4">Visualizza i tuoi progetti sulla mappa</p>
+                    <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+                      {filteredProjects.map(project => (
+                        <div key={project.id} className="bg-white p-3 rounded-lg shadow-sm border">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <div className={`w-3 h-3 rounded-full ${
+                              project.status === 'planning' ? 'bg-blue-500' :
+                              project.status === 'in_progress' ? 'bg-green-500' :
+                              project.status === 'completed' ? 'bg-gray-500' : 'bg-yellow-500'
+                            }`}></div>
+                            <span className="text-sm font-medium text-gray-900">{project.name}</span>
+                          </div>
+                          <p className="text-xs text-gray-600">{project.address}</p>
+                          <div className="mt-2">
+                            <div className="w-full bg-gray-200 rounded-full h-1">
+                              <div 
+                                className="bg-blue-600 h-1 rounded-full"
+                                style={{ width: `${project.progress}%` }}
+                              ></div>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">{project.progress}% completato</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Legend */}
+            <div className="p-4 border-t border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-6">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">Pianificazione</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">In Corso</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 bg-gray-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">Completato</span>
+              </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">In Pausa</span>
+              </div>
+                </div>
+                <div className="text-sm text-gray-500">
+                  {filteredProjects.length} progetti visualizzati
                 </div>
               </div>
-
-        {/* Main Content */}
-        <div className="flex-1 p-6">
-          {/* Search and Filters */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                  type="text"
-                  placeholder="Cerca progetti..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-                <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">Tutti gli Stati</option>
-                <option value="planning">Pianificazione</option>
-                <option value="in_progress">In Corso</option>
-                <option value="completed">Completato</option>
-                <option value="on_hold">In Pausa</option>
-                </select>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => setViewMode('map')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'map' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                <MapPin className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                <BarChart3 className="w-4 h-4" />
-              </button>
             </div>
           </div>
+        )}
 
-          {/* Map View */}
-          {viewMode === 'map' && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center mb-4">
-                <div className="text-center">
-                  <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600">Mappa Interattiva</p>
-                  <p className="text-sm text-gray-500">Integrazione con Google Maps in sviluppo</p>
-              </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredProjects.map(project => (
-                  <div key={project.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-semibold text-gray-900">{project.name}</h3>
-                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(project.status)}`}>
-                        {getStatusLabel(project.status)}
-                      </span>
-          </div>
-
-                    <p className="text-sm text-gray-600 mb-3">{project.address}</p>
-                    
-                    <div className="space-y-2 mb-3">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Budget:</span>
-                        <span className="font-medium">{formatCurrency(project.budget)}</span>
-              </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Progresso:</span>
-                        <span className="font-medium">{project.progress}%</span>
-              </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Inizio:</span>
-                        <span className="font-medium">{formatDate(project.startDate)}</span>
-            </div>
-          </div>
-
-                    <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
-                      <div 
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${project.progress}%` }}
-                      ></div>
-                    </div>
-                    
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {project.tags.map(tag => (
-                        <span key={tag} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                          {tag}
-                        </span>
-                      ))}
-              </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <button className="p-1 text-gray-600 hover:bg-gray-100 rounded transition-colors">
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button className="p-1 text-gray-600 hover:bg-gray-100 rounded transition-colors">
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button className="p-1 text-gray-600 hover:bg-gray-100 rounded transition-colors">
-                          <Share className="w-4 h-4" />
-                        </button>
-              </div>
-                      <button className="p-1 text-gray-600 hover:bg-gray-100 rounded transition-colors">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-            </div>
-          </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* List View */}
-          {viewMode === 'list' && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        {/* List View */}
+        {viewMode === 'list' && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -422,7 +540,7 @@ export default function MappaProgettiPage() {
                     Progetto
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Indirizzo
+                      Indirizzo
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Stato
@@ -431,7 +549,7 @@ export default function MappaProgettiPage() {
                     Budget
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Progresso
+                      Progresso
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Azioni
@@ -439,46 +557,46 @@ export default function MappaProgettiPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredProjects.map(project => (
-                      <tr key={project.id} className="hover:bg-gray-50">
+                  {filteredProjects.map(project => (
+                    <tr key={project.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">{project.name}</div>
-                            <div className="text-sm text-gray-500">{formatDate(project.startDate)}</div>
+                      <div>
+                          <div className="text-sm font-medium text-gray-900">{project.name}</div>
+                          <div className="text-sm text-gray-500">{formatDate(project.startDate)}</div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{project.address}</div>
+                        <div className="text-sm text-gray-900">{project.address}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(project.status)}`}>
-                            {getStatusLabel(project.status)}
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(project.status)}`}>
+                          {getStatusLabel(project.status)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {formatCurrency(project.budget)}
+                        {formatCurrency(project.budget)}
                     </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                              <div 
-                                className="bg-blue-600 h-2 rounded-full"
-                                style={{ width: `${project.progress}%` }}
-                              ></div>
-                            </div>
-                            <span className="text-sm text-gray-900">{project.progress}%</span>
-                          </div>
+                      <td className="px-6 py-4 whitespace-nowrap">
+            <div className="flex items-center">
+                          <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                            <div 
+                              className="bg-blue-600 h-2 rounded-full"
+                              style={{ width: `${project.progress}%` }}
+                            ></div>
+              </div>
+                          <span className="text-sm text-gray-900">{project.progress}%</span>
+              </div>
                     </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
-                            <button className="text-blue-600 hover:text-blue-900">
-                              <Eye className="w-4 h-4" />
-                            </button>
-                            <button className="text-green-600 hover:text-green-900">
-                              <Edit className="w-4 h-4" />
+                          <button className="text-blue-600 hover:text-blue-900">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button className="text-green-600 hover:text-green-900">
+                            <Edit className="w-4 h-4" />
                         </button>
                         <button className="text-gray-600 hover:text-gray-900">
-                              <Download className="w-4 h-4" />
+                            <Download className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -488,61 +606,60 @@ export default function MappaProgettiPage() {
             </table>
           </div>
         </div>
-          )}
+        )}
 
-          {/* Statistics */}
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between">
+        {/* Statistics */}
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
                   <div>
-                  <p className="text-sm font-medium text-gray-600">Progetti Totali</p>
-                  <p className="text-2xl font-bold text-gray-900">{projects.length}</p>
+                <p className="text-sm font-medium text-gray-600">Progetti Totali</p>
+                <p className="text-2xl font-bold text-gray-900">{projects.length}</p>
+              </div>
+              <Building className="w-8 h-8 text-blue-600" />
                   </div>
-                <Building className="w-8 h-8 text-blue-600" />
+                  </div>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+                    <div>
+                <p className="text-sm font-medium text-gray-600">In Corso</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {projects.filter(p => p.status === 'in_progress').length}
+                </p>
+                    </div>
+              <Calendar className="w-8 h-8 text-green-600" />
                     </div>
                   </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
                   <div>
-                  <p className="text-sm font-medium text-gray-600">In Corso</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {projects.filter(p => p.status === 'in_progress').length}
-                  </p>
+                <p className="text-sm font-medium text-gray-600">Completati</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {projects.filter(p => p.status === 'completed').length}
+                </p>
+                  </div>
+              <Target className="w-8 h-8 text-gray-600" />
+                  </div>
                 </div>
-                <Calendar className="w-8 h-8 text-green-600" />
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between">
-                  <div>
-                  <p className="text-sm font-medium text-gray-600">Completati</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {projects.filter(p => p.status === 'completed').length}
-                  </p>
-                  </div>
-                <Target className="w-8 h-8 text-gray-600" />
-                    </div>
-                  </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between">
-                  <div>
-                  <p className="text-sm font-medium text-gray-600">Budget Totale</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {formatCurrency(projects.reduce((sum, p) => sum + p.budget, 0))}
-                  </p>
-                </div>
-                <CreditCard className="w-8 h-8 text-purple-600" />
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Budget Totale</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {formatCurrency(projects.reduce((sum, p) => sum + p.budget, 0))}
+                </p>
               </div>
+              <CreditCard className="w-8 h-8 text-purple-600" />
             </div>
           </div>
-        </div>
-      </div>
-      
+                    </div>
+                  </div>
+
       {/* Feedback Widget */}
       <FeedbackWidget />
-    </div>
+    </DashboardLayout>
   );
 }
