@@ -18,8 +18,12 @@ if (process.env.OPENAI_API_KEY) {
 }
 
 export async function POST(request: NextRequest) {
+  let message = '';
+  
   try {
-    const { message, context } = await request.json();
+    const requestData = await request.json();
+    message = requestData.message || '';
+    const { context } = requestData;
 
     console.log('🤖 [Chat API] Richiesta chat:', { message: message.substring(0, 100) });
     console.log('🔑 [Chat API] OPENAI_API_KEY presente:', !!process.env.OPENAI_API_KEY);
