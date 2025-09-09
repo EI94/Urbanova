@@ -105,17 +105,15 @@ export default function FeasibilityAnalysisPage() {
       
       console.log('👤 [TEST] Progetti per pierpaolo.laurito@gmail.com:', userProjects.length);
       
-      // Cerca specificamente "Ciliegie"
+      // Cerca specificamente "Ciliegie" (solo per debug, senza popup)
       const ciliegieProject = projectsData.find(project => 
         project.name && project.name.toLowerCase().includes('ciliegie')
       );
       
       if (ciliegieProject) {
         console.log('🍒 [TEST] TROVATO PROGETTO CILIEGIE!', ciliegieProject);
-        toast('🍒 Progetto Ciliegie trovato!', { icon: '✅' });
       } else {
         console.log('❌ [TEST] Progetto Ciliegie non trovato');
-        toast('❌ Progetto Ciliegie non trovato', { icon: '❌' });
       }
       
       setProjects(userProjects);
@@ -132,61 +130,157 @@ export default function FeasibilityAnalysisPage() {
           id: 'mock-1',
           name: 'Progetto Ciliegie',
           address: 'Via Roma, 123 - Roma EUR',
+          status: 'COMPLETATO' as const,
+          startDate: new Date('2024-01-15'),
+          constructionStartDate: new Date('2024-03-01'),
+          duration: 18,
+          totalArea: 2000,
           createdBy: 'pierpaolo.laurito@gmail.com',
           createdAt: new Date(),
           updatedAt: new Date(),
           costs: {
-            total: 500000,
-            land: 200000,
-            construction: 250000,
-            permits: 30000,
-            other: 20000
+            land: {
+              purchasePrice: 200000,
+              purchaseTaxes: 10000,
+              intermediationFees: 5000,
+              subtotal: 215000
+            },
+            construction: {
+              excavation: 50000,
+              structures: 150000,
+              systems: 30000,
+              finishes: 20000,
+              subtotal: 250000
+            },
+            externalWorks: 15000,
+            concessionFees: 30000,
+            design: 10000,
+            bankCharges: 5000,
+            exchange: 2000,
+            insurance: 3000,
+            total: 500000
+          },
+          revenues: {
+            units: 8,
+            averageArea: 120,
+            pricePerSqm: 3500,
+            revenuePerUnit: 420000,
+            totalSales: 3360000,
+            otherRevenues: 0,
+            total: 3360000
           },
           results: {
+            profit: 77500,
             margin: 15.5,
             roi: 12.3,
-            payback: 8.1
-          }
+            paybackPeriod: 8.1
+          },
+          targetMargin: 20,
+          isTargetAchieved: false
         },
         {
           id: 'mock-2',
           name: 'Residenziale Milano Centro',
           address: 'Corso Buenos Aires, 45 - Milano',
+          status: 'IN_CORSO' as const,
+          startDate: new Date('2024-02-01'),
+          constructionStartDate: new Date('2024-04-01'),
+          duration: 24,
+          totalArea: 1500,
           createdBy: 'pierpaolo.laurito@gmail.com',
           createdAt: new Date(),
           updatedAt: new Date(),
           costs: {
-            total: 750000,
-            land: 300000,
-            construction: 400000,
-            permits: 40000,
-            other: 10000
+            land: {
+              purchasePrice: 300000,
+              purchaseTaxes: 15000,
+              intermediationFees: 8000,
+              subtotal: 323000
+            },
+            construction: {
+              excavation: 60000,
+              structures: 250000,
+              systems: 50000,
+              finishes: 40000,
+              subtotal: 400000
+            },
+            externalWorks: 20000,
+            concessionFees: 40000,
+            design: 15000,
+            bankCharges: 8000,
+            exchange: 3000,
+            insurance: 5000,
+            total: 750000
+          },
+          revenues: {
+            units: 12,
+            averageArea: 100,
+            pricePerSqm: 4000,
+            revenuePerUnit: 400000,
+            totalSales: 4800000,
+            otherRevenues: 0,
+            total: 4800000
           },
           results: {
+            profit: 136500,
             margin: 18.2,
             roi: 15.7,
-            payback: 6.4
-          }
+            paybackPeriod: 6.4
+          },
+          targetMargin: 25,
+          isTargetAchieved: false
         },
         {
           id: 'mock-3',
           name: 'Uffici Torino Porta Nuova',
           address: 'Via Roma, 78 - Torino',
+          status: 'PIANIFICAZIONE' as const,
+          startDate: new Date('2024-03-01'),
+          constructionStartDate: new Date('2024-06-01'),
+          duration: 30,
+          totalArea: 3000,
           createdBy: 'pierpaolo.laurito@gmail.com',
           createdAt: new Date(),
           updatedAt: new Date(),
           costs: {
-            total: 1200000,
-            land: 500000,
-            construction: 600000,
-            permits: 80000,
-            other: 20000
+            land: {
+              purchasePrice: 500000,
+              purchaseTaxes: 25000,
+              intermediationFees: 12000,
+              subtotal: 537000
+            },
+            construction: {
+              excavation: 80000,
+              structures: 400000,
+              systems: 80000,
+              finishes: 40000,
+              subtotal: 600000
+            },
+            externalWorks: 30000,
+            concessionFees: 80000,
+            design: 25000,
+            bankCharges: 12000,
+            exchange: 5000,
+            insurance: 8000,
+            total: 1200000
+          },
+          revenues: {
+            units: 20,
+            averageArea: 150,
+            pricePerSqm: 3000,
+            revenuePerUnit: 450000,
+            totalSales: 9000000,
+            otherRevenues: 0,
+            total: 9000000
           },
           results: {
+            profit: 265200,
             margin: 22.1,
             roi: 19.3,
-            payback: 5.2
-          }
+            paybackPeriod: 5.2
+          },
+          targetMargin: 30,
+          isTargetAchieved: false
         }
       ];
       
@@ -199,7 +293,7 @@ export default function FeasibilityAnalysisPage() {
         averageROI: 15.8
       });
       
-      toast('⚠️ Usando dati mock - Firebase non configurato', { icon: '⚠️' });
+      console.log('⚠️ [TEST] Usando dati mock - Firebase non configurato');
     } finally {
       setLoading(false);
     }
