@@ -22,6 +22,20 @@ export async function POST(request: NextRequest) {
     const { message, context } = await request.json();
 
     console.log('🤖 [Chat API] Richiesta chat:', { message: message.substring(0, 100) });
+    console.log('🔑 [Chat API] OPENAI_API_KEY presente:', !!process.env.OPENAI_API_KEY);
+
+    // Inizializza OpenAI se non è già fatto
+    if (!openai && process.env.OPENAI_API_KEY) {
+      try {
+        openai = new OpenAI({
+          apiKey: process.env.OPENAI_API_KEY,
+        });
+        console.log('✅ [Chat API] OpenAI inizializzato dinamicamente');
+      } catch (error) {
+        console.error('❌ [Chat API] Errore inizializzazione dinamica OpenAI:', error);
+        openai = null;
+      }
+    }
 
     // Se OpenAI non è disponibile, usa risposte predefinite
     if (!openai) {
@@ -50,8 +64,10 @@ Rispondi sempre in italiano, in modo professionale ma amichevole.
 Sii specifico e fornisci consigli pratici quando possibile.
 Se l'utente chiede qualcosa di non relativo all'immobiliare, riporta gentilmente la conversazione sui servizi Urbanova.`;
 
+    console.log('🔄 [Chat API] Chiamata a OpenAI...');
+    
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-4o',
       messages: [
         {
           role: 'system',
