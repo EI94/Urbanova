@@ -289,136 +289,39 @@ export default function UnifiedDashboardPage() {
     setInputValue('');
     setIsLoading(true);
 
-    // Simula processing
-    setTimeout(async () => {
-      let response: ChatMessage;
+    try {
+      // Chiama l'API reale del chatbot
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: inputValue,
+          history: newMessages.slice(-10), // Invia solo gli ultimi 10 messaggi come contesto
+        }),
+      });
 
-      const message = inputValue.toLowerCase();
-
-      // Tool OS Integration - Utilizza API reale
-      if (
-        message.includes('business plan') ||
-        message.includes('bp') ||
-        message.includes('proforma') ||
-        message.includes('costi') ||
-        message.includes('ricavi')
-      ) {
-        const runId = await executeToolAction('feasibility-tool', 'run_bp', {
-          projectId: 'proj-a',
-        });
-
-        response = {
-          id: (Date.now() + 1).toString(),
-          type: 'assistant',
-          content:
-            `📊 **Business Plan** avviato!\n\n` +
-            `Progetto: Progetto A\n` +
-            `📈 Calcolo: ROI, Margini, Payback\n` +
-            `🔍 Comps/OMI: Integrazione automatica\n` +
-            `⏱️ Tempo stimato: 45s\n\n` +
-            `Il Business Plan è in elaborazione...`,
-          timestamp: new Date(),
-          metadata: {
-            toolId: 'feasibility-tool',
-            actionName: 'run_bp',
-            runId,
-          },
-        };
-      } else if (message.includes('sensitivity') || message.includes('sensibilità')) {
-        const runId = await executeToolAction('feasibility-tool', 'sensitivity_analysis', {
-          projectId: 'proj-b',
-          variations: '±15%',
-        });
-
-        response = {
-          id: (Date.now() + 1).toString(),
-          type: 'assistant',
-          content:
-            `📊 **Analisi di Sensibilità** avviata!\n\n` +
-            `Progetto: Progetto B\n` +
-            `📈 Variazioni: ±15%\n` +
-            `🔍 Parametri: Prezzo, Costi, Tempi\n` +
-            `⏱️ Tempo stimato: 30s\n\n` +
-            `L'analisi di sensibilità è in corso...`,
-          timestamp: new Date(),
-          metadata: {
-            toolId: 'feasibility-tool',
-            actionName: 'sensitivity_analysis',
-            runId,
-          },
-        };
-      } else if (message.includes('market intelligence') || message.includes('analisi mercato')) {
-        const runId = await executeToolAction('market-intelligence-tool', 'analyze_market', {
-          location: 'Milano',
-          propertyType: 'residential',
-        });
-
-        response = {
-          id: (Date.now() + 1).toString(),
-          type: 'assistant',
-          content:
-            `📊 **Market Intelligence** avviata!\n\n` +
-            `📍 Zona: Milano\n` +
-            `🏠 Tipo: Residenziale\n` +
-            `📈 Analisi: Trend prezzi, domanda, offerta\n` +
-            `⏱️ Tempo stimato: 60s\n\n` +
-            `L'analisi di mercato è in corso...`,
-          timestamp: new Date(),
-          metadata: {
-            toolId: 'market-intelligence-tool',
-            actionName: 'analyze_market',
-            runId,
-          },
-        };
-      } else if (message.includes('design') || message.includes('progetto') || message.includes('terreno')) {
-        const runId = await executeToolAction('design-center-tool', 'create_design', {
-          location: 'Roma EUR',
-          propertyType: 'residential',
-        });
-
-        response = {
-          id: (Date.now() + 1).toString(),
-          type: 'assistant',
-          content:
-            `🎨 **Design Center** avviato!\n\n` +
-            `📍 Zona: Roma EUR\n` +
-            `🏠 Tipo: Residenziale\n` +
-            `🎨 Generazione: Design AI-powered\n` +
-            `⏱️ Tempo stimato: 90s\n\n` +
-            `La creazione del design è in corso...`,
-          timestamp: new Date(),
-          metadata: {
-            toolId: 'design-center-tool',
-            actionName: 'create_design',
-            runId,
-          },
-        };
-      } else {
-        response = {
-          id: (Date.now() + 1).toString(),
-          type: 'assistant',
-          content:
-            `🤖 Ho capito la tua richiesta: "${inputValue}"\n\n` +
-            `Posso aiutarti con:\n` +
-            `• 📊 Business Plan e analisi finanziarie\n` +
-            `• 📈 Market Intelligence e analisi di mercato\n` +
-            `• 🎨 Design Center e progettazione\n` +
-            `• 📋 Gestione progetti e documenti\n` +
-            `• 🏗️ Permessi e compliance\n` +
-            `• 📅 Project Timeline AI\n\n` +
-            `Prova a essere più specifico su cosa vuoi fare!`,
-          timestamp: new Date(),
-        };
+      if (!response.ok) {
+        throw new Error(`Errore API: ${response.status}`);
       }
 
-      const finalMessages = [...newMessages, response];
+      const data = await response.json();
+      
+      const aiResponse: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        type: 'assistant',
+        content: data.response.content,
+        timestamp: new Date(),
+      };
+
+      const finalMessages = [...newMessages, aiResponse];
       setMessages(finalMessages);
-      setIsLoading(false);
 
       // Salva nella chat history se è una conversazione significativa
       if (finalMessages.length > 2) {
         const chatTitle = inputValue.length > 30 ? inputValue.substring(0, 30) + '...' : inputValue;
-        const chatPreview = response.content.substring(0, 100) + '...';
+        const chatPreview = aiResponse.content.substring(0, 100) + '...';
         
         const newChat = {
           id: Date.now().toString(),
@@ -430,7 +333,31 @@ export default function UnifiedDashboardPage() {
 
         setChatHistory(prev => [newChat, ...prev.slice(0, 9)]); // Mantieni solo le ultime 10 chat
       }
-    }, 1000);
+    } catch (error) {
+      console.error('❌ [Chatbot] Errore chiamata API:', error);
+      
+      // Fallback in caso di errore
+      const fallbackResponse: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        type: 'assistant',
+        content:
+          `🤖 Ho capito la tua richiesta: "${inputValue}"\n\n` +
+          `Posso aiutarti con:\n` +
+          `• 📊 Business Plan e analisi finanziarie\n` +
+          `• 📈 Market Intelligence e analisi di mercato\n` +
+          `• 🎨 Design Center e progettazione\n` +
+          `• 📋 Gestione progetti e documenti\n` +
+          `• 🏗️ Permessi e compliance\n` +
+          `• 📅 Project Timeline AI\n\n` +
+          `Prova a essere più specifico su cosa vuoi fare!`,
+        timestamp: new Date(),
+      };
+
+      const finalMessages = [...newMessages, fallbackResponse];
+      setMessages(finalMessages);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
