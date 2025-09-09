@@ -221,10 +221,10 @@ export default function BusinessPlanPage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
                 <FileText className="w-8 h-8 text-green-600" />
-                Business Plan Generator AI
+                Business Plan Generator
               </h1>
               <p className="text-gray-600 mt-2">
-                Genera piani d'affari professionali con proiezioni finanziarie intelligenti
+                Genera Business Plan professionali con proiezioni finanziarie intelligenti
               </p>
             </div>
             <Button
