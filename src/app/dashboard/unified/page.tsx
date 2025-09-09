@@ -311,7 +311,7 @@ export default function UnifiedDashboardPage() {
       const aiResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: data.response.content,
+        content: data.response,
         timestamp: new Date(),
       };
 

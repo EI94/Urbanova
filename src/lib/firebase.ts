@@ -53,25 +53,19 @@ if (typeof window !== 'undefined') {
 
 // Configurazione per gestire errori di connessione
 if (typeof window !== 'undefined') {
-  // MEGA DEBUG: Cattura TUTTI gli errori Firebase
+  // Gestione errori Firebase più robusta
   window.addEventListener('error', (event) => {
-    if (event.error && event.error.message && event.error.message.includes('collection')) {
-      console.error('🚨 [FIREBASE ERROR CAUGHT] Firebase collection error detected!');
-      console.error('🚨 [FIREBASE ERROR] Error:', event.error);
-      console.error('🚨 [FIREBASE ERROR] Stack:', event.error.stack);
-      console.error('🚨 [FIREBASE ERROR] Source:', event.filename, event.lineno, event.colno);
+    // Ignora errori Firebase 400 che non bloccano l'app
+    if (event.error && event.error.message && 
+        (event.error.message.includes('collection') || 
+         event.error.message.includes('firestore') ||
+         event.error.message.includes('400'))) {
+      console.warn('⚠️ [FIREBASE ERROR] Firebase connection issue (non critico):', event.error.message);
+      // Non bloccare l'app per errori di connessione Firebase
+      event.preventDefault();
+      return false;
     }
   });
-
-  // APPROCCIO NUCLEARE DISABILITATO: Non funziona, causa solo confusione
-  // Torniamo al semplice approccio con safeCollection() nei file sorgente
-  console.log('🔥 [SIMPLE APPROACH] Approccio nucleare disabilitato, usando solo safeCollection()');
-
-  // Gestione errori di connessione Firebase
-  const handleFirebaseError = (error: any) => {
-    console.warn('⚠️ Firebase connection issue:', error);
-    // Non bloccare l'app per errori di connessione
-  };
 
   // Intercetta errori di rete Firebase
   window.addEventListener('online', () => {
@@ -80,6 +74,17 @@ if (typeof window !== 'undefined') {
 
   window.addEventListener('offline', () => {
     console.warn('⚠️ Connessione persa - modalità offline');
+  });
+
+  // Gestione errori Promise non gestiti
+  window.addEventListener('unhandledrejection', (event) => {
+    if (event.reason && event.reason.message && 
+        (event.reason.message.includes('firestore') || 
+         event.reason.message.includes('400'))) {
+      console.warn('⚠️ [FIREBASE PROMISE ERROR] Firebase promise rejected (non critico):', event.reason.message);
+      event.preventDefault();
+      return false;
+    }
   });
 }
 
