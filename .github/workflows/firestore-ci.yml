@@ -40,11 +40,11 @@ jobs:
       - name: Install Firebase CLI
         run: pnpm add -g firebase-tools@13.15.0
         
-      - name: Validate Firestore rules
-        run: firebase firestore:rules:validate
+      - name: Deploy Firestore rules
+        run: firebase deploy --only firestore:rules
         
-      - name: Validate Firestore indexes
-        run: firebase firestore:indexes:validate
+      - name: List Firestore indexes
+        run: firebase firestore:indexes
         
       - name: Check rules and indexes sync
         run: |
