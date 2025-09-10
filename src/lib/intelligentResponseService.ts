@@ -220,7 +220,175 @@ export class IntelligentResponseService {
       return this.generateProjectOverview(project, queryResult.data.metrics, userProfile);
     }
     
-    return 'Ecco i dati che hai richiesto:\n\n' + JSON.stringify(queryResult.data, null, 2);
+    // Genera risposta conversazionale invece di JSON grezzo
+    return this.generateConversationalResponse(queryResult.data, userProfile);
+  }
+
+  /**
+   * Genera risposta conversazionale invece di JSON grezzo
+   */
+  private generateConversationalResponse(data: any, userProfile: UserMemoryProfile): string {
+    if (!data) {
+      return 'Non ho trovato i dati richiesti.';
+    }
+
+    // Se è una lista di progetti
+    if (data.projects && Array.isArray(data.projects)) {
+      return this.formatProjectsList(data, userProfile);
+    }
+
+    // Se è un singolo progetto
+    if (data.name && data.type) {
+      return this.formatSingleProject(data, userProfile);
+    }
+
+    // Se è un riassunto
+    if (data.summary) {
+      return this.formatSummary(data, userProfile);
+    }
+
+    // Fallback conversazionale
+    return this.formatGenericData(data, userProfile);
+  }
+
+  /**
+   * Formatta lista di progetti in modo conversazionale
+   */
+  private formatProjectsList(data: any, userProfile: UserMemoryProfile): string {
+    const projects = data.projects || [];
+    const totalCount = data.totalCount || projects.length;
+    
+    if (projects.length === 0) {
+      return `Non hai ancora progetti. Crea il tuo primo progetto di fattibilità per iniziare!`;
+    }
+
+    let response = `Hai ${totalCount} progetti nel tuo portafoglio:\n\n`;
+    
+    projects.forEach((project: any, index: number) => {
+      response += `**${index + 1}. ${project.name}**\n`;
+      response += `📍 ${project.location}\n`;
+      response += `📊 ROI: ${project.keyMetrics?.roi || 0}% | Margine: ${project.keyMetrics?.margin || 0}%\n`;
+      response += `💰 Budget: €${(project.keyMetrics?.budget || 0).toLocaleString()}\n`;
+      response += `📅 Status: ${this.formatStatus(project.status)}\n\n`;
+    });
+
+    // Aggiungi insights
+    if (data.summary) {
+      response += `**Riepilogo Portafoglio:**\n`;
+      response += `• Budget totale: €${(data.summary.totalBudget || 0).toLocaleString()}\n`;
+      response += `• ROI medio: ${data.summary.averageROI || 0}%\n`;
+      response += `• Zona principale: ${data.summary.topLocation || 'N/A'}\n\n`;
+    }
+
+    // Aggiungi raccomandazioni
+    if (data.summary?.statusBreakdown) {
+      const statuses = data.summary.statusBreakdown;
+      if (statuses.PIANIFICAZIONE > 0) {
+        response += `💡 Hai ${statuses.PIANIFICAZIONE} progetti in pianificazione. Considera di definire i dettagli operativi.\n`;
+      }
+      if (statuses.IN_CORSO > 0) {
+        response += `⚡ Hai ${statuses.IN_CORSO} progetti in corso. Monitora i progressi regolarmente.\n`;
+      }
+    }
+
+    return response;
+  }
+
+  /**
+   * Formatta singolo progetto
+   */
+  private formatSingleProject(project: any, userProfile: UserMemoryProfile): string {
+    let response = `**${project.name}**\n\n`;
+    response += `📍 **Zona**: ${project.location}\n`;
+    response += `📊 **ROI**: ${project.keyMetrics?.roi || 0}%\n`;
+    response += `💰 **Budget**: €${(project.keyMetrics?.budget || 0).toLocaleString()}\n`;
+    response += `📅 **Status**: ${this.formatStatus(project.status)}\n\n`;
+    
+    if (project.keyMetrics?.margin) {
+      response += `Il margine di profitto è del ${project.keyMetrics.margin}%, che è ${this.getMarginRating(project.keyMetrics.margin)}.\n`;
+    }
+    
+    return response;
+  }
+
+  /**
+   * Formatta riassunto
+   */
+  private formatSummary(data: any, userProfile: UserMemoryProfile): string {
+    const summary = data.summary || data;
+    let response = `**Riepilogo del tuo portafoglio:**\n\n`;
+    
+    if (summary.totalProjects) {
+      response += `📊 **Progetti totali**: ${summary.totalProjects}\n`;
+    }
+    if (summary.totalBudget) {
+      response += `💰 **Budget totale**: €${summary.totalBudget.toLocaleString()}\n`;
+    }
+    if (summary.averageROI) {
+      response += `📈 **ROI medio**: ${summary.averageROI}%\n`;
+    }
+    if (summary.topLocation) {
+      response += `📍 **Zona principale**: ${summary.topLocation}\n`;
+    }
+    
+    return response;
+  }
+
+  /**
+   * Formatta dati generici
+   */
+  private formatGenericData(data: any, userProfile: UserMemoryProfile): string {
+    if (typeof data === 'string') {
+      return data;
+    }
+    
+    if (typeof data === 'number') {
+      return `Il valore è ${data.toLocaleString()}`;
+    }
+    
+    if (typeof data === 'object') {
+      const keys = Object.keys(data);
+      if (keys.length === 0) {
+        return 'Non ci sono dati disponibili.';
+      }
+      
+      let response = 'Ecco i dati richiesti:\n\n';
+      keys.forEach(key => {
+        const value = data[key];
+        if (typeof value === 'number') {
+          response += `• **${key}**: ${value.toLocaleString()}\n`;
+        } else {
+          response += `• **${key}**: ${value}\n`;
+        }
+      });
+      return response;
+    }
+    
+    return 'Dati non disponibili.';
+  }
+
+  /**
+   * Formatta status del progetto
+   */
+  private formatStatus(status: string): string {
+    const statusMap: Record<string, string> = {
+      'PIANIFICAZIONE': 'In pianificazione',
+      'IN_CORSO': 'In corso',
+      'COMPLETATO': 'Completato',
+      'SOSPESO': 'Sospeso'
+    };
+    return statusMap[status] || status;
+  }
+
+  /**
+   * Valuta il margine di profitto
+   */
+  private getMarginRating(margin: number): string {
+    if (margin >= 25) return 'eccellente';
+    if (margin >= 20) return 'molto buono';
+    if (margin >= 15) return 'buono';
+    if (margin >= 10) return 'nella media';
+    return 'da migliorare';
   }
 
   /**

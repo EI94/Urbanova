@@ -50,6 +50,7 @@ import { Workspace } from '@/types/workspace';
 import { ProjectPreview as ProjectPreviewType } from '@/lib/intentService';
 import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
 import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
+import MarkdownRenderer from '@/components/ui/MarkdownRenderer';
 
 // Mock data per i progetti (in produzione verrà da API)
 const mockProjects = [
@@ -949,7 +950,7 @@ export default function UnifiedDashboardPage() {
                                 : 'bg-gray-100 text-gray-900'
                             }`}
                           >
-                            <div className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</div>
+                            <MarkdownRenderer content={message.content} className="text-sm leading-relaxed" />
                             
                             {/* Mostra dati intelligenti se presenti */}
                             {message.intelligentData && (
