@@ -66,10 +66,10 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
   useEffect(() => {
     const loadData = async () => {
       try {
-        if (auth.user?.uid) {
+        if (auth.currentUser?.uid) {
           const [notificationsData, profileData] = await Promise.all([
-            firebaseNotificationService.getNotificationStats(auth.user.uid),
-            firebaseUserProfileService.getUserProfile(auth.user.uid),
+            firebaseNotificationService.getNotificationStats(auth.currentUser.uid),
+            firebaseUserProfileService.getUserProfile(auth.currentUser.uid),
           ]);
           setNotifications(notificationsData);
           setUserProfile(profileData);
@@ -80,7 +80,7 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
     };
 
     loadData();
-  }, [auth.user?.uid]);
+  }, [auth.currentUser?.uid]);
 
   const handleLogout = async () => {
     try {

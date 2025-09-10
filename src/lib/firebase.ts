@@ -65,6 +65,7 @@ if (typeof window !== 'undefined') {
       event.preventDefault();
       return false;
     }
+    return;
   });
 
   // Intercetta errori di rete Firebase
@@ -85,6 +86,7 @@ if (typeof window !== 'undefined') {
       event.preventDefault();
       return false;
     }
+    return;
   });
 }
 

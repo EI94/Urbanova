@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { complianceService } from '@/lib/complianceService';
-import { zComplianceCheckRequest } from '@urbanova/types';
+import { z } from 'zod';
+
+// Schema di validazione per le richieste di compliance
+const zComplianceCheckRequest = z.object({
+  projectId: z.string().min(1, 'Project ID è richiesto'),
+  checkType: z.enum(['building', 'environmental', 'safety', 'accessibility']),
+  parameters: z.record(z.any()).optional(),
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +22,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           message: 'Dati di input non validi',
-          errors: validationResult.error.errors.map(e => e.message),
+          errors: validationResult.error.errors.map((e: any) => e.message),
         },
         { status: 400 }
       );

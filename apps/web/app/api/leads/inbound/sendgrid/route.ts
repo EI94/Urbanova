@@ -125,7 +125,10 @@ export async function POST(request: NextRequest) {
 
     // 2. Parsing del payload
     const formData = await request.formData();
-    const payload = Object.fromEntries(formData.entries());
+    const payload: Record<string, string> = {};
+    formData.forEach((value, key) => {
+      payload[key] = value.toString();
+    });
 
     const validationResult = SendGridInboundSchema.safeParse(payload);
     if (!validationResult.success) {
