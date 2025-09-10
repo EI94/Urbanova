@@ -32,12 +32,14 @@ import {
   TrendingUpIcon,
   CalendarIcon,
   Users,
+  Trash2,
 } from 'lucide-react';
 
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { dashboardService, DashboardStats } from '@/lib/dashboardService';
-import { chatHistoryService, ChatSession, ChatMessage } from '@/lib/chatHistoryService';
+import { chatHistoryService, ChatSession } from '@/lib/chatHistoryService';
+import { ChatMessage } from '@/types/chat';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
 import WorkspaceManager from '@/components/workspace/WorkspaceManager';
 import ProjectPreview from '@/components/chat/ProjectPreview';
@@ -115,14 +117,7 @@ interface ToolExecution {
 export default function UnifiedDashboardPage() {
   const { t } = useLanguage();
   const { currentUser } = useAuth();
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: '1',
-      type: 'assistant',
-      content: 'Ciao! Sono Urbanova, il tuo assistente intelligente per la gestione immobiliare. Come posso aiutarti oggi?',
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeToolExecutions, setActiveToolExecutions] = useState<ToolExecution[]>([]);
@@ -323,15 +318,16 @@ export default function UnifiedDashboardPage() {
         type: 'assistant',
         content: data.response,
         timestamp: new Date(),
-        // Aggiungi dati intelligenti se presenti
-        intelligentData: data.type ? {
-          type: data.type,
-          confidence: data.confidence,
-          relatedData: data.relatedData,
-          followUpQuestions: data.followUpQuestions,
-          actions: data.actions,
-          visualizations: data.visualizations
-        } : undefined
+        ...(data.type ? {
+          intelligentData: {
+            type: data.type,
+            confidence: data.confidence,
+            relatedData: data.relatedData,
+            followUpQuestions: data.followUpQuestions || [],
+            actions: data.actions || [],
+            visualizations: data.visualizations || []
+          }
+        } : {})
       };
 
       // Gestisci project preview se presente
@@ -796,7 +792,72 @@ export default function UnifiedDashboardPage() {
                   </div>
                   
                   <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                    {messages.map((message, index) => (
+                    {messages.length === 0 ? (
+                      // Stato vuoto stile ChatGPT
+                      <div className="flex flex-col items-center justify-center h-full space-y-8">
+                        <div className="text-center">
+                          <h2 className="text-3xl font-medium text-gray-800 mb-2">
+                            Cosa c'è in programma oggi?
+                          </h2>
+                        </div>
+                        
+                        {/* Tool grid stile ChatGPT */}
+                        <div className="grid grid-cols-2 gap-3 w-full max-w-2xl">
+                          <button
+                            onClick={() => setInputValue('Crea un nuovo studio di fattibilità')}
+                            className="flex items-center space-x-3 p-4 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-left"
+                          >
+                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                              <BarChart3 className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900">Analisi Fattibilità</div>
+                              <div className="text-sm text-gray-500">Valuta la redditività del progetto</div>
+                            </div>
+                          </button>
+                          
+                          <button
+                            onClick={() => setInputValue('Cerca terreni e immobili')}
+                            className="flex items-center space-x-3 p-4 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-left"
+                          >
+                            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                              <Search className="w-5 h-5 text-green-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900">Market Intelligence</div>
+                              <div className="text-sm text-gray-500">Trova opportunità immobiliari</div>
+                            </div>
+                          </button>
+                          
+                          <button
+                            onClick={() => setInputValue('Crea un nuovo progetto')}
+                            className="flex items-center space-x-3 p-4 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-left"
+                          >
+                            <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                              <Plus className="w-5 h-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900">Nuovo Progetto</div>
+                              <div className="text-sm text-gray-500">Avvia un nuovo sviluppo</div>
+                            </div>
+                          </button>
+                          
+                          <button
+                            onClick={() => setInputValue('Genera business plan')}
+                            className="flex items-center space-x-3 p-4 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-left"
+                          >
+                            <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                              <FileText className="w-5 h-5 text-orange-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900">Business Plan</div>
+                              <div className="text-sm text-gray-500">Crea piano strategico</div>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      messages.map((message, index) => (
                       <div key={message.id} className="space-y-2">
                         <div
                           className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -887,7 +948,8 @@ export default function UnifiedDashboardPage() {
                           </div>
                         )}
                       </div>
-                    ))}
+                      ))
+                    )}
                     
                     {isLoading && (
                       <div className="flex justify-start">
@@ -1168,63 +1230,89 @@ export default function UnifiedDashboardPage() {
             )}
           </div>
 
-          {/* Chat History Panel */}
+          {/* Chat History Panel - Stile ChatGPT */}
           {showChatHistory && (
-            <div className="w-80 bg-white shadow-lg border-l border-gray-200">
-              <div className="p-4 border-b border-gray-200">
+            <div className="w-80 bg-gray-900 text-white shadow-lg border-l border-gray-700">
+              <div className="p-4 border-b border-gray-700">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-medium text-gray-900">Chat History</h3>
+                  <h3 className="font-medium text-white">Conversazioni</h3>
                   <button
                     onClick={() => setShowChatHistory(false)}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-gray-400 hover:text-white transition-colors"
                   >
                     <Square className="w-4 h-4" />
                   </button>
                 </div>
               </div>
-              <div className="p-4 space-y-3">
+              
+              {/* Nuovo bottone chat */}
+              <div className="p-3 border-b border-gray-700">
+                <button
+                  onClick={() => {
+                    setMessages([]);
+                    setCurrentSessionId(null);
+                    setShowChatHistory(false);
+                  }}
+                  className="w-full flex items-center space-x-3 p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span className="text-sm">Nuova conversazione</span>
+                </button>
+              </div>
+              
+              <div className="p-3 space-y-2 max-h-96 overflow-y-auto">
                 {chatHistory.length === 0 ? (
                   <div className="text-center py-8">
-                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <Clock className="w-6 h-6 text-gray-400" />
+                    <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <MessageCircle className="w-6 h-6 text-gray-400" />
                     </div>
-                    <h4 className="font-medium text-gray-900 mb-1">Nessuna chat precedente</h4>
-                    <p className="text-sm text-gray-500">
-                      Le tue conversazioni con Urbanova appariranno qui
+                    <h4 className="font-medium text-white mb-1">Nessuna conversazione</h4>
+                    <p className="text-sm text-gray-400">
+                      Le tue chat con Urbanova appariranno qui
                     </p>
                   </div>
                 ) : (
                   chatHistory.map(chat => (
                     <div
                       key={chat.id}
-                      className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group"
+                      className={`p-3 rounded-lg hover:bg-gray-800 transition-colors cursor-pointer group relative ${
+                        currentSessionId === chat.id ? 'bg-gray-800' : ''
+                      }`}
+                      onClick={() => {
+                        setMessages(chat.messages);
+                        setCurrentSessionId(chat.id);
+                        setShowChatHistory(false);
+                        console.log('✅ [Chat History] Sessione caricata:', chat.title);
+                      }}
                     >
-                      <div 
-                        className="cursor-pointer"
-                        onClick={() => {
-                          setMessages(chat.messages);
-                          setCurrentSessionId(chat.id);
-                          setShowChatHistory(false);
-                          console.log('✅ [Chat History] Sessione caricata:', chat.title);
-                        }}
-                      >
-                        <h4 className="font-medium text-gray-900 text-sm mb-1">{chat.title}</h4>
-                        <p className="text-xs text-gray-500 mb-2">{chat.preview}</p>
-                        <p className="text-xs text-gray-400">{chat.timestamp.toLocaleDateString()}</p>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-white text-sm truncate mb-1">{chat.title}</h4>
+                          <p className="text-xs text-gray-400 truncate">{chat.preview}</p>
+                        </div>
+                        <div className="ml-2 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span className="text-xs text-gray-500">
+                            {new Date(chat.timestamp).toLocaleDateString('it-IT', { 
+                              day: 'numeric', 
+                              month: 'short' 
+                            })}
+                          </span>
+                        </div>
                       </div>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (confirm('Sei sicuro di voler eliminare questa chat?')) {
+                          if (confirm('Sei sicuro di voler eliminare questa conversazione?')) {
                             chatHistoryService.deleteChatSession(chat.id);
                             const updatedHistory = chatHistoryService.getChatSessions();
                             setChatHistory(updatedHistory);
                             console.log('✅ [Chat History] Sessione eliminata:', chat.title);
                           }
                         }}
-                        className="opacity-0 group-hover:opacity-100 mt-2 text-red-500 hover:text-red-700 text-xs transition-opacity"
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-700 rounded transition-all"
+                        title="Elimina conversazione"
                       >
-                        Elimina
+                        <Trash2 className="w-3 h-3 text-gray-400 hover:text-red-400" />
                       </button>
                     </div>
                   ))
