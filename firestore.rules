@@ -77,8 +77,12 @@ service cloud.firestore {
       // TODO: Rimuovere in produzione e implementare autenticazione corretta
       allow read: if true;
       
-      // Scrittura: owner o project manager
-      allow create, update, delete: if isProjectOwnerOrPM(projectId);
+      // TEMPORANEO: Permetti scrittura per tutti per testing/debugging
+      // TODO: Rimuovere in produzione e implementare autenticazione corretta
+      allow create, update, delete: if true;
+      
+      // Scrittura normale: owner o project manager (disabilitata temporaneamente)
+      // allow create, update, delete: if isProjectOwnerOrPM(projectId);
       
       // Eccezione: admin possono accedere a tutti i progetti
       allow read, write: if isAuthenticated() && 

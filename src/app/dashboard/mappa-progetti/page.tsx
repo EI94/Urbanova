@@ -185,7 +185,7 @@ export default function MappaProgettiPage() {
     const script = document.createElement('script');
     // Usa una chiave API temporanea per il test
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyBvOkBw7cG6hY7v8x9z0a1b2c3d4e5f6g7h8';
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
     script.async = true;
     script.defer = true;
     script.onload = () => {
@@ -628,7 +628,7 @@ export default function MappaProgettiPage() {
                   {projects.filter(p => p.status === 'in_progress').length}
                 </p>
                     </div>
-              <Calendar className="w-8 h-8 text-green-600" />
+              <CalendarLucide className="w-8 h-8 text-green-600" />
                     </div>
                   </div>
 
