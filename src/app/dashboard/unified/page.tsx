@@ -40,7 +40,9 @@ import { dashboardService, DashboardStats } from '@/lib/dashboardService';
 import { chatHistoryService, ChatSession, ChatMessage } from '@/lib/chatHistoryService';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
 import WorkspaceManager from '@/components/workspace/WorkspaceManager';
+import ProjectPreview from '@/components/chat/ProjectPreview';
 import { Workspace } from '@/types/workspace';
+import { ProjectPreview as ProjectPreviewType } from '@/lib/intentService';
 
 // Mock data per i progetti (in produzione verrà da API)
 const mockProjects = [
@@ -139,6 +141,9 @@ export default function UnifiedDashboardPage() {
   // Workspace management
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [showWorkspaceManager, setShowWorkspaceManager] = useState(false);
+  
+  // Project previews from chat
+  const [projectPreviews, setProjectPreviews] = useState<ProjectPreviewType[]>([]);
 
   // Stato per i dati della dashboard
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -302,6 +307,8 @@ export default function UnifiedDashboardPage() {
         body: JSON.stringify({
           message: inputValue,
           history: newMessages.slice(-10), // Invia solo gli ultimi 10 messaggi come contesto
+          userId: currentUser?.uid,
+          userEmail: currentUser?.email,
         }),
       });
 
@@ -316,7 +323,22 @@ export default function UnifiedDashboardPage() {
         type: 'assistant',
         content: data.response,
         timestamp: new Date(),
+        // Aggiungi dati intelligenti se presenti
+        intelligentData: data.type ? {
+          type: data.type,
+          confidence: data.confidence,
+          relatedData: data.relatedData,
+          followUpQuestions: data.followUpQuestions,
+          actions: data.actions,
+          visualizations: data.visualizations
+        } : undefined
       };
+
+      // Gestisci project preview se presente
+      if (data.projectPreview) {
+        setProjectPreviews(prev => [data.projectPreview, ...prev]);
+        console.log('✅ [Chat] Project preview aggiunto:', data.projectPreview.id);
+      }
 
       const finalMessages = [...newMessages, aiResponse];
       setMessages(finalMessages);
@@ -774,25 +796,96 @@ export default function UnifiedDashboardPage() {
                   </div>
                   
                   <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                    {messages.map(message => (
-                      <div
-                        key={message.id}
-                        className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-                      >
+                    {messages.map((message, index) => (
+                      <div key={message.id} className="space-y-2">
                         <div
-                          className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl ${
-                            message.type === 'user'
-                              ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
-                              : 'bg-gray-100 text-gray-900'
-                          }`}
+                          className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
-                          <div className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</div>
-                          <div className={`text-xs mt-2 ${
-                            message.type === 'user' ? 'text-blue-100' : 'text-gray-500'
-                          }`}>
-                            {message.timestamp.toLocaleTimeString()}
+                          <div
+                            className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl ${
+                              message.type === 'user'
+                                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+                                : 'bg-gray-100 text-gray-900'
+                            }`}
+                          >
+                            <div className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</div>
+                            
+                            {/* Mostra dati intelligenti se presenti */}
+                            {message.intelligentData && (
+                              <div className="mt-3 space-y-2">
+                                {/* Follow-up questions */}
+                                {message.intelligentData.followUpQuestions.length > 0 && (
+                                  <div className="bg-blue-50 p-3 rounded-lg">
+                                    <div className="text-xs font-medium text-blue-700 mb-2">Domande correlate:</div>
+                                    <div className="space-y-1">
+                                      {message.intelligentData.followUpQuestions.map((question, qIndex) => (
+                                        <button
+                                          key={qIndex}
+                                          onClick={() => setInputValue(question)}
+                                          className="block w-full text-left text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-100 p-2 rounded transition-colors"
+                                        >
+                                          {question}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                {/* Actions */}
+                                {message.intelligentData.actions.length > 0 && (
+                                  <div className="flex flex-wrap gap-2">
+                                    {message.intelligentData.actions.map((action, aIndex) => (
+                                      <button
+                                        key={aIndex}
+                                        onClick={() => {
+                                          if (action.url) {
+                                            window.open(action.url, '_blank');
+                                          }
+                                        }}
+                                        className="flex items-center space-x-1 px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-full text-xs transition-colors"
+                                      >
+                                        {action.icon && <span>{action.icon}</span>}
+                                        <span>{action.label}</span>
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+                                
+                                {/* Confidence indicator */}
+                                {message.intelligentData.confidence > 0 && (
+                                  <div className="text-xs text-gray-500">
+                                    Confidenza: {Math.round(message.intelligentData.confidence * 100)}%
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            
+                            <div className={`text-xs mt-2 ${
+                              message.type === 'user' ? 'text-blue-100' : 'text-gray-500'
+                            }`}>
+                              {message.timestamp.toLocaleTimeString()}
+                            </div>
                           </div>
                         </div>
+                        
+                        {/* Mostra project preview dopo l'ultimo messaggio dell'assistente */}
+                        {message.type === 'assistant' && index === messages.length - 1 && projectPreviews.length > 0 && (
+                          <div className="flex justify-start mt-3">
+                            <div className="max-w-md">
+                              {projectPreviews.map(project => (
+                                <ProjectPreview
+                                  key={project.id}
+                                  project={project}
+                                  onViewProject={(projectId) => {
+                                    console.log('Visualizza progetto:', projectId);
+                                    // Redirect al progetto
+                                    window.open(project.url, '_blank');
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                     

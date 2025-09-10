@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { intentService, UserIntent, ProjectPreview } from '@/lib/intentService';
+import { userMemoryService, UserMemoryProfile } from '@/lib/userMemoryService';
+import { naturalQueryProcessor } from '@/lib/naturalQueryProcessor';
+import { intelligentResponseService, IntelligentResponse } from '@/lib/intelligentResponseService';
 
 // Inizializza OpenAI solo se la chiave è disponibile
 let openai: OpenAI | null = null;
@@ -23,10 +27,49 @@ export async function POST(request: NextRequest) {
   try {
     const requestData = await request.json();
     message = requestData.message || '';
-    const { context } = requestData;
+    const { context, history = [], userId, userEmail } = requestData;
 
     console.log('🤖 [Chat API] Richiesta chat:', { message: message.substring(0, 100) });
     console.log('🔑 [Chat API] OPENAI_API_KEY presente:', !!process.env.OPENAI_API_KEY);
+
+    // 🧠 ANGELO CUSTODE - Sistema di memoria intelligente
+    console.log('🧠 [Angelo Custode] Processando query con memoria intelligente...');
+    
+    let intelligentResponse: IntelligentResponse | null = null;
+    let projectPreview: ProjectPreview | null = null;
+    
+    // Se abbiamo userId e userEmail, usa il sistema di memoria intelligente
+    if (userId && userEmail) {
+      try {
+        console.log('🔍 [Angelo Custode] Processando query naturale...');
+        const queryResult = await userMemoryService.processNaturalQuery(message, userId, userEmail, history);
+        
+        if (queryResult.success) {
+          console.log('✅ [Angelo Custode] Query processata con successo');
+          
+          // Genera risposta intelligente
+          const userProfile = await userMemoryService.getUserProfile(userId);
+          if (userProfile) {
+            intelligentResponse = await intelligentResponseService.generateResponse({
+              userProfile,
+              queryResult,
+              conversationHistory: history,
+              currentIntent: 'query',
+              sessionData: {}
+            });
+          }
+        }
+      } catch (error) {
+        console.error('❌ [Angelo Custode] Errore processamento query naturale:', error);
+      }
+    }
+    
+    // Se non abbiamo risposta intelligente, usa il sistema tradizionale
+    if (!intelligentResponse) {
+      console.log('🔄 [Angelo Custode] Fallback a sistema tradizionale...');
+      
+      // Il sistema tradizionale verrà gestito più avanti nel codice
+    }
 
     // Inizializza OpenAI se non è già fatto
     if (!openai && process.env.OPENAI_API_KEY) {
@@ -41,12 +84,55 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Se abbiamo una risposta intelligente, usala
+    if (intelligentResponse) {
+      console.log('✅ [Angelo Custode] Usando risposta intelligente');
+      return NextResponse.json({
+        success: true,
+        response: intelligentResponse.response,
+        type: intelligentResponse.type,
+        confidence: intelligentResponse.confidence,
+        relatedData: intelligentResponse.relatedData,
+        followUpQuestions: intelligentResponse.followUpQuestions,
+        actions: intelligentResponse.actions,
+        visualizations: intelligentResponse.visualizations,
+        projectPreview: projectPreview,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    // Se non abbiamo risposta intelligente, usa il sistema tradizionale
+    let userIntent: UserIntent | null = null;
+    
+    // Riconosci intent per il sistema tradizionale
+    if (!intelligentResponse) {
+      userIntent = await intentService.recognizeIntent(message, history);
+      
+      // Se l'intent è per creare un progetto e abbiamo tutti i dati, crea il progetto
+      if (userIntent && userIntent.type !== 'general' && userIntent.missingFields.length === 0 && userId) {
+        console.log('🚀 [Intent] Creazione progetto automatica...');
+        console.log('🚀 [Intent] Dati progetto:', userIntent.collectedData);
+        try {
+          projectPreview = await intentService.createProjectFromIntent(userIntent, userId, userEmail || '');
+          
+          if (projectPreview) {
+            console.log('✅ [Intent] Progetto creato:', projectPreview.id);
+          } else {
+            console.log('❌ [Intent] Creazione progetto fallita');
+          }
+        } catch (error) {
+          console.error('❌ [Intent] Errore creazione progetto:', error);
+        }
+      }
+    }
+
     // Se OpenAI non è disponibile, usa risposte predefinite
     if (!openai) {
       console.warn('⚠️ [Chat API] OpenAI non configurato, usando risposte predefinite');
       return NextResponse.json({
         success: true,
         response: getFallbackResponse(message),
+        projectPreview: projectPreview,
         timestamp: new Date().toISOString(),
       });
     }
@@ -90,10 +176,23 @@ Se l'utente chiede qualcosa di non relativo all'immobiliare, riporta gentilmente
 
     console.log('✅ [Chat API] Risposta generata:', response.substring(0, 100));
 
+    // Genera risposta intelligente basata sull'intent
+    let finalResponse = response;
+    
+    // Se abbiamo un progetto creato, usa la risposta intelligente
+    if (projectPreview && userIntent) {
+      finalResponse = intentService.generateIntelligentResponse(userIntent, projectPreview);
+    } else if (userIntent && userIntent.type !== 'general' && userIntent.missingFields.length > 0) {
+      // Se mancano informazioni, usa la risposta intelligente per raccogliere dati
+      finalResponse = intentService.generateIntelligentResponse(userIntent);
+    }
+
     return NextResponse.json({
       success: true,
-      response,
+      response: finalResponse,
       timestamp: new Date().toISOString(),
+      intent: userIntent,
+      projectPreview: projectPreview,
     });
 
   } catch (error) {
