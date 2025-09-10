@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
+import { XIcon } from '@/components/icons';
 
 /**
  * Banner per mostrare le variabili d'ambiente opzionali mancanti
@@ -92,7 +93,7 @@ export function EnvironmentBanner() {
               className="text-yellow-600 hover:text-yellow-800 transition-colors"
               aria-label="Chiudi banner"
             >
-              <X className="h-4 w-4" />
+              <XIcon className="h-4 w-4" />
             </button>
           </div>
         </div>

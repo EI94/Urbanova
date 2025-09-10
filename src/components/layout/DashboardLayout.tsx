@@ -27,6 +27,8 @@ import {
   ClientIcon,
   ProjectIcon,
   MapIcon,
+  UsersIcon,
+  XIcon,
 } from '@/components/icons';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
 import LanguageSelector from '@/components/ui/LanguageSelector';
@@ -52,6 +54,8 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [teamOpen, setTeamOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationStats>({
     unread: 0,
     total: 0,
@@ -73,9 +77,54 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
           ]);
           setNotifications(notificationsData);
           setUserProfile(profileData);
+        } else {
+          // Utente demo per testing
+          setNotifications({
+            unread: 0,
+            total: 0,
+            read: 0,
+            dismissed: 0,
+            byType: {},
+            byPriority: {},
+          });
+          setUserProfile({
+            id: 'demo-user',
+            userId: 'demo-user',
+            firstName: 'Demo',
+            lastName: 'User',
+            displayName: 'Demo User',
+            email: 'demo@urbanova.com',
+            timezone: 'Europe/Rome',
+            language: 'it',
+            dateFormat: 'DD/MM/YYYY',
+            currency: 'EUR',
+            preferences: {
+              theme: 'light',
+              sidebarCollapsed: false,
+              emailNotifications: true,
+              pushNotifications: true,
+            },
+            security: {
+              twoFactorEnabled: false,
+              lastPasswordChange: new Date(),
+              loginHistory: [],
+            },
+            metadata: {},
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
         }
-    } catch (error) {
+      } catch (error) {
         console.error('Error loading data:', error);
+        // Fallback per demo
+        setNotifications({
+          unread: 0,
+          total: 0,
+          read: 0,
+          dismissed: 0,
+          byType: {},
+          byPriority: {},
+        });
       }
     };
 
@@ -308,13 +357,118 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
             </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex">
+        <div className="flex-1 flex flex-col">
+          {/* Header con icone */}
+          <header className="bg-white border-b border-gray-200 px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                {/* Notifiche */}
+                <button 
+                  onClick={() => setNotificationsOpen(!notificationsOpen)}
+                  className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
+                  title="Notifiche"
+                >
+                  <BellIcon className="w-5 h-5" />
+                  {notifications.unread > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {notifications.unread > 9 ? '9+' : notifications.unread}
+                    </span>
+                  )}
+                </button>
+                
+                {/* Profilo Utente */}
+                <button 
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
+                  title="Profilo Utente"
+                >
+                  <UserIcon className="w-5 h-5" />
+                </button>
+                
+                {/* Team */}
+                <button 
+                  onClick={() => setTeamOpen(!teamOpen)}
+                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
+                  title="Team"
+                >
+                  <UsersIcon className="w-5 h-5" />
+                </button>
+                
+                {/* Settings */}
+                <button 
+                  onClick={() => setSettingsOpen(!settingsOpen)}
+                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
+                  title="Impostazioni"
+                >
+                  <SettingsIcon className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </header>
+          
           {/* Content Area */}
           <div className="flex-1 p-6">
             {children}
           </div>
         </div>
       </div>
+
+      {/* Pannelli Header */}
+      {notificationsOpen && (
+        <NotificationsPanel 
+          isOpen={notificationsOpen}
+          onClose={() => setNotificationsOpen(false)}
+        />
+      )}
+      
+      {profileOpen && (
+        <UserProfilePanel 
+          isOpen={profileOpen}
+          onClose={() => setProfileOpen(false)}
+        />
+      )}
+      
+      {teamOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">Team</h2>
+              <button
+                onClick={() => setTeamOpen(false)}
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
+              >
+                <XIcon className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="text-gray-600">Funzionalità Team in sviluppo...</p>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {settingsOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">Impostazioni</h2>
+              <button
+                onClick={() => setSettingsOpen(false)}
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
+              >
+                <XIcon className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="text-gray-600">Impostazioni in sviluppo...</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Feedback Widget */}
       <FeedbackWidget className="" />
