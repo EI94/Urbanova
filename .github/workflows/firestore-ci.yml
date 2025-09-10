@@ -27,7 +27,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
           
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -38,7 +38,7 @@ jobs:
         run: pnpm install
         
       - name: Install Firebase CLI
-        run: pnpm add -g firebase-tools
+        run: pnpm add -g firebase-tools@13.15.0
         
       - name: Validate Firestore rules
         run: firebase firestore:rules:validate
