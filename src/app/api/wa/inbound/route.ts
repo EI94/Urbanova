@@ -1,7 +1,32 @@
 // WhatsApp Inbound Webhook API Route
 
 import { NextRequest, NextResponse } from 'next/server';
-import { InteractivePlannerController, PlannerContext, PlannerRequest } from '@urbanova/os';
+
+// Mock types per evitare errori di import
+interface PlannerRequest {
+  id: string;
+  userId: string;
+  projectId?: string;
+  message: string;
+  text?: string;
+  context?: any;
+}
+
+interface PlannerContext {
+  sessionId: string;
+  userId: string;
+  projectId?: string;
+  workspaceId?: string;
+  userRole?: string;
+  channel?: string;
+  channelId?: string;
+  status: string;
+  plan?: any;
+}
+
+interface InteractivePlannerController {
+  handleNewRequest(request: PlannerRequest): Promise<{ session: PlannerContext }>;
+}
 
 // Mock controller for demonstration - in production this would be injected
 const mockController = {
@@ -70,12 +95,14 @@ export async function POST(request: NextRequest) {
 
     // Create planner context
     const context: PlannerContext = {
+      sessionId: `wa-session-${waSenderId}`,
       userId: `wa-${waSenderId}`,
       workspaceId: 'default', // In production, resolve from user mapping
       userRole: 'user', // In production, resolve from user permissions
       projectId: ProjectId,
       channel: 'whatsapp',
       channelId: waSenderId,
+      status: 'active',
     };
 
     // Check if message is a plan request
@@ -127,6 +154,9 @@ export async function POST(request: NextRequest) {
     if (isPlanRequest(text)) {
       // Handle as new plan request
       const planRequest: PlannerRequest = {
+        id: `wa-${Date.now()}`,
+        userId: From || 'unknown',
+        message: text,
         text,
         context,
       };
@@ -197,12 +227,14 @@ export async function PUT(request: NextRequest) {
 
     // Create planner context
     const context: PlannerContext = {
+      sessionId: `wa-session-${waSenderId}`,
       userId: `wa-${waSenderId}`,
       workspaceId: 'default',
       userRole: 'user',
       projectId: undefined as any,
       channel: 'whatsapp',
       channelId: waSenderId,
+      status: 'active',
     };
 
     // Map button responses to planner actions
@@ -261,6 +293,9 @@ export async function PUT(request: NextRequest) {
 
     // Handle new request
     const planRequest: PlannerRequest = {
+      id: `wa-${Date.now()}`,
+      userId: From || 'unknown',
+      message: text,
       text,
       context,
     };

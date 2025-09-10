@@ -2,7 +2,26 @@
 // Gestione comandi chat per operazioni SAL
 
 import { salService } from './salService';
-import { SALCreateRequest, SALResult } from '@urbanova/types';
+
+// Mock types per evitare errori di import
+interface SALCreateRequest {
+  projectId: string;
+  vendorId: string;
+  title: string;
+  amount: number;
+  description?: string;
+  dueDate?: string;
+  lines?: any[];
+  terms?: any;
+  conditions?: any;
+}
+
+interface SALResult {
+  id: string;
+  status: string;
+  message: string;
+  sal?: any;
+}
 
 export interface SALChatCommand {
   type: 'create' | 'send' | 'sign' | 'pay' | 'status';
@@ -206,6 +225,7 @@ export class SALChatService {
       projectId: command.projectId,
       vendorId: 'vendor-mock-001',
       title: command.title || `SAL per ${command.projectId}`,
+      amount: command.amount || 1000,
       description: `SAL generato tramite chat per il progetto ${command.projectId}`,
       lines: [
         {

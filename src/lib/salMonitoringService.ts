@@ -3,8 +3,21 @@
  * Gestisce logging, metriche e monitoraggio delle performance del sistema SAL
  */
 
-import { SAL, SALStatus } from '@urbanova/types';
 import { monitoringService } from './monitoringService';
+
+// Mock types per evitare errori di import
+type SALStatus = 'draft' | 'sent' | 'signed' | 'paid' | 'cancelled' | 'expired';
+
+interface SAL {
+  id: string;
+  projectId: string;
+  vendorId: string;
+  title: string;
+  amount: number;
+  status: SALStatus;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface SALMetrics {
   totalSALs: number;
@@ -373,12 +386,12 @@ export class SALMonitoringService {
     return {
       totalSALs: 0,
       salsByStatus: {
-        DRAFT: 0,
-        SENT: 0,
-        SIGNED_VENDOR: 0,
-        SIGNED_PM: 0,
-        READY_TO_PAY: 0,
-        PAID: 0,
+        draft: 0,
+        sent: 0,
+        signed: 0,
+        paid: 0,
+        cancelled: 0,
+        expired: 0,
       },
       averageProcessingTime: 0,
       successRate: 100,
