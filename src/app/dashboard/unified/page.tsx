@@ -866,75 +866,43 @@ export default function UnifiedDashboardPage() {
                           </h2>
                         </div>
                         
-                        {/* Tool grid stile ChatGPT */}
-                        <div className="grid grid-cols-2 gap-3 w-full max-w-2xl">
-                          <button
-                            onClick={() => setInputValue('Crea un nuovo studio di fattibilità')}
-                            className={`flex items-center space-x-3 p-4 border rounded-xl transition-colors text-left ${
-                              darkMode 
-                                ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' 
-                                : 'bg-white border-gray-200 hover:bg-gray-50'
-                            }`}
-                          >
-                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                              <BarChart3 className="w-5 h-5 text-blue-600" />
-                            </div>
-                            <div>
-                              <div className={`font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>Analisi Fattibilità</div>
-                              <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Valuta la redditività del progetto</div>
-                            </div>
-                          </button>
-                          
-                          <button
-                            onClick={() => setInputValue('Cerca terreni e immobili')}
-                            className={`flex items-center space-x-3 p-4 border rounded-xl transition-colors text-left ${
-                              darkMode 
-                                ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' 
-                                : 'bg-white border-gray-200 hover:bg-gray-50'
-                            }`}
-                          >
-                            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                              <Search className="w-5 h-5 text-green-600" />
-                            </div>
-                            <div>
-                              <div className={`font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>Market Intelligence</div>
-                              <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Trova opportunità immobiliari</div>
-                            </div>
-                          </button>
-                          
-                          <button
-                            onClick={() => setInputValue('Crea un nuovo progetto')}
-                            className={`flex items-center space-x-3 p-4 border rounded-xl transition-colors text-left ${
-                              darkMode 
-                                ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' 
-                                : 'bg-white border-gray-200 hover:bg-gray-50'
-                            }`}
-                          >
-                            <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                              <Plus className="w-5 h-5 text-purple-600" />
-                            </div>
-                            <div>
-                              <div className={`font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>Nuovo Progetto</div>
-                              <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Avvia un nuovo sviluppo</div>
-                            </div>
-                          </button>
-                          
-                          <button
-                            onClick={() => setInputValue('Genera business plan')}
-                            className={`flex items-center space-x-3 p-4 border rounded-xl transition-colors text-left ${
-                              darkMode 
-                                ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' 
-                                : 'bg-white border-gray-200 hover:bg-gray-50'
-                            }`}
-                          >
-                            <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                              <FileText className="w-5 h-5 text-orange-600" />
-                            </div>
-                            <div>
-                              <div className={`font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>Business Plan</div>
-                              <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Crea piano strategico</div>
-                            </div>
-                          </button>
+                        {/* Suggerimenti eleganti stile ChatGPT */}
+                        <div className="space-y-3 w-full max-w-2xl">
+                          <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'} text-center`}>
+                            Prova a chiedere qualcosa come:
+                          </div>
+                          <div className="space-y-2">
+                            <button
+                              onClick={() => setInputValue('Crea un nuovo studio di fattibilità')}
+                              className={`w-full p-3 text-left border rounded-lg transition-colors ${
+                                darkMode 
+                                  ? 'bg-gray-700 border-gray-600 hover:bg-gray-600 text-gray-300' 
+                                  : 'bg-white border-gray-200 hover:bg-gray-50 text-gray-700'
+                              }`}
+                            >
+                              "Crea un nuovo studio di fattibilità"
+                            </button>
+                            <button
+                              onClick={() => setInputValue('Cerca terreni e immobili')}
+                              className={`w-full p-3 text-left border rounded-lg transition-colors ${
+                                darkMode 
+                                  ? 'bg-gray-700 border-gray-600 hover:bg-gray-600 text-gray-300' 
+                                  : 'bg-white border-gray-200 hover:bg-gray-50 text-gray-700'
+                              }`}
+                            >
+                              "Cerca terreni e immobili"
+                            </button>
+                            <button
+                              onClick={() => setInputValue('Crea un nuovo progetto')}
+                              className={`w-full p-3 text-left border rounded-lg transition-colors ${
+                                darkMode 
+                                  ? 'bg-gray-700 border-gray-600 hover:bg-gray-600 text-gray-300' 
+                                  : 'bg-white border-gray-200 hover:bg-gray-50 text-gray-700'
+                              }`}
+                            >
+                              "Crea un nuovo progetto"
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ) : (
@@ -1049,36 +1017,6 @@ export default function UnifiedDashboardPage() {
                   {/* Quick Actions */}
                   {showQuickActions && (
                     <div className="p-4 border-t border-gray-200">
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
-                        <button
-                          onClick={() => setInputValue('Analisi di fattibilità per progetto residenziale a Milano')}
-                          className="flex items-center space-x-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors text-sm"
-                        >
-                          <TrendingUp className="w-4 h-4 text-blue-600" />
-                          <span className="text-blue-700">Analisi Fattibilità</span>
-                        </button>
-                        <button
-                          onClick={() => setInputValue('Market Intelligence per zona Porta Nuova Milano')}
-                          className="flex items-center space-x-2 px-3 py-2 bg-green-50 hover:bg-green-100 rounded-lg transition-colors text-sm"
-                        >
-                          <Search className="w-4 h-4 text-green-600" />
-                          <span className="text-green-700">Market Intelligence</span>
-                        </button>
-                        <button
-                          onClick={() => setInputValue('Crea design per terreno residenziale Roma EUR')}
-                          className="flex items-center space-x-2 px-3 py-2 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors text-sm"
-                        >
-                          <Sparkles className="w-4 h-4 text-orange-600" />
-                          <span className="text-orange-700">Design Center</span>
-                        </button>
-                        <button
-                          onClick={() => setInputValue('Business Plan completo con Comps/OMI')}
-                          className="flex items-center space-x-2 px-3 py-2 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors text-sm"
-                        >
-                          <FileText className="w-4 h-4 text-purple-600" />
-                          <span className="text-purple-700">Business Plan</span>
-                        </button>
-                      </div>
                     </div>
                   )}
                   
