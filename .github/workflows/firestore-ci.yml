@@ -40,6 +40,13 @@ jobs:
       - name: Install Firebase CLI
         run: pnpm add -g firebase-tools@13.15.0
         
+      - name: Authenticate Firebase
+        run: |
+          echo "${{ secrets.FIREBASE_TOKEN }}" | firebase login:ci --token
+          
+      - name: Set Firebase project
+        run: firebase use staging
+        
       - name: Deploy Firestore rules
         run: firebase deploy --only firestore:rules
         
