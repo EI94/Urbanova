@@ -67,14 +67,16 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
       setLoading(true);
       let userProfile = await firebaseUserProfileService.getUserProfile(userId);
 
-      if (!userProfile && currentUser) {
+      if (!userProfile) {
         // Crea profilo di default per l'utente
-        userProfile = await firebaseUserProfileService.createUserProfile(userId, {
-          email: currentUser.email || '',
-          displayName: currentUser.displayName || 'Utente',
-          firstName: currentUser.firstName || '',
-          lastName: currentUser.lastName || '',
-        });
+        const defaultProfile = {
+          email: currentUser?.email || 'demo@urbanova.com',
+          displayName: currentUser?.displayName || 'Demo User',
+          firstName: currentUser?.firstName || 'Demo',
+          lastName: currentUser?.lastName || 'User',
+        };
+        
+        userProfile = await firebaseUserProfileService.createUserProfile(userId, defaultProfile);
       }
 
       setProfile(userProfile);
