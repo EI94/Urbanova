@@ -431,6 +431,11 @@ export default function FeasibilityProjectPage() {
       return;
     }
 
+    // Non salvare se è già in corso un salvataggio manuale
+    if (loading) {
+      return;
+    }
+
     setAutoSaving(true);
     try {
       console.log('💾 Salvataggio automatico in corso...');
@@ -625,12 +630,20 @@ export default function FeasibilityProjectPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <Link href="/dashboard/feasibility-analysis">
-              <button className="btn btn-ghost btn-sm">
-                <ArrowLeftIcon className="h-4 w-4 mr-2" />
-                Indietro
-              </button>
-            </Link>
+            <button
+              onClick={() => {
+                if (loading || autoSaving) {
+                  toast('⏳ Attendere il completamento del salvataggio...', { icon: '⏳' });
+                  return;
+                }
+                router.push('/dashboard/feasibility-analysis');
+              }}
+              disabled={loading || autoSaving}
+              className="btn btn-ghost btn-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ArrowLeftIcon className="h-4 w-4 mr-2" />
+              Indietro
+            </button>
             <div>
               <div className="flex items-center space-x-3">
                 <h1 className="text-3xl font-bold text-gray-900">

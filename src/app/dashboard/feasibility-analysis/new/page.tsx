@@ -387,6 +387,11 @@ export default function NewFeasibilityProjectPage() {
       return;
     }
 
+    // Non salvare se è già in corso un salvataggio manuale
+    if (loading) {
+      return;
+    }
+
     setAutoSaving(true);
     try {
       console.log('🧠 Salvataggio intelligente in corso...');
@@ -484,6 +489,11 @@ export default function NewFeasibilityProjectPage() {
 
       setSavedProjectId(projectId);
       toast('✅ Progetto creato con successo! Ora puoi generare il report.', { icon: '✅' });
+      
+      // Attendi un momento per assicurarsi che il salvataggio sia completato
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Mostra il report generator
       setShowReportGenerator(true);
     } catch (error: any) {
       console.error('❌ Errore creazione progetto:', error);
@@ -553,15 +563,29 @@ export default function NewFeasibilityProjectPage() {
           <div className="flex items-center space-x-4">
             <div className="flex space-x-2">
               <button
-                onClick={() => router.back()}
-                className="btn btn-ghost btn-sm hover:bg-gray-100 transition-colors"
+                onClick={() => {
+                  if (loading || autoSaving) {
+                    toast('⏳ Attendere il completamento del salvataggio...', { icon: '⏳' });
+                    return;
+                  }
+                  router.push('/dashboard/feasibility-analysis');
+                }}
+                disabled={loading || autoSaving}
+                className="btn btn-ghost btn-sm hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ArrowLeftIcon className="h-4 w-4 mr-2" />
                 Indietro
               </button>
               <button
-                onClick={() => router.push('/dashboard/feasibility-analysis')}
-                className="btn btn-outline btn-sm hover:bg-blue-50 transition-colors"
+                onClick={() => {
+                  if (loading || autoSaving) {
+                    toast('⏳ Attendere il completamento del salvataggio...', { icon: '⏳' });
+                    return;
+                  }
+                  router.push('/dashboard/feasibility-analysis');
+                }}
+                disabled={loading || autoSaving}
+                className="btn btn-outline btn-sm hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 📋 Lista Progetti
               </button>
