@@ -45,6 +45,7 @@ import FeedbackWidget from '@/components/ui/FeedbackWidget';
 import WorkspaceManager from '@/components/workspace/WorkspaceManager';
 import ProjectPreview from '@/components/chat/ProjectPreview';
 import NotificationsPanel from '@/components/ui/NotificationsPanel';
+import UserProfilePanel from '@/components/ui/UserProfilePanel';
 import { Workspace } from '@/types/workspace';
 import { ProjectPreview as ProjectPreviewType } from '@/lib/intentService';
 import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
@@ -1340,56 +1341,10 @@ export default function UnifiedDashboardPage() {
       />
 
       {/* Profile Panel */}
-      {showProfile && (
-        <div className="fixed inset-0 bg-black/20 z-40" onClick={() => setShowProfile(false)} />
-      )}
-      {showProfile && (
-        <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-2xl z-50">
-          <div className="p-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Profilo Utente</h3>
-              <button
-                onClick={() => setShowProfile(false)}
-                className="p-1 rounded-md text-gray-400 hover:text-gray-600"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-          <div className="p-4 space-y-4">
-            {userProfile ? (
-              <>
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <User className="w-8 h-8 text-white" />
-                  </div>
-                  <h4 className="font-medium text-gray-900">{userProfile.displayName || 'Utente'}</h4>
-                  <p className="text-sm text-gray-500">{userProfile.email}</p>
-                </div>
-                <div className="space-y-3">
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <h5 className="font-medium text-gray-900 mb-1">Informazioni Account</h5>
-                    <p className="text-sm text-gray-600">Ruolo: {userProfile.role || 'Utente'}</p>
-                    <p className="text-sm text-gray-600">Membro dal: {new Date(userProfile.createdAt).toLocaleDateString('it-IT')}</p>
-                  </div>
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <h5 className="font-medium text-gray-900 mb-1">Statistiche</h5>
-                    <p className="text-sm text-gray-600">Progetti: {userProfile.projectCount || 0}</p>
-                    <p className="text-sm text-gray-600">Workspace: {userProfile.workspaceCount || 0}</p>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="text-center py-8">
-                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <User className="w-6 h-6 text-gray-400" />
-                </div>
-                <p className="text-gray-500">Caricamento profilo...</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <UserProfilePanel
+        isOpen={showProfile}
+        onClose={() => setShowProfile(false)}
+      />
 
       {/* Settings Panel */}
       {showSettings && (

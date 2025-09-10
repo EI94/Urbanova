@@ -79,66 +79,21 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
   useEffect(() => {
     const loadData = async () => {
       try {
-        if (auth.user?.uid) {
+        if (auth.currentUser?.uid) {
           const [notificationsData, profileData] = await Promise.all([
-            firebaseNotificationService.getNotificationStats(auth.user.uid),
-            firebaseUserProfileService.getUserProfile(auth.user.uid),
+            firebaseNotificationService.getNotificationStats(auth.currentUser.uid),
+            firebaseUserProfileService.getUserProfile(auth.currentUser.uid),
           ]);
           setNotifications(notificationsData);
           setUserProfile(profileData);
-        } else {
-          // Utente demo per testing
-          setNotifications({
-            unread: 0,
-            total: 0,
-            read: 0,
-            dismissed: 0,
-            byType: {},
-            byPriority: {},
-          });
-          setUserProfile({
-            id: 'demo-user',
-            userId: 'demo-user',
-            firstName: 'Demo',
-            lastName: 'User',
-            displayName: 'Demo User',
-            email: 'demo@urbanova.com',
-            timezone: 'Europe/Rome',
-            language: 'it',
-            dateFormat: 'DD/MM/YYYY',
-            currency: 'EUR',
-            preferences: {
-              theme: 'light',
-              sidebarCollapsed: false,
-              emailNotifications: true,
-              pushNotifications: true,
-            },
-            security: {
-              twoFactorEnabled: false,
-              lastPasswordChange: new Date(),
-              loginHistory: [],
-            },
-            metadata: {},
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          });
         }
       } catch (error) {
         console.error('Error loading data:', error);
-        // Fallback per demo
-        setNotifications({
-          unread: 0,
-          total: 0,
-          read: 0,
-          dismissed: 0,
-          byType: {},
-          byPriority: {},
-        });
       }
     };
 
     loadData();
-  }, [auth.user?.uid]);
+  }, [auth.currentUser?.uid]);
 
   const handleLogout = async () => {
     try {
@@ -160,7 +115,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
     <div className="min-h-screen bg-gray-50">
 
       <div className="flex">
-        {/* Sidebar */}
+      {/* Sidebar */}
         <div className="w-64 bg-white shadow-sm border-r min-h-screen">
           {/* Sidebar Header - Apple Style */}
           <div className="px-6 py-6 border-b border-gray-100">
@@ -174,7 +129,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
               </div>
             </div>
           </div>
-          
+
           <div className="p-4">
             <nav className="space-y-2">
             {/* Sezione principale */}
@@ -273,7 +228,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   <CalendarIcon className="w-4 h-4 mr-3" />
                   Project Timeline AI
                 </Link>
-            </div>
+                  </div>
 
               {/* Progetti */}
               <div className="space-y-1">
@@ -360,9 +315,9 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   <MarketingIcon className="w-4 h-4 mr-3" />
                   Marketing
                 </Link>
-              </div>
+          </div>
             </nav>
-              </div>
+        </div>
             </div>
 
         {/* Main Content */}
@@ -373,22 +328,22 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
               <div className="flex items-center space-x-4">
                 <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
               </div>
-              
+
               <div className="flex items-center space-x-4">
                 {/* Notifiche */}
-                <button 
+              <button
                   onClick={() => setNotificationsOpen(!notificationsOpen)}
                   className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
                   title="Notifiche"
-                >
-                  <BellIcon className="w-5 h-5" />
+              >
+                <BellIcon className="w-5 h-5" />
                   {notifications.unread > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                       {notifications.unread > 9 ? '9+' : notifications.unread}
-                    </span>
-                  )}
-                </button>
-                
+                  </span>
+                )}
+              </button>
+
                 {/* Profilo Utente */}
                 <button 
                   onClick={() => setProfileOpen(!profileOpen)}
@@ -399,16 +354,16 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                 </button>
                 
                 {/* Team */}
-                <button 
+                <button
                   onClick={() => setTeamOpen(!teamOpen)}
                   className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
                   title="Team"
                 >
                   <UsersIcon className="w-5 h-5" />
                 </button>
-                
+
                 {/* Settings */}
-                <button 
+                <button
                   onClick={() => setSettingsOpen(!settingsOpen)}
                   className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
                   title="Impostazioni"

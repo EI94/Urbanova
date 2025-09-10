@@ -22,7 +22,7 @@ interface UserProfilePanelProps {
 export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelProps) {
   const { t } = useLanguage();
   const auth = useAuth();
-  const currentUser = auth.user;
+  const currentUser = auth.currentUser;
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'preferences'>('profile');
