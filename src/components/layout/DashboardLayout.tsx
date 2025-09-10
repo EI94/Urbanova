@@ -40,6 +40,7 @@ import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
 import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 import { NotificationStats } from '@/types/notifications';
 import { UserProfile } from '@/types/userProfile';
+import AuthGuard from '@/components/AuthGuard';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -47,6 +48,14 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ children, title = 'Dashboard' }: DashboardLayoutProps) {
+  return (
+    <AuthGuard>
+      <DashboardLayoutContent children={children} title={title} />
+    </AuthGuard>
+  );
+}
+
+function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayoutProps) {
   const { t } = useLanguage();
   const auth = useAuth();
   const pathname = usePathname();

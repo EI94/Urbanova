@@ -44,10 +44,10 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
   const userId = currentUser?.uid || 'demo-user';
 
   useEffect(() => {
-    if (isOpen && currentUser) {
+    if (isOpen) {
       loadProfile();
     }
-  }, [isOpen, currentUser]);
+  }, [isOpen]);
 
   // Rimuovo il listener per ora - Firebase ha real-time updates nativi
   // useEffect(() => {
@@ -65,15 +65,23 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
   const loadProfile = async () => {
     try {
       setLoading(true);
+      
+      // Se non c'è utente autenticato, non caricare il profilo
+      if (!currentUser) {
+        console.warn('No authenticated user - cannot load profile');
+        setLoading(false);
+        return;
+      }
+
       let userProfile = await firebaseUserProfileService.getUserProfile(userId);
 
-      if (!userProfile) {
-        // Crea profilo di default per l'utente
+      if (!userProfile && currentUser) {
+        // Crea profilo per l'utente autenticato
         const defaultProfile = {
-          email: currentUser?.email || 'demo@urbanova.com',
-          displayName: currentUser?.displayName || 'Demo User',
-          firstName: currentUser?.firstName || 'Demo',
-          lastName: currentUser?.lastName || 'User',
+          email: currentUser.email || '',
+          displayName: currentUser.displayName || 'Utente',
+          firstName: currentUser.firstName || '',
+          lastName: currentUser.lastName || '',
         };
         
         userProfile = await firebaseUserProfileService.createUserProfile(userId, defaultProfile);
