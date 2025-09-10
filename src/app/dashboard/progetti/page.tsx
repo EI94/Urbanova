@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import {
   Building,
   Plus,
@@ -242,77 +243,24 @@ export default function ProgettiPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-                  <Building className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-semibold text-gray-900">Progetti</h1>
-                  <p className="text-sm text-gray-600">Gestisci tutti i tuoi progetti immobiliari</p>
-                </div>
-              </div>
-            </div>
-            <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              <Plus className="w-4 h-4" />
-              <span>Nuovo Progetto</span>
-            </button>
+    <DashboardLayout title="Progetti">
+      <div className="flex-1 p-6">
+        {/* Header con bottone + Nuovo Progetto */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <Building className="w-8 h-8 text-purple-600" />
+              Progetti
+            </h1>
+            <p className="text-gray-600 mt-2">
+              Gestisci tutti i tuoi progetti immobiliari
+            </p>
           </div>
+          <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <Plus className="w-4 h-4" />
+            <span>Nuovo Progetto</span>
+          </button>
         </div>
-      </div>
-
-      <div className="flex">
-        {/* Sidebar */}
-        <div className="w-64 bg-white border-r border-gray-200 min-h-screen">
-          <div className="p-6">
-            <nav className="space-y-2">
-              <Link href="/dashboard/unified" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <BarChart3 className="w-5 h-5" />
-                <span>Dashboard</span>
-              </Link>
-              <Link href="/dashboard/market-intelligence" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <TrendingUp className="w-5 h-5" />
-                <span>Market Intelligence</span>
-              </Link>
-              <Link href="/dashboard/feasibility-analysis" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <FileText className="w-5 h-5" />
-                <span>Analisi Fattibilità</span>
-              </Link>
-              <Link href="/dashboard/design-center" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <Building className="w-5 h-5" />
-                <span>Design Center</span>
-              </Link>
-              <Link href="/dashboard/business-plan" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <Target className="w-5 h-5" />
-                <span>Business Plan</span>
-              </Link>
-              <Link href="/dashboard/permits-compliance" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <Shield className="w-5 h-5" />
-                <span>Permessi & Compliance</span>
-              </Link>
-              <Link href="/dashboard/project-timeline" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <Calendar className="w-5 h-5" />
-                <span>Project Timeline AI</span>
-              </Link>
-              <Link href="/dashboard/progetti" className="flex items-center space-x-3 px-3 py-2 text-purple-600 bg-purple-50 rounded-lg transition-colors">
-                <Building className="w-5 h-5" />
-                <span>Progetti</span>
-              </Link>
-              <Link href="/dashboard/billing" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                <CreditCard className="w-5 h-5" />
-                <span>Billing & Usage</span>
-              </Link>
-            </nav>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 p-6">
           {/* Search and Filters */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-4">
@@ -575,6 +523,7 @@ export default function ProgettiPage() {
       
       {/* Feedback Widget */}
       <FeedbackWidget />
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

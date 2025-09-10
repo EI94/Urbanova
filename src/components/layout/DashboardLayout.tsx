@@ -25,7 +25,6 @@ import {
   MeetingIcon,
   CampaignIcon,
   ClientIcon,
-  PlusIcon,
   ProjectIcon,
   MapIcon,
 } from '@/components/icons';
@@ -215,13 +214,6 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
                 >
                   <BuildingIcon className="w-4 h-4 mr-3" />
                   Progetti
-                </Link>
-                <Link
-                  href="/dashboard/progetti/nuovo"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <PlusIcon className="w-4 h-4 mr-3" />
-                  Nuovo Progetto
                 </Link>
                 <Link
                   href="/dashboard/mappa-progetti"
