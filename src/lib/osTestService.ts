@@ -905,7 +905,8 @@ export class OSTestService {
    * Esegue un singolo test
    */
   private async executeTest(testCase: TestCase): Promise<string> {
-    const response = await fetch('/api/chat', {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3112';
+    const response = await fetch(`${baseUrl}/api/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -33,6 +33,7 @@ import {
   Users,
   Trash2,
   Bell,
+  X,
 } from 'lucide-react';
 
 import { useLanguage } from '@/contexts/LanguageContext';
