@@ -41,7 +41,7 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
   const fileInputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  const userId = currentUser?.uid || 'demo-user';
+  const userId = currentUser?.uid;
 
   useEffect(() => {
     if (isOpen) {
@@ -67,7 +67,7 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
       setLoading(true);
       
       // Se non c'è utente autenticato, non caricare il profilo
-      if (!currentUser) {
+      if (!currentUser || !userId) {
         console.warn('No authenticated user - cannot load profile');
         setLoading(false);
         return;

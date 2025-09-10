@@ -75,24 +75,31 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
   });
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
-  // Carica notifiche e profilo utente
+  // Carica notifiche e profilo utente solo se l'utente è autenticato
   useEffect(() => {
     const loadData = async () => {
       try {
         if (auth.currentUser?.uid) {
+          console.log('🔄 [DashboardLayout] Caricamento dati per utente:', auth.currentUser.uid);
           const [notificationsData, profileData] = await Promise.all([
             firebaseNotificationService.getNotificationStats(auth.currentUser.uid),
             firebaseUserProfileService.getUserProfile(auth.currentUser.uid),
           ]);
           setNotifications(notificationsData);
           setUserProfile(profileData);
+          console.log('✅ [DashboardLayout] Dati caricati:', { notificationsData, profileData });
+        } else {
+          console.log('⚠️ [DashboardLayout] Nessun utente autenticato, skip caricamento dati');
         }
       } catch (error) {
-        console.error('Error loading data:', error);
+        console.error('❌ [DashboardLayout] Errore caricamento dati:', error);
       }
     };
 
-    loadData();
+    // Carica solo se l'utente è autenticato
+    if (auth.currentUser?.uid) {
+      loadData();
+    }
   }, [auth.currentUser?.uid]);
 
   const handleLogout = async () => {
