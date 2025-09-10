@@ -26,7 +26,6 @@ import {
   AlertCircle,
   Play,
   Pause,
-  Square,
   BuildingIcon,
   EuroIcon,
   TrendingUpIcon,
@@ -132,7 +131,6 @@ export default function UnifiedDashboardPage() {
   const [activeTab, setActiveTab] = useState<
     'overview' | 'projects' | 'analytics' | 'tools' | 'business-plan' | 'market-intelligence' | 'feasibility-analysis' | 'design-center' | 'permits-compliance' | 'project-timeline' | 'project-management' | 'marketing' | 'epc'
   >('overview');
-  const [showToolPanel, setShowToolPanel] = useState(false);
   
   // Chat history e quick actions
   const [chatHistory, setChatHistory] = useState<ChatSession[]>([]);
@@ -482,7 +480,7 @@ export default function UnifiedDashboardPage() {
       case 'COMPLETED':
         return <CheckCircle className="w-4 h-4 text-green-500" />;
       default:
-        return <Square className="w-4 h-4 text-gray-500" />;
+        return <div className="w-4 h-4 bg-gray-300 rounded" />;
     }
   };
 
@@ -528,17 +526,6 @@ export default function UnifiedDashboardPage() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setShowToolPanel(!showToolPanel)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  showToolPanel
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                <Zap className="w-4 h-4 inline mr-2" />
-                Tool Panel
-              </button>
               
               {/* Notifiche */}
               <button 
@@ -1259,7 +1246,7 @@ export default function UnifiedDashboardPage() {
                     onClick={() => setShowChatHistory(false)}
                     className="text-gray-400 hover:text-white transition-colors"
                   >
-                    <Square className="w-4 h-4" />
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -1340,33 +1327,6 @@ export default function UnifiedDashboardPage() {
             </div>
           )}
 
-          {/* Tool Panel */}
-          {showToolPanel && (
-            <div className="w-80 bg-white shadow-lg border-l border-gray-200">
-              <div className="p-4 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-medium text-gray-900">Tool Panel</h3>
-                  <button
-                    onClick={() => setShowToolPanel(false)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <Square className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-              <div className="p-4 space-y-4">
-                <div className="text-center py-8">
-                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Zap className="w-6 h-6 text-purple-600" />
-                  </div>
-                  <h4 className="font-medium text-gray-900 mb-1">Tool Panel</h4>
-                  <p className="text-sm text-gray-500">
-                    Pannello strumenti avanzato in sviluppo
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
       
