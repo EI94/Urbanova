@@ -5,6 +5,7 @@ import { Inter } from 'next/font/google';
 import Toaster from '@/components/ui/Toaster';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
+import { DarkModeProvider } from '@/contexts/DarkModeContext';
 import CommandPaletteWrapper from '@/components/CommandPaletteWrapper';
 import { EnvironmentBanner } from '@/components/ui/EnvironmentBanner';
 // FirebaseInterceptorLoader rimosso - approccio semplice con safeCollection()
@@ -115,9 +116,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={inter.className}>
         <LanguageProvider>
           <AuthProvider>
-            <EnvironmentBanner />
-            <CommandPaletteWrapper>{children}</CommandPaletteWrapper>
-            <Toaster />
+            <DarkModeProvider>
+              <EnvironmentBanner />
+              <CommandPaletteWrapper>{children}</CommandPaletteWrapper>
+              <Toaster />
+            </DarkModeProvider>
           </AuthProvider>
         </LanguageProvider>
       </body>

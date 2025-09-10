@@ -33,18 +33,23 @@ import {
   CalendarIcon,
   Users,
   Trash2,
+  Bell,
 } from 'lucide-react';
 
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDarkMode } from '@/contexts/DarkModeContext';
 import { dashboardService, DashboardStats } from '@/lib/dashboardService';
 import { chatHistoryService, ChatSession } from '@/lib/chatHistoryService';
 import { ChatMessage } from '@/types/chat';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
 import WorkspaceManager from '@/components/workspace/WorkspaceManager';
 import ProjectPreview from '@/components/chat/ProjectPreview';
+import NotificationsPanel from '@/components/ui/NotificationsPanel';
 import { Workspace } from '@/types/workspace';
 import { ProjectPreview as ProjectPreviewType } from '@/lib/intentService';
+import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
+import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 
 // Mock data per i progetti (in produzione verrà da API)
 const mockProjects = [
@@ -117,6 +122,7 @@ interface ToolExecution {
 export default function UnifiedDashboardPage() {
   const { t } = useLanguage();
   const { currentUser } = useAuth();
+  const { darkMode, setDarkMode } = useDarkMode();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -139,6 +145,13 @@ export default function UnifiedDashboardPage() {
   
   // Project previews from chat
   const [projectPreviews, setProjectPreviews] = useState<ProjectPreviewType[]>([]);
+
+  // Notifications, Profile, Settings
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [userProfile, setUserProfile] = useState<any>(null);
 
   // Stato per i dati della dashboard
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -175,6 +188,8 @@ export default function UnifiedDashboardPage() {
         // Carica workspace dell'utente
         if (currentUser) {
           await loadWorkspaces();
+          // Carica notifiche e profilo utente
+          await loadUserData();
         }
 
         console.log('✅ [Unified Dashboard] Statistiche iniziali caricate:', initialStats);
@@ -202,6 +217,24 @@ export default function UnifiedDashboardPage() {
 
     return unsubscribe;
   }, [stats]);
+
+  // Carica dati utente (notifiche e profilo)
+  const loadUserData = async () => {
+    try {
+      if (!currentUser?.uid) return;
+
+      const [notificationsData, profileData] = await Promise.all([
+        firebaseNotificationService.getNotifications(currentUser.uid),
+        firebaseUserProfileService.getUserProfile(currentUser.uid),
+      ]);
+
+      setNotifications(notificationsData);
+      setUserProfile(profileData);
+      console.log('✅ [User Data] Notifiche e profilo caricati');
+    } catch (error) {
+      console.error('❌ [User Data] Errore caricamento dati utente:', error);
+    }
+  };
 
   // Esegue tool action tramite API
   const executeToolAction = async (toolId: string, action: string, args: any) => {
@@ -477,9 +510,9 @@ export default function UnifiedDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-sm border-b`}>
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -488,8 +521,8 @@ export default function UnifiedDashboardPage() {
                   <Building2 className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-semibold text-gray-900">Urbanova Dashboard</h1>
-                  <p className="text-sm text-gray-500">Design Center & Project Management</p>
+                  <h1 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Urbanova Dashboard</h1>
+                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Design Center & Project Management</p>
                 </div>
               </div>
             </div>
@@ -505,14 +538,45 @@ export default function UnifiedDashboardPage() {
                 <Zap className="w-4 h-4 inline mr-2" />
                 Tool Panel
               </button>
+              
+              {/* Notifiche */}
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                title="Notifiche"
+              >
+                <Bell className="w-5 h-5" />
+                {notifications.filter(n => !n.isRead).length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {notifications.filter(n => !n.isRead).length}
+                  </span>
+                )}
+              </button>
+              
+              {/* Profilo */}
+              <button 
+                onClick={() => setShowProfile(!showProfile)}
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                title="Profilo"
+              >
+                <User className="w-5 h-5" />
+              </button>
+              
+              {/* Workspace */}
               <button 
                 onClick={() => setShowWorkspaceManager(true)}
-                className="p-2 text-gray-400 hover:text-gray-600"
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
                 title="Gestione Workspace"
               >
                 <Users className="w-5 h-5" />
               </button>
-              <button className="p-2 text-gray-400 hover:text-gray-600">
+              
+              {/* Settings */}
+              <button 
+                onClick={() => setShowSettings(!showSettings)}
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                title="Impostazioni"
+              >
                 <Settings className="w-5 h-5" />
               </button>
             </div>
@@ -522,20 +586,20 @@ export default function UnifiedDashboardPage() {
 
       <div className="flex">
         {/* Sidebar */}
-        <div className="w-64 bg-white shadow-sm border-r min-h-screen">
+        <div className={`w-64 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-sm border-r min-h-screen`}>
           <div className="p-4">
             <nav className="space-y-2">
               {/* Sezione principale */}
               <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <h3 className={`px-3 py-2 text-xs font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-wider`}>
                   DASHBOARD
                 </h3>
                 <button
                   onClick={() => setActiveTab('overview')}
                   className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                     activeTab === 'overview'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? darkMode ? 'bg-blue-900 text-blue-300' : 'bg-blue-100 text-blue-700'
+                      : darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
                   <BarChart3 className="w-4 h-4 mr-3" />
@@ -756,33 +820,33 @@ export default function UnifiedDashboardPage() {
         {/* Main Content */}
         <div className="flex-1 flex">
           {/* Content Area */}
-          <div className="flex-1 p-6">
+          <div className={`flex-1 p-6 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
             {activeTab === 'overview' && (
               <div className="space-y-6">
                 {/* Urbanova Interface - ChatGPT/Cursor Style */}
-                <div className="bg-white rounded-lg shadow border border-gray-200 h-[600px] flex flex-col">
-                  <div className="p-4 border-b border-gray-200">
+                <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg shadow border h-[600px] flex flex-col`}>
+                  <div className={`p-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                           <Bot className="w-5 h-5 text-white" />
                         </div>
                         <div>
-                          <h2 className="text-lg font-semibold text-gray-900">Urbanova</h2>
-                          <p className="text-sm text-gray-500">Assistente Intelligente per la Gestione Immobiliare</p>
+                          <h2 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Urbanova</h2>
+                          <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Assistente Intelligente per la Gestione Immobiliare</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => setShowChatHistory(!showChatHistory)}
-                          className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                          className={`p-2 transition-colors ${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-400 hover:text-gray-600'}`}
                           title="Chat History"
                         >
                           <Clock className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => setShowQuickActions(!showQuickActions)}
-                          className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                          className={`p-2 transition-colors ${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-400 hover:text-gray-600'}`}
                           title="Quick Actions"
                         >
                           <Zap className="w-4 h-4" />
@@ -796,7 +860,7 @@ export default function UnifiedDashboardPage() {
                       // Stato vuoto stile ChatGPT
                       <div className="flex flex-col items-center justify-center h-full space-y-8">
                         <div className="text-center">
-                          <h2 className="text-3xl font-medium text-gray-800 mb-2">
+                          <h2 className={`text-3xl font-medium ${darkMode ? 'text-white' : 'text-gray-800'} mb-2`}>
                             Cosa c'è in programma oggi?
                           </h2>
                         </div>
@@ -805,53 +869,69 @@ export default function UnifiedDashboardPage() {
                         <div className="grid grid-cols-2 gap-3 w-full max-w-2xl">
                           <button
                             onClick={() => setInputValue('Crea un nuovo studio di fattibilità')}
-                            className="flex items-center space-x-3 p-4 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-left"
+                            className={`flex items-center space-x-3 p-4 border rounded-xl transition-colors text-left ${
+                              darkMode 
+                                ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' 
+                                : 'bg-white border-gray-200 hover:bg-gray-50'
+                            }`}
                           >
                             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                               <BarChart3 className="w-5 h-5 text-blue-600" />
                             </div>
                             <div>
-                              <div className="font-medium text-gray-900">Analisi Fattibilità</div>
-                              <div className="text-sm text-gray-500">Valuta la redditività del progetto</div>
+                              <div className={`font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>Analisi Fattibilità</div>
+                              <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Valuta la redditività del progetto</div>
                             </div>
                           </button>
                           
                           <button
                             onClick={() => setInputValue('Cerca terreni e immobili')}
-                            className="flex items-center space-x-3 p-4 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-left"
+                            className={`flex items-center space-x-3 p-4 border rounded-xl transition-colors text-left ${
+                              darkMode 
+                                ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' 
+                                : 'bg-white border-gray-200 hover:bg-gray-50'
+                            }`}
                           >
                             <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
                               <Search className="w-5 h-5 text-green-600" />
                             </div>
                             <div>
-                              <div className="font-medium text-gray-900">Market Intelligence</div>
-                              <div className="text-sm text-gray-500">Trova opportunità immobiliari</div>
+                              <div className={`font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>Market Intelligence</div>
+                              <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Trova opportunità immobiliari</div>
                             </div>
                           </button>
                           
                           <button
                             onClick={() => setInputValue('Crea un nuovo progetto')}
-                            className="flex items-center space-x-3 p-4 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-left"
+                            className={`flex items-center space-x-3 p-4 border rounded-xl transition-colors text-left ${
+                              darkMode 
+                                ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' 
+                                : 'bg-white border-gray-200 hover:bg-gray-50'
+                            }`}
                           >
                             <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
                               <Plus className="w-5 h-5 text-purple-600" />
                             </div>
                             <div>
-                              <div className="font-medium text-gray-900">Nuovo Progetto</div>
-                              <div className="text-sm text-gray-500">Avvia un nuovo sviluppo</div>
+                              <div className={`font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>Nuovo Progetto</div>
+                              <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Avvia un nuovo sviluppo</div>
                             </div>
                           </button>
                           
                           <button
                             onClick={() => setInputValue('Genera business plan')}
-                            className="flex items-center space-x-3 p-4 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-left"
+                            className={`flex items-center space-x-3 p-4 border rounded-xl transition-colors text-left ${
+                              darkMode 
+                                ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' 
+                                : 'bg-white border-gray-200 hover:bg-gray-50'
+                            }`}
                           >
                             <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
                               <FileText className="w-5 h-5 text-orange-600" />
                             </div>
                             <div>
-                              <div className="font-medium text-gray-900">Business Plan</div>
-                              <div className="text-sm text-gray-500">Crea piano strategico</div>
+                              <div className={`font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>Business Plan</div>
+                              <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Crea piano strategico</div>
                             </div>
                           </button>
                         </div>
@@ -1354,6 +1434,163 @@ export default function UnifiedDashboardPage() {
       {/* Feedback Widget */}
       <FeedbackWidget />
       
+      {/* Notifications Panel */}
+      <NotificationsPanel
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
+      />
+
+      {/* Profile Panel */}
+      {showProfile && (
+        <div className="fixed inset-0 bg-black/20 z-40" onClick={() => setShowProfile(false)} />
+      )}
+      {showProfile && (
+        <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-2xl z-50">
+          <div className="p-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Profilo Utente</h3>
+              <button
+                onClick={() => setShowProfile(false)}
+                className="p-1 rounded-md text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+          <div className="p-4 space-y-4">
+            {userProfile ? (
+              <>
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <User className="w-8 h-8 text-white" />
+                  </div>
+                  <h4 className="font-medium text-gray-900">{userProfile.displayName || 'Utente'}</h4>
+                  <p className="text-sm text-gray-500">{userProfile.email}</p>
+                </div>
+                <div className="space-y-3">
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <h5 className="font-medium text-gray-900 mb-1">Informazioni Account</h5>
+                    <p className="text-sm text-gray-600">Ruolo: {userProfile.role || 'Utente'}</p>
+                    <p className="text-sm text-gray-600">Membro dal: {new Date(userProfile.createdAt).toLocaleDateString('it-IT')}</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <h5 className="font-medium text-gray-900 mb-1">Statistiche</h5>
+                    <p className="text-sm text-gray-600">Progetti: {userProfile.projectCount || 0}</p>
+                    <p className="text-sm text-gray-600">Workspace: {userProfile.workspaceCount || 0}</p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <User className="w-6 h-6 text-gray-400" />
+                </div>
+                <p className="text-gray-500">Caricamento profilo...</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Settings Panel */}
+      {showSettings && (
+        <div className="fixed inset-0 bg-black/20 z-40" onClick={() => setShowSettings(false)} />
+      )}
+      {showSettings && (
+        <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-2xl z-50">
+          <div className="p-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Impostazioni</h3>
+              <button
+                onClick={() => setShowSettings(false)}
+                className="p-1 rounded-md text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+          <div className="p-4 space-y-6">
+            {/* Dark Mode Toggle */}
+            <div className="space-y-3">
+              <h4 className="font-medium text-gray-900">Aspetto</h4>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm">🌙</span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">Modalità Scura</p>
+                    <p className="text-sm text-gray-500">Attiva il tema scuro per tutte le pagine</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setDarkMode(!darkMode)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    darkMode ? 'bg-blue-600' : 'bg-gray-200'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      darkMode ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+
+            {/* Notifiche */}
+            <div className="space-y-3">
+              <h4 className="font-medium text-gray-900">Notifiche</h4>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="text-sm text-gray-700">Notifiche Email</span>
+                  <input type="checkbox" defaultChecked className="rounded" />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="text-sm text-gray-700">Notifiche Push</span>
+                  <input type="checkbox" defaultChecked className="rounded" />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="text-sm text-gray-700">Aggiornamenti Progetti</span>
+                  <input type="checkbox" defaultChecked className="rounded" />
+                </div>
+              </div>
+            </div>
+
+            {/* Privacy */}
+            <div className="space-y-3">
+              <h4 className="font-medium text-gray-900">Privacy</h4>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="text-sm text-gray-700">Profilo Pubblico</span>
+                  <input type="checkbox" className="rounded" />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="text-sm text-gray-700">Condivisione Dati</span>
+                  <input type="checkbox" defaultChecked className="rounded" />
+                </div>
+              </div>
+            </div>
+
+            {/* Azioni */}
+            <div className="space-y-3">
+              <h4 className="font-medium text-gray-900">Azioni</h4>
+              <div className="space-y-2">
+                <button className="w-full p-3 text-left text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                  Esporta Dati
+                </button>
+                <button className="w-full p-3 text-left text-sm text-orange-600 hover:bg-orange-50 rounded-lg transition-colors">
+                  Cambia Password
+                </button>
+                <button className="w-full p-3 text-left text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                  Elimina Account
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Workspace Manager Modal */}
       <WorkspaceManager
         isOpen={showWorkspaceManager}
