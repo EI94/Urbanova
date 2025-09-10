@@ -100,33 +100,23 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <BuildingIcon className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-semibold text-gray-900">Urbanova Dashboard</h1>
-                  <p className="text-sm text-gray-500">Design Center & Project Management</p>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button className="p-2 text-gray-400 hover:text-gray-600">
-                <SettingsIcon className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-            </div>
-          </div>
 
       <div className="flex">
         {/* Sidebar */}
         <div className="w-64 bg-white shadow-sm border-r min-h-screen">
+          {/* Sidebar Header - Apple Style */}
+          <div className="px-6 py-6 border-b border-gray-100">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-sm">
+                <BuildingIcon className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg font-semibold text-gray-900 tracking-tight">Urbanova</h1>
+                <p className="text-xs text-gray-500 font-medium">Design Center</p>
+              </div>
+            </div>
+          </div>
+          
           <div className="p-4">
             <nav className="space-y-2">
             {/* Sezione principale */}
@@ -136,7 +126,11 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
                 </h3>
                 <Link
                   href="/dashboard"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                  className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                    isActive('/dashboard')
+                      ? 'bg-blue-50 text-blue-700 shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
                 >
                   <DashboardIcon className="w-4 h-4 mr-3" />
                   Dashboard
@@ -150,17 +144,21 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
                 </h3>
                 <Link
                   href="/dashboard/market-intelligence"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                  className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                    isActive('/dashboard/market-intelligence')
+                      ? 'bg-blue-50 text-blue-700 shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
                 >
                   <SearchIcon className="w-4 h-4 mr-3" />
                   Market Intelligence
                 </Link>
                 <Link
                   href="/dashboard/feasibility-analysis"
-                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
                     isActive('/dashboard/feasibility-analysis')
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'bg-blue-50 text-blue-700 shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
                   <CalculatorIcon className="w-4 h-4 mr-3" />
@@ -168,7 +166,11 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
                 </Link>
                 <Link
                   href="/dashboard/design-center"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                  className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                    isActive('/dashboard/design-center')
+                      ? 'bg-blue-50 text-blue-700 shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
                 >
                   <PaletteIcon className="w-4 h-4 mr-3" />
                   Design Center
@@ -182,26 +184,38 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
                 </h3>
                 <Link
                   href="/dashboard/business-plan"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                  className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                    isActive('/dashboard/business-plan')
+                      ? 'bg-blue-50 text-blue-700 shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
                 >
                   <BusinessPlanIcon className="w-4 h-4 mr-3" />
                   Business Plan
                 </Link>
                 <Link
                   href="/dashboard/permits-compliance"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                  className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                    isActive('/dashboard/permits-compliance')
+                      ? 'bg-blue-50 text-blue-700 shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
                 >
                   <PermitIcon className="w-4 h-4 mr-3" />
                   Permessi & Compliance
                 </Link>
                 <Link
                   href="/dashboard/project-timeline"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                  className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                    isActive('/dashboard/project-timeline')
+                      ? 'bg-blue-50 text-blue-700 shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
                 >
                   <CalendarIcon className="w-4 h-4 mr-3" />
                   Project Timeline AI
                 </Link>
-              </div>
+            </div>
 
               {/* Progetti */}
               <div className="space-y-1">
@@ -210,14 +224,22 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
                 </h3>
                 <Link
                   href="/dashboard/progetti"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                  className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                    isActive('/dashboard/progetti')
+                      ? 'bg-blue-50 text-blue-700 shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
                 >
                   <BuildingIcon className="w-4 h-4 mr-3" />
                   Progetti
                 </Link>
                 <Link
                   href="/dashboard/mappa-progetti"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                  className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                    isActive('/dashboard/mappa-progetti')
+                      ? 'bg-blue-50 text-blue-700 shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
                 >
                   <MapIcon className="w-4 h-4 mr-3" />
                   Mappa Progetti
@@ -231,21 +253,33 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
                 </h3>
                 <Link
                   href="/dashboard/project-management"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                  className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                    isActive('/dashboard/project-management')
+                      ? 'bg-blue-50 text-blue-700 shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
                 >
                   <ProjectIcon className="w-4 h-4 mr-3" />
                   Gestione Progetti
                 </Link>
                 <Link
                   href="/dashboard/project-management/documents"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                  className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                    isActive('/dashboard/project-management/documents')
+                      ? 'bg-blue-50 text-blue-700 shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
                 >
                   <DocumentIcon className="w-4 h-4 mr-3" />
                   Documenti
                 </Link>
                 <Link
                   href="/dashboard/project-management/meetings"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                  className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                    isActive('/dashboard/project-management/meetings')
+                      ? 'bg-blue-50 text-blue-700 shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
                 >
                   <MeetingIcon className="w-4 h-4 mr-3" />
                   Riunioni
@@ -259,7 +293,11 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
                 </h3>
                 <Link
                   href="/dashboard/marketing"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                  className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                    isActive('/dashboard/marketing')
+                      ? 'bg-blue-50 text-blue-700 shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
                 >
                   <MarketingIcon className="w-4 h-4 mr-3" />
                   Marketing
