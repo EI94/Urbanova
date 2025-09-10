@@ -40,9 +40,10 @@ jobs:
       - name: Install Firebase CLI
         run: pnpm add -g firebase-tools@13.15.0
         
-      - name: Authenticate Firebase
+      - name: Setup Firebase Service Account
         run: |
-          echo "${{ secrets.FIREBASE_TOKEN }}" | firebase login:ci --token
+          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}" > firebase-service-account.json
+          export GOOGLE_APPLICATION_CREDENTIALS=firebase-service-account.json
           
       - name: Set Firebase project
         run: firebase use staging
