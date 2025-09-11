@@ -568,26 +568,13 @@ export default function NewFeasibilityProjectPage() {
                     toast('⏳ Attendere il completamento del salvataggio...', { icon: '⏳' });
                     return;
                   }
-                  router.push('/dashboard/feasibility-analysis');
+                  router.back();
                 }}
                 disabled={loading || autoSaving}
                 className="btn btn-ghost btn-sm hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ArrowLeftIcon className="h-4 w-4 mr-2" />
                 Indietro
-              </button>
-              <button
-                onClick={() => {
-                  if (loading || autoSaving) {
-                    toast('⏳ Attendere il completamento del salvataggio...', { icon: '⏳' });
-                    return;
-                  }
-                  router.push('/dashboard/feasibility-analysis');
-                }}
-                disabled={loading || autoSaving}
-                className="btn btn-outline btn-sm hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                📋 Lista Progetti
               </button>
             </div>
             <div>

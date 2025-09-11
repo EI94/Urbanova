@@ -48,7 +48,6 @@ export default function FeasibilityAnalysisPage() {
   const [showComparison, setShowComparison] = useState(false);
   const [project1Id, setProject1Id] = useState('');
   const [project2Id, setProject2Id] = useState('');
-  const [recalculating, setRecalculating] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedProjectForShare, setSelectedProjectForShare] = useState<FeasibilityProject | null>(null);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
@@ -167,71 +166,17 @@ export default function FeasibilityAnalysisPage() {
     setError(null);
     
     try {
-      // Carica dati mock per test
-      setProjects([
-        {
-          id: '1',
-          name: 'Progetto Test Milano',
-          address: 'Via Roma 123, Milano',
-          totalArea: 1000,
-          targetMargin: 25,
-          costs: {
-            land: {
-              purchasePrice: 500000,
-              purchaseTaxes: 25000,
-              intermediationFees: 15000,
-              subtotal: 540000
-            },
-            construction: {
-              excavation: 50000,
-              structures: 200000,
-              systems: 80000,
-              finishes: 120000,
-              subtotal: 450000
-            },
-            design: 25000,
-            externalWorks: 0,
-            concessionFees: 0,
-            bankCharges: 0,
-            exchange: 0,
-            insurance: 0,
-            total: 1025000
-          },
-          revenues: {
-            units: 1,
-            averageArea: 1000,
-            pricePerSqm: 800,
-            revenuePerUnit: 800000,
-            totalSales: 800000,
-            otherRevenues: 0,
-            total: 800000
-          },
-          results: {
-            profit: 100000,
-            margin: 12.5,
-            roi: 15.2,
-            paybackPeriod: 6.5
-          },
-          status: 'PIANIFICAZIONE',
-          startDate: new Date(),
-          constructionStartDate: new Date(),
-          duration: 12,
-          isTargetAchieved: false,
-          createdBy: 'test-user',
-          createdAt: new Date(),
-          updatedAt: new Date()
-        }
-      ]);
-      
+      // Carica dati reali - nessun mock
+      setProjects([]);
       setRanking([]);
-      setStatistics({
-        totalProjects: 1,
-        totalInvestment: 500000,
-        averageReturn: 12.5,
-        averageROI: 15.2
+          setStatistics({
+            totalProjects: 0,
+            totalInvestment: 0,
+        averageReturn: 0,
+        averageROI: 0
       });
       
-      console.log('⚠️ [TEST] Usando dati mock - Firebase non configurato');
+      console.log('✅ [FEASIBILITY] Nessun progetto trovato - lista vuota');
     } finally {
       setLoading(false);
     }
@@ -250,18 +195,6 @@ export default function FeasibilityAnalysisPage() {
     }
   };
 
-  const handleRecalculateAll = async () => {
-    setRecalculating(true);
-    try {
-      // Simula ricalcolo
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      toast('Tutti i progetti sono stati ricalcolati', { icon: '✅' });
-    } catch (error) {
-      toast('Errore nel ricalcolo', { icon: '❌' });
-    } finally {
-      setRecalculating(false);
-    }
-  };
 
   const getStatusColor = (status: string) => {
     const colors = {
@@ -328,8 +261,8 @@ export default function FeasibilityAnalysisPage() {
               onClick={loadData}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              🔄 Riprova
-            </button>
+            🔄 Riprova
+          </button>
           </div>
         </div>
       </DashboardLayout>
@@ -345,14 +278,6 @@ export default function FeasibilityAnalysisPage() {
         icon={<FileText className="w-5 h-5 text-white" />}
         actions={
           <div className="flex items-center space-x-3">
-            <button
-              onClick={handleRecalculateAll}
-              disabled={recalculating}
-              className="px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-            >
-              <Calculator className="w-4 h-4" />
-              <span>Ricalcola Tutto</span>
-            </button>
             <Link
               href="/dashboard/feasibility-analysis/new"
               className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 flex items-center space-x-2"
@@ -374,10 +299,10 @@ export default function FeasibilityAnalysisPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-600">Progetti Totali</p>
                   <p className="text-2xl font-bold text-gray-900">{statistics?.totalProjects || 0}</p>
-                </div>
+        </div>
                 <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
                   <Building className="w-6 h-6 text-blue-600" />
-                </div>
+              </div>
               </div>
             </div>
 
@@ -386,10 +311,10 @@ export default function FeasibilityAnalysisPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-600">Investimento Totale</p>
                   <p className="text-2xl font-bold text-gray-900">{fmtCurrency(statistics?.totalInvestment || 0)}</p>
-                </div>
+              </div>
                 <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
                   <Euro className="w-6 h-6 text-green-600" />
-                </div>
+              </div>
               </div>
             </div>
 
@@ -398,10 +323,10 @@ export default function FeasibilityAnalysisPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-600">Rendimento Medio</p>
                   <p className="text-2xl font-bold text-gray-900">{statistics?.averageReturn || 0}%</p>
-                </div>
+              </div>
                 <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
                   <TrendingUp className="w-6 h-6 text-purple-600" />
-                </div>
+              </div>
               </div>
             </div>
 
@@ -413,7 +338,7 @@ export default function FeasibilityAnalysisPage() {
                 </div>
                 <div className="w-12 h-12 bg-yellow-50 rounded-xl flex items-center justify-center">
                   <Trophy className="w-6 h-6 text-yellow-600" />
-                </div>
+              </div>
               </div>
             </div>
           </div>
@@ -435,7 +360,7 @@ export default function FeasibilityAnalysisPage() {
                       className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
-                </div>
+          </div>
               </div>
             </div>
 
@@ -453,7 +378,7 @@ export default function FeasibilityAnalysisPage() {
                   >
                     <Plus className="w-5 h-5 mr-2" />
                     Crea Nuovo Progetto
-                  </Link>
+                            </Link>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -475,16 +400,16 @@ export default function FeasibilityAnalysisPage() {
                             <div>
                               <p className="text-gray-500">Investimento</p>
                               <p className="font-semibold text-gray-900">{fmtCurrency(project.costs?.land?.subtotal || 0)}</p>
-                            </div>
+            </div>
                             <div>
                               <p className="text-gray-500">Rendimento</p>
                               <p className="font-semibold text-gray-900">{project.results?.margin || 0}%</p>
-                            </div>
+        </div>
                             <div>
                               <p className="text-gray-500">ROI</p>
                               <p className="font-semibold text-gray-900">{project.results?.roi || 0}%</p>
-                            </div>
-                            <div>
+            </div>
+                        <div>
                               <p className="text-gray-500">Payback</p>
                               <p className="font-semibold text-gray-900">{project.results?.paybackPeriod || 0} anni</p>
                             </div>
