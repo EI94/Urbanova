@@ -91,7 +91,12 @@ export default function UserProfilePanelNew({ isOpen, onClose }: UserProfilePane
           updatedAt: new Date(),
         };
         
-        userProfile = await firebaseUserProfileService.createUserProfile(userId, defaultProfile);
+        userProfile = await firebaseUserProfileService.createUserProfile(userId, {
+          email: defaultProfile.email,
+          displayName: defaultProfile.displayName,
+          firstName: defaultProfile.firstName,
+          lastName: defaultProfile.lastName,
+        });
         console.log('✅ [UserProfilePanel] Nuovo profilo creato:', userProfile);
       }
 
