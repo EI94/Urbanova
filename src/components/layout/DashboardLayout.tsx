@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare, Bell, User, Users, Settings, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
@@ -11,10 +11,7 @@ import {
   CalculatorIcon,
   PaletteIcon,
   CalendarIcon,
-  BellIcon,
-  UserIcon,
   LogoutIcon,
-  SettingsIcon,
   BuildingIcon,
   NewProjectIcon,
   BusinessPlanIcon,
@@ -27,8 +24,6 @@ import {
   ClientIcon,
   ProjectIcon,
   MapIcon,
-  UsersIcon,
-  XIcon,
 } from '@/components/icons';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
 import LanguageSelector from '@/components/ui/LanguageSelector';
@@ -147,7 +142,6 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
               </div>
               <div>
                 <h1 className="text-lg font-semibold text-gray-900 tracking-tight">Urbanova</h1>
-                <p className="text-xs text-gray-500 font-medium">Design Center</p>
               </div>
             </div>
           </div>
@@ -358,7 +352,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
                   title="Notifiche"
               >
-                <BellIcon className="w-5 h-5" />
+                <Bell className="w-5 h-5" />
                   {notifications.unread > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                       {notifications.unread > 9 ? '9+' : notifications.unread}
@@ -372,7 +366,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
                   title="Profilo Utente"
                 >
-                  <UserIcon className="w-5 h-5" />
+                  <User className="w-5 h-5" />
                 </button>
                 
                 {/* Team */}
@@ -381,7 +375,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
                   title="Team"
                 >
-                  <UsersIcon className="w-5 h-5" />
+                  <Users className="w-5 h-5" />
                 </button>
 
                 {/* Settings */}
@@ -390,7 +384,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
                   title="Impostazioni"
                 >
-                  <SettingsIcon className="w-5 h-5" />
+                  <Settings className="w-5 h-5" />
                 </button>
               </div>
             </div>
@@ -443,7 +437,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                 onClick={() => setSettingsOpen(false)}
                 className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
               >
-                <XIcon className="w-5 h-5" />
+                <X className="w-5 h-5" />
               </button>
             </div>
             <div className="p-6">

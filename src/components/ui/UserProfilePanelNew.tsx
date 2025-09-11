@@ -62,15 +62,15 @@ export default function UserProfilePanelNew({ isOpen, onClose }: UserProfilePane
       let userProfile = await firebaseUserProfileService.getUserProfile(userId);
       console.log('📋 [UserProfilePanel] Profilo caricato:', userProfile);
 
-      if (!userProfile && currentUser) {
+      if (!userProfile) {
         console.log('🆕 [UserProfilePanel] Creazione nuovo profilo');
         const defaultProfile: UserProfile = {
           id: userId,
           userId: userId,
-          email: currentUser.email || '',
-          displayName: currentUser.displayName || 'Utente',
-          firstName: currentUser.firstName || '',
-          lastName: currentUser.lastName || '',
+          email: currentUser?.email || '',
+          displayName: currentUser?.displayName || 'Utente',
+          firstName: currentUser?.firstName || '',
+          lastName: currentUser?.lastName || '',
           timezone: 'Europe/Rome',
           language: 'it',
           dateFormat: 'DD/MM/YYYY',
@@ -91,13 +91,19 @@ export default function UserProfilePanelNew({ isOpen, onClose }: UserProfilePane
           updatedAt: new Date(),
         };
         
-        userProfile = await firebaseUserProfileService.createUserProfile(userId, {
-          email: defaultProfile.email,
-          displayName: defaultProfile.displayName,
-          firstName: defaultProfile.firstName,
-          lastName: defaultProfile.lastName,
-        });
-        console.log('✅ [UserProfilePanel] Nuovo profilo creato:', userProfile);
+        try {
+          userProfile = await firebaseUserProfileService.createUserProfile(userId, {
+            email: defaultProfile.email,
+            displayName: defaultProfile.displayName,
+            firstName: defaultProfile.firstName,
+            lastName: defaultProfile.lastName,
+          });
+          console.log('✅ [UserProfilePanel] Nuovo profilo creato:', userProfile);
+        } catch (createError) {
+          console.error('❌ [UserProfilePanel] Errore creazione profilo:', createError);
+          // Usa il profilo di default anche se la creazione fallisce
+          userProfile = defaultProfile;
+        }
       }
 
       if (userProfile) {
