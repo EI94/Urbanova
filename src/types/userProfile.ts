@@ -1,13 +1,22 @@
 export interface UserProfile {
   id: string;
+  userId: string;
   firstName: string;
   lastName: string;
   displayName: string;
   email: string;
   phone?: string;
   company?: string;
+  position?: string;
   role?: string;
+  bio?: string;
+  website?: string;
+  linkedin?: string;
+  github?: string;
+  location?: string;
   avatar?: string;
+  skills?: string[];
+  interests?: string[];
   timezone: string;
   language: string;
   dateFormat: string;
@@ -23,6 +32,7 @@ export interface UserProfile {
     lastPasswordChange: Date;
     loginHistory: LoginAttempt[];
   };
+  metadata: Record<string, any>;
   createdAt: Date;
   updatedAt: Date;
 }

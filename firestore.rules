@@ -69,6 +69,43 @@ service cloud.firestore {
     }
     
     // ============================================================================
+    // USER PROFILES COLLECTION (NUOVO)
+    // ============================================================================
+    
+    match /userProfiles/{userId} {
+      // Solo l'owner può leggere e scrivere il proprio profilo
+      allow read, write: if isOwner(userId);
+      
+      // Eccezione: admin possono leggere tutti i profili per supporto
+      allow read: if isAuthenticated() && 
+                   exists(/databases/$(database)/documents/userProfiles/$(request.auth.uid)) &&
+                   get(/databases/$(database)/documents/userProfiles/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // ============================================================================
+    // NOTIFICATIONS COLLECTION
+    // ============================================================================
+    
+    match /notifications/{notificationId} {
+      // Solo l'owner può leggere le proprie notifiche
+      allow read: if isAuthenticated() && 
+                   resource.data.userId == request.auth.uid;
+      
+      // Solo l'owner può creare/aggiornare le proprie notifiche
+      allow create, update: if isAuthenticated() && 
+                             request.resource.data.userId == request.auth.uid;
+      
+      // Solo l'owner può eliminare le proprie notifiche
+      allow delete: if isAuthenticated() && 
+                     resource.data.userId == request.auth.uid;
+      
+      // Eccezione: admin possono leggere tutte le notifiche
+      allow read: if isAuthenticated() && 
+                   exists(/databases/$(database)/documents/userProfiles/$(request.auth.uid)) &&
+                   get(/databases/$(database)/documents/userProfiles/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // ============================================================================
     // PROJECTS COLLECTION
     // ============================================================================
     

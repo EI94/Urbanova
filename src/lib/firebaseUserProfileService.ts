@@ -12,55 +12,9 @@ import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage
 import { safeCollection } from './firebaseUtils';
 import { db, storage } from './firebase';
 
-// Tipi per il profilo utente
-export interface UserProfile {
-  id: string;
-  userId: string;
-  firstName: string;
-  lastName: string;
-  displayName: string;
-  email: string;
-  phone?: string;
-  company?: string;
-  position?: string;
-  bio?: string;
-  website?: string;
-  linkedin?: string;
-  github?: string;
-  location?: string;
-  avatar?: string;
-  skills?: string[];
-  interests?: string[];
-  timezone: string;
-  language: string;
-  role?: string;
-  dateFormat: string;
-  currency: string;
-  preferences: {
-    theme: 'light' | 'dark' | 'auto';
-    sidebarCollapsed: boolean;
-    emailNotifications: boolean;
-    pushNotifications: boolean;
-  };
-  security: {
-    twoFactorEnabled: boolean;
-    lastPasswordChange: Date;
-    loginHistory: LoginAttempt[];
-  };
-  metadata: Record<string, any>;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// Importa i tipi dalla definizione centrale
+import { UserProfile, LoginAttempt } from '@/types/userProfile';
 
-export interface LoginAttempt {
-  id: string;
-  timestamp: Date;
-  ipAddress: string;
-  userAgent: string;
-  success: boolean;
-  location?: string;
-  metadata?: Record<string, any>;
-}
 
 export interface AvatarUpload {
   file: {
