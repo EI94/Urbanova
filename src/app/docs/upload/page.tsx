@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { jwtService } from '@urbanova/agents/src/docHunter/jwt';
 
 interface UploadPageProps {}
 
-export default function UploadPage({}: UploadPageProps) {
+function UploadPageContent() {
   const searchParams = useSearchParams();
   const [token, setToken] = useState<string>('');
   const [tokenValid, setTokenValid] = useState<boolean | null>(null);
@@ -281,5 +281,20 @@ export default function UploadPage({}: UploadPageProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function UploadPage({}: UploadPageProps) {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Caricamento pagina upload...</p>
+        </div>
+      </div>
+    }>
+      <UploadPageContent />
+    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 
 import { CheckIcon, GlobeIcon, SettingsIcon, RefreshIcon } from '@/components/icons';
 import CompleteLanguageTest from '@/components/ui/CompleteLanguageTest';
@@ -12,7 +12,7 @@ import SmoothnessTest from '@/components/ui/SmoothnessTest';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getSupportedLanguages } from '@/lib/languageConfig';
 
-export default function TestLanguagePage() {
+function TestLanguagePageContent() {
   const {
     currentLanguage,
     languageConfig,
@@ -455,5 +455,24 @@ export default function TestLanguagePage() {
         />
       </div>
     </div>
+  );
+}
+
+export default function TestLanguagePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="flex items-center justify-center h-64">
+              <div className="loading loading-spinner loading-lg"></div>
+              <span className="ml-3">Caricamento test lingua...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    }>
+      <TestLanguagePageContent />
+    </Suspense>
   );
 }

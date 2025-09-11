@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 
 import {
   ArrowLeftIcon,
@@ -20,7 +20,7 @@ import {
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { designCenterService, DesignTemplate } from '@/lib/designCenterService';
 
-export default function TemplateCustomizerPage() {
+function TemplateCustomizerPageContent() {
   const searchParams = useSearchParams();
   const templateId = searchParams.get('templateId');
 
@@ -472,5 +472,20 @@ export default function TemplateCustomizerPage() {
         </div>
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function TemplateCustomizerPage() {
+  return (
+    <Suspense fallback={
+      <DashboardLayout title="Personalizzazione Template">
+        <div className="flex items-center justify-center h-64">
+          <div className="loading loading-spinner loading-lg"></div>
+          <span className="ml-3">Caricamento...</span>
+        </div>
+      </DashboardLayout>
+    }>
+      <TemplateCustomizerPageContent />
+    </Suspense>
   );
 }

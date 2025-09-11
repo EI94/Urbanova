@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { salService } from '@/lib/salService';
 import { SAL, SALSignRequest } from '@urbanova/types';
 
-export default function SALSignPage() {
+function SALSignPageContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
 
@@ -314,5 +314,20 @@ export default function SALSignPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SALSignPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Caricamento pagina firma SAL...</p>
+        </div>
+      </div>
+    }>
+      <SALSignPageContent />
+    </Suspense>
   );
 }
