@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import {
   Building,
   Plus,
@@ -28,8 +27,10 @@ import {
   Bot,
   Sparkles,
   Settings,
+  CheckCircle,
 } from 'lucide-react';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 
 // ============================================================================
 // TYPES
@@ -123,36 +124,36 @@ export default function DesignCenterPage() {
       const mockProjects: Project[] = [
         {
           id: '1',
-          name: 'Progetto Villa Roma',
+          name: 'Villa Moderna Roma',
           template: 'Villa Moderna',
           status: 'in_progress',
-          progress: 65,
+          progress: 75,
           lastModified: '2024-01-20',
           thumbnail: '/projects/villa-roma.jpg',
-          location: 'Roma, RM',
-          budget: 850000,
+          location: 'Roma, Italia',
+          budget: 450000,
         },
         {
           id: '2',
-          name: 'Residenze Milano',
+          name: 'Condominio Eco Milano',
           template: 'Condominio Sostenibile',
-          status: 'draft',
-          progress: 25,
+          status: 'completed',
+          progress: 100,
           lastModified: '2024-01-18',
-          thumbnail: '/projects/residenze-milano.jpg',
-          location: 'Milano, MI',
-          budget: 2500000,
+          thumbnail: '/projects/condominio-milano.jpg',
+          location: 'Milano, Italia',
+          budget: 1200000,
         },
         {
           id: '3',
-          name: 'Shopping Center Napoli',
+          name: 'Centro Commerciale Napoli',
           template: 'Centro Commerciale',
-          status: 'completed',
-          progress: 100,
+          status: 'draft',
+          progress: 25,
           lastModified: '2024-01-15',
-          thumbnail: '/projects/shopping-napoli.jpg',
-          location: 'Napoli, NA',
-          budget: 5200000,
+          thumbnail: '/projects/centro-napoli.jpg',
+          location: 'Napoli, Italia',
+          budget: 2500000,
         },
       ];
 
@@ -165,36 +166,9 @@ export default function DesignCenterPage() {
     }
   };
 
-  const categories = [
-    { id: 'all', name: 'Tutti' },
-    { id: 'residential', name: 'Residenziale' },
-    { id: 'commercial', name: 'Commerciale' },
-    { id: 'industrial', name: 'Industriale' },
-    { id: 'public', name: 'Pubblico' },
-  ];
-
-  const getStatusColor = (status: string) => {
-    const colors = {
-      draft: 'text-gray-600 bg-gray-100',
-      in_progress: 'text-blue-600 bg-blue-100',
-      completed: 'text-green-600 bg-green-100',
-      archived: 'text-yellow-600 bg-yellow-100',
-    };
-    return colors[status as keyof typeof colors] || 'text-gray-600 bg-gray-100';
-  };
-
-  const getStatusLabel = (status: string) => {
-    const labels = {
-      draft: 'Bozza',
-      in_progress: 'In Corso',
-      completed: 'Completato',
-      archived: 'Archiviato',
-    };
-    return labels[status as keyof typeof labels] || status;
-  };
-
   const filteredTemplates = templates.filter(template => {
-    const matchesSearch = template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = searchTerm === '' || 
+                         template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          template.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          template.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
@@ -208,193 +182,23 @@ export default function DesignCenterPage() {
 
   if (loading) {
     return (
+      <DashboardLayout title="Design Center">
         <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
+      </DashboardLayout>
     );
   }
 
-    return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <Building className="w-5 h-5 text-white" />
-        </div>
-                <div>
-                  <h1 className="text-xl font-semibold text-gray-900">Urbanova Dashboard</h1>
-                  <p className="text-sm text-gray-500">Design Center & Project Management</p>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button className="p-2 text-gray-400 hover:text-gray-600">
-                <Settings className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex">
-        {/* Sidebar */}
-        <div className="w-64 bg-white shadow-sm border-r min-h-screen">
-          <div className="p-4">
-            <nav className="space-y-2">
-              {/* Sezione principale */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  DASHBOARD
-                </h3>
-                <Link
-                  href="/dashboard"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <BarChart3 className="w-4 h-4 mr-3" />
-                  Dashboard
-                </Link>
-        </div>
-
-              {/* Discovery */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  DISCOVERY
-                </h3>
-                <Link
-                  href="/dashboard/market-intelligence"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Search className="w-4 h-4 mr-3" />
-                  Market Intelligence
-                </Link>
-                <Link
-                  href="/dashboard/feasibility-analysis"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <FileText className="w-4 h-4 mr-3" />
-                  Analisi Fattibilità
-                </Link>
-                <Link
-                  href="/dashboard/design-center"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors bg-blue-100 text-blue-700"
-                >
-                  <Target className="w-4 h-4 mr-3" />
-                  Design Center
-                </Link>
-              </div>
-
-              {/* Planning & Compliance */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  PLANNING/COMPLIANCE
-                </h3>
-                <Link
-                  href="/dashboard/business-plan"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <FileText className="w-4 h-4 mr-3" />
-                  Business Plan
-                </Link>
-                <Link
-                  href="/dashboard/permits-compliance"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Shield className="w-4 h-4 mr-3" />
-                  Permessi & Compliance
-                </Link>
-                <Link
-                  href="/dashboard/project-timeline"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Calendar className="w-4 h-4 mr-3" />
-                  Project Timeline AI
-                </Link>
-              </div>
-
-              {/* Progetti */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  PROGETTI
-                </h3>
-                <Link
-                  href="/dashboard/progetti"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Building className="w-4 h-4 mr-3" />
-                  Progetti
-                </Link>
-                <Link
-                  href="/dashboard/progetti/nuovo"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Plus className="w-4 h-4 mr-3" />
-                  Nuovo Progetto
-                </Link>
-                <Link
-                  href="/dashboard/mappa-progetti"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Target className="w-4 h-4 mr-3" />
-                  Mappa Progetti
-                </Link>
-              </div>
-
-              {/* Gestione Progetti */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  GESTIONE PROGETTI
-                </h3>
-                <Link
-                  href="/dashboard/project-management"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <FileText className="w-4 h-4 mr-3" />
-                  Gestione Progetti
-                </Link>
-                <Link
-                  href="/dashboard/project-management/documents"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <FileText className="w-4 h-4 mr-3" />
-                  Documenti
-                </Link>
-                <Link
-                  href="/dashboard/project-management/meetings"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Calendar className="w-4 h-4 mr-3" />
-                  Riunioni
-                </Link>
-              </div>
-
-              {/* Marketing/Sales */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  MARKETING/SALES
-                </h3>
-                <Link
-                  href="/dashboard/marketing"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <BarChart3 className="w-4 h-4 mr-3" />
-                  Marketing
-                </Link>
-              </div>
-            </nav>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 p-6">
-          {/* Tabs */}
-          <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
+  return (
+    <DashboardLayout title="Design Center">
+      <div className="max-w-7xl mx-auto">
+        {/* Tabs */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => setActiveTab('templates')}
-              className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeTab === 'templates'
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
@@ -404,7 +208,7 @@ export default function DesignCenterPage() {
             </button>
             <button
               onClick={() => setActiveTab('projects')}
-              className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeTab === 'projects'
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
@@ -414,7 +218,7 @@ export default function DesignCenterPage() {
             </button>
             <button
               onClick={() => setActiveTab('analytics')}
-              className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeTab === 'analytics'
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
@@ -424,214 +228,331 @@ export default function DesignCenterPage() {
             </button>
           </div>
 
-          {/* Search and Filters */}
-          <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                  placeholder="Cerca template o progetti..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded-md transition-colors ${
+                viewMode === 'grid' ? 'bg-gray-200 text-gray-900' : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              <Grid className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-md transition-colors ${
+                viewMode === 'list' ? 'bg-gray-200 text-gray-900' : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
-              {activeTab === 'templates' && (
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  {categories.map(category => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              )}
+        {/* Search and Filter */}
+        <div className="flex items-center space-x-4 mb-6">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Cerca template o progetti..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="all">Tutti</option>
+            <option value="residential">Residenziale</option>
+            <option value="commercial">Commerciale</option>
+            <option value="industrial">Industriale</option>
+            <option value="public">Pubblico</option>
+          </select>
+        </div>
+
+        {/* Content */}
+        {activeTab === 'templates' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">Template Disponibili</h2>
+              <span className="text-sm text-gray-500">{filteredTemplates.length} template</span>
             </div>
 
-              <div className="flex items-center space-x-2">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                <Grid className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                <List className="w-4 h-4" />
-              </button>
-              </div>
-            </div>
-
-          {/* Content based on active tab */}
-          {activeTab === 'templates' && (
-            <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
-              {filteredTemplates.map(template => (
-                <div key={template.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                  <div className="aspect-video bg-gray-100 relative">
-                    <div className="absolute inset-0 flex items-center justify-center">
+            {viewMode === 'grid' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredTemplates.map((template) => (
+                  <div key={template.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                    <div className="aspect-w-16 aspect-h-9 bg-gray-200 flex items-center justify-center">
                       <Building className="w-12 h-12 text-gray-400" />
-          </div>
-                    {template.isPremium && (
-                      <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 text-xs rounded-full">
-                        Premium
-          </div>
-        )}
-            </div>
-
-                  <div className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-semibold text-gray-900">{template.name}</h3>
-                      <div className="flex items-center space-x-1 text-sm text-gray-600">
-                        <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                        <span>{template.rating}</span>
+                    </div>
+                    <div className="p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-semibold text-gray-900">{template.name}</h3>
+                        {template.isPremium && (
+                          <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                            Premium
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">{template.description}</p>
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {template.tags.map((tag) => (
+                          <span key={tag} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center space-x-1">
+                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                          <span className="text-sm text-gray-600">{template.rating}</span>
+                        </div>
+                        <span className="text-sm text-gray-500">{template.downloads} download</span>
+                      </div>
+                      <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                        Usa Template
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-
-                    <p className="text-sm text-gray-600 mb-3">{template.description}</p>
-                    
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {template.tags.map(tag => (
-                        <span key={tag} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                          {tag}
-                        </span>
-                      ))}
-              </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4 text-sm text-gray-600">
-                        <span>{template.downloads} download</span>
-              </div>
-
+            ) : (
+              <div className="space-y-4">
+                {filteredTemplates.map((template) => (
+                  <div key={template.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Building className="w-8 h-8 text-gray-400" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-semibold text-gray-900">{template.name}</h3>
+                          {template.isPremium && (
+                            <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                              Premium
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">{template.description}</p>
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {template.tags.map((tag) => (
+                            <span key={tag} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <div className="flex items-center space-x-1">
+                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                            <span className="text-sm text-gray-600">{template.rating}</span>
+                          </div>
+                          <span className="text-sm text-gray-500">{template.downloads} download</span>
+                          <span className="text-sm text-gray-500">{template.createdAt}</span>
+                        </div>
+                      </div>
                       <div className="flex items-center space-x-2">
-                        <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <button className="p-2 text-gray-400 hover:text-gray-600">
                           <Eye className="w-4 h-4" />
                         </button>
-                        <button className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
+                        <button className="p-2 text-gray-400 hover:text-gray-600">
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
                           Usa Template
-                    </button>
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                    </div>
-                    </div>
-                    </div>
-              ))}
-                    </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
-          {activeTab === 'projects' && (
-            <div className="space-y-4">
-              {filteredProjects.map(project => (
-                <div key={project.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                        <Building className="w-6 h-6 text-gray-600" />
+        {activeTab === 'projects' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">I Miei Progetti</h2>
+              <button className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
+                <Plus className="w-4 h-4" />
+                <span>Nuovo Progetto</span>
+              </button>
+            </div>
+
+            {viewMode === 'grid' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredProjects.map((project) => (
+                  <div key={project.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                    <div className="aspect-w-16 aspect-h-9 bg-gray-200 flex items-center justify-center">
+                      <Building className="w-12 h-12 text-gray-400" />
                     </div>
-                      <div>
+                    <div className="p-4">
+                      <div className="flex items-start justify-between mb-2">
                         <h3 className="font-semibold text-gray-900">{project.name}</h3>
-                        <p className="text-sm text-gray-600">Basato su: {project.template}</p>
-                    </div>
-                  </div>
-
-                    <div className="flex items-center space-x-2">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(project.status)}`}>
-                        {getStatusLabel(project.status)}
-                      </span>
-                      <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                        <Edit className="w-4 h-4" />
-                    </button>
-                      <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                        <Share className="w-4 h-4" />
-                    </button>
-                      <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                        <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-                    </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                          <div className="flex items-center space-x-2">
-                      <MapPin className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">{project.location}</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                      <Clock className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">
-                        {new Date(project.lastModified).toLocaleDateString('it-IT')}
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">
-                        Budget: €{project.budget?.toLocaleString()}
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">
-                        Progresso: {project.progress}%
-                            </span>
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          project.status === 'completed' ? 'bg-green-100 text-green-800' :
+                          project.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                          project.status === 'draft' ? 'bg-gray-100 text-gray-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {project.status === 'completed' ? 'Completato' :
+                           project.status === 'in_progress' ? 'In Corso' :
+                           project.status === 'draft' ? 'Bozza' : 'Archiviato'}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">Template: {project.template}</p>
+                      <div className="mb-3">
+                        <div className="flex items-center justify-between text-sm text-gray-600 mb-1">
+                          <span>Progresso</span>
+                          <span>{project.progress}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${project.progress}%` }}
+                          ></div>
                         </div>
                       </div>
-
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${project.progress}%` }}
-                    ></div>
-                            </div>
-                          </div>
-              ))}
-                            </div>
-          )}
-
-          {activeTab === 'analytics' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900">Progetti Totali</h3>
-                  <Building className="w-5 h-5 text-blue-600" />
+                      <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
+                        <span>Ultima modifica: {project.lastModified}</span>
                       </div>
-                <div className="text-2xl font-bold text-gray-900 mb-2">{projects.length}</div>
-                <p className="text-sm text-gray-600">+2 questo mese</p>
+                      <div className="flex items-center space-x-2">
+                        <button className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors">
+                          Modifica
+                        </button>
+                        <button className="p-2 text-gray-400 hover:text-gray-600">
+                          <Share className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900">Progetti Attivi</h3>
-                  <Clock className="w-5 h-5 text-green-600" />
-                                </div>
-                <div className="text-2xl font-bold text-gray-900 mb-2">
-                  {projects.filter(p => p.status === 'in_progress').length}
-                              </div>
-                <p className="text-sm text-gray-600">In corso di sviluppo</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredProjects.map((project) => (
+                  <div key={project.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Building className="w-8 h-8 text-gray-400" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-semibold text-gray-900">{project.name}</h3>
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                            project.status === 'completed' ? 'bg-green-100 text-green-800' :
+                            project.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                            project.status === 'draft' ? 'bg-gray-100 text-gray-800' :
+                            'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {project.status === 'completed' ? 'Completato' :
+                             project.status === 'in_progress' ? 'In Corso' :
+                             project.status === 'draft' ? 'Bozza' : 'Archiviato'}
+                          </span>
                         </div>
-              
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900">Progetti Completati</h3>
-                  <CheckCircle className="w-5 h-5 text-green-600" />
+                        <p className="text-sm text-gray-600 mb-2">Template: {project.template}</p>
+                        <div className="mb-2">
+                          <div className="flex items-center justify-between text-sm text-gray-600 mb-1">
+                            <span>Progresso</span>
+                            <span>{project.progress}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                              style={{ width: `${project.progress}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                          <span>Ultima modifica: {project.lastModified}</span>
+                          {project.location && <span>📍 {project.location}</span>}
+                          {project.budget && <span>💰 €{project.budget.toLocaleString()}</span>}
+                        </div>
                       </div>
-                <div className="text-2xl font-bold text-gray-900 mb-2">
-                  {projects.filter(p => p.status === 'completed').length}
+                      <div className="flex items-center space-x-2">
+                        <button className="p-2 text-gray-400 hover:text-gray-600">
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button className="p-2 text-gray-400 hover:text-gray-600">
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button className="p-2 text-gray-400 hover:text-gray-600">
+                          <Share className="w-4 h-4" />
+                        </button>
+                        <button className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                          Modifica
+                        </button>
+                      </div>
                     </div>
-                <p className="text-sm text-gray-600">Terminati con successo</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'analytics' && (
+          <div className="space-y-6">
+            <h2 className="text-lg font-semibold text-gray-900">Analytics</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Template Utilizzati</p>
+                    <p className="text-2xl font-semibold text-gray-900">{projects.length}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <Building className="w-6 h-6 text-blue-600" />
                   </div>
                 </div>
-          )}
+              </div>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Progetti Completati</p>
+                    <p className="text-2xl font-semibold text-gray-900">
+                      {projects.filter(p => p.status === 'completed').length}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <CheckCircle className="w-6 h-6 text-green-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Progetti in Corso</p>
+                    <p className="text-2xl font-semibold text-gray-900">
+                      {projects.filter(p => p.status === 'in_progress').length}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                    <Clock className="w-6 h-6 text-yellow-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Tempo Medio</p>
+                    <p className="text-2xl font-semibold text-gray-900">15 giorni</p>
+                  </div>
+                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <TrendingUp className="w-6 h-6 text-purple-600" />
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
+        )}
+      </div>
       
       {/* Feedback Widget */}
       <FeedbackWidget />
-          </div>
+    </DashboardLayout>
   );
 }

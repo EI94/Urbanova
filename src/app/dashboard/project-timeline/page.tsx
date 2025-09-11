@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import {
   Calendar,
   Plus,
@@ -27,6 +26,7 @@ import {
   Settings,
 } from 'lucide-react';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 
 // ============================================================================
 // TYPES
@@ -83,7 +83,7 @@ export default function ProjectTimelinePage() {
           status: 'in_progress',
           startDate: '2024-01-15',
           endDate: '2024-06-15',
-        progress: 65,
+          progress: 65,
         },
         {
           id: '2',
@@ -98,7 +98,7 @@ export default function ProjectTimelinePage() {
           name: 'Centro Commerciale Napoli',
           status: 'completed',
           startDate: '2023-06-01',
-          endDate: '2024-01-15',
+          endDate: '2023-12-15',
           progress: 100,
         },
       ];
@@ -147,308 +147,76 @@ export default function ProjectTimelinePage() {
           dependencies: [],
           progress: 0,
         },
-        {
-          id: '4',
-          title: 'Consegna Documentazione Tecnica',
-          description: 'Consegna della documentazione tecnica completa',
-          type: 'delivery',
-          status: 'overdue',
-          priority: 'high',
-          startDate: '2024-01-30',
-          endDate: '2024-01-30',
-          assignedTo: ['Anna Neri'],
-          projectId: '2',
-          dependencies: [],
-          progress: 0,
-        },
-        {
-          id: '5',
-          title: 'Collaudo Impianti Elettrici',
-          description: 'Collaudo e test degli impianti elettrici',
-          type: 'task',
-          status: 'pending',
-          priority: 'high',
-          startDate: '2024-02-20',
-          endDate: '2024-02-25',
-          assignedTo: ['Marco Blu', 'Sara Rossi'],
-          projectId: '1',
-          dependencies: ['2'],
-          progress: 0,
-        },
       ];
 
       setProjects(mockProjects);
       setTimelineEvents(mockEvents);
     } catch (error) {
-      console.error('Error loading timeline data:', error);
+      console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    const colors = {
-      pending: 'text-yellow-600 bg-yellow-100',
-      in_progress: 'text-blue-600 bg-blue-100',
-      completed: 'text-green-600 bg-green-100',
-      overdue: 'text-red-600 bg-red-100',
-    };
-    return colors[status as keyof typeof colors] || 'text-gray-600 bg-gray-100';
-  };
-
-  const getStatusLabel = (status: string) => {
-    const labels = {
-      pending: 'In Attesa',
-      in_progress: 'In Corso',
-      completed: 'Completato',
-      overdue: 'In Ritardo',
-    };
-    return labels[status as keyof typeof labels] || status;
-  };
-
-  const getTypeColor = (type: string) => {
-    const colors = {
-      milestone: 'text-purple-600 bg-purple-100',
-      task: 'text-blue-600 bg-blue-100',
-      meeting: 'text-green-600 bg-green-100',
-      deadline: 'text-red-600 bg-red-100',
-      delivery: 'text-orange-600 bg-orange-100',
-    };
-    return colors[type as keyof typeof colors] || 'text-gray-600 bg-gray-100';
-  };
-
-  const getTypeLabel = (type: string) => {
-    const labels = {
-      milestone: 'Milestone',
-      task: 'Task',
-      meeting: 'Riunione',
-      deadline: 'Scadenza',
-      delivery: 'Consegna',
-    };
-    return labels[type as keyof typeof labels] || type;
-  };
-
-  const getPriorityColor = (priority: string) => {
-    const colors = {
-      low: 'text-gray-600 bg-gray-100',
-      medium: 'text-blue-600 bg-blue-100',
-      high: 'text-orange-600 bg-orange-100',
-      critical: 'text-red-600 bg-red-100',
-    };
-    return colors[priority as keyof typeof colors] || 'text-gray-600 bg-gray-100';
-  };
-
-  const getPriorityLabel = (priority: string) => {
-    const labels = {
-      low: 'Bassa',
-      medium: 'Media',
-      high: 'Alta',
-      critical: 'Critica',
-    };
-    return labels[priority as keyof typeof labels] || priority;
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('it-IT');
-  };
-
   const filteredEvents = timelineEvents.filter(event => {
-    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = searchTerm === '' || 
+                         event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          event.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = selectedStatus === 'all' || event.status === selectedStatus;
     const matchesProject = selectedProject === 'all' || event.projectId === selectedProject;
     return matchesSearch && matchesStatus && matchesProject;
   });
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed': return 'bg-green-100 text-green-800';
+      case 'in_progress': return 'bg-blue-100 text-blue-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'overdue': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'critical': return 'bg-red-100 text-red-800';
+      case 'high': return 'bg-orange-100 text-orange-800';
+      case 'medium': return 'bg-blue-100 text-blue-800';
+      case 'low': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'milestone': return 'bg-purple-100 text-purple-800';
+      case 'task': return 'bg-blue-100 text-blue-800';
+      case 'meeting': return 'bg-green-100 text-green-800';
+      case 'deadline': return 'bg-red-100 text-red-800';
+      case 'delivery': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <DashboardLayout title="Project Timeline AI">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-white" />
-                </div>
-          <div>
-                  <h1 className="text-xl font-semibold text-gray-900">Urbanova Dashboard</h1>
-                  <p className="text-sm text-gray-500">Design Center & Project Management</p>
-              </div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button className="p-2 text-gray-400 hover:text-gray-600">
-                <Settings className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-          </div>
-        </div>
-
-      <div className="flex">
-        {/* Sidebar */}
-        <div className="w-64 bg-white shadow-sm border-r min-h-screen">
-          <div className="p-4">
-            <nav className="space-y-2">
-              {/* Sezione principale */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  DASHBOARD
-                </h3>
-                <Link
-                  href="/dashboard"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <BarChart3 className="w-4 h-4 mr-3" />
-                  Dashboard
-                </Link>
-              </div>
-
-              {/* Discovery */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  DISCOVERY
-                </h3>
-                <Link
-                  href="/dashboard/market-intelligence"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Search className="w-4 h-4 mr-3" />
-                  Market Intelligence
-                </Link>
-                <Link
-                  href="/dashboard/feasibility-analysis"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <FileText className="w-4 h-4 mr-3" />
-                  Analisi Fattibilità
-                </Link>
-                <Link
-                  href="/dashboard/design-center"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Target className="w-4 h-4 mr-3" />
-                  Design Center
-                </Link>
-              </div>
-
-              {/* Planning & Compliance */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  PLANNING/COMPLIANCE
-                </h3>
-                <Link
-                  href="/dashboard/business-plan"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <FileText className="w-4 h-4 mr-3" />
-                  Business Plan
-                </Link>
-                <Link
-                  href="/dashboard/permits-compliance"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Shield className="w-4 h-4 mr-3" />
-                  Permessi & Compliance
-                </Link>
-                <Link
-                  href="/dashboard/project-timeline"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors bg-blue-100 text-blue-700"
-                >
-                  <Calendar className="w-4 h-4 mr-3" />
-                  Project Timeline AI
-                </Link>
-              </div>
-
-              {/* Progetti */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  PROGETTI
-                </h3>
-                <Link
-                  href="/dashboard/progetti"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Building className="w-4 h-4 mr-3" />
-                  Progetti
-                </Link>
-                <Link
-                  href="/dashboard/progetti/nuovo"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Plus className="w-4 h-4 mr-3" />
-                  Nuovo Progetto
-                </Link>
-                <Link
-                  href="/dashboard/mappa-progetti"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Target className="w-4 h-4 mr-3" />
-                  Mappa Progetti
-                </Link>
-              </div>
-
-              {/* Gestione Progetti */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  GESTIONE PROGETTI
-                </h3>
-                <Link
-                  href="/dashboard/project-management"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <FileText className="w-4 h-4 mr-3" />
-                  Gestione Progetti
-                </Link>
-                <Link
-                  href="/dashboard/project-management/documents"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <FileText className="w-4 h-4 mr-3" />
-                  Documenti
-                </Link>
-                <Link
-                  href="/dashboard/project-management/meetings"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Calendar className="w-4 h-4 mr-3" />
-                  Riunioni
-                </Link>
-          </div>
-
-              {/* Marketing/Sales */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  MARKETING/SALES
-                </h3>
-                <Link
-                  href="/dashboard/marketing"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <BarChart3 className="w-4 h-4 mr-3" />
-                  Marketing
-                </Link>
-              </div>
-            </nav>
-          </div>
-          </div>
-
-        {/* Main Content */}
-        <div className="flex-1 p-6">
-          {/* Tabs */}
-          <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
+    <DashboardLayout title="Project Timeline AI">
+      <div className="max-w-7xl mx-auto">
+        {/* Tabs */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => setActiveTab('timeline')}
-              className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeTab === 'timeline'
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
@@ -458,7 +226,7 @@ export default function ProjectTimelinePage() {
             </button>
             <button
               onClick={() => setActiveTab('calendar')}
-              className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeTab === 'calendar'
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
@@ -466,247 +234,230 @@ export default function ProjectTimelinePage() {
             >
               Calendario
             </button>
-                  <button
+            <button
               onClick={() => setActiveTab('analytics')}
-              className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeTab === 'analytics'
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               Analytics
-                  </button>
+            </button>
           </div>
 
-          {/* Search and Filters */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Cerca eventi..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">Tutti gli Stati</option>
-                <option value="pending">In Attesa</option>
-                <option value="in_progress">In Corso</option>
-                <option value="completed">Completato</option>
-                <option value="overdue">In Ritardo</option>
-              </select>
-              
-              <select
-                value={selectedProject}
-                onChange={(e) => setSelectedProject(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">Tutti i Progetti</option>
-                {projects.map(project => (
-                  <option key={project.id} value={project.id}>
-                    {project.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Content based on active tab */}
-          {activeTab === 'timeline' && (
-            <div className="space-y-4">
-              {filteredEvents.map(event => (
-                <div key={event.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                        <Calendar className="w-6 h-6 text-gray-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900">{event.title}</h3>
-                        <p className="text-sm text-gray-600">{event.description}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(event.status)}`}>
-                        {getStatusLabel(event.status)}
-                      </span>
-                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getTypeColor(event.type)}`}>
-                        {getTypeLabel(event.type)}
-                      </span>
-                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(event.priority)}`}>
-                        {getPriorityLabel(event.priority)}
-                      </span>
-          </div>
+          <button className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
+            <Plus className="w-4 h-4" />
+            <span>Nuovo Evento</span>
+          </button>
         </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">
-                        Inizio: {formatDate(event.startDate)}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Clock className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">
-                        Fine: {formatDate(event.endDate)}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">
-                        Progresso: {event.progress}%
-                    </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">
-                        Assegnato a: {event.assignedTo.join(', ')}
-                          </span>
-                        </div>
-                        </div>
-
-                  <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-                            <div
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${event.progress}%` }}
-                            ></div>
-                          </div>
-                  
-                  {event.dependencies.length > 0 && (
-                    <div className="mb-4">
-                      <p className="text-sm text-gray-600 mb-2">Dipendenze:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {event.dependencies.map(depId => {
-                          const depEvent = timelineEvents.find(e => e.id === depId);
-                          return depEvent ? (
-                            <span key={depId} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                              {depEvent.title}
-                            </span>
-                          ) : null;
-                        })}
-                      </div>
+        {/* Search and Filter */}
+        <div className="flex items-center space-x-4 mb-6">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Cerca eventi..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
           </div>
-        )}
+          <select
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="all">Tutti gli Stati</option>
+            <option value="pending">In Attesa</option>
+            <option value="in_progress">In Corso</option>
+            <option value="completed">Completato</option>
+            <option value="overdue">In Ritardo</option>
+          </select>
+          <select
+            value={selectedProject}
+            onChange={(e) => setSelectedProject(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="all">Tutti i Progetti</option>
+            {projects.map(project => (
+              <option key={project.id} value={project.id}>{project.name}</option>
+            ))}
+          </select>
+        </div>
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <button className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
-                        Modifica
-                      </button>
-                      <button className="px-3 py-1 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors">
-                        Completa
-                      </button>
-                  </div>
+        {/* Content */}
+        {activeTab === 'timeline' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">Timeline Progetti</h2>
+              <span className="text-sm text-gray-500">{filteredEvents.length} eventi</span>
+            </div>
 
-                    <div className="flex items-center space-x-2">
-                      <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                        <Share className="w-4 h-4" />
-                      </button>
-                      <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                        <Download className="w-4 h-4" />
-                      </button>
-                  </div>
+            <div className="space-y-4">
+              {filteredEvents.map((event) => (
+                <div key={event.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <h3 className="text-lg font-semibold text-gray-900">{event.title}</h3>
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(event.status)}`}>
+                          {event.status === 'completed' ? 'Completato' :
+                           event.status === 'in_progress' ? 'In Corso' :
+                           event.status === 'pending' ? 'In Attesa' : 'In Ritardo'}
+                        </span>
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getTypeColor(event.type)}`}>
+                          {event.type === 'milestone' ? 'Milestone' :
+                           event.type === 'task' ? 'Task' :
+                           event.type === 'meeting' ? 'Riunione' :
+                           event.type === 'deadline' ? 'Scadenza' : 'Consegna'}
+                        </span>
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(event.priority)}`}>
+                          {event.priority === 'critical' ? 'Critica' :
+                           event.priority === 'high' ? 'Alta' :
+                           event.priority === 'medium' ? 'Media' : 'Bassa'}
+                        </span>
+                      </div>
+                      <p className="text-gray-600 mb-3">{event.description}</p>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <p className="text-sm text-gray-500 mb-1">Inizio</p>
+                          <p className="text-sm font-medium text-gray-900">{event.startDate}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500 mb-1">Fine</p>
+                          <p className="text-sm font-medium text-gray-900">{event.endDate}</p>
+                        </div>
+                      </div>
+
+                      <div className="mb-4">
+                        <div className="flex items-center justify-between text-sm text-gray-600 mb-1">
+                          <span>Progresso</span>
+                          <span>{event.progress}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${event.progress}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div>
+                            <p className="text-sm text-gray-500 mb-1">Assegnato a</p>
+                            <div className="flex items-center space-x-2">
+                              {event.assignedTo.map((person, index) => (
+                                <span key={index} className="text-sm text-gray-700 bg-gray-100 px-2 py-1 rounded">
+                                  {person}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <button className="p-2 text-gray-400 hover:text-gray-600">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button className="p-2 text-gray-400 hover:text-gray-600">
+                            <Download className="w-4 h-4" />
+                          </button>
+                          <button className="p-2 text-gray-400 hover:text-gray-600">
+                            <Share className="w-4 h-4" />
+                          </button>
+                          <button className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                            Modifica
+                          </button>
+                          <button className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">
+                            Completa
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
-          )}
+          </div>
+        )}
 
-          {activeTab === 'calendar' && (
+        {activeTab === 'calendar' && (
+          <div className="space-y-6">
+            <h2 className="text-lg font-semibold text-gray-900">Vista Calendario</h2>
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600">Vista Calendario</p>
-                  <p className="text-sm text-gray-500">Integrazione calendario in sviluppo</p>
-                </div>
+              <div className="text-center text-gray-500 py-12">
+                <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                <p>Vista calendario in sviluppo...</p>
+              </div>
             </div>
           </div>
         )}
 
-          {activeTab === 'analytics' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {activeTab === 'analytics' && (
+          <div className="space-y-6">
+            <h2 className="text-lg font-semibold text-gray-900">Analytics</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900">Eventi Totali</h3>
-                  <Calendar className="w-5 h-5 text-blue-600" />
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Eventi Totali</p>
+                    <p className="text-2xl font-semibold text-gray-900">{timelineEvents.length}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <Calendar className="w-6 h-6 text-blue-600" />
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900 mb-2">{timelineEvents.length}</div>
-                <p className="text-sm text-gray-600">Eventi nella timeline</p>
-                        </div>
-
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900">In Corso</h3>
-                  <Clock className="w-5 h-5 text-green-600" />
-                </div>
-                <div className="text-2xl font-bold text-gray-900 mb-2">
-                  {timelineEvents.filter(e => e.status === 'in_progress').length}
-                </div>
-                <p className="text-sm text-gray-600">Eventi attualmente in corso</p>
-                        </div>
-
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900">Completati</h3>
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                          </div>
-                <div className="text-2xl font-bold text-gray-900 mb-2">
-                  {timelineEvents.filter(e => e.status === 'completed').length}
-                </div>
-                <p className="text-sm text-gray-600">Eventi completati</p>
               </div>
-
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900">In Ritardo</h3>
-                  <AlertTriangle className="w-5 h-5 text-red-600" />
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Completati</p>
+                    <p className="text-2xl font-semibold text-gray-900">
+                      {timelineEvents.filter(e => e.status === 'completed').length}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <CheckCircle className="w-6 h-6 text-green-600" />
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900 mb-2">
-                  {timelineEvents.filter(e => e.status === 'overdue').length}
-                </div>
-                <p className="text-sm text-gray-600">Eventi in ritardo</p>
-                        </div>
-
+              </div>
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900">Progresso Medio</h3>
-                  <BarChart3 className="w-5 h-5 text-purple-600" />
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">In Corso</p>
+                    <p className="text-2xl font-semibold text-gray-900">
+                      {timelineEvents.filter(e => e.status === 'in_progress').length}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                    <Clock className="w-6 h-6 text-yellow-600" />
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900 mb-2">
-                  {Math.round(timelineEvents.reduce((sum, e) => sum + e.progress, 0) / timelineEvents.length)}%
-                          </div>
-                <p className="text-sm text-gray-600">Progresso medio degli eventi</p>
-                        </div>
-
+              </div>
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900">Progetti Attivi</h3>
-                  <Building className="w-5 h-5 text-blue-600" />
-                        </div>
-                <div className="text-2xl font-bold text-gray-900 mb-2">
-                  {projects.filter(p => p.status === 'in_progress').length}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">In Ritardo</p>
+                    <p className="text-2xl font-semibold text-gray-900">
+                      {timelineEvents.filter(e => e.status === 'overdue').length}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                    <AlertTriangle className="w-6 h-6 text-red-600" />
+                  </div>
                 </div>
-                <p className="text-sm text-gray-600">Progetti in corso</p>
               </div>
             </div>
-          )}
           </div>
+        )}
       </div>
       
       {/* Feedback Widget */}
       <FeedbackWidget />
-    </div>
+    </DashboardLayout>
   );
 }
