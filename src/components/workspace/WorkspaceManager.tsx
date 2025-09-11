@@ -17,6 +17,7 @@ import {
   X
 } from 'lucide-react';
 import { Workspace, WorkspaceMember } from '@/types/workspace';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface WorkspaceManagerProps {
   isOpen: boolean;
@@ -33,6 +34,7 @@ export default function WorkspaceManager({
   onWorkspaceCreated,
   onMemberInvited
 }: WorkspaceManagerProps) {
+  const { currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState<'workspaces' | 'create' | 'invite'>('workspaces');
   const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
   const [members, setMembers] = useState<WorkspaceMember[]>([]);
@@ -65,7 +67,7 @@ export default function WorkspaceManager({
   const loadWorkspaceMembers = async (workspaceId: string) => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/workspace/${workspaceId}/members?userId=${localStorage.getItem('userId')}`);
+      const response = await fetch(`/api/workspace/${workspaceId}/members?userId=${currentUser?.uid}`);
       const data = await response.json();
       
       if (data.success) {
@@ -99,8 +101,8 @@ export default function WorkspaceManager({
         },
         body: JSON.stringify({
           ...createForm,
-          ownerId: localStorage.getItem('userId'),
-          ownerEmail: localStorage.getItem('userEmail')
+          ownerId: currentUser?.uid,
+          ownerEmail: currentUser?.email
         }),
       });
 
@@ -144,7 +146,7 @@ export default function WorkspaceManager({
         body: JSON.stringify({
           workspaceId: selectedWorkspace.id,
           ...inviteForm,
-          invitedBy: localStorage.getItem('userId')
+          invitedBy: currentUser?.uid
         }),
       });
 

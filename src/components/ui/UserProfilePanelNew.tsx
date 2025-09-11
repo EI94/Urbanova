@@ -64,11 +64,31 @@ export default function UserProfilePanelNew({ isOpen, onClose }: UserProfilePane
 
       if (!userProfile && currentUser) {
         console.log('🆕 [UserProfilePanel] Creazione nuovo profilo');
-        const defaultProfile = {
+        const defaultProfile: UserProfile = {
+          id: userId,
+          userId: userId,
           email: currentUser.email || '',
           displayName: currentUser.displayName || 'Utente',
           firstName: currentUser.firstName || '',
           lastName: currentUser.lastName || '',
+          timezone: 'Europe/Rome',
+          language: 'it',
+          dateFormat: 'DD/MM/YYYY',
+          currency: 'EUR',
+          preferences: {
+            theme: 'auto',
+            sidebarCollapsed: false,
+            emailNotifications: true,
+            pushNotifications: true,
+          },
+          security: {
+            twoFactorEnabled: false,
+            lastPasswordChange: new Date(),
+            loginHistory: [],
+          },
+          metadata: {},
+          createdAt: new Date(),
+          updatedAt: new Date(),
         };
         
         userProfile = await firebaseUserProfileService.createUserProfile(userId, defaultProfile);
