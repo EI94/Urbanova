@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageSquare, Bell, User, Users, Settings, X } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
@@ -11,7 +11,10 @@ import {
   CalculatorIcon,
   PaletteIcon,
   CalendarIcon,
+  BellIcon,
+  UserIcon,
   LogoutIcon,
+  SettingsIcon,
   BuildingIcon,
   NewProjectIcon,
   BusinessPlanIcon,
@@ -24,11 +27,14 @@ import {
   ClientIcon,
   ProjectIcon,
   MapIcon,
+  UsersIcon,
+  XIcon,
 } from '@/components/icons';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
 import LanguageSelector from '@/components/ui/LanguageSelector';
 import NotificationsPanel from '@/components/ui/NotificationsPanel';
 import UserProfilePanelNew from '@/components/ui/UserProfilePanelNew';
+import WorkspaceManager from '@/components/workspace/WorkspaceManager';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
@@ -69,6 +75,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
     byPriority: {},
   });
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [workspaces, setWorkspaces] = useState<any[]>([]);
 
   // Carica notifiche e profilo utente solo se l'utente è autenticato
   useEffect(() => {
@@ -82,6 +89,19 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
           ]);
           setNotifications(notificationsData);
           setUserProfile(profileData);
+          
+          // Carica workspace dell'utente con gestione errori
+          try {
+            const { workspaceService } = await import('@/lib/workspaceService');
+            const workspaceData = await workspaceService.getWorkspacesByUser(auth.currentUser.uid);
+            setWorkspaces(workspaceData);
+            console.log('✅ [DashboardLayout] Workspace caricati:', workspaceData);
+          } catch (workspaceError) {
+            console.error('❌ [DashboardLayout] Errore caricamento workspace:', workspaceError);
+            // Non bloccare il caricamento se i workspace falliscono
+            setWorkspaces([]);
+          }
+          
           console.log('✅ [DashboardLayout] Dati caricati:', { notificationsData, profileData });
         } else {
           console.log('⚠️ [DashboardLayout] Nessun utente autenticato, skip caricamento dati');
@@ -338,7 +358,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
                   title="Notifiche"
               >
-                <Bell className="w-5 h-5" />
+                <BellIcon className="w-5 h-5" />
                   {notifications.unread > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                       {notifications.unread > 9 ? '9+' : notifications.unread}
@@ -352,7 +372,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
                   title="Profilo Utente"
                 >
-                  <User className="w-5 h-5" />
+                  <UserIcon className="w-5 h-5" />
                 </button>
                 
                 {/* Team */}
@@ -361,7 +381,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
                   title="Team"
                 >
-                  <Users className="w-5 h-5" />
+                  <UsersIcon className="w-5 h-5" />
                 </button>
 
                 {/* Settings */}
@@ -370,7 +390,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
                   title="Impostazioni"
                 >
-                  <Settings className="w-5 h-5" />
+                  <SettingsIcon className="w-5 h-5" />
                 </button>
               </div>
             </div>
@@ -399,22 +419,19 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
       )}
       
       {teamOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Team</h2>
-              <button
-                onClick={() => setTeamOpen(false)}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-6">
-              <p className="text-gray-600">Funzionalità Team in sviluppo...</p>
-            </div>
-          </div>
-        </div>
+        <WorkspaceManager
+          isOpen={teamOpen}
+          onClose={() => setTeamOpen(false)}
+          workspaces={workspaces}
+          onWorkspaceCreated={(workspace) => {
+            setWorkspaces(prev => [...prev, workspace]);
+            setTeamOpen(false);
+          }}
+          onMemberInvited={() => {
+            // Handle member invitation
+            console.log('Member invited');
+          }}
+        />
       )}
       
       {settingsOpen && (
@@ -426,7 +443,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                 onClick={() => setSettingsOpen(false)}
                 className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
               >
-                <X className="w-5 h-5" />
+                <XIcon className="w-5 h-5" />
               </button>
             </div>
             <div className="p-6">
