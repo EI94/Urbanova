@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, User, Mail, Phone, Building, MapPin, Globe, Linkedin, Github, Camera, Save, Eye, EyeOff, Shield, Key, Settings } from 'lucide-react';
+import { User, Mail, Phone, Building, MapPin, Globe, Linkedin, Github, Camera, Save, Eye, EyeOff, Shield, Key, Settings } from 'lucide-react';
+import { XIcon } from '@/components/icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
@@ -154,7 +155,7 @@ export default function UserProfilePanelNew({ isOpen, onClose }: UserProfilePane
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <X className="w-5 h-5" />
+            <XIcon className="w-5 h-5" />
           </button>
         </div>
 

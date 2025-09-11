@@ -13,7 +13,8 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
-  Loader2
+  Loader2,
+  X
 } from 'lucide-react';
 import { Workspace, WorkspaceMember } from '@/types/workspace';
 
