@@ -376,9 +376,6 @@ export default function MarketIntelligencePage() {
         <div className="flex justify-between items-start">
           <div className="flex items-center space-x-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                Market Intelligence
-              </h1>
               <p className="text-gray-600 mt-2">
                 Scopriamo le migliori opportunità di terreni
               </p>

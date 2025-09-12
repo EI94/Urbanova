@@ -137,11 +137,8 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
           {/* Sidebar Header - Apple Style */}
           <div className="px-6 py-6 border-b border-gray-100">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-sm">
-                <Building2 className="w-4 h-4 text-white" />
-              </div>
-              <div>
-                <h1 className="text-lg font-semibold text-gray-900 tracking-tight">Urbanova</h1>
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <Building2 className="w-5 h-5 text-white" />
               </div>
             </div>
           </div>
