@@ -77,7 +77,7 @@ export interface ProjectMetrics {
 }
 
 class DashboardService {
-  private readonly PROJECTS_COLLECTION = 'projects';
+  private readonly PROJECTS_COLLECTION = 'feasibilityProjects';
   private readonly ACTIVITIES_COLLECTION = 'dashboard_activities';
   private readonly METRICS_COLLECTION = 'project_metrics';
 
@@ -158,7 +158,7 @@ class DashboardService {
   async getAllProjects(): Promise<Project[]> {
     try {
       const projectsRef = safeCollection(this.PROJECTS_COLLECTION);
-      const q = query(projectsRef, where('isActive', '==', true), orderBy('lastUpdated', 'desc'));
+      const q = query(projectsRef, orderBy('updatedAt', 'desc'));
 
       const snapshot = await getDocs(q);
       return this.parseProjectsSnapshot(snapshot);
@@ -270,9 +270,10 @@ class DashboardService {
     // Calcolo budget totale
     const totalBudget = projects.reduce((sum, p) => sum + (p.budget || 0), 0);
 
-    // Calcolo ROI medio
-    const totalROI = metrics.reduce((sum, m) => sum + m.roi, 0);
-    const averageROI = metrics.length > 0 ? totalROI / metrics.length : 0;
+    // Calcolo ROI medio dai progetti (i progetti di fattibilità hanno già il ROI calcolato)
+    const projectsWithROI = projects.filter(p => p.roi && p.roi > 0);
+    const totalROI = projectsWithROI.reduce((sum, p) => sum + (p.roi || 0), 0);
+    const averageROI = projectsWithROI.length > 0 ? totalROI / projectsWithROI.length : 0;
 
     // Calcolo progetti per tipo
     const projectsByType: Record<ProjectType, number> = {
@@ -355,18 +356,50 @@ class DashboardService {
 
     snapshot.forEach((doc: any) => {
       const data = doc.data();
-      projects.push({
+      
+      // Mappa i dati del progetto di fattibilità alla struttura Project
+      const project: Project = {
         id: doc.id,
         name: data.name || 'Progetto senza nome',
-
-
-        type: data.type || 'RESIDENTIAL',
-        status: data.status || 'PLANNING',
+        budget: data.costs?.total || 0,
+        roi: data.results?.roi || 0,
+        type: this.mapFeasibilityTypeToProjectType(data),
+        status: this.mapFeasibilityStatusToProjectStatus(data.status),
         createdAt: data.createdAt?.toDate() || new Date(),
-      } as any);
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+      };
+      
+      projects.push(project);
     });
 
     return projects;
+  }
+
+  /**
+   * Mappa il tipo di progetto di fattibilità al tipo di progetto dashboard
+   */
+  private mapFeasibilityTypeToProjectType(data: any): ProjectType {
+    // Per ora mappiamo tutto a 'residential' dato che i progetti di fattibilità
+    // non hanno un campo type esplicito
+    return 'residential';
+  }
+
+  /**
+   * Mappa lo status del progetto di fattibilità allo status del progetto dashboard
+   */
+  private mapFeasibilityStatusToProjectStatus(feasibilityStatus: string): ProjectStatus {
+    switch (feasibilityStatus) {
+      case 'PIANIFICAZIONE':
+        return 'draft';
+      case 'IN_CORSO':
+        return 'active';
+      case 'COMPLETATO':
+        return 'completed';
+      case 'SOSPESO':
+        return 'on_hold';
+      default:
+        return 'draft';
+    }
   }
 
   /**

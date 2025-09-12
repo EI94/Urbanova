@@ -53,58 +53,7 @@ import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
 import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 import MarkdownRenderer from '@/components/ui/MarkdownRenderer';
 
-// Mock data per i progetti (in produzione verrà da API)
-const mockProjects = [
-  {
-    id: 'proj-1',
-    name: 'Residenza Marina',
-    status: 'IN_PROGRESS',
-    roi: 18.5,
-    progress: 65,
-    nextMilestone: 'Approvazione Permessi',
-    dueDate: '2025-02-15',
-    location: 'Roma, EUR',
-    category: 'Residenziale',
-    budget: '€2.5M',
-    team: ['PM', 'Architetto', 'Ingegnere'],
-  },
-  {
-    id: 'proj-2',
-    name: 'Centro Commerciale Nord',
-    status: 'PLANNING',
-    roi: 22.3,
-    progress: 25,
-    nextMilestone: 'Analisi Fattibilità',
-    dueDate: '2025-03-20',
-    location: 'Milano, Porta Nuova',
-    category: 'Commerciale',
-    budget: '€8.2M',
-    team: ['PM', 'Urbanista', 'Economista'],
-  },
-  {
-    id: 'proj-3',
-    name: 'Residenza Storica',
-    status: 'COMPLETED',
-    roi: 15.8,
-    progress: 100,
-    nextMilestone: 'Collaudo Finale',
-    dueDate: '2024-12-10',
-    location: 'Firenze, Centro',
-    category: 'Residenziale',
-    budget: '€1.8M',
-    team: ['PM', 'Restauratore', 'Ingegnere'],
-  },
-];
-
-// Mock data per le metriche (in produzione verrà da API)
-const mockMetrics = {
-  totalProjects: 12,
-  activeProjects: 8,
-  totalROI: 19.2,
-  avgPayback: 4.2,
-  documentsComplete: 78,
-  nextDeadlines: 3,
-};
+// I dati mock sono stati rimossi - ora utilizziamo dati reali dal database
 
 // Le interfacce ChatMessage e ChatSession sono ora importate da chatHistoryService
 
@@ -1040,7 +989,7 @@ export default function UnifiedDashboardPage() {
                       </div>
                       <div className="ml-3">
                         <p className="text-xs font-medium text-gray-600">Progetti</p>
-                        <p className="text-lg font-bold text-gray-900">{stats?.totalProjects || mockMetrics.totalProjects}</p>
+                        <p className="text-lg font-bold text-gray-900">{stats?.totalProjects || 0}</p>
                       </div>
                     </div>
                   </div>
@@ -1052,7 +1001,7 @@ export default function UnifiedDashboardPage() {
                       </div>
                       <div className="ml-3">
                         <p className="text-xs font-medium text-gray-600">Attivi</p>
-                        <p className="text-lg font-bold text-gray-900">{stats?.activeProjects || mockMetrics.activeProjects}</p>
+                        <p className="text-lg font-bold text-gray-900">{stats?.activeProjects || 0}</p>
                       </div>
                     </div>
                   </div>
@@ -1079,7 +1028,7 @@ export default function UnifiedDashboardPage() {
                       <div className="ml-3">
                         <p className="text-xs font-medium text-gray-600">ROI</p>
                         <p className="text-lg font-bold text-gray-900">
-                          {stats?.averageROI?.toFixed(1) || mockMetrics.totalROI}%
+                          {stats?.averageROI?.toFixed(1) || 0}%
                         </p>
                       </div>
                     </div>
