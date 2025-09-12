@@ -55,6 +55,20 @@ export default function NewFeasibilityProjectPage() {
   const [autoSaving, setAutoSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [recalculateTimeout, setRecalculateTimeout] = useState<NodeJS.Timeout | null>(null);
+
+  // Helper function per gestire i timeout in modo sicuro
+  const safeSetTimeout = (callback: () => void, delay: number) => {
+    // Pulisce il timeout precedente se esiste
+    if (recalculateTimeout) {
+      clearTimeout(recalculateTimeout);
+    }
+    
+    // Imposta il nuovo timeout
+    const timeout = setTimeout(callback, delay);
+    setRecalculateTimeout(timeout);
+    return timeout;
+  };
 
   const [project, setProject] = useState<Partial<FeasibilityProject>>({
     name: '',
@@ -161,14 +175,36 @@ export default function NewFeasibilityProjectPage() {
     };
   }, [project, calculatedCosts, calculatedRevenues, calculatedResults]);
 
-  // Cleanup timeout on unmount
+  // Cleanup timeout on unmount e navigazione
   useEffect(() => {
-    return () => {
+    const handleBeforeUnload = () => {
+      // Pulisce tutti i timeout quando l'utente naviga via
       if (autoSaveTimeout) {
         clearTimeout(autoSaveTimeout);
       }
+      if (recalculateTimeout) {
+        clearTimeout(recalculateTimeout);
+      }
     };
-  }, []);
+
+    // Aggiunge listener per beforeunload
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      // Rimuove listener
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      
+      // Pulisce timeout
+      if (autoSaveTimeout) {
+        clearTimeout(autoSaveTimeout);
+        setAutoSaveTimeout(null);
+      }
+      if (recalculateTimeout) {
+        clearTimeout(recalculateTimeout);
+        setRecalculateTimeout(null);
+      }
+    };
+  }, [autoSaveTimeout, recalculateTimeout]);
 
   // Gestisce la modalità edit
   useEffect(() => {
@@ -233,7 +269,7 @@ export default function NewFeasibilityProjectPage() {
     });
 
     // Ricalcola automaticamente
-    setTimeout(() => recalculateAll(), 100);
+    safeSetTimeout(() => recalculateAll(), 100);
   };
 
   const handleFinancingChange = (field: string, value: any) => {
@@ -243,7 +279,7 @@ export default function NewFeasibilityProjectPage() {
     }));
 
     // Ricalcola automaticamente per aggiornare assicurazioni
-    setTimeout(() => recalculateAll(), 100);
+    safeSetTimeout(() => recalculateAll(), 100);
   };
 
   // Nuove funzioni per gestire i costi di costruzione
@@ -283,7 +319,7 @@ export default function NewFeasibilityProjectPage() {
       setConstructionCostsPerSqm(costsPerSqm);
     }
 
-    setTimeout(() => recalculateAll(), 100);
+    safeSetTimeout(() => recalculateAll(), 100);
   };
 
   const handleConstructionCostPerSqmChange = (field: string, value: number) => {
@@ -308,7 +344,7 @@ export default function NewFeasibilityProjectPage() {
       } as Partial<FeasibilityProject>));
     }
 
-    setTimeout(() => recalculateAll(), 100);
+    safeSetTimeout(() => recalculateAll(), 100);
   };
 
   const recalculateAll = () => {
@@ -1175,7 +1211,7 @@ export default function NewFeasibilityProjectPage() {
                               ...prev,
                               constructionInsurance: e.target.checked,
                             }));
-                            setTimeout(() => recalculateAll(), 100);
+                            safeSetTimeout(() => recalculateAll(), 100);
                           }}
                           className="checkbox checkbox-primary"
                         />
@@ -1202,7 +1238,7 @@ export default function NewFeasibilityProjectPage() {
                               ...prev,
                               financingInsurance: e.target.checked,
                             }));
-                            setTimeout(() => recalculateAll(), 100);
+                            safeSetTimeout(() => recalculateAll(), 100);
                           }}
                           className="checkbox checkbox-primary"
                         />
