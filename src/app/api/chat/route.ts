@@ -92,37 +92,11 @@ export async function POST(request: NextRequest) {
 
         } catch (error) {
           console.error('❌ [UrbanovaOS] Errore processamento:', error);
-
-          // Fallback al sistema tradizionale
-          console.log('🔄 [UrbanovaOS] Fallback a sistema tradizionale...');
-
-          try {
-            const queryResult = await userMemoryService.processNaturalQuery(message, userId, userEmail, history);
-
-            if (queryResult.success) {
-              const userProfile = await userMemoryService.getUserProfile(userId);
-              if (userProfile) {
-                intelligentResponse = await intelligentResponseService.generateResponse({
-                  userProfile,
-                  queryResult,
-                  conversationHistory: history,
-                  currentIntent: 'query',
-                  sessionData: {}
-                });
-              }
-            }
-          } catch (fallbackError) {
-            console.error('❌ [Sistema Tradizionale] Errore anche nel fallback:', fallbackError);
-          }
+          // ESPERIENZA AGENTE UMANO: Nessun fallback confuso, continua con OpenAI
         }
       }
     
-    // Se non abbiamo risposta da Urbanova OS, usa il sistema tradizionale
-    if (!urbanovaResponse && !intelligentResponse) {
-      console.log('🔄 [Sistema Tradizionale] Usando sistema tradizionale...');
-      
-      // Il sistema tradizionale verrà gestito più avanti nel codice
-    }
+    // ESPERIENZA AGENTE UMANO: Nessun sistema tradizionale, solo OpenAI
 
     // Inizializza OpenAI se non è già fatto
     if (!openai && process.env.OPENAI_API_KEY) {
@@ -137,57 +111,41 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Se abbiamo una risposta intelligente, usala
-    if (intelligentResponse) {
-      console.log('✅ [Angelo Custode] Usando risposta intelligente');
-      return NextResponse.json({
-        success: true,
-        response: intelligentResponse.response,
-        type: intelligentResponse.type,
-        confidence: intelligentResponse.confidence,
-        relatedData: intelligentResponse.relatedData,
-        followUpQuestions: intelligentResponse.followUpQuestions,
-        actions: intelligentResponse.actions,
-        visualizations: intelligentResponse.visualizations,
-        projectPreview: projectPreview,
-        timestamp: new Date().toISOString(),
-      });
-    }
+    // ESPERIENZA AGENTE UMANO: Non usare mai risposte intelligenti come fallback
+    // Solo OpenAI per risposte naturali
 
-    // Se non abbiamo risposta intelligente, usa il sistema tradizionale
+    // ESPERIENZA AGENTE UMANO: Solo riconoscimento intent per progetti, non per risposte
     let userIntent: UserIntent | null = null;
     
-    // Riconosci intent per il sistema tradizionale
-    if (!intelligentResponse) {
-      userIntent = await intentService.recognizeIntent(message, history);
-      
-      // Se l'intent è per creare un progetto e abbiamo tutti i dati, crea il progetto
-      if (userIntent && userIntent.type !== 'general' && userIntent.missingFields.length === 0 && userId) {
-        console.log('🚀 [Intent] Creazione progetto automatica...');
-        console.log('🚀 [Intent] Dati progetto:', userIntent.collectedData);
-        try {
-          projectPreview = await intentService.createProjectFromIntent(userIntent, userId, userEmail || '');
-          
-          if (projectPreview) {
-            console.log('✅ [Intent] Progetto creato:', projectPreview.id);
-          } else {
-            console.log('❌ [Intent] Creazione progetto fallita');
-          }
-        } catch (error) {
-          console.error('❌ [Intent] Errore creazione progetto:', error);
+    // Riconosci intent solo per creazione progetti automatica
+    userIntent = await intentService.recognizeIntent(message, history);
+    
+    // Se l'intent è per creare un progetto e abbiamo tutti i dati, crea il progetto
+    if (userIntent && userIntent.type !== 'general' && userIntent.missingFields.length === 0 && userId) {
+      console.log('🚀 [Intent] Creazione progetto automatica...');
+      console.log('🚀 [Intent] Dati progetto:', userIntent.collectedData);
+      try {
+        projectPreview = await intentService.createProjectFromIntent(userIntent, userId, userEmail || '');
+        
+        if (projectPreview) {
+          console.log('✅ [Intent] Progetto creato:', projectPreview.id);
+        } else {
+          console.log('❌ [Intent] Creazione progetto fallita');
         }
+      } catch (error) {
+        console.error('❌ [Intent] Errore creazione progetto:', error);
       }
     }
 
-    // Se OpenAI non è disponibile, usa risposte predefinite
+    // ESPERIENZA AGENTE UMANO: Gestione errori trasparente come Cursor
     if (!openai) {
-      console.warn('⚠️ [Chat API] OpenAI non configurato, usando risposte predefinite');
+      console.error('❌ [Chat API] Provider LLM non disponibile');
       return NextResponse.json({
-        success: true,
-        response: getFallbackResponse(message),
-        projectPreview: projectPreview,
+        success: false,
+        error: 'Problemi di connessione al provider del modello. Riprova tra qualche minuto.',
+        response: 'Mi dispiace, al momento non riesco a rispondere. Ci sono problemi di connessione al provider del modello. Riprova tra qualche minuto.',
         timestamp: new Date().toISOString(),
-      });
+      }, { status: 503 });
     }
 
     // Crea il prompt per Urbanova
@@ -227,53 +185,42 @@ Rispondi in italiano, in modo professionale e diretto. Sii specifico e fornisci 
 
     console.log('✅ [Chat API] Risposta generata:', response.substring(0, 100));
 
-    // Genera risposta finale
-    let finalResponse = response;
-    let finalMetadata: any = {};
+    // ESPERIENZA AGENTE UMANO: Sempre OpenAI come risposta principale
+    let finalResponse = response; // Risposta naturale di OpenAI
+    let finalMetadata: any = {
+      agentType: 'human-like',
+      provider: 'openai',
+      confidence: 0.9
+    };
     
-      // Se abbiamo risposta da Urbanova OS, usala
-      if (urbanovaResponse) {
-        finalResponse = urbanovaResponse.response;
-        finalMetadata = {
-          urbanovaOS: true,
-          confidence: urbanovaResponse.confidence,
-          systemsUsed: urbanovaResponse.metadata.systemsUsed,
-          pluginsExecuted: urbanovaResponse.metadata.pluginsExecuted,
-          workflowsTriggered: urbanovaResponse.metadata.workflowsTriggered,
-          classifications: urbanovaResponse.metadata.classifications,
-          vectorMatches: urbanovaResponse.metadata.vectorMatches,
-          executionTime: urbanovaResponse.metadata.executionTime,
-          memoryUsage: urbanovaResponse.metadata.memoryUsage,
-          cpuUsage: urbanovaResponse.metadata.cpuUsage,
-          suggestedActions: urbanovaResponse.suggestedActions,
-          nextSteps: urbanovaResponse.nextSteps,
-          systemStatus: urbanovaResponse.systemStatus
-        };
-    } else if (intelligentResponse) {
-      // Se abbiamo risposta intelligente tradizionale, usala
-      finalResponse = (intelligentResponse as any).response || (intelligentResponse as any).message || 'Risposta intelligente generata';
-        finalMetadata = {
-          urbanovaOS: false,
-          intelligent: true,
-          confidence: (intelligentResponse as any).confidence || 0.8,
-          type: (intelligentResponse as any).type || 'intelligent'
-        };
-    } else {
-      // Se abbiamo un progetto creato, usa la risposta intelligente
-      if (projectPreview && userIntent) {
-        finalResponse = intentService.generateIntelligentResponse(userIntent, projectPreview);
-      } else if (userIntent && userIntent.type !== 'general' && userIntent.missingFields.length > 0) {
-        // Se mancano informazioni, usa la risposta intelligente per raccogliere dati
-        finalResponse = intentService.generateIntelligentResponse(userIntent);
-      }
-      
-        finalMetadata = {
-          urbanovaOS: false,
-          intelligent: false,
-          traditional: true,
-          intent: userIntent,
-          projectPreview: projectPreview
-        };
+    // Aggiungi metadata Urbanova OS per analytics (non per risposta)
+    if (urbanovaResponse) {
+      finalMetadata.urbanovaOS = {
+        systemsUsed: urbanovaResponse.metadata.systemsUsed,
+        pluginsExecuted: urbanovaResponse.metadata.pluginsExecuted,
+        workflowsTriggered: urbanovaResponse.metadata.workflowsTriggered,
+        classifications: urbanovaResponse.metadata.classifications,
+        vectorMatches: urbanovaResponse.metadata.vectorMatches,
+        executionTime: urbanovaResponse.metadata.executionTime,
+        suggestedActions: urbanovaResponse.suggestedActions,
+        nextSteps: urbanovaResponse.nextSteps,
+        systemStatus: urbanovaResponse.systemStatus
+      };
+    }
+    
+    // Aggiungi metadata progetto se creato
+    if (projectPreview) {
+      finalMetadata.projectCreated = true;
+      finalMetadata.projectId = projectPreview.id;
+    }
+    
+    // Aggiungi metadata intent se riconosciuto
+    if (userIntent) {
+      finalMetadata.intent = {
+        type: userIntent.type,
+        confidence: userIntent.confidence,
+        missingFields: userIntent.missingFields
+      };
     }
 
     return NextResponse.json({
@@ -288,127 +235,51 @@ Rispondi in italiano, in modo professionale e diretto. Sii specifico e fornisci 
   } catch (error) {
     console.error('❌ [Chat API] Errore:', error);
     
-    // Se è un errore di autenticazione OpenAI, usa fallback
-    if (error instanceof Error && error.message.includes('401')) {
-      console.warn('⚠️ [Chat API] Chiave OpenAI non valida, usando fallback');
-      return NextResponse.json({
-        success: true,
-        response: getFallbackResponse(message),
-        timestamp: new Date().toISOString(),
-      });
+    // ESPERIENZA AGENTE UMANO: Gestione errori trasparente come Cursor
+    if (error instanceof Error) {
+      // Errore di autenticazione OpenAI
+      if (error.message.includes('401') || error.message.includes('unauthorized')) {
+        console.error('❌ [Chat API] Chiave OpenAI non valida');
+        return NextResponse.json({
+          success: false,
+          error: 'Problemi di autenticazione con il provider del modello. Contatta il supporto.',
+          response: 'Mi dispiace, ci sono problemi di autenticazione con il provider del modello. Contatta il supporto tecnico.',
+          timestamp: new Date().toISOString(),
+        }, { status: 401 });
+      }
+      
+      // Errore di rate limit OpenAI
+      if (error.message.includes('429') || error.message.includes('rate limit')) {
+        console.error('❌ [Chat API] Rate limit OpenAI raggiunto');
+        return NextResponse.json({
+          success: false,
+          error: 'Limite di richieste raggiunto. Riprova tra qualche minuto.',
+          response: 'Mi dispiace, ho raggiunto il limite di richieste. Riprova tra qualche minuto.',
+          timestamp: new Date().toISOString(),
+        }, { status: 429 });
+      }
+      
+      // Errore di timeout OpenAI
+      if (error.message.includes('timeout') || error.message.includes('TIMEOUT')) {
+        console.error('❌ [Chat API] Timeout OpenAI');
+        return NextResponse.json({
+          success: false,
+          error: 'Timeout del provider del modello. Riprova.',
+          response: 'Mi dispiace, il provider del modello ha impiegato troppo tempo a rispondere. Riprova.',
+          timestamp: new Date().toISOString(),
+        }, { status: 504 });
+      }
     }
     
+    // Errore generico
     return NextResponse.json({
       success: false,
-      error: 'Errore interno del server',
-      response: getFallbackResponse(message),
+      error: 'Errore interno del server. Riprova tra qualche minuto.',
+      response: 'Mi dispiace, si è verificato un errore interno. Riprova tra qualche minuto.',
       timestamp: new Date().toISOString(),
     }, { status: 500 });
   }
 }
 
-function getFallbackResponse(message: string): string {
-  const lowerMessage = message.toLowerCase();
-  
-  if (lowerMessage.includes('analisi') || lowerMessage.includes('fattibilità')) {
-    return `📊 **Analisi di Fattibilità**
-
-Posso aiutarti con l'analisi di fattibilità immobiliare! Ecco cosa posso fare:
-
-• **Calcolo ROI e Margini** - Analisi finanziaria completa
-• **Proiezioni di Vendita** - Stime basate su dati di mercato
-• **Analisi di Sensibilità** - Scenari ottimistici e pessimistici
-• **Comparazioni OMI** - Dati ufficiali di mercato
-• **Report PDF** - Documenti professionali
-
-Per iniziare, dimmi:
-- Che tipo di progetto stai valutando?
-- In quale zona?
-- Qual è il tuo budget stimato?`;
-  }
-  
-  if (lowerMessage.includes('market') || lowerMessage.includes('mercato') || lowerMessage.includes('intelligence')) {
-    return `📈 **Market Intelligence**
-
-Ecco come posso aiutarti con l'analisi di mercato:
-
-• **Trend di Mercato** - Analisi delle tendenze locali
-• **Prezzi OMI** - Dati ufficiali aggiornati
-• **Demografia** - Analisi della popolazione target
-• **Infrastrutture** - Valutazione servizi e trasporti
-• **Opportunità** - Identificazione zone promettenti
-
-Per iniziare, specifica:
-- La zona di interesse
-- Il tipo di immobile
-- Il periodo di analisi`;
-  }
-  
-  if (lowerMessage.includes('design') || lowerMessage.includes('progettazione')) {
-    return `🎨 **Design Center**
-
-Posso supportarti nella progettazione:
-
-• **Layout Ottimizzati** - Soluzioni spaziali efficienti
-• **Rendering 3D** - Visualizzazioni realistiche
-• **Materiali e Finiture** - Selezione tecnica
-• **Normative** - Conformità edilizia
-• **Sostenibilità** - Soluzioni green
-
-Dimmi:
-- Che tipo di edificio vuoi progettare?
-- Quali sono i tuoi requisiti?
-- Hai vincoli particolari?`;
-  }
-  
-  if (lowerMessage.includes('business plan') || lowerMessage.includes('piano')) {
-    return `💼 **Business Plan**
-
-Posso aiutarti a creare un business plan completo:
-
-• **Proiezioni Finanziarie** - Flussi di cassa e ROI
-• **Analisi di Mercato** - Studio della domanda
-• **Strategia Commerciale** - Piano di vendita
-• **Gestione Rischio** - Identificazione e mitigazione
-• **Presentazione** - Documenti professionali
-
-Per iniziare, ho bisogno di:
-- Dettagli del progetto
-- Investimento previsto
-- Timeline di sviluppo`;
-  }
-  
-  if (lowerMessage.includes('terreni') || lowerMessage.includes('scansione') || lowerMessage.includes('land')) {
-    return `🗺️ **Scansione Terreni**
-
-Posso aiutarti a trovare terreni interessanti:
-
-• **Ricerca Automatica** - Scansione portali immobiliari
-• **Filtri Avanzati** - Prezzo, zona, superficie
-• **Analisi AI** - Valutazione automatica potenziale
-• **Report Completi** - Dettagli e raccomandazioni
-• **Notifiche** - Aggiornamenti su nuove opportunità
-
-Specifica:
-- Zona di interesse
-- Budget disponibile
-- Caratteristiche richieste`;
-  }
-  
-  // Risposta generica
-  return `🤖 **Urbanova Assistant**
-
-Ciao! Sono il tuo assistente intelligente per la gestione immobiliare.
-
-Posso aiutarti con:
-
-• 📊 **Analisi di Fattibilità** - Valutazione progetti immobiliari
-• 📈 **Market Intelligence** - Analisi di mercato e trend
-• 🎨 **Design Center** - Progettazione e rendering
-• 📋 **Gestione Progetti** - Organizzazione e timeline
-• 🏗️ **Permessi e Compliance** - Normative edilizie
-• 🗺️ **Scansione Terreni** - Ricerca automatica opportunità
-• 💼 **Business Plan** - Piani finanziari completi
-
-**Come posso aiutarti oggi?** Sii specifico sulla tua richiesta per ricevere il supporto migliore!`;
-}
+// ESPERIENZA AGENTE UMANO: Nessun fallback, solo OpenAI
+// Se OpenAI non funziona, errore trasparente come Cursor

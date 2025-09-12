@@ -427,6 +427,9 @@ export class UrbanovaOSOrchestrator {
         pluginResults
       );
       
+      // Se non abbiamo contenuto specifico, restituisci null per usare OpenAI
+      const finalResponseContent = responseContent || null;
+      
       // 3. Calcola confidence
       const confidence = this.calculateConfidence(classification, vectorMatches, workflowResults, pluginResults);
       
@@ -441,7 +444,7 @@ export class UrbanovaOSOrchestrator {
 
       const response: UrbanovaOSResponse = {
         type: responseType,
-        response: responseContent,
+        response: finalResponseContent,
         confidence,
         metadata: {
           systemsUsed: this.getSystemsUsed(workflowResults, pluginResults),
@@ -653,18 +656,29 @@ export class UrbanovaOSOrchestrator {
     // Genera contenuto risposta basato su tutti i risultati
     let response = '';
 
+    // Se abbiamo risultati specifici, generiamo una risposta dettagliata
     if (pluginResults.length > 0) {
       response += 'Ho eseguito le seguenti azioni per te:\n';
       pluginResults.forEach(result => {
-        response += `- ${result.outputs?.result || 'Azione completata'}\n`;
+        const actionResult = result.outputs?.result || result.result || 'Azione completata';
+        response += `- ${actionResult}\n`;
       });
     }
 
     if (workflowResults.length > 0) {
-      response += '\nHo attivato i seguenti workflow:\n';
-      workflowResults.forEach(result => {
-        response += `- ${result.outputs?.result || 'Workflow completato'}\n`;
-      });
+      // Solo se abbiamo workflow con risultati specifici
+      const hasSpecificResults = workflowResults.some(result => 
+        result.outputs?.result && 
+        !result.outputs.result.includes('Workflow completato')
+      );
+      
+      if (hasSpecificResults) {
+        response += '\nHo attivato i seguenti workflow:\n';
+        workflowResults.forEach(result => {
+          const workflowResult = result.outputs?.result || result.result || 'Workflow completato';
+          response += `- ${workflowResult}\n`;
+        });
+      }
     }
 
     if (vectorMatches.length > 0) {
@@ -674,8 +688,9 @@ export class UrbanovaOSOrchestrator {
       });
     }
 
-    if (!response) {
-      response = 'Ho ricevuto la tua richiesta. Come posso aiutarti?';
+    // Se non abbiamo risultati specifici, restituiamo null per usare la risposta di OpenAI
+    if (!response || response.trim() === '') {
+      return null; // Indica di usare la risposta di OpenAI
     }
 
     return response;
