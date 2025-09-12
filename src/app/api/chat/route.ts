@@ -4,7 +4,7 @@ import { intentService, UserIntent, ProjectPreview } from '@/lib/intentService';
 import { userMemoryService, UserMemoryProfile } from '@/lib/userMemoryService';
 import { naturalQueryProcessor } from '@/lib/naturalQueryProcessor';
 import { intelligentResponseService, IntelligentResponse } from '@/lib/intelligentResponseService';
-import { sofiaOrchestrator, SofiaRequest, SofiaResponse } from '@/lib/sofiaOrchestrator';
+import { urbanovaOSOrchestrator, UrbanovaOSRequest, UrbanovaOSResponse } from '@/lib/urbanovaOS/orchestrator';
 
 // Inizializza OpenAI solo se la chiave è disponibile
 let openai: OpenAI | null = null;
@@ -33,79 +33,92 @@ export async function POST(request: NextRequest) {
     console.log('🤖 [Chat API] Richiesta chat:', { message: message.substring(0, 100) });
     console.log('🔑 [Chat API] OPENAI_API_KEY presente:', !!process.env.OPENAI_API_KEY);
 
-    // 🚀 SOFIA 2.0 - Sistema conversazionale avanzato
-    console.log('🚀 [SOFIA 2.0] Processando richiesta con architettura conversazionale avanzata...');
-    
-    let sofiaResponse: SofiaResponse | null = null;
-    let intelligentResponse: IntelligentResponse | null = null;
-    let projectPreview: ProjectPreview | null = null;
-    
-    // Se abbiamo userId e userEmail, usa SOFIA 2.0
-    if (userId && userEmail) {
-      try {
-        console.log('🎯 [SOFIA 2.0] Processando con sistema conversazionale avanzato...');
-        
-        const sofiaRequest: SofiaRequest = {
-          sessionId: `session_${userId}_${Date.now()}`,
-          userId,
-          userEmail,
-          message: {
-            id: `msg_${Date.now()}`,
-            content: message,
-            type: 'user' as const,
-            timestamp: new Date()
-          },
-          conversationHistory: history.map((msg: any) => ({
-            id: msg.id || `msg_${Date.now()}`,
-            content: msg.content || msg.message || '',
-            type: (msg.role || msg.type || 'user') as 'user' | 'assistant',
-            timestamp: new Date(msg.timestamp || Date.now()),
-            ...(msg.intelligentData && { intelligentData: msg.intelligentData })
-          })),
-          context: { userId, userEmail, history }
-        };
-        
-        sofiaResponse = await sofiaOrchestrator.processRequest(sofiaRequest);
-        
-        if (sofiaResponse && sofiaResponse.type === 'success') {
-          console.log('✅ [SOFIA 2.0] Richiesta processata con successo:', {
-            confidence: sofiaResponse.confidence,
-            systemsUsed: sofiaResponse.metadata.systemsUsed.length,
-            memoryUpdated: sofiaResponse.metadata.memoryUpdated
-          });
-        } else {
-          console.log('⚠️ [SOFIA 2.0] Fallback o escalation:', sofiaResponse?.type);
-        }
-        
-      } catch (error) {
-        console.error('❌ [SOFIA 2.0] Errore processamento:', error);
-        
-        // Fallback al sistema tradizionale
-        console.log('🔄 [SOFIA 2.0] Fallback a sistema tradizionale...');
-        
+      // 🚀 URBANOVA OS - Sistema Enterprise avanzato
+      console.log('🚀 [UrbanovaOS] Processando richiesta con architettura enterprise avanzata...');
+
+      let urbanovaResponse: UrbanovaOSResponse | null = null;
+      let intelligentResponse: IntelligentResponse | null = null;
+      let projectPreview: ProjectPreview | null = null;
+
+      // Se abbiamo userId e userEmail, usa Urbanova OS
+      if (userId && userEmail) {
         try {
-          const queryResult = await userMemoryService.processNaturalQuery(message, userId, userEmail, history);
-          
-          if (queryResult.success) {
-            const userProfile = await userMemoryService.getUserProfile(userId);
-            if (userProfile) {
-              intelligentResponse = await intelligentResponseService.generateResponse({
-                userProfile,
-                queryResult,
-                conversationHistory: history,
-                currentIntent: 'query',
-                sessionData: {}
-              });
+          console.log('🎯 [UrbanovaOS] Processando con sistema enterprise avanzato...');
+
+          const urbanovaRequest: UrbanovaOSRequest = {
+            sessionId: `session_${userId}_${Date.now()}`,
+            userId,
+            userEmail,
+            message: {
+              id: `msg_${Date.now()}`,
+              content: message,
+              type: 'user' as const,
+              timestamp: new Date()
+            },
+            conversationHistory: history.map((msg: any) => ({
+              id: msg.id || `msg_${Date.now()}`,
+              content: msg.content || msg.message || '',
+              type: (msg.role || msg.type || 'user') as 'user' | 'assistant',
+              timestamp: new Date(msg.timestamp || Date.now()),
+              ...(msg.intelligentData && { intelligentData: msg.intelligentData })
+            })),
+            context: { 
+              userId, 
+              userEmail, 
+              history,
+              environment: 'production' as const
+            },
+            metadata: {
+              source: 'chat' as const,
+              priority: 'normal' as const,
+              timeout: 30000,
+              retryCount: 0,
+              maxRetries: 3
             }
+          };
+
+          urbanovaResponse = await urbanovaOSOrchestrator.processRequest(urbanovaRequest);
+
+          if (urbanovaResponse && urbanovaResponse.type === 'success') {
+            console.log('✅ [UrbanovaOS] Richiesta processata con successo:', {
+              confidence: urbanovaResponse.confidence,
+              systemsUsed: urbanovaResponse.metadata.systemsUsed.length,
+              pluginsExecuted: urbanovaResponse.metadata.pluginsExecuted.length,
+              workflowsTriggered: urbanovaResponse.metadata.workflowsTriggered.length
+            });
+          } else {
+            console.log('⚠️ [UrbanovaOS] Fallback o escalation:', urbanovaResponse?.type);
           }
-        } catch (fallbackError) {
-          console.error('❌ [Sistema Tradizionale] Errore anche nel fallback:', fallbackError);
+
+        } catch (error) {
+          console.error('❌ [UrbanovaOS] Errore processamento:', error);
+
+          // Fallback al sistema tradizionale
+          console.log('🔄 [UrbanovaOS] Fallback a sistema tradizionale...');
+
+          try {
+            const queryResult = await userMemoryService.processNaturalQuery(message, userId, userEmail, history);
+
+            if (queryResult.success) {
+              const userProfile = await userMemoryService.getUserProfile(userId);
+              if (userProfile) {
+                intelligentResponse = await intelligentResponseService.generateResponse({
+                  userProfile,
+                  queryResult,
+                  conversationHistory: history,
+                  currentIntent: 'query',
+                  sessionData: {}
+                });
+              }
+            }
+          } catch (fallbackError) {
+            console.error('❌ [Sistema Tradizionale] Errore anche nel fallback:', fallbackError);
+          }
         }
       }
-    }
     
-    // Se non abbiamo risposta da SOFIA 2.0, usa il sistema tradizionale
-    if (!sofiaResponse && !intelligentResponse) {
+    // Se non abbiamo risposta da Urbanova OS, usa il sistema tradizionale
+    if (!urbanovaResponse && !intelligentResponse) {
       console.log('🔄 [Sistema Tradizionale] Usando sistema tradizionale...');
       
       // Il sistema tradizionale verrà gestito più avanti nel codice
@@ -218,32 +231,33 @@ Rispondi in italiano, in modo professionale e diretto. Sii specifico e fornisci 
     let finalResponse = response;
     let finalMetadata: any = {};
     
-    // Se abbiamo risposta da SOFIA 2.0, usala
-    if (sofiaResponse) {
-      finalResponse = sofiaResponse.response;
-      finalMetadata = {
-        sofia: true,
-        confidence: sofiaResponse.confidence,
-        systemsUsed: sofiaResponse.metadata.systemsUsed,
-        memoryUpdated: sofiaResponse.metadata.memoryUpdated,
-        personalityAdapted: sofiaResponse.metadata.personalityAdapted,
-        learningApplied: sofiaResponse.metadata.learningApplied,
-        conversationPhase: sofiaResponse.metadata.conversationPhase,
-        userMood: sofiaResponse.metadata.userMood,
-        complexity: sofiaResponse.metadata.complexity,
-        suggestedActions: sofiaResponse.suggestedActions,
-        nextSteps: sofiaResponse.nextSteps,
-        systemStatus: sofiaResponse.systemStatus
-      };
+      // Se abbiamo risposta da Urbanova OS, usala
+      if (urbanovaResponse) {
+        finalResponse = urbanovaResponse.response;
+        finalMetadata = {
+          urbanovaOS: true,
+          confidence: urbanovaResponse.confidence,
+          systemsUsed: urbanovaResponse.metadata.systemsUsed,
+          pluginsExecuted: urbanovaResponse.metadata.pluginsExecuted,
+          workflowsTriggered: urbanovaResponse.metadata.workflowsTriggered,
+          classifications: urbanovaResponse.metadata.classifications,
+          vectorMatches: urbanovaResponse.metadata.vectorMatches,
+          executionTime: urbanovaResponse.metadata.executionTime,
+          memoryUsage: urbanovaResponse.metadata.memoryUsage,
+          cpuUsage: urbanovaResponse.metadata.cpuUsage,
+          suggestedActions: urbanovaResponse.suggestedActions,
+          nextSteps: urbanovaResponse.nextSteps,
+          systemStatus: urbanovaResponse.systemStatus
+        };
     } else if (intelligentResponse) {
       // Se abbiamo risposta intelligente tradizionale, usala
       finalResponse = (intelligentResponse as any).response || (intelligentResponse as any).message || 'Risposta intelligente generata';
-      finalMetadata = {
-        sofia: false,
-        intelligent: true,
-        confidence: (intelligentResponse as any).confidence || 0.8,
-        type: (intelligentResponse as any).type || 'intelligent'
-      };
+        finalMetadata = {
+          urbanovaOS: false,
+          intelligent: true,
+          confidence: (intelligentResponse as any).confidence || 0.8,
+          type: (intelligentResponse as any).type || 'intelligent'
+        };
     } else {
       // Se abbiamo un progetto creato, usa la risposta intelligente
       if (projectPreview && userIntent) {
@@ -253,13 +267,13 @@ Rispondi in italiano, in modo professionale e diretto. Sii specifico e fornisci 
         finalResponse = intentService.generateIntelligentResponse(userIntent);
       }
       
-      finalMetadata = {
-        sofia: false,
-        intelligent: false,
-        traditional: true,
-        intent: userIntent,
-        projectPreview: projectPreview
-      };
+        finalMetadata = {
+          urbanovaOS: false,
+          intelligent: false,
+          traditional: true,
+          intent: userIntent,
+          projectPreview: projectPreview
+        };
     }
 
     return NextResponse.json({
