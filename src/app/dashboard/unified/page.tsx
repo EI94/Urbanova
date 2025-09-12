@@ -364,15 +364,8 @@ export default function UnifiedDashboardPage() {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
         content:
-          `🤖 Ho capito la tua richiesta: "${inputValue}"\n\n` +
-          `Posso aiutarti con:\n` +
-          `• 📊 Business Plan e analisi finanziarie\n` +
-          `• 📈 Market Intelligence e analisi di mercato\n` +
-          `• 🎨 Design Center e progettazione\n` +
-          `• 📋 Gestione progetti e documenti\n` +
-          `• 🏗️ Permessi e compliance\n` +
-          `• 📅 Project Timeline AI\n\n` +
-          `Prova a essere più specifico su cosa vuoi fare!`,
+          `Ciao! Sono qui per aiutarti con tutto quello che riguarda lo sviluppo immobiliare. Posso supportarti nella creazione di business plan, analisi di mercato, progettazione, gestione documenti, permessi e molto altro.\n\n` +
+          `Dimmi pure cosa hai in mente - magari vuoi iniziare un nuovo progetto, analizzare un terreno specifico, o hai bisogno di aiuto con la documentazione? Sono qui per rendere il tuo lavoro più semplice e efficace.`,
         timestamp: new Date(),
       };
 
