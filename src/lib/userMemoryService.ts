@@ -15,6 +15,7 @@ import {
 import { predictiveAnalyticsService, PredictiveInsight, MarketForecast, ProjectOptimization } from './predictiveAnalyticsService';
 import { marketIntelligenceOS, MarketIntelligenceQuery } from './marketIntelligenceOS';
 import { db } from '@/lib/firebase';
+import { safeCollection } from '@/lib/firebaseUtils';
 import { FeasibilityProject } from '@/types/feasibility';
 import { ChatMessage } from '@/types/chat';
 
@@ -550,48 +551,8 @@ export class UserMemoryService {
     try {
       console.log('🔄 [UserMemory] Caricamento progetti feasibility per utente:', userId);
       
-      // Per ora, crea progetti mock per test
-      const mockProjects: ProjectContext[] = [
-        {
-          id: 'ciliegie-mock',
-          name: 'Progetto Ciliegie',
-          type: 'feasibility',
-          status: 'PIANIFICAZIONE',
-          location: 'Milano',
-          keyMetrics: {
-            totalArea: 1200,
-            budget: 800000,
-            roi: 18.5,
-            margin: 22.3,
-            timeline: 18
-          },
-          lastModified: new Date(),
-          importance: 'high'
-        },
-        {
-          id: 'villa-roma-mock',
-          name: 'Villa Roma',
-          type: 'feasibility',
-          status: 'IN_CORSO',
-          location: 'Roma',
-          keyMetrics: {
-            totalArea: 800,
-            budget: 600000,
-            roi: 15.2,
-            margin: 18.7,
-            timeline: 12
-          },
-          lastModified: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 giorni fa
-          importance: 'medium'
-        }
-      ];
-      
-      console.log('✅ [UserMemory] Progetti mock caricati:', mockProjects.length);
-      return mockProjects;
-      
-      // TODO: Implementare caricamento reale da Firebase
-      /*
-      const projectsRef = collection(db, 'feasibilityProjects');
+      // Carica progetti reali da Firebase
+      const projectsRef = safeCollection('feasibilityProjects');
       const q = query(
         projectsRef,
         where('createdBy', '==', userId),
@@ -600,22 +561,30 @@ export class UserMemoryService {
       );
       
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({
-        id: doc.id,
-        name: doc.data().name || 'Progetto senza nome',
-        type: 'feasibility' as const,
-        status: doc.data().status || 'unknown',
-        location: doc.data().address || 'Non specificato',
-        keyMetrics: {
-          totalArea: doc.data().totalArea || 0,
-          budget: doc.data().costs?.total || 0,
-          roi: doc.data().results?.roi || 0,
-          margin: doc.data().results?.margin || 0
-        },
-        lastModified: doc.data().updatedAt?.toDate() || new Date(),
-        importance: 'medium' as const
-      }));
-      */
+      const projects: ProjectContext[] = [];
+      
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        projects.push({
+          id: doc.id,
+          name: data.name || 'Progetto senza nome',
+          type: 'feasibility',
+          status: data.status || 'unknown',
+          location: data.address || 'Non specificato',
+          keyMetrics: {
+            totalArea: data.totalArea || 0,
+            budget: data.costs?.total || 0,
+            roi: data.results?.roi || 0,
+            margin: data.results?.margin || 0,
+            timeline: data.duration || 0
+          },
+          lastModified: data.updatedAt?.toDate() || data.createdAt?.toDate() || new Date(),
+          importance: this.calculateProjectImportance(data)
+        });
+      });
+      
+      console.log('✅ [UserMemory] Progetti reali caricati:', projects.length);
+      return projects;
     } catch (error) {
       console.error('❌ [UserMemory] Errore caricamento progetti feasibility:', error);
       return [];
@@ -2230,6 +2199,29 @@ export class UserMemoryService {
     
     // Salva in cache
     this.memoryCache.set(profile.userId, profile);
+  }
+
+  /**
+   * Calcola l'importanza di un progetto basata sui suoi dati
+   */
+  private calculateProjectImportance(data: any): 'high' | 'medium' | 'low' {
+    // Calcola importanza basata su ROI, budget e status
+    const roi = data.results?.roi || 0;
+    const budget = data.costs?.total || 0;
+    const status = data.status;
+    
+    // Progetti con ROI alto e budget significativo sono importanti
+    if (roi > 20 && budget > 500000) {
+      return 'high';
+    }
+    
+    // Progetti in corso o con ROI medio sono mediamente importanti
+    if (status === 'IN_CORSO' || (roi > 10 && budget > 200000)) {
+      return 'medium';
+    }
+    
+    // Altri progetti sono di bassa importanza
+    return 'low';
   }
 }
 
