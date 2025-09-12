@@ -4,6 +4,7 @@ import { intentService, UserIntent, ProjectPreview } from '@/lib/intentService';
 import { userMemoryService, UserMemoryProfile } from '@/lib/userMemoryService';
 import { naturalQueryProcessor } from '@/lib/naturalQueryProcessor';
 import { intelligentResponseService, IntelligentResponse } from '@/lib/intelligentResponseService';
+import { sofiaOrchestrator, SofiaRequest, SofiaResponse } from '@/lib/sofiaOrchestrator';
 
 // Inizializza OpenAI solo se la chiave è disponibile
 let openai: OpenAI | null = null;
@@ -32,41 +33,80 @@ export async function POST(request: NextRequest) {
     console.log('🤖 [Chat API] Richiesta chat:', { message: message.substring(0, 100) });
     console.log('🔑 [Chat API] OPENAI_API_KEY presente:', !!process.env.OPENAI_API_KEY);
 
-    // 🧠 ANGELO CUSTODE - Sistema di memoria intelligente
-    console.log('🧠 [Angelo Custode] Processando query con memoria intelligente...');
+    // 🚀 SOFIA 2.0 - Sistema conversazionale avanzato
+    console.log('🚀 [SOFIA 2.0] Processando richiesta con architettura conversazionale avanzata...');
     
+    let sofiaResponse: SofiaResponse | null = null;
     let intelligentResponse: IntelligentResponse | null = null;
     let projectPreview: ProjectPreview | null = null;
     
-    // Se abbiamo userId e userEmail, usa il sistema di memoria intelligente
+    // Se abbiamo userId e userEmail, usa SOFIA 2.0
     if (userId && userEmail) {
       try {
-        console.log('🔍 [Angelo Custode] Processando query naturale...');
-        const queryResult = await userMemoryService.processNaturalQuery(message, userId, userEmail, history);
+        console.log('🎯 [SOFIA 2.0] Processando con sistema conversazionale avanzato...');
         
-        if (queryResult.success) {
-          console.log('✅ [Angelo Custode] Query processata con successo');
-          
-          // Genera risposta intelligente
-          const userProfile = await userMemoryService.getUserProfile(userId);
-          if (userProfile) {
-            intelligentResponse = await intelligentResponseService.generateResponse({
-              userProfile,
-              queryResult,
-              conversationHistory: history,
-              currentIntent: 'query',
-              sessionData: {}
-            });
-          }
+        const sofiaRequest: SofiaRequest = {
+          sessionId: `session_${userId}_${Date.now()}`,
+          userId,
+          userEmail,
+          message: {
+            id: `msg_${Date.now()}`,
+            content: message,
+            type: 'user' as const,
+            timestamp: new Date()
+          },
+          conversationHistory: history.map((msg: any) => ({
+            id: msg.id || `msg_${Date.now()}`,
+            content: msg.content || msg.message || '',
+            type: (msg.role || msg.type || 'user') as 'user' | 'assistant',
+            timestamp: new Date(msg.timestamp || Date.now()),
+            ...(msg.intelligentData && { intelligentData: msg.intelligentData })
+          })),
+          context: { userId, userEmail, history }
+        };
+        
+        sofiaResponse = await sofiaOrchestrator.processRequest(sofiaRequest);
+        
+        if (sofiaResponse && sofiaResponse.type === 'success') {
+          console.log('✅ [SOFIA 2.0] Richiesta processata con successo:', {
+            confidence: sofiaResponse.confidence,
+            systemsUsed: sofiaResponse.metadata.systemsUsed.length,
+            memoryUpdated: sofiaResponse.metadata.memoryUpdated
+          });
+        } else {
+          console.log('⚠️ [SOFIA 2.0] Fallback o escalation:', sofiaResponse?.type);
         }
+        
       } catch (error) {
-        console.error('❌ [Angelo Custode] Errore processamento query naturale:', error);
+        console.error('❌ [SOFIA 2.0] Errore processamento:', error);
+        
+        // Fallback al sistema tradizionale
+        console.log('🔄 [SOFIA 2.0] Fallback a sistema tradizionale...');
+        
+        try {
+          const queryResult = await userMemoryService.processNaturalQuery(message, userId, userEmail, history);
+          
+          if (queryResult.success) {
+            const userProfile = await userMemoryService.getUserProfile(userId);
+            if (userProfile) {
+              intelligentResponse = await intelligentResponseService.generateResponse({
+                userProfile,
+                queryResult,
+                conversationHistory: history,
+                currentIntent: 'query',
+                sessionData: {}
+              });
+            }
+          }
+        } catch (fallbackError) {
+          console.error('❌ [Sistema Tradizionale] Errore anche nel fallback:', fallbackError);
+        }
       }
     }
     
-    // Se non abbiamo risposta intelligente, usa il sistema tradizionale
-    if (!intelligentResponse) {
-      console.log('🔄 [Angelo Custode] Fallback a sistema tradizionale...');
+    // Se non abbiamo risposta da SOFIA 2.0, usa il sistema tradizionale
+    if (!sofiaResponse && !intelligentResponse) {
+      console.log('🔄 [Sistema Tradizionale] Usando sistema tradizionale...');
       
       // Il sistema tradizionale verrà gestito più avanti nel codice
     }
@@ -174,21 +214,59 @@ Rispondi in italiano, in modo professionale e diretto. Sii specifico e fornisci 
 
     console.log('✅ [Chat API] Risposta generata:', response.substring(0, 100));
 
-    // Genera risposta intelligente basata sull'intent
+    // Genera risposta finale
     let finalResponse = response;
+    let finalMetadata: any = {};
     
-    // Se abbiamo un progetto creato, usa la risposta intelligente
-    if (projectPreview && userIntent) {
-      finalResponse = intentService.generateIntelligentResponse(userIntent, projectPreview);
-    } else if (userIntent && userIntent.type !== 'general' && userIntent.missingFields.length > 0) {
-      // Se mancano informazioni, usa la risposta intelligente per raccogliere dati
-      finalResponse = intentService.generateIntelligentResponse(userIntent);
+    // Se abbiamo risposta da SOFIA 2.0, usala
+    if (sofiaResponse) {
+      finalResponse = sofiaResponse.response;
+      finalMetadata = {
+        sofia: true,
+        confidence: sofiaResponse.confidence,
+        systemsUsed: sofiaResponse.metadata.systemsUsed,
+        memoryUpdated: sofiaResponse.metadata.memoryUpdated,
+        personalityAdapted: sofiaResponse.metadata.personalityAdapted,
+        learningApplied: sofiaResponse.metadata.learningApplied,
+        conversationPhase: sofiaResponse.metadata.conversationPhase,
+        userMood: sofiaResponse.metadata.userMood,
+        complexity: sofiaResponse.metadata.complexity,
+        suggestedActions: sofiaResponse.suggestedActions,
+        nextSteps: sofiaResponse.nextSteps,
+        systemStatus: sofiaResponse.systemStatus
+      };
+    } else if (intelligentResponse) {
+      // Se abbiamo risposta intelligente tradizionale, usala
+      finalResponse = (intelligentResponse as any).response || (intelligentResponse as any).message || 'Risposta intelligente generata';
+      finalMetadata = {
+        sofia: false,
+        intelligent: true,
+        confidence: (intelligentResponse as any).confidence || 0.8,
+        type: (intelligentResponse as any).type || 'intelligent'
+      };
+    } else {
+      // Se abbiamo un progetto creato, usa la risposta intelligente
+      if (projectPreview && userIntent) {
+        finalResponse = intentService.generateIntelligentResponse(userIntent, projectPreview);
+      } else if (userIntent && userIntent.type !== 'general' && userIntent.missingFields.length > 0) {
+        // Se mancano informazioni, usa la risposta intelligente per raccogliere dati
+        finalResponse = intentService.generateIntelligentResponse(userIntent);
+      }
+      
+      finalMetadata = {
+        sofia: false,
+        intelligent: false,
+        traditional: true,
+        intent: userIntent,
+        projectPreview: projectPreview
+      };
     }
 
     return NextResponse.json({
       success: true,
       response: finalResponse,
       timestamp: new Date().toISOString(),
+      metadata: finalMetadata,
       intent: userIntent,
       projectPreview: projectPreview,
     });
