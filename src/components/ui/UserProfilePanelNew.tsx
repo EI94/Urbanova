@@ -48,6 +48,49 @@ export default function UserProfilePanelNew({ isOpen, onClose }: UserProfilePane
     }
   }, [isOpen, userId]);
 
+  // Salvataggio automatico quando profileUpdate cambia
+  useEffect(() => {
+    if (!userId || !profile || !profileUpdate) return;
+
+    // Debounce per evitare troppe chiamate API
+    const timeoutId = setTimeout(() => {
+      const hasChanges = Object.keys(profileUpdate).some(key => {
+        const value = profileUpdate[key as keyof ProfileUpdate];
+        const originalValue = profile[key as keyof UserProfile];
+        return value !== undefined && value !== originalValue;
+      });
+
+      if (hasChanges) {
+        console.log('💾 [UserProfilePanel] Salvataggio automatico:', profileUpdate);
+        handleSaveProfile();
+      }
+    }, 1000); // Salva dopo 1 secondo di inattività
+
+    return () => clearTimeout(timeoutId);
+  }, [profileUpdate, userId, profile]);
+
+  // Salvataggio finale quando il panel si chiude
+  useEffect(() => {
+    return () => {
+      // Salva i dati quando il componente viene smontato
+      if (userId && profile && profileUpdate) {
+        const hasChanges = Object.keys(profileUpdate).some(key => {
+          const value = profileUpdate[key as keyof ProfileUpdate];
+          const originalValue = profile[key as keyof UserProfile];
+          return value !== undefined && value !== originalValue;
+        });
+
+        if (hasChanges) {
+          console.log('💾 [UserProfilePanel] Salvataggio finale al chiudere:', profileUpdate);
+          // Salvataggio sincrono per evitare perdita di dati
+          firebaseUserProfileService.updateUserProfile(userId, profileUpdate).catch(error => {
+            console.error('❌ [UserProfilePanel] Errore salvataggio finale:', error);
+          });
+        }
+      }
+    };
+  }, [userId, profile, profileUpdate]);
+
   const loadProfile = async () => {
     try {
       setLoading(true);
@@ -148,21 +191,36 @@ export default function UserProfilePanelNew({ isOpen, onClose }: UserProfilePane
       setSaving(true);
       console.log('📸 [UserProfilePanel] Upload immagine:', file.name);
 
-      // Crea un URL temporaneo per l'anteprima
+      // Crea un URL temporaneo per l'anteprima immediata
       const tempUrl = URL.createObjectURL(file);
       
-      // Aggiorna il profilo con l'URL temporaneo
-      const updatedProfile = await firebaseUserProfileService.updateUserProfile(userId, {
-        avatar: tempUrl
-      });
+      // Aggiorna immediatamente l'UI con l'anteprima
+      if (profile) {
+        setProfile({ ...profile, avatar: tempUrl });
+      }
 
-      if (updatedProfile) {
-        setProfile(updatedProfile);
-        toast.success('Immagine caricata con successo');
+      // Carica l'immagine su Firebase Storage
+      const avatarUrl = await firebaseUserProfileService.uploadAvatar(userId, file);
+      
+      if (avatarUrl) {
+        // Aggiorna il profilo con l'URL permanente
+        const updatedProfile = await firebaseUserProfileService.updateUserProfile(userId, {
+          avatar: avatarUrl
+        });
+
+        if (updatedProfile) {
+          setProfile(updatedProfile);
+          toast.success('Immagine caricata e salvata con successo');
+        }
       }
     } catch (error) {
       console.error('❌ [UserProfilePanel] Errore upload immagine:', error);
       toast.error('Errore nel caricamento dell\'immagine');
+      
+      // Ripristina l'avatar originale in caso di errore
+      if (profile) {
+        setProfile({ ...profile, avatar: profile.avatar });
+      }
     } finally {
       setSaving(false);
     }
@@ -220,7 +278,14 @@ export default function UserProfilePanelNew({ isOpen, onClose }: UserProfilePane
       <div className="relative bg-white w-96 h-full shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Profilo Utente</h2>
+          <div className="flex flex-col">
+            <h2 className="text-xl font-semibold text-gray-900">Profilo Utente</h2>
+            {saving && (
+              <p className="text-xs text-blue-600 font-medium mt-1">
+                Salvataggio automatico...
+              </p>
+            )}
+          </div>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
