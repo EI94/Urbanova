@@ -393,7 +393,7 @@ export default function MarketIntelligencePage() {
       </div>
 
       <div className="space-y-6">
-        {/* Header con icona SearchIcon e stato servizi */}
+        {/* Stato servizi */}
         <div className="flex justify-between items-start">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
