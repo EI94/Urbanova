@@ -246,13 +246,24 @@ Rispondi in italiano, in modo professionale e diretto. Sii specifico e fornisci 
       timestamp: Date.now()
     });
 
-    // ESPERIENZA AGENTE UMANO: Sempre OpenAI come risposta principale
-    let finalResponse = response; // Risposta naturale di OpenAI
+    // ESPERIENZA AGENTE UMANO: Usa risposta OS se disponibile, altrimenti OpenAI
+    let finalResponse = response; // Default: risposta naturale di OpenAI
     let finalMetadata: any = {
       agentType: 'human-like',
       provider: 'openai',
       confidence: 0.9
     };
+    
+    // 🧠 PRIORITÀ: Se Urbanova OS ha generato una risposta specifica, usala
+    if (urbanovaResponse && urbanovaResponse.response && urbanovaResponse.response.trim() !== '') {
+      console.log('🎯 [Chat API] Usando risposta specifica di Urbanova OS');
+      finalResponse = urbanovaResponse.response;
+      finalMetadata.provider = 'urbanova-os';
+      finalMetadata.confidence = urbanovaResponse.confidence;
+      finalMetadata.agentType = 'urbanova-os';
+    } else {
+      console.log('🤖 [Chat API] Usando risposta naturale di OpenAI');
+    }
     
     // Aggiungi metadata Urbanova OS per analytics (non per risposta)
     if (urbanovaResponse) {

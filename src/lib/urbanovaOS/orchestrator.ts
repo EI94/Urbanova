@@ -6,6 +6,7 @@ import { UrbanovaOSClassificationEngine } from './ml/classificationEngine';
 import { UrbanovaOSVectorStore } from './vector/vectorStore';
 import { UrbanovaOSWorkflowEngine } from './workflow/workflowEngine';
 import { UrbanovaOSPluginSystem } from './plugins/pluginSystem';
+import { userMemoryService } from '@/lib/userMemoryService';
 
 // ============================================================================
 // INTERFACCE TYPESCRIPT
@@ -451,13 +452,16 @@ export class UrbanovaOSOrchestrator {
       const responseType = this.determineResponseType(classification, workflowResults, pluginResults);
       
       // 2. Genera contenuto risposta
-      const responseContent = await this.generateResponseContent(
+      const responseResult = await this.generateResponseContent(
         request,
         classification,
         vectorMatches,
         workflowResults,
         pluginResults
       );
+      
+      const responseContent = responseResult.content;
+      const usedUserMemory = responseResult.usedUserMemory;
       
       // Se non abbiamo contenuto specifico, restituisci null per usare OpenAI
       const finalResponseContent = responseContent || null;
@@ -479,7 +483,7 @@ export class UrbanovaOSOrchestrator {
         response: finalResponseContent,
         confidence,
         metadata: {
-          systemsUsed: this.getSystemsUsed(workflowResults, pluginResults),
+          systemsUsed: this.getSystemsUsed(workflowResults, pluginResults, usedUserMemory),
           executionTime: 0, // Sarà aggiornato dal chiamante
           memoryUsage: 0,
           cpuUsage: 0,
@@ -684,48 +688,139 @@ export class UrbanovaOSOrchestrator {
     vectorMatches: VectorMatch[],
     workflowResults: any[],
     pluginResults: any[]
-  ): Promise<string> {
-    // Genera contenuto risposta basato su tutti i risultati
-    let response = '';
-
-    // Se abbiamo risultati specifici, generiamo una risposta dettagliata
-    if (pluginResults.length > 0) {
-      response += 'Ho eseguito le seguenti azioni per te:\n';
-      pluginResults.forEach(result => {
-        const actionResult = result.outputs?.result || result.result || 'Azione completata';
-        response += `- ${actionResult}\n`;
-      });
-    }
-
-    if (workflowResults.length > 0) {
-      // Solo se abbiamo workflow con risultati specifici
-      const hasSpecificResults = workflowResults.some(result => 
-        result.outputs?.result && 
-        !result.outputs.result.includes('Workflow completato')
-      );
+  ): Promise<{ content: string | null; usedUserMemory: boolean }> {
+    console.log('🧠 [UrbanovaOS Orchestrator] Generando contenuto risposta con UserMemoryService');
+    
+    try {
+      // 🧠 PRIORITÀ MASSIMA: UserMemoryService per query sui progetti dell'utente
+      const userQuery = request.message.content.toLowerCase();
       
-      if (hasSpecificResults) {
-        response += '\nHo attivato i seguenti workflow:\n';
-        workflowResults.forEach(result => {
-          const workflowResult = result.outputs?.result || result.result || 'Workflow completato';
-          response += `- ${workflowResult}\n`;
+      // Rileva query sui progetti dell'utente (condizione più inclusiva)
+      if (userQuery.includes('progetti') || userQuery.includes('quanto') || userQuery.includes('quanti') || 
+          userQuery.includes('attivi') || userQuery.includes('portafoglio') || userQuery.includes('miei progetti') ||
+          userQuery.includes('quanti progetti') || userQuery.includes('quanto progetti') || 
+          userQuery.includes('progetti attivi') || userQuery.includes('progetti ho') ||
+          userQuery.includes('nel mio portafoglio') || userQuery.includes('portafoglio progetti')) {
+        
+        console.log('🎯 [UrbanovaOS Orchestrator] Query sui progetti rilevata, chiamando UserMemoryService...');
+        
+        const memoryResult = await userMemoryService.processNaturalQuery(
+          request.message.content,
+          request.userId,
+          request.userEmail,
+          request.conversationHistory
+        );
+        
+        if (memoryResult.success && memoryResult.data) {
+          console.log('✅ [UrbanovaOS Orchestrator] UserMemoryService ha trovato dati:', {
+            projects: memoryResult.relatedProjects?.length || 0,
+            insights: memoryResult.insights?.length || 0
+          });
+          
+          // Genera risposta basata sui dati reali dell'utente
+          let response = '';
+          
+          if (memoryResult.data.projects) {
+            const projects = memoryResult.data.projects;
+            if (projects.length === 0) {
+              response = 'Non hai ancora progetti nel tuo portafoglio. Crea il tuo primo progetto di fattibilità per iniziare!';
+            } else {
+              response = `Hai ${projects.length} progetti nel tuo portafoglio:\n\n`;
+              projects.slice(0, 5).forEach((project: any, index: number) => {
+                response += `${index + 1}. **${project.name}**\n`;
+                response += `   📍 ${project.location}\n`;
+                response += `   💰 Budget: €${project.keyMetrics.budget?.toLocaleString('it-IT') || 'Non specificato'}\n`;
+                response += `   📊 ROI: ${project.keyMetrics.roi || 'Non calcolato'}%\n`;
+                response += `   📅 Ultimo aggiornamento: ${project.lastModified.toLocaleDateString('it-IT')}\n\n`;
+              });
+              
+              if (projects.length > 5) {
+                response += `... e altri ${projects.length - 5} progetti.\n\n`;
+              }
+            }
+          } else if (memoryResult.data.totalCount !== undefined) {
+            response = `Hai ${memoryResult.data.totalCount} progetti attivi nel tuo portafoglio.`;
+          } else if (memoryResult.data.project) {
+            // Risposta per progetto specifico
+            const project = memoryResult.data.project;
+            response = `**${project.name}**:\n`;
+            if (memoryResult.data.metric && memoryResult.data.value !== undefined) {
+              response += `${memoryResult.data.metric}: ${memoryResult.data.value}${memoryResult.data.unit || ''}\n`;
+            } else {
+              response += `📍 ${project.location}\n`;
+              response += `💰 Budget: €${project.metrics.budget?.toLocaleString('it-IT') || 'Non specificato'}\n`;
+              response += `📊 ROI: ${project.metrics.roi || 'Non calcolato'}%\n`;
+            }
+          }
+          
+          // Aggiungi insights se disponibili
+          if (memoryResult.insights && memoryResult.insights.length > 0) {
+            response += '\n💡 **Insights:**\n';
+            memoryResult.insights.forEach(insight => {
+              response += `• ${insight}\n`;
+            });
+          }
+          
+          // Aggiungi suggerimenti se disponibili
+          if (memoryResult.suggestions && memoryResult.suggestions.length > 0) {
+            response += '\n🎯 **Suggerimenti:**\n';
+            memoryResult.suggestions.forEach(suggestion => {
+              response += `• ${suggestion}\n`;
+            });
+          }
+          
+          return { content: response, usedUserMemory: true };
+        } else {
+          console.log('⚠️ [UrbanovaOS Orchestrator] UserMemoryService non ha trovato dati specifici');
+        }
+      }
+      
+      // Se non è una query sui progetti, usa la logica originale
+      let response = '';
+
+      // Se abbiamo risultati specifici, generiamo una risposta dettagliata
+      if (pluginResults.length > 0) {
+        response += 'Ho eseguito le seguenti azioni per te:\n';
+        pluginResults.forEach(result => {
+          const actionResult = result.outputs?.result || result.result || 'Azione completata';
+          response += `- ${actionResult}\n`;
         });
       }
-    }
 
-    if (vectorMatches.length > 0) {
-      response += '\nEcco alcune informazioni rilevanti:\n';
-      vectorMatches.slice(0, 3).forEach(match => {
-        response += `- ${match.content.substring(0, 100)}...\n`;
-      });
-    }
+      if (workflowResults.length > 0) {
+        // Solo se abbiamo workflow con risultati specifici
+        const hasSpecificResults = workflowResults.some(result => 
+          result.outputs?.result && 
+          !result.outputs.result.includes('Workflow completato')
+        );
+        
+        if (hasSpecificResults) {
+          response += '\nHo attivato i seguenti workflow:\n';
+          workflowResults.forEach(result => {
+            const workflowResult = result.outputs?.result || result.result || 'Workflow completato';
+            response += `- ${workflowResult}\n`;
+          });
+        }
+      }
 
-    // Se non abbiamo risultati specifici, restituiamo null per usare la risposta di OpenAI
-    if (!response || response.trim() === '') {
-      return null; // Indica di usare la risposta di OpenAI
-    }
+      if (vectorMatches.length > 0) {
+        response += '\nEcco alcune informazioni rilevanti:\n';
+        vectorMatches.slice(0, 3).forEach(match => {
+          response += `- ${match.content.substring(0, 100)}...\n`;
+        });
+      }
 
-    return response;
+      // Se non abbiamo risultati specifici, restituiamo null per usare la risposta di OpenAI
+      if (!response || response.trim() === '') {
+        return { content: null, usedUserMemory: false }; // Indica di usare la risposta di OpenAI
+      }
+
+      return { content: response, usedUserMemory: false };
+      
+    } catch (error) {
+      console.error('❌ [UrbanovaOS Orchestrator] Errore generazione contenuto risposta:', error);
+      return { content: null, usedUserMemory: false }; // Fallback a OpenAI
+    }
   }
 
   private calculateConfidence(
@@ -791,7 +886,7 @@ export class UrbanovaOSOrchestrator {
     };
   }
 
-  private getSystemsUsed(workflowResults: any[], pluginResults: any[]): string[] {
+  private getSystemsUsed(workflowResults: any[], pluginResults: any[], usedUserMemory: boolean = false): string[] {
     const systems = ['classification', 'vector'];
     
     if (workflowResults.length > 0) {
@@ -800,6 +895,10 @@ export class UrbanovaOSOrchestrator {
     
     if (pluginResults.length > 0) {
       systems.push('plugins');
+    }
+    
+    if (usedUserMemory) {
+      systems.push('user-memory');
     }
     
     return systems;
