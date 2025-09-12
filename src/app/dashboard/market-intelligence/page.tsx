@@ -33,6 +33,7 @@ import {
   Bot,
   Sparkles,
   MessageCircle,
+  Building2,
 } from 'lucide-react';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -376,7 +377,7 @@ export default function MarketIntelligencePage() {
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <SearchIcon className="w-5 h-5 text-white" />
+                <Building2 className="w-5 h-5 text-white" />
               </div>
               <div>
                 <h1 className="text-xl font-semibold text-gray-900">Urbanova</h1>

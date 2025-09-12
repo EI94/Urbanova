@@ -778,7 +778,6 @@ export default function UnifiedDashboardPage() {
                         </div>
                         <div>
                           <h2 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Urbanova</h2>
-                          <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Assistente Intelligente per la Gestione Immobiliare</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
