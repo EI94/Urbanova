@@ -372,10 +372,19 @@ export default function MarketIntelligencePage() {
   return (
     <DashboardLayout title="Market Intelligence">
       <div className="space-y-6">
-        {/* Header con stato servizi */}
+        {/* Header con logo Urbanova e stato servizi */}
         <div className="flex justify-between items-start">
           <div className="flex items-center space-x-4">
-            <div>
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <Building2 className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-semibold text-gray-900">Urbanova</h1>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <SearchIcon className="w-5 h-5 text-gray-600" />
               <p className="text-gray-600 mt-2">
                 Scopriamo le migliori opportunità di terreni
               </p>
