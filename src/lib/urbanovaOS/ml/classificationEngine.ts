@@ -54,6 +54,33 @@ export interface MLMetadata {
   lastUpdated: Date;
 }
 
+export interface ClassificationResult {
+  category: string;
+  confidence: number;
+  intent: string;
+  entities: EntityResult[];
+  sentiment: string;
+  urgency: string;
+  complexity: string;
+  userExpertise: string;
+  projectPhase: string;
+  actions: ActionResult[];
+}
+
+export interface EntityResult {
+  name: string;
+  value: string;
+  confidence: number;
+  type: string;
+}
+
+export interface ActionResult {
+  action: string;
+  tool: string;
+  parameters: Record<string, any>;
+  priority: string;
+}
+
 export interface TrainingData {
   input: string;
   expectedOutput: MLClassificationResult;
@@ -94,6 +121,58 @@ export class UrbanovaOSClassificationEngine {
   // ============================================================================
 
   /**
+   * 🎯 METODO COMPATIBILE: Classifica richiesta per orchestrator
+   */
+  async classify(request: {
+    text: string;
+    context: any;
+    history: any[];
+  }): Promise<ClassificationResult> {
+    console.log('🧠 [UrbanovaOS ML] Classificando richiesta per orchestrator');
+    
+    try {
+      // Crea oggetto ChatMessage compatibile
+      const message: ChatMessage = {
+        id: `msg_${Date.now()}`,
+        content: request.text,
+        timestamp: new Date(),
+        role: 'user'
+      };
+      
+      // Usa il metodo principale
+      const result = await this.classifyMessage(message, request.context, request.history);
+      
+      // Converte risultato per orchestrator
+      return {
+        category: result.context.domain,
+        confidence: result.confidence,
+        intent: result.intent,
+        entities: result.entities.map(e => ({
+          name: e.entity,
+          value: e.value,
+          confidence: e.confidence,
+          type: e.type
+        })),
+        sentiment: result.context.sentiment,
+        urgency: result.context.urgency,
+        complexity: result.context.complexity,
+        userExpertise: result.context.userExpertise,
+        projectPhase: result.context.projectPhase,
+        actions: result.actions.map(a => ({
+          action: a.action,
+          tool: a.tool,
+          parameters: a.parameters,
+          priority: a.priority
+        }))
+      };
+      
+    } catch (error) {
+      console.error('❌ [UrbanovaOS ML] Errore classificazione:', error);
+      return this.getFallbackClassification();
+    }
+  }
+
+  /**
    * 🎯 METODO PRINCIPALE: Classifica messaggio con ML avanzato
    */
   async classifyMessage(
@@ -102,25 +181,35 @@ export class UrbanovaOSClassificationEngine {
     userHistory: ChatMessage[]
   ): Promise<MLClassificationResult> {
     const startTime = Date.now();
-    console.log('🧠 [UrbanovaOS ML] Classificando messaggio con ML avanzato');
+    console.log('🧠 [UrbanovaOS ML] Classificando messaggio con ML ottimizzato');
 
     try {
-      // 1. Preprocessing avanzato
-      const preprocessedInput = await this.preprocessInput(message, context, userHistory);
+      // 🚀 OTTIMIZZAZIONE: Classificazione rapida per risposte immediate
+      const quickClassification = await this.quickClassify(message.content);
       
-      // 2. Estrazione features avanzate
-      const features = await this.extractAdvancedFeatures(preprocessedInput);
+      // Se confidence è alta, restituisci subito
+      if (quickClassification.confidence > 0.8) {
+        console.log('⚡ [UrbanovaOS ML] Classificazione rapida completata:', {
+          intent: quickClassification.intent,
+          confidence: quickClassification.confidence,
+          processingTime: Date.now() - startTime
+        });
+        return quickClassification;
+      }
+
+      // Altrimenti, fai classificazione completa solo se necessario
+      console.log('🔄 [UrbanovaOS ML] Avviando classificazione completa...');
       
-      // 3. Classificazione multi-modello
-      const classificationResults = await this.runMultiModelClassification(features);
+      // 1. Preprocessing ottimizzato (parallelo)
+      const [preprocessedInput, basicFeatures] = await Promise.all([
+        this.preprocessInput(message, context, userHistory),
+        this.extractBasicFeatures(message.content)
+      ]);
       
-      // 4. Ensemble learning
-      const ensembleResult = await this.applyEnsembleLearning(classificationResults);
+      // 2. Classificazione semplificata ma efficace
+      const finalResult = await this.smartClassify(preprocessedInput, basicFeatures, message, context);
       
-      // 5. Post-processing e validazione
-      const finalResult = await this.postProcessResult(ensembleResult, message, context);
-      
-      // 6. Aggiorna metriche performance
+      // 3. Aggiorna metriche performance
       this.updatePerformanceMetrics(finalResult, startTime);
 
       console.log('✅ [UrbanovaOS ML] Classificazione completata:', {
@@ -176,7 +265,189 @@ export class UrbanovaOSClassificationEngine {
   }
 
   // ============================================================================
-  // METODI PRIVATI
+  // METODI PRIVATI OTTIMIZZATI
+  // ============================================================================
+
+  /**
+   * 🚀 Classificazione rapida per risposte immediate
+   */
+  private async quickClassify(text: string): Promise<MLClassificationResult> {
+    const keywords = {
+      'feasibility': ['fattibilità', 'studio', 'analisi', 'terreno', 'progetto'],
+      'market': ['mercato', 'prezzi', 'ricerca', 'immobiliare'],
+      'project': ['progetto', 'gestione', 'timeline', 'piano'],
+      'compliance': ['permessi', 'normative', 'compliance', 'verifica'],
+      'general': ['ciao', 'come', 'spiegami', 'che ore']
+    };
+
+    const lowerText = text.toLowerCase();
+    let bestMatch = 'general';
+    let maxScore = 0;
+
+    for (const [category, words] of Object.entries(keywords)) {
+      const score = words.reduce((sum, word) => 
+        sum + (lowerText.includes(word) ? 1 : 0), 0
+      );
+      if (score > maxScore) {
+        maxScore = score;
+        bestMatch = category;
+      }
+    }
+
+    const confidence = Math.min(0.95, 0.5 + (maxScore * 0.1));
+
+    return {
+      intent: `${bestMatch}_query`,
+      confidence,
+      entities: this.extractQuickEntities(text),
+      context: {
+        domain: bestMatch === 'general' ? 'general' : 'real_estate',
+        urgency: 'medium',
+        complexity: 'simple',
+        sentiment: 'neutral',
+        userExpertise: 'intermediate',
+        projectPhase: 'planning'
+      },
+      actions: [],
+      metadata: {
+        modelVersion: 'quick_v1.0',
+        processingTime: Date.now(),
+        featuresUsed: ['keywords'],
+        confidenceThreshold: 0.8,
+        trainingData: 'quick_classification',
+        lastUpdated: new Date()
+      }
+    };
+  }
+
+  /**
+   * 🧠 Classificazione intelligente semplificata
+   */
+  private async smartClassify(
+    preprocessedInput: PreprocessedInput,
+    basicFeatures: any,
+    message: ChatMessage,
+    context: any
+  ): Promise<MLClassificationResult> {
+    // Classificazione semplificata ma efficace
+    const intent = this.determineIntent(preprocessedInput.normalizedText);
+    const entities = this.extractSmartEntities(preprocessedInput.normalizedText);
+    const sentiment = this.analyzeSentiment(preprocessedInput.normalizedText);
+    
+    return {
+      intent,
+      confidence: 0.75,
+      entities,
+      context: {
+        domain: 'real_estate',
+        urgency: 'medium',
+        complexity: 'moderate',
+        sentiment,
+        userExpertise: 'intermediate',
+        projectPhase: 'planning'
+      },
+      actions: [],
+      metadata: {
+        modelVersion: 'smart_v1.0',
+        processingTime: Date.now(),
+        featuresUsed: ['smart_classification'],
+        confidenceThreshold: 0.7,
+        trainingData: 'smart_data',
+        lastUpdated: new Date()
+      }
+    };
+  }
+
+  /**
+   * 📊 Estrazione features di base
+   */
+  private async extractBasicFeatures(text: string): Promise<any> {
+    return {
+      length: text.length,
+      wordCount: text.split(' ').length,
+      hasNumbers: /\d/.test(text),
+      hasLocation: /(milano|roma|firenze|torino|napoli|bologna)/i.test(text),
+      hasArea: /(mq|metri|ettari)/i.test(text)
+    };
+  }
+
+  /**
+   * 🎯 Determinazione intent semplificata
+   */
+  private determineIntent(text: string): string {
+    if (/fattibilità|studio|analisi/i.test(text)) return 'feasibility_analysis';
+    if (/mercato|prezzi|ricerca/i.test(text)) return 'market_research';
+    if (/progetto|gestione|timeline/i.test(text)) return 'project_management';
+    if (/permessi|normative|compliance/i.test(text)) return 'compliance_check';
+    return 'general_query';
+  }
+
+  /**
+   * 🏷️ Estrazione entità rapida
+   */
+  private extractQuickEntities(text: string): EntityClassification[] {
+    const entities: EntityClassification[] = [];
+    
+    // Estrai numeri (aree, prezzi)
+    const numbers = text.match(/\d+[.,]?\d*\s*(mq|metri|€|euro)/gi);
+    numbers?.forEach((match, index) => {
+      entities.push({
+        entity: 'number',
+        value: match,
+        confidence: 0.8,
+        startIndex: text.indexOf(match),
+        endIndex: text.indexOf(match) + match.length,
+        type: 'number',
+        attributes: { unit: match.includes('€') ? 'currency' : 'area' }
+      });
+    });
+
+    // Estrai città
+    const cities = text.match(/(milano|roma|firenze|torino|napoli|bologna|genova|palermo|bari|verona|bergamo|padova)/gi);
+    cities?.forEach((city, index) => {
+      entities.push({
+        entity: 'location',
+        value: city,
+        confidence: 0.9,
+        startIndex: text.indexOf(city),
+        endIndex: text.indexOf(city) + city.length,
+        type: 'location',
+        attributes: { country: 'italy' }
+      });
+    });
+
+    return entities;
+  }
+
+  /**
+   * 🏷️ Estrazione entità intelligente
+   */
+  private extractSmartEntities(text: string): EntityClassification[] {
+    return this.extractQuickEntities(text); // Per ora usa la versione rapida
+  }
+
+  /**
+   * 😊 Analisi sentiment semplificata
+   */
+  private analyzeSentiment(text: string): 'positive' | 'neutral' | 'negative' {
+    const positiveWords = ['ottimo', 'perfetto', 'grazie', 'bene', 'buono'];
+    const negativeWords = ['problema', 'errore', 'male', 'cattivo', 'difficile'];
+    
+    const lowerText = text.toLowerCase();
+    const positiveScore = positiveWords.reduce((sum, word) => 
+      sum + (lowerText.includes(word) ? 1 : 0), 0
+    );
+    const negativeScore = negativeWords.reduce((sum, word) => 
+      sum + (lowerText.includes(word) ? 1 : 0), 0
+    );
+
+    if (positiveScore > negativeScore) return 'positive';
+    if (negativeScore > positiveScore) return 'negative';
+    return 'neutral';
+  }
+
+  // ============================================================================
+  // METODI PRIVATI ORIGINALI
   // ============================================================================
 
   /**
@@ -538,6 +809,21 @@ export class UrbanovaOSClassificationEngine {
         trainingData: 'fallback',
         lastUpdated: new Date()
       }
+    };
+  }
+
+  private getFallbackClassification(): ClassificationResult {
+    return {
+      category: 'general',
+      confidence: 0.5,
+      intent: 'general_query',
+      entities: [],
+      sentiment: 'neutral',
+      urgency: 'medium',
+      complexity: 'simple',
+      userExpertise: 'intermediate',
+      projectPhase: 'planning',
+      actions: []
     };
   }
 

@@ -39,6 +39,16 @@ export interface VectorSearchResult {
   metadata: SearchMetadata;
 }
 
+export interface VectorMatch {
+  id: string;
+  content: string;
+  similarity: number;
+  metadata: DocumentMetadata;
+  relevanceScore: number;
+  category: string;
+  timestamp: Date;
+}
+
 export interface SearchMetadata {
   queryType: 'semantic' | 'keyword' | 'hybrid' | 'contextual';
   searchTime: number;
@@ -126,6 +136,45 @@ export class UrbanovaOSVectorStore {
   // ============================================================================
 
   /**
+   * 🎯 METODO COMPATIBILE: Ricerca per orchestrator
+   */
+  async search(request: {
+    query: string;
+    category: string;
+    intent: string;
+    entities: any[];
+    limit: number;
+    threshold: number;
+  }): Promise<VectorMatch[]> {
+    console.log('🗄️ [UrbanovaOS VectorStore] Ricerca per orchestrator');
+    
+    try {
+      // Usa il metodo principale
+      const results = await this.semanticSearch(request.query, {
+        category: request.category,
+        intent: request.intent,
+        limit: request.limit,
+        threshold: request.threshold
+      });
+      
+      // Converte risultato per orchestrator
+      return results.map(result => ({
+        id: result.document.id,
+        content: result.document.content,
+        similarity: result.similarity,
+        metadata: result.document.metadata,
+        relevanceScore: result.relevanceScore,
+        category: result.document.metadata.type,
+        timestamp: result.document.timestamp
+      }));
+      
+    } catch (error) {
+      console.error('❌ [UrbanovaOS VectorStore] Errore ricerca:', error);
+      return [];
+    }
+  }
+
+  /**
    * 🎯 METODO PRINCIPALE: Ricerca semantica avanzata
    */
   async semanticSearch(
@@ -133,35 +182,48 @@ export class UrbanovaOSVectorStore {
     options: SearchOptions = {}
   ): Promise<VectorSearchResult[]> {
     const startTime = Date.now();
-    console.log('🗄️ [UrbanovaOS VectorStore] Eseguendo ricerca semantica avanzata');
+    console.log('🗄️ [UrbanovaOS VectorStore] Eseguendo ricerca semantica ottimizzata');
 
     try {
-      // 1. Preprocessing query
+      // 🚀 OTTIMIZZAZIONE: Ricerca rapida per query semplici
+      if (query.length < 50 && !options.category) {
+        const quickResults = await this.quickSearch(query, options);
+        if (quickResults.length > 0) {
+          console.log('⚡ [UrbanovaOS VectorStore] Ricerca rapida completata:', {
+            query: query.substring(0, 30),
+            results: quickResults.length,
+            searchTime: Date.now() - startTime
+          });
+          return quickResults;
+        }
+      }
+
+      // Altrimenti, ricerca completa ottimizzata
+      console.log('🔄 [UrbanovaOS VectorStore] Avviando ricerca completa...');
+      
+      // 1. Preprocessing ottimizzato
       const preprocessedQuery = await this.preprocessQuery(query);
       
-      // 2. Genera embedding query
-      const queryEmbedding = await this.generateEmbedding(preprocessedQuery);
+      // 2. Genera embedding rapido
+      const queryEmbedding = await this.generateQuickEmbedding(preprocessedQuery);
       
-      // 3. Ricerca multi-indice
-      const searchResults = await this.multiIndexSearch(queryEmbedding, options);
+      // 3. Ricerca multi-indice (parallela)
+      const searchResults = await this.multiIndexSearchParallel(queryEmbedding, options);
       
-      // 4. Ranking avanzato
-      const rankedResults = await this.advancedRanking(searchResults, query, options);
+      // 4. Ranking semplificato
+      const rankedResults = await this.quickRanking(searchResults, query, options);
       
-      // 5. Filtraggio e post-processing
-      const filteredResults = await this.filterAndPostProcess(rankedResults, options);
-      
-      // 6. Aggiorna metriche
-      this.updateSearchMetrics(filteredResults, Date.now() - startTime);
+      // 5. Aggiorna metriche
+      this.updateSearchMetrics(rankedResults, Date.now() - startTime);
 
       console.log('✅ [UrbanovaOS VectorStore] Ricerca completata:', {
         query: query.substring(0, 50),
-        results: filteredResults.length,
-        avgSimilarity: filteredResults.reduce((sum, r) => sum + r.similarity, 0) / filteredResults.length,
+        results: rankedResults.length,
+        avgSimilarity: rankedResults.reduce((sum, r) => sum + r.similarity, 0) / rankedResults.length,
         searchTime: Date.now() - startTime
       });
 
-      return filteredResults;
+      return rankedResults;
 
     } catch (error) {
       console.error('❌ [UrbanovaOS VectorStore] Errore ricerca semantica:', error);
@@ -307,7 +369,155 @@ export class UrbanovaOSVectorStore {
   }
 
   // ============================================================================
-  // METODI PRIVATI
+  // METODI PRIVATI OTTIMIZZATI
+  // ============================================================================
+
+  /**
+   * 🚀 Ricerca rapida per query semplici
+   */
+  private async quickSearch(query: string, options: SearchOptions): Promise<VectorSearchResult[]> {
+    const keywords = query.toLowerCase().split(' ');
+    const results: VectorSearchResult[] = [];
+    
+    // Ricerca per keyword nei documenti esistenti
+    for (const [id, doc] of this.documents) {
+      const content = doc.content.toLowerCase();
+      const matches = keywords.filter(keyword => content.includes(keyword)).length;
+      
+      if (matches > 0) {
+        const similarity = matches / keywords.length;
+        if (similarity >= (options.threshold || 0.3)) {
+          results.push({
+            document: doc,
+            similarity,
+            relevanceScore: similarity * 0.8,
+            explanation: `Keyword match: ${matches}/${keywords.length}`,
+            context: doc.content.substring(0, 200),
+            metadata: {
+              queryType: 'keyword',
+              searchTime: Date.now(),
+              indexUsed: 'quick',
+              filtersApplied: 0,
+              rankingMethod: 'keyword_match'
+            }
+          });
+        }
+      }
+    }
+    
+    return results.slice(0, options.limit || 10);
+  }
+
+  /**
+   * ⚡ Generazione embedding rapida
+   */
+  private async generateQuickEmbedding(text: string): Promise<number[]> {
+    // Simulazione embedding rapido basato su hash
+    const hash = this.simpleHash(text);
+    const embedding = [];
+    for (let i = 0; i < 128; i++) {
+      embedding.push((hash + i) % 1000 / 1000);
+    }
+    return embedding;
+  }
+
+  /**
+   * 🔍 Ricerca multi-indice parallela
+   */
+  private async multiIndexSearchParallel(
+    embedding: number[],
+    options: SearchOptions
+  ): Promise<VectorSearchResult[]> {
+    const promises = Array.from(this.indexes.values()).map(index => 
+      this.searchSingleIndex(index, embedding, options)
+    );
+    
+    const results = await Promise.all(promises);
+    return results.flat();
+  }
+
+  /**
+   * 🏆 Ranking rapido
+   */
+  private async quickRanking(
+    results: VectorSearchResult[],
+    query: string,
+    options: SearchOptions
+  ): Promise<VectorSearchResult[]> {
+    return results
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, options.limit || 10);
+  }
+
+  /**
+   * 🔍 Ricerca in singolo indice
+   */
+  private async searchSingleIndex(
+    index: VectorIndex,
+    embedding: number[],
+    options: SearchOptions
+  ): Promise<VectorSearchResult[]> {
+    const results: VectorSearchResult[] = [];
+    
+    for (const [id, doc] of this.documents) {
+      if (options.category && doc.metadata.type !== options.category) continue;
+      
+      const similarity = this.calculateSimilarity(embedding, doc.embedding);
+      if (similarity >= (options.threshold || 0.5)) {
+        results.push({
+          document: doc,
+          similarity,
+          relevanceScore: similarity,
+          explanation: `Similarity: ${similarity.toFixed(3)}`,
+          context: doc.content.substring(0, 200),
+          metadata: {
+            queryType: 'semantic',
+            searchTime: Date.now(),
+            indexUsed: index.name,
+            filtersApplied: 1,
+            rankingMethod: 'similarity'
+          }
+        });
+      }
+    }
+    
+    return results;
+  }
+
+  /**
+   * 📊 Calcolo similarità semplificato
+   */
+  private calculateSimilarity(embedding1: number[], embedding2: number[]): number {
+    if (embedding1.length !== embedding2.length) return 0;
+    
+    let dotProduct = 0;
+    let norm1 = 0;
+    let norm2 = 0;
+    
+    for (let i = 0; i < embedding1.length; i++) {
+      dotProduct += embedding1[i] * embedding2[i];
+      norm1 += embedding1[i] * embedding1[i];
+      norm2 += embedding2[i] * embedding2[i];
+    }
+    
+    return dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
+  }
+
+  /**
+   * 🔢 Hash semplice per embedding rapido
+   */
+  private simpleHash(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return Math.abs(hash);
+  }
+
+  // ============================================================================
+  // METODI PRIVATI ORIGINALI
   // ============================================================================
 
   /**

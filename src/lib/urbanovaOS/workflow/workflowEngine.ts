@@ -94,6 +94,17 @@ export interface WorkflowExecution {
   error?: WorkflowError;
 }
 
+export interface WorkflowExecutionResult {
+  workflowId: string;
+  executionId: string;
+  status: string;
+  results: any[];
+  executionTime: number;
+  success: boolean;
+  error?: string;
+  context: any;
+}
+
 export interface ExecutionContext {
   userId: string;
   sessionId: string;
@@ -153,6 +164,54 @@ export class UrbanovaOSWorkflowEngine {
   // ============================================================================
   // METODI PRINCIPALI
   // ============================================================================
+
+  /**
+   * 🎯 METODO COMPATIBILE: Esegue workflow per orchestrator
+   */
+  async executeWorkflows(request: {
+    trigger: string;
+    context: any;
+    userId: string;
+    sessionId: string;
+    parameters?: Record<string, any>;
+  }): Promise<WorkflowExecutionResult[]> {
+    console.log('⚙️ [UrbanovaOS WorkflowEngine] Esecuzione workflow per orchestrator');
+    
+    try {
+      // Usa il metodo principale
+      const result = await this.executeWorkflow(request.trigger, {
+        userId: request.userId,
+        sessionId: request.sessionId,
+        context: request.context,
+        parameters: request.parameters || {}
+      });
+      
+      // Converte risultato per orchestrator
+      return [{
+        workflowId: result.workflowId,
+        executionId: result.id,
+        status: result.status,
+        results: Array.from(result.variables.values()),
+        executionTime: result.metrics.executionTime,
+        success: result.status === 'completed',
+        error: result.error?.message,
+        context: result.context
+      }];
+      
+    } catch (error) {
+      console.error('❌ [UrbanovaOS WorkflowEngine] Errore esecuzione:', error);
+      return [{
+        workflowId: 'fallback',
+        executionId: `exec_${Date.now()}`,
+        status: 'failed',
+        results: [],
+        executionTime: 0,
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        context: request.context
+      }];
+    }
+  }
 
   /**
    * 🎯 METODO PRINCIPALE: Esegue workflow avanzato
@@ -572,6 +631,7 @@ export class UrbanovaOSWorkflowEngine {
 
   private loadPreBuiltWorkflows(): void {
     // Carica workflow pre-costruiti
+    this.loadUserMessageWorkflow();
     this.loadFeasibilityAnalysisWorkflow();
     this.loadMarketResearchWorkflow();
     this.loadProjectManagementWorkflow();
@@ -732,6 +792,60 @@ export class UrbanovaOSWorkflowEngine {
         }
       }
     });
+  }
+
+  private loadUserMessageWorkflow(): void {
+    // Carica workflow messaggi utente
+    const workflow: WorkflowDefinition = {
+      id: 'user_message',
+      name: 'Gestione Messaggi Utente',
+      description: 'Workflow per gestire messaggi generici degli utenti',
+      version: '1.0.0',
+      status: 'active',
+      triggers: [{
+        id: 'user-message-trigger',
+        type: 'user_action',
+        name: 'Messaggio Utente',
+        configuration: {},
+        conditions: [],
+        enabled: true
+      }],
+      steps: [
+        {
+          id: 'process-message',
+          name: 'Elaborazione Messaggio',
+          type: 'action',
+          configuration: { language: 'it', context: 'general' },
+          inputs: [],
+          outputs: [],
+          conditions: [],
+          retryPolicy: { maxRetries: 1, backoffMs: 500 },
+          timeout: 5000,
+          dependencies: []
+        },
+        {
+          id: 'generate-response',
+          name: 'Generazione Risposta',
+          type: 'action',
+          configuration: { style: 'friendly', length: 'medium' },
+          inputs: [],
+          outputs: [],
+          conditions: [],
+          retryPolicy: { maxRetries: 1, backoffMs: 500 },
+          timeout: 10000,
+          dependencies: ['process-message']
+        }
+      ],
+      variables: new Map(),
+      retryPolicy: { maxRetries: 1, backoffMultiplier: 1 },
+      timeout: 20000,
+      priority: 'medium',
+      estimatedDuration: '1-2 secondi',
+      complexity: 'simple'
+    };
+    
+    this.workflows.set('user_message', workflow);
+    console.log('💬 [UrbanovaOS WorkflowEngine] Workflow messaggi utente caricato');
   }
 
   private loadFeasibilityAnalysisWorkflow(): void {
