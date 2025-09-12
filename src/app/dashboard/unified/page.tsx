@@ -970,7 +970,7 @@ export default function UnifiedDashboardPage() {
                         value={inputValue}
                         onChange={e => setInputValue(e.target.value)}
                         onKeyPress={handleKeyPress}
-                        placeholder="Chiedi qualcosa a Urbanova..."
+                        placeholder="Chiedi qualcosa..."
                         className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                         disabled={isLoading}
                       />
@@ -1105,7 +1105,7 @@ export default function UnifiedDashboardPage() {
                         value={inputValue}
                         onChange={e => setInputValue(e.target.value)}
                         onKeyPress={handleKeyPress}
-                        placeholder="Chiedi qualcosa a Urbanova Tool OS..."
+                        placeholder="Chiedi qualcosa..."
                         className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         disabled={isLoading}
                       />
