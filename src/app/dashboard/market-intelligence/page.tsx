@@ -358,7 +358,7 @@ export default function MarketIntelligencePage() {
 
   if (loading) {
     return (
-      <DashboardLayout>
+      <DashboardLayout title="Market Intelligence">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -370,19 +370,11 @@ export default function MarketIntelligencePage() {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout title="Market Intelligence">
       <div className="space-y-6">
-        {/* Header con logo Urbanova e stato servizi */}
+        {/* Header con stato servizi */}
         <div className="flex justify-between items-start">
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-semibold text-gray-900">Urbanova</h1>
-              </div>
-            </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
                 Market Intelligence

@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageSquare, Bell, User, Users, Settings, X } from 'lucide-react';
+import { MessageSquare, Bell, User, Users, Settings, X, Building2 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
@@ -138,7 +138,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
           <div className="px-6 py-6 border-b border-gray-100">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-sm">
-                <BuildingIcon className="w-4 h-4 text-white" />
+                <Building2 className="w-4 h-4 text-white" />
               </div>
               <div>
                 <h1 className="text-lg font-semibold text-gray-900 tracking-tight">Urbanova</h1>
