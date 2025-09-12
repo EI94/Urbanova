@@ -477,9 +477,6 @@ export default function UnifiedDashboardPage() {
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <Building2 className="w-5 h-5 text-white" />
                 </div>
-                <div>
-                  <h1 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Urbanova</h1>
-                </div>
               </div>
             </div>
             <div className="flex items-center space-x-4">
