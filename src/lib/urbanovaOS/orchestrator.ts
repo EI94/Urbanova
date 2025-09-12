@@ -176,37 +176,69 @@ export class UrbanovaOSOrchestrator {
       messageId: request.message.id,
       priority: request.metadata.priority
     });
+    
+    // 🚀 OTTIMIZZAZIONE: Timeout per evitare richieste troppo lunghe
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Orchestrator timeout')), 20000); // 20s timeout
+    });
+    
+    const processPromise = this.processRequestInternal(request);
+    
+    return await Promise.race([processPromise, timeoutPromise]);
+  }
 
+  /**
+   * 🚀 METODO INTERNO: Processa richiesta senza timeout esterno
+   */
+  private async processRequestInternal(request: UrbanovaOSRequest): Promise<UrbanovaOSResponse> {
+    const startTime = Date.now();
+    
     try {
-      // 1. VALIDAZIONE E SICUREZZA
-      await this.validateAndSecureRequest(request);
+      // 🚀 OTTIMIZZAZIONE AGGRESSIVA: Esecuzione parallela per performance
+      console.log('⚡ [UrbanovaOS Orchestrator] Avviando processamento parallelo ottimizzato');
       
-      // 2. CLASSIFICAZIONE INTELLIGENTE
-      const classification = await this.classifyRequest(request);
+      // 1. VALIDAZIONE E SICUREZZA (parallela con classificazione)
+      const [validationResult, classification] = await Promise.all([
+        this.validateAndSecureRequest(request),
+        this.classifyRequest(request)
+      ]);
       
-      // 3. RICERCA VECTOR STORE
-      const vectorMatches = await this.searchVectorStore(request, classification);
+      // 2. RICERCA E WORKFLOW IN PARALLELO (se classification confidence è alta)
+      let vectorMatches: any[] = [];
+      let workflowResults: any[] = [];
       
-      // 4. ESECUZIONE WORKFLOW
-      const workflowResults = await this.executeWorkflows(request, classification, vectorMatches);
+      if (classification.confidence > 0.7) {
+        // Alta confidence: esegui tutto in parallelo
+        [vectorMatches, workflowResults] = await Promise.all([
+          this.searchVectorStore(request, classification),
+          this.executeWorkflows(request, classification, [])
+        ]);
+      } else {
+        // Bassa confidence: esegui sequenzialmente per sicurezza
+        vectorMatches = await this.searchVectorStore(request, classification);
+        workflowResults = await this.executeWorkflows(request, classification, vectorMatches);
+      }
       
-      // 5. ESECUZIONE PLUGIN
-      const pluginResults = await this.executePlugins(request, classification, vectorMatches);
+      // 3. PLUGIN E GENERAZIONE RISPOSTA IN PARALLELO
+      const [pluginResults, response] = await Promise.all([
+        this.executePlugins(request, classification, vectorMatches),
+        this.generateResponse(request, classification, vectorMatches, workflowResults, [])
+      ]);
       
-      // 6. GENERAZIONE RISPOSTA
-      const response = await this.generateResponse(request, classification, vectorMatches, workflowResults, pluginResults);
+      // 4. AGGIORNAMENTO METRICHE E NOTIFICA (parallela, non bloccante)
+      Promise.all([
+        this.updateMetrics(request, response, Date.now() - startTime),
+        this.notifyEvents(request, response)
+      ]).catch(error => {
+        console.warn('⚠️ [UrbanovaOS Orchestrator] Errore non critico in metriche/notifiche:', error);
+      });
       
-      // 7. AGGIORNAMENTO METRICHE
-      await this.updateMetrics(request, response, Date.now() - startTime);
-      
-      // 8. NOTIFICA EVENTI
-      await this.notifyEvents(request, response);
-      
-      console.log('✅ [UrbanovaOS Orchestrator] Richiesta processata con successo:', {
+      console.log('✅ [UrbanovaOS Orchestrator] Richiesta processata con successo (parallelo):', {
         sessionId: request.sessionId,
         executionTime: Date.now() - startTime,
         confidence: response.confidence,
-        systemsUsed: response.metadata.systemsUsed.length
+        systemsUsed: response.metadata.systemsUsed.length,
+        parallelExecution: true
       });
 
       return response;

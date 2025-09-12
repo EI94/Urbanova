@@ -478,8 +478,7 @@ export default function UnifiedDashboardPage() {
                   <Building2 className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Urbanova Dashboard</h1>
-                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Design Center & Project Management</p>
+                  <h1 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Urbanova</h1>
                 </div>
               </div>
             </div>

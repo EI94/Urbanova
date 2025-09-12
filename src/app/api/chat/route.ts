@@ -5,18 +5,31 @@ import { userMemoryService, UserMemoryProfile } from '@/lib/userMemoryService';
 import { naturalQueryProcessor } from '@/lib/naturalQueryProcessor';
 import { intelligentResponseService, IntelligentResponse } from '@/lib/intelligentResponseService';
 import { urbanovaOSOrchestrator, UrbanovaOSRequest, UrbanovaOSResponse } from '@/lib/urbanovaOS/orchestrator';
+import { responseCache, logCacheStats } from '@/lib/responseCache';
+import { retryLogic, logRetryStats } from '@/lib/retryLogic';
+import { OpenAIOptimizer } from '@/lib/openaiOptimizer';
 
 // Inizializza OpenAI solo se la chiave è disponibile
 let openai: OpenAI | null = null;
+let openaiOptimizer: OpenAIOptimizer | null = null;
+
 if (process.env.OPENAI_API_KEY) {
   try {
     openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
-    console.log('✅ [Chat API] OpenAI configurato correttamente');
+    openaiOptimizer = new OpenAIOptimizer(openai);
+    
+    // 🚀 PRE-CACHE: Inizializza cache per query comuni
+    responseCache.preCacheCommonQueries().catch(error => {
+      console.warn('⚠️ [Chat API] Errore pre-cache (non critico):', error);
+    });
+    
+    console.log('✅ [Chat API] OpenAI e Optimizer configurati correttamente');
   } catch (error) {
     console.error('❌ [Chat API] Errore configurazione OpenAI:', error);
     openai = null;
+    openaiOptimizer = null;
   }
 } else {
   console.warn('⚠️ [Chat API] OPENAI_API_KEY non configurata. Il chatbot funzionerà in modalità fallback.');
@@ -24,6 +37,7 @@ if (process.env.OPENAI_API_KEY) {
 
 export async function POST(request: NextRequest) {
   let message = '';
+  const startTime = Date.now();
   
   try {
     const requestData = await request.json();
@@ -32,6 +46,10 @@ export async function POST(request: NextRequest) {
 
     console.log('🤖 [Chat API] Richiesta chat:', { message: message.substring(0, 100) });
     console.log('🔑 [Chat API] OPENAI_API_KEY presente:', !!process.env.OPENAI_API_KEY);
+    
+    // 🚀 MONITORAGGIO: Log statistiche cache e retry
+    logCacheStats();
+    logRetryStats();
 
       // 🚀 URBANOVA OS - Sistema Enterprise avanzato
       console.log('🚀 [UrbanovaOS] Processando richiesta con architettura enterprise avanzata...');
@@ -138,8 +156,8 @@ export async function POST(request: NextRequest) {
     }
 
     // ESPERIENZA AGENTE UMANO: Gestione errori trasparente come Cursor
-    if (!openai) {
-      console.error('❌ [Chat API] Provider LLM non disponibile');
+    if (!openai || !openaiOptimizer) {
+      console.error('❌ [Chat API] Provider LLM o Optimizer non disponibile');
       return NextResponse.json({
         success: false,
         error: 'Problemi di connessione al provider del modello. Riprova tra qualche minuto.',
@@ -163,27 +181,70 @@ Servizi disponibili:
 
 Rispondi in italiano, in modo professionale e diretto. Sii specifico e fornisci consigli pratici. Non menzionare mai di essere un assistente AI.`;
 
-    console.log('🔄 [Chat API] Chiamata a OpenAI...');
+    // 🚀 OTTIMIZZAZIONE: Controlla cache prima di chiamare OpenAI
+    const cacheKey = { message, userId, userEmail };
+    const cachedResponse = responseCache.get(message, cacheKey);
     
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt,
-        },
-        {
-          role: 'user',
-          content: message,
-        },
-      ],
-      max_tokens: 500,
-      temperature: 0.7,
-    });
+    if (cachedResponse) {
+      console.log('🎯 [Chat API] Risposta da cache:', cachedResponse.response.substring(0, 100));
+      const response = cachedResponse.response;
+      
+      // Genera risposta finale con metadata cache
+      let finalResponse = response;
+      let finalMetadata: any = {
+        agentType: 'human-like',
+        provider: 'openai',
+        confidence: 0.9,
+        cached: true,
+        cacheHit: true
+      };
+      
+      // Aggiungi metadata Urbanova OS se disponibile
+      if (cachedResponse.metadata?.urbanovaOS) {
+        finalMetadata.urbanovaOS = cachedResponse.metadata.urbanovaOS;
+      }
+      
+      return NextResponse.json({
+        success: true,
+        response: finalResponse,
+        timestamp: new Date().toISOString(),
+        metadata: finalMetadata,
+        intent: userIntent,
+        projectPreview: projectPreview,
+      });
+    }
 
-    const response = completion.choices[0]?.message?.content || 'Mi dispiace, non sono riuscito a generare una risposta.';
+    console.log('🔄 [Chat API] Chiamata a OpenAI con optimizer aggressivo...');
+    
+    // 🚀 OTTIMIZZAZIONE AGGRESSIVA: Usa OpenAI Optimizer
+    const response = await retryLogic.execute(
+      () => openaiOptimizer!.optimizedCompletion({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt,
+          },
+          {
+            role: 'user',
+            content: message,
+          },
+        ],
+        max_tokens: 500,
+        temperature: 0.7,
+        priority: 'high', // Alta priorità per performance
+        timeout: 10000 // Timeout ridotto per performance
+      }),
+      'OpenAI Optimized Completion'
+    );
 
     console.log('✅ [Chat API] Risposta generata:', response.substring(0, 100));
+    
+    // 🚀 OTTIMIZZAZIONE: Salva risposta in cache
+    responseCache.set(message, cacheKey, response, {
+      urbanovaOS: urbanovaResponse?.metadata,
+      timestamp: Date.now()
+    });
 
     // ESPERIENZA AGENTE UMANO: Sempre OpenAI come risposta principale
     let finalResponse = response; // Risposta naturale di OpenAI
@@ -222,6 +283,17 @@ Rispondi in italiano, in modo professionale e diretto. Sii specifico e fornisci 
         missingFields: userIntent.missingFields
       };
     }
+
+    // 🚀 MONITORAGGIO: Log performance totale
+    const totalTime = Date.now() - startTime;
+    console.log(`⚡ [Chat API] Performance: ${totalTime}ms totali`);
+    
+    // Aggiungi metriche performance ai metadata
+    finalMetadata.performance = {
+      totalTime,
+      cacheStats: responseCache.getStats(),
+      retryStats: retryLogic.getStats()
+    };
 
     return NextResponse.json({
       success: true,
