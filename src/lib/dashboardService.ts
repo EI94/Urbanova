@@ -107,43 +107,64 @@ class DashboardService {
   /**
    * Sottoscrive ai cambiamenti della dashboard in tempo reale
    */
-  subscribeToDashboardUpdates(callback: (stats: DashboardStats) => void): () => void {
+  subscribeToDashboardUpdates(callback: (stats: DashboardStats) => void, userId?: string): () => void {
     console.log('🔄 [DashboardService] Sottoscrizione aggiornamenti dashboard...');
+
+    // 🔒 CONTROLLO AUTENTICAZIONE: Solo se l'utente è autenticato
+    if (!userId) {
+      console.warn('⚠️ [DashboardService] Utente non autenticato, skip sottoscrizione real-time');
+      // Restituisce callback vuoto per evitare errori
+      return () => {};
+    }
 
     const projectsRef = safeCollection(this.PROJECTS_COLLECTION);
     const activitiesRef = safeCollection(this.ACTIVITIES_COLLECTION);
 
-    // Sottoscrizione ai progetti
-    const projectsUnsubscribe = onSnapshot(projectsRef, async snapshot => {
-      console.log('🔄 [DashboardService] Progetti aggiornati, ricalcolo statistiche...');
+    // Sottoscrizione ai progetti con gestione errori
+    const projectsUnsubscribe = onSnapshot(
+      projectsRef, 
+      async snapshot => {
+        console.log('🔄 [DashboardService] Progetti aggiornati, ricalcolo statistiche...');
 
-      try {
-        const projects = this.parseProjectsSnapshot(snapshot);
-        const activities = await this.getRecentActivities(10);
-        const metrics = await this.getAllProjectMetrics();
+        try {
+          const projects = this.parseProjectsSnapshot(snapshot);
+          const activities = await this.getRecentActivities(10);
+          const metrics = await this.getAllProjectMetrics();
 
-        const stats = this.calculateDashboardStats(projects, activities, metrics);
-        callback(stats);
-      } catch (error) {
-        console.error('❌ [DashboardService] Errore aggiornamento dashboard:', error);
+          const stats = this.calculateDashboardStats(projects, activities, metrics);
+          callback(stats);
+        } catch (error) {
+          console.error('❌ [DashboardService] Errore aggiornamento dashboard:', error);
+        }
+      },
+      error => {
+        console.error('❌ [DashboardService] Errore listener progetti:', error);
+        // Non propagare l'errore per evitare loop infiniti
       }
-    });
+    );
 
-    // Sottoscrizione alle attività
-    const activitiesUnsubscribe = onSnapshot(activitiesRef, async snapshot => {
-      console.log('🔄 [DashboardService] Attività aggiornate, ricalcolo statistiche...');
+    // Sottoscrizione alle attività con gestione errori
+    const activitiesUnsubscribe = onSnapshot(
+      activitiesRef, 
+      async snapshot => {
+        console.log('🔄 [DashboardService] Attività aggiornate, ricalcolo statistiche...');
 
-      try {
-        const projects = await this.getAllProjects();
-        const activities = this.parseActivitiesSnapshot(snapshot);
-        const metrics = await this.getAllProjectMetrics();
+        try {
+          const projects = await this.getAllProjects();
+          const activities = this.parseActivitiesSnapshot(snapshot);
+          const metrics = await this.getAllProjectMetrics();
 
-        const stats = this.calculateDashboardStats(projects, activities, metrics);
-        callback(stats);
-      } catch (error) {
-        console.error('❌ [DashboardService] Errore aggiornamento dashboard:', error);
+          const stats = this.calculateDashboardStats(projects, activities, metrics);
+          callback(stats);
+        } catch (error) {
+          console.error('❌ [DashboardService] Errore aggiornamento dashboard:', error);
+        }
+      },
+      error => {
+        console.error('❌ [DashboardService] Errore listener attività:', error);
+        // Non propagare l'errore per evitare loop infiniti
       }
-    });
+    );
 
     return () => {
       projectsUnsubscribe();

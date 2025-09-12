@@ -123,6 +123,13 @@ export default function UnifiedDashboardPage() {
         setLoading(true);
         setError(null);
 
+        // 🔒 CONTROLLO AUTENTICAZIONE: Solo se l'utente è autenticato
+        if (!currentUser?.uid) {
+          console.warn('⚠️ [Unified Dashboard] Utente non autenticato, skip caricamento dati');
+          setLoading(false);
+          return;
+        }
+
         // Inizializza i dati della dashboard se necessario
         await dashboardService.initializeDashboardData();
 
@@ -152,7 +159,7 @@ export default function UnifiedDashboardPage() {
     };
 
     initializeDashboard();
-  }, []);
+  }, [currentUser?.uid]);
 
   // Sottoscrizione agli aggiornamenti in tempo reale
   useEffect(() => {
@@ -163,7 +170,7 @@ export default function UnifiedDashboardPage() {
     const unsubscribe = dashboardService.subscribeToDashboardUpdates(newStats => {
       console.log('🔄 [Unified Dashboard] Aggiornamento real-time ricevuto:', newStats);
       setStats(newStats);
-    });
+    }, currentUser?.uid);
 
     return unsubscribe;
   }, [stats]);
