@@ -2,9 +2,9 @@
 // Orchestratore principale per Urbanova OS con architettura enterprise
 
 import { ChatMessage } from '@/types/chat';
-import { ClassificationEngine } from './ml/classificationEngine';
-import { VectorStore } from './vector/vectorStore';
-import { WorkflowEngine } from './workflow/workflowEngine';
+import { UrbanovaOSClassificationEngine } from './ml/classificationEngine';
+import { UrbanovaOSVectorStore } from './vector/vectorStore';
+import { UrbanovaOSWorkflowEngine } from './workflow/workflowEngine';
 import { UrbanovaOSPluginSystem } from './plugins/pluginSystem';
 
 // ============================================================================
@@ -132,9 +132,9 @@ export interface Entity {
 // ============================================================================
 
 export class UrbanovaOSOrchestrator {
-  private classificationEngine: ClassificationEngine;
-  private vectorStore: VectorStore;
-  private workflowEngine: WorkflowEngine;
+  private classificationEngine: UrbanovaOSClassificationEngine;
+  private vectorStore: UrbanovaOSVectorStore;
+  private workflowEngine: UrbanovaOSWorkflowEngine;
   private pluginSystem: UrbanovaOSPluginSystem;
   private performanceMonitor: PerformanceMonitor;
   private healthChecker: HealthChecker;
@@ -144,9 +144,9 @@ export class UrbanovaOSOrchestrator {
   private metricsCollector: MetricsCollector;
 
   constructor() {
-    this.classificationEngine = new ClassificationEngine();
-    this.vectorStore = new VectorStore();
-    this.workflowEngine = new WorkflowEngine();
+    this.classificationEngine = new UrbanovaOSClassificationEngine();
+    this.vectorStore = new UrbanovaOSVectorStore();
+    this.workflowEngine = new UrbanovaOSWorkflowEngine();
     this.pluginSystem = new UrbanovaOSPluginSystem();
     this.performanceMonitor = new PerformanceMonitor();
     this.healthChecker = new HealthChecker();
@@ -579,15 +579,12 @@ export class UrbanovaOSOrchestrator {
   // ============================================================================
 
   private initializeSystems(): void {
-    console.log('🔧 [UrbanovaOS Orchestrator] Inizializzando sistemi');
+    console.log('🔧 [UrbanovaOS Orchestrator] Sistemi già inizializzati nel costruttore');
     
-    // Inizializza tutti i sistemi
-    this.classificationEngine.initialize();
-    this.vectorStore.initialize();
-    this.workflowEngine.initialize();
-    this.pluginSystem.initialize();
+    // I sistemi si inizializzano automaticamente nel costruttore
+    // Non è necessario chiamare initialize() esplicitamente
     
-    console.log('✅ [UrbanovaOS Orchestrator] Sistemi inizializzati');
+    console.log('✅ [UrbanovaOS Orchestrator] Sistemi pronti');
   }
 
   private startMonitoring(): void {
