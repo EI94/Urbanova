@@ -120,7 +120,16 @@ class FirebaseNotificationService {
       return notification;
     } catch (error) {
       console.error('Error creating notification:', error);
-      throw new Error('Failed to create notification');
+      
+      // Se è un errore di permessi Firestore, non bloccare l'app
+      if (error instanceof Error && error.message.includes('permission')) {
+        console.warn('⚠️ [NotificationService] Permessi Firestore insufficienti per creare notifiche');
+        return null as any; // Ritorna null invece di lanciare errore
+      }
+      
+      // Per altri errori, logga ma non blocca l'app
+      console.warn('⚠️ [NotificationService] Errore creazione notifica (non critico):', error);
+      return null as any;
     }
   }
 

@@ -351,28 +351,6 @@ service cloud.firestore {
                      get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.ownerId == request.auth.uid;
     }
     
-    // ============================================================================
-    // NOTIFICATIONS COLLECTION
-    // ============================================================================
-    
-    match /notifications/{notificationId} {
-      // Lettura: solo l'owner della notifica
-      allow read: if isAuthenticated() && 
-                   resource.data.userId == request.auth.uid;
-      
-      // Scrittura: solo l'owner della notifica
-      allow create, update: if isAuthenticated() && 
-                             request.resource.data.userId == request.auth.uid;
-      
-      // Eliminazione: solo l'owner della notifica
-      allow delete: if isAuthenticated() && 
-                     resource.data.userId == request.auth.uid;
-      
-      // Eccezione: admin possono leggere tutte le notifiche
-      allow read: if isAuthenticated() && 
-                   exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-    }
     
     // ============================================================================
     // DEFAULT DENY

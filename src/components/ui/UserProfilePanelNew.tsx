@@ -129,6 +129,45 @@ export default function UserProfilePanelNew({ isOpen, onClose }: UserProfilePane
     }
   };
 
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !userId) return;
+
+    // Validazione file
+    if (file.size > 5 * 1024 * 1024) { // 5MB
+      toast.error('L\'immagine deve essere inferiore a 5MB');
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Seleziona un file immagine valido');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      console.log('📸 [UserProfilePanel] Upload immagine:', file.name);
+
+      // Crea un URL temporaneo per l'anteprima
+      const tempUrl = URL.createObjectURL(file);
+      
+      // Aggiorna il profilo con l'URL temporaneo
+      const updatedProfile = await firebaseUserProfileService.updateUserProfile(userId, {
+        avatar: tempUrl
+      });
+
+      if (updatedProfile) {
+        setProfile(updatedProfile);
+        toast.success('Immagine caricata con successo');
+      }
+    } catch (error) {
+      console.error('❌ [UserProfilePanel] Errore upload immagine:', error);
+      toast.error('Errore nel caricamento dell\'immagine');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleSaveProfile = async () => {
     if (!userId || !profileUpdate) return;
 
@@ -272,9 +311,19 @@ export default function UserProfilePanelNew({ isOpen, onClose }: UserProfilePane
                           <User className="w-8 h-8 text-gray-400" />
                         )}
                       </div>
-                      <button className="absolute bottom-0 right-0 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
+                      <button 
+                        onClick={() => document.getElementById('avatar-upload')?.click()}
+                        className="absolute bottom-0 right-0 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
+                      >
                         <Camera className="w-4 h-4" />
                       </button>
+                      <input
+                        id="avatar-upload"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleImageUpload}
+                      />
                     </div>
                   </div>
 
