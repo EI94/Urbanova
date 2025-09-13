@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import {
   Shield,
   FileText,
@@ -23,6 +22,7 @@ import {
   Settings,
 } from 'lucide-react';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 
 // ============================================================================
 // TYPES
@@ -73,16 +73,16 @@ export default function PermitsCompliancePage() {
   const loadData = async () => {
     try {
       // Mock permits data
-    const mockPermits: Permit[] = [
-      {
+      const mockPermits: Permit[] = [
+        {
           id: '1',
-        name: 'Permesso di Costruire',
+          name: 'Permesso di Costruire',
           type: 'building',
           status: 'approved',
           priority: 'high',
           applicationDate: '2024-01-15',
           expiryDate: '2025-01-15',
-        cost: 2500,
+          cost: 2500,
           progress: 100,
           documents: ['domanda.pdf', 'planimetrie.pdf', 'relazione_tecnica.pdf'],
           requirements: ['Planimetrie', 'Relazione Tecnica', 'Certificato Agibilità'],
@@ -101,68 +101,68 @@ export default function PermitsCompliancePage() {
         },
         {
           id: '3',
-          name: 'Certificato di Prevenzione Incendi',
+          name: 'Certificato Agibilità',
           type: 'safety',
           status: 'pending',
-          priority: 'high',
-          applicationDate: '2024-01-18',
+          priority: 'medium',
+          applicationDate: '2024-02-01',
           cost: 1200,
-          progress: 40,
-          documents: ['domanda_vvf.pdf', 'progetto_antincendio.pdf'],
-          requirements: ['Progetto Antincendio', 'Collaudo Impianti'],
+          progress: 30,
+          documents: ['domanda_agibilita.pdf'],
+          requirements: ['Collaudo Statico', 'Certificato Prevenzione Incendi'],
         },
         {
           id: '4',
           name: 'Variante Urbanistica',
           type: 'zoning',
           status: 'rejected',
-          priority: 'medium',
-          applicationDate: '2023-12-10',
+          priority: 'high',
+          applicationDate: '2024-01-10',
           cost: 3000,
-        progress: 0,
-          documents: ['domanda_variante.pdf'],
-          requirements: ['Studio di Fattibilità', 'Piano Particolareggiato'],
-          notes: 'Rigettata per mancanza di documentazione completa',
+          progress: 0,
+          documents: ['domanda_variante.pdf', 'studio_impatto.pdf'],
+          requirements: ['Studio Impatto Ambientale', 'Parere Soprintendenza'],
+          notes: 'Rigettato per mancanza documentazione paesaggistica',
         },
       ];
 
-      // Mock compliance checks data
+      // Mock compliance data
       const mockCompliance: ComplianceCheck[] = [
         {
           id: '1',
-          name: 'Controllo Sicurezza Lavoratori',
+          name: 'Sicurezza Antincendio',
           category: 'safety',
           status: 'compliant',
           lastCheck: '2024-01-15',
-          nextCheck: '2024-04-15',
+          nextCheck: '2024-07-15',
           responsible: 'Mario Rossi',
         },
         {
           id: '2',
-          name: 'Monitoraggio Emissioni',
+          name: 'Emissioni Atmosferiche',
           category: 'environmental',
           status: 'non_compliant',
           lastCheck: '2024-01-10',
           nextCheck: '2024-02-10',
           responsible: 'Giulia Bianchi',
-          notes: 'Valori superiori ai limiti consentiti',
+          notes: 'Superamento limiti NOx - richiesta installazione filtro',
         },
         {
           id: '3',
-          name: 'Verifica Documentazione Legale',
+          name: 'Conformità Urbanistica',
           category: 'legal',
           status: 'pending',
-          lastCheck: '2023-12-20',
-          nextCheck: '2024-01-20',
+          lastCheck: '2024-01-05',
+          nextCheck: '2024-03-05',
           responsible: 'Luca Verdi',
         },
         {
           id: '4',
-          name: 'Controllo Contabilità',
+          name: 'Bilancio Ambientale',
           category: 'financial',
-          status: 'compliant',
-          lastCheck: '2024-01-05',
-          nextCheck: '2024-04-05',
+          status: 'not_applicable',
+          lastCheck: '2024-01-01',
+          nextCheck: '2024-12-31',
           responsible: 'Anna Neri',
         },
       ];
@@ -170,7 +170,7 @@ export default function PermitsCompliancePage() {
       setPermits(mockPermits);
       setComplianceChecks(mockCompliance);
     } catch (error) {
-      console.error('Error loading permits and compliance data:', error);
+      console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
@@ -252,188 +252,31 @@ export default function PermitsCompliancePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <DashboardLayout title="Permessi & Compliance">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-white" />
-                </div>
-          <div>
-                  <h1 className="text-xl font-semibold text-gray-900">Urbanova Dashboard</h1>
-                  <p className="text-sm text-gray-500">Design Center & Project Management</p>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button className="p-2 text-gray-400 hover:text-gray-600">
-                <Settings className="w-5 h-5" />
-              </button>
+    <DashboardLayout title="Permessi & Compliance">
+      <div className="flex-1 p-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                <Shield className="w-8 h-8 text-blue-600" />
+                Permessi & Compliance
+              </h1>
+              <p className="text-gray-600 mt-2">
+                Gestisci permessi edilizi e verifiche di conformità
+              </p>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div className="flex">
-        {/* Sidebar */}
-        <div className="w-64 bg-white shadow-sm border-r min-h-screen">
-          <div className="p-4">
-            <nav className="space-y-2">
-              {/* Sezione principale */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  DASHBOARD
-                </h3>
-                <Link
-                  href="/dashboard"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <BarChart3 className="w-4 h-4 mr-3" />
-                  Dashboard
-                </Link>
-              </div>
-
-              {/* Discovery */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  DISCOVERY
-                </h3>
-                <Link
-                  href="/dashboard/market-intelligence"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Search className="w-4 h-4 mr-3" />
-                  Market Intelligence
-                </Link>
-                <Link
-                  href="/dashboard/feasibility-analysis"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <FileText className="w-4 h-4 mr-3" />
-                  Analisi Fattibilità
-                </Link>
-                <Link
-                  href="/dashboard/design-center"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Target className="w-4 h-4 mr-3" />
-                  Design Center
-                </Link>
-              </div>
-
-              {/* Planning & Compliance */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  PLANNING/COMPLIANCE
-                </h3>
-                <Link
-                  href="/dashboard/business-plan"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <FileText className="w-4 h-4 mr-3" />
-                  Business Plan
-                </Link>
-                <Link
-                  href="/dashboard/permits-compliance"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors bg-blue-100 text-blue-700"
-                >
-                  <Shield className="w-4 h-4 mr-3" />
-                  Permessi & Compliance
-                </Link>
-                <Link
-                  href="/dashboard/project-timeline"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Calendar className="w-4 h-4 mr-3" />
-                  Project Timeline AI
-                </Link>
-              </div>
-
-              {/* Progetti */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  PROGETTI
-                </h3>
-                <Link
-                  href="/dashboard/progetti"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Building className="w-4 h-4 mr-3" />
-                  Progetti
-                </Link>
-                <Link
-                  href="/dashboard/progetti/nuovo"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Plus className="w-4 h-4 mr-3" />
-                  Nuovo Progetto
-                </Link>
-                <Link
-                  href="/dashboard/mappa-progetti"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Target className="w-4 h-4 mr-3" />
-                  Mappa Progetti
-                </Link>
-              </div>
-
-              {/* Gestione Progetti */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  GESTIONE PROGETTI
-                </h3>
-                <Link
-                  href="/dashboard/project-management"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <FileText className="w-4 h-4 mr-3" />
-                  Gestione Progetti
-                </Link>
-                <Link
-                  href="/dashboard/project-management/documents"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <FileText className="w-4 h-4 mr-3" />
-                  Documenti
-                </Link>
-                <Link
-                  href="/dashboard/project-management/meetings"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <Calendar className="w-4 h-4 mr-3" />
-                  Riunioni
-                </Link>
-              </div>
-
-              {/* Marketing/Sales */}
-              <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  MARKETING/SALES
-                </h3>
-                <Link
-                  href="/dashboard/marketing"
-                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-                >
-                  <BarChart3 className="w-4 h-4 mr-3" />
-                  Marketing
-                </Link>
-              </div>
-            </nav>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 p-6">
           {/* Tabs */}
           <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
             <button
@@ -456,7 +299,7 @@ export default function PermitsCompliancePage() {
             >
               Compliance
             </button>
-                <button
+            <button
               onClick={() => setActiveTab('reports')}
               className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 activeTab === 'reports'
@@ -465,7 +308,7 @@ export default function PermitsCompliancePage() {
               }`}
             >
               Report
-                </button>
+            </button>
           </div>
 
           {/* Search and Filters */}
@@ -494,89 +337,84 @@ export default function PermitsCompliancePage() {
                 <option value="expired">Scaduto</option>
               </select>
             </div>
+
+            <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <Plus className="w-4 h-4 mr-2" />
+              Nuovo Permesso
+            </button>
           </div>
 
           {/* Content based on active tab */}
           {activeTab === 'permits' && (
             <div className="space-y-4">
-              {filteredPermits.map(permit => (
-                <div key={permit.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                        <FileText className="w-6 h-6 text-gray-600" />
+              {filteredPermits.map((permit) => (
+                <div key={permit.id} className="bg-white rounded-lg shadow-sm border p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <FileText className="w-5 h-5 text-gray-400" />
+                        <h3 className="text-lg font-semibold text-gray-900">{permit.name}</h3>
+                        <span className="text-sm text-gray-500">{getTypeLabel(permit.type)}</span>
                       </div>
-                    <div>
-                        <h3 className="font-semibold text-gray-900">{permit.name}</h3>
-                        <p className="text-sm text-gray-600">{getTypeLabel(permit.type)}</p>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <div>
+                          <p className="text-sm text-gray-500">Richiesta</p>
+                          <p className="font-medium">{formatDate(permit.applicationDate)}</p>
+                        </div>
+                        {permit.expiryDate && (
+                          <div>
+                            <p className="text-sm text-gray-500">Scadenza</p>
+                            <p className="font-medium">{formatDate(permit.expiryDate)}</p>
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-sm text-gray-500">Costo</p>
+                          <p className="font-medium">{formatCurrency(permit.cost)}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Progresso</p>
+                          <div className="flex items-center space-x-2">
+                            <div className="flex-1 bg-gray-200 rounded-full h-2">
+                              <div 
+                                className="bg-blue-600 h-2 rounded-full" 
+                                style={{ width: `${permit.progress}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-sm font-medium">{permit.progress}%</span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(permit.status)}`}>
-                        {getStatusLabel(permit.status)}
-                      </span>
-                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(permit.priority)}`}>
-                        {getPriorityLabel(permit.priority)}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">
-                        Richiesta: {formatDate(permit.applicationDate)}
-                      </span>
-                    </div>
-                    {permit.expiryDate && (
-                      <div className="flex items-center space-x-2">
-                        <Clock className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm text-gray-600">
-                          Scadenza: {formatDate(permit.expiryDate)}
-                        </span>
-                </div>
-                    )}
-                    <div className="flex items-center space-x-2">
-                      <CreditCard className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">
-                        Costo: {formatCurrency(permit.cost)}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">
-                        Progresso: {permit.progress}%
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-                    <div 
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${permit.progress}%` }}
-                    ></div>
-                </div>
 
-                  {permit.notes && (
-                    <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <p className="text-sm text-yellow-800">{permit.notes}</p>
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-wrap gap-2">
-                      {permit.requirements.map(requirement => (
-                        <span key={requirement} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                          {requirement}
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(permit.status)}`}>
+                          {getStatusLabel(permit.status)}
                         </span>
-                      ))}
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(permit.priority)}`}>
+                          {getPriorityLabel(permit.priority)}
+                        </span>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {permit.requirements.map((req, index) => (
+                          <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+                            {req}
+                          </span>
+                        ))}
+                      </div>
+
+                      {permit.notes && (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
+                          <p className="text-sm text-yellow-800">{permit.notes}</p>
+                        </div>
+                      )}
                     </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+
+                    <div className="flex items-center space-x-2 ml-4">
+                      <button className="p-2 text-gray-400 hover:text-gray-600">
                         <Download className="w-4 h-4" />
                       </button>
-                      <button className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
+                      <button className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
                         Gestisci
                       </button>
                     </div>
@@ -588,137 +426,65 @@ export default function PermitsCompliancePage() {
 
           {activeTab === 'compliance' && (
             <div className="space-y-4">
-              {complianceChecks.map(check => (
-                <div key={check.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                        <CheckCircle className="w-6 h-6 text-gray-600" />
+              {complianceChecks.map((check) => (
+                <div key={check.id} className="bg-white rounded-lg shadow-sm border p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <CheckCircle className="w-5 h-5 text-gray-400" />
+                        <h3 className="text-lg font-semibold text-gray-900">{check.name}</h3>
+                        <span className="text-sm text-gray-500 capitalize">{check.category}</span>
                       </div>
-                    <div>
-                        <h3 className="font-semibold text-gray-900">{check.name}</h3>
-                        <p className="text-sm text-gray-600 capitalize">{check.category}</p>
-                    </div>
-                    </div>
-                    
-                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(check.status)}`}>
-                      {getStatusLabel(check.status)}
-                    </span>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">
-                        Ultimo Controllo: {formatDate(check.lastCheck)}
-                      </span>
-                </div>
-                    <div className="flex items-center space-x-2">
-                      <Clock className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">
-                        Prossimo: {formatDate(check.nextCheck)}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">
-                        Responsabile: {check.responsible}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  {check.notes && (
-                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                      <p className="text-sm text-red-800">{check.notes}</p>
-                </div>
-                  )}
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                          <p className="text-sm text-gray-500">Ultimo Controllo</p>
+                          <p className="font-medium">{formatDate(check.lastCheck)}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Prossimo Controllo</p>
+                          <p className="font-medium">{formatDate(check.nextCheck)}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Responsabile</p>
+                          <p className="font-medium">{check.responsible}</p>
+                        </div>
+                      </div>
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <button className="px-3 py-1 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors">
-                        Esegui Controllo
-                      </button>
-                      <button className="px-3 py-1 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors">
-                        Visualizza Dettagli
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(check.status)}`}>
+                          {getStatusLabel(check.status)}
+                        </span>
+                      </div>
+
+                      {check.notes && (
+                        <div className="bg-red-50 border border-red-200 rounded p-3">
+                          <p className="text-sm text-red-800">{check.notes}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center space-x-2 ml-4">
+                      <button className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                        Gestisci
                       </button>
                     </div>
                   </div>
                 </div>
               ))}
-              </div>
+            </div>
           )}
 
           {activeTab === 'reports' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900">Permessi Totali</h3>
-                  <FileText className="w-5 h-5 text-blue-600" />
-                </div>
-                <div className="text-2xl font-bold text-gray-900 mb-2">{permits.length}</div>
-                <p className="text-sm text-gray-600">Permessi registrati</p>
-              </div>
-
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900">In Attesa</h3>
-                  <Clock className="w-5 h-5 text-yellow-600" />
-                        </div>
-                <div className="text-2xl font-bold text-gray-900 mb-2">
-                  {permits.filter(p => p.status === 'pending').length}
-                </div>
-                <p className="text-sm text-gray-600">Permessi in attesa di approvazione</p>
-              </div>
-
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900">Approvati</h3>
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                </div>
-                <div className="text-2xl font-bold text-gray-900 mb-2">
-                  {permits.filter(p => p.status === 'approved').length}
-                </div>
-                <p className="text-sm text-gray-600">Permessi approvati</p>
-              </div>
-
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900">Non Conformi</h3>
-                  <AlertTriangle className="w-5 h-5 text-red-600" />
-                      </div>
-                <div className="text-2xl font-bold text-gray-900 mb-2">
-                  {complianceChecks.filter(c => c.status === 'non_compliant').length}
-                      </div>
-                <p className="text-sm text-gray-600">Controlli non conformi</p>
-                    </div>
-
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900">Costo Totale</h3>
-                  <CreditCard className="w-5 h-5 text-purple-600" />
-                      </div>
-                <div className="text-2xl font-bold text-gray-900 mb-2">
-                  {formatCurrency(permits.reduce((sum, p) => sum + p.cost, 0))}
-                      </div>
-                <p className="text-sm text-gray-600">Spesa totale permessi</p>
-              </div>
-              
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900">Conformità Media</h3>
-                  <Shield className="w-5 h-5 text-green-600" />
-            </div>
-                <div className="text-2xl font-bold text-gray-900 mb-2">
-                  {Math.round((complianceChecks.filter(c => c.status === 'compliant').length / complianceChecks.length) * 100)}%
-                    </div>
-                <p className="text-sm text-gray-600">Livello di conformità</p>
-              </div>
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Report Compliance</h3>
+              <p className="text-gray-600">I report di compliance saranno disponibili a breve.</p>
             </div>
           )}
         </div>
       </div>
-      
-      {/* Feedback Widget */}
+
       <FeedbackWidget />
-    </div>
+    </DashboardLayout>
   );
 }
