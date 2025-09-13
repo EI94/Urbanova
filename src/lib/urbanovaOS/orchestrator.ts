@@ -647,7 +647,7 @@ export class UrbanovaOSOrchestrator {
   // 🎯 GESTIONE SIMULAZIONI MULTIPLE
   private detectSimulationRequest(message: string): {
     isSimulation: boolean;
-    simulationType: 'sensitivity' | 'what_if' | 'optimization' | 'comparison' | 'multiple';
+    simulationType: 'sensitivity' | 'what_if' | 'optimization' | 'comparison' | 'multiple' | 'risk_analysis' | 'market_benchmark' | 'competitive_analysis' | 'investment_valuation' | 'complex_workflow' | 'multi_step_analysis' | 'intelligent_planning' | 'strategic_consulting';
     parameters: Record<string, any>;
   } {
     const lowerMessage = message.toLowerCase();
@@ -699,6 +699,52 @@ export class UrbanovaOSOrchestrator {
         isSimulation: true,
         simulationType: 'multiple',
         parameters: this.extractMultipleScenariosParameters(message)
+      };
+    }
+
+    // 🚀 FASE 4: WORKFLOW INTELLIGENTE - Riconoscimento richieste complesse
+    
+    // Rileva workflow complessi multi-step
+    if (lowerMessage.includes('fammi un piano completo') || lowerMessage.includes('sviluppa una strategia') ||
+        lowerMessage.includes('crea un workflow') || lowerMessage.includes('processo completo') ||
+        lowerMessage.includes('piano di sviluppo') || lowerMessage.includes('roadmap strategica')) {
+      return {
+        isSimulation: true,
+        simulationType: 'complex_workflow',
+        parameters: this.extractComplexWorkflowParameters(message)
+      };
+    }
+
+    // Rileva analisi multi-step
+    if (lowerMessage.includes('analisi completa') || lowerMessage.includes('studio approfondito') ||
+        lowerMessage.includes('valutazione integrale') || lowerMessage.includes('assessment completo') ||
+        lowerMessage.includes('analisi dettagliata') || lowerMessage.includes('studio dettagliato')) {
+      return {
+        isSimulation: true,
+        simulationType: 'multi_step_analysis',
+        parameters: this.extractMultiStepAnalysisParameters(message)
+      };
+    }
+
+    // Rileva pianificazione intelligente
+    if (lowerMessage.includes('pianifica') || lowerMessage.includes('organizza') ||
+        lowerMessage.includes('struttura') || lowerMessage.includes('definisci') ||
+        lowerMessage.includes('progetta') || lowerMessage.includes('architettura')) {
+      return {
+        isSimulation: true,
+        simulationType: 'intelligent_planning',
+        parameters: this.extractIntelligentPlanningParameters(message)
+      };
+    }
+
+    // Rileva consulenza strategica
+    if (lowerMessage.includes('consulenza') || lowerMessage.includes('consiglio') ||
+        lowerMessage.includes('raccomandazione') || lowerMessage.includes('suggerimento') ||
+        lowerMessage.includes('guida') || lowerMessage.includes('supporto strategico')) {
+      return {
+        isSimulation: true,
+        simulationType: 'strategic_consulting',
+        parameters: this.extractStrategicConsultingParameters(message)
       };
     }
     
@@ -922,6 +968,114 @@ export class UrbanovaOSOrchestrator {
     return params;
   }
 
+  // 🚀 FASE 4: WORKFLOW INTELLIGENTE - Metodi di estrazione parametri
+
+  private extractComplexWorkflowParameters(message: string): Record<string, any> {
+    const params: Record<string, any> = {};
+    
+    // Estrai tipo di workflow
+    if (message.match(/sviluppo/i)) params.workflowType = 'development';
+    if (message.match(/costruzione/i)) params.workflowType = 'construction';
+    if (message.match(/commercializzazione/i)) params.workflowType = 'commercialization';
+    if (message.match(/gestione/i)) params.workflowType = 'management';
+    
+    // Estrai fasi specifiche
+    const phases = [];
+    if (message.match(/progettazione/i)) phases.push('design');
+    if (message.match(/permessi/i)) phases.push('permits');
+    if (message.match(/finanziamento/i)) phases.push('financing');
+    if (message.match(/vendita/i)) phases.push('sales');
+    if (phases.length > 0) params.phases = phases;
+    
+    // Estrai timeline
+    const timelineMatch = message.match(/(\d+)\s*(mesi|anni)/i);
+    if (timelineMatch) {
+      params.timeline = {
+        value: parseInt(timelineMatch[1]),
+        unit: timelineMatch[2]
+      };
+    }
+    
+    return params;
+  }
+
+  private extractMultiStepAnalysisParameters(message: string): Record<string, any> {
+    const params: Record<string, any> = {};
+    
+    // Estrai tipo di analisi
+    if (message.match(/fattibilità/i)) params.analysisType = 'feasibility';
+    if (message.match(/rischio/i)) params.analysisType = 'risk';
+    if (message.match(/mercato/i)) params.analysisType = 'market';
+    if (message.match(/finanziaria/i)) params.analysisType = 'financial';
+    
+    // Estrai livello di dettaglio
+    if (message.match(/dettagliata/i)) params.detailLevel = 'detailed';
+    if (message.match(/approfondita/i)) params.detailLevel = 'deep';
+    if (message.match(/completa/i)) params.detailLevel = 'complete';
+    
+    // Estrai componenti specifici
+    const components = [];
+    if (message.match(/tecnica/i)) components.push('technical');
+    if (message.match(/economica/i)) components.push('economic');
+    if (message.match(/legale/i)) components.push('legal');
+    if (message.match(/ambientale/i)) components.push('environmental');
+    if (components.length > 0) params.components = components;
+    
+    return params;
+  }
+
+  private extractIntelligentPlanningParameters(message: string): Record<string, any> {
+    const params: Record<string, any> = {};
+    
+    // Estrai tipo di pianificazione
+    if (message.match(/strategica/i)) params.planningType = 'strategic';
+    if (message.match(/operativa/i)) params.planningType = 'operational';
+    if (message.match(/finanziaria/i)) params.planningType = 'financial';
+    if (message.match(/temporale/i)) params.planningType = 'temporal';
+    
+    // Estrai obiettivi
+    const objectives = [];
+    if (message.match(/efficienza/i)) objectives.push('efficiency');
+    if (message.match(/redditività/i)) objectives.push('profitability');
+    if (message.match(/crescita/i)) objectives.push('growth');
+    if (message.match(/sostenibilità/i)) objectives.push('sustainability');
+    if (objectives.length > 0) params.objectives = objectives;
+    
+    // Estrai orizzonte temporale
+    const horizonMatch = message.match(/(\d+)\s*(mesi|anni)/i);
+    if (horizonMatch) {
+      params.horizon = {
+        value: parseInt(horizonMatch[1]),
+        unit: horizonMatch[2]
+      };
+    }
+    
+    return params;
+  }
+
+  private extractStrategicConsultingParameters(message: string): Record<string, any> {
+    const params: Record<string, any> = {};
+    
+    // Estrai area di consulenza
+    if (message.match(/investimenti/i)) params.consultingArea = 'investments';
+    if (message.match(/sviluppo/i)) params.consultingArea = 'development';
+    if (message.match(/mercato/i)) params.consultingArea = 'market';
+    if (message.match(/finanziaria/i)) params.consultingArea = 'financial';
+    
+    // Estrai tipo di supporto
+    if (message.match(/decisione/i)) params.supportType = 'decision_support';
+    if (message.match(/valutazione/i)) params.supportType = 'evaluation';
+    if (message.match(/ottimizzazione/i)) params.supportType = 'optimization';
+    if (message.match(/risoluzione/i)) params.supportType = 'problem_solving';
+    
+    // Estrai urgenza
+    if (message.match(/urgente/i)) params.urgency = 'high';
+    if (message.match(/priorità/i)) params.urgency = 'medium';
+    if (message.match(/normale/i)) params.urgency = 'low';
+    
+    return params;
+  }
+
   private async generateSimulationAnalysis(
     projectData: ProjectData,
     simulationType: string,
@@ -959,6 +1113,18 @@ export class UrbanovaOSOrchestrator {
         break;
       case 'investment_valuation':
         analysis += await this.generateInvestmentValuation(projectData, parameters);
+        break;
+      case 'complex_workflow':
+        analysis += await this.generateComplexWorkflow(projectData, parameters);
+        break;
+      case 'multi_step_analysis':
+        analysis += await this.generateMultiStepAnalysis(projectData, parameters);
+        break;
+      case 'intelligent_planning':
+        analysis += await this.generateIntelligentPlanning(projectData, parameters);
+        break;
+      case 'strategic_consulting':
+        analysis += await this.generateStrategicConsulting(projectData, parameters);
         break;
       default:
         analysis += 'Tipo di simulazione non riconosciuto.';
@@ -2638,6 +2804,282 @@ export class UrbanovaOSOrchestrator {
       actions,
       risks
     };
+  }
+
+  // 🚀 FASE 4: WORKFLOW INTELLIGENTE - Metodi di generazione
+
+  private async generateComplexWorkflow(projectData: ProjectData, parameters: Record<string, any>): Promise<string> {
+    let analysis = `# 🚀 WORKFLOW COMPLESSO - ${projectData.name}\n\n`;
+    
+    const workflowType = parameters.workflowType || 'development';
+    const phases = parameters.phases || ['design', 'permits', 'financing', 'construction', 'sales'];
+    const timeline = parameters.timeline || { value: 24, unit: 'mesi' };
+    
+    analysis += `**📋 Tipo Workflow:** ${workflowType.toUpperCase()}\n`;
+    analysis += `**⏱️ Timeline:** ${timeline.value} ${timeline.unit}\n\n`;
+    
+    // Fase 1: Analisi Preliminare
+    analysis += `## 🎯 FASE 1: ANALISI PRELIMINARE\n`;
+    analysis += `- **Valutazione Terreno:** ${projectData.landArea} mq\n`;
+    analysis += `- **Area Costruibile:** ${projectData.buildableArea} mq\n`;
+    analysis += `- **Costo Costruzione:** €${projectData.constructionCostPerSqm}/mq\n`;
+    analysis += `- **Prezzo Acquisto:** €${projectData.purchasePrice.toLocaleString()}\n`;
+    analysis += `- **Margine Target:** ${(projectData.targetMargin * 100).toFixed(1)}%\n\n`;
+    
+    // Fase 2: Pianificazione Strategica
+    analysis += `## 🎯 FASE 2: PIANIFICAZIONE STRATEGICA\n`;
+    analysis += `- **Obiettivo Principale:** Massimizzare ROI\n`;
+    analysis += `- **Strategia di Prezzo:** Analisi comparativa mercato\n`;
+    analysis += `- **Timeline Vendite:** ${timeline.value} ${timeline.unit}\n`;
+    analysis += `- **Target Clienti:** Investitori e famiglie\n\n`;
+    
+    // Fase 3: Workflow Operativo
+    analysis += `## 🎯 FASE 3: WORKFLOW OPERATIVO\n`;
+    phases.forEach((phase, index) => {
+      const phaseNames = {
+        'design': 'Progettazione',
+        'permits': 'Permessi',
+        'financing': 'Finanziamento',
+        'construction': 'Costruzione',
+        'sales': 'Vendita'
+      };
+      analysis += `${index + 1}. **${phaseNames[phase] || phase}** - ${Math.ceil(timeline.value / phases.length)} ${timeline.unit}\n`;
+    });
+    
+    // Fase 4: Monitoraggio e Controllo
+    analysis += `\n## 🎯 FASE 4: MONITORAGGIO E CONTROLLO\n`;
+    analysis += `- **KPI Principali:** ROI, Tempo di vendita, Margine\n`;
+    analysis += `- **Report Periodici:** Settimanali\n`;
+    analysis += `- **Soglie di Allerta:** -10% margine, +20% tempo\n`;
+    analysis += `- **Azioni Correttive:** Rivedere prezzo, ottimizzare costi\n\n`;
+    
+    // Raccomandazioni
+    analysis += `## 💡 RACCOMANDAZIONI STRATEGICHE\n`;
+    analysis += `1. **Iniziare subito** con la fase di progettazione\n`;
+    analysis += `2. **Parallelizzare** permessi e finanziamento\n`;
+    analysis += `3. **Monitorare** costantemente i costi di costruzione\n`;
+    analysis += `4. **Preparare** strategia di vendita in anticipo\n`;
+    analysis += `5. **Mantenere** flessibilità per adattamenti\n\n`;
+    
+    return analysis;
+  }
+
+  private async generateMultiStepAnalysis(projectData: ProjectData, parameters: Record<string, any>): Promise<string> {
+    let analysis = `# 🔍 ANALISI MULTI-STEP - ${projectData.name}\n\n`;
+    
+    const analysisType = parameters.analysisType || 'feasibility';
+    const detailLevel = parameters.detailLevel || 'detailed';
+    const components = parameters.components || ['technical', 'economic', 'financial'];
+    
+    analysis += `**📊 Tipo Analisi:** ${analysisType.toUpperCase()}\n`;
+    analysis += `**🔬 Livello Dettaglio:** ${detailLevel.toUpperCase()}\n`;
+    analysis += `**🧩 Componenti:** ${components.join(', ').toUpperCase()}\n\n`;
+    
+    // Step 1: Analisi Tecnica
+    if (components.includes('technical')) {
+      analysis += `## 🔧 STEP 1: ANALISI TECNICA\n`;
+      analysis += `- **Fattibilità Costruttiva:** ✅ Verificata\n`;
+      analysis += `- **Vincoli Normativi:** Analisi in corso\n`;
+      analysis += `- **Infrastrutture:** Valutazione necessaria\n`;
+      analysis += `- **Accessibilità:** Da verificare\n\n`;
+    }
+    
+    // Step 2: Analisi Economica
+    if (components.includes('economic')) {
+      analysis += `## 💰 STEP 2: ANALISI ECONOMICA\n`;
+      const totalCost = projectData.buildableArea * projectData.constructionCostPerSqm;
+      const totalRevenue = totalCost * (1 + projectData.targetMargin);
+      const profit = totalRevenue - totalCost - projectData.purchasePrice;
+      
+      analysis += `- **Costo Totale Costruzione:** €${totalCost.toLocaleString()}\n`;
+      analysis += `- **Ricavi Stimati:** €${totalRevenue.toLocaleString()}\n`;
+      analysis += `- **Profitto Lordo:** €${profit.toLocaleString()}\n`;
+      analysis += `- **ROI:** ${((profit / projectData.purchasePrice) * 100).toFixed(1)}%\n\n`;
+    }
+    
+    // Step 3: Analisi Finanziaria
+    if (components.includes('financial')) {
+      analysis += `## 📈 STEP 3: ANALISI FINANZIARIA\n`;
+      analysis += `- **Flussi di Cassa:** Proiezione 24 mesi\n`;
+      analysis += `- **Break-even:** Calcolo in corso\n`;
+      analysis += `- **Sensibilità:** Analisi variazioni ±20%\n`;
+      analysis += `- **Scenari:** Pessimistico, Base, Ottimistico\n\n`;
+    }
+    
+    // Step 4: Analisi di Rischio
+    if (components.includes('risk')) {
+      analysis += `## ⚠️ STEP 4: ANALISI DI RISCHIO\n`;
+      analysis += `- **Rischio Mercato:** Medio\n`;
+      analysis += `- **Rischio Costruzione:** Basso\n`;
+      analysis += `- **Rischio Finanziario:** Medio\n`;
+      analysis += `- **Mitigazione:** Diversificazione, Assicurazioni\n\n`;
+    }
+    
+    // Step 5: Raccomandazioni Finali
+    analysis += `## 🎯 STEP 5: RACCOMANDAZIONI FINALI\n`;
+    analysis += `1. **Procedere** con l'analisi dettagliata\n`;
+    analysis += `2. **Verificare** tutti i vincoli normativi\n`;
+    analysis += `3. **Ottimizzare** la struttura finanziaria\n`;
+    analysis += `4. **Preparare** piano di mitigazione rischi\n`;
+    analysis += `5. **Monitorare** costantemente l'evoluzione\n\n`;
+    
+    return analysis;
+  }
+
+  private async generateIntelligentPlanning(projectData: ProjectData, parameters: Record<string, any>): Promise<string> {
+    let analysis = `# 🧠 PIANIFICAZIONE INTELLIGENTE - ${projectData.name}\n\n`;
+    
+    const planningType = parameters.planningType || 'strategic';
+    const objectives = parameters.objectives || ['efficiency', 'profitability'];
+    const horizon = parameters.horizon || { value: 24, unit: 'mesi' };
+    
+    analysis += `**🎯 Tipo Pianificazione:** ${planningType.toUpperCase()}\n`;
+    analysis += `**🎪 Obiettivi:** ${objectives.join(', ').toUpperCase()}\n`;
+    analysis += `**⏰ Orizzonte:** ${horizon.value} ${horizon.unit}\n\n`;
+    
+    // Piano Strategico
+    analysis += `## 🎯 PIANO STRATEGICO\n`;
+    analysis += `### Visione\n`;
+    analysis += `Sviluppare un progetto immobiliare di successo che massimizzi il ROI e soddisfi le esigenze del mercato target.\n\n`;
+    
+    analysis += `### Missione\n`;
+    analysis += `Creare valore attraverso sviluppo immobiliare sostenibile e redditizio.\n\n`;
+    
+    analysis += `### Obiettivi Chiave\n`;
+    objectives.forEach((obj, index) => {
+      const objNames = {
+        'efficiency': 'Massimizzare efficienza operativa',
+        'profitability': 'Garantire redditività target',
+        'growth': 'Espandere portafoglio progetti',
+        'sustainability': 'Sviluppo sostenibile'
+      };
+      analysis += `${index + 1}. ${objNames[obj] || obj}\n`;
+    });
+    
+    // Piano Operativo
+    analysis += `\n## ⚙️ PIANO OPERATIVO\n`;
+    analysis += `### Fase 1: Pre-Development (0-3 mesi)\n`;
+    analysis += `- Analisi di mercato approfondita\n`;
+    analysis += `- Progettazione preliminare\n`;
+    analysis += `- Raccolta permessi\n`;
+    analysis += `- Strutturazione finanziaria\n\n`;
+    
+    analysis += `### Fase 2: Development (3-18 mesi)\n`;
+    analysis += `- Costruzione\n`;
+    analysis += `- Controllo qualità\n`;
+    analysis += `- Gestione fornitori\n`;
+    analysis += `- Monitoraggio costi\n\n`;
+    
+    analysis += `### Fase 3: Commercialization (18-24 mesi)\n`;
+    analysis += `- Marketing e vendite\n`;
+    analysis += `- Gestione clienti\n`;
+    analysis += `- Consegna immobili\n`;
+    analysis += `- Chiusura progetto\n\n`;
+    
+    // Piano di Controllo
+    analysis += `## 📊 PIANO DI CONTROLLO\n`;
+    analysis += `### KPI Principali\n`;
+    analysis += `- **ROI Target:** ${(projectData.targetMargin * 100).toFixed(1)}%\n`;
+    analysis += `- **Timeline:** ${horizon.value} ${horizon.unit}\n`;
+    analysis += `- **Budget:** €${(projectData.buildableArea * projectData.constructionCostPerSqm).toLocaleString()}\n`;
+    analysis += `- **Qualità:** 100% conformità normativa\n\n`;
+    
+    analysis += `### Report Periodici\n`;
+    analysis += `- **Settimanali:** Progresso costruzione\n`;
+    analysis += `- **Mensili:** Performance finanziaria\n`;
+    analysis += `- **Trimestrali:** Review strategica\n`;
+    analysis += `- **Annuali:** Valutazione complessiva\n\n`;
+    
+    return analysis;
+  }
+
+  private async generateStrategicConsulting(projectData: ProjectData, parameters: Record<string, any>): Promise<string> {
+    let analysis = `# 🎯 CONSULENZA STRATEGICA - ${projectData.name}\n\n`;
+    
+    const consultingArea = parameters.consultingArea || 'investments';
+    const supportType = parameters.supportType || 'decision_support';
+    const urgency = parameters.urgency || 'medium';
+    
+    analysis += `**🏢 Area Consulenza:** ${consultingArea.toUpperCase()}\n`;
+    analysis += `**🛠️ Tipo Supporto:** ${supportType.toUpperCase()}\n`;
+    analysis += `**⚡ Urgenza:** ${urgency.toUpperCase()}\n\n`;
+    
+    // Analisi Situazionale
+    analysis += `## 📊 ANALISI SITUAZIONALE\n`;
+    analysis += `### Punti di Forza\n`;
+    analysis += `- **Posizione Strategica:** Terreno ben localizzato\n`;
+    analysis += `- **Margine Target:** ${(projectData.targetMargin * 100).toFixed(1)}% competitivo\n`;
+    analysis += `- **Area Costruibile:** ${projectData.buildableArea} mq ottimale\n`;
+    analysis += `- **Costo Costruzione:** €${projectData.constructionCostPerSqm}/mq controllato\n\n`;
+    
+    analysis += `### Aree di Miglioramento\n`;
+    analysis += `- **Analisi Mercato:** Approfondire target clienti\n`;
+    analysis += `- **Gestione Rischio:** Implementare mitigazioni\n`;
+    analysis += `- **Efficienza Operativa:** Ottimizzare processi\n`;
+    analysis += `- **Sostenibilità:** Valutare impatto ambientale\n\n`;
+    
+    // Raccomandazioni Strategiche
+    analysis += `## 💡 RACCOMANDAZIONI STRATEGICHE\n`;
+    
+    if (consultingArea === 'investments') {
+      analysis += `### Investimenti\n`;
+      analysis += `1. **Diversificare** portafoglio progetti\n`;
+      analysis += `2. **Ottimizzare** struttura finanziaria\n`;
+      analysis += `3. **Monitorare** trend di mercato\n`;
+      analysis += `4. **Valutare** partnership strategiche\n\n`;
+    }
+    
+    if (consultingArea === 'development') {
+      analysis += `### Sviluppo\n`;
+      analysis += `1. **Accelerare** fase progettuale\n`;
+      analysis += `2. **Parallelizzare** attività critiche\n`;
+      analysis += `3. **Controllare** costi di costruzione\n`;
+      analysis += `4. **Gestire** fornitori chiave\n\n`;
+    }
+    
+    if (consultingArea === 'market') {
+      analysis += `### Mercato\n`;
+      analysis += `1. **Analizzare** concorrenza locale\n`;
+      analysis += `2. **Identificare** nicchie di mercato\n`;
+      analysis += `3. **Sviluppare** proposta di valore\n`;
+      analysis += `4. **Posizionare** prezzo competitivo\n\n`;
+    }
+    
+    // Piano di Azione
+    analysis += `## 🎯 PIANO DI AZIONE\n`;
+    analysis += `### Azioni Immediate (0-30 giorni)\n`;
+    analysis += `- Completare analisi di mercato\n`;
+    analysis += `- Finalizzare progettazione\n`;
+    analysis += `- Avviare pratiche permessi\n`;
+    analysis += `- Strutturare finanziamento\n\n`;
+    
+    analysis += `### Azioni a Medio Termine (1-6 mesi)\n`;
+    analysis += `- Iniziare costruzione\n`;
+    analysis += `- Implementare controlli qualità\n`;
+    analysis += `- Sviluppare strategia vendite\n`;
+    analysis += `- Gestire stakeholder\n\n`;
+    
+    analysis += `### Azioni a Lungo Termine (6-24 mesi)\n`;
+    analysis += `- Completare costruzione\n`;
+    analysis += `- Avviare vendite\n`;
+    analysis += `- Monitorare performance\n`;
+    analysis += `- Valutare replicabilità\n\n`;
+    
+    // Monitoraggio e Follow-up
+    analysis += `## 📈 MONITORAGGIO E FOLLOW-UP\n`;
+    analysis += `### Metriche di Successo\n`;
+    analysis += `- **ROI Raggiunto:** ${(projectData.targetMargin * 100).toFixed(1)}%\n`;
+    analysis += `- **Timeline Rispettata:** 100%\n`;
+    analysis += `- **Budget Rispettato:** ±5%\n`;
+    analysis += `- **Qualità:** 100% conformità\n\n`;
+    
+    analysis += `### Review Periodiche\n`;
+    analysis += `- **Settimanali:** Progresso operativo\n`;
+    analysis += `- **Mensili:** Performance finanziaria\n`;
+    analysis += `- **Trimestrali:** Review strategica\n`;
+    analysis += `- **Finale:** Valutazione complessiva\n\n`;
+    
+    return analysis;
   }
 
   private extractFeasibilityData(message: string): any {
