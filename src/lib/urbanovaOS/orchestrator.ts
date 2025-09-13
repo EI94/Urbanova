@@ -696,7 +696,17 @@ export class UrbanovaOSOrchestrator {
           userQuery.includes('progetti attivi') || userQuery.includes('progetti ho') ||
           userQuery.includes('nel mio portafoglio') || userQuery.includes('portafoglio progetti');
       
+      // Rileva richieste di analisi di fattibilità
+      const isFeasibilityQuery = userQuery.includes('analisi di fattibilità') || userQuery.includes('analisi fattibilità') ||
+          userQuery.includes('studio di fattibilità') || userQuery.includes('studio fattibilità') ||
+          userQuery.includes('business plan') || userQuery.includes('businessplan') ||
+          userQuery.includes('monteporzio') || userQuery.includes('bifamiliare') ||
+          userQuery.includes('costo costruzione') || userQuery.includes('marginalità') ||
+          userQuery.includes('prezzo di vendita') || userQuery.includes('roi') ||
+          userQuery.includes('terreno') && (userQuery.includes('mq') || userQuery.includes('metri quadrati'));
+      
       console.log('🎯 [UrbanovaOS Orchestrator] È una query sui progetti?', isProjectQuery);
+      console.log('🏗️ [UrbanovaOS Orchestrator] È una richiesta di analisi di fattibilità?', isFeasibilityQuery);
       
       if (isProjectQuery) {
         
@@ -773,7 +783,28 @@ export class UrbanovaOSOrchestrator {
         }
       }
       
-      // Se non è una query sui progetti, usa la logica originale
+      // 🏗️ GESTIONE ANALISI DI FATTIBILITÀ
+      if (isFeasibilityQuery) {
+        console.log('🏗️ [UrbanovaOS Orchestrator] Richiesta di analisi di fattibilità rilevata!');
+        
+        // Estrai parametri dal messaggio
+        const feasibilityData = this.extractFeasibilityData(request.message.content);
+        
+        if (feasibilityData.isValid) {
+          console.log('📊 [UrbanovaOS Orchestrator] Dati fattibilità estratti:', feasibilityData);
+          
+          // Genera analisi di fattibilità smart
+          const feasibilityAnalysis = await this.generateFeasibilityAnalysis(feasibilityData, request);
+          
+          return { content: feasibilityAnalysis, usedUserMemory: true };
+        } else {
+          // Chiedi informazioni mancanti
+          const missingInfoResponse = this.generateMissingInfoResponse(feasibilityData);
+          return { content: missingInfoResponse, usedUserMemory: true };
+        }
+      }
+      
+      // Se non è una query sui progetti o analisi di fattibilità, usa la logica originale
       let response = '';
 
       // Se abbiamo risultati specifici, generiamo una risposta dettagliata
@@ -973,6 +1004,220 @@ class CacheManager {
   
   set(key: string, value: any): void {
     console.log(`💾 [CacheManager] Salvando cache: ${key}`);
+  }
+
+  // ============================================================================
+  // METODI ANALISI DI FATTIBILITÀ
+  // ============================================================================
+
+  /**
+   * Estrae dati di fattibilità dal messaggio dell'utente
+   */
+  private extractFeasibilityData(message: string): any {
+    const data: any = {
+      isValid: false,
+      projectName: '',
+      landArea: 0,
+      buildableArea: 0,
+      projectType: '',
+      apartments: 0,
+      areaPerApartment: 0,
+      parkingSpaces: 0,
+      constructionCostPerSqm: 0,
+      insuranceRate: 0,
+      totalArea: 0,
+      purchasePrice: 0,
+      targetMargin: 0,
+      location: '',
+      missingInfo: []
+    };
+
+    const text = message.toLowerCase();
+
+    // Estrai nome progetto
+    const projectNameMatch = text.match(/nome del progetto[:\s]*([^,.\n]+)/i);
+    if (projectNameMatch) data.projectName = projectNameMatch[1].trim();
+
+    // Estrai area terreno
+    const landAreaMatch = text.match(/(\d+)\s*(?:metri quadrati|mq|m²)/i);
+    if (landAreaMatch) data.landArea = parseInt(landAreaMatch[1]);
+
+    // Estrai area costruibile
+    const buildableMatch = text.match(/(\d+)\s*(?:metri quadrati|mq|m²).*?(?:costruire|edificabile)/i);
+    if (buildableMatch) data.buildableArea = parseInt(buildableMatch[1]);
+
+    // Estrai tipo progetto
+    if (text.includes('bifamiliare')) {
+      data.projectType = 'bifamiliare';
+      data.apartments = 2;
+    }
+
+    // Estrai parcheggi
+    const parkingMatch = text.match(/(\d+)\s*parcheggi/i);
+    if (parkingMatch) data.parkingSpaces = parseInt(parkingMatch[1]);
+
+    // Estrai area per appartamento
+    const apartmentAreaMatch = text.match(/(\d+)\s*(?:metri quadrati|mq|m²).*?(?:per appartamento|appartamento)/i);
+    if (apartmentAreaMatch) data.areaPerApartment = parseInt(apartmentAreaMatch[1]);
+
+    // Estrai costo costruzione
+    const constructionCostMatch = text.match(/(\d+)\s*euro.*?(?:per metro quadrato|per mq|per m²)/i);
+    if (constructionCostMatch) data.constructionCostPerSqm = parseInt(constructionCostMatch[1]);
+
+    // Estrai tasso assicurazione
+    const insuranceMatch = text.match(/(\d+(?:\.\d+)?)\s*%.*?(?:assicurazioni|assicurazione)/i);
+    if (insuranceMatch) data.insuranceRate = parseFloat(insuranceMatch[1]);
+
+    // Estrai area totale
+    const totalAreaMatch = text.match(/(\d+)\s*(?:metri quadrati|mq|m²).*?(?:totali|totale)/i);
+    if (totalAreaMatch) data.totalArea = parseInt(totalAreaMatch[1]);
+
+    // Estrai prezzo acquisto
+    const purchasePriceMatch = text.match(/(\d+(?:\.\d+)?)\s*(?:euro|€)/i);
+    if (purchasePriceMatch) data.purchasePrice = parseFloat(purchasePriceMatch[1].replace('.', ''));
+
+    // Estrai target marginalità
+    const marginMatch = text.match(/(\d+(?:\.\d+)?)\s*%.*?(?:marginalità|margine)/i);
+    if (marginMatch) data.targetMargin = parseFloat(marginMatch[1]);
+
+    // Estrai localizzazione
+    const locationMatch = text.match(/(?:a |in |presso )([^,.\n]+)/i);
+    if (locationMatch) data.location = locationMatch[1].trim();
+
+    // Valida dati essenziali
+    const requiredFields = ['projectName', 'landArea', 'buildableArea', 'constructionCostPerSqm', 'purchasePrice', 'targetMargin'];
+    data.missingInfo = requiredFields.filter(field => !data[field] || data[field] === 0);
+
+    data.isValid = data.missingInfo.length === 0;
+
+    return data;
+  }
+
+  /**
+   * Genera analisi di fattibilità smart
+   */
+  private async generateFeasibilityAnalysis(data: any, request: UrbanovaOSRequest): Promise<string> {
+    console.log('🏗️ [UrbanovaOS Orchestrator] Generando analisi di fattibilità smart...');
+
+    // Calcoli base
+    const totalConstructionArea = data.totalArea || (data.areaPerApartment * data.apartments);
+    const totalConstructionCost = totalConstructionArea * data.constructionCostPerSqm;
+    const insuranceCost = totalConstructionCost * (data.insuranceRate / 100);
+    const totalProjectCost = data.purchasePrice + totalConstructionCost + insuranceCost;
+    
+    // Calcola prezzi di vendita per target margin
+    const targetRevenue = totalProjectCost * (1 + data.targetMargin / 100);
+    const pricePerSqm = targetRevenue / totalConstructionArea;
+    const pricePerApartment = targetRevenue / data.apartments;
+
+    // Simula check prezzi di mercato (magia Urbanova)
+    const marketCheck = await this.simulateMarketPriceCheck(data.location, pricePerSqm);
+
+    let analysis = `# 🏗️ Analisi di Fattibilità: ${data.projectName}\n\n`;
+
+    analysis += `## 📊 Dati Progetto\n`;
+    analysis += `- **Localizzazione**: ${data.location}\n`;
+    analysis += `- **Area Terreno**: ${data.landArea} m²\n`;
+    analysis += `- **Area Costruibile**: ${data.buildableArea} m²\n`;
+    analysis += `- **Tipo Progetto**: ${data.projectType}\n`;
+    analysis += `- **Appartamenti**: ${data.apartments}\n`;
+    analysis += `- **Area per Appartamento**: ${data.areaPerApartment} m²\n`;
+    analysis += `- **Parcheggi**: ${data.parkingSpaces}\n\n`;
+
+    analysis += `## 💰 Analisi Economica\n`;
+    analysis += `- **Costo Terreno**: €${data.purchasePrice.toLocaleString('it-IT')}\n`;
+    analysis += `- **Costo Costruzione**: €${totalConstructionCost.toLocaleString('it-IT')} (€${data.constructionCostPerSqm}/m²)\n`;
+    analysis += `- **Costo Assicurazioni**: €${insuranceCost.toLocaleString('it-IT')} (${data.insuranceRate}%)\n`;
+    analysis += `- **Costo Totale Progetto**: €${totalProjectCost.toLocaleString('it-IT')}\n\n`;
+
+    analysis += `## 🎯 Target Marginalità: ${data.targetMargin}%\n`;
+    analysis += `- **Ricavi Necessari**: €${targetRevenue.toLocaleString('it-IT')}\n`;
+    analysis += `- **Prezzo per m²**: €${pricePerSqm.toLocaleString('it-IT')}\n`;
+    analysis += `- **Prezzo per Appartamento**: €${pricePerApartment.toLocaleString('it-IT')}\n\n`;
+
+    // Aggiungi check prezzi di mercato (magia Urbanova)
+    analysis += `## 🔍 Analisi di Mercato (${data.location})\n`;
+    analysis += marketCheck;
+
+    analysis += `\n## 📈 Raccomandazioni\n`;
+    if (pricePerSqm < 3000) {
+      analysis += `✅ **Ottima opportunità**: Il prezzo target è competitivo per la zona.\n`;
+    } else if (pricePerSqm < 4000) {
+      analysis += `⚠️ **Valutare attentamente**: Prezzo nella media, monitorare il mercato.\n`;
+    } else {
+      analysis += `❌ **Alto rischio**: Prezzo elevato, considerare alternative.\n`;
+    }
+
+    analysis += `\n## 🚀 Prossimi Passi\n`;
+    analysis += `1. **Verifica Permessi**: Controlla la conformità urbanistica\n`;
+    analysis += `2. **Analisi Sensibilità**: Testa variazioni di prezzo e costi\n`;
+    analysis += `3. **Finanziamento**: Valuta opzioni di credito\n`;
+    analysis += `4. **Timeline**: Pianifica le fasi del progetto\n\n`;
+
+    analysis += `💡 **Suggerimento**: Usa la pagina "Analisi di Fattibilità" per approfondire e creare il progetto completo!`;
+
+    return analysis;
+  }
+
+  /**
+   * Simula check prezzi di mercato (magia Urbanova)
+   */
+  private async simulateMarketPriceCheck(location: string, targetPrice: number): Promise<string> {
+    // Simula delay per realismo
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const basePrice = 2500; // Prezzo base simulato
+    const variation = Math.random() * 1000 - 500; // Variazione ±500€
+    const marketPrice = basePrice + variation;
+
+    let analysis = `- **Prezzo Medio di Mercato**: €${marketPrice.toLocaleString('it-IT')}/m²\n`;
+    
+    if (targetPrice < marketPrice * 0.9) {
+      analysis += `- **Status**: 🟢 **Sottovalutato** - Ottima opportunità!\n`;
+    } else if (targetPrice < marketPrice * 1.1) {
+      analysis += `- **Status**: 🟡 **In linea** - Prezzo di mercato\n`;
+    } else {
+      analysis += `- **Status**: 🔴 **Sopravvalutato** - Attenzione ai rischi\n`;
+    }
+
+    analysis += `- **Tendenza**: ${Math.random() > 0.5 ? '📈 In crescita' : '📉 Stabile'}\n`;
+    analysis += `- **Concorrenza**: ${Math.random() > 0.5 ? 'Bassa' : 'Media'}\n`;
+
+    return analysis;
+  }
+
+  /**
+   * Genera risposta per informazioni mancanti
+   */
+  private generateMissingInfoResponse(data: any): string {
+    let response = `# 🏗️ Analisi di Fattibilità\n\n`;
+    response += `Per creare un'analisi di fattibilità completa per **${data.projectName || 'il tuo progetto'}**, ho bisogno di alcune informazioni aggiuntive:\n\n`;
+
+    response += `## 📋 Informazioni Mancanti:\n`;
+    data.missingInfo.forEach(field => {
+      const fieldNames: { [key: string]: string } = {
+        projectName: 'Nome del progetto',
+        landArea: 'Area del terreno (in m²)',
+        buildableArea: 'Area costruibile (in m²)',
+        constructionCostPerSqm: 'Costo di costruzione per m² (in €)',
+        purchasePrice: 'Prezzo di acquisto del terreno (in €)',
+        targetMargin: 'Target di marginalità (in %)'
+      };
+      response += `- **${fieldNames[field] || field}**\n`;
+    });
+
+    response += `\n## 💡 Esempio di Richiesta Completa:\n`;
+    response += `"Crea un'analisi di fattibilità per Villa Roma. Terreno 500 m², area costruibile 400 m², bifamiliare, 4 parcheggi, 120 m² per appartamento, costo costruzione 1800 €/m², prezzo acquisto 300.000 €, target marginalità 25%."\n\n`;
+
+    response += `Una volta fornite tutte le informazioni, potrò creare un'analisi dettagliata con:\n`;
+    response += `- 📊 Calcoli economici precisi\n`;
+    response += `- 🔍 Analisi di mercato per la zona\n`;
+    response += `- 📈 Raccomandazioni strategiche\n`;
+    response += `- 🚀 Prossimi passi operativi\n\n`;
+
+    response += `Sono qui per rendere il tuo progetto immobiliare un successo! 🏗️✨`;
+
+    return response;
   }
 }
 

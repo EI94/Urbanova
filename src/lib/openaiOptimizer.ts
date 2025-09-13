@@ -45,7 +45,7 @@ class OpenAIOptimizer {
       cacheHitRate: 0,
       streamingEnabled: true
     };
-    this.adaptiveTimeout = 15000; // 15s iniziale
+    this.adaptiveTimeout = 30000; // 30s per analisi complesse
     this.loadFactor = 1.0;
     this.streamingEnabled = true;
     
