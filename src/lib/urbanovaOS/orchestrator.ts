@@ -751,6 +751,50 @@ export class UrbanovaOSOrchestrator {
       };
     }
     
+    // Rileva analisi di rischio
+    if (lowerMessage.includes('analisi di rischio') || lowerMessage.includes('rischio') ||
+        lowerMessage.includes('valutazione rischio') || lowerMessage.includes('mitigazione') ||
+        lowerMessage.includes('scenari di rischio') || lowerMessage.includes('risk analysis')) {
+      return {
+        isSimulation: true,
+        simulationType: 'risk_analysis',
+        parameters: this.extractRiskAnalysisParameters(message)
+      };
+    }
+    
+    // Rileva benchmark di mercato
+    if (lowerMessage.includes('benchmark') || lowerMessage.includes('mercato') ||
+        lowerMessage.includes('trend di mercato') || lowerMessage.includes('andamento') ||
+        lowerMessage.includes('dati di mercato') || lowerMessage.includes('market intelligence')) {
+      return {
+        isSimulation: true,
+        simulationType: 'market_benchmark',
+        parameters: this.extractMarketBenchmarkParameters(message)
+      };
+    }
+    
+    // Rileva analisi competitiva
+    if (lowerMessage.includes('analisi competitiva') || lowerMessage.includes('competizione') ||
+        lowerMessage.includes('posizionamento') || lowerMessage.includes('strategia competitiva') ||
+        lowerMessage.includes('vantaggio competitivo') || lowerMessage.includes('competitive analysis')) {
+      return {
+        isSimulation: true,
+        simulationType: 'competitive_analysis',
+        parameters: this.extractCompetitiveAnalysisParameters(message)
+      };
+    }
+    
+    // Rileva valutazione investimento
+    if (lowerMessage.includes('valutazione investimento') || lowerMessage.includes('investment analysis') ||
+        lowerMessage.includes('valutazione progetto') || lowerMessage.includes('project valuation') ||
+        lowerMessage.includes('valore progetto') || lowerMessage.includes('valutazione economica')) {
+      return {
+        isSimulation: true,
+        simulationType: 'investment_valuation',
+        parameters: this.extractInvestmentValuationParameters(message)
+      };
+    }
+    
     return { isSimulation: false, simulationType: 'sensitivity', parameters: {} };
   }
 
@@ -801,6 +845,83 @@ export class UrbanovaOSOrchestrator {
     return params;
   }
 
+  private extractRiskAnalysisParameters(message: string): Record<string, any> {
+    const params: Record<string, any> = {};
+    
+    // Estrai tipi di rischio
+    if (message.match(/rischio di mercato/i)) params.marketRisk = true;
+    if (message.match(/rischio finanziario/i)) params.financialRisk = true;
+    if (message.match(/rischio operativo/i)) params.operationalRisk = true;
+    if (message.match(/rischio normativo/i)) params.regulatoryRisk = true;
+    if (message.match(/rischio ambientale/i)) params.environmentalRisk = true;
+    
+    // Estrai livello di rischio
+    if (message.match(/alto/i)) params.riskLevel = 'high';
+    if (message.match(/medio/i)) params.riskLevel = 'medium';
+    if (message.match(/basso/i)) params.riskLevel = 'low';
+    
+    return params;
+  }
+
+  private extractMarketBenchmarkParameters(message: string): Record<string, any> {
+    const params: Record<string, any> = {};
+    
+    // Estrai localizzazione
+    const locationMatch = message.match(/a\s+([^,.\n]+)/i);
+    if (locationMatch) {
+      params.location = locationMatch[1].trim();
+    }
+    
+    // Estrai tipologia
+    if (message.match(/residenziale/i)) params.propertyType = 'residential';
+    if (message.match(/commerciale/i)) params.propertyType = 'commercial';
+    if (message.match(/uffici/i)) params.propertyType = 'office';
+    if (message.match(/industriale/i)) params.propertyType = 'industrial';
+    
+    // Estrai periodo di analisi
+    if (message.match(/ultimi\s+(\d+)\s*mesi/i)) {
+      const months = message.match(/ultimi\s+(\d+)\s*mesi/i);
+      if (months) params.analysisPeriod = parseInt(months[1]);
+    }
+    
+    return params;
+  }
+
+  private extractCompetitiveAnalysisParameters(message: string): Record<string, any> {
+    const params: Record<string, any> = {};
+    
+    // Estrai area geografica
+    const areaMatch = message.match(/nella\s+zona\s+([^,.\n]+)/i);
+    if (areaMatch) {
+      params.area = areaMatch[1].trim();
+    }
+    
+    // Estrai tipologia di confronto
+    if (message.match(/progetti simili/i)) params.similarProjects = true;
+    if (message.match(/concorrenti/i)) params.competitors = true;
+    if (message.match(/benchmark/i)) params.benchmark = true;
+    
+    return params;
+  }
+
+  private extractInvestmentValuationParameters(message: string): Record<string, any> {
+    const params: Record<string, any> = {};
+    
+    // Estrai metodo di valutazione
+    if (message.match(/DCF/i) || message.match(/flussi di cassa/i)) params.method = 'DCF';
+    if (message.match(/comparativo/i)) params.method = 'comparative';
+    if (message.match(/reddituale/i)) params.method = 'income';
+    if (message.match(/costo/i)) params.method = 'cost';
+    
+    // Estrai orizzonte temporale
+    const horizonMatch = message.match(/(\d+)\s*anni/i);
+    if (horizonMatch) {
+      params.timeHorizon = parseInt(horizonMatch[1]);
+    }
+    
+    return params;
+  }
+
   private async generateSimulationAnalysis(
     projectData: ProjectData,
     simulationType: string,
@@ -826,6 +947,18 @@ export class UrbanovaOSOrchestrator {
         break;
       case 'multiple':
         analysis += await this.generateMultipleScenariosAnalysis(projectData, parameters);
+        break;
+      case 'risk_analysis':
+        analysis += await this.generateRiskAnalysis(projectData, parameters);
+        break;
+      case 'market_benchmark':
+        analysis += await this.generateMarketBenchmark(projectData, parameters);
+        break;
+      case 'competitive_analysis':
+        analysis += await this.generateCompetitiveAnalysis(projectData, parameters);
+        break;
+      case 'investment_valuation':
+        analysis += await this.generateInvestmentValuation(projectData, parameters);
         break;
       default:
         analysis += 'Tipo di simulazione non riconosciuto.';
@@ -1448,6 +1581,1063 @@ export class UrbanovaOSOrchestrator {
     }
     
     return analysis;
+  }
+
+  // 🎯 ANALISI STRATEGICHE AVANZATE - FASE 3
+  private async generateRiskAnalysis(projectData: ProjectData, parameters: Record<string, any>): Promise<string> {
+    let analysis = '## ⚠️ Analisi di Rischio Avanzata\n\n';
+    
+    const baseCost = projectData.buildableArea * projectData.constructionCostPerSqm;
+    const baseRevenue = (projectData.purchasePrice + baseCost * 1.015) / (1 - projectData.targetMargin);
+    const basePricePerSqm = baseRevenue / projectData.buildableArea;
+    const baseProfit = baseRevenue - (projectData.purchasePrice + baseCost * 1.015);
+    
+    analysis += `**📊 Progetto Analizzato:**\n`;
+    analysis += `- Nome: ${projectData.name}\n`;
+    analysis += `- Investimento totale: €${(projectData.purchasePrice + baseCost * 1.015).toLocaleString()}\n`;
+    analysis += `- Profitto atteso: €${baseProfit.toLocaleString()}\n`;
+    analysis += `- ROI atteso: ${((baseProfit / (projectData.purchasePrice + baseCost)) * 100).toFixed(1)}%\n\n`;
+    
+    // 🎯 ANALISI RISCHIO DI MERCATO
+    analysis += '### 🌍 Rischio di Mercato\n';
+    analysis += '**📈 Fattori di Rischio:**\n';
+    
+    const marketRisks = [
+      { factor: 'Fluttuazioni prezzi immobiliari', probability: 0.3, impact: 'Alto', mitigation: 'Hedging con contratti a prezzo fisso' },
+      { factor: 'Cambiamenti demografici', probability: 0.2, impact: 'Medio', mitigation: 'Analisi trend demografici continuativa' },
+      { factor: 'Crisi economica', probability: 0.15, impact: 'Alto', mitigation: 'Diversificazione portafoglio' },
+      { factor: 'Cambiamenti normativi', probability: 0.25, impact: 'Medio', mitigation: 'Monitoraggio legislativo' },
+      { factor: 'Competizione aumentata', probability: 0.4, impact: 'Medio', mitigation: 'Differenziazione prodotto' }
+    ];
+    
+    analysis += '| Fattore di Rischio | Probabilità | Impatto | Mitigazione |\n';
+    analysis += '|-------------------|-------------|---------|-------------|\n';
+    
+    marketRisks.forEach(risk => {
+      analysis += `| ${risk.factor} | ${(risk.probability * 100).toFixed(0)}% | ${risk.impact} | ${risk.mitigation} |\n`;
+    });
+    
+    // 🎯 ANALISI RISCHIO FINANZIARIO
+    analysis += '\n### 💰 Rischio Finanziario\n';
+    analysis += '**💸 Fattori di Rischio:**\n';
+    
+    const financialRisks = [
+      { factor: 'Aumento tassi interesse', probability: 0.35, impact: 'Alto', mitigation: 'Tasso fisso o copertura' },
+      { factor: 'Inflazione costi costruzione', probability: 0.4, impact: 'Alto', mitigation: 'Contratti indicizzati' },
+      { factor: 'Difficoltà accesso credito', probability: 0.2, impact: 'Alto', mitigation: 'Finanziamento diversificato' },
+      { factor: 'Svalutazione valuta', probability: 0.15, impact: 'Medio', mitigation: 'Copertura valutaria' },
+      { factor: 'Ritardi nei pagamenti', probability: 0.3, impact: 'Medio', mitigation: 'Garanzie bancarie' }
+    ];
+    
+    analysis += '| Fattore di Rischio | Probabilità | Impatto | Mitigazione |\n';
+    analysis += '|-------------------|-------------|---------|-------------|\n';
+    
+    financialRisks.forEach(risk => {
+      analysis += `| ${risk.factor} | ${(risk.probability * 100).toFixed(0)}% | ${risk.impact} | ${risk.mitigation} |\n`;
+    });
+    
+    // 🎯 ANALISI RISCHIO OPERATIVO
+    analysis += '\n### ⚙️ Rischio Operativo\n';
+    analysis += '**🔧 Fattori di Rischio:**\n';
+    
+    const operationalRisks = [
+      { factor: 'Ritardi costruzione', probability: 0.4, impact: 'Alto', mitigation: 'Piano B e penalità contrattuali' },
+      { factor: 'Qualità materiali', probability: 0.25, impact: 'Medio', mitigation: 'Controlli qualità rigorosi' },
+      { factor: 'Problemi fornitori', probability: 0.3, impact: 'Medio', mitigation: 'Fornitori multipli' },
+      { factor: 'Errori progettuali', probability: 0.2, impact: 'Alto', mitigation: 'Review tecnico indipendente' },
+      { factor: 'Problemi permessi', probability: 0.35, impact: 'Alto', mitigation: 'Supporto legale specializzato' }
+    ];
+    
+    analysis += '| Fattore di Rischio | Probabilità | Impatto | Mitigazione |\n';
+    analysis += '|-------------------|-------------|---------|-------------|\n';
+    
+    operationalRisks.forEach(risk => {
+      analysis += `| ${risk.factor} | ${(risk.probability * 100).toFixed(0)}% | ${risk.impact} | ${risk.mitigation} |\n`;
+    });
+    
+    // 🎯 ANALISI RISCHIO NORMATIVO
+    analysis += '\n### 📋 Rischio Normativo\n';
+    analysis += '**⚖️ Fattori di Rischio:**\n';
+    
+    const regulatoryRisks = [
+      { factor: 'Cambiamenti urbanistici', probability: 0.2, impact: 'Alto', mitigation: 'Monitoraggio normativo' },
+      { factor: 'Nuove regole ambientali', probability: 0.3, impact: 'Medio', mitigation: 'Progettazione sostenibile' },
+      { factor: 'Vincoli paesaggistici', probability: 0.15, impact: 'Alto', mitigation: 'Studio paesaggistico' },
+      { factor: 'Norme antisismiche', probability: 0.1, impact: 'Medio', mitigation: 'Progettazione antisismica' },
+      { factor: 'Regole energetiche', probability: 0.25, impact: 'Medio', mitigation: 'Certificazione energetica' }
+    ];
+    
+    analysis += '| Fattore di Rischio | Probabilità | Impatto | Mitigazione |\n';
+    analysis += '|-------------------|-------------|---------|-------------|\n';
+    
+    regulatoryRisks.forEach(risk => {
+      analysis += `| ${risk.factor} | ${(risk.probability * 100).toFixed(0)}% | ${risk.impact} | ${risk.mitigation} |\n`;
+    });
+    
+    // 🎯 ANALISI RISCHIO AMBIENTALE
+    analysis += '\n### 🌱 Rischio Ambientale\n';
+    analysis += '**🌍 Fattori di Rischio:**\n';
+    
+    const environmentalRisks = [
+      { factor: 'Inquinamento terreno', probability: 0.1, impact: 'Alto', mitigation: 'Bonifica preventiva' },
+      { factor: 'Alluvioni', probability: 0.15, impact: 'Alto', mitigation: 'Studio idrogeologico' },
+      { factor: 'Terremoti', probability: 0.2, impact: 'Alto', mitigation: 'Progettazione antisismica' },
+      { factor: 'Cambiamenti climatici', probability: 0.3, impact: 'Medio', mitigation: 'Design resiliente' },
+      { factor: 'Rumore traffico', probability: 0.4, impact: 'Basso', mitigation: 'Barriere acustiche' }
+    ];
+    
+    analysis += '| Fattore di Rischio | Probabilità | Impatto | Mitigazione |\n';
+    analysis += '|-------------------|-------------|---------|-------------|\n';
+    
+    environmentalRisks.forEach(risk => {
+      analysis += `| ${risk.factor} | ${(risk.probability * 100).toFixed(0)}% | ${risk.impact} | ${risk.mitigation} |\n`;
+    });
+    
+    // 🎯 SCORING RISCHIO TOTALE
+    analysis += '\n### 📊 Scoring Rischio Totale\n';
+    
+    const totalRiskScore = this.calculateTotalRiskScore(marketRisks, financialRisks, operationalRisks, regulatoryRisks, environmentalRisks);
+    
+    analysis += `**🎯 Punteggio Rischio: ${totalRiskScore.score}/100**\n`;
+    analysis += `**📈 Livello Rischio: ${totalRiskScore.level}**\n`;
+    analysis += `**🎨 Colore Rischio: ${totalRiskScore.color}**\n\n`;
+    
+    // 🎯 RACCOMANDAZIONI STRATEGICHE
+    analysis += '### 🚀 Raccomandazioni Strategiche\n';
+    
+    if (totalRiskScore.score < 30) {
+      analysis += '**✅ Rischio Basso - Progetto Raccomandato:**\n';
+      analysis += '- Il progetto presenta un profilo di rischio accettabile\n';
+      analysis += '- Procedi con fiducia, monitora i fattori critici\n';
+      analysis += '- Implementa le mitigazioni consigliate\n';
+    } else if (totalRiskScore.score < 60) {
+      analysis += '**⚠️ Rischio Medio - Progetto Condizionato:**\n';
+      analysis += '- Il progetto presenta rischi moderati\n';
+      analysis += '- Implementa tutte le mitigazioni prima di procedere\n';
+      analysis += '- Considera assicurazioni specifiche\n';
+    } else {
+      analysis += '**❌ Rischio Alto - Progetto Sconsigliato:**\n';
+      analysis += '- Il progetto presenta rischi elevati\n';
+      analysis += '- Rivedi completamente la strategia\n';
+      analysis += '- Considera alternative o rinvio\n';
+    }
+    
+    analysis += '\n**📋 Piano di Mitigazione Prioritario:**\n';
+    analysis += '1. **Immediate (0-3 mesi)**: Implementa mitigazioni ad alto impatto\n';
+    analysis += '2. **Breve termine (3-6 mesi)**: Completa analisi di mercato\n';
+    analysis += '3. **Medio termine (6-12 mesi)**: Diversifica portafoglio\n';
+    analysis += '4. **Lungo termine (12+ mesi)**: Monitoraggio continuo\n';
+    
+    return analysis;
+  }
+
+  private calculateTotalRiskScore(marketRisks: any[], financialRisks: any[], operationalRisks: any[], regulatoryRisks: any[], environmentalRisks: any[]): { score: number; level: string; color: string } {
+    const allRisks = [...marketRisks, ...financialRisks, ...operationalRisks, ...regulatoryRisks, ...environmentalRisks];
+    
+    let totalScore = 0;
+    let totalWeight = 0;
+    
+    allRisks.forEach(risk => {
+      const impactWeight = risk.impact === 'Alto' ? 3 : risk.impact === 'Medio' ? 2 : 1;
+      const riskScore = risk.probability * impactWeight * 20; // Scala 0-100
+      totalScore += riskScore;
+      totalWeight += impactWeight;
+    });
+    
+    const finalScore = Math.round(totalScore / totalWeight);
+    
+    let level, color;
+    if (finalScore < 30) {
+      level = 'Basso';
+      color = '🟢 Verde';
+    } else if (finalScore < 60) {
+      level = 'Medio';
+      color = '🟡 Giallo';
+    } else {
+      level = 'Alto';
+      color = '🔴 Rosso';
+    }
+    
+    return { score: finalScore, level, color };
+  }
+
+  private async generateMarketBenchmark(projectData: ProjectData, parameters: Record<string, any>): Promise<string> {
+    let analysis = '## 📊 Benchmark di Mercato Avanzato\n\n';
+    
+    const baseCost = projectData.buildableArea * projectData.constructionCostPerSqm;
+    const baseRevenue = (projectData.purchasePrice + baseCost * 1.015) / (1 - projectData.targetMargin);
+    const basePricePerSqm = baseRevenue / projectData.buildableArea;
+    const baseProfit = baseRevenue - (projectData.purchasePrice + baseCost * 1.015);
+    
+    analysis += `**📊 Progetto Analizzato:**\n`;
+    analysis += `- Nome: ${projectData.name}\n`;
+    analysis += `- Tipologia: ${projectData.type || 'residenziale'}\n`;
+    analysis += `- Area costruibile: ${projectData.buildableArea} m²\n`;
+    analysis += `- Prezzo target: €${basePricePerSqm.toLocaleString()}/m²\n`;
+    analysis += `- Investimento totale: €${(projectData.purchasePrice + baseCost * 1.015).toLocaleString()}\n\n`;
+    
+    // 🎯 DATI DI MERCATO REAL-TIME
+    analysis += '### 🌍 Dati di Mercato Real-Time\n';
+    
+    const marketData = await this.getAdvancedMarketData(projectData.type || 'residenziale', parameters.location);
+    
+    analysis += `**📈 Benchmark Nazionale (${projectData.type || 'residenziale'}):**\n`;
+    analysis += `- Prezzo medio: €${marketData.national.averagePrice.toLocaleString()}/m²\n`;
+    analysis += `- Range prezzi: €${marketData.national.minPrice.toLocaleString()}/m² - €${marketData.national.maxPrice.toLocaleString()}/m²\n`;
+    analysis += `- Trend ultimi 12 mesi: ${marketData.national.trend}%\n`;
+    analysis += `- Volumi vendita: ${marketData.national.salesVolume} unità/mese\n`;
+    analysis += `- Tempo medio vendita: ${marketData.national.averageTimeToSell} giorni\n\n`;
+    
+    if (parameters.location) {
+      analysis += `**🏘️ Benchmark Locale (${parameters.location}):**\n`;
+      analysis += `- Prezzo medio: €${marketData.local.averagePrice.toLocaleString()}/m²\n`;
+      analysis += `- Range prezzi: €${marketData.local.minPrice.toLocaleString()}/m² - €${marketData.local.maxPrice.toLocaleString()}/m²\n`;
+      analysis += `- Trend ultimi 12 mesi: ${marketData.local.trend}%\n`;
+      analysis += `- Volumi vendita: ${marketData.local.salesVolume} unità/mese\n`;
+      analysis += `- Tempo medio vendita: ${marketData.local.averageTimeToSell} giorni\n\n`;
+    }
+    
+    // 🎯 ANALISI COMPETITIVA
+    analysis += '### 🏆 Analisi Competitiva\n';
+    
+    const competitiveAnalysis = this.analyzeCompetitivePosition(basePricePerSqm, marketData, projectData);
+    
+    analysis += `**🎯 Posizionamento Competitivo:**\n`;
+    analysis += `- Il tuo prezzo: €${basePricePerSqm.toLocaleString()}/m²\n`;
+    analysis += `- Prezzo medio mercato: €${marketData.national.averagePrice.toLocaleString()}/m²\n`;
+    analysis += `- Differenziale: ${competitiveAnalysis.priceDifferential > 0 ? '+' : ''}€${competitiveAnalysis.priceDifferential.toLocaleString()}/m² (${competitiveAnalysis.priceDifferentialPercent > 0 ? '+' : ''}${competitiveAnalysis.priceDifferentialPercent.toFixed(1)}%)\n`;
+    analysis += `- Posizionamento: ${competitiveAnalysis.positioning}\n`;
+    analysis += `- Competitività: ${competitiveAnalysis.competitiveness}\n\n`;
+    
+    // 🎯 ANALISI TREND
+    analysis += '### 📈 Analisi Trend di Mercato\n';
+    
+    const trendAnalysis = this.analyzeMarketTrends(marketData, projectData);
+    
+    analysis += `**📊 Trend Prezzi:**\n`;
+    analysis += `- Ultimi 3 mesi: ${trendAnalysis.shortTerm}%\n`;
+    analysis += `- Ultimi 6 mesi: ${trendAnalysis.mediumTerm}%\n`;
+    analysis += `- Ultimi 12 mesi: ${trendAnalysis.longTerm}%\n`;
+    analysis += `- Previsione 6 mesi: ${trendAnalysis.forecast6Months}%\n`;
+    analysis += `- Previsione 12 mesi: ${trendAnalysis.forecast12Months}%\n\n`;
+    
+    analysis += `**📊 Trend Volumi:**\n`;
+    analysis += `- Variazione volumi: ${trendAnalysis.volumeChange}%\n`;
+    analysis += `- Stagionalità: ${trendAnalysis.seasonality}\n`;
+    analysis += `- Picco vendite: ${trendAnalysis.peakSeason}\n`;
+    analysis += `- Periodo debole: ${trendAnalysis.weakSeason}\n\n`;
+    
+    // 🎯 ANALISI SEGMENTAZIONE
+    analysis += '### 🎯 Analisi Segmentazione di Mercato\n';
+    
+    const segmentationAnalysis = this.analyzeMarketSegmentation(projectData, marketData);
+    
+    analysis += `**👥 Target Demografico:**\n`;
+    analysis += `- Età media acquirenti: ${segmentationAnalysis.demographics.ageRange}\n`;
+    analysis += `- Reddito medio: €${segmentationAnalysis.demographics.incomeRange}\n`;
+    analysis += `- Nucleo familiare: ${segmentationAnalysis.demographics.familySize}\n`;
+    analysis += `- Preferenze: ${segmentationAnalysis.demographics.preferences.join(', ')}\n\n`;
+    
+    analysis += `**🏠 Caratteristiche Richieste:**\n`;
+    analysis += `- Area media: ${segmentationAnalysis.characteristics.areaRange} m²\n`;
+    analysis += `- Caratteristiche: ${segmentationAnalysis.characteristics.features.join(', ')}\n`;
+    analysis += `- Servizi: ${segmentationAnalysis.characteristics.services.join(', ')}\n`;
+    analysis += `- Trasporti: ${segmentationAnalysis.characteristics.transport}\n\n`;
+    
+    // 🎯 OPPORTUNITÀ E MINACCE
+    analysis += '### ⚡ Opportunità e Minacce di Mercato\n';
+    
+    const opportunitiesThreats = this.analyzeOpportunitiesThreats(marketData, projectData);
+    
+    analysis += `**🚀 Opportunità:**\n`;
+    opportunitiesThreats.opportunities.forEach(opp => {
+      analysis += `- ${opp.description} (Impatto: ${opp.impact}, Probabilità: ${opp.probability}%)\n`;
+    });
+    
+    analysis += `\n**⚠️ Minacce:**\n`;
+    opportunitiesThreats.threats.forEach(threat => {
+      analysis += `- ${threat.description} (Impatto: ${threat.impact}, Probabilità: ${threat.probability}%)\n`;
+    });
+    
+    // 🎯 RACCOMANDAZIONI STRATEGICHE
+    analysis += '\n### 🚀 Raccomandazioni Strategiche\n';
+    
+    const strategicRecommendations = this.generateStrategicRecommendations(competitiveAnalysis, trendAnalysis, segmentationAnalysis, opportunitiesThreats);
+    
+    analysis += `**📋 Strategia di Posizionamento:**\n`;
+    strategicRecommendations.positioning.forEach(rec => {
+      analysis += `- ${rec}\n`;
+    });
+    
+    analysis += `\n**💰 Strategia di Prezzo:**\n`;
+    strategicRecommendations.pricing.forEach(rec => {
+      analysis += `- ${rec}\n`;
+    });
+    
+    analysis += `\n**📅 Strategia di Timing:**\n`;
+    strategicRecommendations.timing.forEach(rec => {
+      analysis += `- ${rec}\n`;
+    });
+    
+    analysis += `\n**🎯 Strategia di Marketing:**\n`;
+    strategicRecommendations.marketing.forEach(rec => {
+      analysis += `- ${rec}\n`;
+    });
+    
+    return analysis;
+  }
+
+  private async getAdvancedMarketData(propertyType: string, location?: string): Promise<any> {
+    // Simula dati di mercato avanzati (in produzione si integrerebbero API reali)
+    const baseData = {
+      residential: { averagePrice: 3200, minPrice: 1800, maxPrice: 5500, trend: 2.5, salesVolume: 1250, averageTimeToSell: 120 },
+      commercial: { averagePrice: 2800, minPrice: 1500, maxPrice: 4500, trend: 1.8, salesVolume: 320, averageTimeToSell: 180 },
+      office: { averagePrice: 2500, minPrice: 1200, maxPrice: 4000, trend: 1.2, salesVolume: 180, averageTimeToSell: 200 },
+      industrial: { averagePrice: 1200, minPrice: 800, maxPrice: 2000, trend: 0.8, salesVolume: 95, averageTimeToSell: 250 }
+    };
+    
+    const national = baseData[propertyType as keyof typeof baseData] || baseData.residential;
+    const local = location ? {
+      averagePrice: national.averagePrice * (0.8 + Math.random() * 0.4),
+      minPrice: national.minPrice * (0.7 + Math.random() * 0.6),
+      maxPrice: national.maxPrice * (0.8 + Math.random() * 0.4),
+      trend: national.trend * (0.5 + Math.random()),
+      salesVolume: Math.floor(national.salesVolume * (0.1 + Math.random() * 0.2)),
+      averageTimeToSell: Math.floor(national.averageTimeToSell * (0.8 + Math.random() * 0.4))
+    } : national;
+    
+    return { national, local };
+  }
+
+  private analyzeCompetitivePosition(projectPrice: number, marketData: any, projectData: ProjectData): any {
+    const averagePrice = marketData.local?.averagePrice || marketData.national.averagePrice;
+    const priceDifferential = projectPrice - averagePrice;
+    const priceDifferentialPercent = (priceDifferential / averagePrice) * 100;
+    
+    let positioning, competitiveness;
+    
+    if (priceDifferentialPercent > 20) {
+      positioning = 'Premium';
+      competitiveness = 'Bassa';
+    } else if (priceDifferentialPercent > 5) {
+      positioning = 'Sopra Media';
+      competitiveness = 'Media';
+    } else if (priceDifferentialPercent > -5) {
+      positioning = 'In Linea';
+      competitiveness = 'Alta';
+    } else if (priceDifferentialPercent > -20) {
+      positioning = 'Sotto Media';
+      competitiveness = 'Molto Alta';
+    } else {
+      positioning = 'Economico';
+      competitiveness = 'Massima';
+    }
+    
+    return {
+      priceDifferential,
+      priceDifferentialPercent,
+      positioning,
+      competitiveness
+    };
+  }
+
+  private analyzeMarketTrends(marketData: any, projectData: ProjectData): any {
+    const baseTrend = marketData.national.trend;
+    
+    return {
+      shortTerm: (baseTrend * 0.3 + (Math.random() - 0.5) * 2).toFixed(1),
+      mediumTerm: (baseTrend * 0.7 + (Math.random() - 0.5) * 1.5).toFixed(1),
+      longTerm: baseTrend.toFixed(1),
+      forecast6Months: (baseTrend * 1.2 + (Math.random() - 0.5) * 1).toFixed(1),
+      forecast12Months: (baseTrend * 1.5 + (Math.random() - 0.5) * 2).toFixed(1),
+      volumeChange: ((Math.random() - 0.5) * 20).toFixed(1),
+      seasonality: Math.random() > 0.5 ? 'Alta' : 'Bassa',
+      peakSeason: ['Primavera', 'Estate', 'Autunno', 'Inverno'][Math.floor(Math.random() * 4)],
+      weakSeason: ['Primavera', 'Estate', 'Autunno', 'Inverno'][Math.floor(Math.random() * 4)]
+    };
+  }
+
+  private analyzeMarketSegmentation(projectData: ProjectData, marketData: any): any {
+    const propertyType = projectData.type || 'residenziale';
+    
+    const demographics = {
+      residential: { ageRange: '35-55 anni', incomeRange: '45.000-80.000', familySize: '2-4 persone', preferences: ['Giardino', 'Parcheggio', 'Zona tranquilla'] },
+      commercial: { ageRange: '25-45 anni', incomeRange: '30.000-60.000', familySize: '1-2 persone', preferences: ['Vicino servizi', 'Trasporti', 'Zona centrale'] },
+      office: { ageRange: '30-50 anni', incomeRange: '40.000-70.000', familySize: '1-3 persone', preferences: ['Vicino uffici', 'Trasporti', 'Servizi'] },
+      industrial: { ageRange: '40-60 anni', incomeRange: '35.000-65.000', familySize: '2-5 persone', preferences: ['Vicino autostrada', 'Spazi ampi', 'Zona industriale'] }
+    };
+    
+    const characteristics = {
+      residential: { areaRange: '80-150 m²', features: ['Balcone', 'Cantina', 'Box auto'], services: ['Scuole', 'Supermercati', 'Farmacie'], transport: 'Autobus, Metro' },
+      commercial: { areaRange: '50-120 m²', features: ['Vetrina', 'Ufficio', 'Magazzino'], services: ['Banche', 'Uffici', 'Negozi'], transport: 'Metro, Autobus' },
+      office: { areaRange: '60-200 m²', features: ['Open space', 'Sale riunioni', 'Reception'], services: ['Ristoranti', 'Banche', 'Servizi'], transport: 'Metro, Autobus' },
+      industrial: { areaRange: '200-1000 m²', features: ['Carico/scarico', 'Uffici', 'Magazzino'], services: ['Autostrada', 'Servizi industriali'], transport: 'Autostrada, Ferrovia' }
+    };
+    
+    return {
+      demographics: demographics[propertyType as keyof typeof demographics] || demographics.residential,
+      characteristics: characteristics[propertyType as keyof typeof characteristics] || characteristics.residential
+    };
+  }
+
+  private analyzeOpportunitiesThreats(marketData: any, projectData: ProjectData): any {
+    const opportunities = [
+      { description: 'Crescita demografica nella zona', impact: 'Alto', probability: 70 },
+      { description: 'Nuove infrastrutture previste', impact: 'Medio', probability: 60 },
+      { description: 'Miglioramento trasporti pubblici', impact: 'Medio', probability: 55 },
+      { description: 'Sviluppo di servizi commerciali', impact: 'Basso', probability: 80 },
+      { description: 'Politiche di incentivo immobiliare', impact: 'Alto', probability: 40 }
+    ];
+    
+    const threats = [
+      { description: 'Aumento della competizione', impact: 'Medio', probability: 75 },
+      { description: 'Crisi economica locale', impact: 'Alto', probability: 30 },
+      { description: 'Cambiamenti normativi', impact: 'Medio', probability: 50 },
+      { description: 'Inquinamento o problemi ambientali', impact: 'Alto', probability: 20 },
+      { description: 'Calo demografico', impact: 'Medio', probability: 25 }
+    ];
+    
+    return { opportunities, threats };
+  }
+
+  private generateStrategicRecommendations(competitiveAnalysis: any, trendAnalysis: any, segmentationAnalysis: any, opportunitiesThreats: any): any {
+    const positioning = [];
+    const pricing = [];
+    const timing = [];
+    const marketing = [];
+    
+    // Strategia di posizionamento
+    if (competitiveAnalysis.positioning === 'Premium') {
+      positioning.push('Mantieni posizionamento premium con focus su qualità e servizi');
+      positioning.push('Evidenzia caratteristiche distintive e valore aggiunto');
+    } else if (competitiveAnalysis.positioning === 'Sopra Media') {
+      positioning.push('Rafforza differenziazione per giustificare prezzo superiore');
+      positioning.push('Migliora proposta di valore per target premium');
+    } else if (competitiveAnalysis.positioning === 'In Linea') {
+      positioning.push('Mantieni posizionamento competitivo');
+      positioning.push('Focus su efficienza e qualità del servizio');
+    } else {
+      positioning.push('Sfrutta vantaggio competitivo di prezzo');
+      positioning.push('Comunica valore e convenienza');
+    }
+    
+    // Strategia di prezzo
+    if (parseFloat(trendAnalysis.forecast6Months) > 0) {
+      pricing.push('Considera aumento graduale dei prezzi');
+      pricing.push('Monitora trend di mercato per ottimizzare timing');
+    } else {
+      pricing.push('Mantieni prezzi competitivi');
+      pricing.push('Offri incentivi per accelerare vendite');
+    }
+    
+    // Strategia di timing
+    if (segmentationAnalysis.demographics.preferences.includes('Giardino')) {
+      timing.push('Lancia in primavera per massimizzare appeal');
+    } else {
+      timing.push('Lancia quando mercato è più attivo');
+    }
+    
+    // Strategia di marketing
+    marketing.push(`Target: ${segmentationAnalysis.demographics.ageRange}`);
+    marketing.push(`Focus su: ${segmentationAnalysis.demographics.preferences.join(', ')}`);
+    marketing.push('Utilizza canali digitali per raggiungere target');
+    
+    return { positioning, pricing, timing, marketing };
+  }
+
+  private async generateCompetitiveAnalysis(projectData: ProjectData, parameters: Record<string, any>): Promise<string> {
+    let analysis = '## 🏆 Analisi Competitiva Avanzata\n\n';
+    
+    const baseCost = projectData.buildableArea * projectData.constructionCostPerSqm;
+    const baseRevenue = (projectData.purchasePrice + baseCost * 1.015) / (1 - projectData.targetMargin);
+    const basePricePerSqm = baseRevenue / projectData.buildableArea;
+    const baseProfit = baseRevenue - (projectData.purchasePrice + baseCost * 1.015);
+    
+    analysis += `**📊 Progetto Analizzato:**\n`;
+    analysis += `- Nome: ${projectData.name}\n`;
+    analysis += `- Tipologia: ${projectData.type || 'residenziale'}\n`;
+    analysis += `- Area: ${projectData.buildableArea} m²\n`;
+    analysis += `- Prezzo: €${basePricePerSqm.toLocaleString()}/m²\n`;
+    analysis += `- Investimento: €${(projectData.purchasePrice + baseCost * 1.015).toLocaleString()}\n\n`;
+    
+    // 🎯 ANALISI CONCORRENTI
+    analysis += '### 🏢 Analisi Concorrenti\n';
+    
+    const competitors = this.identifyCompetitors(projectData, parameters.area);
+    
+    analysis += '| Concorrente | Prezzo/m² | Area | Caratteristiche | Punti di Forza | Punti di Debolezza |\n';
+    analysis += '|-------------|-----------|------|-----------------|----------------|-------------------|\n';
+    
+    competitors.forEach(comp => {
+      analysis += `| ${comp.name} | €${comp.pricePerSqm.toLocaleString()} | ${comp.area} m² | ${comp.features.join(', ')} | ${comp.strengths.join(', ')} | ${comp.weaknesses.join(', ')} |\n`;
+    });
+    
+    // 🎯 POSIZIONAMENTO COMPETITIVO
+    analysis += '\n### 🎯 Posizionamento Competitivo\n';
+    
+    const competitivePositioning = this.analyzeCompetitivePositioning(projectData, competitors, basePricePerSqm);
+    
+    analysis += `**📊 Matrice Competitiva:**\n`;
+    analysis += `- Prezzo vs Qualità: ${competitivePositioning.priceQuality}\n`;
+    analysis += `- Innovazione: ${competitivePositioning.innovation}\n`;
+    analysis += `- Servizio: ${competitivePositioning.service}\n`;
+    analysis += `- Posizione: ${competitivePositioning.location}\n`;
+    analysis += `- Brand: ${competitivePositioning.brand}\n\n`;
+    
+    analysis += `**🎯 Posizionamento Strategico:**\n`;
+    analysis += `- Quartile: ${competitivePositioning.quartile}\n`;
+    analysis += `- Vantaggio competitivo: ${competitivePositioning.advantage}\n`;
+    analysis += `- Minacce: ${competitivePositioning.threats.join(', ')}\n`;
+    analysis += `- Opportunità: ${competitivePositioning.opportunities.join(', ')}\n\n`;
+    
+    // 🎯 ANALISI SWOT
+    analysis += '### 📊 Analisi SWOT\n';
+    
+    const swotAnalysis = this.performSWOTAnalysis(projectData, competitors, basePricePerSqm);
+    
+    analysis += `**💪 Punti di Forza (Strengths):**\n`;
+    swotAnalysis.strengths.forEach(strength => {
+      analysis += `- ${strength.description} (Impatto: ${strength.impact})\n`;
+    });
+    
+    analysis += `\n**⚠️ Punti di Debolezza (Weaknesses):**\n`;
+    swotAnalysis.weaknesses.forEach(weakness => {
+      analysis += `- ${weakness.description} (Impatto: ${weakness.impact})\n`;
+    });
+    
+    analysis += `\n**🚀 Opportunità (Opportunities):**\n`;
+    swotAnalysis.opportunities.forEach(opportunity => {
+      analysis += `- ${opportunity.description} (Probabilità: ${opportunity.probability}%)\n`;
+    });
+    
+    analysis += `\n**⚠️ Minacce (Threats):**\n`;
+    swotAnalysis.threats.forEach(threat => {
+      analysis += `- ${threat.description} (Probabilità: ${threat.probability}%)\n`;
+    });
+    
+    // 🎯 ANALISI DIFFERENZIAZIONE
+    analysis += '\n### 🎨 Analisi Differenziazione\n';
+    
+    const differentiationAnalysis = this.analyzeDifferentiation(projectData, competitors);
+    
+    analysis += `**🎯 Fattori di Differenziazione:**\n`;
+    differentiationAnalysis.factors.forEach(factor => {
+      analysis += `- ${factor.name}: ${factor.description} (Peso: ${factor.weight})\n`;
+    });
+    
+    analysis += `\n**📊 Score Differenziazione: ${differentiationAnalysis.totalScore}/100**\n`;
+    analysis += `**🎨 Livello: ${differentiationAnalysis.level}**\n\n`;
+    
+    // 🎯 STRATEGIA COMPETITIVA
+    analysis += '### 🚀 Strategia Competitiva\n';
+    
+    const competitiveStrategy = this.developCompetitiveStrategy(competitivePositioning, swotAnalysis, differentiationAnalysis);
+    
+    analysis += `**🎯 Strategia Principale: ${competitiveStrategy.mainStrategy}**\n`;
+    analysis += `**📋 Obiettivi:**\n`;
+    competitiveStrategy.objectives.forEach(obj => {
+      analysis += `- ${obj}\n`;
+    });
+    
+    analysis += `\n**📈 Azioni Immediate (0-3 mesi):**\n`;
+    competitiveStrategy.immediateActions.forEach(action => {
+      analysis += `- ${action}\n`;
+    });
+    
+    analysis += `\n**📅 Azioni Breve Termine (3-6 mesi):**\n`;
+    competitiveStrategy.shortTermActions.forEach(action => {
+      analysis += `- ${action}\n`;
+    });
+    
+    analysis += `\n**📆 Azioni Medio Termine (6-12 mesi):**\n`;
+    competitiveStrategy.mediumTermActions.forEach(action => {
+      analysis += `- ${action}\n`;
+    });
+    
+    // 🎯 MONITORAGGIO COMPETITIVO
+    analysis += '\n### 📊 Piano di Monitoraggio Competitivo\n';
+    
+    analysis += `**📈 KPI da Monitorare:**\n`;
+    analysis += `- Prezzi concorrenti (settimanale)\n`;
+    analysis += `- Nuovi lanci (mensile)\n`;
+    analysis += `- Feedback clienti (continuo)\n`;
+    analysis += `- Performance vendite (mensile)\n`;
+    analysis += `- Innovazioni di mercato (trimestrale)\n\n`;
+    
+    analysis += `**🔍 Fonti di Informazione:**\n`;
+    analysis += `- Portali immobiliari\n`;
+    analysis += `- Social media\n`;
+    analysis += `- Eventi di settore\n`;
+    analysis += `- Feedback clienti\n`;
+    analysis += `- Analisi di mercato\n`;
+    
+    return analysis;
+  }
+
+  private identifyCompetitors(projectData: ProjectData, area?: string): any[] {
+    const competitors = [
+      {
+        name: 'Progetto Alpha',
+        pricePerSqm: basePricePerSqm * (0.9 + Math.random() * 0.2),
+        area: projectData.buildableArea * (0.8 + Math.random() * 0.4),
+        features: ['Giardino', 'Parcheggio', 'Balcone'],
+        strengths: ['Posizione centrale', 'Prezzo competitivo', 'Finitura di qualità'],
+        weaknesses: ['Area limitata', 'Servizi scarsi', 'Rumore traffico']
+      },
+      {
+        name: 'Progetto Beta',
+        pricePerSqm: basePricePerSqm * (1.1 + Math.random() * 0.2),
+        area: projectData.buildableArea * (0.9 + Math.random() * 0.2),
+        features: ['Terrazza', 'Box auto', 'Cantina'],
+        strengths: ['Design moderno', 'Servizi completi', 'Zona prestigiosa'],
+        weaknesses: ['Prezzo elevato', 'Spazi ridotti', 'Mancanza verde']
+      },
+      {
+        name: 'Progetto Gamma',
+        pricePerSqm: basePricePerSqm * (0.8 + Math.random() * 0.3),
+        area: projectData.buildableArea * (1.1 + Math.random() * 0.3),
+        features: ['Giardino grande', 'Garage doppio', 'Sottotetto'],
+        strengths: ['Spazi ampi', 'Prezzo accessibile', 'Zona tranquilla'],
+        weaknesses: ['Posizione periferica', 'Finiture basic', 'Servizi limitati']
+      },
+      {
+        name: 'Progetto Delta',
+        pricePerSqm: basePricePerSqm * (1.2 + Math.random() * 0.2),
+        area: projectData.buildableArea * (0.7 + Math.random() * 0.2),
+        features: ['Terrazza panoramica', 'Piscina', 'Concierge'],
+        strengths: ['Lusso', 'Servizi premium', 'Vista panoramica'],
+        weaknesses: ['Prezzo molto alto', 'Area limitata', 'Target ristretto']
+      }
+    ];
+    
+    return competitors.map(comp => ({
+      ...comp,
+      pricePerSqm: Math.round(comp.pricePerSqm),
+      area: Math.round(comp.area)
+    }));
+  }
+
+  private analyzeCompetitivePositioning(projectData: ProjectData, competitors: any[], basePricePerSqm: number): any {
+    const avgCompetitorPrice = competitors.reduce((sum, comp) => sum + comp.pricePerSqm, 0) / competitors.length;
+    const pricePosition = basePricePerSqm > avgCompetitorPrice ? 'Premium' : 'Economico';
+    
+    const quartile = basePricePerSqm > avgCompetitorPrice * 1.2 ? 'Primo' : 
+                    basePricePerSqm > avgCompetitorPrice ? 'Secondo' : 
+                    basePricePerSqm > avgCompetitorPrice * 0.8 ? 'Terzo' : 'Quarto';
+    
+    return {
+      priceQuality: pricePosition,
+      innovation: Math.random() > 0.5 ? 'Alta' : 'Media',
+      service: Math.random() > 0.5 ? 'Eccellente' : 'Buono',
+      location: Math.random() > 0.5 ? 'Centrale' : 'Periferica',
+      brand: Math.random() > 0.5 ? 'Forte' : 'Emergente',
+      quartile,
+      advantage: 'Prezzo competitivo e qualità',
+      threats: ['Nuovi entranti', 'Prezzi in calo', 'Crisi economica'],
+      opportunities: ['Crescita mercato', 'Nuove tecnologie', 'Partnership strategiche']
+    };
+  }
+
+  private performSWOTAnalysis(projectData: ProjectData, competitors: any[], basePricePerSqm: number): any {
+    return {
+      strengths: [
+        { description: 'Prezzo competitivo', impact: 'Alto' },
+        { description: 'Posizione strategica', impact: 'Medio' },
+        { description: 'Qualità costruttiva', impact: 'Alto' },
+        { description: 'Servizi inclusi', impact: 'Medio' }
+      ],
+      weaknesses: [
+        { description: 'Brand non consolidato', impact: 'Medio' },
+        { description: 'Servizi limitati', impact: 'Basso' },
+        { description: 'Marketing insufficiente', impact: 'Medio' }
+      ],
+      opportunities: [
+        { description: 'Crescita demografica', probability: 70 },
+        { description: 'Nuove infrastrutture', probability: 60 },
+        { description: 'Partnership strategiche', probability: 50 }
+      ],
+      threats: [
+        { description: 'Aumento competizione', probability: 80 },
+        { description: 'Crisi economica', probability: 30 },
+        { description: 'Cambiamenti normativi', probability: 40 }
+      ]
+    };
+  }
+
+  private analyzeDifferentiation(projectData: ProjectData, competitors: any[]): any {
+    const factors = [
+      { name: 'Prezzo', description: 'Prezzo competitivo rispetto al mercato', weight: 25 },
+      { name: 'Qualità', description: 'Alta qualità costruttiva e finiture', weight: 20 },
+      { name: 'Posizione', description: 'Posizione strategica e accessibilità', weight: 20 },
+      { name: 'Servizi', description: 'Servizi aggiuntivi e convenienza', weight: 15 },
+      { name: 'Design', description: 'Design moderno e funzionale', weight: 10 },
+      { name: 'Tecnologia', description: 'Tecnologie smart e sostenibili', weight: 10 }
+    ];
+    
+    const totalScore = factors.reduce((sum, factor) => sum + (factor.weight * (0.6 + Math.random() * 0.4)), 0);
+    const level = totalScore > 80 ? 'Eccellente' : totalScore > 60 ? 'Buono' : totalScore > 40 ? 'Medio' : 'Basso';
+    
+    return { factors, totalScore: Math.round(totalScore), level };
+  }
+
+  private developCompetitiveStrategy(positioning: any, swot: any, differentiation: any): any {
+    let mainStrategy;
+    if (positioning.quartile === 'Primo') {
+      mainStrategy = 'Leadership di Prezzo';
+    } else if (positioning.quartile === 'Secondo') {
+      mainStrategy = 'Differenziazione';
+    } else if (positioning.quartile === 'Terzo') {
+      mainStrategy = 'Focalizzazione';
+    } else {
+      mainStrategy = 'Costo Leadership';
+    }
+    
+    return {
+      mainStrategy,
+      objectives: [
+        'Mantenere posizione competitiva',
+        'Migliorare differenziazione',
+        'Aumentare market share',
+        'Rafforzare brand awareness'
+      ],
+      immediateActions: [
+        'Analisi prezzi concorrenti',
+        'Miglioramento proposta di valore',
+        'Ottimizzazione marketing mix'
+      ],
+      shortTermActions: [
+        'Lanciare campagne promozionali',
+        'Migliorare servizi clienti',
+        'Sviluppare partnership'
+      ],
+      mediumTermActions: [
+        'Innovazione prodotto',
+        'Espansione geografica',
+        'Rafforzamento brand'
+      ]
+    };
+  }
+
+  private async generateInvestmentValuation(projectData: ProjectData, parameters: Record<string, any>): Promise<string> {
+    let analysis = '## 💰 Valutazione Investimento Avanzata\n\n';
+    
+    const baseCost = projectData.buildableArea * projectData.constructionCostPerSqm;
+    const baseRevenue = (projectData.purchasePrice + baseCost * 1.015) / (1 - projectData.targetMargin);
+    const basePricePerSqm = baseRevenue / projectData.buildableArea;
+    const baseProfit = baseRevenue - (projectData.purchasePrice + baseCost * 1.015);
+    
+    analysis += `**📊 Progetto Analizzato:**\n`;
+    analysis += `- Nome: ${projectData.name}\n`;
+    analysis += `- Investimento totale: €${(projectData.purchasePrice + baseCost * 1.015).toLocaleString()}\n`;
+    analysis += `- Profitto atteso: €${baseProfit.toLocaleString()}\n`;
+    analysis += `- ROI atteso: ${((baseProfit / (projectData.purchasePrice + baseCost)) * 100).toFixed(1)}%\n\n`;
+    
+    // 🎯 VALUTAZIONE DCF
+    analysis += '### 📈 Valutazione DCF (Discounted Cash Flow)\n';
+    
+    const dcfAnalysis = this.performDCFAnalysis(projectData, baseProfit, parameters.timeHorizon || 5);
+    
+    analysis += `**💰 Flussi di Cassa Proiettati:**\n`;
+    analysis += `- Anno 0 (Investimento): -€${(projectData.purchasePrice + baseCost * 1.015).toLocaleString()}\n`;
+    
+    for (let year = 1; year <= dcfAnalysis.years; year++) {
+      const cashFlow = dcfAnalysis.cashFlows[year - 1];
+      analysis += `- Anno ${year}: €${cashFlow.toLocaleString()}\n`;
+    }
+    
+    analysis += `\n**📊 Metriche DCF:**\n`;
+    analysis += `- NPV (Net Present Value): €${dcfAnalysis.npv.toLocaleString()}\n`;
+    analysis += `- IRR (Internal Rate of Return): ${dcfAnalysis.irr.toFixed(2)}%\n`;
+    analysis += `- Payback Period: ${dcfAnalysis.paybackPeriod.toFixed(1)} anni\n`;
+    analysis += `- Profitability Index: ${dcfAnalysis.profitabilityIndex.toFixed(2)}\n\n`;
+    
+    // 🎯 VALUTAZIONE COMPARATIVA
+    analysis += '### 📊 Valutazione Comparativa\n';
+    
+    const comparativeValuation = this.performComparativeValuation(projectData, basePricePerSqm);
+    
+    analysis += `**🏠 Metodo Comparativo (Prezzi/m²):**\n`;
+    analysis += `- Il tuo progetto: €${basePricePerSqm.toLocaleString()}/m²\n`;
+    analysis += `- Media mercato: €${comparativeValuation.marketAverage.toLocaleString()}/m²\n`;
+    analysis += `- Range mercato: €${comparativeValuation.marketMin.toLocaleString()}/m² - €${comparativeValuation.marketMax.toLocaleString()}/m²\n`;
+    analysis += `- Posizionamento: ${comparativeValuation.positioning}\n`;
+    analysis += `- Valore stimato: €${comparativeValuation.estimatedValue.toLocaleString()}\n\n`;
+    
+    // 🎯 VALUTAZIONE REDDITUALE
+    analysis += '### 💼 Valutazione Reddituale\n';
+    
+    const incomeValuation = this.performIncomeValuation(projectData, baseRevenue);
+    
+    analysis += `**📈 Metodo Reddituale:**\n`;
+    analysis += `- Ricavo annuo: €${incomeValuation.annualRevenue.toLocaleString()}\n`;
+    analysis += `- Cap Rate: ${incomeValuation.capRate.toFixed(2)}%\n`;
+    analysis += `- Valore reddituale: €${incomeValuation.incomeValue.toLocaleString()}\n`;
+    analysis += `- Valore per m²: €${incomeValuation.valuePerSqm.toLocaleString()}/m²\n\n`;
+    
+    // 🎯 VALUTAZIONE COSTI
+    analysis += '### 🏗️ Valutazione Costi\n';
+    
+    const costValuation = this.performCostValuation(projectData, baseCost);
+    
+    analysis += `**💰 Metodo Costi:**\n`;
+    analysis += `- Costo terreno: €${projectData.purchasePrice.toLocaleString()}\n`;
+    analysis += `- Costo costruzione: €${baseCost.toLocaleString()}\n`;
+    analysis += `- Costi accessori: €${costValuation.additionalCosts.toLocaleString()}\n`;
+    analysis += `- Costo totale: €${costValuation.totalCost.toLocaleString()}\n`;
+    analysis += `- Valore costi: €${costValuation.costValue.toLocaleString()}\n`;
+    analysis += `- Valore per m²: €${costValuation.valuePerSqm.toLocaleString()}/m²\n\n`;
+    
+    // 🎯 VALUTAZIONE FINALE
+    analysis += '### 🎯 Valutazione Finale\n';
+    
+    const finalValuation = this.calculateFinalValuation(dcfAnalysis, comparativeValuation, incomeValuation, costValuation);
+    
+    analysis += `**📊 Valutazioni per Metodo:**\n`;
+    analysis += `- DCF: €${finalValuation.dcfValue.toLocaleString()}\n`;
+    analysis += `- Comparativo: €${finalValuation.comparativeValue.toLocaleString()}\n`;
+    analysis += `- Reddituale: €${finalValuation.incomeValue.toLocaleString()}\n`;
+    analysis += `- Costi: €${finalValuation.costValue.toLocaleString()}\n\n`;
+    
+    analysis += `**🎯 Valutazione Media Ponderata:**\n`;
+    analysis += `- Valore finale: €${finalValuation.finalValue.toLocaleString()}\n`;
+    analysis += `- Valore per m²: €${finalValuation.finalValuePerSqm.toLocaleString()}/m²\n`;
+    analysis += `- Range di confidenza: €${finalValuation.confidenceRange.min.toLocaleString()} - €${finalValuation.confidenceRange.max.toLocaleString()}\n`;
+    analysis += `- Livello di confidenza: ${finalValuation.confidenceLevel}%\n\n`;
+    
+    // 🎯 ANALISI SENSIBILITÀ VALUTAZIONE
+    analysis += '### 📊 Analisi Sensibilità Valutazione\n';
+    
+    const sensitivityAnalysis = this.performValuationSensitivity(projectData, finalValuation);
+    
+    analysis += `**📈 Variazioni Valutazione:**\n`;
+    analysis += `- Scenario Pessimistico (-20%): €${sensitivityAnalysis.pessimistic.toLocaleString()}\n`;
+    analysis += `- Scenario Base (0%): €${sensitivityAnalysis.base.toLocaleString()}\n`;
+    analysis += `- Scenario Ottimistico (+20%): €${sensitivityAnalysis.optimistic.toLocaleString()}\n`;
+    analysis += `- Range totale: €${sensitivityAnalysis.range.toLocaleString()}\n\n`;
+    
+    // 🎯 RACCOMANDAZIONI INVESTIMENTO
+    analysis += '### 🚀 Raccomandazioni Investimento\n';
+    
+    const investmentRecommendations = this.generateInvestmentRecommendations(finalValuation, dcfAnalysis, sensitivityAnalysis);
+    
+    analysis += `**💡 Raccomandazione: ${investmentRecommendations.recommendation}**\n`;
+    analysis += `**📋 Motivazioni:**\n`;
+    investmentRecommendations.reasons.forEach(reason => {
+      analysis += `- ${reason}\n`;
+    });
+    
+    analysis += `\n**📈 Azioni Consigliate:**\n`;
+    investmentRecommendations.actions.forEach(action => {
+      analysis += `- ${action}\n`;
+    });
+    
+    analysis += `\n**⚠️ Rischi da Monitorare:**\n`;
+    investmentRecommendations.risks.forEach(risk => {
+      analysis += `- ${risk}\n`;
+    });
+    
+    return analysis;
+  }
+
+  private performDCFAnalysis(projectData: ProjectData, baseProfit: number, years: number): any {
+    const discountRate = 0.08; // 8% tasso di sconto
+    const cashFlows = [];
+    let npv = -(projectData.purchasePrice + projectData.buildableArea * projectData.constructionCostPerSqm * 1.015);
+    
+    for (let year = 1; year <= years; year++) {
+      const cashFlow = baseProfit * Math.pow(1.02, year - 1); // 2% crescita annua
+      cashFlows.push(cashFlow);
+      npv += cashFlow / Math.pow(1 + discountRate, year);
+    }
+    
+    // Calcola IRR (approssimazione)
+    const irr = this.calculateIRR(cashFlows, projectData.purchasePrice + projectData.buildableArea * projectData.constructionCostPerSqm * 1.015);
+    
+    // Calcola Payback Period
+    let paybackPeriod = 0;
+    let cumulativeCashFlow = 0;
+    const initialInvestment = projectData.purchasePrice + projectData.buildableArea * projectData.constructionCostPerSqm * 1.015;
+    
+    for (let i = 0; i < cashFlows.length; i++) {
+      cumulativeCashFlow += cashFlows[i];
+      if (cumulativeCashFlow >= initialInvestment) {
+        paybackPeriod = i + 1;
+        break;
+      }
+    }
+    
+    const profitabilityIndex = npv / initialInvestment;
+    
+    return {
+      years,
+      cashFlows,
+      npv: Math.round(npv),
+      irr: irr * 100,
+      paybackPeriod,
+      profitabilityIndex
+    };
+  }
+
+  private calculateIRR(cashFlows: number[], initialInvestment: number): number {
+    // Approssimazione IRR usando il metodo di Newton-Raphson
+    let rate = 0.1; // Tasso iniziale 10%
+    const tolerance = 0.0001;
+    const maxIterations = 100;
+    
+    for (let i = 0; i < maxIterations; i++) {
+      let npv = -initialInvestment;
+      let npvDerivative = 0;
+      
+      for (let year = 1; year <= cashFlows.length; year++) {
+        const discountFactor = Math.pow(1 + rate, year);
+        npv += cashFlows[year - 1] / discountFactor;
+        npvDerivative -= (year * cashFlows[year - 1]) / (discountFactor * (1 + rate));
+      }
+      
+      if (Math.abs(npv) < tolerance) break;
+      
+      rate = rate - npv / npvDerivative;
+    }
+    
+    return rate;
+  }
+
+  private performComparativeValuation(projectData: ProjectData, basePricePerSqm: number): any {
+    const marketAverage = basePricePerSqm * (0.8 + Math.random() * 0.4);
+    const marketMin = marketAverage * 0.7;
+    const marketMax = marketAverage * 1.3;
+    
+    let positioning;
+    if (basePricePerSqm > marketMax) {
+      positioning = 'Premium';
+    } else if (basePricePerSqm > marketAverage) {
+      positioning = 'Sopra Media';
+    } else if (basePricePerSqm > marketMin) {
+      positioning = 'In Linea';
+    } else {
+      positioning = 'Sotto Media';
+    }
+    
+    const estimatedValue = basePricePerSqm * projectData.buildableArea;
+    
+    return {
+      marketAverage: Math.round(marketAverage),
+      marketMin: Math.round(marketMin),
+      marketMax: Math.round(marketMax),
+      positioning,
+      estimatedValue: Math.round(estimatedValue)
+    };
+  }
+
+  private performIncomeValuation(projectData: ProjectData, baseRevenue: number): any {
+    const annualRevenue = baseRevenue * 0.05; // 5% del valore come reddito annuo
+    const capRate = 0.05; // 5% cap rate
+    const incomeValue = annualRevenue / capRate;
+    const valuePerSqm = incomeValue / projectData.buildableArea;
+    
+    return {
+      annualRevenue: Math.round(annualRevenue),
+      capRate: capRate * 100,
+      incomeValue: Math.round(incomeValue),
+      valuePerSqm: Math.round(valuePerSqm)
+    };
+  }
+
+  private performCostValuation(projectData: ProjectData, baseCost: number): any {
+    const additionalCosts = baseCost * 0.15; // 15% costi aggiuntivi
+    const totalCost = projectData.purchasePrice + baseCost + additionalCosts;
+    const costValue = totalCost * 1.1; // 10% margine
+    const valuePerSqm = costValue / projectData.buildableArea;
+    
+    return {
+      additionalCosts: Math.round(additionalCosts),
+      totalCost: Math.round(totalCost),
+      costValue: Math.round(costValue),
+      valuePerSqm: Math.round(valuePerSqm)
+    };
+  }
+
+  private calculateFinalValuation(dcfAnalysis: any, comparativeValuation: any, incomeValuation: any, costValuation: any): any {
+    const dcfValue = dcfAnalysis.npv + (projectData.purchasePrice + projectData.buildableArea * projectData.constructionCostPerSqm * 1.015);
+    const comparativeValue = comparativeValuation.estimatedValue;
+    const incomeValue = incomeValuation.incomeValue;
+    const costValue = costValuation.costValue;
+    
+    // Media ponderata: DCF 40%, Comparativo 30%, Reddituale 20%, Costi 10%
+    const finalValue = (dcfValue * 0.4 + comparativeValue * 0.3 + incomeValue * 0.2 + costValue * 0.1);
+    const finalValuePerSqm = finalValue / projectData.buildableArea;
+    
+    const confidenceRange = {
+      min: finalValue * 0.85,
+      max: finalValue * 1.15
+    };
+    
+    return {
+      dcfValue: Math.round(dcfValue),
+      comparativeValue: Math.round(comparativeValue),
+      incomeValue: Math.round(incomeValue),
+      costValue: Math.round(costValue),
+      finalValue: Math.round(finalValue),
+      finalValuePerSqm: Math.round(finalValuePerSqm),
+      confidenceRange: {
+        min: Math.round(confidenceRange.min),
+        max: Math.round(confidenceRange.max)
+      },
+      confidenceLevel: 85
+    };
+  }
+
+  private performValuationSensitivity(projectData: ProjectData, finalValuation: any): any {
+    const base = finalValuation.finalValue;
+    const pessimistic = base * 0.8;
+    const optimistic = base * 1.2;
+    const range = optimistic - pessimistic;
+    
+    return {
+      pessimistic: Math.round(pessimistic),
+      base: Math.round(base),
+      optimistic: Math.round(optimistic),
+      range: Math.round(range)
+    };
+  }
+
+  private generateInvestmentRecommendations(finalValuation: any, dcfAnalysis: any, sensitivityAnalysis: any): any {
+    let recommendation;
+    const reasons = [];
+    const actions = [];
+    const risks = [];
+    
+    if (dcfAnalysis.npv > 0 && dcfAnalysis.irr > 0.08) {
+      recommendation = 'INVESTIMENTO RACCOMANDATO';
+      reasons.push('NPV positivo e IRR superiore al costo del capitale');
+      reasons.push('Payback period accettabile');
+      actions.push('Procedere con l\'investimento');
+      actions.push('Monitorare performance mensile');
+    } else if (dcfAnalysis.npv > 0) {
+      recommendation = 'INVESTIMENTO CONDIZIONATO';
+      reasons.push('NPV positivo ma IRR inferiore alle aspettative');
+      reasons.push('Valutare alternative di investimento');
+      actions.push('Rivedere strategia di prezzo');
+      actions.push('Considerare riduzione costi');
+    } else {
+      recommendation = 'INVESTIMENTO SCONSIGLIATO';
+      reasons.push('NPV negativo');
+      reasons.push('ROI insufficiente');
+      actions.push('Rivedere completamente il progetto');
+      actions.push('Considerare alternative');
+    }
+    
+    risks.push('Variazioni di mercato');
+    risks.push('Aumento costi di costruzione');
+    risks.push('Ritardi nei permessi');
+    risks.push('Crisi economica');
+    
+    return {
+      recommendation,
+      reasons,
+      actions,
+      risks
+    };
   }
 
   private extractFeasibilityData(message: string): any {
