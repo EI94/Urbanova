@@ -4176,22 +4176,43 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
         containsInveceDi: userQuery.includes('invece di')
       });
       
-      // 🚀 SISTEMA CONVERSAZIONALE AVANZATO - ATTIVAZIONE INTELLIGENTE
+      // 🚀 SISTEMA CONVERSAZIONALE AVANZATO - ATTIVAZIONE INTELLIGENTE (PRIORITÀ MASSIMA)
       console.log('🔍 [DEBUG] Controllo attivazione sistema avanzato...');
-      console.log('🔍 [DEBUG] userIntent:', userIntent);
-      console.log('🔍 [DEBUG] extractedData:', extractedData);
+      console.log('🔍 [DEBUG] userIntent:', JSON.stringify(userIntent, null, 2));
+      console.log('🔍 [DEBUG] extractedData:', JSON.stringify(extractedData, null, 2));
       console.log('🔍 [DEBUG] isFeasibilityQuery:', isFeasibilityQuery);
+      console.log('🔍 [DEBUG] userIntent.toolsRequired.length:', userIntent.toolsRequired.length);
+      console.log('🔍 [DEBUG] extractedData.buildableArea:', extractedData.buildableArea);
+      console.log('🔍 [DEBUG] extractedData.constructionCostPerSqm:', extractedData.constructionCostPerSqm);
+      console.log('🔍 [DEBUG] extractedData.purchasePrice:', extractedData.purchasePrice);
       
       // Attiva il sistema avanzato se:
       // 1. Ha tool richiesti (feasibility, sensitivity, risk, market, investment, design_center, project_creation)
       // 2. Ha dati estratti (buildableArea, constructionCostPerSqm, purchasePrice)
       // 3. È una query sui progetti
+      // 4. È una query di fattibilità (anche con errori di battitura)
+      const isFeasibilityQueryAdvanced = userQuery.toLowerCase().includes('fattibil') || 
+                                        userQuery.toLowerCase().includes('anlisi') ||
+                                        userQuery.toLowerCase().includes('studio') ||
+                                        userQuery.toLowerCase().includes('terreno') ||
+                                        userQuery.toLowerCase().includes('costruzion') ||
+                                        userQuery.toLowerCase().includes('acquisto') ||
+                                        userQuery.toLowerCase().includes('margine');
+      
+      // 5. È una query di memoria/conversazione
+      const isMemoryQuery = userQuery.toLowerCase().includes('non ricordo') ||
+                           userQuery.toLowerCase().includes('mi sono perso') ||
+                           userQuery.toLowerCase().includes('ricapitolare') ||
+                           userQuery.toLowerCase().includes('cosa avevo chiesto') ||
+                           userQuery.toLowerCase().includes('conversazione precedente');
+      
       const shouldActivateAdvancedSystem = 
         userIntent.toolsRequired.length > 0 || 
         extractedData.buildableArea || 
         extractedData.constructionCostPerSqm || 
         extractedData.purchasePrice ||
-        isProjectQuery;
+        isProjectQuery ||
+        isFeasibilityQueryAdvanced;
       
       console.log('🔍 [DEBUG] shouldActivateAdvancedSystem:', shouldActivateAdvancedSystem);
       
@@ -4448,7 +4469,9 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
             usedUserMemory: false
           };
         }
-          
+        
+        // Se abbiamo dati sufficienti per l'analisi di fattibilità
+        if (hasRequiredData && projectData) {
           let analysisContent: string;
           let analysisType: string;
           
@@ -4521,7 +4544,7 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
           
           return { content: missingInfoResponse, usedUserMemory: true };
         }
-      }
+        }
       
       // Se non è una query sui progetti o analisi di fattibilità, usa la logica originale
       let response = '';
@@ -4558,8 +4581,30 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
         });
       }
 
-      // Se non abbiamo risultati specifici, restituiamo null per usare la risposta di OpenAI
+      // 🚀 FALLBACK FINALE - Prima di usare OpenAI, prova il sistema avanzato
       if (!response || response.trim() === '') {
+        console.log('🔍 [DEBUG] Nessuna risposta generata, provo sistema avanzato come fallback...');
+        
+        // Riprova con sistema avanzato se non l'abbiamo già fatto
+        if (userIntent.toolsRequired.length > 0 || 
+            extractedData.buildableArea || 
+            extractedData.constructionCostPerSqm || 
+            extractedData.purchasePrice) {
+          console.log('🧠 [Advanced Conversational] FALLBACK - Attivando sistema avanzato...');
+          
+          const conversationalResponse = await this.conversationalEngine.generateAdvancedResponse(
+            userIntent, 
+            memory, 
+            request
+          );
+          
+          if (conversationalResponse.content) {
+            console.log('🧠 [Advanced Conversational] FALLBACK RIUSCITO - Risposta generata');
+            return { content: conversationalResponse.content, usedUserMemory: false };
+          }
+        }
+        
+        console.log('🔍 [DEBUG] Fallback a OpenAI...');
         return { content: null, usedUserMemory: false }; // Indica di usare la risposta di OpenAI
       }
 
@@ -4570,7 +4615,6 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
       return { content: null, usedUserMemory: false }; // Fallback a OpenAI
     }
   }
-}
 
   private calculateConfidence(
     classification: ClassificationResult,
