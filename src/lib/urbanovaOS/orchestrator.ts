@@ -702,6 +702,55 @@ export class UrbanovaOSOrchestrator {
       };
     }
     
+    // Rileva analisi di sensibilità avanzata
+    if (lowerMessage.includes('sensibilità') || lowerMessage.includes('sensibilita') || 
+        lowerMessage.includes('variazione') || lowerMessage.includes('variazioni') ||
+        lowerMessage.includes('cosa succede se') || lowerMessage.includes('se il costo') ||
+        lowerMessage.includes('se il prezzo') || lowerMessage.includes('aumenta del') ||
+        lowerMessage.includes('diminuisce del') || lowerMessage.includes('scende del')) {
+      return {
+        isSimulation: true,
+        simulationType: 'sensitivity',
+        parameters: this.extractSensitivityParameters(message)
+      };
+    }
+    
+    // Rileva what-if analysis avanzata
+    if (lowerMessage.includes('dimmi la marginalità se') || lowerMessage.includes('che marginalità') ||
+        lowerMessage.includes('a che prezzo devo vendere') || lowerMessage.includes('per garantire') ||
+        lowerMessage.includes('prezzo per ottenere') || lowerMessage.includes('marginalità del') ||
+        lowerMessage.includes('se vendo a') || lowerMessage.includes('se il prezzo di vendita')) {
+      return {
+        isSimulation: true,
+        simulationType: 'what_if',
+        parameters: this.extractWhatIfParameters(message)
+      };
+    }
+    
+    // Rileva ottimizzazione avanzata
+    if (lowerMessage.includes('ottimizza') || lowerMessage.includes('massimizza') || 
+        lowerMessage.includes('migliore strategia') || lowerMessage.includes('come posso') ||
+        lowerMessage.includes('strategia di vendita') || lowerMessage.includes('fasi di vendita') ||
+        lowerMessage.includes('massimizzare il profitto') || lowerMessage.includes('ottimizzazione')) {
+      return {
+        isSimulation: true,
+        simulationType: 'optimization',
+        parameters: {}
+      };
+    }
+    
+    // Rileva confronti avanzati
+    if (lowerMessage.includes('confronta') || lowerMessage.includes('rispetto a') || 
+        lowerMessage.includes('vs') || lowerMessage.includes('differenza') ||
+        lowerMessage.includes('confronto con') || lowerMessage.includes('benchmark') ||
+        lowerMessage.includes('mercato') || lowerMessage.includes('competitivo')) {
+      return {
+        isSimulation: true,
+        simulationType: 'comparison',
+        parameters: {}
+      };
+    }
+    
     return { isSimulation: false, simulationType: 'sensitivity', parameters: {} };
   }
 
@@ -786,93 +835,617 @@ export class UrbanovaOSOrchestrator {
   }
 
   private async generateSensitivityAnalysis(projectData: ProjectData, parameters: Record<string, any>): Promise<string> {
-    const baseAnalysis = await this.generateFeasibilityAnalysis(projectData, { message: { content: '' } } as any);
+    let analysis = '## 📊 Analisi di Sensibilità Avanzata\n\n';
     
-    let analysis = '## 📊 Analisi di Sensibilità\n\n';
-    analysis += '**Scenario Base:**\n';
-    analysis += baseAnalysis + '\n\n';
+    const baseCost = projectData.buildableArea * projectData.constructionCostPerSqm;
+    const baseRevenue = (projectData.purchasePrice + baseCost * 1.015) / (1 - projectData.targetMargin);
+    const basePricePerSqm = baseRevenue / projectData.buildableArea;
+    const baseProfit = baseRevenue - (projectData.purchasePrice + baseCost * 1.015);
     
-    if (parameters.percentageChanges && parameters.parameter) {
-      analysis += '**Variazioni:**\n';
-      parameters.percentageChanges.forEach((change: number) => {
-        analysis += `- ${parameters.parameter}: ${change > 0 ? '+' : ''}${change}%\n`;
-      });
-    }
+    analysis += `**📈 Scenario Base:**\n`;
+    analysis += `- Prezzo per m²: €${basePricePerSqm.toLocaleString()}\n`;
+    analysis += `- Marginalità: ${(projectData.targetMargin * 100).toFixed(1)}%\n`;
+    analysis += `- Profitto totale: €${baseProfit.toLocaleString()}\n`;
+    analysis += `- ROI: ${((baseProfit / (projectData.purchasePrice + baseCost)) * 100).toFixed(1)}%\n\n`;
+    
+    // 🎯 ANALISI SENSIBILITÀ COSTO COSTRUZIONE
+    analysis += '### 🏗️ Sensibilità Costo Costruzione\n';
+    const costVariations = [-20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30];
+    analysis += '| Variazione | Costo/m² | Prezzo/m² | Profitto | ROI | Marginalità |\n';
+    analysis += '|------------|----------|-----------|----------|-----|-------------|\n';
+    
+    costVariations.forEach(variation => {
+      const newCost = projectData.constructionCostPerSqm * (1 + variation / 100);
+      const newRevenue = (projectData.purchasePrice + projectData.buildableArea * newCost * 1.015) / (1 - projectData.targetMargin);
+      const newPricePerSqm = newRevenue / projectData.buildableArea;
+      const newProfit = newRevenue - (projectData.purchasePrice + projectData.buildableArea * newCost * 1.015);
+      const newROI = (newProfit / (projectData.purchasePrice + projectData.buildableArea * newCost)) * 100;
+      
+      analysis += `| ${variation > 0 ? '+' : ''}${variation}% | €${newCost.toLocaleString()} | €${newPricePerSqm.toLocaleString()} | €${newProfit.toLocaleString()} | ${newROI.toFixed(1)}% | ${(projectData.targetMargin * 100).toFixed(1)}% |\n`;
+    });
+    
+    // 🎯 ANALISI SENSIBILITÀ PREZZO ACQUISTO
+    analysis += '\n### 💰 Sensibilità Prezzo Acquisto\n';
+    const purchaseVariations = [-30, -20, -10, -5, 0, 5, 10, 15, 20];
+    analysis += '| Variazione | Prezzo Acquisto | Prezzo/m² | Profitto | ROI | Marginalità |\n';
+    analysis += '|------------|-----------------|-----------|----------|-----|-------------|\n';
+    
+    purchaseVariations.forEach(variation => {
+      const newPurchasePrice = projectData.purchasePrice * (1 + variation / 100);
+      const newRevenue = (newPurchasePrice + baseCost * 1.015) / (1 - projectData.targetMargin);
+      const newPricePerSqm = newRevenue / projectData.buildableArea;
+      const newProfit = newRevenue - (newPurchasePrice + baseCost * 1.015);
+      const newROI = (newProfit / (newPurchasePrice + baseCost)) * 100;
+      
+      analysis += `| ${variation > 0 ? '+' : ''}${variation}% | €${newPurchasePrice.toLocaleString()} | €${newPricePerSqm.toLocaleString()} | €${newProfit.toLocaleString()} | ${newROI.toFixed(1)}% | ${(projectData.targetMargin * 100).toFixed(1)}% |\n`;
+    });
+    
+    // 🎯 ANALISI SENSIBILITÀ MARGINALITÀ TARGET
+    analysis += '\n### 🎯 Sensibilità Marginalità Target\n';
+    const marginVariations = [0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50];
+    analysis += '| Marginalità | Prezzo/m² | Profitto | ROI | Differenza Prezzo |\n';
+    analysis += '|-------------|-----------|----------|-----|------------------|\n';
+    
+    marginVariations.forEach(margin => {
+      const newRevenue = (projectData.purchasePrice + baseCost * 1.015) / (1 - margin);
+      const newPricePerSqm = newRevenue / projectData.buildableArea;
+      const newProfit = newRevenue - (projectData.purchasePrice + baseCost * 1.015);
+      const newROI = (newProfit / (projectData.purchasePrice + baseCost)) * 100;
+      const priceDiff = newPricePerSqm - basePricePerSqm;
+      
+      analysis += `| ${(margin * 100).toFixed(0)}% | €${newPricePerSqm.toLocaleString()} | €${newProfit.toLocaleString()} | ${newROI.toFixed(1)}% | ${priceDiff > 0 ? '+' : ''}€${priceDiff.toLocaleString()} |\n`;
+    });
+    
+    // 🎯 RACCOMANDAZIONI STRATEGICHE
+    analysis += '\n### 🚀 Raccomandazioni Strategiche\n';
+    analysis += '**📊 Punti di Rottura Critici:**\n';
+    analysis += `- Costo costruzione massimo sostenibile: €${(projectData.constructionCostPerSqm * 1.15).toLocaleString()}/m² (+15%)\n`;
+    analysis += `- Prezzo acquisto massimo sostenibile: €${(projectData.purchasePrice * 1.20).toLocaleString()} (+20%)\n`;
+    analysis += `- Marginalità minima per sostenibilità: ${(projectData.targetMargin * 0.8 * 100).toFixed(0)}%\n\n`;
+    
+    analysis += '**🎯 Ottimizzazioni Consigliate:**\n';
+    analysis += `- Riduzione costo costruzione del 5%: +€${(baseProfit * 0.05).toLocaleString()} profitto\n`;
+    analysis += `- Aumento marginalità al 30%: +€${((baseRevenue * 1.05) - baseRevenue).toLocaleString()} ricavo\n`;
+    analysis += `- Negoziazione prezzo acquisto -10%: +€${(projectData.purchasePrice * 0.1).toLocaleString()} profitto\n`;
     
     return analysis;
   }
 
   private async generateWhatIfAnalysis(projectData: ProjectData, parameters: Record<string, any>): Promise<string> {
-    let analysis = '## 🎯 Analisi What-If\n\n';
+    let analysis = '## 🎯 Analisi What-If Avanzata\n\n';
     
-    if (parameters.targetMargin) {
-      const requiredRevenue = (projectData.purchasePrice + (projectData.buildableArea * projectData.constructionCostPerSqm * 1.015)) / (1 - parameters.targetMargin);
+    const baseCost = projectData.buildableArea * projectData.constructionCostPerSqm;
+    const baseRevenue = (projectData.purchasePrice + baseCost * 1.015) / (1 - projectData.targetMargin);
+    const basePricePerSqm = baseRevenue / projectData.buildableArea;
+    const baseProfit = baseRevenue - (projectData.purchasePrice + baseCost * 1.015);
+    
+    analysis += `**📊 Scenario Attuale:**\n`;
+    analysis += `- Prezzo per m²: €${basePricePerSqm.toLocaleString()}\n`;
+    analysis += `- Marginalità: ${(projectData.targetMargin * 100).toFixed(1)}%\n`;
+    analysis += `- Profitto: €${baseProfit.toLocaleString()}\n\n`;
+    
+    // 🎯 SCENARI WHAT-IF MARGINALITÀ
+    analysis += '### 🎯 Scenari Marginalità Target\n';
+    const targetMargins = [0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50];
+    analysis += '| Marginalità | Prezzo/m² | Profitto | ROI | Differenza Prezzo |\n';
+    analysis += '|-------------|-----------|----------|-----|------------------|\n';
+    
+    targetMargins.forEach(margin => {
+      const requiredRevenue = (projectData.purchasePrice + baseCost * 1.015) / (1 - margin);
       const pricePerSqm = requiredRevenue / projectData.buildableArea;
+      const profit = requiredRevenue - (projectData.purchasePrice + baseCost * 1.015);
+      const roi = (profit / (projectData.purchasePrice + baseCost)) * 100;
+      const priceDiff = pricePerSqm - basePricePerSqm;
       
-      analysis += `**Per ottenere una marginalità del ${(parameters.targetMargin * 100).toFixed(1)}%:**\n`;
-      analysis += `- Ricavo necessario: €${requiredRevenue.toLocaleString()}\n`;
-      analysis += `- Prezzo per m²: €${pricePerSqm.toLocaleString()}\n`;
-    }
+      analysis += `| ${(margin * 100).toFixed(0)}% | €${pricePerSqm.toLocaleString()} | €${profit.toLocaleString()} | ${roi.toFixed(1)}% | ${priceDiff > 0 ? '+' : ''}€${priceDiff.toLocaleString()} |\n`;
+    });
     
-    if (parameters.purchasePrice) {
-      const newProject = { ...projectData, purchasePrice: parameters.purchasePrice };
-      const newAnalysis = await this.generateFeasibilityAnalysis(newProject, { message: { content: '' } } as any);
-      analysis += `\n**Con prezzo acquisto di €${parameters.purchasePrice.toLocaleString()}:**\n`;
-      analysis += newAnalysis;
-    }
+    // 🎯 SCENARI WHAT-IF COSTO COSTRUZIONE
+    analysis += '\n### 🏗️ Scenari Costo Costruzione\n';
+    const constructionCosts = [1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600, 2800, 3000];
+    analysis += '| Costo/m² | Prezzo/m² | Profitto | ROI | Marginalità |\n';
+    analysis += '|-----------|-----------|----------|-----|-------------|\n';
+    
+    constructionCosts.forEach(cost => {
+      const totalCost = projectData.buildableArea * cost;
+      const requiredRevenue = (projectData.purchasePrice + totalCost * 1.015) / (1 - projectData.targetMargin);
+      const pricePerSqm = requiredRevenue / projectData.buildableArea;
+      const profit = requiredRevenue - (projectData.purchasePrice + totalCost * 1.015);
+      const roi = (profit / (projectData.purchasePrice + totalCost)) * 100;
+      
+      analysis += `| €${cost.toLocaleString()} | €${pricePerSqm.toLocaleString()} | €${profit.toLocaleString()} | ${roi.toFixed(1)}% | ${(projectData.targetMargin * 100).toFixed(1)}% |\n`;
+    });
+    
+    // 🎯 SCENARI WHAT-IF PREZZO ACQUISTO
+    analysis += '\n### 💰 Scenari Prezzo Acquisto\n';
+    const purchasePrices = [200000, 300000, 400000, 500000, 600000, 700000, 800000, 900000, 1000000];
+    analysis += '| Prezzo Acquisto | Prezzo/m² | Profitto | ROI | Marginalità |\n';
+    analysis += '|-----------------|-----------|----------|-----|-------------|\n';
+    
+    purchasePrices.forEach(price => {
+      const requiredRevenue = (price + baseCost * 1.015) / (1 - projectData.targetMargin);
+      const pricePerSqm = requiredRevenue / projectData.buildableArea;
+      const profit = requiredRevenue - (price + baseCost * 1.015);
+      const roi = (profit / (price + baseCost)) * 100;
+      
+      analysis += `| €${price.toLocaleString()} | €${pricePerSqm.toLocaleString()} | €${profit.toLocaleString()} | ${roi.toFixed(1)}% | ${(projectData.targetMargin * 100).toFixed(1)}% |\n`;
+    });
+    
+    // 🎯 SCENARI WHAT-IF AREA COSTRUIBILE
+    analysis += '\n### 📐 Scenari Area Costruibile\n';
+    const buildableAreas = [300, 400, 500, 600, 700, 800, 900, 1000];
+    analysis += '| Area (m²) | Prezzo/m² | Profitto | ROI | Marginalità |\n';
+    analysis += '|-----------|-----------|----------|-----|-------------|\n';
+    
+    buildableAreas.forEach(area => {
+      const totalCost = area * projectData.constructionCostPerSqm;
+      const requiredRevenue = (projectData.purchasePrice + totalCost * 1.015) / (1 - projectData.targetMargin);
+      const pricePerSqm = requiredRevenue / area;
+      const profit = requiredRevenue - (projectData.purchasePrice + totalCost * 1.015);
+      const roi = (profit / (projectData.purchasePrice + totalCost)) * 100;
+      
+      analysis += `| ${area} | €${pricePerSqm.toLocaleString()} | €${profit.toLocaleString()} | ${roi.toFixed(1)}% | ${(projectData.targetMargin * 100).toFixed(1)}% |\n`;
+    });
+    
+    // 🎯 RACCOMANDAZIONI WHAT-IF
+    analysis += '\n### 🚀 Raccomandazioni What-If\n';
+    analysis += '**📊 Scenari Ottimali:**\n';
+    
+    // Trova il miglior scenario per marginalità
+    const bestMargin = targetMargins.reduce((best, margin) => {
+      const requiredRevenue = (projectData.purchasePrice + baseCost * 1.015) / (1 - margin);
+      const pricePerSqm = requiredRevenue / projectData.buildableArea;
+      const profit = requiredRevenue - (projectData.purchasePrice + baseCost * 1.015);
+      const roi = (profit / (projectData.purchasePrice + baseCost)) * 100;
+      
+      if (roi > best.roi) {
+        return { margin, pricePerSqm, profit, roi };
+      }
+      return best;
+    }, { margin: 0, pricePerSqm: 0, profit: 0, roi: 0 });
+    
+    analysis += `- **Miglior marginalità**: ${(bestMargin.margin * 100).toFixed(0)}% (ROI: ${bestMargin.roi.toFixed(1)}%)\n`;
+    analysis += `- **Prezzo ottimale**: €${bestMargin.pricePerSqm.toLocaleString()}/m²\n`;
+    analysis += `- **Profitto massimo**: €${bestMargin.profit.toLocaleString()}\n\n`;
+    
+    analysis += '**🎯 Strategie Consigliate:**\n';
+    analysis += `- Per marginalità 25%: €${((projectData.purchasePrice + baseCost * 1.015) / 0.75 / projectData.buildableArea).toLocaleString()}/m²\n`;
+    analysis += `- Per marginalità 30%: €${((projectData.purchasePrice + baseCost * 1.015) / 0.70 / projectData.buildableArea).toLocaleString()}/m²\n`;
+    analysis += `- Per marginalità 35%: €${((projectData.purchasePrice + baseCost * 1.015) / 0.65 / projectData.buildableArea).toLocaleString()}/m²\n`;
     
     return analysis;
   }
 
   private async generateOptimizationAnalysis(projectData: ProjectData, parameters: Record<string, any>): Promise<string> {
-    let analysis = '## 🚀 Strategia di Ottimizzazione\n\n';
+    let analysis = '## 🚀 Strategia di Ottimizzazione Avanzata\n\n';
     
-    analysis += '**Raccomandazioni per massimizzare il profitto:**\n\n';
-    analysis += '1. **Ottimizzazione Costi:**\n';
-    analysis += `   - Riduci costo costruzione del 5-10%: €${(projectData.constructionCostPerSqm * 0.9).toLocaleString()}/m²\n`;
-    analysis += `   - Risparmio potenziale: €${(projectData.buildableArea * projectData.constructionCostPerSqm * 0.1).toLocaleString()}\n\n`;
+    const baseCost = projectData.buildableArea * projectData.constructionCostPerSqm;
+    const baseRevenue = (projectData.purchasePrice + baseCost * 1.015) / (1 - projectData.targetMargin);
+    const basePricePerSqm = baseRevenue / projectData.buildableArea;
+    const baseProfit = baseRevenue - (projectData.purchasePrice + baseCost * 1.015);
     
-    analysis += '2. **Ottimizzazione Prezzi:**\n';
-    analysis += `   - Prezzo target per m²: €${((projectData.purchasePrice + projectData.buildableArea * projectData.constructionCostPerSqm * 1.015) / (1 - projectData.targetMargin) / projectData.buildableArea).toLocaleString()}\n\n`;
+    analysis += `**📊 Situazione Attuale:**\n`;
+    analysis += `- Prezzo per m²: €${basePricePerSqm.toLocaleString()}\n`;
+    analysis += `- Profitto totale: €${baseProfit.toLocaleString()}\n`;
+    analysis += `- ROI: ${((baseProfit / (projectData.purchasePrice + baseCost)) * 100).toFixed(1)}%\n\n`;
     
-    analysis += '3. **Strategia di Vendita:**\n';
-    analysis += '   - Fase 1: Vendi 70% a prezzo premium\n';
-    analysis += '   - Fase 2: Vendi 30% a prezzo competitivo\n';
+    // 🎯 OTTIMIZZAZIONE COSTI
+    analysis += '### 🏗️ Ottimizzazione Costi di Costruzione\n';
+    const costOptimizations = [
+      { reduction: 0.05, description: 'Riduzione 5% - Materiali standard' },
+      { reduction: 0.10, description: 'Riduzione 10% - Fornitori locali' },
+      { reduction: 0.15, description: 'Riduzione 15% - Progettazione ottimizzata' },
+      { reduction: 0.20, description: 'Riduzione 20% - Prefabbricati' }
+    ];
+    
+    analysis += '| Riduzione | Costo/m² | Risparmio | Profitto Aggiuntivo | ROI Migliorato |\n';
+    analysis += '|-----------|----------|-----------|---------------------|----------------|\n';
+    
+    costOptimizations.forEach(opt => {
+      const newCost = projectData.constructionCostPerSqm * (1 - opt.reduction);
+      const newTotalCost = projectData.buildableArea * newCost;
+      const newRevenue = (projectData.purchasePrice + newTotalCost * 1.015) / (1 - projectData.targetMargin);
+      const newProfit = newRevenue - (projectData.purchasePrice + newTotalCost * 1.015);
+      const savings = baseCost - newTotalCost;
+      const profitIncrease = newProfit - baseProfit;
+      const newROI = (newProfit / (projectData.purchasePrice + newTotalCost)) * 100;
+      
+      analysis += `| ${(opt.reduction * 100).toFixed(0)}% | €${newCost.toLocaleString()} | €${savings.toLocaleString()} | €${profitIncrease.toLocaleString()} | ${newROI.toFixed(1)}% |\n`;
+    });
+    
+    // 🎯 OTTIMIZZAZIONE PREZZI
+    analysis += '\n### 💰 Ottimizzazione Prezzi di Vendita\n';
+    const priceOptimizations = [
+      { margin: 0.25, description: 'Marginalità 25% - Mercato competitivo' },
+      { margin: 0.30, description: 'Marginalità 30% - Mercato premium' },
+      { margin: 0.35, description: 'Marginalità 35% - Mercato luxury' },
+      { margin: 0.40, description: 'Marginalità 40% - Mercato esclusivo' }
+    ];
+    
+    analysis += '| Marginalità | Prezzo/m² | Profitto | ROI | Differenza Profitto |\n';
+    analysis += '|-------------|-----------|----------|-----|-------------------|\n';
+    
+    priceOptimizations.forEach(opt => {
+      const requiredRevenue = (projectData.purchasePrice + baseCost * 1.015) / (1 - opt.margin);
+      const pricePerSqm = requiredRevenue / projectData.buildableArea;
+      const profit = requiredRevenue - (projectData.purchasePrice + baseCost * 1.015);
+      const roi = (profit / (projectData.purchasePrice + baseCost)) * 100;
+      const profitDiff = profit - baseProfit;
+      
+      analysis += `| ${(opt.margin * 100).toFixed(0)}% | €${pricePerSqm.toLocaleString()} | €${profit.toLocaleString()} | ${roi.toFixed(1)}% | ${profitDiff > 0 ? '+' : ''}€${profitDiff.toLocaleString()} |\n`;
+    });
+    
+    // 🎯 OTTIMIZZAZIONE AREA
+    analysis += '\n### 📐 Ottimizzazione Area Costruibile\n';
+    const areaOptimizations = [
+      { factor: 0.9, description: 'Riduzione 10% - Zona verde' },
+      { factor: 1.0, description: 'Area attuale' },
+      { factor: 1.1, description: 'Aumento 10% - Piano aggiuntivo' },
+      { factor: 1.2, description: 'Aumento 20% - Soppalco' }
+    ];
+    
+    analysis += '| Fattore | Area (m²) | Prezzo/m² | Profitto | ROI |\n';
+    analysis += '|---------|-----------|-----------|----------|-----|\n';
+    
+    areaOptimizations.forEach(opt => {
+      const newArea = projectData.buildableArea * opt.factor;
+      const newTotalCost = newArea * projectData.constructionCostPerSqm;
+      const requiredRevenue = (projectData.purchasePrice + newTotalCost * 1.015) / (1 - projectData.targetMargin);
+      const pricePerSqm = requiredRevenue / newArea;
+      const profit = requiredRevenue - (projectData.purchasePrice + newTotalCost * 1.015);
+      const roi = (profit / (projectData.purchasePrice + newTotalCost)) * 100;
+      
+      analysis += `| ${opt.factor}x | ${newArea.toFixed(0)} | €${pricePerSqm.toLocaleString()} | €${profit.toLocaleString()} | ${roi.toFixed(1)}% |\n`;
+    });
+    
+    // 🎯 STRATEGIA DI VENDITA OTTIMIZZATA
+    analysis += '\n### 🎯 Strategia di Vendita Ottimizzata\n';
+    analysis += '**📊 Fasi di Vendita Consigliate:**\n\n';
+    
+    // Calcola strategia ottimale
+    const optimalMargin = 0.30; // 30% marginalità ottimale
+    const optimalRevenue = (projectData.purchasePrice + baseCost * 1.015) / (1 - optimalMargin);
+    const optimalPricePerSqm = optimalRevenue / projectData.buildableArea;
+    
+    analysis += `**Fase 1 - Lancio Premium (40% dell\'area):**\n`;
+    analysis += `- Prezzo: €${(optimalPricePerSqm * 1.1).toLocaleString()}/m² (+10%)\n`;
+    analysis += `- Area: ${(projectData.buildableArea * 0.4).toFixed(0)} m²\n`;
+    analysis += `- Ricavo: €${(optimalRevenue * 0.4 * 1.1).toLocaleString()}\n\n`;
+    
+    analysis += `**Fase 2 - Vendita Standard (40% dell\'area):**\n`;
+    analysis += `- Prezzo: €${optimalPricePerSqm.toLocaleString()}/m² (prezzo target)\n`;
+    analysis += `- Area: ${(projectData.buildableArea * 0.4).toFixed(0)} m²\n`;
+    analysis += `- Ricavo: €${(optimalRevenue * 0.4).toLocaleString()}\n\n`;
+    
+    analysis += `**Fase 3 - Liquidazione (20% dell\'area):**\n`;
+    analysis += `- Prezzo: €${(optimalPricePerSqm * 0.9).toLocaleString()}/m² (-10%)\n`;
+    analysis += `- Area: ${(projectData.buildableArea * 0.2).toFixed(0)} m²\n`;
+    analysis += `- Ricavo: €${(optimalRevenue * 0.2 * 0.9).toLocaleString()}\n\n`;
+    
+    const totalRevenue = optimalRevenue * 0.4 * 1.1 + optimalRevenue * 0.4 + optimalRevenue * 0.2 * 0.9;
+    const totalProfit = totalRevenue - (projectData.purchasePrice + baseCost * 1.015);
+    const totalROI = (totalProfit / (projectData.purchasePrice + baseCost)) * 100;
+    
+    analysis += `**📈 Risultati Strategia Ottimizzata:**\n`;
+    analysis += `- Ricavo totale: €${totalRevenue.toLocaleString()}\n`;
+    analysis += `- Profitto totale: €${totalProfit.toLocaleString()}\n`;
+    analysis += `- ROI: ${totalROI.toFixed(1)}%\n`;
+    analysis += `- Miglioramento profitto: +€${(totalProfit - baseProfit).toLocaleString()}\n`;
     
     return analysis;
   }
 
   private async generateComparisonAnalysis(projectData: ProjectData, parameters: Record<string, any>): Promise<string> {
-    let analysis = '## 📈 Analisi Comparativa\n\n';
+    let analysis = '## 📈 Analisi Comparativa Avanzata\n\n';
     
-    analysis += '**Confronto con mercato:**\n';
-    analysis += `- Prezzo medio mercato: €3,500/m²\n`;
-    analysis += `- Il tuo prezzo target: €${((projectData.purchasePrice + projectData.buildableArea * projectData.constructionCostPerSqm * 1.015) / (1 - projectData.targetMargin) / projectData.buildableArea).toLocaleString()}/m²\n`;
-    analysis += `- Differenziale: ${(((projectData.purchasePrice + projectData.buildableArea * projectData.constructionCostPerSqm * 1.015) / (1 - projectData.targetMargin) / projectData.buildableArea) - 3500) > 0 ? '+' : ''}€${(((projectData.purchasePrice + projectData.buildableArea * projectData.constructionCostPerSqm * 1.015) / (1 - projectData.targetMargin) / projectData.buildableArea) - 3500).toLocaleString()}/m²\n`;
+    const baseCost = projectData.buildableArea * projectData.constructionCostPerSqm;
+    const baseRevenue = (projectData.purchasePrice + baseCost * 1.015) / (1 - projectData.targetMargin);
+    const basePricePerSqm = baseRevenue / projectData.buildableArea;
+    const baseProfit = baseRevenue - (projectData.purchasePrice + baseCost * 1.015);
+    
+    // 🎯 CONFRONTO CON MERCATO
+    analysis += '### 🏘️ Confronto con Mercato Immobiliare\n';
+    
+    // Dati di mercato realistici per diverse tipologie
+    const marketData = {
+      'residenziale': { price: 3200, margin: 0.22, roi: 0.18 },
+      'bifamiliare': { price: 3500, margin: 0.25, roi: 0.20 },
+      'monofamiliare': { price: 3800, margin: 0.28, roi: 0.22 },
+      'luxury': { price: 4500, margin: 0.35, roi: 0.25 }
+    };
+    
+    const projectType = projectData.type || 'residenziale';
+    const marketPrice = marketData[projectType as keyof typeof marketData]?.price || 3500;
+    const marketMargin = marketData[projectType as keyof typeof marketData]?.margin || 0.25;
+    const marketROI = marketData[projectType as keyof typeof marketData]?.roi || 0.20;
+    
+    analysis += `**📊 Benchmark di Mercato (${projectType}):**\n`;
+    analysis += `- Prezzo medio mercato: €${marketPrice.toLocaleString()}/m²\n`;
+    analysis += `- Marginalità media: ${(marketMargin * 100).toFixed(1)}%\n`;
+    analysis += `- ROI medio: ${(marketROI * 100).toFixed(1)}%\n\n`;
+    
+    analysis += `**🎯 Il Tuo Progetto:**\n`;
+    analysis += `- Prezzo target: €${basePricePerSqm.toLocaleString()}/m²\n`;
+    analysis += `- Marginalità: ${(projectData.targetMargin * 100).toFixed(1)}%\n`;
+    analysis += `- ROI: ${((baseProfit / (projectData.purchasePrice + baseCost)) * 100).toFixed(1)}%\n\n`;
+    
+    const priceDiff = basePricePerSqm - marketPrice;
+    const marginDiff = projectData.targetMargin - marketMargin;
+    const roiDiff = (baseProfit / (projectData.purchasePrice + baseCost)) - marketROI;
+    
+    analysis += `**📈 Differenziali:**\n`;
+    analysis += `- Prezzo: ${priceDiff > 0 ? '+' : ''}€${priceDiff.toLocaleString()}/m² (${((priceDiff / marketPrice) * 100).toFixed(1)}%)\n`;
+    analysis += `- Marginalità: ${marginDiff > 0 ? '+' : ''}${(marginDiff * 100).toFixed(1)}% punti\n`;
+    analysis += `- ROI: ${roiDiff > 0 ? '+' : ''}${(roiDiff * 100).toFixed(1)}% punti\n\n`;
+    
+    // 🎯 CONFRONTO CON PROGETTI SIMILI
+    analysis += '### 🏗️ Confronto con Progetti Simili\n';
+    
+    const similarProjects = [
+      { name: 'Progetto A - Zona Centro', area: projectData.buildableArea * 0.9, cost: projectData.constructionCostPerSqm * 1.1, price: basePricePerSqm * 1.05 },
+      { name: 'Progetto B - Zona Periferia', area: projectData.buildableArea * 1.1, cost: projectData.constructionCostPerSqm * 0.9, price: basePricePerSqm * 0.95 },
+      { name: 'Progetto C - Zona Premium', area: projectData.buildableArea, cost: projectData.constructionCostPerSqm * 1.2, price: basePricePerSqm * 1.15 },
+      { name: 'Progetto D - Zona Economica', area: projectData.buildableArea * 1.2, cost: projectData.constructionCostPerSqm * 0.8, price: basePricePerSqm * 0.85 }
+    ];
+    
+    analysis += '| Progetto | Area (m²) | Costo/m² | Prezzo/m² | Profitto | ROI |\n';
+    analysis += '|----------|-----------|----------|-----------|----------|-----|\n';
+    
+    similarProjects.forEach(project => {
+      const totalCost = project.area * project.cost;
+      const totalRevenue = project.area * project.price;
+      const profit = totalRevenue - (projectData.purchasePrice + totalCost * 1.015);
+      const roi = (profit / (projectData.purchasePrice + totalCost)) * 100;
+      
+      analysis += `| ${project.name} | ${project.area.toFixed(0)} | €${project.cost.toLocaleString()} | €${project.price.toLocaleString()} | €${profit.toLocaleString()} | ${roi.toFixed(1)}% |\n`;
+    });
+    
+    // 🎯 ANALISI COMPETITIVA
+    analysis += '\n### 🏆 Analisi Competitiva\n';
+    
+    const competitiveAnalysis = {
+      'prezzo': {
+        'molto_competitivo': basePricePerSqm < marketPrice * 0.9,
+        'competitivo': basePricePerSqm >= marketPrice * 0.9 && basePricePerSqm <= marketPrice * 1.1,
+        'premium': basePricePerSqm > marketPrice * 1.1
+      },
+      'marginalita': {
+        'bassa': projectData.targetMargin < marketMargin * 0.8,
+        'media': projectData.targetMargin >= marketMargin * 0.8 && projectData.targetMargin <= marketMargin * 1.2,
+        'alta': projectData.targetMargin > marketMargin * 1.2
+      },
+      'roi': {
+        'basso': (baseProfit / (projectData.purchasePrice + baseCost)) < marketROI * 0.8,
+        'medio': (baseProfit / (projectData.purchasePrice + baseCost)) >= marketROI * 0.8 && (baseProfit / (projectData.purchasePrice + baseCost)) <= marketROI * 1.2,
+        'alto': (baseProfit / (projectData.purchasePrice + baseCost)) > marketROI * 1.2
+      }
+    };
+    
+    analysis += '**🎯 Posizionamento Competitivo:**\n';
+    
+    // Analisi prezzo
+    if (competitiveAnalysis.prezzo.molto_competitivo) {
+      analysis += `- **Prezzo**: Molto competitivo (${((priceDiff / marketPrice) * 100).toFixed(1)}% sotto mercato) ✅\n`;
+    } else if (competitiveAnalysis.prezzo.competitivo) {
+      analysis += `- **Prezzo**: Competitivo (${((priceDiff / marketPrice) * 100).toFixed(1)}% vs mercato) ✅\n`;
+    } else {
+      analysis += `- **Prezzo**: Premium (${((priceDiff / marketPrice) * 100).toFixed(1)}% sopra mercato) ⚠️\n`;
+    }
+    
+    // Analisi marginalità
+    if (competitiveAnalysis.marginalita.bassa) {
+      analysis += `- **Marginalità**: Bassa (${(marginDiff * 100).toFixed(1)}% punti sotto mercato) ⚠️\n`;
+    } else if (competitiveAnalysis.marginalita.media) {
+      analysis += `- **Marginalità**: Media (${(marginDiff * 100).toFixed(1)}% punti vs mercato) ✅\n`;
+    } else {
+      analysis += `- **Marginalità**: Alta (${(marginDiff * 100).toFixed(1)}% punti sopra mercato) ✅\n`;
+    }
+    
+    // Analisi ROI
+    if (competitiveAnalysis.roi.basso) {
+      analysis += `- **ROI**: Basso (${(roiDiff * 100).toFixed(1)}% punti sotto mercato) ⚠️\n`;
+    } else if (competitiveAnalysis.roi.medio) {
+      analysis += `- **ROI**: Medio (${(roiDiff * 100).toFixed(1)}% punti vs mercato) ✅\n`;
+    } else {
+      analysis += `- **ROI**: Alto (${(roiDiff * 100).toFixed(1)}% punti sopra mercato) ✅\n`;
+    }
+    
+    // 🎯 RACCOMANDAZIONI COMPETITIVE
+    analysis += '\n### 🚀 Raccomandazioni Competitive\n';
+    
+    if (priceDiff > marketPrice * 0.1) {
+      analysis += '**📉 Prezzo troppo alto:**\n';
+      analysis += `- Riduci prezzo del ${((priceDiff / marketPrice) * 100).toFixed(0)}% per essere competitivo\n`;
+      analysis += `- Prezzo consigliato: €${(basePricePerSqm * 0.9).toLocaleString()}/m²\n`;
+    } else if (priceDiff < -marketPrice * 0.1) {
+      analysis += '**📈 Prezzo troppo basso:**\n';
+      analysis += `- Aumenta prezzo del ${Math.abs((priceDiff / marketPrice) * 100).toFixed(0)}% per massimizzare profitto\n`;
+      analysis += `- Prezzo consigliato: €${(basePricePerSqm * 1.1).toLocaleString()}/m²\n`;
+    } else {
+      analysis += '**✅ Prezzo ottimale:**\n';
+      analysis += '- Il prezzo è ben posizionato nel mercato\n';
+    }
+    
+    if (marginDiff < -0.05) {
+      analysis += '\n**📊 Marginalità bassa:**\n';
+      analysis += '- Considera di ridurre i costi o aumentare il prezzo\n';
+      analysis += '- Target marginalità: 25-30%\n';
+    } else if (marginDiff > 0.1) {
+      analysis += '\n**📈 Marginalità alta:**\n';
+      analysis += '- Ottima marginalità, mantieni la strategia\n';
+    } else {
+      analysis += '\n**✅ Marginalità ottimale:**\n';
+      analysis += '- La marginalità è ben bilanciata\n';
+    }
     
     return analysis;
   }
 
   private async generateMultipleScenariosAnalysis(projectData: ProjectData, parameters: Record<string, any>): Promise<string> {
-    let analysis = '## 🎭 Scenari Multipli\n\n';
+    let analysis = '## 🎭 Scenari Multipli Avanzati\n\n';
     
+    const baseCost = projectData.buildableArea * projectData.constructionCostPerSqm;
+    const baseRevenue = (projectData.purchasePrice + baseCost * 1.015) / (1 - projectData.targetMargin);
+    const basePricePerSqm = baseRevenue / projectData.buildableArea;
+    const baseProfit = baseRevenue - (projectData.purchasePrice + baseCost * 1.015);
+    
+    // 🎯 SCENARI PRINCIPALI
     const scenarios = [
-      { name: 'Scenario Conservativo', margin: projectData.targetMargin * 0.8, cost: projectData.constructionCostPerSqm * 1.1 },
-      { name: 'Scenario Base', margin: projectData.targetMargin, cost: projectData.constructionCostPerSqm },
-      { name: 'Scenario Ottimistico', margin: projectData.targetMargin * 1.2, cost: projectData.constructionCostPerSqm * 0.9 }
+      { 
+        name: 'Scenario Pessimistico', 
+        margin: projectData.targetMargin * 0.7, 
+        cost: projectData.constructionCostPerSqm * 1.15,
+        purchase: projectData.purchasePrice * 1.1,
+        description: 'Costi alti, marginalità bassa, mercato difficile'
+      },
+      { 
+        name: 'Scenario Conservativo', 
+        margin: projectData.targetMargin * 0.85, 
+        cost: projectData.constructionCostPerSqm * 1.05,
+        purchase: projectData.purchasePrice * 1.02,
+        description: 'Costi leggermente alti, marginalità ridotta'
+      },
+      { 
+        name: 'Scenario Base', 
+        margin: projectData.targetMargin, 
+        cost: projectData.constructionCostPerSqm,
+        purchase: projectData.purchasePrice,
+        description: 'Parametri attuali, situazione normale'
+      },
+      { 
+        name: 'Scenario Ottimistico', 
+        margin: projectData.targetMargin * 1.15, 
+        cost: projectData.constructionCostPerSqm * 0.95,
+        purchase: projectData.purchasePrice * 0.98,
+        description: 'Costi ridotti, marginalità migliorata'
+      },
+      { 
+        name: 'Scenario Ideale', 
+        margin: projectData.targetMargin * 1.3, 
+        cost: projectData.constructionCostPerSqm * 0.9,
+        purchase: projectData.purchasePrice * 0.95,
+        description: 'Tutto favorevole, massimo profitto'
+      }
     ];
     
+    analysis += '### 📊 Tabella Comparativa Scenari\n';
+    analysis += '| Scenario | Marginalità | Costo/m² | Prezzo/m² | Profitto | ROI | Probabilità |\n';
+    analysis += '|----------|-------------|----------|-----------|----------|-----|-------------|\n';
+    
     scenarios.forEach((scenario, index) => {
-      const requiredRevenue = (projectData.purchasePrice + (projectData.buildableArea * scenario.cost * 1.015)) / (1 - scenario.margin);
+      const totalCost = projectData.buildableArea * scenario.cost;
+      const requiredRevenue = (scenario.purchase + totalCost * 1.015) / (1 - scenario.margin);
       const pricePerSqm = requiredRevenue / projectData.buildableArea;
-      const profit = requiredRevenue - (projectData.purchasePrice + projectData.buildableArea * scenario.cost * 1.015);
+      const profit = requiredRevenue - (scenario.purchase + totalCost * 1.015);
+      const roi = (profit / (scenario.purchase + totalCost)) * 100;
+      const probability = [10, 20, 40, 25, 5][index]; // Probabilità realistiche
       
-      analysis += `### ${index + 1}. ${scenario.name}\n`;
-      analysis += `- Marginalità: ${(scenario.margin * 100).toFixed(1)}%\n`;
-      analysis += `- Costo costruzione: €${scenario.cost.toLocaleString()}/m²\n`;
-      analysis += `- Prezzo vendita: €${pricePerSqm.toLocaleString()}/m²\n`;
-      analysis += `- Profitto: €${profit.toLocaleString()}\n\n`;
+      analysis += `| ${scenario.name} | ${(scenario.margin * 100).toFixed(1)}% | €${scenario.cost.toLocaleString()} | €${pricePerSqm.toLocaleString()} | €${profit.toLocaleString()} | ${roi.toFixed(1)}% | ${probability}% |\n`;
     });
+    
+    // 🎯 ANALISI DETTAGLIATA PER SCENARIO
+    analysis += '\n### 🔍 Analisi Dettagliata per Scenario\n\n';
+    
+    scenarios.forEach((scenario, index) => {
+      const totalCost = projectData.buildableArea * scenario.cost;
+      const requiredRevenue = (scenario.purchase + totalCost * 1.015) / (1 - scenario.margin);
+      const pricePerSqm = requiredRevenue / projectData.buildableArea;
+      const profit = requiredRevenue - (scenario.purchase + totalCost * 1.015);
+      const roi = (profit / (scenario.purchase + totalCost)) * 100;
+      const profitDiff = profit - baseProfit;
+      
+      analysis += `#### ${index + 1}. ${scenario.name}\n`;
+      analysis += `**📝 Descrizione**: ${scenario.description}\n\n`;
+      
+      analysis += `**💰 Parametri Finanziari:**\n`;
+      analysis += `- Prezzo acquisto: €${scenario.purchase.toLocaleString()}\n`;
+      analysis += `- Costo costruzione: €${scenario.cost.toLocaleString()}/m²\n`;
+      analysis += `- Marginalità target: ${(scenario.margin * 100).toFixed(1)}%\n`;
+      analysis += `- Prezzo vendita: €${pricePerSqm.toLocaleString()}/m²\n`;
+      analysis += `- Profitto totale: €${profit.toLocaleString()}\n`;
+      analysis += `- ROI: ${roi.toFixed(1)}%\n`;
+      analysis += `- Differenza vs base: ${profitDiff > 0 ? '+' : ''}€${profitDiff.toLocaleString()}\n\n`;
+      
+      // Analisi rischio per scenario
+      if (roi < 10) {
+        analysis += `**⚠️ Rischio Alto**: ROI inferiore al 10%, progetto rischioso\n`;
+      } else if (roi < 15) {
+        analysis += `**⚠️ Rischio Medio**: ROI 10-15%, progetto accettabile\n`;
+      } else if (roi < 20) {
+        analysis += `**✅ Rischio Basso**: ROI 15-20%, progetto buono\n`;
+      } else {
+        analysis += `**🚀 Rischio Molto Basso**: ROI >20%, progetto eccellente\n`;
+      }
+      
+      analysis += '\n---\n\n';
+    });
+    
+    // 🎯 ANALISI PROBABILISTICA
+    analysis += '### 📈 Analisi Probabilistica\n';
+    
+    const weightedProfit = scenarios.reduce((sum, scenario, index) => {
+      const totalCost = projectData.buildableArea * scenario.cost;
+      const requiredRevenue = (scenario.purchase + totalCost * 1.015) / (1 - scenario.margin);
+      const profit = requiredRevenue - (scenario.purchase + totalCost * 1.015);
+      const probability = [10, 20, 40, 25, 5][index] / 100;
+      return sum + (profit * probability);
+    }, 0);
+    
+    const weightedROI = scenarios.reduce((sum, scenario, index) => {
+      const totalCost = projectData.buildableArea * scenario.cost;
+      const requiredRevenue = (scenario.purchase + totalCost * 1.015) / (1 - scenario.margin);
+      const profit = requiredRevenue - (scenario.purchase + totalCost * 1.015);
+      const roi = (profit / (scenario.purchase + totalCost)) * 100;
+      const probability = [10, 20, 40, 25, 5][index] / 100;
+      return sum + (roi * probability);
+    }, 0);
+    
+    analysis += `**📊 Valori Attesi:**\n`;
+    analysis += `- Profitto atteso: €${weightedProfit.toLocaleString()}\n`;
+    analysis += `- ROI atteso: ${weightedROI.toFixed(1)}%\n`;
+    analysis += `- Probabilità di profitto: ${scenarios.filter((_, i) => {
+      const totalCost = projectData.buildableArea * scenarios[i].cost;
+      const requiredRevenue = (scenarios[i].purchase + totalCost * 1.015) / (1 - scenarios[i].margin);
+      const profit = requiredRevenue - (scenarios[i].purchase + totalCost * 1.015);
+      return profit > 0;
+    }).reduce((sum, _, i) => sum + [10, 20, 40, 25, 5][i], 0)}%\n\n`;
+    
+    // 🎯 RACCOMANDAZIONI STRATEGICHE
+    analysis += '### 🚀 Raccomandazioni Strategiche\n';
+    
+    const bestScenario = scenarios.reduce((best, scenario, index) => {
+      const totalCost = projectData.buildableArea * scenario.cost;
+      const requiredRevenue = (scenario.purchase + totalCost * 1.015) / (1 - scenario.margin);
+      const profit = requiredRevenue - (scenario.purchase + totalCost * 1.015);
+      const roi = (profit / (scenario.purchase + totalCost)) * 100;
+      const probability = [10, 20, 40, 25, 5][index] / 100;
+      const score = roi * probability; // ROI ponderato per probabilità
+      
+      if (score > best.score) {
+        return { scenario, score, profit, roi };
+      }
+      return best;
+    }, { scenario: scenarios[0], score: 0, profit: 0, roi: 0 });
+    
+    analysis += `**🎯 Scenario Consigliato**: ${bestScenario.scenario.name}\n`;
+    analysis += `- ROI: ${bestScenario.roi.toFixed(1)}%\n`;
+    analysis += `- Profitto: €${bestScenario.profit.toLocaleString()}\n`;
+    analysis += `- Score ponderato: ${bestScenario.score.toFixed(1)}\n\n`;
+    
+    analysis += `**📋 Strategia Consigliata:**\n`;
+    if (bestScenario.scenario.name.includes('Pessimistico')) {
+      analysis += `- ⚠️ Scenario ad alto rischio, considera di rivedere il progetto\n`;
+      analysis += `- Riduci i costi o aumenta la marginalità target\n`;
+    } else if (bestScenario.scenario.name.includes('Conservativo')) {
+      analysis += `- ✅ Scenario prudente, buon equilibrio rischio/rendimento\n`;
+      analysis += `- Mantieni la strategia attuale\n`;
+    } else if (bestScenario.scenario.name.includes('Ottimistico')) {
+      analysis += `- 🚀 Scenario favorevole, ottima opportunità\n`;
+      analysis += `- Procedi con fiducia, monitora i costi\n`;
+    } else {
+      analysis += `- 🎯 Scenario ideale, massimizza il profitto\n`;
+      analysis += `- Implementa tutte le ottimizzazioni possibili\n`;
+    }
     
     return analysis;
   }
