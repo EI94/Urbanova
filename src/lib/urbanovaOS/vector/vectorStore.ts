@@ -1,7 +1,16 @@
 // 🗄️ URBANOVA OS - VECTOR STORE PER RAG AVANZATO
 // Sistema di vector store avanzato per Retrieval-Augmented Generation
 
-import { ChatMessage } from '@/types/chat';
+// import { ChatMessage } from '@/types/chat';
+
+// Definizione locale per evitare errori di import
+interface ChatMessage {
+  id: string;
+  type: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  intelligentData?: any;
+}
 
 // ============================================================================
 // INTERFACCE TYPESCRIPT
@@ -55,6 +64,7 @@ export interface SearchMetadata {
   indexUsed: string;
   filtersApplied: string[];
   rankingFactors: string[];
+  rankingMethod?: string;
 }
 
 export interface RAGContext {
@@ -372,6 +382,15 @@ export class UrbanovaOSVectorStore {
   // METODI PRIVATI OTTIMIZZATI
   // ============================================================================
 
+  private async preprocessContent(content: string): Promise<string> {
+    // Preprocessing base del contenuto
+    return content
+      .toLowerCase()
+      .replace(/[^\w\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
   /**
    * 🚀 Ricerca rapida per query semplici
    */
@@ -380,7 +399,7 @@ export class UrbanovaOSVectorStore {
     const results: VectorSearchResult[] = [];
     
     // Ricerca per keyword nei documenti esistenti
-    for (const [id, doc] of this.documents) {
+    for (const [id, doc] of Array.from(this.documents)) {
       const content = doc.content.toLowerCase();
       const matches = keywords.filter(keyword => content.includes(keyword)).length;
       
@@ -397,7 +416,8 @@ export class UrbanovaOSVectorStore {
               queryType: 'keyword',
               searchTime: Date.now(),
               indexUsed: 'quick',
-              filtersApplied: 0,
+              filtersApplied: [],
+              rankingFactors: ['keyword_match'],
               rankingMethod: 'keyword_match'
             }
           });
@@ -459,7 +479,7 @@ export class UrbanovaOSVectorStore {
   ): Promise<VectorSearchResult[]> {
     const results: VectorSearchResult[] = [];
     
-    for (const [id, doc] of this.documents) {
+    for (const [id, doc] of Array.from(this.documents)) {
       if (options.category && doc.metadata.type !== options.category) continue;
       
       const similarity = this.calculateSimilarity(embedding, doc.embedding);
@@ -474,7 +494,8 @@ export class UrbanovaOSVectorStore {
             queryType: 'semantic',
             searchTime: Date.now(),
             indexUsed: index.name,
-            filtersApplied: 1,
+            filtersApplied: ['category'],
+            rankingFactors: ['similarity'],
             rankingMethod: 'similarity'
           }
         });
@@ -928,7 +949,7 @@ export class UrbanovaOSVectorStore {
   private removeDuplicateContent(content: string): string {
     // Rimuove contenuto duplicato
     const sentences = content.split('\n\n');
-    const uniqueSentences = [...new Set(sentences)];
+    const uniqueSentences = Array.from(new Set(sentences));
     return uniqueSentences.join('\n\n');
   }
 
@@ -1023,7 +1044,7 @@ Genera una risposta completa e accurata basata sul contesto fornito.
       explanation: 'Risultato di fallback',
       context: 'Contesto di fallback',
       metadata: {
-        queryType: 'fallback',
+        queryType: 'keyword',
         searchTime: 0,
         indexUsed: 'fallback',
         filtersApplied: [],
@@ -1047,7 +1068,7 @@ Genera una risposta completa e accurata basata sul contesto fornito.
         documentsRetrieved: 1,
         maxSimilarity: 0.5,
         avgSimilarity: 0.5,
-        generationMethod: 'fallback',
+        generationMethod: 'retrieval_only',
         qualityScore: 0.5
       }
     };
@@ -1068,6 +1089,9 @@ export interface SearchOptions {
   dateRange?: { start: Date; end: Date };
   language?: string;
   type?: string;
+  category?: string;
+  threshold?: number;
+  intent?: string;
 }
 
 export interface RAGOptions {

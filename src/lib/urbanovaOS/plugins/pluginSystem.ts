@@ -1,7 +1,16 @@
 // 🔌 URBANOVA OS - PLUGIN SYSTEM ESTENDIBILE
 // Sistema di plugin estendibile per Urbanova OS
 
-import { ChatMessage } from '@/types/chat';
+// import { ChatMessage } from '@/types/chat';
+
+// Definizione locale per evitare errori di import
+interface ChatMessage {
+  id: string;
+  type: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  intelligentData?: any;
+}
 
 // ============================================================================
 // INTERFACCE TYPESCRIPT
@@ -411,7 +420,7 @@ export class UrbanovaOSPluginSystem {
       version: pluginSource.version,
       description: pluginSource.description || 'Plugin senza descrizione',
       author: pluginSource.author || 'Unknown',
-      category: pluginSource.category || 'general',
+      category: pluginSource.category || { id: 'general', name: 'General', description: 'General purpose plugin', icon: '🔧', color: '#6B7280' },
       capabilities: pluginSource.capabilities,
       dependencies: pluginSource.dependencies || [],
       configuration: pluginSource.configuration || { settings: [], secrets: [], environment: {}, features: [] },
@@ -1160,9 +1169,7 @@ export interface ManagementOptions {
   force?: boolean;
 }
 
-export interface PluginAction {
-  type: 'activate' | 'deactivate' | 'update' | 'uninstall' | 'configure' | 'restart';
-}
+export type PluginAction = 'activate' | 'deactivate' | 'update' | 'uninstall' | 'configure' | 'restart';
 
 export interface DiscoveryCriteria {
   query: string;

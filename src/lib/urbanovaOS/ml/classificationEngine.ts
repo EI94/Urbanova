@@ -1,7 +1,16 @@
 // 🧠 URBANOVA OS - MACHINE LEARNING CLASSIFICATION ENGINE
 // Sistema di classificazione ML avanzato per Urbanova OS
 
-import { ChatMessage } from '@/types/chat';
+// import { ChatMessage } from '@/types/chat';
+
+// Definizione locale per evitare errori di import
+interface ChatMessage {
+  id: string;
+  type: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  intelligentData?: any;
+}
 
 // ============================================================================
 // INTERFACCE TYPESCRIPT
@@ -136,7 +145,7 @@ export class UrbanovaOSClassificationEngine {
         id: `msg_${Date.now()}`,
         content: request.text,
         timestamp: new Date(),
-        role: 'user'
+        type: 'user'
       };
       
       // Usa il metodo principale
