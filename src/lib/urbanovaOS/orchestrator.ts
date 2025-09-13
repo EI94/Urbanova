@@ -264,9 +264,24 @@ export class UrbanovaOSOrchestrator {
       // 🧠 GESTIONE MEMORIA CONVERSAZIONALE
       const memory = this.getOrCreateMemory(request.sessionId, request.userId);
       
+      console.log('🧠 [DEBUG] Memoria recuperata:', {
+        sessionId: request.sessionId,
+        hasProjectContext: !!memory.projectContext,
+        projectName: memory.projectContext?.name,
+        conversationSteps: memory.conversationFlow.length,
+        previousAnalyses: memory.previousAnalyses.length
+      });
+      
       // Rileva cambiamenti nel contesto conversazionale
       const contextChanges = this.detectContextChanges(request.message.content, memory);
+      console.log('🔄 [DEBUG] Cambiamenti rilevati:', {
+        hasChanges: contextChanges.hasChanges,
+        changes: contextChanges.changes,
+        newProjectData: contextChanges.newProjectData
+      });
+      
       if (contextChanges.hasChanges && contextChanges.newProjectData) {
+        console.log('🔄 [DEBUG] Applicando cambiamenti al contesto...');
         this.handleContextChanges(request.sessionId, contextChanges.changes, contextChanges.newProjectData);
       }
       
@@ -429,15 +444,34 @@ export class UrbanovaOSOrchestrator {
     
     // Se non c'è contesto progetto, controlla se il messaggio contiene dati di progetto
     if (!memory.projectContext) {
+      console.log('🧠 [DEBUG] Nessun contesto progetto esistente, controllando se il messaggio contiene dati...');
       // Estrai dati dal messaggio per vedere se possiamo creare un contesto
       const feasibilityData = this.extractFeasibilityData(currentMessage);
+      console.log('🧠 [DEBUG] Dati estratti dal messaggio:', feasibilityData);
+      
       if (feasibilityData.name || feasibilityData.buildableArea || feasibilityData.constructionCostPerSqm) {
+        console.log('🧠 [DEBUG] Messaggio contiene dati progetto, lasciando gestione al sistema normale');
         return { hasChanges: false, changes: [] }; // Lascia che il sistema normale gestisca
       }
+      
+      // Controlla se è una richiesta di modifica senza contesto
+      if (this.isModificationRequest(currentMessage)) {
+        console.log('🧠 [DEBUG] Rilevata richiesta di modifica senza contesto progetto');
+        return { hasChanges: false, changes: [] };
+      }
+      
       return { hasChanges: false, changes: [] };
     }
     
     const currentProject = memory.projectContext;
+    
+    console.log('🧠 [DEBUG] Contesto progetto esistente:', {
+      name: currentProject.name,
+      buildableArea: currentProject.buildableArea,
+      constructionCostPerSqm: currentProject.constructionCostPerSqm,
+      purchasePrice: currentProject.purchasePrice,
+      targetMargin: currentProject.targetMargin
+    });
     
     // Rileva cambiamenti nel nome progetto
     const namePatterns = [
@@ -449,6 +483,7 @@ export class UrbanovaOSOrchestrator {
     for (const pattern of namePatterns) {
       const match = currentMessage.match(pattern);
       if (match) {
+        console.log('🧠 [DEBUG] Rilevato cambiamento nome progetto:', match[1]);
         changes.push('nome_progetto');
         newProjectData.name = match[1].trim();
         break;
@@ -480,9 +515,15 @@ export class UrbanovaOSOrchestrator {
       const match = currentMessage.match(pattern);
       if (match) {
         const newCost = parseInt(match[1]);
+        console.log('🧠 [DEBUG] Rilevato cambiamento costo:', {
+          newCost,
+          currentCost: currentProject.constructionCostPerSqm,
+          pattern: pattern.toString()
+        });
         if (newCost !== currentProject.constructionCostPerSqm) {
           changes.push('costo_costruzione');
           newProjectData.constructionCostPerSqm = newCost;
+          console.log('🧠 [DEBUG] Cambiamento costo applicato:', newCost);
         }
         break;
       }
@@ -572,6 +613,24 @@ export class UrbanovaOSOrchestrator {
         updatedFields: Object.keys(newProjectData)
       });
     }
+  }
+
+  private isModificationRequest(message: string): boolean {
+    const lowerMessage = message.toLowerCase();
+    
+    // Pattern per richieste di modifica
+    const modificationPatterns = [
+      /metti\s+\d+/i,
+      /invece di/i,
+      /cambia/i,
+      /modifica/i,
+      /aggiorna/i,
+      /ricalcola/i,
+      /non voglio più/i,
+      /aspetta/i
+    ];
+    
+    return modificationPatterns.some(pattern => pattern.test(lowerMessage));
   }
 
   // 🎯 GESTIONE SIMULAZIONI MULTIPLE
