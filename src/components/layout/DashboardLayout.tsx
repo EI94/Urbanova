@@ -141,6 +141,9 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <Building2 className="w-5 h-5 text-white" />
               </div>
+              <div>
+                <h1 className="text-xl font-semibold text-gray-900">Urbanova</h1>
+              </div>
             </div>
           </div>
 
@@ -340,21 +343,8 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
           <header className="bg-white border-b border-gray-200 px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                {/* Logo e scritta Urbanova per Analisi di Fattibilità e Market Intelligence */}
-                {(title === 'Analisi di Fattibilità' || title === 'Market Intelligence') && (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                      <Building2 className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h1 className="text-xl font-semibold text-gray-900">Urbanova</h1>
-                    </div>
-                  </div>
-                )}
-                {/* Titolo normale per altre pagine */}
-                {title !== 'Analisi di Fattibilità' && title !== 'Market Intelligence' && (
-                  <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
-                )}
+                {/* Titolo per tutte le pagine */}
+                <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
               </div>
 
               <div className="flex items-center space-x-4">
