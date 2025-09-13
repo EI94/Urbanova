@@ -1729,9 +1729,6 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
         const simulationRequest = this.detectSimulationRequest(request.message.content);
         console.log('🎯 [UrbanovaOS] Rilevata simulazione:', simulationRequest);
         
-        // Estrai parametri dal messaggio
-        const feasibilityData = this.extractFeasibilityData(request.message.content);
-        
         // 🧠 GESTIONE CONTESTO PROGETTO CON MEMORIA
         let projectData: ProjectData | null = null;
         
@@ -1739,6 +1736,10 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
         if (memory.projectContext) {
           console.log('🏗️ [UrbanovaOS] Usando contesto progetto esistente:', memory.projectContext.name);
           projectData = { ...memory.projectContext };
+          
+          // Estrai parametri dal messaggio per aggiornare il contesto esistente
+          const feasibilityData = this.extractFeasibilityData(request.message.content);
+          console.log('🏗️ [DEBUG] Dati estratti per aggiornamento:', feasibilityData);
           
           // Aggiorna con i nuovi dati se forniti
           if (feasibilityData.name) projectData.name = feasibilityData.name;
@@ -1751,27 +1752,47 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
           if (feasibilityData.insuranceRate) projectData.insuranceRate = feasibilityData.insuranceRate;
           
           projectData.updatedAt = new Date();
-        } else if (feasibilityData.name && feasibilityData.buildableArea && 
-                   feasibilityData.constructionCostPerSqm && feasibilityData.purchasePrice && 
-                   feasibilityData.targetMargin) {
-          // Crea nuovo progetto se abbiamo tutti i dati necessari
-          projectData = {
-            id: `project_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            name: feasibilityData.name,
-            landArea: feasibilityData.landArea || 0,
-            buildableArea: feasibilityData.buildableArea,
-            constructionCostPerSqm: feasibilityData.constructionCostPerSqm,
-            purchasePrice: feasibilityData.purchasePrice,
-            targetMargin: feasibilityData.targetMargin,
-            insuranceRate: feasibilityData.insuranceRate || 0.015,
-            type: feasibilityData.type || 'residenziale',
-            parkingSpaces: feasibilityData.parkingSpaces,
-            apartmentArea: feasibilityData.apartmentArea,
-            location: feasibilityData.location,
-            status: 'draft',
-            createdAt: new Date(),
-            updatedAt: new Date()
-          };
+          console.log('🏗️ [DEBUG] Progetto aggiornato:', {
+            name: projectData.name,
+            buildableArea: projectData.buildableArea,
+            constructionCostPerSqm: projectData.constructionCostPerSqm,
+            purchasePrice: projectData.purchasePrice,
+            targetMargin: projectData.targetMargin
+          });
+        } else {
+          // Estrai parametri dal messaggio per creare nuovo progetto
+          const feasibilityData = this.extractFeasibilityData(request.message.content);
+          console.log('🏗️ [DEBUG] Dati estratti per nuovo progetto:', feasibilityData);
+          
+          if (feasibilityData.name && feasibilityData.buildableArea && 
+              feasibilityData.constructionCostPerSqm && feasibilityData.purchasePrice && 
+              feasibilityData.targetMargin) {
+            // Crea nuovo progetto se abbiamo tutti i dati necessari
+            projectData = {
+              id: `project_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+              name: feasibilityData.name,
+              landArea: feasibilityData.landArea || 0,
+              buildableArea: feasibilityData.buildableArea,
+              constructionCostPerSqm: feasibilityData.constructionCostPerSqm,
+              purchasePrice: feasibilityData.purchasePrice,
+              targetMargin: feasibilityData.targetMargin,
+              insuranceRate: feasibilityData.insuranceRate || 0.015,
+              type: feasibilityData.type || 'residenziale',
+              parkingSpaces: feasibilityData.parkingSpaces,
+              apartmentArea: feasibilityData.apartmentArea,
+              location: feasibilityData.location,
+              status: 'draft',
+              createdAt: new Date(),
+              updatedAt: new Date()
+            };
+            console.log('🏗️ [DEBUG] Nuovo progetto creato:', {
+              name: projectData.name,
+              buildableArea: projectData.buildableArea,
+              constructionCostPerSqm: projectData.constructionCostPerSqm,
+              purchasePrice: projectData.purchasePrice,
+              targetMargin: projectData.targetMargin
+            });
+          }
         }
         
         // Controlla se abbiamo dati sufficienti per l'analisi
