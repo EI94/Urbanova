@@ -760,9 +760,9 @@ export default function UnifiedDashboardPage() {
           {/* Content Area */}
           <div className={`flex-1 p-6 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
             {activeTab === 'overview' && (
-              <div className="space-y-6">
+              <div className="flex flex-col h-[calc(100vh-120px)] space-y-4">
                 {/* Urbanova Interface - ChatGPT/Cursor Style */}
-                <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg shadow border h-[600px] flex flex-col`}>
+                <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg shadow border flex-1 flex flex-col`}>
                   <div className={`p-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
@@ -977,54 +977,54 @@ export default function UnifiedDashboardPage() {
                   </div>
                 </div>
 
-                {/* Quick Stats - Minimized */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
+                {/* Quick Stats - Compact */}
+                <div className="grid grid-cols-4 gap-3">
+                  <div className="bg-white rounded-lg shadow p-3 border border-gray-200">
                     <div className="flex items-center">
-                      <div className="p-2 bg-blue-100 rounded-lg">
-                        <BuildingIcon className="h-5 w-5 text-blue-600" />
+                      <div className="p-1.5 bg-blue-100 rounded-lg">
+                        <BuildingIcon className="h-4 w-4 text-blue-600" />
                       </div>
-                      <div className="ml-3">
+                      <div className="ml-2">
                         <p className="text-xs font-medium text-gray-600">Progetti</p>
-                        <p className="text-lg font-bold text-gray-900">{stats?.totalProjects || 0}</p>
+                        <p className="text-sm font-bold text-gray-900">{stats?.totalProjects || 0}</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
+                  <div className="bg-white rounded-lg shadow p-3 border border-gray-200">
                     <div className="flex items-center">
-                      <div className="p-2 bg-green-100 rounded-lg">
-                        <TrendingUpIcon className="h-5 w-5 text-green-600" />
+                      <div className="p-1.5 bg-green-100 rounded-lg">
+                        <TrendingUpIcon className="h-4 w-4 text-green-600" />
                       </div>
-                      <div className="ml-3">
+                      <div className="ml-2">
                         <p className="text-xs font-medium text-gray-600">Attivi</p>
-                        <p className="text-lg font-bold text-gray-900">{stats?.activeProjects || 0}</p>
+                        <p className="text-sm font-bold text-gray-900">{stats?.activeProjects || 0}</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
+                  <div className="bg-white rounded-lg shadow p-3 border border-gray-200">
                     <div className="flex items-center">
-                      <div className="p-2 bg-yellow-100 rounded-lg">
-                        <EuroIcon className="h-5 w-5 text-yellow-600" />
+                      <div className="p-1.5 bg-yellow-100 rounded-lg">
+                        <EuroIcon className="h-4 w-4 text-yellow-600" />
                       </div>
-                      <div className="ml-3">
+                      <div className="ml-2">
                         <p className="text-xs font-medium text-gray-600">Budget</p>
-                        <p className="text-lg font-bold text-gray-900">
+                        <p className="text-sm font-bold text-gray-900">
                           €{((stats?.totalBudget || 0) / 1000000).toFixed(1)}M
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
+                  <div className="bg-white rounded-lg shadow p-3 border border-gray-200">
                     <div className="flex items-center">
-                      <div className="p-2 bg-purple-100 rounded-lg">
-                        <TrendingUpIcon className="h-5 w-5 text-purple-600" />
+                      <div className="p-1.5 bg-purple-100 rounded-lg">
+                        <TrendingUpIcon className="h-4 w-4 text-purple-600" />
                       </div>
-                      <div className="ml-3">
+                      <div className="ml-2">
                         <p className="text-xs font-medium text-gray-600">ROI</p>
-                        <p className="text-lg font-bold text-gray-900">
+                        <p className="text-sm font-bold text-gray-900">
                           {stats?.averageROI?.toFixed(1) || 0}%
                         </p>
                       </div>
