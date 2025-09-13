@@ -698,6 +698,7 @@ export class UrbanovaOSOrchestrator {
       
       console.log('🔍 [UrbanovaOS Orchestrator] Analizzando query:', userQuery);
       console.log('🔍 [UrbanovaOS Orchestrator] Query completa:', request.message.content);
+      console.log('🔍 [UrbanovaOS Orchestrator] Contenuto messaggio:', request.message.content.substring(0, 100));
       
       // Rileva query sui progetti dell'utente (condizione più inclusiva)
       const isProjectQuery = userQuery.includes('progetti') || userQuery.includes('quanto') || userQuery.includes('quanti') || 
