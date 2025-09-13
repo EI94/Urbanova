@@ -30,6 +30,7 @@ import LanguageSelector from '@/components/ui/LanguageSelector';
 import NotificationsPanel from '@/components/ui/NotificationsPanel';
 import UserProfilePanelFixed from '@/components/ui/UserProfilePanelFixed';
 import WorkspaceManager from '@/components/workspace/WorkspaceManager';
+import SettingsPanel from '@/components/ui/SettingsPanel';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
@@ -431,22 +432,10 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
       )}
       
       {settingsOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Impostazioni</h2>
-              <button
-                onClick={() => setSettingsOpen(false)}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-6">
-              <p className="text-gray-600">Impostazioni in sviluppo...</p>
-            </div>
-          </div>
-        </div>
+        <SettingsPanel 
+          isOpen={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+        />
       )}
 
       {/* Feedback Widget */}
