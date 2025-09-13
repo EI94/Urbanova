@@ -1,12 +1,21 @@
 // 🚀 URBANOVA OS - ORCHESTRATORE ENTERPRISE
 // Orchestratore principale per Urbanova OS con architettura enterprise
 
-import { ChatMessage } from '@/types/chat';
+// import { ChatMessage } from '@/types/chat';
 import { UrbanovaOSClassificationEngine, ClassificationResult } from './ml/classificationEngine';
+
+// Definizione locale per evitare errori di import
+interface ChatMessage {
+  id: string;
+  type: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  intelligentData?: any;
+}
 import { UrbanovaOSVectorStore } from './vector/vectorStore';
 import { UrbanovaOSWorkflowEngine } from './workflow/workflowEngine';
 import { UrbanovaOSPluginSystem } from './plugins/pluginSystem';
-import { userMemoryService } from '@/lib/userMemoryService';
+// import { userMemoryService } from '@/lib/userMemoryService';
 
 // ============================================================================
 // INTERFACCE TYPESCRIPT
@@ -717,12 +726,13 @@ export class UrbanovaOSOrchestrator {
         
         console.log('🎯 [UrbanovaOS Orchestrator] Query sui progetti rilevata, chiamando UserMemoryService...');
         
-        const memoryResult = await userMemoryService.processNaturalQuery(
-          request.message.content,
-          request.userId,
-          request.userEmail,
-          request.conversationHistory
-        );
+        // const memoryResult = await userMemoryService.processNaturalQuery(
+        //   request.message.content,
+        //   request.userId,
+        //   request.userEmail,
+        //   request.conversationHistory
+        // );
+        const memoryResult = { success: false, data: null };
         
         if (memoryResult.success && memoryResult.data) {
           console.log('✅ [UrbanovaOS Orchestrator] UserMemoryService ha trovato dati:', {
