@@ -386,11 +386,22 @@ export class UrbanovaOSOrchestrator {
     // Salva anche nel contesto progetti
     this.projectContexts.set(projectData.id, projectData);
     
-    console.log('🏗️ [UrbanovaOS] Contesto progetto aggiornato:', {
+    // 🧠 DEBUG: Verifica che la memoria sia stata salvata
+    console.log('🏗️ [DEBUG] Contesto progetto aggiornato:', {
       sessionId,
       projectId: projectData.id,
       projectName: projectData.name,
-      contextVersion: memory.contextVersion
+      contextVersion: memory.contextVersion,
+      memorySize: this.conversationMemories.size,
+      projectContextsSize: this.projectContexts.size
+    });
+    
+    // Verifica che la memoria sia stata effettivamente salvata
+    const savedMemory = this.conversationMemories.get(sessionId);
+    console.log('🏗️ [DEBUG] Memoria salvata verificata:', {
+      hasMemory: !!savedMemory,
+      hasProjectContext: !!savedMemory?.projectContext,
+      projectName: savedMemory?.projectContext?.name
     });
   }
 
