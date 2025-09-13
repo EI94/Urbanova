@@ -46,7 +46,7 @@ import FeedbackWidget from '@/components/ui/FeedbackWidget';
 import WorkspaceManager from '@/components/workspace/WorkspaceManager';
 import ProjectPreview from '@/components/chat/ProjectPreview';
 import NotificationsPanel from '@/components/ui/NotificationsPanel';
-import UserProfilePanelNew from '@/components/ui/UserProfilePanelNew';
+import UserProfilePanelFixed from '@/components/ui/UserProfilePanelFixed';
 import { Workspace } from '@/types/workspace';
 import { ProjectPreview as ProjectPreviewType } from '@/lib/intentService';
 import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
@@ -1288,7 +1288,7 @@ export default function UnifiedDashboardPage() {
       />
 
       {/* Profile Panel */}
-      <UserProfilePanelNew
+      <UserProfilePanelFixed
         isOpen={showProfile}
         onClose={() => setShowProfile(false)}
       />

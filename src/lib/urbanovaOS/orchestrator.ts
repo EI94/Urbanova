@@ -3,6 +3,7 @@
 
 // import { ChatMessage } from '@/types/chat';
 import { UrbanovaOSClassificationEngine, ClassificationResult } from './ml/classificationEngine';
+import { AdvancedConversationalEngine } from './conversational/advancedConversationalEngine';
 
 // Definizione locale per evitare errori di import
 interface ChatMessage {
@@ -196,6 +197,7 @@ export class UrbanovaOSOrchestrator {
   private vectorStore: UrbanovaOSVectorStore;
   private workflowEngine: UrbanovaOSWorkflowEngine;
   private pluginSystem: UrbanovaOSPluginSystem;
+  private conversationalEngine: AdvancedConversationalEngine;
   private performanceMonitor: PerformanceMonitor;
   private healthChecker: HealthChecker;
   private eventBus: EventBus;
@@ -212,6 +214,7 @@ export class UrbanovaOSOrchestrator {
     this.vectorStore = new UrbanovaOSVectorStore();
     this.workflowEngine = new UrbanovaOSWorkflowEngine();
     this.pluginSystem = new UrbanovaOSPluginSystem();
+    this.conversationalEngine = new AdvancedConversationalEngine();
     this.performanceMonitor = new PerformanceMonitor();
     this.healthChecker = new HealthChecker();
     this.eventBus = new EventBus();
@@ -351,6 +354,312 @@ export class UrbanovaOSOrchestrator {
   // ============================================================================
   // METODI PRIVATI
   // ============================================================================
+
+  /**
+   * 🧠 ANALISI GOAL-ORIENTED INTELLIGENTE
+   * Analizza il messaggio dell'utente per capire l'intento e estrarre dati
+   * Funziona anche con messaggi aggressivi, confusi o con errori di battitura
+   */
+  private analyzeUserGoal(message: string, memory: ConversationMemory): {
+    isFeasibilityRequest: boolean;
+    extractedData: any;
+    confidence: number;
+    goalType: string;
+    reasoning: string;
+  } {
+    const text = message.toLowerCase();
+    let confidence = 0;
+    let goalType = 'unknown';
+    let reasoning = '';
+    const extractedData: any = {};
+
+    // 🎯 ANALISI SEMANTICA AVANZATA
+    
+    // 1. RILEVA INTENTI DI FATTIBILITÀ (pattern flessibili)
+    const feasibilityIndicators = [
+      // Parole chiave dirette
+      'analisi di fattibilità', 'analisi fattibilità', 'studio di fattibilità', 'studio fattibilità',
+      'business plan', 'businessplan', 'piano di business',
+      'fattibilità', 'feasibility', 'valutazione economica',
+      
+      // Obiettivi finanziari
+      'marginalità', 'margine', 'profitto', 'roi', 'rendimento',
+      'prezzo di vendita', 'prezzo vendita', 'quanto vendere',
+      'costo costruzione', 'costo totale', 'investimento',
+      
+      // Dati tecnici
+      'terreno', 'mq', 'metri quadrati', 'm²', 'superficie',
+      'euro per metro', 'euro/mq', 'euro al metro',
+      'appartamento', 'bifamiliare', 'villa', 'casa',
+      
+      // Azioni richieste
+      'crea', 'fai', 'calcola', 'dimmi', 'aiutami', 'voglio',
+      'quanto costa', 'quanto devo', 'a che prezzo',
+      
+      // Modifiche a progetti esistenti
+      'cambia', 'modifica', 'invece di', 'metti', 'ricalcola', 'aggiorna'
+    ];
+
+    // 2. RILEVA INTENTI DI SENSIBILITÀ
+    const sensitivityIndicators = [
+      'sensibilità', 'sensitivity', 'variazione', 'scenario',
+      'cosa succede se', 'e se', 'simulazione', 'simula',
+      'pessimistico', 'ottimistico', 'conservativo'
+    ];
+
+    // 3. RILEVA INTENTI DI RISCHIO
+    const riskIndicators = [
+      'rischio', 'risk', 'pericolo', 'problema', 'difficoltà',
+      'mitigazione', 'protezione', 'sicurezza'
+    ];
+
+    // 4. RILEVA INTENTI DI MERCATO
+    const marketIndicators = [
+      'mercato', 'market', 'prezzi', 'concorrenza', 'competizione',
+      'benchmark', 'confronto', 'analisi mercato'
+    ];
+
+    // 5. RILEVA INTENTI DI VALUTAZIONE
+    const valuationIndicators = [
+      'valutazione', 'valuation', 'valore', 'irr', 'npv', 'van',
+      'payback', 'ritorno investimento', 'investimento'
+    ];
+
+    // 🧠 CALCOLA CONFIDENCE PER OGNI INTENTO
+    let feasibilityScore = 0;
+    let sensitivityScore = 0;
+    let riskScore = 0;
+    let marketScore = 0;
+    let valuationScore = 0;
+
+    // Conta indicatori per ogni categoria
+    feasibilityIndicators.forEach(indicator => {
+      if (text.includes(indicator)) {
+        feasibilityScore += 1;
+        confidence += 0.1;
+      }
+    });
+
+    sensitivityIndicators.forEach(indicator => {
+      if (text.includes(indicator)) {
+        sensitivityScore += 1;
+        confidence += 0.1;
+      }
+    });
+
+    riskIndicators.forEach(indicator => {
+      if (text.includes(indicator)) {
+        riskScore += 1;
+        confidence += 0.1;
+      }
+    });
+
+    marketIndicators.forEach(indicator => {
+      if (text.includes(indicator)) {
+        marketScore += 1;
+        confidence += 0.1;
+      }
+    });
+
+    valuationIndicators.forEach(indicator => {
+      if (text.includes(indicator)) {
+        valuationScore += 1;
+        confidence += 0.1;
+      }
+    });
+
+    // 🎯 DETERMINA GOAL TYPE E CONFIDENCE
+    const maxScore = Math.max(feasibilityScore, sensitivityScore, riskScore, marketScore, valuationScore);
+    
+    if (feasibilityScore === maxScore && feasibilityScore > 0) {
+      goalType = 'feasibility';
+      confidence = Math.min(confidence, 0.9);
+      reasoning = `Rilevati ${feasibilityScore} indicatori di fattibilità`;
+    } else if (sensitivityScore === maxScore && sensitivityScore > 0) {
+      goalType = 'sensitivity';
+      confidence = Math.min(confidence, 0.8);
+      reasoning = `Rilevati ${sensitivityScore} indicatori di sensibilità`;
+    } else if (riskScore === maxScore && riskScore > 0) {
+      goalType = 'risk';
+      confidence = Math.min(confidence, 0.8);
+      reasoning = `Rilevati ${riskScore} indicatori di rischio`;
+    } else if (marketScore === maxScore && marketScore > 0) {
+      goalType = 'market';
+      confidence = Math.min(confidence, 0.8);
+      reasoning = `Rilevati ${marketScore} indicatori di mercato`;
+    } else if (valuationScore === maxScore && valuationScore > 0) {
+      goalType = 'valuation';
+      confidence = Math.min(confidence, 0.8);
+      reasoning = `Rilevati ${valuationScore} indicatori di valutazione`;
+    }
+
+    // 🔍 ESTRAZIONE DATI INTELLIGENTE (anche da messaggi confusi)
+    this.extractDataIntelligently(message, extractedData);
+    
+    console.log('🔍 [DEEP DEBUG] Dati estratti dal sistema intelligente:', {
+      message: message.substring(0, 100),
+      extractedData: extractedData,
+      hasBuildableArea: !!extractedData.buildableArea,
+      hasConstructionCost: !!extractedData.constructionCostPerSqm,
+      hasPurchasePrice: !!extractedData.purchasePrice,
+      hasTargetMargin: !!extractedData.targetMargin
+    });
+
+    // 🧠 BOOST CONFIDENCE SE ABBIAMO DATI ESTRATTI
+    if (extractedData.buildableArea || extractedData.constructionCostPerSqm || extractedData.purchasePrice) {
+      confidence = Math.min(confidence + 0.3, 0.95);
+      reasoning += ` + dati estratti (${Object.keys(extractedData).filter(k => extractedData[k]).length} parametri)`;
+    }
+
+    // 🧠 BOOST CONFIDENCE SE ABBIAMO CONTESTO PROGETTO
+    if (memory.projectContext) {
+      confidence = Math.min(confidence + 0.2, 0.95);
+      reasoning += ` + contesto progetto esistente`;
+    }
+
+    // 🎯 DETERMINA SE È RICHIESTA FATTIBILITÀ
+    const isFeasibilityRequest = goalType === 'feasibility' || 
+                                (goalType === 'unknown' && confidence > 0.3) ||
+                                (extractedData.buildableArea && extractedData.constructionCostPerSqm);
+
+    return {
+      isFeasibilityRequest,
+      extractedData,
+      confidence: Math.round(confidence * 100) / 100,
+      goalType,
+      reasoning
+    };
+  }
+
+  /**
+   * 🔍 ESTRAZIONE DATI INTELLIGENTE
+   * Estrae dati anche da messaggi confusi, aggressivi o con errori di battitura
+   */
+  private extractDataIntelligently(message: string, extractedData: any): void {
+    const text = message.toLowerCase();
+
+    // 🏷️ NOME PROGETTO (pattern flessibili)
+    const namePatterns = [
+      /nome del progetto[:\s]*([^,.\n]+)/i,
+      /progetto[:\s]*([^,.\n]+)/i,
+      /villa\s+([^,.\n]+)/i,
+      /([^,.\n]+)\s*terreno/i,
+      /studio di fattibilità[:\s]*([^,.\n]+)/i,
+      /analisi di fattibilità[:\s]*([^,.\n]+)/i,
+      /([A-Za-z][^,.\n]*?)\s*terreno/i, // Cattura nomi prima di "terreno"
+      /([A-Za-z][^,.\n]*?)\s*progetto/i  // Cattura nomi prima di "progetto"
+    ];
+
+    for (const pattern of namePatterns) {
+      const match = message.match(pattern);
+      if (match && match[1] && match[1].length > 2) {
+        extractedData.name = match[1].trim();
+        break;
+      }
+    }
+
+    // 📏 AREA TERRENO (pattern flessibili)
+    const areaPatterns = [
+      /(\d+)\s*(?:metri quadrati|mq|m²)/i,
+      /terreno.*?(\d+)\s*(?:metri quadrati|mq|m²)/i,
+      /(\d+)\s*(?:metri quadrati|mq|m²).*?terreno/i
+    ];
+
+    for (const pattern of areaPatterns) {
+      const match = text.match(pattern);
+      if (match) {
+        extractedData.landArea = parseInt(match[1]);
+        extractedData.buildableArea = extractedData.landArea; // Default se non specificato
+        break;
+      }
+    }
+
+    // 🏗️ COSTO COSTRUZIONE (pattern flessibili)
+    const costPatterns = [
+      /(\d+)\s*euro\s*per\s*metro/i,
+      /(\d+)\s*euro\/mq/i,
+      /(\d+)\s*euro\s*al\s*metro/i,
+      /costo\s*costruzione[:\s]*(\d+)/i,
+      /costo[:\s]*(\d+)\s*euro/i
+    ];
+
+    for (const pattern of costPatterns) {
+      const match = text.match(pattern);
+      if (match) {
+        extractedData.constructionCostPerSqm = parseInt(match[1]);
+        break;
+      }
+    }
+
+    // 💰 PREZZO ACQUISTO (pattern flessibili)
+    const pricePatterns = [
+      /acquisto[:\s]*(\d+(?:\.\d+)?)\s*(?:mila|k|000)?\s*euro/i,
+      /(\d+(?:\.\d+)?)\s*(?:mila|k|000)?\s*euro.*?acquisto/i,
+      /terreno[:\s]*(\d+(?:\.\d+)?)\s*(?:mila|k|000)?\s*euro/i,
+      /(\d+(?:\.\d+)?)\s*(?:mila|k|000)?\s*euro.*?terreno/i
+    ];
+
+    for (const pattern of pricePatterns) {
+      const match = text.match(pattern);
+      if (match) {
+        let price = parseFloat(match[1]);
+        if (text.includes('mila') || text.includes('k')) {
+          price *= 1000;
+        }
+        extractedData.purchasePrice = price;
+        break;
+      }
+    }
+
+    // 🎯 MARGINE TARGET (pattern flessibili)
+    const marginPatterns = [
+      /target[:\s]*(\d+(?:\.\d+)?)\s*%/i,
+      /marginalità[:\s]*(\d+(?:\.\d+)?)\s*%/i,
+      /margine[:\s]*(\d+(?:\.\d+)?)\s*%/i,
+      /(\d+(?:\.\d+)?)\s*%.*?target/i,
+      /(\d+(?:\.\d+)?)\s*%.*?margine/i
+    ];
+
+    for (const pattern of marginPatterns) {
+      const match = text.match(pattern);
+      if (match) {
+        extractedData.targetMargin = parseFloat(match[1]) / 100;
+        break;
+      }
+    }
+
+    // 🏢 TIPO PROGETTO
+    if (text.includes('bifamiliare')) extractedData.type = 'bifamiliare';
+    else if (text.includes('villa')) extractedData.type = 'villa';
+    else if (text.includes('appartamento')) extractedData.type = 'appartamento';
+    else if (text.includes('residenziale')) extractedData.type = 'residenziale';
+
+    // 📍 LOCATION
+    const locationPatterns = [
+      /a\s+([A-Za-z\s]+?)(?:\s|,|$)/i,
+      /a\s+([A-Za-z\s]+?)(?:\s|,|$)/i
+    ];
+
+    for (const pattern of locationPatterns) {
+      const match = text.match(pattern);
+      if (match && match[1].length > 2) {
+        extractedData.location = match[1].trim();
+        break;
+      }
+    }
+
+    // 🚗 PARCHEGGI
+    const parkingMatch = text.match(/(\d+)\s*parcheggi/i);
+    if (parkingMatch) {
+      extractedData.parkingSpaces = parseInt(parkingMatch[1]);
+    }
+
+    // 🏠 AREA APPARTAMENTO
+    const apartmentMatch = text.match(/(\d+)\s*metri.*?appartamento/i);
+    if (apartmentMatch) {
+      extractedData.apartmentArea = parseInt(apartmentMatch[1]);
+    }
+  }
 
   // 🧠 GESTIONE MEMORIA CONVERSAZIONALE
   private getOrCreateMemory(sessionId: string, userId: string): ConversationMemory {
@@ -3834,25 +4143,28 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
           userQuery.includes('progetti attivi') || userQuery.includes('progetti ho') ||
           userQuery.includes('nel mio portafoglio') || userQuery.includes('portafoglio progetti');
       
-      // Rileva richieste di analisi di fattibilità (incluse modifiche)
-      const isFeasibilityQuery = userQuery.includes('analisi di fattibilità') || userQuery.includes('analisi fattibilità') ||
-          userQuery.includes('studio di fattibilità') || userQuery.includes('studio fattibilità') ||
-          userQuery.includes('business plan') || userQuery.includes('businessplan') ||
-          userQuery.includes('monteporzio') || userQuery.includes('bifamiliare') ||
-          userQuery.includes('costo costruzione') || userQuery.includes('marginalità') ||
-          userQuery.includes('prezzo di vendita') || userQuery.includes('roi') ||
-          userQuery.includes('crea una analisi') || userQuery.includes('crea un\'analisi') ||
-          userQuery.includes('dimmi a che prezzo') || userQuery.includes('assicurarmi') ||
-          (userQuery.includes('terreno') && (userQuery.includes('mq') || userQuery.includes('metri quadrati'))) ||
-          (userQuery.includes('progetto') && userQuery.includes('euro')) ||
-          (userQuery.includes('appartamento') && userQuery.includes('euro')) ||
-          // 🔥 PATTERN PER MODIFICHE ESISTENTI
-          (memory.projectContext && this.isModificationRequest(request.message.content)) ||
-          (memory.projectContext && userQuery.includes('euro per metro quadrato')) ||
-          (memory.projectContext && userQuery.includes('metti')) ||
-          (memory.projectContext && userQuery.includes('invece di')) ||
-          (memory.projectContext && userQuery.includes('cambia')) ||
-          (memory.projectContext && userQuery.includes('ricalcola'));
+      // 🧠 SISTEMA CONVERSAZIONALE AVANZATO - Ispirato a ChatGPT-5
+      console.log('🧠 [Advanced Conversational] Analizzando richiesta con sistema ChatGPT-5...');
+      console.log('🔍 [DEBUG] Messaggio utente:', request.message.content);
+      console.log('🔍 [DEBUG] Memory context:', memory);
+      
+      const userIntent = this.conversationalEngine.analyzeUserIntent(request.message.content, memory);
+      const isFeasibilityQuery = userIntent.toolsRequired.length > 0 || userIntent.primary === 'feasibility';
+      const extractedData = userIntent.dataExtracted;
+      const confidence = userIntent.confidence;
+      
+      console.log('🧠 [Advanced Conversational] Analisi completata:', {
+        primaryIntent: userIntent.primary,
+        confidence: userIntent.confidence,
+        urgency: userIntent.urgency,
+        complexity: userIntent.complexity,
+        toolsRequired: userIntent.toolsRequired,
+        dataExtracted: userIntent.dataExtracted
+      });
+      
+      console.log('🔍 [DEBUG] isFeasibilityQuery:', isFeasibilityQuery);
+      console.log('🔍 [DEBUG] extractedData:', extractedData);
+      console.log('🔍 [DEBUG] confidence:', confidence);
       
       console.log('🎯 [UrbanovaOS Orchestrator] È una query sui progetti?', isProjectQuery);
       console.log('🏗️ [UrbanovaOS Orchestrator] È una richiesta di analisi di fattibilità?', isFeasibilityQuery);
@@ -3864,8 +4176,66 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
         containsInveceDi: userQuery.includes('invece di')
       });
       
-      if (isProjectQuery) {
+      // 🚀 SISTEMA CONVERSAZIONALE AVANZATO - ATTIVAZIONE INTELLIGENTE
+      console.log('🔍 [DEBUG] Controllo attivazione sistema avanzato...');
+      console.log('🔍 [DEBUG] userIntent:', userIntent);
+      console.log('🔍 [DEBUG] extractedData:', extractedData);
+      console.log('🔍 [DEBUG] isFeasibilityQuery:', isFeasibilityQuery);
+      
+      // Attiva il sistema avanzato se:
+      // 1. Ha tool richiesti (feasibility, sensitivity, risk, market, investment, design_center, project_creation)
+      // 2. Ha dati estratti (buildableArea, constructionCostPerSqm, purchasePrice)
+      // 3. È una query sui progetti
+      const shouldActivateAdvancedSystem = 
+        userIntent.toolsRequired.length > 0 || 
+        extractedData.buildableArea || 
+        extractedData.constructionCostPerSqm || 
+        extractedData.purchasePrice ||
+        isProjectQuery;
+      
+      console.log('🔍 [DEBUG] shouldActivateAdvancedSystem:', shouldActivateAdvancedSystem);
+      
+      if (shouldActivateAdvancedSystem) {
+        console.log('🧠 [Advanced Conversational] SISTEMA AVANZATO ATTIVATO - Generando risposta avanzata...');
+        console.log('🔍 [DEBUG] Chiamando generateAdvancedResponse...');
         
+        const conversationalResponse = await this.conversationalEngine.generateAdvancedResponse(
+          userIntent, 
+          memory, 
+          request
+        );
+        
+        console.log('🔍 [DEBUG] Risposta generata:', conversationalResponse);
+        
+        // Aggiorna memoria se abbiamo dati estratti
+        if (extractedData.buildableArea || extractedData.constructionCostPerSqm || extractedData.purchasePrice) {
+          console.log('🔍 [DEBUG] Aggiornando memoria con dati estratti...');
+          const projectData = {
+            id: `project_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            name: extractedData.name || 'Progetto Automatico',
+            landArea: extractedData.landArea || extractedData.buildableArea || 0,
+            buildableArea: extractedData.buildableArea || 0,
+            constructionCostPerSqm: extractedData.constructionCostPerSqm || 0,
+            purchasePrice: extractedData.purchasePrice || 0,
+            targetMargin: extractedData.targetMargin || 0.25,
+            insuranceRate: 0.015,
+            type: 'residenziale',
+            status: 'draft',
+            createdAt: new Date(),
+            updatedAt: new Date()
+          };
+          this.updateProjectContext(request.sessionId, projectData);
+          console.log('🔍 [DEBUG] Memoria aggiornata con projectData:', projectData);
+        }
+        
+        console.log('🔍 [DEBUG] Restituendo risposta avanzata...');
+        return {
+          content: conversationalResponse.content,
+          usedUserMemory: false
+        };
+      }
+      
+      if (isProjectQuery) {
         console.log('🎯 [UrbanovaOS Orchestrator] Query sui progetti rilevata, chiamando UserMemoryService...');
         
         // const memoryResult = await userMemoryService.processNaturalQuery(
@@ -3876,7 +4246,7 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
         // );
         const memoryResult = { success: false, data: null };
         
-        if (memoryResult.success && memoryResult.data) {
+        if (false && memoryResult.success && memoryResult.data) {
           console.log('✅ [UrbanovaOS Orchestrator] UserMemoryService ha trovato dati:', {
             projects: (memoryResult.data as any)?.relatedProjects?.length || 0,
             insights: (memoryResult.data as any)?.insights?.length || 0
@@ -3940,8 +4310,10 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
         }
       }
       
-      // 🏗️ GESTIONE ANALISI DI FATTIBILITÀ CON MEMORIA CONVERSAZIONALE
-      if (isFeasibilityQuery) {
+      // 🚀 SISTEMA CONVERSAZIONALE AVANZATO - BYPASS TOTALE (RIMOSSO - DUPLICATO)
+      
+      // 🏗️ GESTIONE ANALISI DI FATTIBILITÀ CON MEMORIA CONVERSAZIONALE (FALLBACK)
+      if (false) { // Disabilitato - ora usa sempre il sistema avanzato
         console.log('🏗️ [UrbanovaOS Orchestrator] Richiesta di analisi di fattibilità rilevata!');
         
         // 🎯 RILEVA SIMULAZIONI
@@ -3956,19 +4328,18 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
           console.log('🏗️ [UrbanovaOS] Usando contesto progetto esistente:', memory.projectContext.name);
           projectData = { ...memory.projectContext };
           
-          // Estrai parametri dal messaggio per aggiornare il contesto esistente
-          const feasibilityData = this.extractFeasibilityData(request.message.content);
-          console.log('🏗️ [DEBUG] Dati estratti per aggiornamento:', feasibilityData);
+          // Usa i dati estratti dal sistema intelligente
+          console.log('🏗️ [DEBUG] Dati estratti dal sistema intelligente:', extractedData);
           
           // Aggiorna con i nuovi dati se forniti
-          if (feasibilityData.name) projectData.name = feasibilityData.name;
-          if (feasibilityData.landArea) projectData.landArea = feasibilityData.landArea;
-          if (feasibilityData.buildableArea) projectData.buildableArea = feasibilityData.buildableArea;
-          if (feasibilityData.constructionCostPerSqm) projectData.constructionCostPerSqm = feasibilityData.constructionCostPerSqm;
-          if (feasibilityData.purchasePrice) projectData.purchasePrice = feasibilityData.purchasePrice;
-          if (feasibilityData.targetMargin) projectData.targetMargin = feasibilityData.targetMargin;
-          if (feasibilityData.type) projectData.type = feasibilityData.type;
-          if (feasibilityData.insuranceRate) projectData.insuranceRate = feasibilityData.insuranceRate;
+          if (extractedData.name) projectData.name = extractedData.name;
+          if (extractedData.landArea) projectData.landArea = extractedData.landArea;
+          if (extractedData.buildableArea) projectData.buildableArea = extractedData.buildableArea;
+          if (extractedData.constructionCostPerSqm) projectData.constructionCostPerSqm = extractedData.constructionCostPerSqm;
+          if (extractedData.purchasePrice) projectData.purchasePrice = extractedData.purchasePrice;
+          if (extractedData.targetMargin) projectData.targetMargin = extractedData.targetMargin;
+          if (extractedData.type) projectData.type = extractedData.type;
+          if (extractedData.insuranceRate) projectData.insuranceRate = extractedData.insuranceRate;
           
           projectData.updatedAt = new Date();
           console.log('🏗️ [DEBUG] Progetto aggiornato:', {
@@ -3979,27 +4350,26 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
             targetMargin: projectData.targetMargin
           });
         } else {
-          // Estrai parametri dal messaggio per creare nuovo progetto
-          const feasibilityData = this.extractFeasibilityData(request.message.content);
-          console.log('🏗️ [DEBUG] Dati estratti per nuovo progetto:', feasibilityData);
+          // Usa i dati estratti dal sistema intelligente per creare nuovo progetto
+          console.log('🏗️ [DEBUG] Dati estratti per nuovo progetto:', extractedData);
           
-          if (feasibilityData.name && feasibilityData.buildableArea && 
-              feasibilityData.constructionCostPerSqm && feasibilityData.purchasePrice && 
-              feasibilityData.targetMargin) {
+          if (extractedData.name && extractedData.buildableArea && 
+              extractedData.constructionCostPerSqm && extractedData.purchasePrice && 
+              extractedData.targetMargin) {
             // Crea nuovo progetto se abbiamo tutti i dati necessari
             projectData = {
               id: `project_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-              name: feasibilityData.name,
-              landArea: feasibilityData.landArea || 0,
-              buildableArea: feasibilityData.buildableArea,
-              constructionCostPerSqm: feasibilityData.constructionCostPerSqm,
-              purchasePrice: feasibilityData.purchasePrice,
-              targetMargin: feasibilityData.targetMargin,
-              insuranceRate: feasibilityData.insuranceRate || 0.015,
-              type: feasibilityData.type || 'residenziale',
-              parkingSpaces: feasibilityData.parkingSpaces,
-              apartmentArea: feasibilityData.apartmentArea,
-              location: feasibilityData.location,
+              name: extractedData.name,
+              landArea: extractedData.landArea || 0,
+              buildableArea: extractedData.buildableArea,
+              constructionCostPerSqm: extractedData.constructionCostPerSqm,
+              purchasePrice: extractedData.purchasePrice,
+              targetMargin: extractedData.targetMargin,
+              insuranceRate: extractedData.insuranceRate || 0.015,
+              type: extractedData.type || 'residenziale',
+              parkingSpaces: extractedData.parkingSpaces,
+              apartmentArea: extractedData.apartmentArea,
+              location: extractedData.location,
               status: 'draft',
               createdAt: new Date(),
               updatedAt: new Date()
@@ -4014,16 +4384,70 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
           }
         }
         
-        // Controlla se abbiamo dati sufficienti per l'analisi
-        const hasRequiredData = projectData && projectData.buildableArea && 
-                               projectData.constructionCostPerSqm && projectData.purchasePrice && 
-                               projectData.targetMargin;
+        // Controlla se abbiamo dati sufficienti per l'analisi (dai dati estratti o dal progetto)
+        const hasProjectData = projectData && projectData.buildableArea && 
+                              projectData.constructionCostPerSqm && projectData.purchasePrice && 
+                              projectData.targetMargin;
         
-        if (hasRequiredData && projectData) {
-          console.log('📊 [UrbanovaOS Orchestrator] Dati fattibilità completi, generando analisi smart...');
+        const hasExtractedData = extractedData.buildableArea && extractedData.constructionCostPerSqm && 
+                                extractedData.purchasePrice && extractedData.targetMargin;
+        
+        const hasRequiredData = hasProjectData || hasExtractedData;
+        
+        console.log('🔍 [DEBUG] Controllo hasRequiredData:', {
+          hasProjectData: !!projectData,
+          projectDataComplete: projectData ? {
+            buildableArea: !!projectData.buildableArea,
+            constructionCostPerSqm: !!projectData.constructionCostPerSqm,
+            purchasePrice: !!projectData.purchasePrice,
+            targetMargin: !!projectData.targetMargin
+          } : null,
+          extractedDataComplete: {
+            buildableArea: !!extractedData.buildableArea,
+            constructionCostPerSqm: !!extractedData.constructionCostPerSqm,
+            purchasePrice: !!extractedData.purchasePrice,
+            targetMargin: !!extractedData.targetMargin
+          },
+          hasRequiredData: hasRequiredData,
+          extractedDataValues: extractedData
+        });
+        
+        // 🚀 SISTEMA CONVERSAZIONALE AVANZATO - Attivazione garantita per fattibilità
+        if (isFeasibilityQuery || userIntent.toolsRequired.length > 0 || 
+            (extractedData.buildableArea && extractedData.constructionCostPerSqm) ||
+            extractedData.buildableArea || extractedData.constructionCostPerSqm || extractedData.purchasePrice) {
+          console.log('🧠 [Advanced Conversational] Generando risposta con tool attivati...');
           
-          // Aggiorna il contesto progetto nella memoria
-          this.updateProjectContext(request.sessionId, projectData);
+          const conversationalResponse = await this.conversationalEngine.generateAdvancedResponse(
+            userIntent, 
+            memory, 
+            request
+          );
+          
+          // Aggiorna memoria con i dati estratti
+          if (extractedData.buildableArea) {
+            const projectData = {
+              id: `project_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+              name: extractedData.name || 'Progetto Automatico',
+              landArea: extractedData.landArea || extractedData.buildableArea || 0,
+              buildableArea: extractedData.buildableArea || 0,
+              constructionCostPerSqm: extractedData.constructionCostPerSqm || 0,
+              purchasePrice: extractedData.purchasePrice || 0,
+              targetMargin: extractedData.targetMargin || 0.25,
+              insuranceRate: 0.015,
+              type: 'residenziale',
+              status: 'draft',
+              createdAt: new Date(),
+              updatedAt: new Date()
+            };
+            this.updateProjectContext(request.sessionId, projectData);
+          }
+          
+          return {
+            content: conversationalResponse.content,
+            usedUserMemory: false
+          };
+        }
           
           let analysisContent: string;
           let analysisType: string;
@@ -4146,6 +4570,7 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
       return { content: null, usedUserMemory: false }; // Fallback a OpenAI
     }
   }
+}
 
   private calculateConfidence(
     classification: ClassificationResult,

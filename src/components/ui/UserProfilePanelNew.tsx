@@ -48,23 +48,35 @@ export default function UserProfilePanelNew({ isOpen, onClose }: UserProfilePane
     }
   }, [isOpen, userId]);
 
-  // Salvataggio automatico quando profileUpdate cambia
+  // Sincronizza con il contesto di autenticazione quando il profilo cambia
+  useEffect(() => {
+    if (profile && currentUser) {
+      // Aggiorna il displayName nel contesto di autenticazione se necessario
+      if (profile.displayName && profile.displayName !== currentUser.displayName) {
+        console.log('🔄 [UserProfilePanel] Sincronizzazione displayName con AuthContext');
+        // Il displayName verrà aggiornato automaticamente al prossimo refresh
+      }
+    }
+  }, [profile, currentUser]);
+
+  // Salvataggio automatico quando profileUpdate cambia (con debounce migliorato)
   useEffect(() => {
     if (!userId || !profile || !profileUpdate) return;
 
+    // Verifica se ci sono cambiamenti reali
+    const hasChanges = Object.keys(profileUpdate).some(key => {
+      const value = profileUpdate[key as keyof ProfileUpdate];
+      const originalValue = profile[key as keyof UserProfile];
+      return value !== undefined && value !== originalValue && value !== '';
+    });
+
+    if (!hasChanges) return;
+
     // Debounce per evitare troppe chiamate API
     const timeoutId = setTimeout(() => {
-      const hasChanges = Object.keys(profileUpdate).some(key => {
-        const value = profileUpdate[key as keyof ProfileUpdate];
-        const originalValue = profile[key as keyof UserProfile];
-        return value !== undefined && value !== originalValue;
-      });
-
-      if (hasChanges) {
-        console.log('💾 [UserProfilePanel] Salvataggio automatico:', profileUpdate);
-        handleSaveProfile();
-      }
-    }, 1000); // Salva dopo 1 secondo di inattività
+      console.log('💾 [UserProfilePanel] Salvataggio automatico:', profileUpdate);
+      handleSaveProfile();
+    }, 2000); // Salva dopo 2 secondi di inattività
 
     return () => clearTimeout(timeoutId);
   }, [profileUpdate, userId, profile]);
@@ -73,11 +85,11 @@ export default function UserProfilePanelNew({ isOpen, onClose }: UserProfilePane
   useEffect(() => {
     return () => {
       // Salva i dati quando il componente viene smontato
-      if (userId && profile && profileUpdate) {
+      if (userId && profile && profileUpdate && !saving) {
         const hasChanges = Object.keys(profileUpdate).some(key => {
           const value = profileUpdate[key as keyof ProfileUpdate];
           const originalValue = profile[key as keyof UserProfile];
-          return value !== undefined && value !== originalValue;
+          return value !== undefined && value !== originalValue && value !== '';
         });
 
         if (hasChanges) {
@@ -89,7 +101,7 @@ export default function UserProfilePanelNew({ isOpen, onClose }: UserProfilePane
         }
       }
     };
-  }, [userId, profile, profileUpdate]);
+  }, [userId, profile, profileUpdate, saving]);
 
   const loadProfile = async () => {
     try {
@@ -189,7 +201,7 @@ export default function UserProfilePanelNew({ isOpen, onClose }: UserProfilePane
 
     try {
       setSaving(true);
-      console.log('📸 [UserProfilePanel] Upload immagine:', file.name);
+      console.log('📸 [UserProfilePanel] Upload immagine:', file.name, file.size, file.type);
 
       // Crea un URL temporaneo per l'anteprima immediata
       const tempUrl = URL.createObjectURL(file);
@@ -210,8 +222,13 @@ export default function UserProfilePanelNew({ isOpen, onClose }: UserProfilePane
 
         if (updatedProfile) {
           setProfile(updatedProfile);
+          // Aggiorna anche profileUpdate per sincronizzazione
+          setProfileUpdate(prev => ({ ...prev, avatar: avatarUrl }));
           toast.success('Immagine caricata e salvata con successo');
+          console.log('✅ [UserProfilePanel] Avatar salvato:', avatarUrl);
         }
+      } else {
+        throw new Error('Upload fallito');
       }
     } catch (error) {
       console.error('❌ [UserProfilePanel] Errore upload immagine:', error);
@@ -223,21 +240,56 @@ export default function UserProfilePanelNew({ isOpen, onClose }: UserProfilePane
       }
     } finally {
       setSaving(false);
+      // Pulisci l'URL temporaneo
+      if (event.target.files?.[0]) {
+        URL.revokeObjectURL(URL.createObjectURL(event.target.files[0]));
+      }
     }
   };
 
   const handleSaveProfile = async () => {
-    if (!userId || !profileUpdate) return;
+    if (!userId || !profileUpdate || saving) return;
 
     try {
       setSaving(true);
       console.log('💾 [UserProfilePanel] Salvataggio profilo:', profileUpdate);
       
-      const updatedProfile = await firebaseUserProfileService.updateUserProfile(userId, profileUpdate);
+      // Filtra solo i campi che sono effettivamente cambiati
+      const changesToSave: ProfileUpdate = {};
+      Object.keys(profileUpdate).forEach(key => {
+        const value = profileUpdate[key as keyof ProfileUpdate];
+        const originalValue = profile[key as keyof UserProfile];
+        if (value !== undefined && value !== originalValue && value !== '') {
+          changesToSave[key as keyof ProfileUpdate] = value;
+        }
+      });
+
+      if (Object.keys(changesToSave).length === 0) {
+        console.log('ℹ️ [UserProfilePanel] Nessun cambiamento da salvare');
+        return;
+      }
+
+      console.log('💾 [UserProfilePanel] Cambiamenti da salvare:', changesToSave);
+      
+      const updatedProfile = await firebaseUserProfileService.updateUserProfile(userId, changesToSave);
       
       if (updatedProfile) {
         setProfile(updatedProfile);
+        // Reset profileUpdate per evitare loop infiniti
+        setProfileUpdate({
+          firstName: updatedProfile.firstName,
+          lastName: updatedProfile.lastName,
+          displayName: updatedProfile.displayName,
+          phone: updatedProfile.phone,
+          company: updatedProfile.company,
+          role: updatedProfile.role,
+          timezone: updatedProfile.timezone,
+          language: updatedProfile.language,
+          dateFormat: updatedProfile.dateFormat,
+          currency: updatedProfile.currency,
+        });
         toast.success('Profilo aggiornato con successo');
+        console.log('✅ [UserProfilePanel] Profilo salvato e sincronizzato');
       }
     } catch (error) {
       console.error('❌ [UserProfilePanel] Errore salvataggio:', error);

@@ -28,7 +28,7 @@ import {
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
 import LanguageSelector from '@/components/ui/LanguageSelector';
 import NotificationsPanel from '@/components/ui/NotificationsPanel';
-import UserProfilePanelNew from '@/components/ui/UserProfilePanelNew';
+import UserProfilePanelFixed from '@/components/ui/UserProfilePanelFixed';
 import WorkspaceManager from '@/components/workspace/WorkspaceManager';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -408,7 +408,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
       )}
       
       {profileOpen && (
-        <UserProfilePanelNew
+        <UserProfilePanelFixed
           isOpen={profileOpen}
           onClose={() => setProfileOpen(false)}
         />

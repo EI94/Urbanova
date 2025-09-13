@@ -183,34 +183,35 @@ class FirebaseUserProfileService {
   // GESTIONE AVATAR
   // ========================================
 
-  async uploadAvatar(userId: string, file: { name: string; size: number; type: string }): Promise<string | null> {
+  async uploadAvatar(userId: string, file: File): Promise<string | null> {
     try {
+      console.log('📸 [FirebaseUserProfile] Upload avatar:', file.name, file.size, file.type);
+      
       // Elimina avatar precedente se esiste
       const currentProfile = await this.getUserProfile(userId);
       if (currentProfile?.avatar) {
         try {
           const oldAvatarRef = ref(storage, `avatars/${userId}/avatar`);
           await deleteObject(oldAvatarRef);
+          console.log('🗑️ [FirebaseUserProfile] Avatar precedente eliminato');
         } catch (error) {
-          console.log('No previous avatar to delete');
+          console.log('ℹ️ [FirebaseUserProfile] Nessun avatar precedente da eliminare');
         }
       }
 
-      // Crea un Blob vuoto come placeholder per l'avatar
-      // In un'implementazione reale, dovresti passare il file reale
-      const blob = new Blob([], { type: file.type });
-      
-      // Carica nuovo avatar
+      // Carica nuovo avatar con il file reale
       const avatarRef = ref(storage, `avatars/${userId}/avatar`);
-      const uploadResult = await uploadBytes(avatarRef, blob);
+      const uploadResult = await uploadBytes(avatarRef, file);
       const downloadURL = await getDownloadURL(uploadResult.ref);
+
+      console.log('✅ [FirebaseUserProfile] Avatar caricato:', downloadURL);
 
       // Aggiorna profilo con nuovo URL avatar
       await this.updateUserProfile(userId, { avatar: downloadURL } as any);
 
       return downloadURL;
     } catch (error) {
-      console.error('Error uploading avatar:', error);
+      console.error('❌ [FirebaseUserProfile] Errore upload avatar:', error);
       return null;
     }
   }
