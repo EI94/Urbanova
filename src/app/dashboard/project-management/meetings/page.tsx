@@ -5,7 +5,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 
 export default function ProjectMeetingsPage() {
   return (
-    <DashboardLayout>
+    <DashboardLayout title="Riunioni">
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">📅 Riunioni Progetto</h1>
