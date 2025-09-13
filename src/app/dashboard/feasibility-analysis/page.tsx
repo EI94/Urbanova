@@ -33,7 +33,6 @@ import Link from 'next/link';
 import { useLanguage } from '@/contexts/LanguageContext';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
 import ShareProjectModal from '@/components/workspace/ShareProjectModal';
-import PageHeader from '@/components/ui/PageHeader';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Workspace } from '@/types/workspace';
 
@@ -272,24 +271,20 @@ export default function FeasibilityAnalysisPage() {
 
   return (
     <DashboardLayout title="Analisi di Fattibilità">
-      {/* Page Header - Apple Style */}
-      <div className="mb-6">
-        <PageHeader
-          title="Analisi di Fattibilità"
-          subtitle="Valutiamo la fattibilità economica dei progetti immobiliari"
-          icon={<FileText className="w-5 h-5 text-white" />}
-        actions={
-          <div className="flex items-center space-x-3">
-            <Link
-              href="/dashboard/feasibility-analysis/new"
-              className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 flex items-center space-x-2"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Nuovo Progetto</span>
-            </Link>
-          </div>
-        }
-      />
+      {/* Subtitle */}
+      <div className="mb-6 px-6">
+        <p className="text-gray-600 text-lg">
+          Valutiamo la fattibilità economica dei progetti immobiliari
+        </p>
+        <div className="mt-4">
+          <Link
+            href="/dashboard/feasibility-analysis/new"
+            className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 flex items-center space-x-2 inline-flex"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Nuovo Progetto</span>
+          </Link>
+        </div>
       </div>
 
       {/* Main Content */}
