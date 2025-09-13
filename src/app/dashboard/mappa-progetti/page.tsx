@@ -99,7 +99,7 @@ export default function MappaProgettiPage() {
   const markersRef = useRef<google.maps.Marker[]>([]);
 
   useEffect(() => {
-      loadData();
+    loadData();
     loadGoogleMaps();
   }, []);
 
@@ -612,37 +612,37 @@ export default function MappaProgettiPage() {
         <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
-                  <div>
+              <div>
                 <p className="text-sm font-medium text-gray-600">Progetti Totali</p>
                 <p className="text-2xl font-bold text-gray-900">{projects.length}</p>
               </div>
               <Building className="w-8 h-8 text-blue-600" />
-                  </div>
-                  </div>
+            </div>
+          </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
-                    <div>
+              <div>
                 <p className="text-sm font-medium text-gray-600">In Corso</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {projects.filter(p => p.status === 'in_progress').length}
                 </p>
-                    </div>
+              </div>
               <CalendarLucide className="w-8 h-8 text-green-600" />
-                    </div>
-                  </div>
+            </div>
+          </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
-                  <div>
+              <div>
                 <p className="text-sm font-medium text-gray-600">Completati</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {projects.filter(p => p.status === 'completed').length}
                 </p>
-                  </div>
-              <Target className="w-8 h-8 text-gray-600" />
-                  </div>
-                </div>
+              </div>
+              <TargetLucide className="w-8 h-8 text-gray-600" />
+            </div>
+          </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
