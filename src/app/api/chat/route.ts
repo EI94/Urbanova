@@ -63,8 +63,11 @@ export async function POST(request: NextRequest) {
         try {
           console.log('🎯 [UrbanovaOS] Processando con sistema enterprise avanzato...');
 
+          // 🧠 GENERA SESSIONID PERSISTENTE PER MEMORIA CONVERSAZIONALE
+          const persistentSessionId = `session_${userId}_persistent`;
+          
           const urbanovaRequest: UrbanovaOSRequest = {
-            sessionId: `session_${userId}_${Date.now()}`,
+            sessionId: persistentSessionId,
             userId,
             userEmail,
             message: {
