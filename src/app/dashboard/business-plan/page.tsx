@@ -16,6 +16,7 @@ import {
   MessageCircle,
   Search,
   TrendingUp,
+  ClipboardList,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
@@ -213,15 +214,15 @@ export default function BusinessPlanPage() {
   };
 
   return (
-    <DashboardLayout>
+    <DashboardLayout title="Business Plan">
       <div className="flex-1 p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="flex justify-between items-center mb-8">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <FileText className="w-8 h-8 text-green-600" />
-                Business Plan Generator
+                <ClipboardList className="w-8 h-8 text-blue-600" />
+                Business Plan
               </h1>
               <p className="text-gray-600 mt-2">
                 Genera Business Plan professionali con proiezioni finanziarie intelligenti
