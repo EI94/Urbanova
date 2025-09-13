@@ -18,7 +18,6 @@ import {
   Unsubscribe
 } from 'firebase/firestore';
 import { db } from './firebase';
-import { safeCollection } from './firebaseUtils';
 import {
   Workspace,
   WorkspaceMember,
@@ -51,56 +50,54 @@ export class WorkspaceService {
     try {
       console.log('🔄 [Workspace] Creazione workspace:', request.name);
 
-      return await runTransaction(db, async (transaction) => {
-        // Crea il workspace
-        const workspaceData: Omit<Workspace, 'id'> = {
-          name: request.name,
-          description: request.description,
-          companyName: request.companyName,
-          companyDomain: request.companyDomain,
-          ownerId,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          settings: {
-            allowGuestAccess: false,
-            requireApprovalForJoins: true,
-            maxMembers: 10 // Free plan
-          },
-          subscription: {
-            plan: 'free',
-            seats: 10,
-            usedSeats: 1,
-            expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 giorni
-          }
-        };
+      // Usa addDoc invece di runTransaction per evitare problemi di tipo
+      const workspaceData: Omit<Workspace, 'id'> = {
+        name: request.name,
+        description: request.description,
+        companyName: request.companyName,
+        companyDomain: request.companyDomain,
+        ownerId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        settings: {
+          allowGuestAccess: false,
+          requireApprovalForJoins: true,
+          maxMembers: 10 // Free plan
+        },
+        subscription: {
+          plan: 'free',
+          seats: 10,
+          usedSeats: 1,
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 giorni
+        }
+      };
 
-        const workspaceRef = doc(safeCollection(this.WORKSPACES_COLLECTION));
-        transaction.set(workspaceRef, workspaceData);
+      // Crea il workspace
+      const workspaceRef = await addDoc(collection(db, this.WORKSPACES_COLLECTION), workspaceData);
+      console.log('✅ [Workspace] Workspace creato:', workspaceRef.id);
 
-        // Aggiungi il proprietario come membro
-        const memberData: Omit<WorkspaceMember, 'id'> = {
-          workspaceId: workspaceRef.id,
-          userId: ownerId,
-          email: ownerEmail,
-          role: 'owner',
-          status: 'active',
-          joinedAt: new Date(),
-          invitedBy: ownerId,
-          permissions: {
-            canCreateProjects: true,
-            canEditProjects: true,
-            canDeleteProjects: true,
-            canInviteMembers: true,
-            canManageSettings: true
-          }
-        };
+      // Aggiungi il proprietario come membro
+      const memberData: Omit<WorkspaceMember, 'id'> = {
+        workspaceId: workspaceRef.id,
+        userId: ownerId,
+        email: ownerEmail,
+        role: 'owner',
+        status: 'active',
+        joinedAt: new Date(),
+        invitedBy: ownerId,
+        permissions: {
+          canCreateProjects: true,
+          canEditProjects: true,
+          canDeleteProjects: true,
+          canInviteMembers: true,
+          canManageSettings: true
+        }
+      };
 
-        const memberRef = doc(safeCollection(this.MEMBERS_COLLECTION));
-        transaction.set(memberRef, memberData);
+      await addDoc(collection(db, this.MEMBERS_COLLECTION), memberData);
+      console.log('✅ [Workspace] Membro proprietario aggiunto');
 
-        console.log('✅ [Workspace] Workspace creato:', workspaceRef.id);
-        return workspaceRef.id;
-      });
+      return workspaceRef.id;
     } catch (error) {
       console.error('❌ [Workspace] Errore creazione workspace:', error);
       throw new Error(`Impossibile creare il workspace: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`);
@@ -114,7 +111,7 @@ export class WorkspaceService {
 
       // Trova tutti i workspace dove l'utente è membro
       const membersQuery = query(
-        safeCollection(this.MEMBERS_COLLECTION),
+        collection(db, this.MEMBERS_COLLECTION),
         where('userId', '==', userId),
         where('status', '==', 'active')
       );
@@ -128,7 +125,7 @@ export class WorkspaceService {
 
       // Carica i workspace
       const workspacesQuery = query(
-        safeCollection(this.WORKSPACES_COLLECTION),
+        collection(db, this.WORKSPACES_COLLECTION),
         where('__name__', 'in', workspaceIds)
       );
       const workspacesSnapshot = await getDocs(workspacesQuery);
@@ -188,7 +185,7 @@ export class WorkspaceService {
 
         // Verifica che non sia già membro
         const existingMemberQuery = query(
-          safeCollection(this.MEMBERS_COLLECTION),
+          collection(db, this.MEMBERS_COLLECTION),
           where('workspaceId', '==', workspaceId),
           where('email', '==', request.email)
         );
@@ -210,7 +207,7 @@ export class WorkspaceService {
           createdAt: new Date()
         };
 
-        const invitationRef = doc(safeCollection(this.INVITATIONS_COLLECTION));
+        const invitationRef = doc(collection(db, this.INVITATIONS_COLLECTION));
         transaction.set(invitationRef, invitationData);
 
         // Crea notifica
@@ -274,7 +271,7 @@ export class WorkspaceService {
           permissions: this.getDefaultPermissions(invitation.role)
         };
 
-        const memberRef = doc(safeCollection(this.MEMBERS_COLLECTION));
+        const memberRef = doc(collection(db, this.MEMBERS_COLLECTION));
         transaction.set(memberRef, memberData);
 
         // Aggiorna contatore posti utilizzati
@@ -328,7 +325,7 @@ export class WorkspaceService {
           lastModifiedAt: new Date()
         };
 
-        const sharedProjectRef = doc(safeCollection(this.SHARED_PROJECTS_COLLECTION));
+        const sharedProjectRef = doc(collection(db, this.SHARED_PROJECTS_COLLECTION));
         transaction.set(sharedProjectRef, sharedProjectData);
 
         // Crea collaborazioni per ogni utente con permessi
@@ -353,7 +350,7 @@ export class WorkspaceService {
             lastActiveAt: new Date()
           };
 
-          const collaborationRef = doc(safeCollection(this.COLLABORATIONS_COLLECTION));
+          const collaborationRef = doc(collection(db, this.COLLABORATIONS_COLLECTION));
           transaction.set(collaborationRef, collaborationData);
         }
 
@@ -383,7 +380,7 @@ export class WorkspaceService {
 
       // Verifica che l'utente sia membro del workspace
       const memberQuery = query(
-        safeCollection(this.MEMBERS_COLLECTION),
+        collection(db, this.MEMBERS_COLLECTION),
         where('workspaceId', '==', workspaceId),
         where('userId', '==', userId),
         where('status', '==', 'active')
@@ -396,7 +393,7 @@ export class WorkspaceService {
 
       // Carica progetti condivisi
       const sharedProjectsQuery = query(
-        safeCollection(this.SHARED_PROJECTS_COLLECTION),
+        collection(db, this.SHARED_PROJECTS_COLLECTION),
         where('workspaceId', '==', workspaceId),
         orderBy('lastModifiedAt', 'desc')
       );
@@ -419,7 +416,7 @@ export class WorkspaceService {
   async getWorkspaceMembers(workspaceId: string): Promise<WorkspaceMember[]> {
     try {
       const membersQuery = query(
-        safeCollection(this.MEMBERS_COLLECTION),
+        collection(db, this.MEMBERS_COLLECTION),
         where('workspaceId', '==', workspaceId),
         where('status', '==', 'active'),
         orderBy('joinedAt', 'asc')
@@ -443,7 +440,7 @@ export class WorkspaceService {
     callback: (notifications: WorkspaceNotification[]) => void
   ): Unsubscribe {
     const notificationsQuery = query(
-      safeCollection(this.NOTIFICATIONS_COLLECTION),
+      collection(db, this.NOTIFICATIONS_COLLECTION),
       where('workspaceId', '==', workspaceId),
       where('userId', '==', userId),
       orderBy('createdAt', 'desc'),
@@ -506,7 +503,7 @@ export class WorkspaceService {
     transaction: any,
     notification: Omit<WorkspaceNotification, 'id'>
   ): Promise<void> {
-    const notificationRef = doc(safeCollection(this.NOTIFICATIONS_COLLECTION));
+    const notificationRef = doc(collection(db, this.NOTIFICATIONS_COLLECTION));
     transaction.set(notificationRef, {
       ...notification,
       read: false,
@@ -518,7 +515,7 @@ export class WorkspaceService {
     transaction: any,
     activity: Omit<CollaborationActivity, 'id'>
   ): Promise<void> {
-    const activityRef = doc(safeCollection(this.ACTIVITIES_COLLECTION));
+    const activityRef = doc(collection(db, this.ACTIVITIES_COLLECTION));
     transaction.set(activityRef, {
       ...activity,
       timestamp: new Date()
