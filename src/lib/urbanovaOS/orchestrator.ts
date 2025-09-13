@@ -427,7 +427,13 @@ export class UrbanovaOSOrchestrator {
     const changes: string[] = [];
     let newProjectData: Partial<ProjectData> = {};
     
+    // Se non c'è contesto progetto, controlla se il messaggio contiene dati di progetto
     if (!memory.projectContext) {
+      // Estrai dati dal messaggio per vedere se possiamo creare un contesto
+      const feasibilityData = this.extractFeasibilityData(currentMessage);
+      if (feasibilityData.name || feasibilityData.buildableArea || feasibilityData.constructionCostPerSqm) {
+        return { hasChanges: false, changes: [] }; // Lascia che il sistema normale gestisca
+      }
       return { hasChanges: false, changes: [] };
     }
     
@@ -459,10 +465,15 @@ export class UrbanovaOSOrchestrator {
       newProjectData.type = 'bifamiliare';
     }
     
-    // Rileva cambiamenti nei costi
+    // Rileva cambiamenti nei costi - pattern più robusti
     const costPatterns = [
       /(\d+)\s*euro per metro quadrato/i,
-      /costo.*?(\d+)\s*euro\/mq/i
+      /costo.*?(\d+)\s*euro\/mq/i,
+      /costo.*?(\d+)\s*euro per mq/i,
+      /(\d+)\s*euro\/m²/i,
+      /costo.*?(\d+)\s*euro\/m²/i,
+      /metti\s+(\d+)\s*euro/i,
+      /invece di.*?(\d+)\s*euro/i
     ];
     
     for (const pattern of costPatterns) {
@@ -477,10 +488,12 @@ export class UrbanovaOSOrchestrator {
       }
     }
     
-    // Rileva cambiamenti nel prezzo acquisto
+    // Rileva cambiamenti nel prezzo acquisto - pattern più robusti
     const pricePatterns = [
       /acquisto.*?(\d+(?:\.\d+)?)\s*euro/i,
-      /(\d+(?:\.\d+)?)\s*euro.*?acquisto/i
+      /(\d+(?:\.\d+)?)\s*euro.*?acquisto/i,
+      /prezzo acquisto.*?(\d+(?:\.\d+)?)\s*euro/i,
+      /acquisto.*?(\d+(?:\.\d+)?)\s*€/i
     ];
     
     for (const pattern of pricePatterns) {
@@ -490,6 +503,44 @@ export class UrbanovaOSOrchestrator {
         if (newPrice !== currentProject.purchasePrice) {
           changes.push('prezzo_acquisto');
           newProjectData.purchasePrice = newPrice;
+        }
+        break;
+      }
+    }
+    
+    // Rileva cambiamenti nell'area costruibile
+    const areaPatterns = [
+      /area costruibile.*?(\d+)\s*mq/i,
+      /costruibile.*?(\d+)\s*mq/i,
+      /(\d+)\s*mq.*?costruibile/i
+    ];
+    
+    for (const pattern of areaPatterns) {
+      const match = currentMessage.match(pattern);
+      if (match) {
+        const newArea = parseInt(match[1]);
+        if (newArea !== currentProject.buildableArea) {
+          changes.push('area_costruibile');
+          newProjectData.buildableArea = newArea;
+        }
+        break;
+      }
+    }
+    
+    // Rileva cambiamenti nel target marginalità
+    const marginPatterns = [
+      /target.*?(\d+(?:\.\d+)?)%/i,
+      /marginalità.*?(\d+(?:\.\d+)?)%/i,
+      /(\d+(?:\.\d+)?)%\s*di marginalità/i
+    ];
+    
+    for (const pattern of marginPatterns) {
+      const match = currentMessage.match(pattern);
+      if (match) {
+        const newMargin = parseFloat(match[1]) / 100;
+        if (newMargin !== currentProject.targetMargin) {
+          changes.push('target_marginalità');
+          newProjectData.targetMargin = newMargin;
         }
         break;
       }
