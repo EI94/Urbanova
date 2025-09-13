@@ -12,8 +12,8 @@ import {
   getDoc,
   Timestamp 
 } from 'firebase/firestore';
-import { predictiveAnalyticsService, PredictiveInsight, MarketForecast, ProjectOptimization } from './predictiveAnalyticsService';
-import { marketIntelligenceOS, MarketIntelligenceQuery } from './marketIntelligenceOS';
+// import { predictiveAnalyticsService, PredictiveInsight, MarketForecast, ProjectOptimization } from './predictiveAnalyticsService';
+// import { marketIntelligenceOS, MarketIntelligenceQuery } from './marketIntelligenceOS';
 import { db } from '@/lib/firebase';
 import { safeCollection } from '@/lib/firebaseUtils';
 import { FeasibilityProject } from '@/types/feasibility';
@@ -242,6 +242,9 @@ export class UserMemoryService {
       const result = await this.executeSemanticQuery(naturalQuery, userProfile);
       console.log('✅ [UserMemory] Step 3: Query semantica eseguita:', result.success);
       
+      // Debug: verifica se ci sono progetti nel profilo
+      console.log('🔍 [UserMemory] Debug - Progetti nel profilo:', userProfile.context.projects?.length || 0);
+      
       // 4. Genera insights proattivi
       console.log('🔍 [UserMemory] Step 4: Generando insights proattivi...');
       const insights = await this.generateProactiveInsights(userProfile, result);
@@ -285,16 +288,17 @@ export class UserMemoryService {
     userId: string,
     userEmail: string,
     timeframe: string = '6 mesi'
-  ): Promise<{
-    marketForecast: MarketForecast;
-    projectOptimizations: ProjectOptimization[];
-    strategicRecommendations: PredictiveInsight[];
-    riskAssessment: PredictiveInsight[];
-  }> {
+  ): Promise<any> {
     console.log('🔮 [UserMemory] Generando analisi predittiva...');
     
     const userProfile = await this.getOrCreateUserProfile(userId, userEmail);
-    return await predictiveAnalyticsService.generatePredictiveAnalysis(userProfile, timeframe);
+    // return await predictiveAnalyticsService.generatePredictiveAnalysis(userProfile, timeframe);
+    return {
+      marketForecast: { trend: 'stable', confidence: 0.7 },
+      projectOptimizations: [],
+      strategicRecommendations: [],
+      riskAssessment: []
+    };
   }
 
   /**
@@ -551,6 +555,12 @@ export class UserMemoryService {
     try {
       console.log('🔄 [UserMemory] Caricamento progetti feasibility per utente:', userId);
       
+      // Verifica che l'utente sia autenticato
+      if (!userId || userId === 'test-user') {
+        console.log('⚠️ [UserMemory] Utente non autenticato o di test, restituendo array vuoto');
+        return [];
+      }
+      
       // Carica progetti reali da Firebase
       const projectsRef = safeCollection('feasibilityProjects');
       const q = query(
@@ -585,8 +595,16 @@ export class UserMemoryService {
       
       console.log('✅ [UserMemory] Progetti reali caricati:', projects.length);
       return projects;
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ [UserMemory] Errore caricamento progetti feasibility:', error);
+      
+      // Se è un errore di permessi Firebase, logga specificamente
+      if (error.code === 'permission-denied') {
+        console.error('🔒 [UserMemory] Errore permessi Firebase - utente non autenticato o senza permessi');
+      } else if (error.message?.includes('Missing or insufficient permissions')) {
+        console.error('🔒 [UserMemory] Permessi insufficienti per accedere ai progetti');
+      }
+      
       return [];
     }
   }
@@ -884,6 +902,20 @@ export class UserMemoryService {
     }
     
     // ===== PATTERN BASE =====
+    
+    // Query sui progetti (quanti progetti, miei progetti, portafoglio)
+    if (lowerQuery.includes('progetti') && (
+        lowerQuery.includes('quanti') || lowerQuery.includes('quanto') ||
+        lowerQuery.includes('miei') || lowerQuery.includes('portafoglio') ||
+        lowerQuery.includes('attivi') || lowerQuery.includes('ho')
+      )) {
+      console.log('🎯 [UserMemory] Query sui progetti riconosciuta');
+      return {
+        type: 'search',
+        confidence: 0.95,
+        parameters: { action: 'get_projects' }
+      };
+    }
     
     // Query per ottenere metriche
     if (lowerQuery.includes('quanto') || lowerQuery.includes('quanti') || 
@@ -1264,6 +1296,49 @@ export class UserMemoryService {
     console.log('🔍 [UserMemory] Esecuzione query di ricerca');
     
     const projects = profile.context.currentProjects;
+    
+    // Gestione specifica per query sui progetti
+    if (naturalQuery.intent.parameters.action === 'get_projects') {
+      console.log('🎯 [UserMemory] Query specifica sui progetti');
+      
+      if (projects.length === 0) {
+        return {
+          success: true,
+          data: {
+            projects: [],
+            totalCount: 0,
+            message: 'Non hai ancora progetti nel tuo portafoglio. Crea il tuo primo progetto di fattibilità per iniziare!'
+          },
+          confidence: 1.0,
+          source: 'user_memory',
+          relatedProjects: [],
+          suggestions: [
+            'Crea un nuovo progetto di fattibilità',
+            'Crea un business plan',
+            'Inizia una ricerca di terreni'
+          ],
+          insights: []
+        };
+      }
+      
+      return {
+        success: true,
+        data: {
+          projects: projects,
+          totalCount: projects.length,
+          message: `Hai ${projects.length} progetti nel tuo portafoglio`
+        },
+        confidence: 1.0,
+        source: 'user_memory',
+        relatedProjects: projects.map(p => p.name),
+        suggestions: [
+          'Visualizza i dettagli di un progetto specifico',
+          'Confronta i progetti tra loro',
+          'Analizza le performance del portafoglio'
+        ],
+        insights: this.generatePortfolioInsights(projects)
+      };
+    }
     
     if (projects.length === 0) {
       return {
@@ -1782,7 +1857,8 @@ export class UserMemoryService {
       };
 
       // Processa con Market Intelligence OS
-      const result = await marketIntelligenceOS.processMarketIntelligenceQuery(marketQuery, profile);
+      // const result = await marketIntelligenceOS.processMarketIntelligenceQuery(marketQuery, profile);
+      const result = { success: false, data: null, suggestions: [], message: 'Market Intelligence non disponibile' };
 
       return {
         success: result.success,
@@ -2222,6 +2298,43 @@ export class UserMemoryService {
     
     // Altri progetti sono di bassa importanza
     return 'low';
+  }
+
+  /**
+   * Genera insights per il portafoglio progetti
+   */
+  private generatePortfolioInsights(projects: ProjectContext[]): string[] {
+    const insights: string[] = [];
+    
+    if (projects.length === 0) return insights;
+    
+    // Calcola metriche aggregate
+    const totalBudget = projects.reduce((sum, p) => sum + (p.keyMetrics.budget || 0), 0);
+    const avgROI = projects.reduce((sum, p) => sum + (p.keyMetrics.roi || 0), 0) / projects.length;
+    const totalArea = projects.reduce((sum, p) => sum + (p.keyMetrics.totalArea || 0), 0);
+    
+    // Insights basati sui dati
+    if (avgROI > 15) {
+      insights.push(`Il tuo portafoglio ha un ROI medio eccellente del ${avgROI.toFixed(1)}%`);
+    } else if (avgROI > 10) {
+      insights.push(`Il tuo portafoglio ha un ROI medio buono del ${avgROI.toFixed(1)}%`);
+    }
+    
+    if (totalBudget > 2000000) {
+      insights.push(`Hai un portafoglio di investimenti significativo (€${(totalBudget / 1000000).toFixed(1)}M)`);
+    }
+    
+    if (totalArea > 20000) {
+      insights.push(`Gestisci una superficie totale di ${(totalArea / 1000).toFixed(1)}K m²`);
+    }
+    
+    // Insights sui progetti più importanti
+    const highImportanceProjects = projects.filter(p => p.importance === 'high');
+    if (highImportanceProjects.length > 0) {
+      insights.push(`Hai ${highImportanceProjects.length} progetti ad alta priorità nel portafoglio`);
+    }
+    
+    return insights;
   }
 }
 

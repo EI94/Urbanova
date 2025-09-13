@@ -2,7 +2,7 @@
 // Orchestratore principale per Urbanova OS con architettura enterprise
 
 import { ChatMessage } from '@/types/chat';
-import { UrbanovaOSClassificationEngine } from './ml/classificationEngine';
+import { UrbanovaOSClassificationEngine, ClassificationResult } from './ml/classificationEngine';
 import { UrbanovaOSVectorStore } from './vector/vectorStore';
 import { UrbanovaOSWorkflowEngine } from './workflow/workflowEngine';
 import { UrbanovaOSPluginSystem } from './plugins/pluginSystem';
@@ -62,15 +62,7 @@ export interface UrbanovaOSResponse {
   timestamp: Date;
 }
 
-export interface ClassificationResult {
-  category: string;
-  confidence: number;
-  subcategories: string[];
-  entities: Entity[];
-  intent: string;
-  sentiment: 'positive' | 'negative' | 'neutral';
-  urgency: 'low' | 'medium' | 'high' | 'critical';
-}
+// ClassificationResult è importato da ./ml/classificationEngine
 
 export interface VectorMatch {
   id: string;
@@ -695,12 +687,18 @@ export class UrbanovaOSOrchestrator {
       // 🧠 PRIORITÀ MASSIMA: UserMemoryService per query sui progetti dell'utente
       const userQuery = request.message.content.toLowerCase();
       
+      console.log('🔍 [UrbanovaOS Orchestrator] Analizzando query:', userQuery);
+      
       // Rileva query sui progetti dell'utente (condizione più inclusiva)
-      if (userQuery.includes('progetti') || userQuery.includes('quanto') || userQuery.includes('quanti') || 
+      const isProjectQuery = userQuery.includes('progetti') || userQuery.includes('quanto') || userQuery.includes('quanti') || 
           userQuery.includes('attivi') || userQuery.includes('portafoglio') || userQuery.includes('miei progetti') ||
           userQuery.includes('quanti progetti') || userQuery.includes('quanto progetti') || 
           userQuery.includes('progetti attivi') || userQuery.includes('progetti ho') ||
-          userQuery.includes('nel mio portafoglio') || userQuery.includes('portafoglio progetti')) {
+          userQuery.includes('nel mio portafoglio') || userQuery.includes('portafoglio progetti');
+      
+      console.log('🎯 [UrbanovaOS Orchestrator] È una query sui progetti?', isProjectQuery);
+      
+      if (isProjectQuery) {
         
         console.log('🎯 [UrbanovaOS Orchestrator] Query sui progetti rilevata, chiamando UserMemoryService...');
         

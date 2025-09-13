@@ -271,19 +271,9 @@ export default function FeasibilityAnalysisPage() {
   }
 
   return (
-    <DashboardLayout>
-      {/* Page Header - Apple Style con logo Urbanova */}
+    <DashboardLayout title="Analisi di Fattibilità">
+      {/* Page Header - Apple Style */}
       <div className="mb-6">
-        <div className="flex items-center space-x-4 mb-4">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-semibold text-gray-900">Urbanova</h1>
-            </div>
-          </div>
-        </div>
         <PageHeader
           title="Analisi di Fattibilità"
           subtitle="Valutiamo la fattibilità economica dei progetti immobiliari"
