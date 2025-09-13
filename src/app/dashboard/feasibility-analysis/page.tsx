@@ -271,11 +271,19 @@ export default function FeasibilityAnalysisPage() {
 
   return (
     <DashboardLayout title="Analisi di Fattibilità">
-      {/* Subtitle */}
+      {/* Page Header */}
       <div className="mb-6 px-6">
-        <p className="text-gray-600 text-lg">
-          Valutiamo la fattibilità economica dei progetti immobiliari
-        </p>
+        <div className="flex items-center space-x-4 mb-4">
+          <h1 className="text-2xl font-bold text-gray-900">Analisi di Fattibilità</h1>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+            <Calculator className="w-5 h-5 text-white" />
+          </div>
+          <p className="text-gray-600 text-lg">
+            Valutiamo la fattibilità economica dei progetti immobiliari
+          </p>
+        </div>
         <div className="mt-4">
           <Link
             href="/dashboard/feasibility-analysis/new"

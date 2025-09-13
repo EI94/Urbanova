@@ -192,6 +192,21 @@ export default function DesignCenterPage() {
 
   return (
     <DashboardLayout title="Design Center">
+      {/* Page Header */}
+      <div className="mb-6 px-6">
+        <div className="flex items-center space-x-4 mb-4">
+          <h1 className="text-2xl font-bold text-gray-900">Design Center</h1>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+            <Building className="w-5 h-5 text-white" />
+          </div>
+          <p className="text-gray-600 text-lg">
+            Crea e personalizza i tuoi progetti con i template professionali
+          </p>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto">
         {/* Tabs */}
         <div className="flex items-center justify-between mb-6">

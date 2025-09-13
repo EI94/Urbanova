@@ -32,7 +32,7 @@ import {
   Bot,
   Sparkles,
   MessageCircle,
-  Building2,
+  Search,
 } from 'lucide-react';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -375,7 +375,9 @@ export default function MarketIntelligencePage() {
         <div className="flex justify-between items-start">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <Building2 className="w-5 h-5 text-gray-600" />
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <Search className="w-5 h-5 text-white" />
+              </div>
               <p className="text-gray-600 mt-2">
                 Scopriamo le migliori opportunità di terreni
               </p>
@@ -609,7 +611,7 @@ export default function MarketIntelligencePage() {
                     : 'Avvia Ricerca o Programmala'
                 }
               >
-                <Building2 className="h-4 w-4" />
+                <Search className="h-4 w-4" />
                 {!isOnline
                   ? 'Offline'
                   : searchProgress.phase === 'idle'
