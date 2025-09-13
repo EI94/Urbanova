@@ -95,7 +95,14 @@ export async function POST(request: NextRequest) {
             }
           };
 
-          urbanovaResponse = await urbanovaOSOrchestrator.processRequest(urbanovaRequest);
+          console.log('🚀 [Chat API] Chiamando UrbanovaOS Orchestrator...');
+          try {
+            urbanovaResponse = await urbanovaOSOrchestrator.processRequest(urbanovaRequest);
+            console.log('🚀 [Chat API] UrbanovaOS Response:', urbanovaResponse?.type, urbanovaResponse?.response?.substring(0, 100));
+          } catch (error) {
+            console.error('❌ [Chat API] Errore UrbanovaOS Orchestrator:', error);
+            urbanovaResponse = null;
+          }
 
           if (urbanovaResponse && urbanovaResponse.type === 'success') {
             console.log('✅ [UrbanovaOS] Richiesta processata con successo:', {

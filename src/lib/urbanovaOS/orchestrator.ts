@@ -688,6 +688,7 @@ export class UrbanovaOSOrchestrator {
       const userQuery = request.message.content.toLowerCase();
       
       console.log('🔍 [UrbanovaOS Orchestrator] Analizzando query:', userQuery);
+      console.log('🔍 [UrbanovaOS Orchestrator] Query completa:', request.message.content);
       
       // Rileva query sui progetti dell'utente (condizione più inclusiva)
       const isProjectQuery = userQuery.includes('progetti') || userQuery.includes('quanto') || userQuery.includes('quanti') || 
@@ -1367,6 +1368,7 @@ class CacheManager {
 
     return response;
   }
+
 }
 
 class SecurityManager {
