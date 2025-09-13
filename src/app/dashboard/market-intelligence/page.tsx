@@ -7,7 +7,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 
 import {
-  SearchIcon,
   MailIcon,
   EuroIcon,
   CalendarIcon,
@@ -376,7 +375,10 @@ export default function MarketIntelligencePage() {
         <div className="flex justify-between items-start">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <SearchIcon className="w-5 h-5 text-gray-600" />
+              <h1 className="text-xl font-semibold text-gray-900">Urbanova</h1>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Building2 className="w-5 h-5 text-gray-600" />
               <p className="text-gray-600 mt-2">
                 Scopriamo le migliori opportunità di terreni
               </p>
@@ -610,7 +612,7 @@ export default function MarketIntelligencePage() {
                     : 'Avvia Ricerca o Programmala'
                 }
               >
-                <SearchIcon className="h-4 w-4" />
+                <Building2 className="h-4 w-4" />
                 {!isOnline
                   ? 'Offline'
                   : searchProgress.phase === 'idle'

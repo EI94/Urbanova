@@ -770,7 +770,6 @@ export default function UnifiedDashboardPage() {
                           <Bot className="w-5 h-5 text-white" />
                         </div>
                         <div>
-                          <h2 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Urbanova</h2>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
