@@ -21,6 +21,62 @@ import { UrbanovaOSPluginSystem } from './plugins/pluginSystem';
 // INTERFACCE TYPESCRIPT
 // ============================================================================
 
+// 🧠 SISTEMA DI MEMORIA CONVERSAZIONALE AVANZATO
+export interface ConversationMemory {
+  sessionId: string;
+  userId: string;
+  projectContext: ProjectData | null;
+  previousAnalyses: AnalysisResult[];
+  userPreferences: UserPreferences;
+  conversationFlow: ConversationStep[];
+  lastUpdate: Date;
+  contextVersion: number;
+}
+
+export interface ProjectData {
+  id: string;
+  name: string;
+  landArea: number;
+  buildableArea: number;
+  constructionCostPerSqm: number;
+  purchasePrice: number;
+  targetMargin: number;
+  insuranceRate: number;
+  type: string;
+  parkingSpaces?: number;
+  apartmentArea?: number;
+  location?: string;
+  status: 'draft' | 'active' | 'completed' | 'cancelled';
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface AnalysisResult {
+  id: string;
+  projectId: string;
+  analysisType: 'feasibility' | 'simulation' | 'sensitivity' | 'optimization' | 'risk';
+  parameters: Record<string, any>;
+  results: Record<string, any>;
+  timestamp: Date;
+  confidence: number;
+}
+
+export interface UserPreferences {
+  defaultMargin: number;
+  preferredAnalysisType: string;
+  riskTolerance: 'low' | 'medium' | 'high';
+  marketFocus: string[];
+  notificationSettings: Record<string, boolean>;
+}
+
+export interface ConversationStep {
+  id: string;
+  type: 'user_input' | 'system_response' | 'data_extraction' | 'analysis_generation' | 'simulation_request';
+  content: string;
+  timestamp: Date;
+  metadata: Record<string, any>;
+}
+
 export interface UrbanovaOSRequest {
   sessionId: string;
   userId: string;
@@ -146,6 +202,10 @@ export class UrbanovaOSOrchestrator {
   private cacheManager: CacheManager;
   private securityManager: SecurityManager;
   private metricsCollector: MetricsCollector;
+  
+  // 🧠 SISTEMA DI MEMORIA CONVERSAZIONALE
+  private conversationMemories: Map<string, ConversationMemory> = new Map();
+  private projectContexts: Map<string, ProjectData> = new Map();
 
   constructor() {
     this.classificationEngine = new UrbanovaOSClassificationEngine();
@@ -200,6 +260,26 @@ export class UrbanovaOSOrchestrator {
     try {
       // 🚀 OTTIMIZZAZIONE AGGRESSIVA: Esecuzione parallela per performance
       console.log('⚡ [UrbanovaOS Orchestrator] Avviando processamento parallelo ottimizzato');
+      
+      // 🧠 GESTIONE MEMORIA CONVERSAZIONALE
+      const memory = this.getOrCreateMemory(request.sessionId, request.userId);
+      
+      // Rileva cambiamenti nel contesto conversazionale
+      const contextChanges = this.detectContextChanges(request.message.content, memory);
+      if (contextChanges.hasChanges && contextChanges.newProjectData) {
+        this.handleContextChanges(request.sessionId, contextChanges.changes, contextChanges.newProjectData);
+      }
+      
+      // Aggiungi step conversazione
+      this.addConversationStep(request.sessionId, {
+        type: 'user_input',
+        content: request.message.content,
+        metadata: {
+          userId: request.userId,
+          messageId: request.message.id,
+          contextChanges: contextChanges.changes
+        }
+      });
       
       // 1. VALIDAZIONE E SICUREZZA (parallela con classificazione)
       const [validationResult, classification] = await Promise.all([
@@ -256,6 +336,425 @@ export class UrbanovaOSOrchestrator {
   // ============================================================================
   // METODI PRIVATI
   // ============================================================================
+
+  // 🧠 GESTIONE MEMORIA CONVERSAZIONALE
+  private getOrCreateMemory(sessionId: string, userId: string): ConversationMemory {
+    if (!this.conversationMemories.has(sessionId)) {
+      const memory: ConversationMemory = {
+        sessionId,
+        userId,
+        projectContext: null,
+        previousAnalyses: [],
+        userPreferences: {
+          defaultMargin: 0.25,
+          preferredAnalysisType: 'feasibility',
+          riskTolerance: 'medium',
+          marketFocus: ['residential'],
+          notificationSettings: {}
+        },
+        conversationFlow: [],
+        lastUpdate: new Date(),
+        contextVersion: 1
+      };
+      this.conversationMemories.set(sessionId, memory);
+      console.log('🧠 [UrbanovaOS] Memoria conversazionale creata per sessione:', sessionId);
+    }
+    return this.conversationMemories.get(sessionId)!;
+  }
+
+  private updateProjectContext(sessionId: string, projectData: ProjectData): void {
+    const memory = this.getOrCreateMemory(sessionId, '');
+    memory.projectContext = projectData;
+    memory.lastUpdate = new Date();
+    memory.contextVersion++;
+    
+    // Salva anche nel contesto progetti
+    this.projectContexts.set(projectData.id, projectData);
+    
+    console.log('🏗️ [UrbanovaOS] Contesto progetto aggiornato:', {
+      sessionId,
+      projectId: projectData.id,
+      projectName: projectData.name,
+      contextVersion: memory.contextVersion
+    });
+  }
+
+  private addConversationStep(sessionId: string, step: Omit<ConversationStep, 'id' | 'timestamp'>): void {
+    const memory = this.getOrCreateMemory(sessionId, '');
+    const conversationStep: ConversationStep = {
+      id: `step_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: new Date(),
+      ...step
+    };
+    
+    memory.conversationFlow.push(conversationStep);
+    memory.lastUpdate = new Date();
+    
+    // Mantieni solo gli ultimi 50 step per evitare overflow di memoria
+    if (memory.conversationFlow.length > 50) {
+      memory.conversationFlow = memory.conversationFlow.slice(-50);
+    }
+    
+    console.log('💬 [UrbanovaOS] Step conversazione aggiunto:', {
+      sessionId,
+      stepType: step.type,
+      stepId: conversationStep.id
+    });
+  }
+
+  private addAnalysisResult(sessionId: string, analysis: AnalysisResult): void {
+    const memory = this.getOrCreateMemory(sessionId, '');
+    memory.previousAnalyses.push(analysis);
+    memory.lastUpdate = new Date();
+    
+    // Mantieni solo gli ultimi 20 analisi
+    if (memory.previousAnalyses.length > 20) {
+      memory.previousAnalyses = memory.previousAnalyses.slice(-20);
+    }
+    
+    console.log('📊 [UrbanovaOS] Risultato analisi aggiunto:', {
+      sessionId,
+      analysisType: analysis.analysisType,
+      projectId: analysis.projectId
+    });
+  }
+
+  private detectContextChanges(currentMessage: string, memory: ConversationMemory): {
+    hasChanges: boolean;
+    changes: string[];
+    newProjectData?: Partial<ProjectData>;
+  } {
+    const changes: string[] = [];
+    let newProjectData: Partial<ProjectData> = {};
+    
+    if (!memory.projectContext) {
+      return { hasChanges: false, changes: [] };
+    }
+    
+    const currentProject = memory.projectContext;
+    
+    // Rileva cambiamenti nel nome progetto
+    const namePatterns = [
+      /non voglio più.*?([^,.\n]+)/i,
+      /cambia.*?nome.*?([^,.\n]+)/i,
+      /chiama.*?([^,.\n]+)/i
+    ];
+    
+    for (const pattern of namePatterns) {
+      const match = currentMessage.match(pattern);
+      if (match) {
+        changes.push('nome_progetto');
+        newProjectData.name = match[1].trim();
+        break;
+      }
+    }
+    
+    // Rileva cambiamenti nel tipo progetto
+    if (currentMessage.match(/monofamiliare/i) && currentProject.type !== 'monofamiliare') {
+      changes.push('tipo_progetto');
+      newProjectData.type = 'monofamiliare';
+    }
+    if (currentMessage.match(/bifamiliare/i) && currentProject.type !== 'bifamiliare') {
+      changes.push('tipo_progetto');
+      newProjectData.type = 'bifamiliare';
+    }
+    
+    // Rileva cambiamenti nei costi
+    const costPatterns = [
+      /(\d+)\s*euro per metro quadrato/i,
+      /costo.*?(\d+)\s*euro\/mq/i
+    ];
+    
+    for (const pattern of costPatterns) {
+      const match = currentMessage.match(pattern);
+      if (match) {
+        const newCost = parseInt(match[1]);
+        if (newCost !== currentProject.constructionCostPerSqm) {
+          changes.push('costo_costruzione');
+          newProjectData.constructionCostPerSqm = newCost;
+        }
+        break;
+      }
+    }
+    
+    // Rileva cambiamenti nel prezzo acquisto
+    const pricePatterns = [
+      /acquisto.*?(\d+(?:\.\d+)?)\s*euro/i,
+      /(\d+(?:\.\d+)?)\s*euro.*?acquisto/i
+    ];
+    
+    for (const pattern of pricePatterns) {
+      const match = currentMessage.match(pattern);
+      if (match) {
+        const newPrice = parseFloat(match[1].replace('.', ''));
+        if (newPrice !== currentProject.purchasePrice) {
+          changes.push('prezzo_acquisto');
+          newProjectData.purchasePrice = newPrice;
+        }
+        break;
+      }
+    }
+    
+    return {
+      hasChanges: changes.length > 0,
+      changes,
+      newProjectData: Object.keys(newProjectData).length > 0 ? newProjectData : undefined
+    };
+  }
+
+  private handleContextChanges(sessionId: string, changes: string[], newProjectData: Partial<ProjectData>): void {
+    const memory = this.getOrCreateMemory(sessionId, '');
+    
+    if (memory.projectContext && newProjectData) {
+      // Aggiorna il progetto esistente
+      const updatedProject: ProjectData = {
+        ...memory.projectContext,
+        ...newProjectData,
+        updatedAt: new Date()
+      };
+      
+      this.updateProjectContext(sessionId, updatedProject);
+      
+      console.log('🔄 [UrbanovaOS] Contesto progetto aggiornato per cambiamenti:', {
+        sessionId,
+        changes,
+        updatedFields: Object.keys(newProjectData)
+      });
+    }
+  }
+
+  // 🎯 GESTIONE SIMULAZIONI MULTIPLE
+  private detectSimulationRequest(message: string): {
+    isSimulation: boolean;
+    simulationType: 'sensitivity' | 'what_if' | 'optimization' | 'comparison' | 'multiple';
+    parameters: Record<string, any>;
+  } {
+    const lowerMessage = message.toLowerCase();
+    
+    // Rileva simulazioni di sensibilità
+    if (lowerMessage.includes('cosa succede se') || lowerMessage.includes('se il costo') || 
+        lowerMessage.includes('se il prezzo') || lowerMessage.includes('aumenta del') || 
+        lowerMessage.includes('scende del') || lowerMessage.includes('diminuisce del')) {
+      return {
+        isSimulation: true,
+        simulationType: 'sensitivity',
+        parameters: this.extractSensitivityParameters(message)
+      };
+    }
+    
+    // Rileva what-if analysis
+    if (lowerMessage.includes('dimmi la marginalità se') || lowerMessage.includes('che marginalità') ||
+        lowerMessage.includes('a che prezzo devo vendere') || lowerMessage.includes('per garantire')) {
+      return {
+        isSimulation: true,
+        simulationType: 'what_if',
+        parameters: this.extractWhatIfParameters(message)
+      };
+    }
+    
+    // Rileva ottimizzazione
+    if (lowerMessage.includes('ottimizza') || lowerMessage.includes('massimizza') || 
+        lowerMessage.includes('migliore strategia') || lowerMessage.includes('come posso')) {
+      return {
+        isSimulation: true,
+        simulationType: 'optimization',
+        parameters: {}
+      };
+    }
+    
+    // Rileva confronti
+    if (lowerMessage.includes('confronta') || lowerMessage.includes('rispetto a') || 
+        lowerMessage.includes('vs') || lowerMessage.includes('differenza')) {
+      return {
+        isSimulation: true,
+        simulationType: 'comparison',
+        parameters: {}
+      };
+    }
+    
+    // Rileva simulazioni multiple
+    if (lowerMessage.includes('fammi') && (lowerMessage.includes('scenari') || lowerMessage.includes('simulazioni'))) {
+      return {
+        isSimulation: true,
+        simulationType: 'multiple',
+        parameters: this.extractMultipleScenariosParameters(message)
+      };
+    }
+    
+    return { isSimulation: false, simulationType: 'sensitivity', parameters: {} };
+  }
+
+  private extractSensitivityParameters(message: string): Record<string, any> {
+    const params: Record<string, any> = {};
+    
+    // Estrai variazioni percentuali
+    const percentageMatch = message.match(/(\d+(?:\.\d+)?)%/g);
+    if (percentageMatch) {
+      params.percentageChanges = percentageMatch.map(p => parseFloat(p));
+    }
+    
+    // Estrai parametri specifici
+    if (message.match(/costo costruzione/i)) params.parameter = 'construction_cost';
+    if (message.match(/prezzo vendita/i)) params.parameter = 'selling_price';
+    if (message.match(/prezzo acquisto/i)) params.parameter = 'purchase_price';
+    
+    return params;
+  }
+
+  private extractWhatIfParameters(message: string): Record<string, any> {
+    const params: Record<string, any> = {};
+    
+    // Estrai target marginalità
+    const marginMatch = message.match(/(\d+(?:\.\d+)?)%\s*di marginalità/i);
+    if (marginMatch) {
+      params.targetMargin = parseFloat(marginMatch[1]) / 100;
+    }
+    
+    // Estrai prezzo acquisto specifico
+    const priceMatch = message.match(/(\d+(?:\.\d+)?)\s*euro/i);
+    if (priceMatch) {
+      params.purchasePrice = parseFloat(priceMatch[1].replace('.', ''));
+    }
+    
+    return params;
+  }
+
+  private extractMultipleScenariosParameters(message: string): Record<string, any> {
+    const params: Record<string, any> = {};
+    
+    // Estrai numero di scenari
+    const scenarioMatch = message.match(/(\d+)\s*scenari/i);
+    if (scenarioMatch) {
+      params.scenarioCount = parseInt(scenarioMatch[1]);
+    }
+    
+    return params;
+  }
+
+  private async generateSimulationAnalysis(
+    projectData: ProjectData,
+    simulationType: string,
+    parameters: Record<string, any>,
+    request: UrbanovaOSRequest
+  ): Promise<string> {
+    console.log('🎯 [UrbanovaOS] Generando simulazione:', { simulationType, parameters });
+    
+    let analysis = `# 🎯 Simulazione ${simulationType.toUpperCase()} - ${projectData.name}\n\n`;
+    
+    switch (simulationType) {
+      case 'sensitivity':
+        analysis += await this.generateSensitivityAnalysis(projectData, parameters);
+        break;
+      case 'what_if':
+        analysis += await this.generateWhatIfAnalysis(projectData, parameters);
+        break;
+      case 'optimization':
+        analysis += await this.generateOptimizationAnalysis(projectData, parameters);
+        break;
+      case 'comparison':
+        analysis += await this.generateComparisonAnalysis(projectData, parameters);
+        break;
+      case 'multiple':
+        analysis += await this.generateMultipleScenariosAnalysis(projectData, parameters);
+        break;
+      default:
+        analysis += 'Tipo di simulazione non riconosciuto.';
+    }
+    
+    return analysis;
+  }
+
+  private async generateSensitivityAnalysis(projectData: ProjectData, parameters: Record<string, any>): Promise<string> {
+    const baseAnalysis = await this.generateFeasibilityAnalysis(projectData, { message: { content: '' } } as any);
+    
+    let analysis = '## 📊 Analisi di Sensibilità\n\n';
+    analysis += '**Scenario Base:**\n';
+    analysis += baseAnalysis + '\n\n';
+    
+    if (parameters.percentageChanges && parameters.parameter) {
+      analysis += '**Variazioni:**\n';
+      parameters.percentageChanges.forEach((change: number) => {
+        analysis += `- ${parameters.parameter}: ${change > 0 ? '+' : ''}${change}%\n`;
+      });
+    }
+    
+    return analysis;
+  }
+
+  private async generateWhatIfAnalysis(projectData: ProjectData, parameters: Record<string, any>): Promise<string> {
+    let analysis = '## 🎯 Analisi What-If\n\n';
+    
+    if (parameters.targetMargin) {
+      const requiredRevenue = (projectData.purchasePrice + (projectData.buildableArea * projectData.constructionCostPerSqm * 1.015)) / (1 - parameters.targetMargin);
+      const pricePerSqm = requiredRevenue / projectData.buildableArea;
+      
+      analysis += `**Per ottenere una marginalità del ${(parameters.targetMargin * 100).toFixed(1)}%:**\n`;
+      analysis += `- Ricavo necessario: €${requiredRevenue.toLocaleString()}\n`;
+      analysis += `- Prezzo per m²: €${pricePerSqm.toLocaleString()}\n`;
+    }
+    
+    if (parameters.purchasePrice) {
+      const newProject = { ...projectData, purchasePrice: parameters.purchasePrice };
+      const newAnalysis = await this.generateFeasibilityAnalysis(newProject, { message: { content: '' } } as any);
+      analysis += `\n**Con prezzo acquisto di €${parameters.purchasePrice.toLocaleString()}:**\n`;
+      analysis += newAnalysis;
+    }
+    
+    return analysis;
+  }
+
+  private async generateOptimizationAnalysis(projectData: ProjectData, parameters: Record<string, any>): Promise<string> {
+    let analysis = '## 🚀 Strategia di Ottimizzazione\n\n';
+    
+    analysis += '**Raccomandazioni per massimizzare il profitto:**\n\n';
+    analysis += '1. **Ottimizzazione Costi:**\n';
+    analysis += `   - Riduci costo costruzione del 5-10%: €${(projectData.constructionCostPerSqm * 0.9).toLocaleString()}/m²\n`;
+    analysis += `   - Risparmio potenziale: €${(projectData.buildableArea * projectData.constructionCostPerSqm * 0.1).toLocaleString()}\n\n`;
+    
+    analysis += '2. **Ottimizzazione Prezzi:**\n';
+    analysis += `   - Prezzo target per m²: €${((projectData.purchasePrice + projectData.buildableArea * projectData.constructionCostPerSqm * 1.015) / (1 - projectData.targetMargin) / projectData.buildableArea).toLocaleString()}\n\n`;
+    
+    analysis += '3. **Strategia di Vendita:**\n';
+    analysis += '   - Fase 1: Vendi 70% a prezzo premium\n';
+    analysis += '   - Fase 2: Vendi 30% a prezzo competitivo\n';
+    
+    return analysis;
+  }
+
+  private async generateComparisonAnalysis(projectData: ProjectData, parameters: Record<string, any>): Promise<string> {
+    let analysis = '## 📈 Analisi Comparativa\n\n';
+    
+    analysis += '**Confronto con mercato:**\n';
+    analysis += `- Prezzo medio mercato: €3,500/m²\n`;
+    analysis += `- Il tuo prezzo target: €${((projectData.purchasePrice + projectData.buildableArea * projectData.constructionCostPerSqm * 1.015) / (1 - projectData.targetMargin) / projectData.buildableArea).toLocaleString()}/m²\n`;
+    analysis += `- Differenziale: ${(((projectData.purchasePrice + projectData.buildableArea * projectData.constructionCostPerSqm * 1.015) / (1 - projectData.targetMargin) / projectData.buildableArea) - 3500) > 0 ? '+' : ''}€${(((projectData.purchasePrice + projectData.buildableArea * projectData.constructionCostPerSqm * 1.015) / (1 - projectData.targetMargin) / projectData.buildableArea) - 3500).toLocaleString()}/m²\n`;
+    
+    return analysis;
+  }
+
+  private async generateMultipleScenariosAnalysis(projectData: ProjectData, parameters: Record<string, any>): Promise<string> {
+    let analysis = '## 🎭 Scenari Multipli\n\n';
+    
+    const scenarios = [
+      { name: 'Scenario Conservativo', margin: projectData.targetMargin * 0.8, cost: projectData.constructionCostPerSqm * 1.1 },
+      { name: 'Scenario Base', margin: projectData.targetMargin, cost: projectData.constructionCostPerSqm },
+      { name: 'Scenario Ottimistico', margin: projectData.targetMargin * 1.2, cost: projectData.constructionCostPerSqm * 0.9 }
+    ];
+    
+    scenarios.forEach((scenario, index) => {
+      const requiredRevenue = (projectData.purchasePrice + (projectData.buildableArea * scenario.cost * 1.015)) / (1 - scenario.margin);
+      const pricePerSqm = requiredRevenue / projectData.buildableArea;
+      const profit = requiredRevenue - (projectData.purchasePrice + projectData.buildableArea * scenario.cost * 1.015);
+      
+      analysis += `### ${index + 1}. ${scenario.name}\n`;
+      analysis += `- Marginalità: ${(scenario.margin * 100).toFixed(1)}%\n`;
+      analysis += `- Costo costruzione: €${scenario.cost.toLocaleString()}/m²\n`;
+      analysis += `- Prezzo vendita: €${pricePerSqm.toLocaleString()}/m²\n`;
+      analysis += `- Profitto: €${profit.toLocaleString()}\n\n`;
+    });
+    
+    return analysis;
+  }
 
   private extractFeasibilityData(message: string): any {
     // Estrae dati di fattibilità dal messaggio dell'utente
@@ -988,15 +1487,19 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
     workflowResults: any[],
     pluginResults: any[]
   ): Promise<{ content: string | null; usedUserMemory: boolean }> {
-    console.log('🧠 [UrbanovaOS Orchestrator] Generando contenuto risposta con UserMemoryService');
+    console.log('🧠 [UrbanovaOS Orchestrator] Generando contenuto risposta con memoria conversazionale');
     
     try {
-      // 🧠 PRIORITÀ MASSIMA: UserMemoryService per query sui progetti dell'utente
+      // 🧠 GESTIONE MEMORIA CONVERSAZIONALE
+      const memory = this.getOrCreateMemory(request.sessionId, request.userId);
       const userQuery = request.message.content.toLowerCase();
       
-      console.log('🔍 [UrbanovaOS Orchestrator] Analizzando query:', userQuery);
-      console.log('🔍 [UrbanovaOS Orchestrator] Query completa:', request.message.content);
-      console.log('🔍 [UrbanovaOS Orchestrator] Contenuto messaggio:', request.message.content.substring(0, 100));
+      console.log('🔍 [UrbanovaOS Orchestrator] Analizzando query con memoria:', {
+        sessionId: request.sessionId,
+        hasProjectContext: !!memory.projectContext,
+        previousAnalyses: memory.previousAnalyses.length,
+        conversationSteps: memory.conversationFlow.length
+      });
       
       // Rileva query sui progetti dell'utente (condizione più inclusiva)
       const isProjectQuery = userQuery.includes('progetti') || userQuery.includes('quanto') || userQuery.includes('quanti') || 
@@ -1097,28 +1600,140 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
         }
       }
       
-      // 🏗️ GESTIONE ANALISI DI FATTIBILITÀ
+      // 🏗️ GESTIONE ANALISI DI FATTIBILITÀ CON MEMORIA CONVERSAZIONALE
       if (isFeasibilityQuery) {
         console.log('🏗️ [UrbanovaOS Orchestrator] Richiesta di analisi di fattibilità rilevata!');
+        
+        // 🎯 RILEVA SIMULAZIONI
+        const simulationRequest = this.detectSimulationRequest(request.message.content);
+        console.log('🎯 [UrbanovaOS] Rilevata simulazione:', simulationRequest);
         
         // Estrai parametri dal messaggio
         const feasibilityData = this.extractFeasibilityData(request.message.content);
         
-        // Controlla se abbiamo dati sufficienti per l'analisi
-        const hasRequiredData = feasibilityData.name && feasibilityData.buildableArea && 
-                               feasibilityData.constructionCostPerSqm && feasibilityData.purchasePrice && 
-                               feasibilityData.targetMargin;
+        // 🧠 GESTIONE CONTESTO PROGETTO CON MEMORIA
+        let projectData: ProjectData | null = null;
         
-        if (hasRequiredData) {
+        // Se abbiamo un contesto progetto esistente, usalo come base
+        if (memory.projectContext) {
+          console.log('🏗️ [UrbanovaOS] Usando contesto progetto esistente:', memory.projectContext.name);
+          projectData = { ...memory.projectContext };
+          
+          // Aggiorna con i nuovi dati se forniti
+          if (feasibilityData.name) projectData.name = feasibilityData.name;
+          if (feasibilityData.landArea) projectData.landArea = feasibilityData.landArea;
+          if (feasibilityData.buildableArea) projectData.buildableArea = feasibilityData.buildableArea;
+          if (feasibilityData.constructionCostPerSqm) projectData.constructionCostPerSqm = feasibilityData.constructionCostPerSqm;
+          if (feasibilityData.purchasePrice) projectData.purchasePrice = feasibilityData.purchasePrice;
+          if (feasibilityData.targetMargin) projectData.targetMargin = feasibilityData.targetMargin;
+          if (feasibilityData.type) projectData.type = feasibilityData.type;
+          if (feasibilityData.insuranceRate) projectData.insuranceRate = feasibilityData.insuranceRate;
+          
+          projectData.updatedAt = new Date();
+        } else if (feasibilityData.name && feasibilityData.buildableArea && 
+                   feasibilityData.constructionCostPerSqm && feasibilityData.purchasePrice && 
+                   feasibilityData.targetMargin) {
+          // Crea nuovo progetto se abbiamo tutti i dati necessari
+          projectData = {
+            id: `project_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            name: feasibilityData.name,
+            landArea: feasibilityData.landArea || 0,
+            buildableArea: feasibilityData.buildableArea,
+            constructionCostPerSqm: feasibilityData.constructionCostPerSqm,
+            purchasePrice: feasibilityData.purchasePrice,
+            targetMargin: feasibilityData.targetMargin,
+            insuranceRate: feasibilityData.insuranceRate || 0.015,
+            type: feasibilityData.type || 'residenziale',
+            parkingSpaces: feasibilityData.parkingSpaces,
+            apartmentArea: feasibilityData.apartmentArea,
+            location: feasibilityData.location,
+            status: 'draft',
+            createdAt: new Date(),
+            updatedAt: new Date()
+          };
+        }
+        
+        // Controlla se abbiamo dati sufficienti per l'analisi
+        const hasRequiredData = projectData && projectData.buildableArea && 
+                               projectData.constructionCostPerSqm && projectData.purchasePrice && 
+                               projectData.targetMargin;
+        
+        if (hasRequiredData && projectData) {
           console.log('📊 [UrbanovaOS Orchestrator] Dati fattibilità completi, generando analisi smart...');
           
-          // Genera analisi di fattibilità smart
-          const feasibilityAnalysis = await this.generateFeasibilityAnalysis(feasibilityData, request);
+          // Aggiorna il contesto progetto nella memoria
+          this.updateProjectContext(request.sessionId, projectData);
           
-          return { content: feasibilityAnalysis, usedUserMemory: true };
+          let analysisContent: string;
+          let analysisType: string;
+          
+          // 🎯 GESTIONE SIMULAZIONI
+          if (simulationRequest.isSimulation) {
+            console.log('🎯 [UrbanovaOS] Generando simulazione:', simulationRequest.simulationType);
+            analysisContent = await this.generateSimulationAnalysis(
+              projectData, 
+              simulationRequest.simulationType, 
+              simulationRequest.parameters, 
+              request
+            );
+            analysisType = simulationRequest.simulationType;
+          } else {
+            // Genera analisi di fattibilità standard
+            analysisContent = await this.generateFeasibilityAnalysis(projectData, request);
+            analysisType = 'feasibility';
+          }
+          
+          // Salva il risultato dell'analisi nella memoria
+          const analysisResult: AnalysisResult = {
+            id: `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            projectId: projectData.id,
+            analysisType: analysisType as any,
+            parameters: {
+              buildableArea: projectData.buildableArea,
+              constructionCostPerSqm: projectData.constructionCostPerSqm,
+              purchasePrice: projectData.purchasePrice,
+              targetMargin: projectData.targetMargin,
+              insuranceRate: projectData.insuranceRate,
+              simulationType: simulationRequest.isSimulation ? simulationRequest.simulationType : undefined,
+              simulationParameters: simulationRequest.isSimulation ? simulationRequest.parameters : undefined
+            },
+            results: {
+              analysis: analysisContent,
+              timestamp: new Date()
+            },
+            timestamp: new Date(),
+            confidence: 0.95
+          };
+          
+          this.addAnalysisResult(request.sessionId, analysisResult);
+          
+          // Aggiungi step conversazione
+          this.addConversationStep(request.sessionId, {
+            type: simulationRequest.isSimulation ? 'simulation_request' : 'analysis_generation',
+            content: `${simulationRequest.isSimulation ? 'Simulazione' : 'Analisi di fattibilità'} generata per progetto: ${projectData.name}`,
+            metadata: {
+              projectId: projectData.id,
+              analysisId: analysisResult.id,
+              analysisType: analysisType,
+              simulationType: simulationRequest.isSimulation ? simulationRequest.simulationType : undefined
+            }
+          });
+          
+          return { content: analysisContent, usedUserMemory: true };
         } else {
           // Chiedi informazioni mancanti
           const missingInfoResponse = this.generateMissingInfoResponse(feasibilityData);
+          
+          // Aggiungi step conversazione
+          this.addConversationStep(request.sessionId, {
+            type: 'data_extraction',
+            content: 'Richiesta informazioni mancanti per analisi di fattibilità',
+            metadata: {
+              missingFields: Object.keys(feasibilityData).filter(key => !feasibilityData[key]),
+              extractedData: feasibilityData
+            }
+          });
+          
           return { content: missingInfoResponse, usedUserMemory: true };
         }
       }
