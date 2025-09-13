@@ -963,7 +963,7 @@ export default function UnifiedDashboardPage() {
                         onChange={e => setInputValue(e.target.value)}
                         onKeyPress={handleKeyPress}
                         placeholder="Chiedi qualcosa..."
-                        className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm input-box"
                         disabled={isLoading}
                       />
                       <button
@@ -979,52 +979,52 @@ export default function UnifiedDashboardPage() {
 
                 {/* Quick Stats - Compact */}
                 <div className="grid grid-cols-4 gap-3">
-                  <div className="bg-white rounded-lg shadow p-3 border border-gray-200">
+                  <div className="bg-white rounded-lg shadow p-3 border border-gray-200 kpi-card">
                     <div className="flex items-center">
-                      <div className="p-1.5 bg-blue-100 rounded-lg">
+                      <div className="p-1.5 bg-blue-100 rounded-lg kpi-card-icon">
                         <BuildingIcon className="h-4 w-4 text-blue-600" />
                       </div>
                       <div className="ml-2">
-                        <p className="text-xs font-medium text-gray-600">Progetti</p>
-                        <p className="text-sm font-bold text-gray-900">{stats?.totalProjects || 0}</p>
+                        <p className="text-xs font-medium text-gray-600 kpi-card-text">Progetti</p>
+                        <p className="text-sm font-bold text-gray-900 kpi-card-value">{stats?.totalProjects || 0}</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-lg shadow p-3 border border-gray-200">
+                  <div className="bg-white rounded-lg shadow p-3 border border-gray-200 kpi-card">
                     <div className="flex items-center">
-                      <div className="p-1.5 bg-green-100 rounded-lg">
+                      <div className="p-1.5 bg-green-100 rounded-lg kpi-card-icon">
                         <TrendingUpIcon className="h-4 w-4 text-green-600" />
                       </div>
                       <div className="ml-2">
-                        <p className="text-xs font-medium text-gray-600">Attivi</p>
-                        <p className="text-sm font-bold text-gray-900">{stats?.activeProjects || 0}</p>
+                        <p className="text-xs font-medium text-gray-600 kpi-card-text">Attivi</p>
+                        <p className="text-sm font-bold text-gray-900 kpi-card-value">{stats?.activeProjects || 0}</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-lg shadow p-3 border border-gray-200">
+                  <div className="bg-white rounded-lg shadow p-3 border border-gray-200 kpi-card">
                     <div className="flex items-center">
-                      <div className="p-1.5 bg-yellow-100 rounded-lg">
+                      <div className="p-1.5 bg-yellow-100 rounded-lg kpi-card-icon">
                         <EuroIcon className="h-4 w-4 text-yellow-600" />
                       </div>
                       <div className="ml-2">
-                        <p className="text-xs font-medium text-gray-600">Budget</p>
-                        <p className="text-sm font-bold text-gray-900">
+                        <p className="text-xs font-medium text-gray-600 kpi-card-text">Budget</p>
+                        <p className="text-sm font-bold text-gray-900 kpi-card-value">
                           €{((stats?.totalBudget || 0) / 1000000).toFixed(1)}M
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-lg shadow p-3 border border-gray-200">
+                  <div className="bg-white rounded-lg shadow p-3 border border-gray-200 kpi-card">
                     <div className="flex items-center">
-                      <div className="p-1.5 bg-purple-100 rounded-lg">
+                      <div className="p-1.5 bg-purple-100 rounded-lg kpi-card-icon">
                         <TrendingUpIcon className="h-4 w-4 text-purple-600" />
                       </div>
                       <div className="ml-2">
-                        <p className="text-xs font-medium text-gray-600">ROI</p>
-                        <p className="text-sm font-bold text-gray-900">
+                        <p className="text-xs font-medium text-gray-600 kpi-card-text">ROI</p>
+                        <p className="text-sm font-bold text-gray-900 kpi-card-value">
                           {stats?.averageROI?.toFixed(1) || 0}%
                         </p>
                       </div>
@@ -1098,7 +1098,7 @@ export default function UnifiedDashboardPage() {
                         onChange={e => setInputValue(e.target.value)}
                         onKeyPress={handleKeyPress}
                         placeholder="Chiedi qualcosa..."
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent input-box"
                         disabled={isLoading}
                       />
                       <button

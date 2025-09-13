@@ -135,15 +135,15 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
 
       <div className="flex">
       {/* Sidebar */}
-        <div className="w-64 bg-white shadow-sm border-r min-h-screen">
+        <div className="w-64 bg-white shadow-sm border-r min-h-screen sidebar">
           {/* Sidebar Header - Apple Style */}
           <div className="px-6 py-6 border-b border-gray-100">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center logo-container">
+                <Building2 className="w-5 h-5 text-white logo-icon" />
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">Urbanova</h1>
+                <h1 className="text-xl font-semibold text-gray-900 logo-text">Urbanova</h1>
               </div>
             </div>
           </div>
@@ -152,14 +152,14 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
             <nav className="space-y-2">
             {/* Sezione principale */}
               <div className="space-y-1">
-                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <h3 className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider sidebar-section-title">
                   DASHBOARD
                 </h3>
                 <Link
                   href="/dashboard"
-                  className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                  className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 sidebar-item ${
                     isActive('/dashboard')
-                      ? 'bg-blue-50 text-blue-700 shadow-sm'
+                      ? 'bg-blue-50 text-blue-700 shadow-sm active'
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
@@ -341,7 +341,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
           {/* Header con icone */}
-          <header className="bg-white border-b border-gray-200 px-6 py-4">
+          <header className="bg-white border-b border-gray-200 px-6 py-4 header">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 {/* Titolo per tutte le pagine */}
@@ -352,7 +352,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                 {/* Notifiche */}
               <button
                   onClick={() => setNotificationsOpen(!notificationsOpen)}
-                  className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
+                  className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100 header-icon"
                   title="Notifiche"
               >
                 <Bell className="w-5 h-5" />
@@ -366,7 +366,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                 {/* Profilo Utente */}
                 <button 
                   onClick={() => setProfileOpen(!profileOpen)}
-                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
+                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100 header-icon"
                   title="Profilo Utente"
                 >
                   <User className="w-5 h-5" />
@@ -375,7 +375,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                 {/* Team */}
                 <button
                   onClick={() => setTeamOpen(!teamOpen)}
-                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
+                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100 header-icon"
                   title="Team"
                 >
                   <Users className="w-5 h-5" />
@@ -384,7 +384,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                 {/* Settings */}
                 <button
                   onClick={() => setSettingsOpen(!settingsOpen)}
-                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
+                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100 header-icon"
                   title="Impostazioni"
                 >
                   <Settings className="w-5 h-5" />

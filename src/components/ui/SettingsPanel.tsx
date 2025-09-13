@@ -56,9 +56,9 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto settings-panel">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Impostazioni</h2>
+          <h2 className="text-lg font-semibold text-gray-900 settings-title">Impostazioni</h2>
           <button
             onClick={onClose}
             className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
@@ -71,7 +71,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           {/* Aspetto */}
           <div className="space-y-3">
             <h4 className="font-medium text-gray-900">Aspetto</h4>
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg settings-section">
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
                   <Moon className="w-4 h-4 text-white" />
@@ -100,8 +100,8 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           <div className="space-y-3">
             <h4 className="font-medium text-gray-900">Notifiche</h4>
             <div className="space-y-2">
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm text-gray-700">Notifiche Email</span>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg settings-section">
+                  <span className="text-sm text-gray-700 settings-text">Notifiche Email</span>
                 <input 
                   type="checkbox" 
                   checked={notifications.email}
@@ -109,8 +109,8 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                   className="rounded" 
                 />
               </div>
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm text-gray-700">Notifiche Push</span>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg settings-section">
+                  <span className="text-sm text-gray-700 settings-text">Notifiche Push</span>
                 <input 
                   type="checkbox" 
                   checked={notifications.push}
@@ -118,8 +118,8 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                   className="rounded" 
                 />
               </div>
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm text-gray-700">Aggiornamenti Progetti</span>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg settings-section">
+                  <span className="text-sm text-gray-700 settings-text">Aggiornamenti Progetti</span>
                 <input 
                   type="checkbox" 
                   checked={notifications.projectUpdates}
@@ -134,8 +134,8 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           <div className="space-y-3">
             <h4 className="font-medium text-gray-900">Privacy</h4>
             <div className="space-y-2">
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm text-gray-700">Profilo Pubblico</span>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg settings-section">
+                  <span className="text-sm text-gray-700 settings-text">Profilo Pubblico</span>
                 <input 
                   type="checkbox" 
                   checked={privacy.publicProfile}
@@ -143,8 +143,8 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                   className="rounded" 
                 />
               </div>
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm text-gray-700">Condivisione Dati</span>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg settings-section">
+                  <span className="text-sm text-gray-700 settings-text">Condivisione Dati</span>
                 <input 
                   type="checkbox" 
                   checked={privacy.dataSharing}
