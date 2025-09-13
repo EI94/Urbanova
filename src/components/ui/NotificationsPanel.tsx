@@ -30,12 +30,38 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
   useEffect(() => {
     if (isOpen && currentUser) {
       loadNotifications();
-      // Crea notifica di benvenuto se è il primo accesso
+      // Crea notifiche demo se non ci sono notifiche
       if (notifications.length === 0) {
-        firebaseNotificationService.createWelcomeNotification(userId);
+        createDemoNotifications();
       }
     }
   }, [isOpen, currentUser]);
+
+  const createDemoNotifications = async () => {
+    try {
+      // Crea notifica di benvenuto
+      await firebaseNotificationService.createWelcomeNotification(userId);
+      
+      // Crea notifiche demo per testare il sistema
+      const response = await fetch('/api/notifications/demo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId }),
+      });
+
+      if (response.ok) {
+        console.log('✅ Notifiche demo create');
+        // Ricarica le notifiche dopo averle create
+        setTimeout(() => {
+          loadNotifications();
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('❌ Errore creazione notifiche demo:', error);
+    }
+  };
 
   // Rimuovo il listener per ora - Firebase ha real-time updates nativi
   // useEffect(() => {

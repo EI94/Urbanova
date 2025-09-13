@@ -9,10 +9,10 @@ import {doc,
   orderBy,
   limit as firestoreLimit,
   serverTimestamp,
-  Timestamp } from 'firebase/firestore';
+  Timestamp,
+  collection } from 'firebase/firestore';
 
-import { db } from './firebase';
-import { safeCollection } from './firebaseUtils';
+import { db } from './firebase.ts';
 
 // Tipi per le notifiche
 export interface Notification {
@@ -108,7 +108,7 @@ class FirebaseNotificationService {
         updatedAt: serverTimestamp(),
       };
 
-      const docRef = await addDoc(safeCollection('notifications'), notificationData);
+      const docRef = await addDoc(collection(db, 'notifications'), notificationData);
 
       const notification: Notification = {
         id: docRef.id,
@@ -146,7 +146,7 @@ class FirebaseNotificationService {
       const { limit = 50, unreadOnly = false, type, priority } = options;
 
       let q = query(
-        safeCollection('notifications'),
+        collection(db, 'notifications'),
         where('userId', '==', userId),
         orderBy('createdAt', 'desc')
       );
@@ -204,7 +204,7 @@ class FirebaseNotificationService {
   async markAllAsRead(userId: string): Promise<void> {
     try {
       const q = query(
-        safeCollection('notifications'),
+        collection(db, 'notifications'),
         where('userId', '==', userId),
         where('isRead', '==', false)
       );
@@ -254,13 +254,13 @@ class FirebaseNotificationService {
   async getNotificationStats(userId: string): Promise<NotificationStats> {
     try {
       // Total count
-      const totalQuery = query(safeCollection('notifications'), where('userId', '==', userId));
+      const totalQuery = query(collection(db, 'notifications'), where('userId', '==', userId));
       const totalSnapshot = await getDocs(totalQuery);
       const total = totalSnapshot.size;
 
       // Unread count
       const unreadQuery = query(
-        safeCollection('notifications'),
+        collection(db, 'notifications'),
         where('userId', '==', userId),
         where('isRead', '==', false)
       );
@@ -269,7 +269,7 @@ class FirebaseNotificationService {
 
       // Read count
       const readQuery = query(
-        safeCollection('notifications'),
+        collection(db, 'notifications'),
         where('userId', '==', userId),
         where('isRead', '==', true)
       );
@@ -278,7 +278,7 @@ class FirebaseNotificationService {
 
       // Dismissed count
       const dismissedQuery = query(
-        safeCollection('notifications'),
+        collection(db, 'notifications'),
         where('userId', '==', userId),
         where('isDismissed', '==', true)
       );
@@ -286,7 +286,7 @@ class FirebaseNotificationService {
       const dismissed = dismissedSnapshot.size;
 
       // Count by type
-      const typeQuery = query(safeCollection('notifications'), where('userId', '==', userId));
+      const typeQuery = query(collection(db, 'notifications'), where('userId', '==', userId));
       const typeSnapshot = await getDocs(typeQuery);
       const byType: Record<string, number> = {};
       typeSnapshot.docs.forEach(doc => {
@@ -296,7 +296,7 @@ class FirebaseNotificationService {
       });
 
       // Count by priority
-      const priorityQuery = query(safeCollection('notifications'), where('userId', '==', userId));
+      const priorityQuery = query(collection(db, 'notifications'), where('userId', '==', userId));
       const prioritySnapshot = await getDocs(priorityQuery);
       const byPriority: Record<string, number> = {};
       prioritySnapshot.docs.forEach(doc => {
@@ -461,6 +461,253 @@ class FirebaseNotificationService {
       message:
         'Il tuo account è stato creato con successo. Inizia a esplorare le funzionalità della piattaforma.',
       data: { action: 'welcome' },
+    });
+  }
+
+  // ========================================
+  // NOTIFICHE REALI PER EVENTI SPECIFICI
+  // ========================================
+
+  async createWorkspaceInviteNotification(
+    userId: string, 
+    workspaceName: string, 
+    inviterName: string
+  ): Promise<Notification> {
+    return this.createNotification({
+      userId,
+      type: 'PROJECT',
+      priority: 'HIGH',
+      title: 'Invito al Workspace',
+      message: `${inviterName} ti ha invitato a far parte del workspace "${workspaceName}"`,
+      data: { 
+        action: 'workspace_invite',
+        workspaceName,
+        inviterName
+      },
+      actions: [
+        {
+          type: 'accept',
+          label: 'Accetta',
+          url: '/dashboard/workspace/invites'
+        },
+        {
+          type: 'decline',
+          label: 'Rifiuta',
+          url: '/dashboard/workspace/invites'
+        }
+      ]
+    });
+  }
+
+  async createFileSharedNotification(
+    userId: string,
+    fileName: string,
+    sharerName: string,
+    projectName: string
+  ): Promise<Notification> {
+    return this.createNotification({
+      userId,
+      type: 'PROJECT',
+      priority: 'MEDIUM',
+      title: 'File Condiviso',
+      message: `${sharerName} ha condiviso il file "${fileName}" nel progetto "${projectName}"`,
+      data: { 
+        action: 'file_shared',
+        fileName,
+        sharerName,
+        projectName
+      },
+      actions: [
+        {
+          type: 'view',
+          label: 'Visualizza File',
+          url: '/dashboard/projects/files'
+        }
+      ]
+    });
+  }
+
+  async createProjectUpdateNotification(
+    userId: string,
+    projectName: string,
+    updateType: string,
+    updaterName: string
+  ): Promise<Notification> {
+    return this.createNotification({
+      userId,
+      type: 'PROJECT',
+      priority: 'MEDIUM',
+      title: 'Progetto Aggiornato',
+      message: `${updaterName} ha ${updateType} il progetto "${projectName}"`,
+      data: { 
+        action: 'project_update',
+        projectName,
+        updateType,
+        updaterName
+      },
+      actions: [
+        {
+          type: 'view',
+          label: 'Visualizza Progetto',
+          url: '/dashboard/projects'
+        }
+      ]
+    });
+  }
+
+  async createCollaborationRequestNotification(
+    userId: string,
+    projectName: string,
+    requesterName: string
+  ): Promise<Notification> {
+    return this.createNotification({
+      userId,
+      type: 'PROJECT',
+      priority: 'HIGH',
+      title: 'Richiesta Collaborazione',
+      message: `${requesterName} vuole collaborare al progetto "${projectName}"`,
+      data: { 
+        action: 'collaboration_request',
+        projectName,
+        requesterName
+      },
+      actions: [
+        {
+          type: 'accept',
+          label: 'Accetta',
+          url: '/dashboard/collaborations'
+        },
+        {
+          type: 'decline',
+          label: 'Rifiuta',
+          url: '/dashboard/collaborations'
+        }
+      ]
+    });
+  }
+
+  async createFeasibilityAnalysisCompleteNotification(
+    userId: string,
+    projectName: string,
+    analysisId: string
+  ): Promise<Notification> {
+    return this.createNotification({
+      userId,
+      type: 'SUCCESS',
+      priority: 'MEDIUM',
+      title: 'Analisi di Fattibilità Completata',
+      message: `L'analisi di fattibilità per "${projectName}" è stata completata`,
+      data: { 
+        action: 'feasibility_complete',
+        projectName,
+        analysisId
+      },
+      actions: [
+        {
+          type: 'view',
+          label: 'Visualizza Risultati',
+          url: `/dashboard/feasibility-analysis/${analysisId}`
+        }
+      ]
+    });
+  }
+
+  async createBusinessPlanReadyNotification(
+    userId: string,
+    projectName: string,
+    planId: string
+  ): Promise<Notification> {
+    return this.createNotification({
+      userId,
+      type: 'SUCCESS',
+      priority: 'MEDIUM',
+      title: 'Business Plan Pronto',
+      message: `Il Business Plan per "${projectName}" è stato generato ed è pronto per la revisione`,
+      data: { 
+        action: 'business_plan_ready',
+        projectName,
+        planId
+      },
+      actions: [
+        {
+          type: 'view',
+          label: 'Visualizza Business Plan',
+          url: `/dashboard/business-plan/${planId}`
+        }
+      ]
+    });
+  }
+
+  async createMarketIntelligenceUpdateNotification(
+    userId: string,
+    location: string,
+    newOpportunities: number
+  ): Promise<Notification> {
+    return this.createNotification({
+      userId,
+      type: 'INFO',
+      priority: 'LOW',
+      title: 'Nuove Opportunità di Mercato',
+      message: `Trovate ${newOpportunities} nuove opportunità immobiliari a ${location}`,
+      data: { 
+        action: 'market_update',
+        location,
+        newOpportunities
+      },
+      actions: [
+        {
+          type: 'view',
+          label: 'Visualizza Opportunità',
+          url: '/dashboard/market-intelligence'
+        }
+      ]
+    });
+  }
+
+  async createSystemMaintenanceNotification(
+    userId: string,
+    maintenanceType: string,
+    scheduledTime: string
+  ): Promise<Notification> {
+    return this.createNotification({
+      userId,
+      type: 'SYSTEM',
+      priority: 'MEDIUM',
+      title: 'Manutenzione Sistema',
+      message: `Manutenzione ${maintenanceType} programmata per ${scheduledTime}`,
+      data: { 
+        action: 'system_maintenance',
+        maintenanceType,
+        scheduledTime
+      }
+    });
+  }
+
+  async createDeadlineReminderNotification(
+    userId: string,
+    taskName: string,
+    deadline: string,
+    projectName: string
+  ): Promise<Notification> {
+    return this.createNotification({
+      userId,
+      type: 'ALERT',
+      priority: 'HIGH',
+      title: 'Scadenza Imminente',
+      message: `La scadenza per "${taskName}" nel progetto "${projectName}" è il ${deadline}`,
+      data: { 
+        action: 'deadline_reminder',
+        taskName,
+        deadline,
+        projectName
+      },
+      actions: [
+        {
+          type: 'view',
+          label: 'Visualizza Task',
+          url: '/dashboard/projects/tasks'
+        }
+      ]
     });
   }
 }
