@@ -267,10 +267,10 @@ export default function PermitsCompliancePage() {
           {/* Header */}
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <Shield className="w-8 h-8 text-blue-600" />
-                Permessi & Compliance
-              </h1>
+                  <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                    <FileText className="w-8 h-8 text-blue-600" />
+                    Permessi & Compliance
+                  </h1>
               <p className="text-gray-600 mt-2">
                 Gestisci permessi edilizi e verifiche di conformità
               </p>

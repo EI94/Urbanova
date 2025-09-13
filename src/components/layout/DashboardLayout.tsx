@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageSquare, Bell, User, Users, Settings, X, Building2 } from 'lucide-react';
+import { MessageSquare, Bell, User, Users, Settings, X, Building2, BarChart3, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
@@ -220,7 +220,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
-                  <BusinessPlanIcon className="w-4 h-4 mr-3" />
+                  <BarChart3 className="w-4 h-4 mr-3" />
                   Business Plan
                 </Link>
                 <Link
@@ -231,7 +231,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
-                  <PermitIcon className="w-4 h-4 mr-3" />
+                  <FileText className="w-4 h-4 mr-3" />
                   Permessi & Compliance
                 </Link>
                 <Link
