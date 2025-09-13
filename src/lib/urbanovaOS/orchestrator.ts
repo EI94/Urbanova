@@ -261,46 +261,126 @@ export class UrbanovaOSOrchestrator {
     // Estrae dati di fattibilità dal messaggio dell'utente
     const data: any = {};
     
-    // Nome progetto
-    const projectNameMatch = message.match(/nome del progetto[:\s]+([^,.\n]+)/i);
-    if (projectNameMatch) data.name = projectNameMatch[1].trim();
+    console.log('🔍 [UrbanovaOS] Estraendo dati da:', message.substring(0, 100));
     
-    // Area terreno
-    const landAreaMatch = message.match(/terreno.*?(\d+)\s*metri quadrati/i);
-    if (landAreaMatch) data.landArea = parseInt(landAreaMatch[1]);
+    // Nome progetto - pattern più flessibili
+    const projectNamePatterns = [
+      /nome del progetto[:\s]+([^,.\n]+)/i,
+      /progetto[:\s]+([^,.\n]+)/i,
+      /villa\s+([^,.\n]+)/i,
+      /([^,.\n]+)\s*terreno/i,
+      /studio di fattibilità[:\s]+([^,.\n]+)/i,
+      /analisi di fattibilità[:\s]+([^,.\n]+)/i
+    ];
     
-    // Area costruibile
-    const buildableAreaMatch = message.match(/(\d+)\s*metri quadrati totali/i);
-    if (buildableAreaMatch) data.buildableArea = parseInt(buildableAreaMatch[1]);
+    for (const pattern of projectNamePatterns) {
+      const match = message.match(pattern);
+      if (match) {
+        data.name = match[1].trim();
+        break;
+      }
+    }
+    
+    // Area terreno - pattern più flessibili
+    const landAreaPatterns = [
+      /terreno.*?(\d+)\s*metri quadrati/i,
+      /terreno.*?(\d+)\s*mq/i,
+      /terreno.*?(\d+)\s*m²/i
+    ];
+    
+    for (const pattern of landAreaPatterns) {
+      const match = message.match(pattern);
+      if (match) {
+        data.landArea = parseInt(match[1]);
+        break;
+      }
+    }
+    
+    // Area costruibile - pattern più flessibili
+    const buildableAreaPatterns = [
+      /(\d+)\s*metri quadrati totali/i,
+      /area costruibile.*?(\d+)\s*mq/i,
+      /area costruibile.*?(\d+)\s*metri quadrati/i,
+      /costruibile.*?(\d+)\s*mq/i
+    ];
+    
+    for (const pattern of buildableAreaPatterns) {
+      const match = message.match(pattern);
+      if (match) {
+        data.buildableArea = parseInt(match[1]);
+        break;
+      }
+    }
     
     // Tipo progetto
-    const projectTypeMatch = message.match(/bifamiliare/i);
-    if (projectTypeMatch) data.type = 'bifamiliare';
+    if (message.match(/bifamiliare/i)) data.type = 'bifamiliare';
+    if (message.match(/monofamiliare/i)) data.type = 'monofamiliare';
+    if (message.match(/residenziale/i)) data.type = 'residenziale';
     
-    // Appartamenti
-    const apartmentsMatch = message.match(/(\d+)\s*parcheggi/i);
-    if (apartmentsMatch) data.parkingSpaces = parseInt(apartmentsMatch[1]);
+    // Appartamenti/Parcheggi
+    const parkingMatch = message.match(/(\d+)\s*parcheggi/i);
+    if (parkingMatch) data.parkingSpaces = parseInt(parkingMatch[1]);
     
     // Area per appartamento
     const apartmentAreaMatch = message.match(/(\d+)\s*metri quadrati per appartamento/i);
     if (apartmentAreaMatch) data.apartmentArea = parseInt(apartmentAreaMatch[1]);
     
-    // Costo costruzione
-    const constructionCostMatch = message.match(/(\d+)\s*euro per metro quadrato/i);
-    if (constructionCostMatch) data.constructionCostPerSqm = parseInt(constructionCostMatch[1]);
+    // Costo costruzione - pattern più flessibili
+    const constructionCostPatterns = [
+      /(\d+)\s*euro per metro quadrato/i,
+      /costo.*?(\d+)\s*euro\/mq/i,
+      /(\d+)\s*euro\/m²/i,
+      /(\d+)\s*€\/mq/i
+    ];
+    
+    for (const pattern of constructionCostPatterns) {
+      const match = message.match(pattern);
+      if (match) {
+        data.constructionCostPerSqm = parseInt(match[1]);
+        break;
+      }
+    }
     
     // Assicurazioni
     const insuranceMatch = message.match(/(\d+(?:\.\d+)?)%\s*di assicurazioni/i);
-    if (insuranceMatch) data.insuranceRate = parseFloat(insuranceMatch[1]) / 100;
+    if (insuranceMatch) {
+      data.insuranceRate = parseFloat(insuranceMatch[1]) / 100;
+    } else {
+      // Valore di default per le assicurazioni se non specificato
+      data.insuranceRate = 0.015; // 1.5%
+    }
     
-    // Prezzo acquisto
-    const purchasePriceMatch = message.match(/(\d+(?:\.\d+)?)\s*Euro/i);
-    if (purchasePriceMatch) data.purchasePrice = parseFloat(purchasePriceMatch[1].replace('.', ''));
+    // Prezzo acquisto - pattern più flessibili
+    const purchasePricePatterns = [
+      /prezzo acquisto.*?(\d+(?:\.\d+)?)\s*euro/i,
+      /acquisto.*?(\d+(?:\.\d+)?)\s*euro/i,
+      /(\d+(?:\.\d+)?)\s*euro.*?acquisto/i
+    ];
     
-    // Target marginalità
-    const marginMatch = message.match(/(\d+(?:\.\d+)?)%\s*di marginalità/i);
-    if (marginMatch) data.targetMargin = parseFloat(marginMatch[1]) / 100;
+    for (const pattern of purchasePricePatterns) {
+      const match = message.match(pattern);
+      if (match) {
+        data.purchasePrice = parseFloat(match[1].replace('.', ''));
+        break;
+      }
+    }
     
+    // Target marginalità - pattern più flessibili
+    const marginPatterns = [
+      /(\d+(?:\.\d+)?)%\s*di marginalità/i,
+      /target.*?(\d+(?:\.\d+)?)%/i,
+      /marginalità.*?(\d+(?:\.\d+)?)%/i
+    ];
+    
+    for (const pattern of marginPatterns) {
+      const match = message.match(pattern);
+      if (match) {
+        data.targetMargin = parseFloat(match[1]) / 100;
+        break;
+      }
+    }
+    
+    console.log('🔍 [UrbanovaOS] Dati estratti:', data);
     return data;
   }
 
@@ -1024,8 +1104,13 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
         // Estrai parametri dal messaggio
         const feasibilityData = this.extractFeasibilityData(request.message.content);
         
-        if (feasibilityData.isValid) {
-          console.log('📊 [UrbanovaOS Orchestrator] Dati fattibilità estratti:', feasibilityData);
+        // Controlla se abbiamo dati sufficienti per l'analisi
+        const hasRequiredData = feasibilityData.name && feasibilityData.buildableArea && 
+                               feasibilityData.constructionCostPerSqm && feasibilityData.purchasePrice && 
+                               feasibilityData.targetMargin;
+        
+        if (hasRequiredData) {
+          console.log('📊 [UrbanovaOS Orchestrator] Dati fattibilità completi, generando analisi smart...');
           
           // Genera analisi di fattibilità smart
           const feasibilityAnalysis = await this.generateFeasibilityAnalysis(feasibilityData, request);

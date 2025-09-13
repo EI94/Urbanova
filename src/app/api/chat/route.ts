@@ -96,11 +96,23 @@ export async function POST(request: NextRequest) {
           };
 
           console.log('🚀 [Chat API] Chiamando UrbanovaOS Orchestrator...');
+          console.log('🚀 [Chat API] Request data:', {
+            message: urbanovaRequest.message.content.substring(0, 50),
+            userId: urbanovaRequest.userId,
+            sessionId: urbanovaRequest.sessionId
+          });
+          
           try {
             urbanovaResponse = await urbanovaOSOrchestrator.processRequest(urbanovaRequest);
-            console.log('🚀 [Chat API] UrbanovaOS Response:', urbanovaResponse?.type, urbanovaResponse?.response?.substring(0, 100));
+            console.log('🚀 [Chat API] UrbanovaOS Response ricevuta:', {
+              type: urbanovaResponse?.type,
+              hasResponse: !!urbanovaResponse?.response,
+              responseLength: urbanovaResponse?.response?.length || 0,
+              preview: urbanovaResponse?.response?.substring(0, 100)
+            });
           } catch (error) {
             console.error('❌ [Chat API] Errore UrbanovaOS Orchestrator:', error);
+            console.error('❌ [Chat API] Stack trace:', error.stack);
             urbanovaResponse = null;
           }
 
