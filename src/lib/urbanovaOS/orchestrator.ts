@@ -1629,7 +1629,7 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
           userQuery.includes('progetti attivi') || userQuery.includes('progetti ho') ||
           userQuery.includes('nel mio portafoglio') || userQuery.includes('portafoglio progetti');
       
-      // Rileva richieste di analisi di fattibilità
+      // Rileva richieste di analisi di fattibilità (incluse modifiche)
       const isFeasibilityQuery = userQuery.includes('analisi di fattibilità') || userQuery.includes('analisi fattibilità') ||
           userQuery.includes('studio di fattibilità') || userQuery.includes('studio fattibilità') ||
           userQuery.includes('business plan') || userQuery.includes('businessplan') ||
@@ -1640,10 +1640,24 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
           userQuery.includes('dimmi a che prezzo') || userQuery.includes('assicurarmi') ||
           (userQuery.includes('terreno') && (userQuery.includes('mq') || userQuery.includes('metri quadrati'))) ||
           (userQuery.includes('progetto') && userQuery.includes('euro')) ||
-          (userQuery.includes('appartamento') && userQuery.includes('euro'));
+          (userQuery.includes('appartamento') && userQuery.includes('euro')) ||
+          // 🔥 PATTERN PER MODIFICHE ESISTENTI
+          (memory.projectContext && this.isModificationRequest(request.message.content)) ||
+          (memory.projectContext && userQuery.includes('euro per metro quadrato')) ||
+          (memory.projectContext && userQuery.includes('metti')) ||
+          (memory.projectContext && userQuery.includes('invece di')) ||
+          (memory.projectContext && userQuery.includes('cambia')) ||
+          (memory.projectContext && userQuery.includes('ricalcola'));
       
       console.log('🎯 [UrbanovaOS Orchestrator] È una query sui progetti?', isProjectQuery);
       console.log('🏗️ [UrbanovaOS Orchestrator] È una richiesta di analisi di fattibilità?', isFeasibilityQuery);
+      console.log('🧠 [DEBUG] Dettagli rilevamento:', {
+        hasProjectContext: !!memory.projectContext,
+        isModificationRequest: this.isModificationRequest(request.message.content),
+        containsEuroPerMetro: userQuery.includes('euro per metro quadrato'),
+        containsMetti: userQuery.includes('metti'),
+        containsInveceDi: userQuery.includes('invece di')
+      });
       
       if (isProjectQuery) {
         
