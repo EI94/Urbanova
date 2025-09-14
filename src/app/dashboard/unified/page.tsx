@@ -71,10 +71,13 @@ interface ToolExecution {
 }
 
 export default function UnifiedDashboardPage() {
+  console.log('🔍 [DEBUG CRASH] UnifiedDashboardPage renderizzato - PUNTO CRITICO WEB 1');
   const { t } = useLanguage();
   const authContext = useAuth();
+  console.log('🔍 [DEBUG CRASH] useAuth chiamato - PUNTO CRITICO WEB 2');
   const currentUser = authContext?.currentUser || null;
   const authLoading = authContext?.loading || false;
+  console.log('🔍 [DEBUG CRASH] Auth context estratto - PUNTO CRITICO WEB 3');
   const { darkMode, setDarkMode } = useDarkMode();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -120,6 +123,7 @@ export default function UnifiedDashboardPage() {
 
   // Carica dati dashboard e chat history
   useEffect(() => {
+    console.log('🔍 [DEBUG CRASH] useEffect initializeDashboard - PUNTO CRITICO WEB 4');
     const initializeDashboard = async () => {
       try {
         setLoading(true);
@@ -131,6 +135,7 @@ export default function UnifiedDashboardPage() {
           setLoading(false);
           return;
         }
+        console.log('🔍 [DEBUG CRASH] Utente autenticato, procedo con caricamento - PUNTO CRITICO WEB 5');
 
         // Inizializza i dati della dashboard se necessario
         await dashboardService.initializeDashboardData();
