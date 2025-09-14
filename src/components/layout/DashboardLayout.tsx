@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import AuthProtectedWrapper from '@/components/AuthProtectedWrapper';
+import '@/lib/globalErrorHandler'; // Carica il global error handler
 
 import {
   DashboardIcon,
@@ -49,9 +51,11 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children, title = 'Dashboard' }: DashboardLayoutProps) {
   return (
     <ErrorBoundary>
-      <AuthGuard>
-        <DashboardLayoutContent children={children} title={title} />
-      </AuthGuard>
+      <AuthProtectedWrapper>
+        <AuthGuard>
+          <DashboardLayoutContent children={children} title={title} />
+        </AuthGuard>
+      </AuthProtectedWrapper>
     </ErrorBoundary>
   );
 }
@@ -107,7 +111,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
         } else {
           console.log('⚠️ [DashboardLayout] Nessun utente autenticato, skip caricamento dati');
         }
-      } catch (error) {
+    } catch (error) {
         console.error('❌ [DashboardLayout] Errore caricamento dati:', error);
       }
     };
