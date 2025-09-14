@@ -11,70 +11,9 @@
     @apply bg-slate-50 text-gray-800 antialiased;
   }
   
-  /* Dark mode styles */
+  /* Dark mode styles - simplified */
   .dark body {
     @apply bg-gray-900 text-gray-100;
-  }
-  
-  .dark .bg-white {
-    @apply bg-gray-800;
-  }
-  
-  .dark .text-gray-900 {
-    @apply text-gray-100;
-  }
-  
-  .dark .text-gray-800 {
-    @apply text-gray-200;
-  }
-  
-  .dark .text-gray-700 {
-    @apply text-gray-300;
-  }
-  
-  .dark .text-gray-600 {
-    @apply text-gray-400;
-  }
-  
-  .dark .text-gray-500 {
-    @apply text-gray-500;
-  }
-  
-  .dark .bg-gray-50 {
-    @apply bg-gray-700;
-  }
-  
-  .dark .bg-gray-100 {
-    @apply bg-gray-600;
-  }
-  
-  .dark .border-gray-200 {
-    @apply border-gray-600;
-  }
-  
-  .dark .border-gray-300 {
-    @apply border-gray-500;
-  }
-  
-  .dark .hover\:bg-gray-50:hover {
-    @apply hover:bg-gray-600;
-  }
-  
-  .dark .hover\:bg-gray-100:hover {
-    @apply hover:bg-gray-500;
-  }
-  
-  /* Dark mode specific components */
-  .dark .logo-container {
-    @apply bg-white;
-  }
-  
-  .dark .logo-icon {
-    @apply text-blue-600;
-  }
-  
-  .dark .logo-text {
-    @apply text-gray-900;
   }
   
   /* KPI Cards dark mode */

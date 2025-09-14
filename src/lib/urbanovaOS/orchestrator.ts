@@ -4515,7 +4515,9 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
             usedUserMemory: false
           };
         }
-          
+        
+        // Se abbiamo dati completi per l'analisi di fattibilità
+        if (this.hasCompleteFeasibilityData(extractedData)) {
           let analysisContent: string;
           let analysisType: string;
           
@@ -4659,7 +4661,6 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
       return { content: null, usedUserMemory: false }; // Fallback a OpenAI
     }
   }
-}
 
   private calculateConfidence(
     classification: ClassificationResult,
