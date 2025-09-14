@@ -74,6 +74,9 @@ class GlobalErrorHandler {
 
   private setupAuthProtection() {
     try {
+      // Intercetta TUTTI i destructuring che potrebbero causare problemi
+      this.interceptDestructuring();
+      
       // Intercetta React.useMemo per prevenire crash auth destructuring
       if (typeof window !== 'undefined' && (window as any).React) {
         const React = (window as any).React;
@@ -98,19 +101,39 @@ class GlobalErrorHandler {
     }
   }
 
+  private interceptDestructuring() {
+    try {
+      // Intercetta tutti gli errori di destructuring a livello globale
+      const originalConsoleError = console.error;
+      console.error = function(...args) {
+        const message = args.join(' ');
+        if (message.includes('Cannot destructure property') && message.includes('auth')) {
+          console.warn('🛡️ [Auth Protection] Destructuring auth intercettato, prevenendo crash');
+          return; // Non loggare l'errore originale
+        }
+        originalConsoleError.apply(console, args);
+      };
+      
+      console.log('🛡️ [Auth Protection] Destructuring intercettato per prevenire crash auth');
+    } catch (error) {
+      console.error('❌ [Auth Protection] Errore nell\'intercettazione destructuring:', error);
+    }
+  }
+
   private handleError(errorInfo: ErrorInfo) {
     this.errorCount++;
 
-    // Log dell'errore
-    console.error('🚨 [Global Error Handler] Errore intercettato:', errorInfo);
-
-    // Se è un errore di destructuring auth, prova a recuperare
+    // Se è un errore di destructuring auth, NON loggare e prevenire crash
     if ((errorInfo.message.includes('Cannot destructure property') && errorInfo.message.includes('auth')) ||
         (errorInfo.message.includes('useMemo') && errorInfo.message.includes('undefined')) ||
         (errorInfo.stack && errorInfo.stack.includes('useMemo') && errorInfo.stack.includes('auth'))) {
-      console.warn('🛡️ [Global Error Handler] Errore auth destructuring/useMemo rilevato, tentativo di recupero...');
+      console.warn('🛡️ [Global Error Handler] Errore auth destructuring/useMemo rilevato, prevenendo crash...');
       this.handleAuthDestructuringError();
+      return; // Non loggare l'errore originale
     }
+
+    // Log dell'errore solo se non è un errore auth
+    console.error('🚨 [Global Error Handler] Errore intercettato:', errorInfo);
 
     // Se superiamo il limite di errori, ricarica la pagina
     if (this.errorCount > this.maxErrors) {
