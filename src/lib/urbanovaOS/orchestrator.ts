@@ -4226,6 +4226,16 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
         isFeasibilityQuery: isFeasibilityQuery
       });
       
+      // 🔧 FIX RADICALE: Forza attivazione PRIMA del controllo condizionale
+      const messageText = request.message.content.toLowerCase();
+      if (messageText.includes('analisi di fattibilità') || messageText.includes('studio di fattibilità') || 
+          messageText.includes('fattibilità') || (messageText.includes('terreno') && messageText.includes('edificabili'))) {
+        console.log('🔧 [FIX RADICALE] Rilevata richiesta di fattibilità, forzando attivazione tool...');
+        userIntent.toolsRequired = ['feasibility_analysis'];
+        userIntent.primary = 'feasibility';
+        isFeasibilityQuery = true; // Forza anche la variabile
+      }
+      
       // 🔧 USA L'ESTRAZIONE DATI DELL'ORCHESTRATOR (PIÙ ROBUSTA)
       const goalAnalysis = this.analyzeUserGoal(request.message.content, memory);
       const extractedData = goalAnalysis.extractedData;
@@ -4556,16 +4566,6 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
           console.log('🧠 [Advanced Conversational] Generando risposta con tool attivati...');
           console.log('🔍 [DEBUG] userIntent.toolsRequired:', userIntent.toolsRequired);
           console.log('🔍 [DEBUG] isFeasibilityQuery:', isFeasibilityQuery);
-          
-          // 🔧 FIX RADICALE: Forza attivazione anche se non riconosciuto
-          const messageText = request.message.content.toLowerCase();
-          if (messageText.includes('analisi di fattibilità') || messageText.includes('studio di fattibilità') || 
-              messageText.includes('fattibilità') || (messageText.includes('terreno') && messageText.includes('edificabili'))) {
-            console.log('🔧 [FIX RADICALE] Rilevata richiesta di fattibilità, forzando attivazione tool...');
-            userIntent.toolsRequired = ['feasibility_analysis'];
-            userIntent.primary = 'feasibility';
-            isFeasibilityQuery = true; // Forza anche la variabile
-          }
           
           const conversationalResponse = await this.conversationalEngine.generateAdvancedResponse(
             userIntent, 
