@@ -566,7 +566,7 @@ export class UrbanovaOSOrchestrator {
     ];
 
     for (const pattern of areaPatterns) {
-      const match = text.match(pattern);
+      const match = message.match(pattern);
       if (match) {
         extractedData.landArea = parseInt(match[1]);
         extractedData.buildableArea = extractedData.landArea; // Default se non specificato
@@ -579,12 +579,16 @@ export class UrbanovaOSOrchestrator {
       /(\d+)\s*euro\s*per\s*metro/i,
       /(\d+)\s*euro\/mq/i,
       /(\d+)\s*euro\s*al\s*metro/i,
+      /costruzion[:\s]*(\d+)\s*euro/i,
+      /costruzione[:\s]*(\d+)\s*euro/i,
+      /costruzion[:\s]*(\d+)/i,
+      /costruzione[:\s]*(\d+)/i,
       /costo\s*costruzione[:\s]*(\d+)/i,
       /costo[:\s]*(\d+)\s*euro/i
     ];
 
     for (const pattern of costPatterns) {
-      const match = text.match(pattern);
+      const match = message.match(pattern);
       if (match) {
         extractedData.constructionCostPerSqm = parseInt(match[1]);
         break;
@@ -594,13 +598,14 @@ export class UrbanovaOSOrchestrator {
     // 💰 PREZZO ACQUISTO (pattern flessibili)
     const pricePatterns = [
       /acquisto[:\s]*(\d+(?:\.\d+)?)\s*(?:mila|k|000)?\s*euro/i,
+      /acquisto[:\s]*(\d+(?:\.\d+)?)/i,
       /(\d+(?:\.\d+)?)\s*(?:mila|k|000)?\s*euro.*?acquisto/i,
       /terreno[:\s]*(\d+(?:\.\d+)?)\s*(?:mila|k|000)?\s*euro/i,
       /(\d+(?:\.\d+)?)\s*(?:mila|k|000)?\s*euro.*?terreno/i
     ];
 
     for (const pattern of pricePatterns) {
-      const match = text.match(pattern);
+      const match = message.match(pattern);
       if (match) {
         let price = parseFloat(match[1]);
         if (text.includes('mila') || text.includes('k')) {
@@ -621,7 +626,7 @@ export class UrbanovaOSOrchestrator {
     ];
 
     for (const pattern of marginPatterns) {
-      const match = text.match(pattern);
+      const match = message.match(pattern);
       if (match) {
         extractedData.targetMargin = parseFloat(match[1]) / 100;
         break;
@@ -641,7 +646,7 @@ export class UrbanovaOSOrchestrator {
     ];
 
     for (const pattern of locationPatterns) {
-      const match = text.match(pattern);
+      const match = message.match(pattern);
       if (match && match[1].length > 2) {
         extractedData.location = match[1].trim();
         break;
@@ -649,13 +654,13 @@ export class UrbanovaOSOrchestrator {
     }
 
     // 🚗 PARCHEGGI
-    const parkingMatch = text.match(/(\d+)\s*parcheggi/i);
+    const parkingMatch = message.match(/(\d+)\s*parcheggi/i);
     if (parkingMatch) {
       extractedData.parkingSpaces = parseInt(parkingMatch[1]);
     }
 
     // 🏠 AREA APPARTAMENTO
-    const apartmentMatch = text.match(/(\d+)\s*metri.*?appartamento/i);
+    const apartmentMatch = message.match(/(\d+)\s*metri.*?appartamento/i);
     if (apartmentMatch) {
       extractedData.apartmentArea = parseInt(apartmentMatch[1]);
     }
@@ -4150,7 +4155,13 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
       
       const userIntent = this.conversationalEngine.analyzeUserIntent(request.message.content, memory);
       const isFeasibilityQuery = userIntent.toolsRequired.length > 0 || userIntent.primary === 'feasibility';
-      const extractedData = userIntent.dataExtracted;
+      
+      // 🔧 USA L'ESTRAZIONE DATI DELL'ORCHESTRATOR (PIÙ ROBUSTA)
+      const goalAnalysis = this.analyzeUserGoal(request.message.content, memory);
+      const extractedData = goalAnalysis.extractedData;
+      
+      console.log('🔍 [DEBUG] Goal Analysis:', goalAnalysis);
+      console.log('🔍 [DEBUG] Extracted Data:', extractedData);
       const confidence = userIntent.confidence;
       
       console.log('🧠 [Advanced Conversational] Analisi completata:', {
@@ -4206,13 +4217,29 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
                            userQuery.toLowerCase().includes('cosa avevo chiesto') ||
                            userQuery.toLowerCase().includes('conversazione precedente');
       
+      // 6. È una query con sentiment negativo (frustrazione, rabbia)
+      const isNegativeSentimentQuery = userQuery.toLowerCase().includes('schifo') ||
+                                      userQuery.toLowerCase().includes('incazzato') ||
+                                      userQuery.toLowerCase().includes('frustrato') ||
+                                      userQuery.toLowerCase().includes('inutile') ||
+                                      userQuery.toLowerCase().includes('merda') ||
+                                      userQuery.toLowerCase().includes('non funziona') ||
+                                      userQuery.toLowerCase().includes('troppo complicato') ||
+                                      userQuery.toLowerCase().includes('non capisco') ||
+                                      userQuery.toLowerCase().includes('cazzo') ||
+                                      userQuery.toLowerCase().includes('problema') ||
+                                      userQuery.toLowerCase().includes('difficoltà');
+      
       const shouldActivateAdvancedSystem = 
         userIntent.toolsRequired.length > 0 || 
         extractedData.buildableArea || 
         extractedData.constructionCostPerSqm || 
         extractedData.purchasePrice ||
         isProjectQuery ||
-        isFeasibilityQueryAdvanced;
+        isFeasibilityQueryAdvanced ||
+        isMemoryQuery ||
+        isNegativeSentimentQuery ||
+        true; // RIATTIVATO DOPO FIX IMPORT
       
       console.log('🔍 [DEBUG] shouldActivateAdvancedSystem:', shouldActivateAdvancedSystem);
       
@@ -4220,10 +4247,29 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
         console.log('🧠 [Advanced Conversational] SISTEMA AVANZATO ATTIVATO - Generando risposta avanzata...');
         console.log('🔍 [DEBUG] Chiamando generateAdvancedResponse...');
         
+        // 🔧 PASSA I DATI ESTRATTI AL SISTEMA AVANZATO
+        const projectData = {
+          id: `project_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          name: extractedData.name || 'Progetto Automatico',
+          landArea: extractedData.landArea || extractedData.buildableArea || 0,
+          buildableArea: extractedData.buildableArea || 0,
+          constructionCostPerSqm: extractedData.constructionCostPerSqm || 0,
+          purchasePrice: extractedData.purchasePrice || 0,
+          targetMargin: extractedData.targetMargin || 0.25,
+          insuranceRate: 0.015,
+          type: 'residenziale',
+          status: 'draft',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        
+        console.log('🔍 [DEBUG] ProjectData creato:', projectData);
+        
         const conversationalResponse = await this.conversationalEngine.generateAdvancedResponse(
           userIntent, 
           memory, 
-          request
+          request,
+          projectData
         );
         
         console.log('🔍 [DEBUG] Risposta generata:', conversationalResponse);
@@ -4469,9 +4515,7 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
             usedUserMemory: false
           };
         }
-        
-        // Se abbiamo dati sufficienti per l'analisi di fattibilità
-        if (hasRequiredData && projectData) {
+          
           let analysisContent: string;
           let analysisType: string;
           
@@ -4544,7 +4588,7 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
           
           return { content: missingInfoResponse, usedUserMemory: true };
         }
-        }
+      }
       
       // Se non è una query sui progetti o analisi di fattibilità, usa la logica originale
       let response = '';
@@ -4615,6 +4659,7 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
       return { content: null, usedUserMemory: false }; // Fallback a OpenAI
     }
   }
+}
 
   private calculateConfidence(
     classification: ClassificationResult,

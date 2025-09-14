@@ -30,6 +30,7 @@ export interface ConversationalResponse {
 export class AdvancedConversationalEngine {
   private currentState: ConversationalState;
   private conversationHistory: any[] = [];
+  private static userMemory: Map<string, any> = new Map(); // STATIC per persistenza
   
   constructor() {
     this.currentState = {
@@ -39,6 +40,77 @@ export class AdvancedConversationalEngine {
       contextDepth: 0,
       reliability: 95
     };
+  }
+
+  /**
+   * 🧠 MEMORIA CONVERSAZIONALE AVANZATA
+   * Mantiene il contesto delle conversazioni per utenti smemorati
+   */
+  private updateConversationMemory(userId: string, message: string, response: string) {
+    if (!AdvancedConversationalEngine.userMemory.has(userId)) {
+      AdvancedConversationalEngine.userMemory.set(userId, {
+        conversations: [],
+        lastTopics: [],
+        userPreferences: {},
+        currentProject: null
+      });
+    }
+    
+    const userData = AdvancedConversationalEngine.userMemory.get(userId);
+    userData.conversations.push({
+      timestamp: new Date(),
+      userMessage: message,
+      assistantResponse: response,
+      topics: this.extractTopics(message)
+    });
+    
+    // Mantieni solo le ultime 10 conversazioni
+    if (userData.conversations.length > 10) {
+      userData.conversations = userData.conversations.slice(-10);
+    }
+    
+    AdvancedConversationalEngine.userMemory.set(userId, userData);
+  }
+
+  /**
+   * 🔍 ESTRAZIONE TOPIC DAL MESSAGGIO
+   */
+  private extractTopics(message: string): string[] {
+    const topics = [];
+    const text = message.toLowerCase();
+    
+    if (text.includes('terreno') || text.includes('immobile')) topics.push('real_estate');
+    if (text.includes('fattibil') || text.includes('analisi')) topics.push('feasibility');
+    if (text.includes('costruzion') || text.includes('progetto')) topics.push('construction');
+    if (text.includes('mercato') || text.includes('prezzo')) topics.push('market');
+    if (text.includes('design') || text.includes('progett')) topics.push('design');
+    
+    return topics;
+  }
+
+  /**
+   * 🧠 RECUPERO CONTESTO CONVERSAZIONALE
+   */
+  private getConversationContext(userId: string): string {
+    if (!AdvancedConversationalEngine.userMemory.has(userId)) {
+      return '';
+    }
+    
+    const userData = AdvancedConversationalEngine.userMemory.get(userId);
+    if (userData.conversations.length === 0) {
+      return '';
+    }
+    
+    const recentConversations = userData.conversations.slice(-3);
+    let context = '## 📝 Contesto Conversazione Precedente\n\n';
+    
+    recentConversations.forEach((conv, index) => {
+      context += `**Conversazione ${index + 1}:**\n`;
+      context += `- **Utente**: ${conv.userMessage.substring(0, 100)}...\n`;
+      context += `- **Argomenti**: ${conv.topics.join(', ')}\n\n`;
+    });
+    
+    return context;
   }
 
   /**
@@ -82,7 +154,8 @@ export class AdvancedConversationalEngine {
   async generateAdvancedResponse(
     intent: UserIntent, 
     context: any,
-    originalRequest: any
+    originalRequest: any,
+    projectData?: any
   ): Promise<ConversationalResponse> {
     
     // 🎭 ADATTA STATO EMOTIVO
@@ -94,8 +167,29 @@ export class AdvancedConversationalEngine {
     let response = '';
     let toolsActivated: string[] = [];
     
-    // 💝 RISPOSTA EMPATICA INIZIALE
+    // 🧠 RECUPERA CONTESTO CONVERSAZIONALE PER UTENTI SMEMORATI
+    const userId = originalRequest.userId || 'anonymous';
+    const conversationContext = this.getConversationContext(userId);
+    
+    // 💝 RISPOSTA EMPATICA INIZIALE CON CONTESTO
     response += this.generateEmpathicOpening(intent);
+    
+    // Se l'utente sembra smemorato o confuso, aggiungi contesto
+    if (intent.userSentiment === 'confused' || 
+        originalRequest.message.toLowerCase().includes('non ricordo') ||
+        originalRequest.message.toLowerCase().includes('mi sono perso') ||
+        originalRequest.message.toLowerCase().includes('ricapitolare')) {
+      response += conversationContext;
+    }
+    
+    // Se l'utente è frustrato o arrabbiato, aggiungi supporto empatico
+    if (intent.userSentiment === 'angry' || intent.userSentiment === 'frustrated' ||
+        originalRequest.message.toLowerCase().includes('schifo') ||
+        originalRequest.message.toLowerCase().includes('incazzato') ||
+        originalRequest.message.toLowerCase().includes('frustrato') ||
+        originalRequest.message.toLowerCase().includes('merda')) {
+      response += this.generateEmpathicSupport(intent);
+    }
     
     // 🧠 STATO: ANALYZING
     this.currentState.current = 'analyzing';
@@ -124,6 +218,9 @@ export class AdvancedConversationalEngine {
     const nextSteps = this.generateProactiveNextSteps(intent, context);
     response += this.formatNextSteps(nextSteps);
     
+    // 🧠 AGGIORNA MEMORIA CONVERSAZIONALE
+    this.updateConversationMemory(userId, originalRequest.message, response);
+    
     return {
       content: response,
       state: this.currentState,
@@ -134,12 +231,25 @@ export class AdvancedConversationalEngine {
   }
 
   /**
+   * 💝 GENERAZIONE SUPPORTO EMPATICO PER UTENTI FRUSTRATI
+   */
+  private generateEmpathicSupport(intent: UserIntent): string {
+    const supportMessages = [
+      `## 💝 Supporto Empatico\n\nCapisco perfettamente la tua frustrazione. È normale sentirsi così quando le cose non vanno come previsto. Sono qui per aiutarti a superare questi ostacoli.\n\n`,
+      `## 🤝 Supporto Professionale\n\nLa tua frustrazione è comprensibile. Insieme possiamo identificare il problema e trovare una soluzione efficace. Non sei solo in questo percorso.\n\n`,
+      `## 💪 Motivazione e Supporto\n\nCapisco che questa situazione sia difficile. Ma ricorda: ogni ostacolo è un'opportunità per crescere. Sono qui per guidarti verso il successo.\n\n`
+    ];
+    
+    return supportMessages[Math.floor(Math.random() * supportMessages.length)];
+  }
+
+  /**
    * 🎭 ANALISI SENTIMENT AVANZATA
    */
   private analyzeSentiment(text: string): 'positive' | 'neutral' | 'frustrated' | 'angry' | 'confused' {
-    const angryWords = ['schifo', 'merda', 'inutile', 'perdendo soldi', 'incazzato', 'fallimento', 'disastro'];
-    const frustratedWords = ['non funziona', 'problema', 'difficoltà', 'non capisce', 'lento'];
-    const confusedWords = ['non so', 'aiuto', 'come', 'cosa', 'dove', 'quando'];
+    const angryWords = ['schifo', 'merda', 'inutile', 'perdendo soldi', 'incazzato', 'fallimento', 'disastro', 'cazzo'];
+    const frustratedWords = ['non funziona', 'problema', 'difficoltà', 'non capisce', 'lento', 'frustrato', 'troppo complicato'];
+    const confusedWords = ['non so', 'aiuto', 'come', 'cosa', 'dove', 'quando', 'non capisco'];
     const positiveWords = ['grazie', 'perfetto', 'ottimo', 'bene', 'eccellente'];
     
     if (angryWords.some(word => text.includes(word))) return 'angry';
@@ -211,33 +321,81 @@ export class AdvancedConversationalEngine {
     const data: any = {};
     const text = message.toLowerCase();
 
-    // Area terreno
-    const areaMatch = text.match(/(\d+)\s*(?:mq|metri quadrati|m²)/i);
-    if (areaMatch) {
-      data.buildableArea = parseInt(areaMatch[1]);
-      data.landArea = data.buildableArea;
-    }
-
-    // Costo costruzione
-    const costMatch = text.match(/(\d+)\s*euro\s*(?:per metro|\/mq|al metro)/i);
-    if (costMatch) {
-      data.constructionCostPerSqm = parseInt(costMatch[1]);
-    }
-
-    // Prezzo acquisto
-    const priceMatch = text.match(/acquisto[:\s]*(\d+(?:\.\d+)?)\s*(?:k|000|euro)/i);
-    if (priceMatch) {
-      let price = parseFloat(priceMatch[1]);
-      if (text.includes('k') || text.includes('000')) {
-        price *= 1000;
+    // 🔧 ESTRAZIONE ROBUSTA CON TOLERANZA ERRORI DI BATTITURA
+    
+    // Area terreno - Pattern più flessibili (UNIFICATO CON ORCHESTRATOR)
+    const areaPatterns = [
+      /(\d+)\s*(?:metri quadrati|mq|m²)/i,
+      /terreno.*?(\d+)\s*(?:metri quadrati|mq|m²)/i,
+      /(\d+)\s*(?:metri quadrati|mq|m²).*?terreno/i
+    ];
+    
+    for (const pattern of areaPatterns) {
+      const match = message.match(pattern); // USA MESSAGE COME ORCHESTRATOR
+      if (match) {
+        data.buildableArea = parseInt(match[1]);
+        data.landArea = data.buildableArea;
+        break;
       }
-      data.purchasePrice = price;
     }
 
-    // Margine target
-    const marginMatch = text.match(/(?:target|margine)[:\s]*(\d+(?:\.\d+)?)\s*%/i);
-    if (marginMatch) {
-      data.targetMargin = parseFloat(marginMatch[1]) / 100;
+    // Costo costruzione - Pattern più flessibili (UNIFICATO CON ORCHESTRATOR)
+    const costPatterns = [
+      /(\d+)\s*euro\s*per\s*metro/i,
+      /(\d+)\s*euro\/mq/i,
+      /(\d+)\s*euro\s*al\s*metro/i,
+      /costruzion[:\s]*(\d+)\s*euro/i,
+      /costruzione[:\s]*(\d+)\s*euro/i,
+      /costruzion[:\s]*(\d+)/i,
+      /costruzione[:\s]*(\d+)/i,
+      /costo\s*costruzione[:\s]*(\d+)/i,
+      /costo[:\s]*(\d+)\s*euro/i
+    ];
+    
+    for (const pattern of costPatterns) {
+      const match = message.match(pattern); // USA MESSAGE COME ORCHESTRATOR
+      if (match) {
+        data.constructionCostPerSqm = parseInt(match[1]);
+        break;
+      }
+    }
+
+    // Prezzo acquisto - Pattern più flessibili (UNIFICATO CON ORCHESTRATOR)
+    const pricePatterns = [
+      /acquisto[:\s]*(\d+(?:\.\d+)?)\s*(?:mila|k|000)?\s*euro/i,
+      /acquisto[:\s]*(\d+(?:\.\d+)?)/i,
+      /(\d+(?:\.\d+)?)\s*(?:mila|k|000)?\s*euro.*?acquisto/i,
+      /terreno[:\s]*(\d+(?:\.\d+)?)\s*(?:mila|k|000)?\s*euro/i,
+      /(\d+(?:\.\d+)?)\s*(?:mila|k|000)?\s*euro.*?terreno/i
+    ];
+    
+    for (const pattern of pricePatterns) {
+      const match = message.match(pattern); // USA MESSAGE COME ORCHESTRATOR
+      if (match) {
+        let price = parseFloat(match[1]);
+        if (message.includes('k') || message.includes('000') || message.includes('mila')) {
+          price *= 1000;
+        }
+        data.purchasePrice = price;
+        break;
+      }
+    }
+
+    // Margine target - Pattern più flessibili (UNIFICATO CON ORCHESTRATOR)
+    const marginPatterns = [
+      /target[:\s]*(\d+(?:\.\d+)?)\s*%/i,
+      /marginalità[:\s]*(\d+(?:\.\d+)?)\s*%/i,
+      /margine[:\s]*(\d+(?:\.\d+)?)\s*%/i,
+      /(\d+(?:\.\d+)?)\s*%.*?target/i,
+      /(\d+(?:\.\d+)?)\s*%.*?margine/i
+    ];
+    
+    for (const pattern of marginPatterns) {
+      const match = message.match(pattern); // USA MESSAGE COME ORCHESTRATOR
+      if (match) {
+        data.targetMargin = parseFloat(match[1]) / 100;
+        break;
+      }
     }
 
     // Nome progetto
@@ -246,13 +404,109 @@ export class AdvancedConversationalEngine {
       data.name = nameMatch[1].trim();
     }
 
-    // Location
-    const locationMatch = text.match(/(?:a|in|su)\s+([a-z\s]+?)(?:\s|,|$)/i);
-    if (locationMatch && locationMatch[1].length > 2) {
-      data.location = locationMatch[1].trim();
+    // Location - Pattern più flessibili (UNIFICATO CON ORCHESTRATOR)
+    const locationPatterns = [
+      /a\s+([A-Za-z\s]+?)(?:\s|,|$)/i,
+      /a\s+([A-Za-z\s]+?)(?:\s|,|$)/i
+    ];
+    
+    for (const pattern of locationPatterns) {
+      const match = message.match(pattern); // USA MESSAGE COME ORCHESTRATOR
+      if (match && match[1].length > 2) {
+        data.location = match[1].trim();
+        break;
+      }
     }
 
+    console.log('🔍 [Advanced Engine] Dati estratti:', data);
     return data;
+  }
+
+  /**
+   * ⚡ ANALISI FATTIBILITÀ OTTIMIZZATA - CON TIMEOUT PROTECTION
+   */
+  private async generateFeasibilityAnalysisOptimized(projectData: any): Promise<string> {
+    try {
+      // Importa il servizio di fattibilità
+      const { FeasibilityService } = await import('../../feasibilityService.ts');
+      const feasibilityService = new FeasibilityService();
+      
+      // Genera analisi di fattibilità reale
+      const feasibilityResult = await feasibilityService.generateFeasibilityAnalysis(projectData);
+      
+      if (feasibilityResult && feasibilityResult.content) {
+        let result = `## 🏗️ Analisi di Fattibilità Avanzata\n\n`;
+        result += feasibilityResult.content;
+        result += `\n\n### 📊 Dati Progetto\n`;
+        result += `- **Area Terreno**: ${projectData.buildableArea} mq\n`;
+        result += `- **Costo Costruzione**: €${projectData.constructionCostPerSqm.toLocaleString()}/mq\n`;
+        result += `- **Prezzo Acquisto**: €${projectData.purchasePrice.toLocaleString()}\n`;
+        result += `- **Target Margine**: ${(projectData.targetMargin * 100).toFixed(1)}%\n\n`;
+        return result;
+      } else {
+        return this.generateFeasibilityAnalysis(projectData);
+      }
+    } catch (error) {
+      console.error('❌ [Advanced Engine] Errore analisi fattibilità ottimizzata:', error);
+      return this.generateFeasibilityAnalysis(projectData);
+    }
+  }
+
+  /**
+   * ⚡ SUGGERIMENTI DESIGN OTTIMIZZATI - CON TIMEOUT PROTECTION
+   */
+  private async generateDesignSuggestionsOptimized(projectData: any): Promise<string> {
+    try {
+      // Importa il servizio di design
+      const { AIDesignService } = await import('../../aiDesignService.ts');
+      const aiDesignService = new AIDesignService();
+      
+      // Genera suggerimenti di design
+      const designSuggestions = await aiDesignService.generateDesignSuggestions(projectData);
+      
+      if (designSuggestions && designSuggestions.length > 0) {
+        let result = `## 🎨 Suggerimenti Design AI\n\n`;
+        designSuggestions.slice(0, 3).forEach(suggestion => {
+          result += `### ${suggestion.title}\n`;
+          result += `**Priorità**: ${suggestion.priority}\n`;
+          result += `**Benefici**: ${suggestion.benefits.join(', ')}\n`;
+          result += `**Impatto ROI**: +${suggestion.estimatedImpact.roi}%\n\n`;
+        });
+        return result;
+      } else {
+        return '';
+      }
+    } catch (error) {
+      console.error('❌ [Advanced Engine] Errore suggerimenti design ottimizzati:', error);
+      return '';
+    }
+  }
+
+  /**
+   * ⚡ SALVATAGGIO PROGETTO OTTIMIZZATO - CON TIMEOUT PROTECTION
+   */
+  private async saveProjectOptimized(projectData: any, userId: string): Promise<string> {
+    try {
+      // Importa il servizio di project manager
+      const { ProjectManagerService } = await import('../../projectManagerService.ts');
+      const projectManagerService = new ProjectManagerService();
+      
+      // Salva il progetto
+      const saveResult = await projectManagerService.smartSaveProject(projectData, userId);
+      
+      if (saveResult.success) {
+        let result = `## 📊 Gestione Progetto\n\n`;
+        result += `✅ **Progetto salvato**: ${saveResult.message}\n`;
+        result += `🆔 **ID Progetto**: ${saveResult.projectId}\n`;
+        result += `📝 **Stato**: ${saveResult.isNew ? 'Nuovo progetto' : 'Progetto aggiornato'}\n\n`;
+        return result;
+      } else {
+        return '';
+      }
+    } catch (error) {
+      console.error('❌ [Advanced Engine] Errore salvataggio progetto ottimizzato:', error);
+      return '';
+    }
   }
 
   /**
@@ -261,16 +515,29 @@ export class AdvancedConversationalEngine {
   private determineRequiredTools(intents: any, dataExtracted: any, originalMessage: string): string[] {
     const tools: string[] = [];
     
-    // 🧠 LOGICA INTELLIGENTE: Attiva tool solo se c'è un INTENTO SPECIFICO
+    // 🧠 LOGICA INTELLIGENTE: Attiva tool anche per richieste generiche
     const hasProjectData = dataExtracted.buildableArea || dataExtracted.constructionCostPerSqm || 
                           dataExtracted.purchasePrice || dataExtracted.targetMargin;
+    
+    const text = originalMessage.toLowerCase();
+    
+    // 🎯 RICHIESTE DI PREZZI E COSTI - Sempre attiva
+    if (this.isPriceRequest(text) || this.isCostRequest(text)) {
+      tools.push('feasibility_analysis');
+      return tools;
+    }
+    
+    // 🎯 RICHIESTE DI ANALISI - Sempre attiva
+    if (this.isAnalysisRequest(text)) {
+      tools.push('feasibility_analysis');
+      return tools;
+    }
     
     if (!hasProjectData) {
       return tools; // Nessun tool se non ci sono dati di progetto
     }
     
     // 🎯 ANALISI CONTESTUALE: Riconosce l'intento specifico dell'utente
-    const text = originalMessage.toLowerCase();
     
     // 🔍 ANALISI DI FATTIBILITÀ - Solo se esplicitamente richiesta
     if (this.isFeasibilityRequest(text, intents)) {
@@ -311,18 +578,57 @@ export class AdvancedConversationalEngine {
   }
   
   /**
+   * 💰 RICONOSCIMENTO RICHIESTE DI PREZZI
+   */
+  private isPriceRequest(text: string): boolean {
+    const priceKeywords = [
+      'quanto costa', 'costo', 'prezzo', 'tariffa', 'quanto', 'price',
+      'costi', 'prezzi', 'tariffe', 'quanto viene', 'quanto pagare'
+    ];
+    
+    return priceKeywords.some(keyword => text.includes(keyword));
+  }
+
+  /**
+   * 💸 RICONOSCIMENTO RICHIESTE DI COSTI
+   */
+  private isCostRequest(text: string): boolean {
+    const costKeywords = [
+      'costo', 'spesa', 'investimento', 'budget', 'quanto spendere',
+      'quanto investire', 'quanto mi costa', 'quanto devo pagare'
+    ];
+    
+    return costKeywords.some(keyword => text.includes(keyword));
+  }
+
+  /**
+   * 📊 RICONOSCIMENTO RICHIESTE DI ANALISI
+   */
+  private isAnalysisRequest(text: string): boolean {
+    const analysisKeywords = [
+      'analisi', 'studio', 'valutazione', 'calcolo', 'calcola',
+      'verifica', 'controllo', 'check', 'review'
+    ];
+    
+    return analysisKeywords.some(keyword => text.includes(keyword));
+  }
+
+  /**
    * 🔍 RICONOSCIMENTO RICHIESTA ANALISI DI FATTIBILITÀ
    */
   private isFeasibilityRequest(text: string, intents: any): boolean {
     const feasibilityKeywords = [
       'analisi di fattibilità', 'studio di fattibilità', 'business plan',
       'fattibilità', 'valutazione economica', 'profitto', 'margine',
-      'roi', 'ritorno investimento', 'redditività', 'convenienza'
+      'roi', 'ritorno investimento', 'redditività', 'convenienza',
+      'analisi', 'studio', 'valutazione', 'calcolo', 'calcola',
+      'quanto costa', 'costo totale', 'spesa totale', 'investimento',
+      'terreno', 'progetto', 'immobile', 'costruzione'
     ];
     
     return feasibilityKeywords.some(keyword => text.includes(keyword)) ||
            intents.primary === 'feasibility' ||
-           (intents.confidence > 0.7 && text.includes('terreno') && text.includes('costo'));
+           (intents.confidence > 0.5 && (text.includes('terreno') || text.includes('progetto') || text.includes('immobile')));
   }
   
   /**
@@ -453,44 +759,123 @@ export class AdvancedConversationalEngine {
       updatedAt: new Date()
     };
 
-    // 🎯 ATTIVAZIONE TOOL SPECIFICI BASATI SULL'INTENTO
+    console.log('🔧 [Advanced Engine] Attivando TUTTI I TOOL con dati:', projectData);
+
+    // 🎯 ATTIVAZIONE TUTTI I TOOL DISPONIBILI - CHIAMATE REALI COMPLETE
     let result = '';
     
-    for (const tool of intent.toolsRequired) {
-      switch (tool) {
-        case 'feasibility_analysis':
-          result += this.generateFeasibilityAnalysis(projectData);
-          break;
-          
-        case 'sensitivity_analysis':
-          result += this.generateSensitivityAnalysis(projectData);
-          break;
-          
-        case 'risk_analysis':
-          result += this.generateRiskAnalysis(projectData);
-          break;
-          
-        case 'market_benchmark':
-          result += this.generateMarketBenchmark(projectData);
-          break;
-          
-        case 'investment_valuation':
-          result += this.generateInvestmentValuation(projectData);
-          break;
-          
-        case 'create_project':
-          result += this.generateProjectCreation(projectData);
-          break;
-          
-        case 'design_center':
-          result += this.generateDesignCenter(projectData);
-          break;
-          
-        default:
-          result += this.generateGenericAnalysis(projectData, tool);
+    // 🔧 USA PROJECTDATA PASSATO SE DISPONIBILE
+    const finalProjectData = projectData || {
+      id: `project_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      name: data.name || 'Progetto Automatico',
+      landArea: data.landArea || data.buildableArea || 0,
+      buildableArea: data.buildableArea || 0,
+      constructionCostPerSqm: data.constructionCostPerSqm || 0,
+      purchasePrice: data.purchasePrice || 0,
+      targetMargin: data.targetMargin || 0.25,
+      insuranceRate: 0.015,
+      type: 'residenziale',
+      status: 'draft',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    console.log('🔧 [Advanced Engine] ProjectData finale:', finalProjectData);
+    
+    // OTTIMIZZATO: Attiva analisi di fattibilità solo se necessario
+    if (finalProjectData.buildableArea > 0 || finalProjectData.constructionCostPerSqm > 0 || finalProjectData.purchasePrice > 0) {
+      console.log('🔧 [Advanced Engine] Attivando analisi di fattibilità OTTIMIZZATA...');
+      
+      try {
+        // TIMEOUT PROTECTION: Limita tempo di attesa
+        const feasibilityPromise = this.generateFeasibilityAnalysisOptimized(finalProjectData);
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout')), 5000) // 5 secondi max
+        );
+        
+        const feasibilityResult = await Promise.race([feasibilityPromise, timeoutPromise]);
+        result += feasibilityResult;
+        
+      } catch (error) {
+        console.error('❌ [Advanced Engine] Errore analisi fattibilità:', error);
+        result += this.generateFeasibilityAnalysis(finalProjectData);
       }
     }
+
+    // 🎨 DESIGN CENTER SERVICE - Suggerimenti di design AI (OTTIMIZZATO)
+    try {
+      console.log('🎨 [Advanced Engine] Attivando Design Center Service OTTIMIZZATO...');
+      
+      // TIMEOUT PROTECTION: Limita tempo di attesa
+      const designPromise = this.generateDesignSuggestionsOptimized(finalProjectData);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), 3000) // 3 secondi max
+      );
+      
+      const designResult = await Promise.race([designPromise, timeoutPromise]);
+      result += designResult;
+      
+    } catch (error) {
+      console.error('❌ [Advanced Engine] Errore Design Center:', error);
+    }
+
+    // 📊 PROJECT MANAGER SERVICE - Gestione progetto (OTTIMIZZATO)
+    try {
+      console.log('📊 [Advanced Engine] Attivando Project Manager Service OTTIMIZZATO...');
+      
+      // TIMEOUT PROTECTION: Limita tempo di attesa
+      const projectPromise = this.saveProjectOptimized(finalProjectData, originalRequest.userId);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), 2000) // 2 secondi max
+      );
+      
+      const projectResult = await Promise.race([projectPromise, timeoutPromise]);
+      result += projectResult;
+      
+    } catch (error) {
+      console.error('❌ [Advanced Engine] Errore Project Manager:', error);
+    }
+
+    // 🏗️ DESIGN CENTER SERVICE - Template e layout
+    try {
+      console.log('🏗️ [Advanced Engine] Attivando Design Center Service...');
+      const { DesignCenterService } = await import('../../designCenterService.ts');
+      const designCenterService = new DesignCenterService();
+      
+      const templates = await designCenterService.getTemplatesByCriteria({
+        category: 'RESIDENTIAL',
+        budget: finalProjectData.constructionCostPerSqm > 2000 ? 'HIGH' : 'MEDIUM',
+        area: finalProjectData.buildableArea,
+        zone: 'SUBURBAN'
+      });
+      
+      if (templates && templates.length > 0) {
+        result += `## 🏗️ Template Design Consigliati\n\n`;
+        templates.slice(0, 2).forEach(template => {
+          result += `### ${template.name}\n`;
+          result += `**Categoria**: ${template.category}\n`;
+          result += `**Budget**: ${template.budget}\n`;
+          result += `**ROI Stimato**: ${template.estimatedROI}%\n`;
+          result += `**Tempo Costruzione**: ${template.constructionTime} mesi\n\n`;
+        });
+      }
+    } catch (error) {
+      console.error('❌ [Advanced Engine] Errore Design Center:', error);
+    }
+
+    // 📈 ANALISI DI SENSIBILITÀ AVANZATA
+    result += this.generateSensitivityAnalysis(finalProjectData);
     
+    // ⚠️ ANALISI DI RISCHIO AVANZATA
+    result += this.generateRiskAnalysis(finalProjectData);
+    
+    // 🏪 ANALISI DI MERCATO
+    result += this.generateMarketBenchmark(finalProjectData);
+    
+    // 💰 VALUTAZIONE INVESTIMENTO
+    result += this.generateInvestmentValuation(finalProjectData);
+    
+    console.log('🔧 [Advanced Engine] TUTTI I TOOL attivati, risultato:', result.substring(0, 200) + '...');
     return result;
   }
 
