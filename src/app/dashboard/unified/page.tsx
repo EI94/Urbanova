@@ -343,13 +343,13 @@ export default function UnifiedDashboardPage() {
           sessionToUpdate.messages = finalMessages;
           sessionToUpdate.preview = aiResponse.content.substring(0, 100) + '...';
           chatHistoryService.saveChatSession(sessionToUpdate);
-          console.log('✅ [Chat History] Sessione aggiornata:', sessionToUpdate.title);
+          console.log('✅ [Chat History] Sessione aggiornata:', sessionToUpdate.title || 'Senza titolo');
         } else {
           // Crea nuova sessione
           const newSession = chatHistoryService.createSessionFromMessages(finalMessages);
           chatHistoryService.saveChatSession(newSession);
           setCurrentSessionId(newSession.id);
-          console.log('✅ [Chat History] Nuova sessione creata:', newSession.title);
+          console.log('✅ [Chat History] Nuova sessione creata:', newSession.title || 'Senza titolo');
         }
         
         // Ricarica la chat history
@@ -1236,13 +1236,13 @@ export default function UnifiedDashboardPage() {
                         setMessages(chat.messages);
                         setCurrentSessionId(chat.id);
                         setShowChatHistory(false);
-                        console.log('✅ [Chat History] Sessione caricata:', chat.title);
+                        console.log('✅ [Chat History] Sessione caricata:', chat.title || 'Senza titolo');
                       }}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-white text-sm truncate mb-1">{chat.title}</h4>
-                          <p className="text-xs text-gray-400 truncate">{chat.preview}</p>
+                          <h4 className="font-medium text-white text-sm truncate mb-1">{chat.title || 'Sessione senza titolo'}</h4>
+                          <p className="text-xs text-gray-400 truncate">{chat.preview || 'Nessun preview disponibile'}</p>
                         </div>
                         <div className="ml-2 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <span className="text-xs text-gray-500">
@@ -1260,7 +1260,7 @@ export default function UnifiedDashboardPage() {
                             chatHistoryService.deleteChatSession(chat.id);
                             const updatedHistory = chatHistoryService.getChatSessions();
                             setChatHistory(updatedHistory);
-                            console.log('✅ [Chat History] Sessione eliminata:', chat.title);
+                            console.log('✅ [Chat History] Sessione eliminata:', chat.title || 'Senza titolo');
                           }
                         }}
                         className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-700 rounded transition-all"
