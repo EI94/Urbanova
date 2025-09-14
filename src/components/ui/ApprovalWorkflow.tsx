@@ -60,7 +60,8 @@ export default function ApprovalWorkflow({
   onWorkflowUpdate,
   onWorkflowComplete,
 }: ApprovalWorkflowProps) {
-  const { user } = useAuth();
+  const authContext = useAuth();
+  const user = authContext?.currentUser || null;
   const [workflows, setWorkflows] = useState<WorkflowType[]>([]);
   const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowType | null>(null);
   const [showWorkflowForm, setShowWorkflowForm] = useState(false);

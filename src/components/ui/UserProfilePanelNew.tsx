@@ -16,7 +16,8 @@ interface UserProfilePanelProps {
 
 export default function UserProfilePanelNew({ isOpen, onClose }: UserProfilePanelProps) {
   const { t } = useLanguage();
-  const auth = useAuth();
+  const authContext = useAuth();
+  const auth = authContext || { currentUser: null, loading: false };
   const currentUser = auth.currentUser;
   
   // Stati principali

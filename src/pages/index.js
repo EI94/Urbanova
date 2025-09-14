@@ -5,7 +5,9 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function HomePage() {
   const router = useRouter();
-  const { currentUser, loading } = useAuth();
+  const authContext = useAuth();
+  const currentUser = authContext?.currentUser || null;
+  const loading = authContext?.loading || false;
 
   useEffect(() => {
     if (!loading) {

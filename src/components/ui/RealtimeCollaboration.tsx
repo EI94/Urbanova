@@ -52,7 +52,8 @@ export default function RealTimeCollaboration({
   onVersionChange,
   onWorkflowUpdate,
 }: RealTimeCollaborationProps) {
-  const { user } = useAuth();
+  const authContext = useAuth();
+  const user = authContext?.currentUser || null;
   const [activeTab, setActiveTab] = useState<'comments' | 'versions' | 'workflow' | 'sessions'>(
     'comments'
   );

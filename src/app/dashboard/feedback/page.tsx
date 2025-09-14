@@ -42,7 +42,8 @@ interface Feedback {
 }
 
 const FeedbackDashboard: React.FC = () => {
-  const { user } = useAuth();
+  const authContext = useAuth();
+  const user = authContext?.currentUser || null;
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState<string>('all');

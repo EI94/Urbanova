@@ -36,7 +36,8 @@ import {
 } from '@/lib/permitsService';
 
 export default function PermessiCompliancePage() {
-  const { user } = useAuth();
+  const authContext = useAuth();
+  const user = authContext?.currentUser || null;
   const [activeTab, setActiveTab] = useState<'overview' | 'permessi' | 'timeline' | 'alert'>(
     'overview'
   );

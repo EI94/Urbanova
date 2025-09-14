@@ -55,7 +55,8 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
 
 function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayoutProps) {
   const { t } = useLanguage();
-  const auth = useAuth();
+  const authContext = useAuth();
+  const auth = authContext || { currentUser: null, loading: false };
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);

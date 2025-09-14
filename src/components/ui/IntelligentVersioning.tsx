@@ -65,7 +65,8 @@ export default function IntelligentVersioning({
   onVersionSelect,
   onVersionCompare,
 }: IntelligentVersioningProps) {
-  const { user } = useAuth();
+  const authContext = useAuth();
+  const user = authContext?.currentUser || null;
   const [versions, setVersions] = useState<DesignVersion[]>([]);
   const [selectedVersion, setSelectedVersion] = useState<DesignVersion | null>(null);
   const [showVersionForm, setShowVersionForm] = useState(false);

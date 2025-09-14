@@ -18,7 +18,8 @@ interface NotificationsPanelProps {
 
 export default function NotificationsPanel({ isOpen, onClose }: NotificationsPanelProps) {
   const { t } = useLanguage();
-  const { currentUser } = useAuth() as any;
+  const authContext = useAuth();
+  const currentUser = authContext?.currentUser || null;
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [stats, setStats] = useState<NotificationStats | null>(null);
   const [loading, setLoading] = useState(true);

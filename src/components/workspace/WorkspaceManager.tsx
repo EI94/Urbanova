@@ -34,7 +34,8 @@ export default function WorkspaceManager({
   onWorkspaceCreated,
   onMemberInvited
 }: WorkspaceManagerProps) {
-  const { currentUser } = useAuth();
+  const authContext = useAuth();
+  const currentUser = authContext?.currentUser || null;
   const [activeTab, setActiveTab] = useState<'workspaces' | 'create' | 'invite'>('workspaces');
   const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
   const [members, setMembers] = useState<WorkspaceMember[]>([]);

@@ -10,7 +10,9 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { currentUser, loading } = useAuth();
+  const authContext = useAuth();
+  const currentUser = authContext?.currentUser || null;
+  const loading = authContext?.loading || false;
   const router = useRouter();
 
   useEffect(() => {

@@ -28,7 +28,8 @@ import {
 } from '@/lib/projectTimelineService';
 
 export default function ProjectTimelineAIPage() {
-  const { user } = useAuth();
+  const authContext = useAuth();
+  const user = authContext?.currentUser || null;
   const [activeView, setActiveView] = useState<'gantt' | 'kanban' | 'milestone' | 'risorse'>(
     'gantt'
   );
