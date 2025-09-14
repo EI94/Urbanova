@@ -72,7 +72,9 @@ interface ToolExecution {
 
 export default function UnifiedDashboardPage() {
   const { t } = useLanguage();
-  const { currentUser } = useAuth();
+  const authContext = useAuth();
+  const currentUser = authContext?.currentUser || null;
+  const authLoading = authContext?.loading || false;
   const { darkMode, setDarkMode } = useDarkMode();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -454,6 +456,18 @@ export default function UnifiedDashboardPage() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Caricamento dashboard unificata...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state per auth
+  if (authLoading) {
+    return (
+      <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} flex items-center justify-center`}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className={`${darkMode ? 'text-white' : 'text-gray-900'}`}>Caricamento...</p>
         </div>
       </div>
     );
