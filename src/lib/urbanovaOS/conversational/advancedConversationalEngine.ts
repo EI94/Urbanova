@@ -545,6 +545,30 @@ export class AdvancedConversationalEngine {
       return tools;
     }
     
+    // 🎯 FORZA ATTIVAZIONE per "bifamiliare" - SOLUZIONE RADICALE
+    if (text.includes('bifamiliare') && (text.includes('monteporzio') || text.includes('terreno'))) {
+      tools.push('feasibility_analysis');
+      return tools;
+    }
+    
+    // 🎯 FORZA ATTIVAZIONE per "stimare" + "prezzo" - SOLUZIONE RADICALE
+    if (text.includes('stimare') && text.includes('prezzo')) {
+      tools.push('feasibility_analysis');
+      return tools;
+    }
+    
+    // 🎯 FORZA ATTIVAZIONE per "aiutami" + "analisi" - SOLUZIONE RADICALE
+    if (text.includes('aiutami') && text.includes('analisi')) {
+      tools.push('feasibility_analysis');
+      return tools;
+    }
+    
+    // 🎯 FORZA ATTIVAZIONE per "terreno" + "edificabili" - SOLUZIONE RADICALE
+    if (text.includes('terreno') && text.includes('edificabili')) {
+      tools.push('feasibility_analysis');
+      return tools;
+    }
+    
     if (!hasProjectData) {
       return tools; // Nessun tool se non ci sono dati di progetto
     }
