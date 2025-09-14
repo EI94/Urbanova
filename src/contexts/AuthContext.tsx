@@ -26,9 +26,8 @@ const AuthContext = createContext<AuthContextType | null>(null);
 // Hook personalizzato per utilizzare il contesto - VERSIONE ULTRA-ROBUSTA CON PROTEZIONE AGGIUNTIVA
 export function useAuth() {
   try {
-    // Import dinamico della protezione per evitare circular dependency
-    const { safeUseContext } = require('@/lib/authProtection');
-    const context = safeUseContext(AuthContext);
+    // Controllo diretto del contesto
+    const context = useContext(AuthContext);
     
     // Se il contesto è null o undefined, restituisci un oggetto di fallback
     if (!context) {

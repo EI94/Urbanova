@@ -1,7 +1,7 @@
 // Protezione globale per TUTTI i possibili usi di useAuth
 // Questo file intercetta e protegge ogni chiamata a useAuth
 
-import { useContext } from 'react';
+import React, { useContext, useMemo, useCallback } from 'react';
 
 // Wrapper sicuro per useContext
 export function safeUseContext<T>(context: React.Context<T | null>): T | null {
@@ -17,7 +17,7 @@ export function safeUseContext<T>(context: React.Context<T | null>): T | null {
 // Hook useAuth ultra-protetto
 export function useAuthProtected() {
   try {
-    // Import dinamico per evitare problemi di circular dependency
+    // Import diretto per evitare problemi di bundling
     const { AuthContext } = require('@/contexts/AuthContext');
     const context = safeUseContext(AuthContext);
     
@@ -58,11 +58,9 @@ export function useAuthProtected() {
 export function withAuthProtection<T extends object>(Component: React.ComponentType<T>) {
   return function ProtectedComponent(props: T) {
     try {
-      const React = require('react');
       return React.createElement(Component, props);
     } catch (error) {
       console.error('❌ [Auth Protection] Errore componente protetto:', error);
-      const React = require('react');
       return React.createElement('div', {
         className: 'p-4 bg-red-50 border border-red-200 rounded-lg'
       }, React.createElement('p', {
@@ -75,7 +73,6 @@ export function withAuthProtection<T extends object>(Component: React.ComponentT
 // Intercettore per useMemo che potrebbe causare problemi
 export function safeUseMemo<T>(factory: () => T, deps: React.DependencyList): T {
   try {
-    const { useMemo } = require('react');
     return useMemo(factory, deps);
   } catch (error) {
     console.warn('⚠️ [Auth Protection] Errore useMemo intercettato:', error);
@@ -89,7 +86,6 @@ export function safeUseCallback<T extends (...args: any[]) => any>(
   deps: React.DependencyList
 ): T {
   try {
-    const { useCallback } = require('react');
     return useCallback(callback, deps);
   } catch (error) {
     console.warn('⚠️ [Auth Protection] Errore useCallback intercettato:', error);
