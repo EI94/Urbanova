@@ -105,76 +105,28 @@ export async function POST(request: NextRequest) {
             sessionId: urbanovaRequest.sessionId
           });
           
-          // 🔧 FIX CHIRURGICO: Forza attivazione tool analisi fattibilità
+          // 🎯 REDIRECT CREATIVO: Invia richieste di fattibilità al nuovo endpoint
           const messageText = message.toLowerCase();
           if (messageText.includes('analisi di fattibilità') || messageText.includes('studio di fattibilità') || 
               messageText.includes('fattibilità') || (messageText.includes('terreno') && messageText.includes('edificabili'))) {
-            console.log('🔧 [FIX CHIRURGICO API] Rilevata richiesta di fattibilità, forzando risposta specializzata...');
+            console.log('🎯 [REDIRECT CREATIVO] Rilevata richiesta di fattibilità, redirigendo al nuovo endpoint...');
             
-            // Genera risposta specializzata direttamente
-            const specializedResponse = `🧠 *Sto analizzando i tuoi dati e preparando un'analisi dettagliata...*
-
-# 📊 ANALISI DI FATTIBILITÀ IMMOBILIARE
-
-## 🎯 DATI ESTRATTI
-- **Progetto**: Bifamiliare Via Romoli, Monteporzio
-- **Superficie edificabile**: 240 mq
-- **Tipologia**: Due bifamiliari da 110 mq ciascuna
-- **Parcheggi**: 2 per unità
-- **Stato progetto**: Depositato e pronto
-
-## 💰 ANALISI ECONOMICA PRELIMINARE
-
-### Costi di Costruzione Stimati:
-- **Costo costruzione**: €1.800-2.200/mq
-- **Totale costruzione**: €396.000-484.000 (220 mq totali)
-- **Oneri urbanistici**: €25.000-35.000
-- **Allacciamenti**: €15.000-20.000
-- **Imprevisti (10%)**: €44.000-54.000
-- **TOTALE INVESTIMENTO**: €480.000-593.000
-
-### Prezzo di Vendita Stimato:
-- **Prezzo mercato**: €2.800-3.200/mq
-- **Ricavo totale**: €616.000-704.000
-- **Margine lordo**: €136.000-111.000
-- **ROI stimato**: 20-28%
-
-## 🎯 RACCOMANDAZIONI
-1. **Verifica permessi**: Conferma validità progetto depositato
-2. **Analisi comparativa**: Studio prezzi zona specifica
-3. **Timing mercato**: Valuta momento ottimale vendita
-4. **Finanziamento**: Struttura ottimale investimento
-
-## 📈 PROSSIMI PASSI
-- Analisi dettagliata mercato locale
-- Valutazione finanziamenti disponibili  
-- Studio fattibilità temporale
-- Analisi rischi progetto
-
-*Analisi generata dal sistema intelligente Urbanova OS - Tool Analisi Fattibilità Attivato*`;
-
-            return NextResponse.json({
-              success: true,
-              response: specializedResponse,
-              timestamp: new Date().toISOString(),
-              metadata: {
-                agentType: 'specialized-feasibility',
-                provider: 'urbanova-os',
-                confidence: 0.95,
-                urbanovaOS: {
-                  systemsUsed: ['advanced-conversational', 'feasibility-analysis'],
-                  pluginsExecuted: ['feasibility_analysis'],
-                  workflowsTriggered: ['feasibility-workflow'],
-                  toolsActivated: ['feasibility_analysis']
-                }
-              },
-              intent: {
-                type: 'feasibility_analysis',
-                confidence: 0.95,
-                missingFields: []
-              },
-              projectPreview: null
-            });
+            // Chiama il nuovo endpoint dedicato
+            try {
+              const feasibilityResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://www.urbanova.life'}/api/feasibility-smart`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message, userId, userEmail })
+              });
+              
+              if (feasibilityResponse.ok) {
+                const feasibilityData = await feasibilityResponse.json();
+                console.log('✅ [REDIRECT CREATIVO] Risposta ricevuta dal nuovo endpoint');
+                return NextResponse.json(feasibilityData);
+              }
+            } catch (error) {
+              console.error('❌ [REDIRECT CREATIVO] Errore chiamata endpoint:', error);
+            }
           }
           
           try {
