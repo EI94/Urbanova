@@ -4,10 +4,7 @@ import { MessageSquare, Bell, User, Users, Settings, X, Building2, BarChart3, Fi
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import AuthProtectedWrapper from '@/components/AuthProtectedWrapper';
-import AuthRecoveryHandler from '@/components/AuthRecoveryHandler';
-import '@/lib/globalErrorHandler'; // Carica il global error handler
+// Rimossi tutti i sistemi di protezione globale dopo fix chirurgico
 
 import {
   DashboardIcon,
@@ -51,14 +48,9 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children, title = 'Dashboard' }: DashboardLayoutProps) {
   return (
-    <ErrorBoundary>
-      <AuthRecoveryHandler />
-      <AuthProtectedWrapper>
-        <AuthGuard>
-          <DashboardLayoutContent children={children} title={title} />
-        </AuthGuard>
-      </AuthProtectedWrapper>
-    </ErrorBoundary>
+    <AuthGuard>
+      <DashboardLayoutContent children={children} title={title} />
+    </AuthGuard>
   );
 }
 
