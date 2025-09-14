@@ -202,7 +202,9 @@ export class AdvancedConversationalEngine {
       this.currentState.current = 'calculating';
       
       // 🛠️ ATTIVAZIONE TOOL GARANTITA
+      console.log('🔍 [DEBUG CRASH] Prima di chiamare activateToolsGuaranteed - PUNTO CRITICO 4');
       const toolResults = await this.activateToolsGuaranteed(intent, context, originalRequest);
+      console.log('🔍 [DEBUG CRASH] Dopo activateToolsGuaranteed - PUNTO CRITICO 5');
       toolsActivated = ['feasibility_analysis']; // SEMPRE attiva analisi fattibilità
       
       response += toolResults;
@@ -428,11 +430,16 @@ export class AdvancedConversationalEngine {
   private async generateFeasibilityAnalysisOptimized(projectData: any): Promise<string> {
     try {
       // Importa il servizio di fattibilità
+      console.log('🔍 [DEBUG CRASH] Prima di importare FeasibilityService - PUNTO CRITICO 7');
       const { FeasibilityService } = await import('../../feasibilityService.ts');
+      console.log('🔍 [DEBUG CRASH] Dopo import FeasibilityService - PUNTO CRITICO 8');
       const feasibilityService = new FeasibilityService();
+      console.log('🔍 [DEBUG CRASH] Dopo creazione FeasibilityService - PUNTO CRITICO 9');
       
       // Genera analisi di fattibilità reale
+      console.log('🔍 [DEBUG CRASH] Prima di chiamare generateFeasibilityAnalysis - PUNTO CRITICO 10');
       const feasibilityResult = await feasibilityService.generateFeasibilityAnalysis(projectData);
+      console.log('🔍 [DEBUG CRASH] Dopo generateFeasibilityAnalysis - PUNTO CRITICO 11');
       
       if (feasibilityResult && feasibilityResult.content) {
         let result = `## 🏗️ Analisi di Fattibilità Avanzata\n\n`;
@@ -769,7 +776,9 @@ export class AdvancedConversationalEngine {
    * 🛠️ ATTIVAZIONE TOOL GARANTITA
    */
   private async activateToolsGuaranteed(intent: UserIntent, context: any, originalRequest: any): Promise<string> {
+    console.log('🔍 [DEBUG CRASH] Inizio activateToolsGuaranteed - PUNTO CRITICO 6');
     const data = intent.dataExtracted;
+    console.log('🔍 [DEBUG CRASH] Data estratta:', data);
     
     // Crea sempre un progetto dai dati estratti
     const projectData = {

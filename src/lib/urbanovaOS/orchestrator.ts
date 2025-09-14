@@ -4192,6 +4192,7 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
     pluginResults: any[]
   ): Promise<{ content: string | null; usedUserMemory: boolean }> {
     console.log('🧠 [UrbanovaOS Orchestrator] Generando contenuto risposta con memoria conversazionale');
+    console.log('🔍 [DEBUG CRASH] Inizio generateResponseContent - PUNTO CRITICO 1');
     
     try {
       // 🧠 GESTIONE MEMORIA CONVERSAZIONALE
@@ -4217,8 +4218,11 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
       console.log('🔍 [DEBUG] Messaggio utente:', request.message.content);
       console.log('🔍 [DEBUG] Memory context:', memory);
       
+      console.log('🔍 [DEBUG CRASH] Prima di chiamare analyzeUserIntent - PUNTO CRITICO 2');
       const userIntent = this.conversationalEngine.analyzeUserIntent(request.message.content, memory);
+      console.log('🔍 [DEBUG CRASH] Dopo analyzeUserIntent - PUNTO CRITICO 3');
       const isFeasibilityQuery = userIntent.toolsRequired.length > 0 || userIntent.primary === 'feasibility';
+      console.log('🔍 [DEBUG CRASH] isFeasibilityQuery determinato:', isFeasibilityQuery);
       
       console.log('🔍 [DEBUG] analyzeUserIntent risultato:', {
         userIntent: userIntent,
