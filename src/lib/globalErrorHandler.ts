@@ -76,9 +76,10 @@ class GlobalErrorHandler {
     console.error('🚨 [Global Error Handler] Errore intercettato:', errorInfo);
 
     // Se è un errore di destructuring auth, prova a recuperare
-    if (errorInfo.message.includes('Cannot destructure property') && 
-        errorInfo.message.includes('auth')) {
-      console.warn('🛡️ [Global Error Handler] Errore auth destructuring rilevato, tentativo di recupero...');
+    if ((errorInfo.message.includes('Cannot destructure property') && errorInfo.message.includes('auth')) ||
+        (errorInfo.message.includes('useMemo') && errorInfo.message.includes('undefined')) ||
+        (errorInfo.stack && errorInfo.stack.includes('useMemo') && errorInfo.stack.includes('auth'))) {
+      console.warn('🛡️ [Global Error Handler] Errore auth destructuring/useMemo rilevato, tentativo di recupero...');
       this.handleAuthDestructuringError();
     }
 
@@ -93,21 +94,14 @@ class GlobalErrorHandler {
 
   private handleAuthDestructuringError() {
     try {
-      // Prova a forzare un re-render del componente problematico
-      const event = new CustomEvent('auth-context-reset', {
-        detail: { timestamp: Date.now() }
-      });
-      window.dispatchEvent(event);
+      console.error('🚨 [CRITICAL] Auth destructuring error - IMMEDIATE PAGE RELOAD!');
       
-      // Prova a ricaricare solo il contesto auth
-      setTimeout(() => {
-        const authElements = document.querySelectorAll('[data-auth-context]');
-        authElements.forEach(element => {
-          element.dispatchEvent(new Event('force-update'));
-        });
-      }, 100);
+      // RICARICA IMMEDIATA della pagina
+      window.location.reload();
     } catch (error) {
       console.error('❌ [Global Error Handler] Errore nel recupero auth:', error);
+      // Se anche il reload fallisce, prova con location.href
+      window.location.href = window.location.href;
     }
   }
 
