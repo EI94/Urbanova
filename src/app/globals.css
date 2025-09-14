@@ -11,89 +11,173 @@
     @apply bg-slate-50 text-gray-800 antialiased;
   }
   
-  /* Dark mode styles - simplified */
+  /* Dark mode styles - NO CIRCULAR DEPENDENCIES */
   .dark body {
-    @apply bg-gray-900 text-gray-100;
+    background-color: #111827;
+    color: #f3f4f6;
+  }
+  
+  /* Base dark mode overrides */
+  .dark .bg-white {
+    background-color: #1f2937;
+  }
+  
+  .dark .bg-gray-50 {
+    background-color: #374151;
+  }
+  
+  .dark .bg-gray-100 {
+    background-color: #4b5563;
+  }
+  
+  .dark .bg-slate-50 {
+    background-color: #111827;
+  }
+  
+  .dark .text-gray-900 {
+    color: #f3f4f6;
+  }
+  
+  .dark .text-gray-800 {
+    color: #e5e7eb;
+  }
+  
+  .dark .text-gray-700 {
+    color: #d1d5db;
+  }
+  
+  .dark .text-gray-600 {
+    color: #9ca3af;
+  }
+  
+  .dark .text-gray-500 {
+    color: #6b7280;
+  }
+  
+  .dark .text-gray-400 {
+    color: #9ca3af;
+  }
+  
+  .dark .border-gray-200 {
+    border-color: #4b5563;
+  }
+  
+  .dark .border-gray-300 {
+    border-color: #6b7280;
+  }
+  
+  .dark .hover\:bg-gray-50:hover {
+    background-color: #4b5563;
+  }
+  
+  .dark .hover\:bg-gray-100:hover {
+    background-color: #6b7280;
+  }
+  
+  /* Logo dark mode */
+  .dark .logo-container {
+    background-color: #ffffff;
+  }
+  
+  .dark .logo-icon {
+    color: #2563eb;
+  }
+  
+  .dark .logo-text {
+    color: #111827;
   }
   
   /* KPI Cards dark mode */
   .dark .kpi-card {
-    @apply bg-gray-800 border-gray-600;
+    background-color: #1f2937;
+    border-color: #4b5563;
   }
   
   .dark .kpi-card-icon {
-    @apply bg-gray-700;
+    background-color: #374151;
   }
   
   .dark .kpi-card-text {
-    @apply text-gray-300;
+    color: #d1d5db;
   }
   
   .dark .kpi-card-value {
-    @apply text-gray-100;
+    color: #f3f4f6;
   }
   
   /* Input boxes dark mode */
   .dark .input-box {
-    @apply bg-gray-800 border-gray-600 text-gray-100;
+    background-color: #1f2937;
+    border-color: #4b5563;
+    color: #f3f4f6;
   }
   
   .dark .input-box:focus {
-    @apply border-blue-500 ring-blue-500;
+    border-color: #3b82f6;
+    --tw-ring-color: rgba(59, 130, 246, 0.5);
   }
   
   .dark .input-box::placeholder {
-    @apply text-gray-400;
+    color: #9ca3af;
   }
   
   /* Sidebar dark mode */
   .dark .sidebar {
-    @apply bg-gray-800;
+    background-color: #1f2937;
   }
   
   .dark .sidebar-item {
-    @apply text-gray-300 hover:bg-gray-700 hover:text-gray-100;
+    color: #d1d5db;
+  }
+  
+  .dark .sidebar-item:hover {
+    background-color: #374151;
+    color: #f3f4f6;
   }
   
   .dark .sidebar-item.active {
-    @apply bg-blue-600 text-white;
+    background-color: #2563eb;
+    color: #ffffff;
   }
   
   .dark .sidebar-section-title {
-    @apply text-gray-500;
+    color: #6b7280;
   }
   
   /* Header dark mode */
   .dark .header {
-    @apply bg-gray-800 border-gray-700;
+    background-color: #1f2937;
+    border-color: #374151;
   }
   
   .dark .header-icon {
-    @apply text-gray-400 hover:text-gray-200 hover:bg-gray-700;
+    color: #9ca3af;
+  }
+  
+  .dark .header-icon:hover {
+    color: #e5e7eb;
+    background-color: #374151;
   }
   
   /* Settings panel dark mode */
   .dark .settings-panel {
-    @apply bg-gray-800 border-gray-600;
+    background-color: #1f2937;
+    border-color: #4b5563;
   }
   
   .dark .settings-section {
-    @apply bg-gray-700;
+    background-color: #374151;
   }
   
   .dark .settings-text {
-    @apply text-gray-300;
+    color: #d1d5db;
   }
   
   .dark .settings-title {
-    @apply text-gray-100;
+    color: #f3f4f6;
   }
   
-  /* Additional dark mode improvements */
-  .dark .bg-slate-50 {
-    @apply bg-gray-900;
-  }
-  
+  /* Shadows for dark mode */
   .dark .shadow-sm {
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
   }
@@ -123,17 +207,13 @@
     background: #9ca3af;
   }
   
-  /* Dark mode focus states */
-  .dark .focus\:ring-blue-500:focus {
-    --tw-ring-color: rgba(59, 130, 246, 0.5);
-  }
-  
   /* Dark mode button states */
   .dark .btn-primary {
-    @apply bg-blue-600 hover:bg-blue-700;
+    background-color: #2563eb;
   }
   
   .dark .btn-primary:hover {
+    background-color: #1d4ed8;
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
   }
 }

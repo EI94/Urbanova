@@ -774,8 +774,8 @@ export class UrbanovaOSOrchestrator {
       const feasibilityData = this.extractFeasibilityData(currentMessage);
       console.log('🧠 [DEBUG] Dati estratti dal messaggio:', feasibilityData);
       
-      if (feasibilityData.name || feasibilityData.buildableArea || feasibilityData.constructionCostPerSqm) {
-        console.log('🧠 [DEBUG] Messaggio contiene dati progetto, lasciando gestione al sistema normale');
+      if (feasibilityData.isFeasibilityRequest || feasibilityData.name || feasibilityData.buildableArea || feasibilityData.constructionCostPerSqm) {
+        console.log('🧠 [DEBUG] Messaggio contiene richiesta di analisi di fattibilità, lasciando gestione al sistema normale');
         return { hasChanges: false, changes: [] }; // Lascia che il sistema normale gestisca
       }
       
@@ -3409,7 +3409,11 @@ export class UrbanovaOSOrchestrator {
       /villa\s+([^,.\n]+)/i,
       /([^,.\n]+)\s*terreno/i,
       /studio di fattibilità[:\s]+([^,.\n]+)/i,
-      /analisi di fattibilità[:\s]+([^,.\n]+)/i
+      /analisi di fattibilità[:\s]+([^,.\n]+)/i,
+      /analisi di fattibilità per un progetto di ([^,.\n]+)/i,
+      /progetto di ([^,.\n]+) in/i,
+      /bifamiliare in ([^,.\n]+)/i,
+      /([^,.\n]+) a Monteporzio/i
     ];
     
     for (const pattern of projectNamePatterns) {
@@ -3440,7 +3444,10 @@ export class UrbanovaOSOrchestrator {
       /(\d+)\s*metri quadrati totali/i,
       /area costruibile.*?(\d+)\s*mq/i,
       /area costruibile.*?(\d+)\s*metri quadrati/i,
-      /costruibile.*?(\d+)\s*mq/i
+      /costruibile.*?(\d+)\s*mq/i,
+      /terreno ha (\d+)\s*mq edificabili/i,
+      /(\d+)\s*mq edificabili/i,
+      /edificabili.*?(\d+)\s*mq/i
     ];
     
     for (const pattern of buildableAreaPatterns) {
@@ -3460,9 +3467,17 @@ export class UrbanovaOSOrchestrator {
     const parkingMatch = message.match(/(\d+)\s*parcheggi/i);
     if (parkingMatch) data.parkingSpaces = parseInt(parkingMatch[1]);
     
-    // Area per appartamento
+    // Area per appartamento/bifamiliare
     const apartmentAreaMatch = message.match(/(\d+)\s*metri quadrati per appartamento/i);
     if (apartmentAreaMatch) data.apartmentArea = parseInt(apartmentAreaMatch[1]);
+    
+    // Area per bifamiliare specifica
+    const bifamiliareAreaMatch = message.match(/(\d+)\s*mq per una/i);
+    if (bifamiliareAreaMatch) data.apartmentArea = parseInt(bifamiliareAreaMatch[1]);
+    
+    // Numero di unità
+    const unitsMatch = message.match(/due\s+([^,.\n]+)/i);
+    if (unitsMatch) data.units = 2;
     
     // Costo costruzione - pattern più flessibili
     const constructionCostPatterns = [
@@ -3519,8 +3534,57 @@ export class UrbanovaOSOrchestrator {
       }
     }
     
+    // Verifica se è una richiesta di analisi di fattibilità
+    data.isFeasibilityRequest = this.isFeasibilityAnalysisRequest(message);
+    
     console.log('🔍 [UrbanovaOS] Dati estratti:', data);
     return data;
+  }
+
+  private isFeasibilityAnalysisRequest(message: string): boolean {
+    const feasibilityKeywords = [
+      'analisi di fattibilità',
+      'studio di fattibilità', 
+      'fattibilità',
+      'prezzo di vendita',
+      'stimare',
+      'valutare',
+      'calcolare',
+      'bifamiliare',
+      'monofamiliare',
+      'terreno',
+      'edificabili',
+      'progetto',
+      'costruzione',
+      'vendita',
+      'aiutami',
+      'aiuta',
+      'depositato',
+      'pronto',
+      'mq',
+      'metri quadrati',
+      'parcheggi',
+      'via romoli',
+      'monteporzio'
+    ];
+    
+    const messageLower = message.toLowerCase();
+    const keywordCount = feasibilityKeywords.filter(keyword => 
+      messageLower.includes(keyword)
+    ).length;
+    
+    // Se contiene almeno 2 keyword di fattibilità, è probabilmente una richiesta
+    return keywordCount >= 2;
+  }
+
+  private hasCompleteFeasibilityData(data: any): boolean {
+    // Controlla se abbiamo dati sufficienti per un'analisi di fattibilità
+    return !!(
+      data.isFeasibilityRequest || // Richiesta esplicita di analisi
+      (data.name && data.buildableArea && data.constructionCostPerSqm) || // Dati completi
+      (data.buildableArea && data.constructionCostPerSqm) || // Dati minimi per calcolo
+      (data.name && data.buildableArea) // Dati parziali ma sufficienti per avviare
+    );
   }
 
   private async generateFeasibilityAnalysis(data: any, request: UrbanovaOSRequest): Promise<string> {

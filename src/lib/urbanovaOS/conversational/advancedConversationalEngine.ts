@@ -533,6 +533,18 @@ export class AdvancedConversationalEngine {
       return tools;
     }
     
+    // 🎯 RICHIESTE DI FATTIBILITÀ - Sempre attiva se contiene keyword
+    if (this.isFeasibilityRequest(text, intents)) {
+      tools.push('feasibility_analysis');
+      return tools;
+    }
+    
+    // 🎯 FORZA ATTIVAZIONE per "analisi di fattibilità" - SOLUZIONE RADICALE
+    if (text.includes('analisi di fattibilità') || text.includes('studio di fattibilità')) {
+      tools.push('feasibility_analysis');
+      return tools;
+    }
+    
     if (!hasProjectData) {
       return tools; // Nessun tool se non ci sono dati di progetto
     }
