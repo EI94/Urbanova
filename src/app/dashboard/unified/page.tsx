@@ -74,9 +74,10 @@ export default function UnifiedDashboardPage() {
   console.log('🔍 [DEBUG CRASH] UnifiedDashboardPage renderizzato - PUNTO CRITICO WEB 1');
   const { t } = useLanguage();
   const authContext = useAuth();
-  console.log('🔍 [DEBUG CRASH] useAuth chiamato - PUNTO CRITICO WEB 2');
-  const currentUser = authContext?.currentUser || null;
-  const authLoading = authContext?.loading || false;
+  console.log('🔍 [DEBUG CRASH] useAuth chiamato - PUNTO CRITICO WEB 2', { authContext });
+  // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
+  const currentUser = (authContext && typeof authContext === 'object' && 'currentUser' in authContext) ? authContext.currentUser : null;
+  const authLoading = (authContext && typeof authContext === 'object' && 'loading' in authContext) ? authContext.loading : false;
   console.log('🔍 [DEBUG CRASH] Auth context estratto - PUNTO CRITICO WEB 3');
   const { darkMode, setDarkMode } = useDarkMode();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
