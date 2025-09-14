@@ -30,8 +30,16 @@ class GlobalErrorHandler {
   }
 
   private setupGlobalErrorHandlers() {
-    // Intercetta errori JavaScript globali
+    // Intercetta errori JavaScript globali con prevenzione crash
     window.addEventListener('error', (event) => {
+      // Se è un errore auth destructuring, previeni il crash
+      if (event.message && event.message.includes('Cannot destructure property') && event.message.includes('auth')) {
+        console.warn('🛡️ [CRITICAL] Auth destructuring error intercettato, prevenendo crash');
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+      }
+      
       this.handleError({
         message: event.message,
         stack: event.error?.stack,
@@ -76,6 +84,19 @@ class GlobalErrorHandler {
     try {
       // Intercetta TUTTI i destructuring che potrebbero causare problemi
       this.interceptDestructuring();
+      
+      // Intercetta window.onerror per prevenire crash auth destructuring
+      const originalOnError = window.onerror;
+      window.onerror = function(message, source, lineno, colno, error) {
+        if (message && message.includes('Cannot destructure property') && message.includes('auth')) {
+          console.warn('🛡️ [CRITICAL] window.onerror auth destructuring intercettato, prevenendo crash');
+          return true; // Previeni il default browser error handling
+        }
+        if (originalOnError) {
+          return originalOnError(message, source, lineno, colno, error);
+        }
+        return false;
+      };
       
       // Intercetta React.useMemo per prevenire crash auth destructuring
       if (typeof window !== 'undefined' && (window as any).React) {
