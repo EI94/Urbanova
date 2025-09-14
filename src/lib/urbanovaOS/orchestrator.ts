@@ -4544,24 +4544,12 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
         });
         
         // 🚀 SISTEMA CONVERSAZIONALE AVANZATO - Attivazione garantita per fattibilità
-        // 🎯 FORZA ATTIVAZIONE per "analisi di fattibilità" - SOLUZIONE RADICALE CHATGPT-5
-        const messageText = request.message.content.toLowerCase();
-        const isFeasibilityRequest = messageText.includes('analisi di fattibilità') || 
-                                   messageText.includes('studio di fattibilità') ||
-                                   messageText.includes('bifamiliare') ||
-                                   messageText.includes('stimare') && messageText.includes('prezzo');
-        
-        if (isFeasibilityRequest || isFeasibilityQuery || userIntent.toolsRequired.length > 0 || 
+        if (isFeasibilityQuery || userIntent.toolsRequired.length > 0 || 
             (extractedData.buildableArea && extractedData.constructionCostPerSqm) ||
             extractedData.buildableArea || extractedData.constructionCostPerSqm || extractedData.purchasePrice) {
           console.log('🧠 [Advanced Conversational] Generando risposta con tool attivati...');
-          
-          // 🎯 FORZA ATTIVAZIONE TOOL per richieste di analisi di fattibilità
-          if (isFeasibilityRequest) {
-            console.log('🎯 [FORZA ATTIVAZIONE] Rilevata richiesta di analisi di fattibilità, forzando attivazione tool...');
-            userIntent.toolsRequired = ['feasibility_analysis'];
-            userIntent.primary = 'feasibility';
-          }
+          console.log('🔍 [DEBUG] userIntent.toolsRequired:', userIntent.toolsRequired);
+          console.log('🔍 [DEBUG] isFeasibilityQuery:', isFeasibilityQuery);
           
           const conversationalResponse = await this.conversationalEngine.generateAdvancedResponse(
             userIntent, 

@@ -521,6 +521,13 @@ export class AdvancedConversationalEngine {
     
     const text = originalMessage.toLowerCase();
     
+    console.log('🔍 [DEBUG] determineRequiredTools chiamata con:', {
+      text: text.substring(0, 100) + '...',
+      hasProjectData,
+      intents: intents,
+      dataExtracted: dataExtracted
+    });
+    
     // 🎯 RICHIESTE DI PREZZI E COSTI - Sempre attiva
     if (this.isPriceRequest(text) || this.isCostRequest(text)) {
       tools.push('feasibility_analysis');
@@ -539,35 +546,6 @@ export class AdvancedConversationalEngine {
       return tools;
     }
     
-    // 🎯 FORZA ATTIVAZIONE per "analisi di fattibilità" - SOLUZIONE RADICALE
-    if (text.includes('analisi di fattibilità') || text.includes('studio di fattibilità')) {
-      tools.push('feasibility_analysis');
-      return tools;
-    }
-    
-    // 🎯 FORZA ATTIVAZIONE per "bifamiliare" - SOLUZIONE RADICALE
-    if (text.includes('bifamiliare') && (text.includes('monteporzio') || text.includes('terreno'))) {
-      tools.push('feasibility_analysis');
-      return tools;
-    }
-    
-    // 🎯 FORZA ATTIVAZIONE per "stimare" + "prezzo" - SOLUZIONE RADICALE
-    if (text.includes('stimare') && text.includes('prezzo')) {
-      tools.push('feasibility_analysis');
-      return tools;
-    }
-    
-    // 🎯 FORZA ATTIVAZIONE per "aiutami" + "analisi" - SOLUZIONE RADICALE
-    if (text.includes('aiutami') && text.includes('analisi')) {
-      tools.push('feasibility_analysis');
-      return tools;
-    }
-    
-    // 🎯 FORZA ATTIVAZIONE per "terreno" + "edificabili" - SOLUZIONE RADICALE
-    if (text.includes('terreno') && text.includes('edificabili')) {
-      tools.push('feasibility_analysis');
-      return tools;
-    }
     
     if (!hasProjectData) {
       return tools; // Nessun tool se non ci sono dati di progetto
@@ -662,9 +640,23 @@ export class AdvancedConversationalEngine {
       'terreno', 'progetto', 'immobile', 'costruzione'
     ];
     
-    return feasibilityKeywords.some(keyword => text.includes(keyword)) ||
-           intents.primary === 'feasibility' ||
-           (intents.confidence > 0.5 && (text.includes('terreno') || text.includes('progetto') || text.includes('immobile')));
+    const keywordMatches = feasibilityKeywords.filter(keyword => text.includes(keyword));
+    const hasKeywordMatch = keywordMatches.length > 0;
+    const hasIntentMatch = intents.primary === 'feasibility';
+    const hasConfidenceMatch = intents.confidence > 0.5 && (text.includes('terreno') || text.includes('progetto') || text.includes('immobile'));
+    
+    const result = hasKeywordMatch || hasIntentMatch || hasConfidenceMatch;
+    
+    console.log('🔍 [DEBUG] isFeasibilityRequest:', {
+      text: text.substring(0, 100) + '...',
+      keywordMatches,
+      hasKeywordMatch,
+      hasIntentMatch,
+      hasConfidenceMatch,
+      result
+    });
+    
+    return result;
   }
   
   /**
