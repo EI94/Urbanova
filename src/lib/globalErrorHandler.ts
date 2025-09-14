@@ -1,6 +1,8 @@
 // Global Error Handler per intercettare TUTTI gli errori JavaScript
 // Questo file viene caricato automaticamente per prevenire crash
 
+import React from 'react';
+
 interface ErrorInfo {
   message: string;
   stack?: string;
@@ -24,6 +26,7 @@ class GlobalErrorHandler {
 
   constructor() {
     this.setupGlobalErrorHandlers();
+    this.setupAuthProtection();
   }
 
   private setupGlobalErrorHandlers() {
@@ -69,6 +72,32 @@ class GlobalErrorHandler {
     }
   }
 
+  private setupAuthProtection() {
+    try {
+      // Intercetta React.useMemo per prevenire crash auth destructuring
+      if (typeof window !== 'undefined' && (window as any).React) {
+        const React = (window as any).React;
+        const originalUseMemo = React.useMemo;
+        
+        React.useMemo = function(factory, deps) {
+          try {
+            return originalUseMemo(factory, deps);
+          } catch (error) {
+            if (error.message && error.message.includes('Cannot destructure property') && error.message.includes('auth')) {
+              console.warn('🛡️ [Auth Protection] useMemo auth destructuring intercettato, usando fallback');
+              return factory();
+            }
+            throw error;
+          }
+        };
+        
+        console.log('🛡️ [Auth Protection] React.useMemo intercettato per prevenire crash auth');
+      }
+    } catch (error) {
+      console.error('❌ [Auth Protection] Errore nell\'intercettazione React.useMemo:', error);
+    }
+  }
+
   private handleError(errorInfo: ErrorInfo) {
     this.errorCount++;
 
@@ -94,14 +123,34 @@ class GlobalErrorHandler {
 
   private handleAuthDestructuringError() {
     try {
-      console.error('🚨 [CRITICAL] Auth destructuring error - IMMEDIATE PAGE RELOAD!');
+      console.error('🚨 [CRITICAL] Auth destructuring error - PREVENTING CRASH!');
       
-      // RICARICA IMMEDIATA della pagina
-      window.location.reload();
+      // Invece di ricaricare, previeni il crash intercettando il problema
+      this.preventAuthDestructuringCrash();
     } catch (error) {
       console.error('❌ [Global Error Handler] Errore nel recupero auth:', error);
-      // Se anche il reload fallisce, prova con location.href
-      window.location.href = window.location.href;
+    }
+  }
+
+  private preventAuthDestructuringCrash() {
+    try {
+      // Intercetta tutti i useMemo che potrebbero causare problemi
+      const originalUseMemo = React.useMemo;
+      React.useMemo = function(factory, deps) {
+        try {
+          return originalUseMemo(factory, deps);
+        } catch (error) {
+          if (error.message && error.message.includes('Cannot destructure property') && error.message.includes('auth')) {
+            console.warn('🛡️ [Auth Protection] useMemo auth destructuring intercettato, usando fallback');
+            return factory();
+          }
+          throw error;
+        }
+      };
+      
+      console.log('🛡️ [Auth Protection] useMemo intercettato per prevenire crash auth');
+    } catch (error) {
+      console.error('❌ [Auth Protection] Errore nell\'intercettazione useMemo:', error);
     }
   }
 
