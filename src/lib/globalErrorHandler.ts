@@ -35,6 +35,13 @@ class GlobalErrorHandler {
       // Se è un errore auth destructuring, previeni il crash
       if (event.message && event.message.includes('Cannot destructure property') && event.message.includes('auth')) {
         console.warn('🛡️ [CRITICAL] Auth destructuring error intercettato, prevenendo crash');
+        // Attiva recupero automatico
+        setTimeout(() => {
+          console.log('🔄 [RECOVERY] Tentativo di recupero automatico...');
+          // Forza re-render del componente principale
+          const recoveryEvent = new CustomEvent('auth-recovery');
+          window.dispatchEvent(recoveryEvent);
+        }, 100);
         event.preventDefault();
         event.stopPropagation();
         return false;
@@ -90,6 +97,13 @@ class GlobalErrorHandler {
       window.onerror = function(message, source, lineno, colno, error) {
         if (message && message.includes('Cannot destructure property') && message.includes('auth')) {
           console.warn('🛡️ [CRITICAL] window.onerror auth destructuring intercettato, prevenendo crash');
+          // Attiva recupero automatico
+          setTimeout(() => {
+            console.log('🔄 [RECOVERY] Tentativo di recupero automatico...');
+            // Forza re-render del componente principale
+            const event = new CustomEvent('auth-recovery');
+            window.dispatchEvent(event);
+          }, 100);
           return true; // Previeni il default browser error handling
         }
         if (originalOnError) {

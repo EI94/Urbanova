@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import AuthProtectedWrapper from '@/components/AuthProtectedWrapper';
+import AuthRecoveryHandler from '@/components/AuthRecoveryHandler';
 import '@/lib/globalErrorHandler'; // Carica il global error handler
 
 import {
@@ -51,6 +52,7 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children, title = 'Dashboard' }: DashboardLayoutProps) {
   return (
     <ErrorBoundary>
+      <AuthRecoveryHandler />
       <AuthProtectedWrapper>
         <AuthGuard>
           <DashboardLayoutContent children={children} title={title} />
