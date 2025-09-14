@@ -26,6 +26,11 @@ class ChatHistoryService {
   // Salva una sessione di chat
   saveChatSession(session: ChatSession): void {
     try {
+      // Protezione per evitare crash con title undefined
+      if (!session.title) {
+        session.title = 'Sessione senza titolo';
+      }
+      
       const existingSessions = this.getChatSessions();
       
       // Rimuovi sessioni duplicate (stesso ID)
@@ -49,9 +54,11 @@ class ChatHistoryService {
       
       const sessions = JSON.parse(stored);
       
-      // Converte le date da stringa a oggetto Date
+      // Converte le date da stringa a oggetto Date e protegge title
       return sessions.map((session: any) => ({
         ...session,
+        title: session.title || 'Sessione senza titolo',
+        preview: session.preview || 'Nessun preview disponibile',
         timestamp: new Date(session.timestamp),
         messages: session.messages.map((msg: any) => ({
           ...msg,

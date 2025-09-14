@@ -48,6 +48,12 @@ export async function POST(request: NextRequest) {
     const calculateFeasibility = (data: any) => {
       const area = data.area || 200; // Default più generico
       
+      // Validazione area per evitare NaN
+      if (!area || isNaN(area) || area <= 0) {
+        console.warn('⚠️ [FEASIBILITY] Area non valida, usando default 200 mq');
+        data.area = 200;
+      }
+      
       // Calcola unità basandosi sulla tipologia
       let unita = 1;
       let mqPerUnita = area;
@@ -82,13 +88,19 @@ export async function POST(request: NextRequest) {
       
       const ricavoVendita = (unita * mqPerUnita) * prezzoVendita;
       const margineLordo = ricavoVendita - investimentoTotale;
-      const roi = (margineLordo / investimentoTotale) * 100;
+      const roi = investimentoTotale > 0 ? (margineLordo / investimentoTotale) * 100 : 0;
+      
+      // Validazione finale per evitare NaN
+      const safeInvestimento = isNaN(investimentoTotale) ? 0 : investimentoTotale;
+      const safeRicavo = isNaN(ricavoVendita) ? 0 : ricavoVendita;
+      const safeMargine = isNaN(margineLordo) ? 0 : margineLordo;
+      const safeROI = isNaN(roi) ? 0 : roi;
       
       return {
-        investimentoTotale: Math.round(investimentoTotale),
-        ricavoVendita: Math.round(ricavoVendita),
-        margineLordo: Math.round(margineLordo),
-        roi: Math.round(roi * 100) / 100,
+        investimentoTotale: Math.round(safeInvestimento),
+        ricavoVendita: Math.round(safeRicavo),
+        margineLordo: Math.round(safeMargine),
+        roi: Math.round(safeROI * 100) / 100,
         prezzoPerMq: prezzoVendita,
         unita: unita,
         mqPerUnita: mqPerUnita,

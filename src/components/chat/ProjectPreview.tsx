@@ -54,7 +54,7 @@ export default function ProjectPreview({ project, onViewProject }: ProjectPrevie
         <div className="flex-1 min-w-0">
           <div className="flex items-center space-x-2 mb-1">
             <h3 className="text-sm font-medium text-gray-900 truncate">
-              {project.preview.title}
+              {project.preview?.title || 'Progetto senza titolo'}
             </h3>
             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
               Creato
@@ -62,12 +62,12 @@ export default function ProjectPreview({ project, onViewProject }: ProjectPrevie
           </div>
           
           <p className="text-xs text-gray-500 mb-2">
-            {project.preview.description}
+            {project.preview?.description || 'Nessuna descrizione disponibile'}
           </p>
           
           {/* Informazioni chiave */}
           <div className="space-y-1">
-            {project.preview.keyInfo.slice(0, 2).map((info, index) => (
+            {(project.preview?.keyInfo || []).slice(0, 2).map((info, index) => (
               <div key={index} className="text-xs text-gray-600">
                 {info}
               </div>
