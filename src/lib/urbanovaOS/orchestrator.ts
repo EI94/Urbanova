@@ -4220,6 +4220,12 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
       const userIntent = this.conversationalEngine.analyzeUserIntent(request.message.content, memory);
       const isFeasibilityQuery = userIntent.toolsRequired.length > 0 || userIntent.primary === 'feasibility';
       
+      console.log('🔍 [DEBUG] analyzeUserIntent risultato:', {
+        userIntent: userIntent,
+        toolsRequired: userIntent.toolsRequired,
+        isFeasibilityQuery: isFeasibilityQuery
+      });
+      
       // 🔧 USA L'ESTRAZIONE DATI DELL'ORCHESTRATOR (PIÙ ROBUSTA)
       const goalAnalysis = this.analyzeUserGoal(request.message.content, memory);
       const extractedData = goalAnalysis.extractedData;
