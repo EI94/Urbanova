@@ -14,7 +14,8 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const authContext = useAuth();
+  const login = authContext?.login;
 
   const [formData, setFormData] = useState({
     email: '',

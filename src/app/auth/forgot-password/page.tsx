@@ -7,7 +7,8 @@ import { toast } from 'react-hot-toast';
 import { useAuth } from '../../../contexts/AuthContext';
 
 export default function ForgotPasswordPage() {
-  const { resetPassword } = useAuth();
+  const authContext = useAuth();
+  const resetPassword = authContext?.resetPassword;
 
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);

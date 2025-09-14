@@ -14,7 +14,8 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { signup } = useAuth();
+  const authContext = useAuth();
+  const signup = authContext?.signup;
 
   const [formData, setFormData] = useState({
     firstName: '',

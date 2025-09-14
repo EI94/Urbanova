@@ -38,7 +38,9 @@ import { Workspace } from '@/types/workspace';
 
 export default function FeasibilityAnalysisPage() {
   const { t, formatCurrency: fmtCurrency } = useLanguage();
-  const { currentUser, loading: authLoading } = useAuth();
+  const authContext = useAuth();
+  const currentUser = authContext?.currentUser || null;
+  const authLoading = authContext?.loading || false;
   const [projects, setProjects] = useState<FeasibilityProject[]>([]);
   const [ranking, setRanking] = useState<FeasibilityProject[]>([]);
   const [statistics, setStatistics] = useState<any>(null);
