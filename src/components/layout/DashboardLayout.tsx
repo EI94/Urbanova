@@ -4,6 +4,7 @@ import { MessageSquare, Bell, User, Users, Settings, X, Building2, BarChart3, Fi
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 import {
   DashboardIcon,
@@ -47,9 +48,11 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children, title = 'Dashboard' }: DashboardLayoutProps) {
   return (
-    <AuthGuard>
-      <DashboardLayoutContent children={children} title={title} />
-    </AuthGuard>
+    <ErrorBoundary>
+      <AuthGuard>
+        <DashboardLayoutContent children={children} title={title} />
+      </AuthGuard>
+    </ErrorBoundary>
   );
 }
 

@@ -23,13 +23,45 @@ interface AuthContextType {
 // Creazione del contesto con valori predefiniti
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// Hook personalizzato per utilizzare il contesto
+// Hook personalizzato per utilizzare il contesto - VERSIONE ULTRA-ROBUSTA
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth deve essere utilizzato all'interno di un AuthProvider");
+  try {
+    const context = useContext(AuthContext);
+    
+    // Se il contesto è null o undefined, restituisci un oggetto di fallback
+    if (!context) {
+      console.warn("⚠️ [useAuth] Contesto non disponibile, usando fallback sicuro");
+      return {
+        currentUser: null,
+        loading: false,
+        login: async () => { throw new Error("Auth context not available"); },
+        signup: async () => { throw new Error("Auth context not available"); },
+        logout: async () => { throw new Error("Auth context not available"); },
+        resetPassword: async () => { throw new Error("Auth context not available"); }
+      };
+    }
+    
+    // Assicurati che tutte le proprietà siano definite
+    return {
+      currentUser: context.currentUser || null,
+      loading: context.loading || false,
+      login: context.login || (async () => { throw new Error("Login function not available"); }),
+      signup: context.signup || (async () => { throw new Error("Signup function not available"); }),
+      logout: context.logout || (async () => { throw new Error("Logout function not available"); }),
+      resetPassword: context.resetPassword || (async () => { throw new Error("Reset password function not available"); })
+    };
+  } catch (error) {
+    console.error("❌ [useAuth] Errore critico nel hook:", error);
+    // Restituisci sempre un oggetto valido, mai undefined
+    return {
+      currentUser: null,
+      loading: false,
+      login: async () => { throw new Error("Auth context error"); },
+      signup: async () => { throw new Error("Auth context error"); },
+      logout: async () => { throw new Error("Auth context error"); },
+      resetPassword: async () => { throw new Error("Auth context error"); }
+    };
   }
-  return context;
 }
 
 // Props per il provider
