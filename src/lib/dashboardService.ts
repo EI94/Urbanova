@@ -120,51 +120,70 @@ class DashboardService {
     const projectsRef = collection(db, this.PROJECTS_COLLECTION);
     const activitiesRef = collection(db, this.ACTIVITIES_COLLECTION);
 
-    // Sottoscrizione ai progetti con gestione errori
-    const projectsUnsubscribe = onSnapshot(
-      projectsRef, 
-      async snapshot => {
-        console.log('🔄 [DashboardService] Progetti aggiornati, ricalcolo statistiche...');
+    // CHIRURGICO: Disabilitato onSnapshot temporaneamente per evitare 400 error
+    // const projectsUnsubscribe = onSnapshot(
+    //   projectsRef, 
+    //   async snapshot => {
+    //     console.log('🔄 [DashboardService] Progetti aggiornati, ricalcolo statistiche...');
 
-        try {
-          const projects = this.parseProjectsSnapshot(snapshot);
-          const activities = await this.getRecentActivities(10);
-          const metrics = await this.getAllProjectMetrics();
+    //     try {
+    //       const projects = this.parseProjectsSnapshot(snapshot);
+    //       const activities = await this.getRecentActivities(10);
+    //       const metrics = await this.getAllProjectMetrics();
 
-          const stats = this.calculateDashboardStats(projects, activities, metrics);
-          callback(stats);
-        } catch (error) {
-          console.error('❌ [DashboardService] Errore aggiornamento dashboard:', error);
-        }
-      },
-      error => {
-        console.error('❌ [DashboardService] Errore listener progetti:', error);
-        // Non propagare l'errore per evitare loop infiniti
-      }
-    );
+    //       const stats = this.calculateDashboardStats(projects, activities, metrics);
+    //       callback(stats);
+    //     } catch (error) {
+    //       console.error('❌ [DashboardService] Errore aggiornamento dashboard:', error);
+    //     }
+    //   },
+    //   error => {
+    //     console.error('❌ [DashboardService] Errore listener progetti:', error);
+    //     // Non propagare l'errore per evitare loop infiniti
+    //   }
+    // );
+    
+    // CHIRURGICO: Caricamento iniziale senza real-time per evitare 400 error
+    // Usa Promise per evitare async/await in funzione non async
+    this.getAllProjects()
+      .then(projects => this.getRecentActivities(10)
+        .then(activities => this.getAllProjectMetrics()
+          .then(metrics => {
+            const stats = this.calculateDashboardStats(projects, activities, metrics);
+            callback(stats);
+          })
+        )
+      )
+      .catch(error => {
+        console.error('❌ [DashboardService] Errore caricamento iniziale dashboard:', error);
+      });
+    
+    const projectsUnsubscribe = () => {}; // Callback vuoto
 
-    // Sottoscrizione alle attività con gestione errori
-    const activitiesUnsubscribe = onSnapshot(
-      activitiesRef, 
-      async snapshot => {
-        console.log('🔄 [DashboardService] Attività aggiornate, ricalcolo statistiche...');
+    // CHIRURGICO: Disabilitato onSnapshot temporaneamente per evitare 400 error
+    // const activitiesUnsubscribe = onSnapshot(
+    //   activitiesRef, 
+    //   async snapshot => {
+    //     console.log('🔄 [DashboardService] Attività aggiornate, ricalcolo statistiche...');
 
-        try {
-          const projects = await this.getAllProjects();
-          const activities = this.parseActivitiesSnapshot(snapshot);
-          const metrics = await this.getAllProjectMetrics();
+    //     try {
+    //       const projects = await this.getAllProjects();
+    //       const activities = this.parseActivitiesSnapshot(snapshot);
+    //       const metrics = await this.getAllProjectMetrics();
 
-          const stats = this.calculateDashboardStats(projects, activities, metrics);
-          callback(stats);
-        } catch (error) {
-          console.error('❌ [DashboardService] Errore aggiornamento dashboard:', error);
-        }
-      },
-      error => {
-        console.error('❌ [DashboardService] Errore listener attività:', error);
-        // Non propagare l'errore per evitare loop infiniti
-      }
-    );
+    //       const stats = this.calculateDashboardStats(projects, activities, metrics);
+    //       callback(stats);
+    //     } catch (error) {
+    //       console.error('❌ [DashboardService] Errore aggiornamento dashboard:', error);
+    //     }
+    //   },
+    //   error => {
+    //     console.error('❌ [DashboardService] Errore listener attività:', error);
+    //     // Non propagare l'errore per evitare loop infiniti
+    //   }
+    // );
+    
+    const activitiesUnsubscribe = () => {}; // Callback vuoto
 
     return () => {
       projectsUnsubscribe();
