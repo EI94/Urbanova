@@ -39,8 +39,9 @@ import { Workspace } from '@/types/workspace';
 export default function FeasibilityAnalysisPage() {
   const { t, formatCurrency: fmtCurrency } = useLanguage();
   const authContext = useAuth();
-  const currentUser = authContext?.currentUser || null;
-  const authLoading = authContext?.loading || false;
+  // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
+  const currentUser = (authContext && typeof authContext === 'object' && 'currentUser' in authContext) ? authContext.currentUser : null;
+  const authLoading = (authContext && typeof authContext === 'object' && 'loading' in authContext) ? authContext.loading : false;
   const [projects, setProjects] = useState<FeasibilityProject[]>([]);
   const [ranking, setRanking] = useState<FeasibilityProject[]>([]);
   const [statistics, setStatistics] = useState<any>(null);
@@ -293,8 +294,8 @@ export default function FeasibilityAnalysisPage() {
             <Plus className="w-4 h-4" />
             <span>Nuovo Progetto</span>
           </Link>
+          </div>
         </div>
-      </div>
 
       {/* Main Content */}
       <div className="p-8">

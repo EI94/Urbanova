@@ -43,7 +43,8 @@ interface Feedback {
 
 const FeedbackDashboard: React.FC = () => {
   const authContext = useAuth();
-  const user = authContext?.currentUser || null;
+  // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
+  const user = (authContext && typeof authContext === 'object' && 'currentUser' in authContext) ? authContext.currentUser : null;
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState<string>('all');
