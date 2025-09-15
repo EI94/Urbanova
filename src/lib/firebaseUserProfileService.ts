@@ -294,8 +294,9 @@ class FirebaseUserProfileService {
 
   async getLoginHistory(userId: string, limit: number = 50): Promise<LoginAttempt[]> {
     try {
+      const loginHistoryRef = await safeCollection('loginHistory');
       const q = query(
-        safeCollection('loginHistory'),
+        loginHistoryRef,
         where('userId', '==', userId),
         orderBy('timestamp', 'desc')
       );

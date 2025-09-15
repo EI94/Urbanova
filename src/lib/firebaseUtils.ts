@@ -1,78 +1,26 @@
 import { Firestore, collection } from 'firebase/firestore';
+import { db } from './firebase';
 
 /**
  * Funzione helper per verificare che Firebase sia inizializzato correttamente
  * prima di chiamare collection() per evitare l'errore:
  * "Expected first argument to collection() to be a CollectionReference, a DocumentReference or FirebaseFirestore"
  */
-// Cache globale per l'istanza Firebase
-let cachedDb: Firestore | null = null;
-let cachedApp: any = null;
-
-export async function safeCollection(collectionName: string) {
+export function safeCollection(collectionName: string) {
   console.log('🚀🚀🚀 [safeCollection] CHIAMATA RICEVUTA per collezione:', collectionName);
-  console.log('🚀🚀🚀 [safeCollection] cachedDb type:', typeof cachedDb);
-  console.log('🚀🚀🚀 [safeCollection] cachedDb value:', cachedDb);
-  console.log('🚀🚀🚀 [safeCollection] cachedDb constructor:', cachedDb?.constructor?.name);
-  console.log('🚀🚀🚀 [safeCollection] cachedDb === null:', cachedDb === null);
-  console.log('🚀🚀🚀 [safeCollection] cachedDb === undefined:', cachedDb === undefined);
-  console.log('🚀🚀🚀 [safeCollection] Stack trace chiamata:', new Error().stack);
+  console.log('🚀🚀🚀 [safeCollection] db type:', typeof db);
+  console.log('🚀🚀🚀 [safeCollection] db value:', db);
+  console.log('🚀🚀🚀 [safeCollection] db constructor:', db?.constructor?.name);
   
-  // CHIRURGICO: Usa sempre l'istanza Firebase principale da firebase.ts
-  if (!cachedDb || cachedDb === undefined || cachedDb === null) {
-    console.warn('⚠️⚠️⚠️ [safeCollection] Firebase Firestore non cached - usando istanza principale...');
-    console.warn('⚠️⚠️⚠️ [safeCollection] cachedDb value:', cachedDb);
-    console.warn('⚠️⚠️⚠️ [safeCollection] cachedDb type:', typeof cachedDb);
-    
-    try {
-      // CHIRURGICO: Inizializzazione Firebase diretta per evitare import circolare
-      const firebaseConfig = {
-        apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyAxex9T9insV0Y5-puRZc6y-QQhn1KLXD8',
-        authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'urbanova-b623e.firebaseapp.com',
-        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'urbanova-b623e',
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'urbanova-b623e.firebasestorage.app',
-        messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '599892072352',
-        appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '1:599892072352:web:34553ac67eb39d2b9ab6c5',
-        measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-QHNDTK9P3L',
-      };
-      
-      console.log('🚀🚀🚀 [safeCollection] Inizializzando Firebase con config:', firebaseConfig);
-      
-      // Importa dinamicamente per evitare import circolare
-      const { initializeApp } = await import('firebase/app');
-      const { getFirestore } = await import('firebase/firestore');
-      
-      // Inizializza Firebase completamente
-      cachedApp = initializeApp(firebaseConfig);
-      cachedDb = getFirestore(cachedApp);
-      
-      console.log('✅✅✅ [safeCollection] Firebase inizializzato con successo!');
-      console.log('✅✅✅ [safeCollection] cachedDb type:', typeof cachedDb);
-      console.log('✅✅✅ [safeCollection] cachedDb constructor:', cachedDb?.constructor?.name);
-      console.log('✅✅✅ [safeCollection] cachedDb value:', cachedDb);
-      
-      // Verifica che cachedDb sia valido
-      if (!cachedDb || typeof cachedDb !== 'object') {
-        throw new Error('cachedDb non è un oggetto valido dopo inizializzazione');
-      }
-      
-    } catch (initError: any) {
-      console.error('❌❌❌ [safeCollection] Errore caricamento istanza principale Firebase:', initError);
-      console.error('❌❌❌ [safeCollection] initError message:', initError.message);
-      console.error('❌❌❌ [safeCollection] initError stack:', initError.stack);
-      throw new Error(`Firebase Firestore non inizializzato per ${collectionName}: ${initError.message}`);
-    }
-  }
-  
-  // Verifica che cachedDb sia effettivamente un'istanza di Firestore
-  if (typeof cachedDb !== 'object' || !cachedDb) {
-    console.error('❌❌❌ [safeCollection] Firebase Firestore cached non è un oggetto valido:', typeof cachedDb, cachedDb);
-    throw new Error('Firebase Firestore cached non è valido');
+  // CHIRURGICO: Usa direttamente l'istanza Firebase principale da firebase.ts
+  if (!db || typeof db !== 'object') {
+    console.error('❌❌❌ [safeCollection] Firebase Firestore non inizializzato:', typeof db, db);
+    throw new Error(`Firebase Firestore non inizializzato per ${collectionName}`);
   }
   
   try {
     console.log('🚀🚀🚀 [safeCollection] Chiamando collection() Firebase per:', collectionName);
-    const result = collection(cachedDb, collectionName);
+    const result = collection(db, collectionName);
     console.log('✅✅✅ [safeCollection] Collection REALE creata con successo per:', collectionName);
     return result;
   } catch (error: any) {
