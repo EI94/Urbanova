@@ -56,8 +56,14 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
 
 function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayoutProps) {
   const { t } = useLanguage();
-  const authContext = useAuth();
   // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    console.error('❌ [DashboardLayout] Errore useAuth:', error);
+    authContext = { currentUser: null, loading: false };
+  }
   const auth = (authContext && typeof authContext === 'object') ? authContext : { currentUser: null, loading: false };
   
   // CHIRURGICO: Protezione usePathname per evitare race condition con useAuth

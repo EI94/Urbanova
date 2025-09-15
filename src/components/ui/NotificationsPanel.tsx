@@ -18,8 +18,14 @@ interface NotificationsPanelProps {
 
 export default function NotificationsPanel({ isOpen, onClose }: NotificationsPanelProps) {
   const { t } = useLanguage();
-  const authContext = useAuth();
   // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    console.error('❌ [NotificationsPanel] Errore useAuth:', error);
+    authContext = { currentUser: null, loading: false };
+  }
   const currentUser = (authContext && typeof authContext === 'object' && 'currentUser' in authContext) ? authContext.currentUser : null;
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [stats, setStats] = useState<NotificationStats | null>(null);

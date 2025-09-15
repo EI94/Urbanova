@@ -37,8 +37,14 @@ interface FeedbackWidgetProps {
 }
 
 const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className = '' }) => {
-  const authContext = useAuth();
   // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    console.error('❌ [FeedbackWidget] Errore useAuth:', error);
+    authContext = { currentUser: null, loading: false };
+  }
   const currentUser = (authContext && typeof authContext === 'object' && 'currentUser' in authContext) ? authContext.currentUser : null;
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
