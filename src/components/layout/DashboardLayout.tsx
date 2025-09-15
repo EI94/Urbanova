@@ -88,11 +88,11 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
   useEffect(() => {
     const loadData = async () => {
       try {
-        if (auth.currentUser?.uid) {
+        if (auth && typeof auth === 'object' && 'currentUser' in auth && auth.currentUser?.uid) {
           console.log('🔄 [DashboardLayout] Caricamento dati per utente:', auth.currentUser.uid);
           const [notificationsData, profileData] = await Promise.all([
-            firebaseNotificationService.getNotificationStats(auth.currentUser.uid),
-            firebaseUserProfileService.getUserProfile(auth.currentUser.uid),
+            firebaseNotificationService.getNotificationStats(auth.currentUser?.uid || ''),
+            firebaseUserProfileService.getUserProfile(auth.currentUser?.uid || ''),
           ]);
           setNotifications(notificationsData);
           setUserProfile(profileData);
@@ -100,7 +100,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
           // Carica workspace dell'utente con gestione errori
           try {
             const { workspaceService } = await import('@/lib/workspaceService');
-            const workspaceData = await workspaceService.getWorkspacesByUser(auth.currentUser.uid);
+            const workspaceData = await workspaceService.getWorkspacesByUser(auth.currentUser?.uid || '');
             setWorkspaces(workspaceData);
             console.log('✅ [DashboardLayout] Workspace caricati:', workspaceData);
           } catch (workspaceError) {
@@ -119,10 +119,10 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
     };
 
     // Carica solo se l'utente è autenticato
-    if (auth.currentUser?.uid) {
+    if (auth && typeof auth === 'object' && 'currentUser' in auth && auth.currentUser?.uid) {
       loadData();
     }
-  }, [auth.currentUser?.uid]);
+  }, [auth && typeof auth === 'object' && 'currentUser' in auth ? auth.currentUser?.uid : null]);
 
   const handleLogout = async () => {
     try {

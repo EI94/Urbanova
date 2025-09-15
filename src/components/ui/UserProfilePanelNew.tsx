@@ -19,7 +19,7 @@ export default function UserProfilePanelNew({ isOpen, onClose }: UserProfilePane
   const authContext = useAuth();
   // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
   const auth = (authContext && typeof authContext === 'object') ? authContext : { currentUser: null, loading: false };
-  const currentUser = auth.currentUser;
+  const currentUser = (auth && typeof auth === 'object' && 'currentUser' in auth) ? auth.currentUser : null;
   
   // Stati principali
   const [profile, setProfile] = useState<UserProfile | null>(null);
