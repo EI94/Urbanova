@@ -53,7 +53,8 @@ export default function RealTimeCollaboration({
   onWorkflowUpdate,
 }: RealTimeCollaborationProps) {
   const authContext = useAuth();
-  const user = authContext?.currentUser || null;
+  // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
+  const user = (authContext && typeof authContext === 'object' && 'currentUser' in authContext) ? authContext.currentUser : null;
   const [activeTab, setActiveTab] = useState<'comments' | 'versions' | 'workflow' | 'sessions'>(
     'comments'
   );

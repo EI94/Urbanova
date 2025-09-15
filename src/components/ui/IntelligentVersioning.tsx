@@ -66,7 +66,8 @@ export default function IntelligentVersioning({
   onVersionCompare,
 }: IntelligentVersioningProps) {
   const authContext = useAuth();
-  const user = authContext?.currentUser || null;
+  // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
+  const user = (authContext && typeof authContext === 'object' && 'currentUser' in authContext) ? authContext.currentUser : null;
   const [versions, setVersions] = useState<DesignVersion[]>([]);
   const [selectedVersion, setSelectedVersion] = useState<DesignVersion | null>(null);
   const [showVersionForm, setShowVersionForm] = useState(false);

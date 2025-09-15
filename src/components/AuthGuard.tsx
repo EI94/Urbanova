@@ -10,8 +10,9 @@ interface AuthGuardProps {
 
 export default function AuthGuard({ children }: AuthGuardProps) {
   const authContext = useAuth();
-  const currentUser = authContext?.currentUser || null;
-  const loading = authContext?.loading || false;
+  // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
+  const currentUser = (authContext && typeof authContext === 'object' && 'currentUser' in authContext) ? authContext.currentUser : null;
+  const loading = (authContext && typeof authContext === 'object' && 'loading' in authContext) ? authContext.loading : false;
   const router = useRouter();
 
   useEffect(() => {

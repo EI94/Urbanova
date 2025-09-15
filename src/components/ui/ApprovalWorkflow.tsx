@@ -61,7 +61,8 @@ export default function ApprovalWorkflow({
   onWorkflowComplete,
 }: ApprovalWorkflowProps) {
   const authContext = useAuth();
-  const user = authContext?.currentUser || null;
+  // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
+  const user = (authContext && typeof authContext === 'object' && 'currentUser' in authContext) ? authContext.currentUser : null;
   const [workflows, setWorkflows] = useState<WorkflowType[]>([]);
   const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowType | null>(null);
   const [showWorkflowForm, setShowWorkflowForm] = useState(false);
