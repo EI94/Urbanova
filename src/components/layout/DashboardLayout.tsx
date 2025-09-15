@@ -59,7 +59,14 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
   const authContext = useAuth();
   // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
   const auth = (authContext && typeof authContext === 'object') ? authContext : { currentUser: null, loading: false };
-  const pathname = usePathname();
+  
+  // CHIRURGICO: Protezione usePathname per evitare race condition con useAuth
+  let pathname = '/dashboard';
+  try {
+    pathname = usePathname();
+  } catch (error) {
+    console.warn("⚠️ [DashboardLayout] Errore usePathname:", error);
+  }
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
