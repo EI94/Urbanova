@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { ProfileUpdate } from '@/types/userProfile';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
 
 interface UserProfilePanelProps {
   isOpen: boolean;

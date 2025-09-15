@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 import { UserProfile, ProfileUpdate } from '@/types/userProfile';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
 
 interface UseUserProfileReturn {
   profile: UserProfile | null;
