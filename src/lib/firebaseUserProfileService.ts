@@ -9,7 +9,7 @@ import {
   orderBy,
   serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { collection } from 'firebase/firestore';
+import { safeCollection } from './firebaseUtils';
 import { db, storage } from './firebase';
 
 // Importa i tipi dalla definizione centrale
@@ -266,7 +266,7 @@ class FirebaseUserProfileService {
         timestamp: serverTimestamp(),
       };
 
-      await addDoc(collection(db, 'loginHistory'), loginData);
+      await addDoc(safeCollection('loginHistory'), loginData);
 
       // Aggiorna anche la cronologia nel profilo (ultimi 10)
       const profile = await this.getUserProfile(userId);
@@ -295,7 +295,7 @@ class FirebaseUserProfileService {
   async getLoginHistory(userId: string, limit: number = 50): Promise<LoginAttempt[]> {
     try {
       const q = query(
-        collection(db, 'loginHistory'),
+        safeCollection('loginHistory'),
         where('userId', '==', userId),
         orderBy('timestamp', 'desc')
       );
