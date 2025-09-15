@@ -323,7 +323,7 @@ export class WorkspaceService {
       return await runTransaction(db, async (transaction) => {
         // Verifica che l'utente sia membro del workspace
         const memberQuery = query(
-          safeCollection(this.MEMBERS_COLLECTION),
+          collection(db, this.MEMBERS_COLLECTION),
           where('workspaceId', '==', workspaceId),
           where('userId', '==', sharedBy),
           where('status', '==', 'active')
