@@ -43,4 +43,6 @@ if (typeof window !== 'undefined') {
   };
 
   console.log("🛡️ [React Interceptor] Intercettazione useMemo/useCallback attivata per prevenire crash auth destructuring");
+  console.log("🛡️ [React Interceptor] React.useMemo originale:", originalUseMemo);
+  console.log("🛡️ [React Interceptor] React.useMemo intercettato:", React.useMemo);
 }
