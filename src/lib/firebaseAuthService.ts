@@ -199,20 +199,44 @@ class FirebaseAuthService {
   onAuthStateChanged(callback: (user: User | null) => void) {
     return onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
-        // Ottieni profilo completo da Firestore
-        const userProfile = await this.getUserProfile(firebaseUser.uid);
+        try {
+          // CHIRURGICO: Protezione ultra-sicura per getUserProfile
+          let userProfile = null;
+          try {
+            userProfile = await this.getUserProfile(firebaseUser.uid);
+          } catch (error) {
+            console.warn("⚠️ [Firebase Auth] Errore caricamento profilo:", error);
+            userProfile = null;
+          }
 
-        const user: User = {
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-          displayName: firebaseUser.displayName || userProfile?.displayName || '',
-          firstName: userProfile?.firstName,
-          lastName: userProfile?.lastName,
-          role: userProfile?.role || 'USER',
-          company: userProfile?.company,
-        };
+          // CHIRURGICO: Protezione ultra-sicura per userProfile destructuring
+          const safeUserProfile = (userProfile && typeof userProfile === 'object') ? userProfile : {};
 
-        callback(user);
+          const user: User = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName || safeUserProfile.displayName || '',
+            firstName: safeUserProfile.firstName || null,
+            lastName: safeUserProfile.lastName || null,
+            role: safeUserProfile.role || 'USER',
+            company: safeUserProfile.company || null,
+          };
+
+          callback(user);
+        } catch (error) {
+          console.error("❌ [Firebase Auth] Errore critico in onAuthStateChanged:", error);
+          // Fallback sicuro
+          const user: User = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName || '',
+            firstName: null,
+            lastName: null,
+            role: 'USER',
+            company: null,
+          };
+          callback(user);
+        }
       } else {
         callback(null);
       }
