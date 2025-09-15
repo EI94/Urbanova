@@ -22,7 +22,8 @@ interface UserProfilePanelProps {
 export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelProps) {
   const { t } = useLanguage();
   const authContext = useAuth();
-  const auth = authContext || { currentUser: null, loading: false };
+  // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
+  const auth = (authContext && typeof authContext === 'object') ? authContext : { currentUser: null, loading: false };
   const currentUser = auth.currentUser;
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
