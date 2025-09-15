@@ -9,7 +9,15 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 
-import { auth } from './firebase';
+// CHIRURGICO: Protezione ultra-sicura per evitare crash auth import
+let auth;
+try {
+  const firebaseModule = require('./firebase');
+  auth = firebaseModule.auth;
+} catch (error) {
+  console.error('❌ [firebaseAuthService] Errore import auth:', error);
+  auth = null;
+}
 import { db } from './firebase';
 
 // Interfaccia per l'utente

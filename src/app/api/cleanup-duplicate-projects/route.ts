@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { auth } from '@/lib/firebase';
+// CHIRURGICO: Protezione ultra-sicura per evitare crash auth import
+let auth;
+try {
+  const firebaseModule = require('@/lib/firebase');
+  auth = firebaseModule.auth;
+} catch (error) {
+  console.error('❌ [cleanup-duplicate-projects] Errore import auth:', error);
+  auth = null;
+}
 import { projectManagerService } from '@/lib/projectManagerService';
 
 export async function POST(request: NextRequest) {

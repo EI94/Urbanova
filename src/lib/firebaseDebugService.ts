@@ -1,7 +1,16 @@
 import { onAuthStateChanged, User } from 'firebase/auth';
 import {addDoc, getDocs, doc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { safeCollection } from './firebaseUtils';
-import { db, auth } from './firebase';
+// CHIRURGICO: Protezione ultra-sicura per evitare crash auth import
+let auth;
+try {
+  const firebaseModule = require('./firebase');
+  auth = firebaseModule.auth;
+} catch (error) {
+  console.error('❌ [firebaseDebugService] Errore import auth:', error);
+  auth = null;
+}
+import { db } from './firebase';
 
 export class FirebaseDebugService {
   private static instance: FirebaseDebugService;
