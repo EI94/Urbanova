@@ -9,7 +9,6 @@ import { DarkModeProvider } from '@/contexts/DarkModeContext';
 import CommandPaletteWrapper from '@/components/CommandPaletteWrapper';
 import { EnvironmentBanner } from '@/components/ui/EnvironmentBanner';
 // FirebaseInterceptorLoader rimosso - approccio semplice con safeCollection()
-import '@/lib/reactInterceptor'; // Intercettazione React per prevenire crash auth destructuring
 
 const inter = Inter({ subsets: ['latin'] });
 
