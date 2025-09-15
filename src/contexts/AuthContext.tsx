@@ -22,6 +22,7 @@ interface AuthContextType {
 
 // Creazione del contesto con valori predefiniti
 const AuthContext = createContext<AuthContextType | null>(null);
+AuthContext.displayName = 'AuthContext';
 
 // Hook personalizzato per utilizzare il contesto - VERSIONE ULTRA-ROBUSTA CON PROTEZIONE AGGIUNTIVA
 export function useAuth() {

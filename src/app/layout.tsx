@@ -8,7 +8,8 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import { DarkModeProvider } from '@/contexts/DarkModeContext';
 import CommandPaletteWrapper from '@/components/CommandPaletteWrapper';
 import { EnvironmentBanner } from '@/components/ui/EnvironmentBanner';
-// FirebaseInterceptorLoader rimosso - approccio semplice con safeCollection()
+// SOLUZIONE FINALE: Protezione globale per race condition auth
+import '@/lib/globalAuthProtection';
 
 const inter = Inter({ subsets: ['latin'] });
 
