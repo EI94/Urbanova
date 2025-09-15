@@ -9,6 +9,7 @@ import { DarkModeProvider } from '@/contexts/DarkModeContext';
 import CommandPaletteWrapper from '@/components/CommandPaletteWrapper';
 import { EnvironmentBanner } from '@/components/ui/EnvironmentBanner';
 // FirebaseInterceptorLoader rimosso - approccio semplice con safeCollection()
+import '@/lib/reactInterceptor'; // Intercettazione React per prevenire crash auth destructuring
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -68,50 +69,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/site.webmanifest" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // GLOBAL ERROR INTERCEPTOR - Gestione errori non critici
-              console.log('🔥 [GLOBAL ERROR CATCHER] Inizializzato');
-              
-              window.addEventListener('error', function(event) {
-                const error = event.error;
-                const message = error?.message || '';
-                
-                // Ignora errori Firebase 400 che non bloccano l'app
-                if (message.includes('firestore') || 
-                    message.includes('400') || 
-                    message.includes('Bad Request') ||
-                    message.includes('collection')) {
-                  console.warn('⚠️ [ERROR INTERCEPTOR] Firebase error ignorato (non critico):', message);
-                  event.preventDefault();
-                  return false;
-                }
-                
-                // Ignora errori CSS che non bloccano l'app
-                if (message.includes('@import rules are not allowed')) {
-                  console.warn('⚠️ [ERROR INTERCEPTOR] CSS import error ignorato (non critico):', message);
-                  event.preventDefault();
-                  return false;
-                }
-              });
-              
-              window.addEventListener('unhandledrejection', function(event) {
-                const reason = event.reason;
-                const message = reason?.message || '';
-                
-                // Ignora errori Firebase 400
-                if (message.includes('firestore') || 
-                    message.includes('400') || 
-                    message.includes('Bad Request')) {
-                  console.warn('⚠️ [ERROR INTERCEPTOR] Firebase promise rejection ignorato (non critico):', message);
-                  event.preventDefault();
-                  return false;
-                }
-              });
-            `,
-          }}
-        />
       </head>
       <body className={inter.className}>
         <LanguageProvider>
