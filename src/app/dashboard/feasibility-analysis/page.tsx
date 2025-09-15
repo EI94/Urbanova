@@ -38,8 +38,14 @@ import { Workspace } from '@/types/workspace';
 
 export default function FeasibilityAnalysisPage() {
   const { t, formatCurrency: fmtCurrency } = useLanguage();
-  const authContext = useAuth();
   // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    console.error('❌ [FeasibilityAnalysis] Errore useAuth:', error);
+    authContext = { currentUser: null, loading: false };
+  }
   const currentUser = (authContext && typeof authContext === 'object' && 'currentUser' in authContext) ? authContext.currentUser : null;
   const authLoading = (authContext && typeof authContext === 'object' && 'loading' in authContext) ? authContext.loading : false;
   const [projects, setProjects] = useState<FeasibilityProject[]>([]);
