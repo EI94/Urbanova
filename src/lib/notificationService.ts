@@ -309,13 +309,17 @@ export class NotificationService {
       orderBy('createdAt', 'desc')
     );
 
-    const unsubscribe = onSnapshot(q, snapshot => {
-      const notifications: Notification[] = [];
-      snapshot.forEach(doc => {
-        notifications.push({ id: doc.id, ...doc.data() } as Notification);
-      });
-      callback(notifications);
-    });
+    // CHIRURGICO: Disabilitato onSnapshot temporaneamente per evitare 400 error
+    // const unsubscribe = onSnapshot(q, snapshot => {
+    //   const notifications: Notification[] = [];
+    //   snapshot.forEach(doc => {
+    //     notifications.push({ id: doc.id, ...doc.data() } as Notification);
+    //   });
+    //   callback(notifications);
+    // });
+    
+    // CHIRURGICO: Callback vuoto per evitare 400 error
+    const unsubscribe = () => {};
 
     return unsubscribe;
   }

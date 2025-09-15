@@ -188,13 +188,17 @@ export class CollaborationService {
       orderBy('createdAt', 'desc')
     );
 
-    const unsubscribe = onSnapshot(q, snapshot => {
-      const comments: DesignComment[] = [];
-      snapshot.forEach(doc => {
-        comments.push({ id: doc.id, ...doc.data() } as DesignComment);
-      });
-      callback(comments);
-    });
+    // CHIRURGICO: Disabilitato onSnapshot temporaneamente per evitare 400 error
+    // const unsubscribe = onSnapshot(q, snapshot => {
+    //   const comments: DesignComment[] = [];
+    //   snapshot.forEach(doc => {
+    //     comments.push({ id: doc.id, ...doc.data() } as DesignComment);
+    //   });
+    //   callback(comments);
+    // });
+    
+    // CHIRURGICO: Callback vuoto per evitare 400 error
+    const unsubscribe = () => {};
 
     return unsubscribe;
   }
@@ -260,13 +264,17 @@ export class CollaborationService {
       orderBy('versionNumber', 'desc')
     );
 
-    const unsubscribe = onSnapshot(q, snapshot => {
-      const versions: DesignVersion[] = [];
-      snapshot.forEach(doc => {
-        versions.push({ id: doc.id, ...doc.data() } as DesignVersion);
-      });
-      callback(versions);
-    });
+    // CHIRURGICO: Disabilitato onSnapshot temporaneamente per evitare 400 error
+    // const unsubscribe = onSnapshot(q, snapshot => {
+    //   const versions: DesignVersion[] = [];
+    //   snapshot.forEach(doc => {
+    //     versions.push({ id: doc.id, ...doc.data() } as DesignVersion);
+    //   });
+    //   callback(versions);
+    // });
+    
+    // CHIRURGICO: Callback vuoto per evitare 400 error
+    const unsubscribe = () => {};
 
     return unsubscribe;
   }
@@ -363,13 +371,17 @@ export class CollaborationService {
   ): () => void {
     const workflowRef = doc(db, 'approvalWorkflows', workflowId);
 
-    const unsubscribe = onSnapshot(workflowRef, doc => {
-      if (doc.exists()) {
-        callback({ id: doc.id, ...doc.data() } as ApprovalWorkflow);
-      } else {
-        callback(null);
-      }
-    });
+    // CHIRURGICO: Disabilitato onSnapshot temporaneamente per evitare 400 error
+    // const unsubscribe = onSnapshot(workflowRef, doc => {
+    //   if (doc.exists()) {
+    //     callback({ id: doc.id, ...doc.data() } as ApprovalWorkflow);
+    //   } else {
+    //     callback(null);
+    //   }
+    // });
+    
+    // CHIRURGICO: Callback vuoto per evitare 400 error
+    const unsubscribe = () => {};
 
     return unsubscribe;
   }
@@ -446,13 +458,17 @@ export class CollaborationService {
       orderBy('startedAt', 'desc')
     );
 
-    const unsubscribe = onSnapshot(q, snapshot => {
-      const sessions: CollaborationSession[] = [];
-      snapshot.forEach(doc => {
-        sessions.push({ id: doc.id, ...doc.data() } as CollaborationSession);
-      });
-      callback(sessions);
-    });
+    // CHIRURGICO: Disabilitato onSnapshot temporaneamente per evitare 400 error
+    // const unsubscribe = onSnapshot(q, snapshot => {
+    //   const sessions: CollaborationSession[] = [];
+    //   snapshot.forEach(doc => {
+    //     sessions.push({ id: doc.id, ...doc.data() } as CollaborationSession);
+    //   });
+    //   callback(sessions);
+    // });
+    
+    // CHIRURGICO: Callback vuoto per evitare 400 error
+    const unsubscribe = () => {};
 
     return unsubscribe;
   }

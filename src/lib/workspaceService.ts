@@ -468,14 +468,18 @@ export class WorkspaceService {
       limit(50)
     );
 
-    return onSnapshot(notificationsQuery, (snapshot) => {
-      const notifications = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as WorkspaceNotification[];
-      
-      callback(notifications);
-    });
+    // CHIRURGICO: Disabilitato onSnapshot temporaneamente per evitare 400 error
+    // return onSnapshot(notificationsQuery, (snapshot) => {
+    //   const notifications = snapshot.docs.map(doc => ({
+    //     id: doc.id,
+    //     ...doc.data()
+    //   })) as WorkspaceNotification[];
+    //   
+    //   callback(notifications);
+    // });
+    
+    // CHIRURGICO: Callback vuoto per evitare 400 error
+    return () => {};
   }
 
   // Metodi privati
