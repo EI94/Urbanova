@@ -97,9 +97,9 @@ export function GeographicSearch({
       const data = await response.json();
 
       if (data.success) {
-        setResults(data.results);
+        setResults(data.results || []);
         setShowResults(true);
-        onResultsChange?.(data.results);
+        onResultsChange?.(data.results || []);
       } else {
         setError(data.error || 'Errore durante la ricerca');
         setResults([]);
@@ -217,13 +217,13 @@ export function GeographicSearch({
             </div>
           )}
           
-          {!error && results.length === 0 && !isLoading && (
+          {!error && (results || []).length === 0 && !isLoading && (
             <div className="p-3 text-gray-500 dark:text-gray-400 text-sm">
               Nessun risultato trovato
             </div>
           )}
           
-          {results.map((result) => (
+          {(results || []).map((result) => (
             <button
               key={result.id}
               onClick={() => handleResultSelect(result)}
@@ -297,11 +297,11 @@ export function GeographicSearchResults({
   onSelect?: (result: GeographicSearchResult) => void;
   className?: string;
 }) {
-  if (results.length === 0) return null;
+  if ((results || []).length === 0) return null;
 
   return (
     <div className={cn("space-y-2", className)}>
-      {results.map((result) => (
+      {(results || []).map((result) => (
         <div
           key={result.id}
           onClick={() => onSelect?.(result)}

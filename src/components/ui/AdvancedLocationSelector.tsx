@@ -64,14 +64,14 @@ export default function AdvancedLocationSelector({
         .map(name => name.trim())
         .filter(Boolean);
 
-      if (locationNames.length > 0) {
+      if ((locationNames || []).length > 0) {
         const initializeLocations = async () => {
           const foundLocations: AdvancedLocation[] = [];
 
           for (const name of locationNames) {
             try {
               const results = await advancedLocationsService.searchLocations(name, 5);
-              if (results.length > 0) {
+              if ((results || []).length > 0) {
                 const exactMatch = results.find(
                   loc => loc.name.toLowerCase() === name.toLowerCase()
                 );
@@ -101,7 +101,7 @@ export default function AdvancedLocationSelector({
 
   // Ricerca suggerimenti intelligente con database ISTAT
   useEffect(() => {
-    if (searchQuery.length < 2) {
+    if ((searchQuery || '').length < 2) {
       setSuggestions([]);
       return;
     }
@@ -140,17 +140,17 @@ export default function AdvancedLocationSelector({
         }
 
         // Se non ci sono risultati ISTAT, usa il servizio originale
-        if (results.length === 0) {
+        if ((results || []).length === 0) {
           results = await advancedLocationsService.searchLocations(searchQuery, 30);
         }
 
-        setSuggestions(results);
+        setSuggestions(results || []);
 
         // Statistiche di ricerca
-        const italian = results.filter(loc => loc.country === 'IT').length;
-        const european = results.filter(loc => loc.country === 'EU').length;
+        const italian = (results || []).filter(loc => loc.country === 'IT').length;
+        const european = (results || []).filter(loc => loc.country === 'EU').length;
         setSearchStats({
-          total: results.length,
+          total: (results || []).length,
           italian,
           european,
         });
@@ -204,13 +204,13 @@ export default function AdvancedLocationSelector({
   };
 
   const updateValue = (locations: AdvancedLocation[]) => {
-    if (locations.length === 0) {
+    if ((locations || []).length === 0) {
       onChange('');
-    } else if (locations.length === 1) {
+    } else if ((locations || []).length === 1) {
       onChange(locations[0]?.name || '');
     } else {
       // Per selezione multipla, rimuovi duplicati e mantieni solo località uniche
-      const uniqueLocations = locations.filter(
+      const uniqueLocations = (locations || []).filter(
         (location, index, self) =>
           index ===
           self.findIndex(
@@ -219,7 +219,7 @@ export default function AdvancedLocationSelector({
       );
 
       // Aggiorna lo stato con località uniche
-      if (uniqueLocations.length !== locations.length) {
+      if ((uniqueLocations || []).length !== (locations || []).length) {
         setSelectedLocations(uniqueLocations);
       }
 
@@ -295,9 +295,9 @@ export default function AdvancedLocationSelector({
       </div>
 
       {/* Località selezionate (solo per selezione multipla) */}
-      {showMultiple && selectedLocations.length > 0 && (
+      {showMultiple && (selectedLocations || []).length > 0 && (
         <div className="mt-2 flex flex-wrap gap-2">
-          {selectedLocations.map(location => (
+          {(selectedLocations || []).map(location => (
             <span
               key={location.id}
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
@@ -340,14 +340,14 @@ export default function AdvancedLocationSelector({
           )}
 
           {/* Nessun risultato */}
-          {!isLoading && suggestions.length === 0 && searchQuery.length >= 2 && (
+          {!isLoading && (suggestions || []).length === 0 && (searchQuery || '').length >= 2 && (
             <div className="px-4 py-2 text-sm text-gray-500">
               ❌ Nessuna località trovata per "{searchQuery}"
             </div>
           )}
 
           {/* Suggerimenti */}
-          {suggestions.map(location => (
+          {(suggestions || []).map(location => (
             <button
               key={location.id}
               onClick={() => handleSuggestionClick(location)}
@@ -369,7 +369,7 @@ export default function AdvancedLocationSelector({
           ))}
 
           {/* Footer con informazioni */}
-          {suggestions.length > 0 && (
+          {(suggestions || []).length > 0 && (
             <div className="px-4 py-2 text-xs text-gray-400 border-t border-gray-200">
               💡 Ricerca intelligente con {searchStats.total} località disponibili
             </div>
