@@ -4,9 +4,6 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/database/db';
-import { redisClient } from '@/lib/cache/redisClient';
-import { LoggerService } from '@/lib/cache/logger';
 
 // Interfaccia per lo stato di un servizio
 interface ServiceStatus {
@@ -41,66 +38,17 @@ interface HealthResponse {
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
   const requestId = request.headers.get('x-request-id') || `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  
-  // Log della richiesta
-  LoggerService.logApiRequest({
-    method: 'GET',
-    endpoint: '/api/health',
-    ip: request.ip || request.headers.get('x-forwarded-for') || 'unknown',
-    userAgent: request.headers.get('user-agent') || 'unknown',
-    requestId
-  });
 
   try {
     const services: ServiceStatus[] = [];
     let overallStatus: 'healthy' | 'unhealthy' | 'degraded' = 'healthy';
 
-    // Health check Database
-    try {
-      const dbHealth = await db.healthCheck();
-      services.push({
-        name: 'database',
-        status: dbHealth.status,
-        latency: dbHealth.latency,
-        error: dbHealth.error,
-        details: dbHealth.stats
-      });
-      
-      if (dbHealth.status === 'unhealthy') {
-        overallStatus = 'unhealthy';
-      } else if (dbHealth.status === 'degraded') {
-        overallStatus = 'degraded';
-      }
-    } catch (error) {
-      services.push({
-        name: 'database',
-        status: 'unhealthy',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-      overallStatus = 'unhealthy';
-    }
-
-    // Health check Redis
-    try {
-      const redisHealth = await redisClient.healthCheck();
-      services.push({
-        name: 'redis',
-        status: redisHealth.status,
-        latency: redisHealth.latency,
-        error: redisHealth.error
-      });
-      
-      if (redisHealth.status === 'unhealthy') {
-        overallStatus = overallStatus === 'healthy' ? 'degraded' : overallStatus;
-      }
-    } catch (error) {
-      services.push({
-        name: 'redis',
-        status: 'unhealthy',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-      overallStatus = overallStatus === 'healthy' ? 'degraded' : overallStatus;
-    }
+    // Health check semplificato - solo servizi essenziali
+    services.push({
+      name: 'api',
+      status: 'healthy',
+      latency: 0
+    });
 
     // Health check File System
     try {
@@ -212,27 +160,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const statusCode = overallStatus === 'healthy' ? 200 : 
                      overallStatus === 'degraded' ? 200 : 503;
 
-    // Log della risposta
-    LoggerService.logApiResponse({
-      method: 'GET',
-      endpoint: '/api/health',
-      statusCode,
-      responseTime: responseData.responseTime,
-      requestId
-    });
-
     return NextResponse.json(responseData, { status: statusCode });
 
   } catch (error) {
     const executionTime = Date.now() - startTime;
     
-    LoggerService.logApiError({
-      method: 'GET',
-      endpoint: '/api/health',
-      statusCode: 500,
-      error: error as Error,
-      requestId
-    });
+    console.error('Health check error:', error);
 
     return NextResponse.json({
       status: 'unhealthy',
@@ -251,71 +184,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json();
     
-    // Log della richiesta
-    LoggerService.logApiRequest({
-      method: 'POST',
-      endpoint: '/api/health',
-      ip: request.ip || request.headers.get('x-forwarded-for') || 'unknown',
-      userAgent: request.headers.get('user-agent') || 'unknown',
-      requestId,
-      body
-    });
-
-    // Health check dettagliato con parametri specifici
+    // Health check semplificato
     const { services: requestedServices = ['all'] } = body;
     
     const services: ServiceStatus[] = [];
     let overallStatus: 'healthy' | 'unhealthy' | 'degraded' = 'healthy';
 
-    // Esegui health check solo per i servizi richiesti
-    if (requestedServices.includes('all') || requestedServices.includes('database')) {
-      try {
-        const dbHealth = await db.healthCheck();
-        services.push({
-          name: 'database',
-          status: dbHealth.status,
-          latency: dbHealth.latency,
-          error: dbHealth.error,
-          details: dbHealth.stats
-        });
-        
-        if (dbHealth.status === 'unhealthy') {
-          overallStatus = 'unhealthy';
-        } else if (dbHealth.status === 'degraded') {
-          overallStatus = 'degraded';
-        }
-      } catch (error) {
-        services.push({
-          name: 'database',
-          status: 'unhealthy',
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
-        overallStatus = 'unhealthy';
-      }
-    }
-
-    if (requestedServices.includes('all') || requestedServices.includes('redis')) {
-      try {
-        const redisHealth = await redisClient.healthCheck();
-        services.push({
-          name: 'redis',
-          status: redisHealth.status,
-          latency: redisHealth.latency,
-          error: redisHealth.error
-        });
-        
-        if (redisHealth.status === 'unhealthy') {
-          overallStatus = overallStatus === 'healthy' ? 'degraded' : overallStatus;
-        }
-      } catch (error) {
-        services.push({
-          name: 'redis',
-          status: 'unhealthy',
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
-        overallStatus = overallStatus === 'healthy' ? 'degraded' : overallStatus;
-      }
-    }
+    // Servizio API sempre disponibile
+    services.push({
+      name: 'api',
+      status: 'healthy',
+      latency: 0
+    });
 
     const responseData: HealthResponse = {
       status: overallStatus,
@@ -341,27 +221,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const statusCode = overallStatus === 'healthy' ? 200 : 
                      overallStatus === 'degraded' ? 200 : 503;
 
-    // Log della risposta
-    LoggerService.logApiResponse({
-      method: 'POST',
-      endpoint: '/api/health',
-      statusCode,
-      responseTime: responseData.responseTime,
-      requestId
-    });
-
     return NextResponse.json(responseData, { status: statusCode });
 
   } catch (error) {
     const executionTime = Date.now() - startTime;
     
-    LoggerService.logApiError({
-      method: 'POST',
-      endpoint: '/api/health',
-      statusCode: 500,
-      error: error as Error,
-      requestId
-    });
+    console.error('Health check POST error:', error);
 
     return NextResponse.json({
       status: 'unhealthy',

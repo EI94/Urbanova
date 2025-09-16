@@ -90,7 +90,7 @@ export default function MarketIntelligenceMapModal({
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl">
               <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                {mapStats.totalComuni.toLocaleString()}
+                {mapStats?.totalComuni?.toLocaleString() || '0'}
               </div>
               <div className="text-sm text-blue-600 dark:text-blue-400">
                 Comuni Italiani
@@ -98,7 +98,7 @@ export default function MarketIntelligenceMapModal({
             </div>
             <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-xl">
               <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                {mapStats.totalZone.toLocaleString()}
+                {mapStats?.totalZone?.toLocaleString() || '0'}
               </div>
               <div className="text-sm text-green-600 dark:text-green-400">
                 Zone Geografiche
@@ -106,7 +106,7 @@ export default function MarketIntelligenceMapModal({
             </div>
             <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-xl">
               <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                {mapStats.totalRegioni}
+                {mapStats?.totalRegioni || '0'}
               </div>
               <div className="text-sm text-purple-600 dark:text-purple-400">
                 Regioni
@@ -114,7 +114,7 @@ export default function MarketIntelligenceMapModal({
             </div>
             <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-xl">
               <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                {mapStats.totalProvince}
+                {mapStats?.totalProvince || '0'}
               </div>
               <div className="text-sm text-orange-600 dark:text-orange-400">
                 Province
@@ -124,21 +124,38 @@ export default function MarketIntelligenceMapModal({
 
           {/* Mappa */}
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-6">
-            <InteractiveMap
-              height="500px"
-              initialCenter={[41.9028, 12.4964]}
-              initialZoom={6}
-              markers={geographicMarkers}
-              loading={mapLoading}
-              showSearch={true}
-              showFilters={true}
-              showLegend={true}
-              showControls={true}
-              onMarkerClick={handleMarkerClick}
-              onMapClick={(lat, lng) => {
-                console.log('Mappa cliccata:', { lat, lng });
-              }}
-            />
+            {mapLoading ? (
+              <div className="flex items-center justify-center h-[500px]">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600 dark:text-gray-400">Caricamento mappa...</p>
+                </div>
+              </div>
+            ) : mapError ? (
+              <div className="flex items-center justify-center h-[500px]">
+                <div className="text-center">
+                  <div className="text-red-500 mb-4">⚠️</div>
+                  <p className="text-red-600 dark:text-red-400 mb-2">Errore caricamento mappa</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{mapError}</p>
+                </div>
+              </div>
+            ) : (
+              <InteractiveMap
+                height="500px"
+                initialCenter={[41.9028, 12.4964]}
+                initialZoom={6}
+                markers={geographicMarkers || []}
+                loading={mapLoading}
+                showSearch={true}
+                showFilters={true}
+                showLegend={true}
+                showControls={true}
+                onMarkerClick={handleMarkerClick}
+                onMapClick={(lat, lng) => {
+                  console.log('Mappa cliccata:', { lat, lng });
+                }}
+              />
+            )}
           </div>
 
           {/* Selezione corrente */}

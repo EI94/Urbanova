@@ -313,6 +313,21 @@ export function useMapData(options: UseMapDataOptions = {}) {
     }
   }, []);
 
+  // Statistiche per compatibilità con componenti esistenti
+  const stats = useMemo(() => {
+    const statistics = getStatistics();
+    return {
+      totalComuni: statistics.comuni,
+      totalZone: statistics.zone,
+      totalRegioni: Object.keys(statistics.regionCounts).length,
+      totalProvince: Object.keys(statistics.provinceCounts).length,
+      totalPopulation: statistics.totalPopulation,
+      totalSurface: statistics.totalSurface,
+      averagePopulation: statistics.averagePopulation,
+      averageSurface: statistics.averageSurface
+    };
+  }, [getStatistics]);
+
   return {
     // Stato
     ...state,
@@ -323,6 +338,7 @@ export function useMapData(options: UseMapDataOptions = {}) {
     updateFilters,
     resetFilters,
     searchMarkers,
+    setFilters,
     
     // Funzioni di utilità
     getMarkersByType,
@@ -335,6 +351,12 @@ export function useMapData(options: UseMapDataOptions = {}) {
     isLoading: state.loading,
     hasError: !!state.error,
     isEmpty: state.filteredMarkers.length === 0,
-    hasData: state.markers.length > 0
+    hasData: state.markers.length > 0,
+    
+    // Statistiche per compatibilità
+    stats,
+    
+    // Alias per compatibilità con componenti esistenti
+    geographicMarkers: state.filteredMarkers
   };
 }
