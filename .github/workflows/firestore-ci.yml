@@ -40,20 +40,20 @@ jobs:
       - name: Setup Firebase CLI
         run: npm install -g firebase-tools
 
-      - name: Setup Firebase Project
-        run: |
-          echo "🔧 Setting up Firebase project..."
-          firebase use urbanova-b623e
-          echo "✅ Firebase project set to urbanova-b623e"
-
       - name: Check Firestore Configuration Files
         run: |
           echo "🔍 Checking Firestore configuration files..."
           ls -la firestore.rules firestore.indexes.json firebase.json
           echo "✅ Firestore configuration files found"
 
-      - name: Deploy Firestore Rules and Indexes
+      - name: Validate Firestore Rules
         run: |
-          echo "🚀 Deploying Firestore rules and indexes..."
-          firebase deploy --only firestore:rules,firestore:indexes --project=urbanova-b623e
-          echo "✅ Firestore deployment completed"
+          echo "🔍 Validating Firestore rules..."
+          firebase deploy --only firestore:rules --project=urbanova-b623e --dry-run
+          echo "✅ Firestore rules validation completed"
+
+      - name: Validate Firestore Indexes
+        run: |
+          echo "🔍 Validating Firestore indexes..."
+          firebase deploy --only firestore:indexes --project=urbanova-b623e --dry-run
+          echo "✅ Firestore indexes validation completed"
