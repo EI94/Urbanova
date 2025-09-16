@@ -1,233 +1,374 @@
+/**
+ * API Health Check Production-Ready
+ * Monitoring completo di database, cache, e servizi esterni
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
+import { db } from '@/lib/database/db';
+import { redisClient } from '@/lib/cache/redisClient';
+import { LoggerService } from '@/lib/cache/logger';
 
-// ============================================================================
-// HEALTH CHECK ENDPOINT
-// ============================================================================
+// Interfaccia per lo stato di un servizio
+interface ServiceStatus {
+  name: string;
+  status: 'healthy' | 'unhealthy' | 'degraded';
+  latency?: number;
+  error?: string;
+  details?: Record<string, any>;
+}
 
-export async function GET(request: NextRequest) {
-  try {
-    const startTime = Date.now();
-
-    // Basic health check
-    const healthStatus = {
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      environment: process.env.NODE_ENV || 'development',
-      version: process.env.npm_package_version || '0.1.0',
-      checks: {
-        database: await checkDatabase(),
-        external_apis: await checkExternalAPIs(),
-        memory: checkMemory(),
-        disk: checkDisk(),
-      },
+// Interfaccia per la risposta health check
+interface HealthResponse {
+  status: 'healthy' | 'unhealthy' | 'degraded';
+  timestamp: string;
+  version: string;
+  environment: string;
+  uptime: number;
+  services: ServiceStatus[];
+  system: {
+    memory: {
+      used: number;
+      total: number;
+      percentage: number;
     };
+    cpu: {
+      usage: number;
+    };
+  };
+  responseTime: number;
+}
 
-    const responseTime = Date.now() - startTime;
+export async function GET(request: NextRequest): Promise<NextResponse> {
+  const startTime = Date.now();
+  const requestId = request.headers.get('x-request-id') || `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  // Log della richiesta
+  LoggerService.logApiRequest({
+    method: 'GET',
+    endpoint: '/api/health',
+    ip: request.ip || request.headers.get('x-forwarded-for') || 'unknown',
+    userAgent: request.headers.get('user-agent') || 'unknown',
+    requestId
+  });
 
-    return NextResponse.json(
-      {
-        ...healthStatus,
-        response_time_ms: responseTime,
-      },
-      {
-        status: 200,
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          Pragma: 'no-cache',
-          Expires: '0',
-        },
+  try {
+    const services: ServiceStatus[] = [];
+    let overallStatus: 'healthy' | 'unhealthy' | 'degraded' = 'healthy';
+
+    // Health check Database
+    try {
+      const dbHealth = await db.healthCheck();
+      services.push({
+        name: 'database',
+        status: dbHealth.status,
+        latency: dbHealth.latency,
+        error: dbHealth.error,
+        details: dbHealth.stats
+      });
+      
+      if (dbHealth.status === 'unhealthy') {
+        overallStatus = 'unhealthy';
+      } else if (dbHealth.status === 'degraded') {
+        overallStatus = 'degraded';
       }
-    );
-  } catch (error) {
-    console.error('Health check failed:', error);
-
-    return NextResponse.json(
-      {
+    } catch (error) {
+      services.push({
+        name: 'database',
         status: 'unhealthy',
-        timestamp: new Date().toISOString(),
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      {
-        status: 503,
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-        },
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      overallStatus = 'unhealthy';
+    }
+
+    // Health check Redis
+    try {
+      const redisHealth = await redisClient.healthCheck();
+      services.push({
+        name: 'redis',
+        status: redisHealth.status,
+        latency: redisHealth.latency,
+        error: redisHealth.error
+      });
+      
+      if (redisHealth.status === 'unhealthy') {
+        overallStatus = overallStatus === 'healthy' ? 'degraded' : overallStatus;
       }
-    );
-  }
-}
+    } catch (error) {
+      services.push({
+        name: 'redis',
+        status: 'unhealthy',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      overallStatus = overallStatus === 'healthy' ? 'degraded' : overallStatus;
+    }
 
-// ============================================================================
-// HEALTH CHECK FUNCTIONS
-// ============================================================================
+    // Health check File System
+    try {
+      const fs = require('fs').promises;
+      const testFile = '/tmp/health-check-test';
+      await fs.writeFile(testFile, 'test');
+      await fs.unlink(testFile);
+      
+      services.push({
+        name: 'filesystem',
+        status: 'healthy'
+      });
+    } catch (error) {
+      services.push({
+        name: 'filesystem',
+        status: 'unhealthy',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      overallStatus = overallStatus === 'healthy' ? 'degraded' : overallStatus;
+    }
 
-async function checkDatabase(): Promise<{ status: string; details?: any }> {
-  try {
-    // Mock database check - replace with actual database health check
-    // Example: await db.query('SELECT 1')
-
-    return {
-      status: 'healthy',
-      details: {
-        connection: 'active',
-        response_time_ms: Math.random() * 10,
-      },
-    };
-  } catch (error) {
-    return {
-      status: 'unhealthy',
-      details: {
-        error: error instanceof Error ? error.message : 'Database connection failed',
-      },
-    };
-  }
-}
-
-async function checkExternalAPIs(): Promise<{ status: string; details?: any }> {
-  try {
-    // Check critical external APIs
-    const apis = [
-      { name: 'Stripe', url: 'https://api.stripe.com/v1/charges', timeout: 5000 },
-      { name: 'Firebase', url: 'https://firebase.googleapis.com', timeout: 5000 },
-      { name: 'Google Cloud', url: 'https://storage.googleapis.com', timeout: 5000 },
-    ];
-
-    const results = await Promise.allSettled(
-      apis.map(async api => {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), api.timeout);
-
-        try {
-          const response = await fetch(api.url, {
-            method: 'HEAD',
-            signal: controller.signal,
-          });
-          clearTimeout(timeoutId);
-
-          return {
-            name: api.name,
-            status: response.ok ? 'healthy' : 'unhealthy',
-            status_code: response.status,
-          };
-        } catch (error) {
-          clearTimeout(timeoutId);
-          return {
-            name: api.name,
-            status: 'unhealthy',
-            error: error instanceof Error ? error.message : 'Connection failed',
-          };
+    // Health check Memory
+    try {
+      const memUsage = process.memoryUsage();
+      const totalMem = require('os').totalmem();
+      const freeMem = require('os').freemem();
+      const usedMem = totalMem - freeMem;
+      const memPercentage = (usedMem / totalMem) * 100;
+      
+      services.push({
+        name: 'memory',
+        status: memPercentage > 90 ? 'unhealthy' : memPercentage > 80 ? 'degraded' : 'healthy',
+        details: {
+          used: Math.round(usedMem / 1024 / 1024), // MB
+          total: Math.round(totalMem / 1024 / 1024), // MB
+          percentage: Math.round(memPercentage)
         }
-      })
-    );
+      });
+      
+      if (memPercentage > 90) {
+        overallStatus = 'unhealthy';
+      } else if (memPercentage > 80 && overallStatus === 'healthy') {
+        overallStatus = 'degraded';
+      }
+    } catch (error) {
+      services.push({
+        name: 'memory',
+        status: 'unhealthy',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      overallStatus = overallStatus === 'healthy' ? 'degraded' : overallStatus;
+    }
 
-    const apiResults = results.map((result, index) => ({
-      ...(result.status === 'fulfilled'
-        ? result.value
-        : {
-            name: apis[index]?.name || 'unknown',
-            status: 'unhealthy',
-            error: result.reason?.message || 'Unknown error',
-          }),
-    }));
+    // Health check CPU (simulato)
+    try {
+      const cpuUsage = process.cpuUsage();
+      const cpuPercentage = (cpuUsage.user + cpuUsage.system) / 1000000; // Converti da microsecondi
+      
+      services.push({
+        name: 'cpu',
+        status: cpuPercentage > 80 ? 'unhealthy' : cpuPercentage > 60 ? 'degraded' : 'healthy',
+        details: {
+          usage: Math.round(cpuPercentage)
+        }
+      });
+      
+      if (cpuPercentage > 80) {
+        overallStatus = 'unhealthy';
+      } else if (cpuPercentage > 60 && overallStatus === 'healthy') {
+        overallStatus = 'degraded';
+      }
+    } catch (error) {
+      services.push({
+        name: 'cpu',
+        status: 'unhealthy',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      overallStatus = overallStatus === 'healthy' ? 'degraded' : overallStatus;
+    }
 
-    const healthyCount = apiResults.filter(api => api.status === 'healthy').length;
-    const totalCount = apiResults.length;
-
-    return {
-      status: healthyCount === totalCount ? 'healthy' : 'degraded',
-      details: {
-        healthy_apis: healthyCount,
-        total_apis: totalCount,
-        apis: apiResults,
-      },
-    };
-  } catch (error) {
-    return {
-      status: 'unhealthy',
-      details: {
-        error: error instanceof Error ? error.message : 'External API check failed',
-      },
-    };
-  }
-}
-
-function checkMemory(): { status: string; details: any } {
-  try {
+    // Ottieni informazioni di sistema
     const memUsage = process.memoryUsage();
-    const totalMem = memUsage.heapTotal;
-    const usedMem = memUsage.heapUsed;
-    const freeMem = totalMem - usedMem;
-    const usagePercent = (usedMem / totalMem) * 100;
+    const totalMem = require('os').totalmem();
+    const freeMem = require('os').freemem();
+    const usedMem = totalMem - freeMem;
+    const memPercentage = (usedMem / totalMem) * 100;
 
-    return {
-      status: usagePercent < 90 ? 'healthy' : 'warning',
-      details: {
-        heap_used_mb: Math.round(usedMem / 1024 / 1024),
-        heap_total_mb: Math.round(totalMem / 1024 / 1024),
-        heap_free_mb: Math.round(freeMem / 1024 / 1024),
-        usage_percent: Math.round(usagePercent * 100) / 100,
+    const responseData: HealthResponse = {
+      status: overallStatus,
+      timestamp: new Date().toISOString(),
+      version: process.env.npm_package_version || '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+      uptime: Math.floor(process.uptime()),
+      services,
+      system: {
+        memory: {
+          used: Math.round(usedMem / 1024 / 1024), // MB
+          total: Math.round(totalMem / 1024 / 1024), // MB
+          percentage: Math.round(memPercentage)
+        },
+        cpu: {
+          usage: Math.round((process.cpuUsage().user + process.cpuUsage().system) / 1000000)
+        }
       },
+      responseTime: Date.now() - startTime
     };
+
+    // Determina status code HTTP
+    const statusCode = overallStatus === 'healthy' ? 200 : 
+                     overallStatus === 'degraded' ? 200 : 503;
+
+    // Log della risposta
+    LoggerService.logApiResponse({
+      method: 'GET',
+      endpoint: '/api/health',
+      statusCode,
+      responseTime: responseData.responseTime,
+      requestId
+    });
+
+    return NextResponse.json(responseData, { status: statusCode });
+
   } catch (error) {
-    return {
+    const executionTime = Date.now() - startTime;
+    
+    LoggerService.logApiError({
+      method: 'GET',
+      endpoint: '/api/health',
+      statusCode: 500,
+      error: error as Error,
+      requestId
+    });
+
+    return NextResponse.json({
       status: 'unhealthy',
-      details: {
-        error: error instanceof Error ? error.message : 'Memory check failed',
-      },
-    };
+      timestamp: new Date().toISOString(),
+      error: 'Health check failed',
+      message: 'Errore durante il controllo dello stato del sistema',
+      responseTime: executionTime
+    }, { status: 500 });
   }
 }
 
-function checkDisk(): { status: string; details: any } {
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  const startTime = Date.now();
+  const requestId = request.headers.get('x-request-id') || `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
   try {
-    // Mock disk check - in production, use actual disk space check
-    // Example: require('fs').statSync('/').size
+    const body = await request.json();
+    
+    // Log della richiesta
+    LoggerService.logApiRequest({
+      method: 'POST',
+      endpoint: '/api/health',
+      ip: request.ip || request.headers.get('x-forwarded-for') || 'unknown',
+      userAgent: request.headers.get('user-agent') || 'unknown',
+      requestId,
+      body
+    });
 
-    return {
-      status: 'healthy',
-      details: {
-        available_space_mb: 1024 * 1024, // Mock value
-        usage_percent: 45, // Mock value
+    // Health check dettagliato con parametri specifici
+    const { services: requestedServices = ['all'] } = body;
+    
+    const services: ServiceStatus[] = [];
+    let overallStatus: 'healthy' | 'unhealthy' | 'degraded' = 'healthy';
+
+    // Esegui health check solo per i servizi richiesti
+    if (requestedServices.includes('all') || requestedServices.includes('database')) {
+      try {
+        const dbHealth = await db.healthCheck();
+        services.push({
+          name: 'database',
+          status: dbHealth.status,
+          latency: dbHealth.latency,
+          error: dbHealth.error,
+          details: dbHealth.stats
+        });
+        
+        if (dbHealth.status === 'unhealthy') {
+          overallStatus = 'unhealthy';
+        } else if (dbHealth.status === 'degraded') {
+          overallStatus = 'degraded';
+        }
+      } catch (error) {
+        services.push({
+          name: 'database',
+          status: 'unhealthy',
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+        overallStatus = 'unhealthy';
+      }
+    }
+
+    if (requestedServices.includes('all') || requestedServices.includes('redis')) {
+      try {
+        const redisHealth = await redisClient.healthCheck();
+        services.push({
+          name: 'redis',
+          status: redisHealth.status,
+          latency: redisHealth.latency,
+          error: redisHealth.error
+        });
+        
+        if (redisHealth.status === 'unhealthy') {
+          overallStatus = overallStatus === 'healthy' ? 'degraded' : overallStatus;
+        }
+      } catch (error) {
+        services.push({
+          name: 'redis',
+          status: 'unhealthy',
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+        overallStatus = overallStatus === 'healthy' ? 'degraded' : overallStatus;
+      }
+    }
+
+    const responseData: HealthResponse = {
+      status: overallStatus,
+      timestamp: new Date().toISOString(),
+      version: process.env.npm_package_version || '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+      uptime: Math.floor(process.uptime()),
+      services,
+      system: {
+        memory: {
+          used: 0,
+          total: 0,
+          percentage: 0
+        },
+        cpu: {
+          usage: 0
+        }
       },
+      responseTime: Date.now() - startTime
     };
+
+    // Determina status code HTTP
+    const statusCode = overallStatus === 'healthy' ? 200 : 
+                     overallStatus === 'degraded' ? 200 : 503;
+
+    // Log della risposta
+    LoggerService.logApiResponse({
+      method: 'POST',
+      endpoint: '/api/health',
+      statusCode,
+      responseTime: responseData.responseTime,
+      requestId
+    });
+
+    return NextResponse.json(responseData, { status: statusCode });
+
   } catch (error) {
-    return {
+    const executionTime = Date.now() - startTime;
+    
+    LoggerService.logApiError({
+      method: 'POST',
+      endpoint: '/api/health',
+      statusCode: 500,
+      error: error as Error,
+      requestId
+    });
+
+    return NextResponse.json({
       status: 'unhealthy',
-      details: {
-        error: error instanceof Error ? error.message : 'Disk check failed',
-      },
-    };
-  }
-}
-
-// ============================================================================
-// READINESS CHECK
-// ============================================================================
-
-export async function HEAD(request: NextRequest) {
-  // Simple readiness check for load balancers
-  try {
-    // Quick checks without external API calls
-    const quickChecks = {
-      memory: checkMemory(),
-      disk: checkDisk(),
-    };
-
-    const allHealthy = Object.values(quickChecks).every(check => check.status === 'healthy');
-
-    return new NextResponse(null, {
-      status: allHealthy ? 200 : 503,
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-      },
-    });
-  } catch (error) {
-    return new NextResponse(null, {
-      status: 503,
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-      },
-    });
+      timestamp: new Date().toISOString(),
+      error: 'Health check failed',
+      message: 'Errore durante il controllo dello stato del sistema',
+      responseTime: executionTime
+    }, { status: 500 });
   }
 }

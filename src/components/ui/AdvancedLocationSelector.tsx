@@ -12,6 +12,7 @@ import {
   MapPinIcon,
 } from '@/components/icons';
 import { advancedLocationsService, AdvancedLocation } from '@/lib/advancedLocationsService';
+import { GeographicSearchResult } from '@/components/ui/GeographicSearch';
 
 interface AdvancedLocationSelectorProps {
   value: string;
@@ -98,7 +99,7 @@ export default function AdvancedLocationSelector({
     }
   }, [value, showMultiple]);
 
-  // Ricerca suggerimenti intelligente
+  // Ricerca suggerimenti intelligente con database ISTAT
   useEffect(() => {
     if (searchQuery.length < 2) {
       setSuggestions([]);
@@ -110,7 +111,39 @@ export default function AdvancedLocationSelector({
     // Debounce per evitare troppe ricerche
     const timeoutId = setTimeout(async () => {
       try {
-        const results = await advancedLocationsService.searchLocations(searchQuery, 30);
+        // Prima prova con il servizio ISTAT completo
+        let results: AdvancedLocation[] = [];
+        
+        try {
+          // Chiamata all'API ISTAT per ricerca completa
+          const istatResponse = await fetch(`/api/geographic/autocomplete?q=${encodeURIComponent(searchQuery)}&limit=30`);
+          if (istatResponse.ok) {
+            const istatResults: GeographicSearchResult[] = await istatResponse.json();
+            // Converte i risultati ISTAT nel formato AdvancedLocation
+            results = istatResults.map(result => ({
+              id: result.id,
+              name: result.nome,
+              country: 'IT',
+              region: result.regione,
+              province: result.provincia,
+              type: result.tipo,
+              population: result.popolazione,
+              surface: result.superficie,
+              coordinates: {
+                lat: result.latitudine,
+                lng: result.longitudine
+              }
+            }));
+          }
+        } catch (istatError) {
+          console.warn('Errore API ISTAT, fallback al servizio originale:', istatError);
+        }
+
+        // Se non ci sono risultati ISTAT, usa il servizio originale
+        if (results.length === 0) {
+          results = await advancedLocationsService.searchLocations(searchQuery, 30);
+        }
+
         setSuggestions(results);
 
         // Statistiche di ricerca
