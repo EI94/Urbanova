@@ -14,7 +14,13 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const authContext = useAuth();
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    console.error('❌ [RegisterPage] Errore useAuth:', error);
+    authContext = { signup: null };
+  }
   const signup = authContext?.signup;
 
   const [formData, setFormData] = useState({

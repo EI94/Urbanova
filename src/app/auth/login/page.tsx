@@ -14,7 +14,13 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
-  const authContext = useAuth();
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    console.error('❌ [LoginPage] Errore useAuth:', error);
+    authContext = { login: null };
+  }
   const login = authContext?.login;
 
   const [formData, setFormData] = useState({
