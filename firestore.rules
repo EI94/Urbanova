@@ -411,7 +411,7 @@ service cloud.firestore {
     // GEOGRAPHIC DATA COLLECTIONS
     // ============================================================================
     
-    // Test deploy workflow
+    // Test deploy workflow - Forza deploy produzione
     
     // Collezione comuni italiani - accesso pubblico per ricerca geografica
     match /comuni_italiani/{comuneId} {
