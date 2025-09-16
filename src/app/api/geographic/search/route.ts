@@ -1,12 +1,11 @@
 /**
- * API Endpoint Ricerca Geografica con Firestore
- * Utilizza il database Firebase esistente di Urbanova
+ * API Endpoint Ricerca Geografica Production Level
+ * Utilizza Firestore per utenti paganti con dati reali italiani
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, orderBy, limit, startAfter } from 'firebase/firestore';
+import { firestoreGeographicService } from '@/lib/geographic/firestoreGeographicService';
 
 // Mock rate limiting function
 const rateLimit = (config: any) => {
@@ -18,7 +17,7 @@ const rateLimit = (config: any) => {
 
 // Schema di validazione per la richiesta
 const SearchRequestSchema = z.object({
-  q: z.string().min(1).max(100),
+  q: z.string().min(1).max(100).optional(),
   type: z.enum(['comune', 'zona', 'all']).optional().default('all'),
   region: z.string().optional(),
   province: z.string().optional(),
@@ -59,11 +58,11 @@ interface SearchResult {
   tipo: 'comune' | 'zona';
   popolazione?: number;
   superficie?: number;
-  latitudine?: number;
-  longitudine?: number;
-  metadata?: Record<string, any>;
+  latitudine?: number | undefined;
+  longitudine?: number | undefined;
+  metadata?: Record<string, any> | undefined;
   score?: number;
-  distance?: number;
+  distance?: number | undefined;
 }
 
 // Interfaccia per la risposta API
@@ -86,26 +85,15 @@ interface SearchResponse {
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
-  const requestId = request.headers.get('x-request-id') || `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   
-  // Log della richiesta
-  LoggerService.logApiRequest({
-    method: 'GET',
-    endpoint: '/api/geographic/search',
-    ip: request.ip || request.headers.get('x-forwarded-for') || 'unknown',
-    userAgent: request.headers.get('user-agent') || 'unknown',
-    requestId,
-    query: Object.fromEntries(request.nextUrl.searchParams)
-  });
-
   try {
     // Estrai parametri dalla query string
     const searchParams = request.nextUrl.searchParams;
     const rawParams = {
-      q: searchParams.get('q'),
-      type: searchParams.get('type'),
-      region: searchParams.get('region'),
-      province: searchParams.get('province'),
+      q: searchParams.get('q') || undefined,
+      type: searchParams.get('type') || undefined,
+      region: searchParams.get('region') || undefined,
+      province: searchParams.get('province') || undefined,
       lat: searchParams.get('lat') ? parseFloat(searchParams.get('lat')!) : undefined,
       lng: searchParams.get('lng') ? parseFloat(searchParams.get('lng')!) : undefined,
       radius: searchParams.get('radius') ? parseFloat(searchParams.get('radius')!) : undefined,
@@ -113,25 +101,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       offset: searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : undefined,
       includeCoordinates: searchParams.get('includeCoordinates') === 'true',
       includeMetadata: searchParams.get('includeMetadata') === 'true',
-      sortBy: searchParams.get('sortBy')
+      sortBy: searchParams.get('sortBy') || undefined
     };
 
     // Valida i parametri
     const validationResult = SearchRequestSchema.safeParse(rawParams);
     if (!validationResult.success) {
-      const errorMessage = 'Parametri di ricerca non validi';
-      LoggerService.logApiError({
-        method: 'GET',
-        endpoint: '/api/geographic/search',
-        statusCode: 400,
-        error: new Error(errorMessage),
-        requestId,
-        query: rawParams
-      });
-
       return NextResponse.json({
         success: false,
-        error: errorMessage,
+        error: 'Parametri di ricerca non validi',
         message: 'Parametri di ricerca non validi',
         details: validationResult.error.errors
       }, { status: 400 });
@@ -139,204 +117,31 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const params = validationResult.data;
 
-    // Genera chiave cache
-    const cacheKey = `search:${Buffer.from(JSON.stringify(params)).toString('base64')}`;
-    
-    // Controlla cache
-    let cachedResult = await CacheService.getCachedSearchResult(cacheKey);
-    if (cachedResult) {
-      const executionTime = Date.now() - startTime;
-      
-      LoggerService.logApiResponse({
-        method: 'GET',
-        endpoint: '/api/geographic/search',
-        statusCode: 200,
-        responseTime: executionTime,
-        requestId
-      });
+    // Inizializza dati geografici se necessario
+    await firestoreGeographicService.initializeGeographicData();
 
-      return NextResponse.json({
-        success: true,
-        data: {
-          ...cachedResult,
-          executionTime,
-          cached: true
-        }
-      });
-    }
-
-    // Esegui ricerca nel database
-    let query: string;
-    let queryParams: any[];
-    let countQuery: string;
-    let countParams: any[];
-
-    if (params.lat && params.lng) {
-      // Ricerca combinata (full-text + spaziale)
-      const columns = ['nome', 'provincia', 'regione'];
-      const searchVector = columns.map(col => `to_tsvector('italian', ${col})`).join(' || ');
-      const searchQuery = `to_tsquery('italian', $1)`;
-      
-      query = `
-        SELECT 
-          id,
-          nome,
-          provincia,
-          regione,
-          'comune' as tipo,
-          popolazione,
-          superficie,
-          ST_Y(geom) as latitudine,
-          ST_X(geom) as longitudine,
-          ts_rank(${searchVector}, ${searchQuery}) as score,
-          ST_Distance(geom, ST_SetSRID(ST_MakePoint($3, $2), 4326)) as distance
-        FROM comuni
-        WHERE ${searchVector} @@ ${searchQuery}
-          AND ST_DWithin(geom, ST_SetSRID(ST_MakePoint($3, $2), 4326), $4 * 1000)
-          ${params.type === 'comune' ? '' : `
-        UNION ALL
-        SELECT 
-          id,
-          nome,
-          provincia,
-          regione,
-          'zona' as tipo,
-          popolazione,
-          superficie,
-          ST_Y(geom) as latitudine,
-          ST_X(geom) as longitudine,
-          ts_rank(${searchVector}, ${searchQuery}) as score,
-          ST_Distance(geom, ST_SetSRID(ST_MakePoint($3, $2), 4326)) as distance
-        FROM zone
-        WHERE ${searchVector} @@ ${searchQuery}
-          AND ST_DWithin(geom, ST_SetSRID(ST_MakePoint($3, $2), 4326), $4 * 1000)
-          `}
-        ORDER BY score DESC, distance ASC
-        LIMIT $5 OFFSET $6
-      `;
-      
-      queryParams = [params.q, params.lat, params.lng, params.radius, params.limit, params.offset];
-      
-      countQuery = `
-        SELECT COUNT(*) as total FROM (
-          SELECT 1 FROM comuni
-          WHERE ${searchVector} @@ ${searchQuery}
-            AND ST_DWithin(geom, ST_SetSRID(ST_MakePoint($3, $2), 4326), $4 * 1000)
-          ${params.type === 'comune' ? '' : `
-          UNION ALL
-          SELECT 1 FROM zone
-          WHERE ${searchVector} @@ ${searchQuery}
-            AND ST_DWithin(geom, ST_SetSRID(ST_MakePoint($3, $2), 4326), $4 * 1000)
-          `}
-        ) as combined_results
-      `;
-      
-      countParams = [params.q, params.lat, params.lng, params.radius];
-    } else {
-      // Ricerca solo full-text
-      const columns = ['nome', 'provincia', 'regione'];
-      const searchVector = columns.map(col => `to_tsvector('italian', ${col})`).join(' || ');
-      const searchQuery = `to_tsquery('italian', $1)`;
-      
-      query = `
-        SELECT 
-          id,
-          nome,
-          provincia,
-          regione,
-          'comune' as tipo,
-          popolazione,
-          superficie,
-          ST_Y(geom) as latitudine,
-          ST_X(geom) as longitudine,
-          ts_rank(${searchVector}, ${searchQuery}) as score
-        FROM comuni
-        WHERE ${searchVector} @@ ${searchQuery}
-          ${params.region ? 'AND regione = $2' : ''}
-          ${params.province ? `AND provincia = $${params.region ? '3' : '2'}` : ''}
-        ${params.type === 'comune' ? '' : `
-        UNION ALL
-        SELECT 
-          id,
-          nome,
-          provincia,
-          regione,
-          'zona' as tipo,
-          popolazione,
-          superficie,
-          ST_Y(geom) as latitudine,
-          ST_X(geom) as longitudine,
-          ts_rank(${searchVector}, ${searchQuery}) as score
-        FROM zone
-        WHERE ${searchVector} @@ ${searchQuery}
-          ${params.region ? 'AND regione = $2' : ''}
-          ${params.province ? `AND provincia = $${params.region ? '3' : '2'}` : ''}
-        `}
-        ORDER BY score DESC, nome ASC
-        LIMIT $${params.region ? (params.province ? '4' : '3') : (params.province ? '3' : '2')} 
-        OFFSET $${params.region ? (params.province ? '5' : '4') : (params.province ? '4' : '3')}
-      `;
-      
-      queryParams = [params.q];
-      if (params.region) queryParams.push(params.region);
-      if (params.province) queryParams.push(params.province);
-      queryParams.push(params.limit, params.offset);
-      
-      countQuery = `
-        SELECT COUNT(*) as total FROM (
-          SELECT 1 FROM comuni
-          WHERE ${searchVector} @@ ${searchQuery}
-            ${params.region ? 'AND regione = $2' : ''}
-            ${params.province ? `AND provincia = $${params.region ? '3' : '2'}` : ''}
-          ${params.type === 'comune' ? '' : `
-          UNION ALL
-          SELECT 1 FROM zone
-          WHERE ${searchVector} @@ ${searchQuery}
-            ${params.region ? 'AND regione = $2' : ''}
-            ${params.province ? `AND provincia = $${params.region ? '3' : '2'}` : ''}
-          `}
-        ) as combined_results
-      `;
-      
-      countParams = [params.q];
-      if (params.region) countParams.push(params.region);
-      if (params.province) countParams.push(params.province);
-    }
-
-    // Esegui query in parallelo
-    const [results, countResult] = await Promise.all([
-      db.query(query, queryParams),
-      db.query(countQuery, countParams)
-    ]);
-
-    const total = parseInt(countResult.rows[0].total);
-    const hasMore = params.offset + params.limit < total;
-
-    // Formatta risultati
-    const formattedResults: SearchResult[] = results.rows.map(row => ({
-      id: row.id,
-      nome: row.nome,
-      provincia: row.provincia,
-      regione: row.regione,
-      tipo: row.tipo,
-      popolazione: row.popolazione,
-      superficie: row.superficie,
-      latitudine: params.includeCoordinates ? row.latitudine : undefined,
-      longitudine: params.includeCoordinates ? row.longitudine : undefined,
-      metadata: params.includeMetadata ? {
-        score: row.score,
-        distance: row.distance
-      } : undefined,
-      score: row.score,
-      distance: row.distance
-    }));
+    // Esegui ricerca production level con Firestore
+    const searchResults = await firestoreGeographicService.searchGeographicData({
+      query: params.q,
+      type: params.type,
+      region: params.region || undefined,
+      province: params.province || undefined,
+      lat: params.lat || undefined,
+      lng: params.lng || undefined,
+      radius: params.radius,
+      limit: params.limit,
+      offset: params.offset,
+      includeCoordinates: params.includeCoordinates,
+      includeMetadata: params.includeMetadata,
+      sortBy: params.sortBy
+    });
 
     const responseData = {
-      results: formattedResults,
-      total,
+      results: searchResults.results,
+      total: searchResults.total,
       page: Math.floor(params.offset / params.limit) + 1,
       limit: params.limit,
-      hasMore,
+      hasMore: searchResults.hasMore,
       query: params.q,
       filters: {
         type: params.type,
@@ -346,21 +151,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         lng: params.lng,
         radius: params.radius
       },
-      executionTime: Date.now() - startTime,
+      executionTime: searchResults.executionTime,
       cached: false
     };
-
-    // Cache il risultato
-    await CacheService.cacheSearchResult(cacheKey, responseData);
-
-    // Log della risposta
-    LoggerService.logApiResponse({
-      method: 'GET',
-      endpoint: '/api/geographic/search',
-      statusCode: 200,
-      responseTime: responseData.executionTime,
-      requestId
-    });
 
     return NextResponse.json({
       success: true,
@@ -370,13 +163,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   } catch (error) {
     const executionTime = Date.now() - startTime;
     
-    LoggerService.logApiError({
-      method: 'GET',
-      endpoint: '/api/geographic/search',
-      statusCode: 500,
-      error: error as Error,
-      requestId
-    });
+    console.error('❌ Errore API geographic search:', error);
 
     return NextResponse.json({
       success: false,
