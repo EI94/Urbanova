@@ -338,7 +338,8 @@ export class FirestoreGeographicService {
       filters.push(where('provincia', '==', province));
     }
 
-    filters.push(where('attivo', '==', true));
+    // Temporaneamente rimosso per debugging
+    // filters.push(where('attivo', '==', true));
 
     // Applica filtri
     filters.forEach(filter => {

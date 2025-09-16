@@ -313,6 +313,70 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "comuni_italiani",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "attivo",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "popolazione",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "comuni_italiani",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "regione",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "attivo",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "popolazione",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "comuni_italiani",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "provincia",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "attivo",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "popolazione",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "zone_italiane",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "attivo",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "nome",
+          "order": "ASCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": []
