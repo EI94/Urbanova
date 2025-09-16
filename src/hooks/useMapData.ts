@@ -68,7 +68,7 @@ export function useMapData(options: UseMapDataOptions = {}) {
     setState(prev => ({ ...prev, loading: true, error: null }));
 
     try {
-      // Carica comuni con limite ragionevole per la modale
+      // Carica comuni con limite ragionevole per la modale (DEPLOY FORZATO)
       const comuniResponse = await fetch('/api/geographic/search?type=comune&limit=100&includeCoordinates=true&includeMetadata=true');
       const comuniData = await comuniResponse.json();
 
