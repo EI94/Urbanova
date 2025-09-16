@@ -285,19 +285,20 @@ export class FirestoreGeographicService {
     includeCoordinates: boolean;
     includeMetadata: boolean;
   }): Promise<GeographicSearchResult[]> {
-    const {
-      query,
-      region,
-      province,
-      lat,
-      lng,
-      radius = 50,
-      limit: limitParam,
-      includeCoordinates,
-      includeMetadata
-    } = params;
+    try {
+      const {
+        query: searchQuery,
+        region,
+        province,
+        lat,
+        lng,
+        radius = 50,
+        limit: limitParam,
+        includeCoordinates,
+        includeMetadata
+      } = params;
 
-    let q = query(collection(db, this.comuniCollection));
+      let q = query(collection(db, this.comuniCollection));
 
     // Filtri base
     const filters: any[] = [];
@@ -330,7 +331,7 @@ export class FirestoreGeographicService {
       const data = doc.data() as ComuneItaliano;
       
       // Filtro per query se specificata
-      if (query && !this.matchesQuery(data, query)) {
+      if (searchQuery && !this.matchesQuery(data, searchQuery)) {
         return;
       }
 
@@ -344,7 +345,7 @@ export class FirestoreGeographicService {
       }
 
       // Calcola score di rilevanza
-      const score = this.calculateRelevanceScore(data, query, lat, lng);
+      const score = this.calculateRelevanceScore(data, searchQuery, lat, lng);
 
       results.push({
         id: doc.id,
@@ -370,6 +371,19 @@ export class FirestoreGeographicService {
     });
 
     return results;
+    
+    } catch (error: any) {
+      console.error('❌ Errore ricerca comuni:', error);
+      
+      // Se è un errore di permessi Firebase, ritorna risultati vuoti
+      if (error.code === 'permission-denied') {
+        console.log('⚠️ Permessi Firebase insufficienti per ricerca comuni');
+        return [];
+      }
+      
+      // Per altri errori, ritorna comunque risultati vuoti
+      return [];
+    }
   }
 
   /**
@@ -386,19 +400,20 @@ export class FirestoreGeographicService {
     includeCoordinates: boolean;
     includeMetadata: boolean;
   }): Promise<GeographicSearchResult[]> {
-    const {
-      query,
-      region,
-      province,
-      lat,
-      lng,
-      radius = 50,
-      limit: limitParam,
-      includeCoordinates,
-      includeMetadata
-    } = params;
+    try {
+      const {
+        query: searchQuery,
+        region,
+        province,
+        lat,
+        lng,
+        radius = 50,
+        limit: limitParam,
+        includeCoordinates,
+        includeMetadata
+      } = params;
 
-    let q = query(collection(db, this.zoneCollection));
+      let q = query(collection(db, this.zoneCollection));
 
     // Filtri base
     const filters: any[] = [];
@@ -431,7 +446,7 @@ export class FirestoreGeographicService {
       const data = doc.data() as ZonaItaliana;
       
       // Filtro per query se specificata
-      if (query && !this.matchesQuery(data, query)) {
+      if (searchQuery && !this.matchesQuery(data, searchQuery)) {
         return;
       }
 
@@ -445,7 +460,7 @@ export class FirestoreGeographicService {
       }
 
       // Calcola score di rilevanza
-      const score = this.calculateRelevanceScore(data, query, lat, lng);
+      const score = this.calculateRelevanceScore(data, searchQuery, lat, lng);
 
       results.push({
         id: doc.id,
@@ -470,6 +485,19 @@ export class FirestoreGeographicService {
     });
 
     return results;
+    
+    } catch (error: any) {
+      console.error('❌ Errore ricerca zone:', error);
+      
+      // Se è un errore di permessi Firebase, ritorna risultati vuoti
+      if (error.code === 'permission-denied') {
+        console.log('⚠️ Permessi Firebase insufficienti per ricerca zone');
+        return [];
+      }
+      
+      // Per altri errori, ritorna comunque risultati vuoti
+      return [];
+    }
   }
 
   /**
@@ -483,9 +511,10 @@ export class FirestoreGeographicService {
     includeCoordinates: boolean;
     fuzzy: boolean;
   }): Promise<GeographicAutocompleteResult[]> {
-    const { query, region, province, limit: limitParam, includeCoordinates, fuzzy } = params;
+    try {
+      const { query: searchQuery, region, province, limit: limitParam, includeCoordinates, fuzzy } = params;
 
-    let q = query(collection(db, this.comuniCollection));
+      let q = query(collection(db, this.comuniCollection));
 
     // Filtri base
     const filters: any[] = [];
@@ -518,11 +547,11 @@ export class FirestoreGeographicService {
       const data = doc.data() as ComuneItaliano;
       
       // Calcola score di rilevanza per autocomplete
-      const score = this.calculateAutocompleteScore(data, query, fuzzy);
+      const score = this.calculateAutocompleteScore(data, searchQuery, fuzzy);
       
       if (score > 0) {
         const text = `${data.nome}, ${data.provincia}, ${data.regione}`;
-        const highlight = this.highlightText(text, query);
+        const highlight = this.highlightText(text, searchQuery);
 
         results.push({
           id: doc.id,
@@ -541,6 +570,19 @@ export class FirestoreGeographicService {
     });
 
     return results;
+    
+    } catch (error: any) {
+      console.error('❌ Errore autocomplete comuni:', error);
+      
+      // Se è un errore di permessi Firebase, ritorna risultati vuoti
+      if (error.code === 'permission-denied') {
+        console.log('⚠️ Permessi Firebase insufficienti per autocomplete comuni');
+        return [];
+      }
+      
+      // Per altri errori, ritorna comunque risultati vuoti
+      return [];
+    }
   }
 
   /**
@@ -554,7 +596,8 @@ export class FirestoreGeographicService {
     includeCoordinates: boolean;
     fuzzy: boolean;
   }): Promise<GeographicAutocompleteResult[]> {
-    const { query, region, province, limit: limitParam, includeCoordinates, fuzzy } = params;
+    try {
+      const { query: searchQuery, region, province, limit: limitParam, includeCoordinates, fuzzy } = params;
 
     let q = query(collection(db, this.zoneCollection));
 
@@ -589,11 +632,11 @@ export class FirestoreGeographicService {
       const data = doc.data() as ZonaItaliana;
       
       // Calcola score di rilevanza per autocomplete
-      const score = this.calculateAutocompleteScore(data, query, fuzzy);
+      const score = this.calculateAutocompleteScore(data, searchQuery, fuzzy);
       
       if (score > 0) {
         const text = `${data.nome}, ${data.comune}, ${data.provincia}`;
-        const highlight = this.highlightText(text, query);
+        const highlight = this.highlightText(text, searchQuery);
 
         results.push({
           id: doc.id,
@@ -612,6 +655,19 @@ export class FirestoreGeographicService {
     });
 
     return results;
+    
+    } catch (error: any) {
+      console.error('❌ Errore autocomplete zone:', error);
+      
+      // Se è un errore di permessi Firebase, ritorna risultati vuoti
+      if (error.code === 'permission-denied') {
+        console.log('⚠️ Permessi Firebase insufficienti per autocomplete zone');
+        return [];
+      }
+      
+      // Per altri errori, ritorna comunque risultati vuoti
+      return [];
+    }
   }
 
   /**
@@ -634,12 +690,12 @@ export class FirestoreGeographicService {
    */
   private calculateRelevanceScore(
     data: ComuneItaliano | ZonaItaliana, 
-    query: string, 
+    searchQuery: string, 
     lat?: number, 
     lng?: number
   ): number {
     let score = 0;
-    const queryLower = query.toLowerCase();
+    const queryLower = searchQuery.toLowerCase();
 
     // Score per corrispondenza nome
     if (data.nome.toLowerCase().includes(queryLower)) {
@@ -681,10 +737,10 @@ export class FirestoreGeographicService {
    */
   private calculateAutocompleteScore(
     data: ComuneItaliano | ZonaItaliana, 
-    query: string, 
+    searchQuery: string, 
     fuzzy: boolean
   ): number {
-    const queryLower = query.toLowerCase();
+    const queryLower = searchQuery.toLowerCase();
     let score = 0;
 
     // Score per corrispondenza esatta
@@ -775,8 +831,8 @@ export class FirestoreGeographicService {
   /**
    * Evidenzia il testo di ricerca nei risultati
    */
-  private highlightText(text: string, query: string): string {
-    const queryLower = query.toLowerCase();
+  private highlightText(text: string, searchQuery: string): string {
+    const queryLower = searchQuery.toLowerCase();
     const textLower = text.toLowerCase();
     
     if (!textLower.includes(queryLower)) {
@@ -784,7 +840,7 @@ export class FirestoreGeographicService {
     }
     
     const startIndex = textLower.indexOf(queryLower);
-    const endIndex = startIndex + query.length;
+    const endIndex = startIndex + searchQuery.length;
     
     return text.substring(0, startIndex) + 
            `<mark>${text.substring(startIndex, endIndex)}</mark>` + 
@@ -852,9 +908,16 @@ export class FirestoreGeographicService {
       await batch.commit();
       console.log('✅ Dati geografici inizializzati con successo');
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Errore inizializzazione dati geografici:', error);
-      // Non lanciare l'errore, continua con dati vuoti
+      
+      // Se è un errore di permessi, continua senza inizializzazione
+      if (error.code === 'permission-denied') {
+        console.log('⚠️ Permessi Firebase insufficienti - continuando senza inizializzazione dati geografici');
+        return;
+      }
+      
+      // Per altri errori, continua comunque
       console.log('⚠️ Continuando senza inizializzazione dati geografici');
     }
   }
