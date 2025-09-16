@@ -68,55 +68,55 @@ export function useMapData(options: UseMapDataOptions = {}) {
     setState(prev => ({ ...prev, loading: true, error: null }));
 
     try {
-      // TEMPORANEAMENTE DISABILITATO: Carica comuni con limite ridotto per evitare loop infiniti
-      // const comuniResponse = await fetch('/api/geographic/search?type=comune&limit=5000&includeCoordinates=true&includeMetadata=true');
-      // const comuniData = await comuniResponse.json();
+      // Carica comuni con limite ragionevole per la modale
+      const comuniResponse = await fetch('/api/geographic/search?type=comune&limit=100&includeCoordinates=true&includeMetadata=true');
+      const comuniData = await comuniResponse.json();
 
-      // if (!comuniData.success) {
-      //   throw new Error(comuniData.error || 'Errore caricamento comuni');
-      // }
+      if (!comuniData.success) {
+        throw new Error(comuniData.error || 'Errore caricamento comuni');
+      }
 
-      // TEMPORANEAMENTE DISABILITATO: Carica zone con limite ridotto per evitare loop infiniti
-      // const zoneResponse = await fetch('/api/geographic/search?type=zona&limit=5000&includeCoordinates=true&includeMetadata=true');
-      // const zoneData = await zoneResponse.json();
+      // Carica zone con limite ragionevole per la modale
+      const zoneResponse = await fetch('/api/geographic/search?type=zona&limit=50&includeCoordinates=true&includeMetadata=true');
+      const zoneData = await zoneResponse.json();
 
-      // if (!zoneData.success) {
-      //   throw new Error(zoneData.error || 'Errore caricamento zone');
-      // }
+      if (!zoneData.success) {
+        throw new Error(zoneData.error || 'Errore caricamento zone');
+      }
 
-      // TEMPORANEAMENTE DISABILITATO: Converte dati in markers
-      // const comuniMarkers: MapMarker[] = comuniData.results.map((comune: any) => ({
-      //   id: comune.id,
-      //   position: [comune.latitudine, comune.longitudine],
-      //   type: 'comune' as const,
-      //   nome: comune.nome,
-      //   provincia: comune.provincia,
-      //   regione: comune.regione,
-      //   popolazione: comune.popolazione,
-      //   superficie: comune.superficie,
-      //   metadata: comune.metadata
-      // }));
+      // Converte dati in markers
+      const comuniMarkers: MapMarker[] = (comuniData.data?.results || []).map((comune: any) => ({
+        id: comune.id,
+        position: [comune.latitudine || 0, comune.longitudine || 0],
+        type: 'comune' as const,
+        nome: comune.nome,
+        provincia: comune.provincia,
+        regione: comune.regione,
+        popolazione: comune.popolazione,
+        superficie: comune.superficie,
+        metadata: comune.metadata
+      }));
 
-      // const zoneMarkers: MapMarker[] = zoneData.results.map((zona: any) => ({
-      //   id: zona.id,
-      //   position: [zona.latitudine, zona.longitudine],
-      //   type: 'zona' as const,
-      //   nome: zona.nome,
-      //   provincia: zona.provincia,
-      //   regione: zona.regione,
-      //   popolazione: zona.popolazione,
-      //   superficie: zona.superficie,
-      //   metadata: zona.metadata
-      // }));
+      const zoneMarkers: MapMarker[] = (zoneData.data?.results || []).map((zona: any) => ({
+        id: zona.id,
+        position: [zona.latitudine || 0, zona.longitudine || 0],
+        type: 'zona' as const,
+        nome: zona.nome,
+        provincia: zona.provincia,
+        regione: zona.regione,
+        popolazione: zona.popolazione,
+        superficie: zona.superficie,
+        metadata: zona.metadata
+      }));
 
-      // const allMarkers = [...comuniMarkers, ...zoneMarkers].slice(0, maxMarkers);
+      const allMarkers = [...comuniMarkers, ...zoneMarkers].slice(0, maxMarkers);
 
-      // Ritorna dati vuoti temporaneamente per evitare loop infiniti
+      // Aggiorna stato con i dati caricati
       setState(prev => ({
         ...prev,
-        markers: [],
+        markers: allMarkers,
         loading: false,
-        totalCount: 0,
+        totalCount: allMarkers.length,
         lastUpdate: new Date()
       }));
 
