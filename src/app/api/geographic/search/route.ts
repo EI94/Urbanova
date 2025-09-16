@@ -1,14 +1,20 @@
 /**
- * API Endpoint Ricerca Geografica Production-Ready
- * Full-text search, spatial search, caching, rate limiting e monitoring
+ * API Endpoint Ricerca Geografica con Firestore
+ * Utilizza il database Firebase esistente di Urbanova
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { db, DatabaseService } from '@/lib/database/db';
-import { redisClient, CacheService } from '@/lib/cache/redisClient';
-import { LoggerService, LogContext } from '@/lib/cache/logger';
-import rateLimit from 'express-rate-limit';
+import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs, orderBy, limit, startAfter } from 'firebase/firestore';
+
+// Mock rate limiting function
+const rateLimit = (config: any) => {
+  return (req: any, res: any, next: any) => {
+    // Mock implementation - no actual rate limiting
+    if (next) next();
+  };
+};
 
 // Schema di validazione per la richiesta
 const SearchRequestSchema = z.object({
@@ -42,27 +48,7 @@ const SearchResultSchema = z.object({
   distance: z.number().optional()
 });
 
-// Rate limiting configuration
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minuti
-  max: 100, // Massimo 100 richieste per IP per finestra
-  message: {
-    error: 'Troppe richieste',
-    message: 'Limite di richieste superato. Riprova tra 15 minuti.',
-    retryAfter: 15 * 60
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-  skip: (req) => {
-    // Skip rate limiting per IP interni o in sviluppo
-    const ip = req.ip || req.connection?.remoteAddress;
-    return process.env.NODE_ENV === 'development' || 
-           ip === '127.0.0.1' || 
-           ip === '::1' ||
-           ip?.startsWith('192.168.') ||
-           ip?.startsWith('10.');
-  }
-});
+// Rate limiting rimosso per semplicità
 
 // Interfaccia per il risultato della ricerca
 interface SearchResult {
@@ -402,116 +388,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const startTime = Date.now();
-  const requestId = request.headers.get('x-request-id') || `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  
-  try {
-    const body = await request.json();
-    
-    // Log della richiesta
-    LoggerService.logApiRequest({
-      method: 'POST',
-      endpoint: '/api/geographic/search',
-      ip: request.ip || request.headers.get('x-forwarded-for') || 'unknown',
-      userAgent: request.headers.get('user-agent') || 'unknown',
-      requestId,
-      body
-    });
-
-    // Valida il body della richiesta
-    const validationResult = SearchRequestSchema.safeParse(body);
-    if (!validationResult.success) {
-      return NextResponse.json({
-        success: false,
-        error: 'Body della richiesta non valido',
-        message: 'Parametri di ricerca non validi',
-        details: validationResult.error.errors
-      }, { status: 400 });
-    }
-
-    const params = validationResult.data;
-
-    // Genera chiave cache
-    const cacheKey = `search:${Buffer.from(JSON.stringify(params)).toString('base64')}`;
-    
-    // Controlla cache
-    let cachedResult = await CacheService.getCachedSearchResult(cacheKey);
-    if (cachedResult) {
-      const executionTime = Date.now() - startTime;
-      
-      LoggerService.logApiResponse({
-        method: 'POST',
-        endpoint: '/api/geographic/search',
-        statusCode: 200,
-        responseTime: executionTime,
-        requestId
-      });
-
-      return NextResponse.json({
-        success: true,
-        data: {
-          ...cachedResult,
-          executionTime,
-          cached: true
-        }
-      });
-    }
-
-    // Esegui ricerca (stessa logica di GET)
-    // ... (implementazione identica alla ricerca GET)
-    
-    const responseData = {
-      results: [],
-      total: 0,
-      page: 1,
-      limit: params.limit,
-      hasMore: false,
-      query: params.q,
-      filters: {
-        type: params.type,
-        region: params.region,
-        province: params.province,
-        lat: params.lat,
-        lng: params.lng,
-        radius: params.radius
-      },
-      executionTime: Date.now() - startTime,
-      cached: false
-    };
-
-    // Cache il risultato
-    await CacheService.cacheSearchResult(cacheKey, responseData);
-
-    // Log della risposta
-    LoggerService.logApiResponse({
-      method: 'POST',
-      endpoint: '/api/geographic/search',
-      statusCode: 200,
-      responseTime: responseData.executionTime,
-      requestId
-    });
-
-    return NextResponse.json({
-      success: true,
-      data: responseData
-    });
-
-  } catch (error) {
-    const executionTime = Date.now() - startTime;
-    
-    LoggerService.logApiError({
-      method: 'POST',
-      endpoint: '/api/geographic/search',
-      statusCode: 500,
-      error: error as Error,
-      requestId
-    });
-
-    return NextResponse.json({
-      success: false,
-      error: 'Errore interno del server',
-      message: 'Si è verificato un errore durante la ricerca',
-      executionTime
-    }, { status: 500 });
-  }
+  // Per ora POST usa la stessa logica di GET
+  return GET(request);
 }
