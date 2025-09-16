@@ -71,18 +71,17 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
     }
   };
 
-  // Rimuovo il listener per ora - Firebase ha real-time updates nativi
-  // useEffect(() => {
-  //   const unsubscribe = notificationService.subscribe((event) => {
-  //     if (event.detail.type === 'notification_created' ||
-  //         event.detail.type === 'notification_updated' ||
-  //         event.detail.type === 'notification_deleted') {
-  //       loadNotifications();
-  //     }
-  //   });
+  // CHIRURGICO: Riabilitato listener real-time per notifiche
+  useEffect(() => {
+    if (!userId) return;
 
-  //   return unsubscribe;
-  // }, []);
+    const unsubscribe = firebaseNotificationService.getNotificationsRealtime(userId, (realtimeNotifications) => {
+      console.log('🔄 [NotificationsPanel] Notifiche real-time ricevute:', realtimeNotifications.length);
+      setNotifications(realtimeNotifications);
+    });
+
+    return unsubscribe;
+  }, [userId]);
 
   const loadNotifications = async () => {
     try {
@@ -308,7 +307,7 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
           </button>
         </div>
 
-        {stats && stats.unread > 0 && (
+        {realUnreadCount > 0 && (
           <div className="p-3 border-b bg-gray-50">
             <button
               onClick={handleMarkAllAsRead}
