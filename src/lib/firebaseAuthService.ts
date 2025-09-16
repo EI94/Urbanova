@@ -9,16 +9,7 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 
-// CHIRURGICO: Protezione ultra-sicura per evitare crash auth import
-let auth;
-try {
-  const firebaseModule = require('./firebase');
-  auth = firebaseModule.auth;
-} catch (error) {
-  console.error('❌ [firebaseAuthService] Errore import auth:', error);
-  auth = null;
-}
-import { db } from './firebase';
+import { auth, db } from './firebase';
 
 // Interfaccia per l'utente
 export interface User {
@@ -62,6 +53,10 @@ class FirebaseAuthService {
     lastName?: string
   ): Promise<AuthResult> {
     try {
+      if (!auth) {
+        throw new Error('Firebase auth non disponibile');
+      }
+      
       // Crea utente con Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
@@ -123,6 +118,10 @@ class FirebaseAuthService {
 
   async login(email: string, password: string): Promise<AuthResult> {
     try {
+      if (!auth) {
+        throw new Error('Firebase auth non disponibile');
+      }
+      
       // Login con Firebase Auth
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
@@ -173,6 +172,10 @@ class FirebaseAuthService {
 
   async logout(): Promise<boolean> {
     try {
+      if (!auth) {
+        throw new Error('Firebase auth non disponibile');
+      }
+      
       await signOut(auth);
       return true;
     } catch (error) {
@@ -187,6 +190,10 @@ class FirebaseAuthService {
 
   async resetPassword(email: string): Promise<boolean> {
     try {
+      if (!auth) {
+        throw new Error('Firebase auth non disponibile');
+      }
+      
       await sendPasswordResetEmail(auth, email);
       return true;
     } catch (error: any) {
@@ -205,6 +212,12 @@ class FirebaseAuthService {
   // ========================================
 
   onAuthStateChanged(callback: (user: User | null) => void) {
+    if (!auth) {
+      console.error('❌ [Firebase Auth] auth non disponibile, callback con null');
+      callback(null);
+      return () => {}; // unsubscribe function vuota
+    }
+    
     return onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
         try {
@@ -256,6 +269,11 @@ class FirebaseAuthService {
   // ========================================
 
   getCurrentUser(): User | null {
+    if (!auth) {
+      console.error('❌ [Firebase Auth] auth non disponibile in getCurrentUser');
+      return null;
+    }
+    
     const firebaseUser = auth.currentUser;
     if (firebaseUser) {
       return {
