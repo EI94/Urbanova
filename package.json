@@ -31,7 +31,13 @@
     "workspace:test": "npm run test --workspaces",
     "migrate:dry-run": "tsx scripts/migrate.ts migrate:dry-run",
     "migrate:apply": "tsx scripts/migrate.ts migrate:apply",
-    "migrate:validate": "tsx scripts/migrate.ts migrate:validate"
+    "migrate:validate": "tsx scripts/migrate.ts migrate:validate",
+    "phase1:audit": "tsx scripts/phase1-execution.ts --audit-only",
+    "phase1:validate-sources": "tsx scripts/phase1-execution.ts --validate-sources-only",
+    "phase1:monitor": "tsx scripts/phase1-execution.ts --monitor-only",
+    "phase1:execute": "tsx scripts/phase1-execution.ts",
+    "phase1:test": "tsx scripts/test-phase1.ts",
+    "phase1:full": "npm run phase1:test && npm run phase1:execute"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.17.0",

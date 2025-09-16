@@ -642,3 +642,4 @@ ${auditResult.recommendations.map(rec => `
 
 // Esporta istanza singleton
 export const systemAuditor = new SystemAuditor();
+
