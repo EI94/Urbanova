@@ -268,7 +268,7 @@ export default function MarketIntelligenceMap({
             />
             
             {/* Risultati ricerca */}
-            {searchResults.length > 0 && (
+            {(searchResults || []).length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto">
                 {searchResults.map((result) => (
                   <button
@@ -413,7 +413,7 @@ export default function MarketIntelligenceMap({
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl">
             <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-              {filteredTerrain.length}
+              {(filteredTerrain || []).length}
             </div>
             <div className="text-sm text-blue-600 dark:text-blue-400">
               Terreni trovati
@@ -421,7 +421,7 @@ export default function MarketIntelligenceMap({
           </div>
           <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-xl">
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-              {filteredTerrain.filter(t => t.status === 'disponibile').length}
+              {(filteredTerrain || []).filter(t => t.status === 'disponibile').length}
             </div>
             <div className="text-sm text-green-600 dark:text-green-400">
               Disponibili
@@ -429,7 +429,7 @@ export default function MarketIntelligenceMap({
           </div>
           <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-xl">
             <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-              {Math.round(filteredTerrain.reduce((sum, t) => sum + t.aiScore, 0) / filteredTerrain.length) || 0}
+              {Math.round((filteredTerrain || []).reduce((sum, t) => sum + t.aiScore, 0) / ((filteredTerrain || []).length || 1)) || 0}
             </div>
             <div className="text-sm text-purple-600 dark:text-purple-400">
               AI Score medio
@@ -437,7 +437,7 @@ export default function MarketIntelligenceMap({
           </div>
           <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-xl">
             <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-              €{Math.round(filteredTerrain.reduce((sum, t) => sum + t.price, 0) / filteredTerrain.length).toLocaleString() || 0}
+              €{Math.round((filteredTerrain || []).reduce((sum, t) => sum + t.price, 0) / ((filteredTerrain || []).length || 1)).toLocaleString() || 0}
             </div>
             <div className="text-sm text-orange-600 dark:text-orange-400">
               Prezzo medio
@@ -609,7 +609,7 @@ export default function MarketIntelligenceMap({
         )}
 
         {/* Nessun risultato */}
-        {filteredTerrain.length === 0 && (
+        {(filteredTerrain || []).length === 0 && (
           <div className="text-center py-12">
             <MapPin className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">

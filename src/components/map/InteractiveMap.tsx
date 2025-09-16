@@ -372,7 +372,9 @@ export function InteractiveMap({
   }, []);
 
   // Filtra markers basato sui filtri
-  const filteredMarkers = markers.filter(marker => {
+  const filteredMarkers = (markers || []).filter(marker => {
+    if (!marker) return false; // Protezione aggiuntiva
+    
     if (!filters.showComuni && marker.type === 'comune') return false;
     if (!filters.showZone && marker.type === 'zona') return false;
     
@@ -571,8 +573,8 @@ export function InteractiveMap({
 
       {/* Info panel */}
       <div className="map-info-panel">
-        {filteredMarkers.length} elementi visualizzati
-        {searchResults.length > 0 && ` • ${searchResults.length} risultati ricerca`}
+        {(filteredMarkers || []).length} elementi visualizzati
+        {(searchResults || []).length > 0 && ` • ${(searchResults || []).length} risultati ricerca`}
       </div>
     </div>
   );

@@ -132,7 +132,7 @@ export function useMapData(options: UseMapDataOptions = {}) {
 
   // Filtra markers basato sui filtri
   const filteredMarkers = useMemo(() => {
-    return state.markers.filter(marker => {
+    return (state.markers || []).filter(marker => {
       // Filtro tipo elemento
       if (!filters.showComuni && marker.type === 'comune') return false;
       if (!filters.showZone && marker.type === 'zona') return false;
@@ -171,7 +171,7 @@ export function useMapData(options: UseMapDataOptions = {}) {
     setState(prev => ({
       ...prev,
       filteredMarkers,
-      filteredCount: filteredMarkers.length
+      filteredCount: (filteredMarkers || []).length
     }));
   }, [filteredMarkers]);
 
@@ -195,19 +195,19 @@ export function useMapData(options: UseMapDataOptions = {}) {
 
   // Funzioni di utilità
   const getMarkersByType = useCallback((type: 'comune' | 'zona') => {
-    return filteredMarkers.filter(marker => marker.type === type);
+    return (filteredMarkers || []).filter(marker => marker.type === type);
   }, [filteredMarkers]);
 
   const getMarkersByRegion = useCallback((region: string) => {
-    return filteredMarkers.filter(marker => marker.regione === region);
+    return (filteredMarkers || []).filter(marker => marker.regione === region);
   }, [filteredMarkers]);
 
   const getMarkersByProvince = useCallback((province: string) => {
-    return filteredMarkers.filter(marker => marker.provincia === province);
+    return (filteredMarkers || []).filter(marker => marker.provincia === province);
   }, [filteredMarkers]);
 
   const getMarkersInBounds = useCallback((bounds: { north: number; south: number; east: number; west: number }) => {
-    return filteredMarkers.filter(marker => {
+    return (filteredMarkers || []).filter(marker => {
       const [lat, lng] = marker.position;
       return lat >= bounds.south && lat <= bounds.north && lng >= bounds.west && lng <= bounds.east;
     });
@@ -217,36 +217,36 @@ export function useMapData(options: UseMapDataOptions = {}) {
     const comuni = getMarkersByType('comune');
     const zone = getMarkersByType('zona');
     
-    const totalPopulation = filteredMarkers.reduce((sum, marker) => sum + (marker.popolazione || 0), 0);
-    const totalSurface = filteredMarkers.reduce((sum, marker) => sum + (marker.superficie || 0), 0);
+    const totalPopulation = (filteredMarkers || []).reduce((sum, marker) => sum + (marker.popolazione || 0), 0);
+    const totalSurface = (filteredMarkers || []).reduce((sum, marker) => sum + (marker.superficie || 0), 0);
     
-    const regionCounts = filteredMarkers.reduce((acc, marker) => {
+    const regionCounts = (filteredMarkers || []).reduce((acc, marker) => {
       acc[marker.regione] = (acc[marker.regione] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
-    const provinceCounts = filteredMarkers.reduce((acc, marker) => {
+    const provinceCounts = (filteredMarkers || []).reduce((acc, marker) => {
       acc[marker.provincia] = (acc[marker.provincia] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
-    const zoneTypeCounts = zone.reduce((acc, marker) => {
+    const zoneTypeCounts = (zone || []).reduce((acc, marker) => {
       const type = marker.metadata?.tipo_zona || 'unknown';
       acc[type] = (acc[type] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
     return {
-      total: filteredMarkers.length,
-      comuni: comuni.length,
-      zone: zone.length,
+      total: (filteredMarkers || []).length,
+      comuni: (comuni || []).length,
+      zone: (zone || []).length,
       totalPopulation,
       totalSurface,
       regionCounts,
       provinceCounts,
       zoneTypeCounts,
-      averagePopulation: filteredMarkers.length > 0 ? totalPopulation / filteredMarkers.length : 0,
-      averageSurface: filteredMarkers.length > 0 ? totalSurface / filteredMarkers.length : 0
+      averagePopulation: (filteredMarkers || []).length > 0 ? totalPopulation / (filteredMarkers || []).length : 0,
+      averageSurface: (filteredMarkers || []).length > 0 ? totalSurface / (filteredMarkers || []).length : 0
     };
   }, [filteredMarkers, getMarkersByType]);
 
@@ -319,8 +319,8 @@ export function useMapData(options: UseMapDataOptions = {}) {
     return {
       totalComuni: statistics.comuni,
       totalZone: statistics.zone,
-      totalRegioni: Object.keys(statistics.regionCounts).length,
-      totalProvince: Object.keys(statistics.provinceCounts).length,
+      totalRegioni: Object.keys(statistics.regionCounts || {}).length,
+      totalProvince: Object.keys(statistics.provinceCounts || {}).length,
       totalPopulation: statistics.totalPopulation,
       totalSurface: statistics.totalSurface,
       averagePopulation: statistics.averagePopulation,
@@ -350,13 +350,13 @@ export function useMapData(options: UseMapDataOptions = {}) {
     // Computed
     isLoading: state.loading,
     hasError: !!state.error,
-    isEmpty: state.filteredMarkers.length === 0,
-    hasData: state.markers.length > 0,
+    isEmpty: (state.filteredMarkers || []).length === 0,
+    hasData: (state.markers || []).length > 0,
     
     // Statistiche per compatibilità
     stats,
     
     // Alias per compatibilità con componenti esistenti
-    geographicMarkers: state.filteredMarkers
+    geographicMarkers: state.filteredMarkers || []
   };
 }
