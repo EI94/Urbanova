@@ -42,15 +42,89 @@ jobs:
 
       - name: Authenticate with Firebase
         run: |
+          if [ -z "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}" ]; then
+            echo "❌ FIREBASE_SERVICE_ACCOUNT_KEY secret is not configured"
+            exit 1
+          fi
+          
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > $HOME/firebase-service-account.json
           export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-service-account.json"
-          firebase use urbanova-staging
+          
+          # Verifica che il file sia stato creato correttamente
+          if [ ! -f "$HOME/firebase-service-account.json" ]; then
+            echo "❌ Failed to create Firebase service account file"
+            exit 1
+          fi
+          
+          # Verifica che il file contenga JSON valido
+          if ! jq . "$HOME/firebase-service-account.json" > /dev/null 2>&1; then
+            echo "❌ Firebase service account file is not valid JSON"
+            exit 1
+          fi
+          
+          echo "✅ Firebase service account configured successfully"
+          firebase use urbanova-b623e
+          
+          # Verifica che Firebase sia autenticato
+          if ! firebase projects:list > /dev/null 2>&1; then
+            echo "❌ Firebase authentication failed"
+            exit 1
+          fi
+          
+          echo "✅ Firebase authentication successful"
+          
+          # Verifica che il progetto esista
+          if ! firebase projects:list | grep -q "urbanova-b623e"; then
+            echo "❌ Project urbanova-b623e not found or not accessible"
+            exit 1
+          fi
+          
+          echo "✅ Project urbanova-b623e found and accessible"
+
+      - name: Check Firestore Configuration Files
+        run: |
+          echo "🔍 Checking Firestore configuration files..."
+          
+          if [ ! -f "firestore.rules" ]; then
+            echo "❌ firestore.rules file not found"
+            exit 1
+          fi
+          
+          if [ ! -f "firestore.indexes.json" ]; then
+            echo "❌ firestore.indexes.json file not found"
+            exit 1
+          fi
+          
+          if [ ! -f "firebase.json" ]; then
+            echo "❌ firebase.json file not found"
+            exit 1
+          fi
+          
+          echo "✅ All Firestore configuration files found"
 
       - name: Validate Firestore Rules
-        run: firebase firestore:rules:validate --project=urbanova-staging
+        run: |
+          echo "🔍 Validating Firestore rules..."
+          if ! firebase firestore:rules:validate --project=urbanova-b623e; then
+            echo "❌ Firestore rules validation failed"
+            exit 1
+          fi
+          echo "✅ Firestore rules validation successful"
 
       - name: Deploy Firestore Rules
-        run: firebase deploy --only firestore:rules --project=urbanova-staging
+        run: |
+          echo "🚀 Deploying Firestore rules..."
+          if ! firebase deploy --only firestore:rules --project=urbanova-b623e; then
+            echo "❌ Firestore rules deployment failed"
+            exit 1
+          fi
+          echo "✅ Firestore rules deployed successfully"
 
       - name: Deploy Firestore Indexes
-        run: firebase deploy --only firestore:indexes --project=urbanova-staging
+        run: |
+          echo "🚀 Deploying Firestore indexes..."
+          if ! firebase deploy --only firestore:indexes --project=urbanova-b623e; then
+            echo "❌ Firestore indexes deployment failed"
+            exit 1
+          fi
+          echo "✅ Firestore indexes deployed successfully"
