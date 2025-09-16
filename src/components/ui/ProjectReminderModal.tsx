@@ -20,8 +20,14 @@ export default function ProjectReminderModal({
   projectId,
   projectName,
 }: ProjectReminderModalProps) {
-  const authContext = useAuth();
   // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    console.error('❌ [ProjectReminderModal] Errore useAuth:', error);
+    authContext = { currentUser: null, loading: false };
+  }
   const user = (authContext && typeof authContext === 'object' && 'currentUser' in authContext) ? authContext.currentUser : null;
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);

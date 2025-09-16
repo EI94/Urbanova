@@ -76,6 +76,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // CHIRURGICO: Protezione ultra-sicura per inizializzazione provider
+  console.log('🔥 [AuthProvider] Inizializzazione provider...');
+
   // Funzione per registrazione
   async function signup(
     email: string,
@@ -143,22 +146,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Effetto per controllare lo stato dell'autenticazione
   useEffect(() => {
-    const unsubscribe = firebaseAuthService.onAuthStateChanged((user: User | null) => {
-      setCurrentUser(user);
-      setLoading(false);
-    });
+    console.log('🔥 [AuthProvider] useEffect onAuthStateChanged...');
+    
+    try {
+      const unsubscribe = firebaseAuthService.onAuthStateChanged((user: User | null) => {
+        console.log('🔥 [AuthProvider] onAuthStateChanged callback:', user ? 'User logged in' : 'User logged out');
+        setCurrentUser(user);
+        setLoading(false);
+      });
 
-    return unsubscribe;
+      return unsubscribe;
+    } catch (error) {
+      console.error('❌ [AuthProvider] Errore in onAuthStateChanged:', error);
+      setLoading(false);
+      return () => {}; // unsubscribe function vuota
+    }
   }, []);
 
   const value = {
-    currentUser,
-    loading,
-    signup,
-    login,
-    logout,
-    resetPassword,
+    currentUser: currentUser || null,
+    loading: loading || false,
+    signup: signup || (async () => { throw new Error("Signup not available"); }),
+    login: login || (async () => { throw new Error("Login not available"); }),
+    logout: logout || (async () => { throw new Error("Logout not available"); }),
+    resetPassword: resetPassword || (async () => { throw new Error("Reset password not available"); }),
   };
+
+  console.log('🔥 [AuthProvider] Rendering provider con value:', { 
+    currentUser: value.currentUser ? 'User present' : 'No user', 
+    loading: value.loading 
+  });
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

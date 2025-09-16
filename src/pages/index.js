@@ -5,8 +5,14 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function HomePage() {
   const router = useRouter();
-  const authContext = useAuth();
   // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    console.error('❌ [HomePage] Errore useAuth:', error);
+    authContext = { currentUser: null, loading: false };
+  }
   const currentUser = (authContext && typeof authContext === 'object' && 'currentUser' in authContext) ? authContext.currentUser : null;
   const loading = (authContext && typeof authContext === 'object' && 'loading' in authContext) ? authContext.loading : false;
 

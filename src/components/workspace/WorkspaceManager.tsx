@@ -34,8 +34,14 @@ export default function WorkspaceManager({
   onWorkspaceCreated,
   onMemberInvited
 }: WorkspaceManagerProps) {
-  const authContext = useAuth();
   // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    console.error('❌ [WorkspaceManager] Errore useAuth:', error);
+    authContext = { currentUser: null, loading: false };
+  }
   const currentUser = (authContext && typeof authContext === 'object' && 'currentUser' in authContext) ? authContext.currentUser : null;
   const [activeTab, setActiveTab] = useState<'workspaces' | 'create' | 'invite'>('workspaces');
   const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
