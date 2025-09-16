@@ -144,13 +144,17 @@ class NotificationService {
       (0, firestore_1.where)('userId', '==', userId),
       (0, firestore_1.orderBy)('createdAt', 'desc')
     );
-    const unsubscribe = (0, firestore_1.onSnapshot)(q, snapshot => {
-      const notifications = [];
-      snapshot.forEach(doc => {
-        notifications.push({ id: doc.id, ...doc.data() });
-      });
-      callback(notifications);
-    });
+    // CHIRURGICO: Disabilitato onSnapshot temporaneamente per evitare 400 error e loop infiniti
+    // const unsubscribe = (0, firestore_1.onSnapshot)(q, snapshot => {
+    //   const notifications = [];
+    //   snapshot.forEach(doc => {
+    //     notifications.push({ id: doc.id, ...doc.data() });
+    //   });
+    //   callback(notifications);
+    // });
+    
+    // CHIRURGICO: Callback vuoto per evitare 400 error e loop infiniti
+    const unsubscribe = () => {};
     return unsubscribe;
   }
   // ===== NOTIFICATION TEMPLATES =====

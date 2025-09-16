@@ -309,13 +309,17 @@ export class ExternalIntegrationService {
       orderBy('importDate', 'desc')
     );
 
-    const unsubscribe = onSnapshot(q, snapshot => {
-      const files: DesignFile[] = [];
-      snapshot.forEach(doc => {
-        files.push({ id: doc.id, ...doc.data() } as DesignFile);
-      });
-      callback(files);
-    });
+    // CHIRURGICO: Disabilitato onSnapshot temporaneamente per evitare 400 error e loop infiniti
+    // const unsubscribe = onSnapshot(q, snapshot => {
+    //   const files: DesignFile[] = [];
+    //   snapshot.forEach(doc => {
+    //     files.push({ id: doc.id, ...doc.data() } as DesignFile);
+    //   });
+    //   callback(files);
+    // });
+
+    // CHIRURGICO: Callback vuoto per evitare 400 error e loop infiniti
+    const unsubscribe = () => {};
 
     return unsubscribe;
   }
