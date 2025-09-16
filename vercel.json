@@ -28,13 +28,6 @@
       "schedule": "5 0 * * *" 
     }
   ],
-  "redirects": [
-    {
-      "source": "/api/(.*)",
-      "destination": "https://www.urbanova.life/api/$1",
-      "permanent": false
-    }
-  ],
   "headers": [
     { 
       "source": "/(.*)", 
