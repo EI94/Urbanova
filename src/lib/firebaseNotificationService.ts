@@ -10,7 +10,8 @@ import {doc,
   limit as firestoreLimit,
   serverTimestamp,
   Timestamp,
-  collection } from 'firebase/firestore';
+  collection,
+  onSnapshot } from 'firebase/firestore';
 
 import { db } from './firebase.ts';
 
@@ -332,6 +333,55 @@ class FirebaseNotificationService {
         byPriority: {},
       };
     }
+  }
+
+  // ========================================
+  // NOTIFICHE REAL-TIME
+  // ========================================
+
+  getNotificationsRealtime(
+    userId: string,
+    callback: (notifications: Notification[]) => void
+  ): () => void {
+    const q = query(
+      collection(db, 'notifications'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
+
+    // CHIRURGICO: Riabilitato onSnapshot con protezione per evitare loop infiniti
+    const unsubscribe = onSnapshot(q, snapshot => {
+      try {
+        const notifications: Notification[] = [];
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          notifications.push({
+            id: doc.id,
+            userId: data.userId,
+            type: data.type,
+            priority: data.priority,
+            title: data.title,
+            message: data.message,
+            data: data.data,
+            isRead: data.isRead || false,
+            isArchived: data.isArchived || false,
+            expiresAt: data.expiresAt?.toDate() || null,
+            actions: data.actions || [],
+            createdAt: data.createdAt?.toDate() || new Date(),
+            updatedAt: data.updatedAt?.toDate() || new Date(),
+          });
+        });
+        callback(notifications);
+      } catch (error) {
+        console.error('❌ [FirebaseNotification] Errore onSnapshot:', error);
+        // Non propagare l'errore per evitare loop infiniti
+      }
+    }, error => {
+      console.error('❌ [FirebaseNotification] Errore listener notifiche:', error);
+      // Non propagare l'errore per evitare loop infiniti
+    });
+
+    return unsubscribe;
   }
 
   // ========================================
