@@ -31,7 +31,7 @@
   "redirects": [
     {
       "source": "/api/(.*)",
-      "destination": "https://www.urbanova.life/api/:1",
+      "destination": "https://www.urbanova.life/api/$1",
       "permanent": false
     }
   ],
