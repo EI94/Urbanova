@@ -144,6 +144,9 @@ export class FirestoreGeographicService {
         sortBy = 'relevance'
       } = params;
 
+      // Inizializza i dati se necessario
+      await this.initializeGeographicData();
+
       let allResults: GeographicSearchResult[] = [];
 
       // Ricerca comuni
@@ -193,8 +196,20 @@ export class FirestoreGeographicService {
         executionTime: Date.now() - startTime
       };
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Errore ricerca geografica:', error);
+      
+      // Se è un errore di permessi, ritorna risultati vuoti
+      if (error.code === 'permission-denied') {
+        console.log('⚠️ Permessi Firebase insufficienti per ricerca geografica');
+        return {
+          results: [],
+          total: 0,
+          hasMore: false,
+          executionTime: Date.now() - startTime
+        };
+      }
+      
       // Ritorna risultati vuoti invece di lanciare errore
       return {
         results: [],
@@ -227,6 +242,9 @@ export class FirestoreGeographicService {
         includeCoordinates = false,
         fuzzy = true
       } = params;
+
+      // Inizializza i dati se necessario
+      await this.initializeGeographicData();
 
       let allResults: GeographicAutocompleteResult[] = [];
 
@@ -264,8 +282,15 @@ export class FirestoreGeographicService {
 
       return allResults.slice(0, limitParam);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Errore autocomplete geografico:', error);
+      
+      // Se è un errore di permessi, ritorna risultati vuoti
+      if (error.code === 'permission-denied') {
+        console.log('⚠️ Permessi Firebase insufficienti per autocomplete geografico');
+        return [];
+      }
+      
       // Ritorna risultati vuoti invece di lanciare errore
       return [];
     }

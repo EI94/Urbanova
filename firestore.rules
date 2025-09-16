@@ -407,6 +407,28 @@ service cloud.firestore {
                      get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.ownerId == request.auth.uid;
     }
     
+    // ============================================================================
+    // GEOGRAPHIC DATA COLLECTIONS
+    // ============================================================================
+    
+    // Collezione comuni italiani - accesso pubblico per ricerca geografica
+    match /comuni_italiani/{comuneId} {
+      // Lettura: tutti gli utenti autenticati
+      allow read: if isAuthenticated();
+      
+      // Scrittura: solo server (App Check o service account)
+      allow create, update, delete: if isServerRequest();
+    }
+    
+    // Collezione zone italiane - accesso pubblico per ricerca geografica
+    match /zone_italiane/{zonaId} {
+      // Lettura: tutti gli utenti autenticati
+      allow read: if isAuthenticated();
+      
+      // Scrittura: solo server (App Check o service account)
+      allow create, update, delete: if isServerRequest();
+    }
+    
     
     // ============================================================================
     // DEFAULT DENY
