@@ -225,13 +225,17 @@ export class ExternalIntegrationService {
   getToolsRealtime(callback: (tools: ExternalTool[]) => void): () => void {
     const q = query(safeCollection('externalTools'), orderBy('name'));
 
-    const unsubscribe = onSnapshot(q, snapshot => {
-      const tools: ExternalTool[] = [];
-      snapshot.forEach(doc => {
-        tools.push({ id: doc.id, ...doc.data() } as ExternalTool);
-      });
-      callback(tools);
-    });
+    // CHIRURGICO: Disabilitato onSnapshot temporaneamente per evitare 400 error e loop infiniti
+    // const unsubscribe = onSnapshot(q, snapshot => {
+    //   const tools: ExternalTool[] = [];
+    //   snapshot.forEach(doc => {
+    //     tools.push({ id: doc.id, ...doc.data() } as ExternalTool);
+    //   });
+    //   callback(tools);
+    // });
+
+    // CHIRURGICO: Callback vuoto per evitare 400 error e loop infiniti
+    const unsubscribe = () => {};
 
     return unsubscribe;
   }

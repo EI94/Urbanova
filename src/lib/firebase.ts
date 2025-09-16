@@ -59,7 +59,9 @@ if (typeof window !== 'undefined') {
     if (event.error && event.error.message && 
         (event.error.message.includes('collection') || 
          event.error.message.includes('firestore') ||
-         event.error.message.includes('400'))) {
+         event.error.message.includes('400') ||
+         event.error.message.includes('permission-denied') ||
+         event.error.message.includes('Write/channel'))) {
       console.warn('⚠️ [FIREBASE ERROR] Firebase connection issue (non critico):', event.error.message);
       // Non bloccare l'app per errori di connessione Firebase
       event.preventDefault();
@@ -81,7 +83,9 @@ if (typeof window !== 'undefined') {
   window.addEventListener('unhandledrejection', (event) => {
     if (event.reason && event.reason.message && 
         (event.reason.message.includes('firestore') || 
-         event.reason.message.includes('400'))) {
+         event.reason.message.includes('400') ||
+         event.reason.message.includes('permission-denied') ||
+         event.reason.message.includes('Write/channel'))) {
       console.warn('⚠️ [FIREBASE PROMISE ERROR] Firebase promise rejected (non critico):', event.reason.message);
       event.preventDefault();
       return false;

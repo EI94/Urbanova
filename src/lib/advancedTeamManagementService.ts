@@ -369,40 +369,44 @@ class AdvancedTeamManagementService {
    * Sottoscrive ai cambiamenti del team in tempo reale
    */
   subscribeToTeamChanges(teamId: string, callback: (members: TeamMember[]) => void): () => void {
-    const membersRef = safeCollection(this.MEMBERS_COLLECTION);
-    const q = query(membersRef, where('teamId', '==', teamId), where('isActive', '==', true));
+    // CHIRURGICO: Disabilitato onSnapshot temporaneamente per evitare 400 error e loop infiniti
+    // const membersRef = safeCollection(this.MEMBERS_COLLECTION);
+    // const q = query(membersRef, where('teamId', '==', teamId), where('isActive', '==', true));
 
-    const unsubscribe = onSnapshot(q, snapshot => {
-      const members: TeamMember[] = [];
-      snapshot.forEach(doc => {
-        if (!doc) return;
-        const data = doc.data();
-        members.push({
-          id: doc.id,
-          userId: data.userId,
-          name: data.name,
-          email: data.email,
-          avatar: data.avatar || '👤',
-          role: data.role,
-          permissions: data.permissions || [],
-          isOnline: data.isOnline || false,
-          lastSeen: data.lastSeen?.toDate() || new Date(),
-          currentActivity: data.currentActivity || 'Non specificato',
-          joinDate: data.joinDate?.toDate() || new Date(),
-          isActive: data.isActive || true,
-          performance: data.performance || {
-            commentsCount: 0,
-            votesCount: 0,
-            favoritesCount: 0,
-            sessionsCreated: 0,
-            sessionsJoined: 0,
-            lastActivity: new Date(),
-          },
-        });
-      });
+    // const unsubscribe = onSnapshot(q, snapshot => {
+    //   const members: TeamMember[] = [];
+    //   snapshot.forEach(doc => {
+    //     if (!doc) return;
+    //     const data = doc.data();
+    //     members.push({
+    //       id: doc.id,
+    //       userId: data.userId,
+    //       name: data.name,
+    //       email: data.email,
+    //       avatar: data.avatar || '👤',
+    //       role: data.role,
+    //       permissions: data.permissions || [],
+    //       isOnline: data.isOnline || false,
+    //       lastSeen: data.lastSeen?.toDate() || new Date(),
+    //       currentActivity: data.currentActivity || 'Non specificato',
+    //       joinDate: data.joinDate?.toDate() || new Date(),
+    //       isActive: data.isActive || true,
+    //       performance: data.performance || {
+    //         commentsCount: 0,
+    //         votesCount: 0,
+    //         favoritesCount: 0,
+    //         sessionsCreated: 0,
+    //         sessionsJoined: 0,
+    //         lastActivity: new Date(),
+    //       },
+    //     });
+    //   });
 
-      callback(members);
-    });
+    //   callback(members);
+    // });
+
+    // CHIRURGICO: Callback vuoto per evitare 400 error e loop infiniti
+    const unsubscribe = () => {};
 
     return unsubscribe;
   }

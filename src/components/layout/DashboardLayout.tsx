@@ -96,12 +96,28 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
       try {
         if (auth && typeof auth === 'object' && 'currentUser' in auth && auth.currentUser?.uid) {
           console.log('🔄 [DashboardLayout] Caricamento dati per utente:', auth.currentUser.uid);
-          const [notificationsData, profileData] = await Promise.all([
-            firebaseNotificationService.getNotificationStats(auth.currentUser?.uid || ''),
-            firebaseUserProfileService.getUserProfile(auth.currentUser?.uid || ''),
-          ]);
-          setNotifications(notificationsData);
-          setUserProfile(profileData);
+          
+          // Carica notifiche con gestione errori
+          try {
+            const notificationsData = await firebaseNotificationService.getNotificationStats(auth.currentUser?.uid || '');
+            setNotifications(notificationsData);
+            console.log('✅ [DashboardLayout] Notifiche caricate:', notificationsData);
+          } catch (notificationError) {
+            console.error('❌ [DashboardLayout] Errore caricamento notifiche:', notificationError);
+            // Non bloccare il caricamento se le notifiche falliscono
+            setNotifications({ unread: 0, total: 0 });
+          }
+          
+          // Carica profilo utente con gestione errori
+          try {
+            const profileData = await firebaseUserProfileService.getUserProfile(auth.currentUser?.uid || '');
+            setUserProfile(profileData);
+            console.log('✅ [DashboardLayout] Profilo caricato:', profileData);
+          } catch (profileError) {
+            console.error('❌ [DashboardLayout] Errore caricamento profilo:', profileError);
+            // Non bloccare il caricamento se il profilo fallisce
+            setUserProfile(null);
+          }
           
           // Carica workspace dell'utente con gestione errori
           try {
@@ -115,12 +131,13 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
             setWorkspaces([]);
           }
           
-          console.log('✅ [DashboardLayout] Dati caricati:', { notificationsData, profileData });
+          console.log('✅ [DashboardLayout] Caricamento dati completato');
         } else {
           console.log('⚠️ [DashboardLayout] Nessun utente autenticato, skip caricamento dati');
         }
-    } catch (error) {
-        console.error('❌ [DashboardLayout] Errore caricamento dati:', error);
+      } catch (error) {
+        console.error('❌ [DashboardLayout] Errore generale caricamento dati:', error);
+        // Non bloccare l'app per errori di caricamento dati
       }
     };
 

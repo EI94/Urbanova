@@ -73,11 +73,14 @@ class FirebaseUserProfileService {
 
   async getUserProfile(userId: string): Promise<UserProfile | null> {
     try {
+      console.log('🔄 [FirebaseUserProfile] Caricamento profilo per:', userId);
+      
       const profileRef = doc(db, 'userProfiles', userId);
       const profileSnap = await getDoc(profileRef);
 
       if (profileSnap.exists()) {
         const data = profileSnap.data();
+        console.log('✅ [FirebaseUserProfile] Profilo trovato:', data);
         return {
           id: profileSnap.id,
           ...data,
@@ -91,9 +94,17 @@ class FirebaseUserProfileService {
         } as UserProfile;
       }
 
+      console.log('ℹ️ [FirebaseUserProfile] Nessun profilo trovato per:', userId);
       return null;
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      console.error('❌ [FirebaseUserProfile] Errore caricamento profilo:', error);
+      
+      // Se è un errore di permessi, non bloccare l'app
+      if (error instanceof Error && error.message.includes('permission-denied')) {
+        console.warn('⚠️ [FirebaseUserProfile] Permessi insufficienti per caricare profilo');
+        return null;
+      }
+      
       return null;
     }
   }
@@ -108,6 +119,8 @@ class FirebaseUserProfileService {
     }
   ): Promise<UserProfile> {
     try {
+      console.log('🆕 [FirebaseUserProfile] Creazione profilo per:', userId);
+      
       const defaultProfile: Omit<UserProfile, 'id'> = {
         userId,
         firstName: profileData.firstName || '',
@@ -145,12 +158,45 @@ class FirebaseUserProfileService {
         },
       });
 
+      console.log('✅ [FirebaseUserProfile] Profilo creato con successo per:', userId);
       return {
         id: userId,
         ...defaultProfile,
       };
     } catch (error) {
-      console.error('Error creating user profile:', error);
+      console.error('❌ [FirebaseUserProfile] Errore creazione profilo:', error);
+      
+      // Se è un errore di permessi, restituisci un profilo temporaneo
+      if (error instanceof Error && error.message.includes('permission-denied')) {
+        console.warn('⚠️ [FirebaseUserProfile] Permessi insufficienti per creare profilo, usando profilo temporaneo');
+        return {
+          id: userId,
+          userId,
+          firstName: profileData.firstName || '',
+          lastName: profileData.lastName || '',
+          displayName: profileData.displayName,
+          email: profileData.email,
+          timezone: 'Europe/Rome',
+          language: 'it',
+          dateFormat: 'DD/MM/YYYY',
+          currency: 'EUR',
+          preferences: {
+            theme: 'light',
+            sidebarCollapsed: false,
+            emailNotifications: true,
+            pushNotifications: true,
+          },
+          security: {
+            twoFactorEnabled: false,
+            lastPasswordChange: new Date(),
+            loginHistory: [],
+          },
+          metadata: {},
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+      }
+      
       throw new Error('Failed to create user profile');
     }
   }

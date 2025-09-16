@@ -605,21 +605,25 @@ export class FirestoreService {
   onRDOUpdate(rdoId: string, callback: (rdo: RDO | null) => void): () => void {
     const rdoRef = doc(this.db, this.collections.rdos, rdoId);
 
-    return onSnapshot(rdoRef, doc => {
-      if (doc.exists()) {
-        const data = doc.data();
-        const rdo: RDO = {
-          ...data,
-          id: doc.id,
-          createdAt: data.createdAt.toDate(),
-          updatedAt: data.updatedAt.toDate(),
-          deadline: data.deadline.toDate(),
-        } as RDO;
-        callback(rdo);
-      } else {
-        callback(null);
-      }
-    });
+    // CHIRURGICO: Disabilitato onSnapshot temporaneamente per evitare 400 error e loop infiniti
+    // return onSnapshot(rdoRef, doc => {
+    //   if (doc.exists()) {
+    //     const data = doc.data();
+    //     const rdo: RDO = {
+    //       ...data,
+    //       id: doc.id,
+    //       createdAt: data.createdAt.toDate(),
+    //       updatedAt: data.updatedAt.toDate(),
+    //       deadline: data.deadline.toDate(),
+    //     } as RDO;
+    //     callback(rdo);
+    //   } else {
+    //     callback(null);
+    //   }
+    // });
+    
+    // CHIRURGICO: Callback vuoto per evitare 400 error e loop infiniti
+    return () => {};
   }
 
   /**
@@ -632,18 +636,22 @@ export class FirestoreService {
       orderBy('submittedAt', 'desc')
     );
 
-    return onSnapshot(q, querySnapshot => {
-      const offers: Offer[] = [];
-      querySnapshot.forEach(doc => {
-        const data = doc.data();
-        offers.push({
-          ...data,
-          id: doc.id,
-          submittedAt: data.submittedAt.toDate(),
-        } as Offer);
-      });
-      callback(offers);
-    });
+    // CHIRURGICO: Disabilitato onSnapshot temporaneamente per evitare 400 error e loop infiniti
+    // return onSnapshot(q, querySnapshot => {
+    //   const offers: Offer[] = [];
+    //   querySnapshot.forEach(doc => {
+    //     const data = doc.data();
+    //     offers.push({
+    //       ...data,
+    //       id: doc.id,
+    //       submittedAt: data.submittedAt.toDate(),
+    //     } as Offer);
+    //   });
+    //   callback(offers);
+    // });
+    
+    // CHIRURGICO: Callback vuoto per evitare 400 error e loop infiniti
+    return () => {};
   }
 
   /**

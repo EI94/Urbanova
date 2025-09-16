@@ -253,6 +253,8 @@ class FirebaseNotificationService {
 
   async getNotificationStats(userId: string): Promise<NotificationStats> {
     try {
+      console.log('🔄 [FirebaseNotification] Caricamento statistiche notifiche per:', userId);
+      
       // Total count
       const totalQuery = query(collection(db, 'notifications'), where('userId', '==', userId));
       const totalSnapshot = await getDocs(totalQuery);
@@ -314,7 +316,13 @@ class FirebaseNotificationService {
         byPriority,
       };
     } catch (error) {
-      console.error('Error fetching notification stats:', error);
+      console.error('❌ [FirebaseNotification] Errore caricamento statistiche:', error);
+      
+      // Se è un errore di permessi, restituisci statistiche vuote
+      if (error instanceof Error && error.message.includes('permission-denied')) {
+        console.warn('⚠️ [FirebaseNotification] Permessi insufficienti per caricare statistiche');
+      }
+      
       return {
         total: 0,
         unread: 0,
