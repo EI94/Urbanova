@@ -1110,13 +1110,13 @@ export default function UnifiedDashboardPage() {
                           Mappa temporaneamente disabilitata per risolvere problemi di performance
                         </p>
                       </div>
-                      {/* TEMPORANEAMENTE DISABILITATO: {mapMarkers.length > 0 && (
+                      {/* TEMPORANEAMENTE DISABILITATO: mapMarkers.length > 0 && (
                         <div className="mt-3">
                           <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                             {mapMarkers.length} elementi geografici caricati
                           </p>
                         </div>
-                      )}
+                      ) */}
                     </div>
                   </div>
                 )}
