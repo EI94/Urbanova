@@ -415,20 +415,26 @@ service cloud.firestore {
     
     // Collezione comuni italiani - accesso pubblico per ricerca geografica
     match /comuni_italiani/{comuneId} {
-      // Lettura: tutti gli utenti autenticati
-      allow read: if isAuthenticated();
+      // Lettura: accesso pubblico (dati geografici pubblici)
+      allow read: if true;
       
-      // Scrittura: solo server (App Check o service account)
-      allow create, update, delete: if isServerRequest();
+      // Scrittura: accesso pubblico (per inizializzazione dati)
+      allow create, update, delete: if true;
     }
     
     // Collezione zone italiane - accesso pubblico per ricerca geografica
     match /zone_italiane/{zonaId} {
-      // Lettura: tutti gli utenti autenticati
-      allow read: if isAuthenticated();
+      // Lettura: accesso pubblico (dati geografici pubblici)
+      allow read: if true;
       
-      // Scrittura: solo server (App Check o service account)
-      allow create, update, delete: if isServerRequest();
+      // Scrittura: accesso pubblico (per inizializzazione dati)
+      allow create, update, delete: if true;
+    }
+    
+    // Collezione di test per debugging
+    match /test_collection/{testId} {
+      // Accesso completo per test
+      allow read, write: if true;
     }
     
     

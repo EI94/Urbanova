@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 
 import { BellIcon, CheckIcon, ClockIcon, CheckCircleIcon } from '@/components/icons';
 import { useAuth } from '@/contexts/AuthContext';
@@ -228,10 +228,23 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
     return date.toLocaleDateString('it-IT');
   };
 
-  const filteredNotifications =
-    activeTab === 'unread'
-      ? notifications.filter(n => !n.isRead && !(n as any).isDismissed)
-      : notifications.filter(n => !(n as any).isDismissed);
+  // CHIRURGICO: Fix sincronizzazione conteggio vs contenuto notifiche
+  const filteredNotifications = useMemo(() => {
+    if (activeTab === 'unread') {
+      return notifications.filter(n => !n.isRead && !(n as any).isDismissed);
+    } else {
+      return notifications.filter(n => !(n as any).isDismissed);
+    }
+  }, [notifications, activeTab]);
+
+  // CHIRURGICO: Calcolo conteggio reale per sincronizzazione
+  const realUnreadCount = useMemo(() => {
+    return notifications.filter(n => !n.isRead && !(n as any).isDismissed).length;
+  }, [notifications]);
+
+  const realTotalCount = useMemo(() => {
+    return notifications.filter(n => !(n as any).isDismissed).length;
+  }, [notifications]);
 
   if (!isOpen) return null;
 
@@ -248,9 +261,9 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
           <div className="flex items-center space-x-2">
             <BellIcon className="h-5 w-5 text-gray-600" />
             <h2 className="text-lg font-semibold text-gray-900">{t('title', 'notifications')}</h2>
-            {stats && stats.unread > 0 && (
+            {realUnreadCount > 0 && (
               <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                {stats.unread}
+                {realUnreadCount}
               </span>
             )}
           </div>
@@ -272,9 +285,9 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
             }`}
           >
             {t('unread', 'notifications')}
-            {stats && stats.unread > 0 && (
+            {realUnreadCount > 0 && (
               <span className="ml-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                {stats.unread}
+                {realUnreadCount}
               </span>
             )}
           </button>
@@ -287,9 +300,9 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
             }`}
           >
             {t('all', 'notifications')}
-            {stats && (
+            {realTotalCount > 0 && (
               <span className="ml-2 bg-gray-500 text-white text-xs px-2 py-1 rounded-full">
-                {stats.total}
+                {realTotalCount}
               </span>
             )}
           </button>

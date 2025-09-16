@@ -918,10 +918,16 @@ export class FirestoreGeographicService {
       const comuniSnapshot = await getDocs(collection(db, this.comuniCollection));
       console.log(`📊 Comuni esistenti in Firestore: ${comuniSnapshot.size}`);
       
-      if (comuniSnapshot.size > 0) {
-        console.log('✅ Dati geografici già presenti');
+      if (comuniSnapshot.size > 5) {
+        console.log('✅ Dati geografici già presenti (più di 5 comuni)');
         return;
       }
+      
+      if (comuniSnapshot.size > 0) {
+        console.log(`⚠️ Trovati ${comuniSnapshot.size} comuni esistenti, ma probabilmente incompleti. Procedendo con inizializzazione...`);
+      }
+      
+      console.log('🔄 Inizializzazione necessaria - procedendo con inserimento dati...');
 
       // Inserisci comuni principali italiani
       const comuniPrincipali = this.getComuniPrincipali();
@@ -955,9 +961,35 @@ export class FirestoreGeographicService {
         return;
       }
       
-      // Per altri errori, continua comunque
-      console.log('⚠️ Continuando senza inizializzazione dati geografici');
+      // Per altri errori, rilancia sempre per debugging
+      console.log('⚠️ Errore durante inizializzazione dati geografici');
       throw error; // Rilancia l'errore per debugging
+    }
+  }
+
+  /**
+   * Ottiene conteggio comuni in Firestore
+   */
+  async getComuniCount(): Promise<number> {
+    try {
+      const snapshot = await getDocs(collection(db, this.comuniCollection));
+      return snapshot.size;
+    } catch (error: any) {
+      console.error('❌ Errore conteggio comuni:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Ottiene conteggio zone in Firestore
+   */
+  async getZoneCount(): Promise<number> {
+    try {
+      const snapshot = await getDocs(collection(db, this.zoneCollection));
+      return snapshot.size;
+    } catch (error: any) {
+      console.error('❌ Errore conteggio zone:', error);
+      return 0;
     }
   }
 
