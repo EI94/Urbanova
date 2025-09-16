@@ -323,6 +323,8 @@ export class FirestoreGeographicService {
         includeMetadata
       } = params;
 
+      console.log(`🔍 Ricerca comuni: "${searchQuery}", regione: ${region}, provincia: ${province}, limit: ${limitParam}`);
+
       let q = query(collection(db, this.comuniCollection));
 
     // Filtri base
@@ -350,6 +352,8 @@ export class FirestoreGeographicService {
     q = query(q, limit(limitParam));
 
     const snapshot = await getDocs(q);
+    console.log(`📊 Trovati ${snapshot.size} documenti in Firestore per comuni`);
+    
     const results: GeographicSearchResult[] = [];
 
     snapshot.forEach(doc => {
@@ -395,6 +399,7 @@ export class FirestoreGeographicService {
       });
     });
 
+    console.log(`✅ Ricerca comuni completata: ${results.length} risultati per "${searchQuery}"`);
     return results;
     
     } catch (error: any) {
@@ -911,6 +916,8 @@ export class FirestoreGeographicService {
       
       // Verifica se i dati esistono già
       const comuniSnapshot = await getDocs(collection(db, this.comuniCollection));
+      console.log(`📊 Comuni esistenti in Firestore: ${comuniSnapshot.size}`);
+      
       if (comuniSnapshot.size > 0) {
         console.log('✅ Dati geografici già presenti');
         return;
@@ -918,9 +925,11 @@ export class FirestoreGeographicService {
 
       // Inserisci comuni principali italiani
       const comuniPrincipali = this.getComuniPrincipali();
+      console.log(`📝 Inserendo ${comuniPrincipali.length} comuni principali...`);
+      
       const batch = writeBatch(db);
 
-      comuniPrincipali.forEach(comune => {
+      comuniPrincipali.forEach((comune, index) => {
         const docRef = doc(collection(db, this.comuniCollection));
         batch.set(docRef, {
           ...comune,
@@ -928,13 +937,17 @@ export class FirestoreGeographicService {
           dataAggiornamento: new Date(),
           attivo: true
         });
+        console.log(`📝 Preparato comune ${index + 1}: ${comune.nome}`);
       });
 
+      console.log('💾 Committando batch a Firestore...');
       await batch.commit();
       console.log('✅ Dati geografici inizializzati con successo');
 
     } catch (error: any) {
       console.error('❌ Errore inizializzazione dati geografici:', error);
+      console.error('❌ Codice errore:', error.code);
+      console.error('❌ Messaggio errore:', error.message);
       
       // Se è un errore di permessi, continua senza inizializzazione
       if (error.code === 'permission-denied') {
@@ -944,6 +957,7 @@ export class FirestoreGeographicService {
       
       // Per altri errori, continua comunque
       console.log('⚠️ Continuando senza inizializzazione dati geografici');
+      throw error; // Rilancia l'errore per debugging
     }
   }
 
