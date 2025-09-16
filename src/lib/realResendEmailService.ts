@@ -221,7 +221,7 @@ Supporto: support@urbanova.com
       message:
         'Questo è un test del servizio Resend REALE Urbanova. Se ricevi questa email, Resend funziona perfettamente!',
       reportTitle: 'Test Report - Urbanova',
-      reportUrl: 'https://urbanova.life/test',
+      reportUrl: 'https://www.urbanova.life/test',
     };
 
     return this.sendEmail(testData);

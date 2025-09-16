@@ -376,7 +376,7 @@ export class RealLandScrapingAgent {
         <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
           <p style="color: #6b7280; font-size: 14px; margin: 0;">
             Questa email è stata generata automaticamente da Urbanova AI<br>
-            <a href="https://urbanova.life/dashboard" style="color: #3b82f6;">Accedi al Dashboard</a>
+            <a href="https://www.urbanova.life/dashboard" style="color: #3b82f6;">Accedi al Dashboard</a>
           </p>
         </div>
       </body>

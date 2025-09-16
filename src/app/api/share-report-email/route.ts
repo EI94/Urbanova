@@ -95,12 +95,12 @@ export async function POST(request: NextRequest) {
           
           <p>Per visualizzare il report completo, clicca sul pulsante qui sotto:</p>
           
-          <a href="${reportUrl || 'https://urbanova.life'}" class="button">
+          <a href="${reportUrl || 'https://www.urbanova.life'}" class="button">
             📊 Visualizza Report
           </a>
           
           <p><em>Se il pulsante non funziona, copia e incolla questo link nel browser:</em></p>
-          <p style="word-break: break-all; color: #3b82f6;">${reportUrl || 'https://urbanova.life'}</p>
+          <p style="word-break: break-all; color: #3b82f6;">${reportUrl || 'https://www.urbanova.life'}</p>
         </div>
         
         <div class="footer">

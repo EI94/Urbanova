@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       subject,
       message,
       reportTitle: 'Debug Resend',
-      reportUrl: 'https://urbanova.life/debug',
+      reportUrl: 'https://www.urbanova.life/debug',
     });
 
     console.log('📊 Risultato debug Resend:', debugResult);

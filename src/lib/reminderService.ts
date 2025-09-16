@@ -107,7 +107,7 @@ class ReminderService {
         reminderDate: format(reminder.reminderDate, 'EEEE d MMMM yyyy', { locale: it }),
         reminderTime: reminder.reminderTime,
         note: reminder.note,
-        projectLink: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/feasibility-analysis/${reminder.projectId}`,
+        projectLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.urbanova.life'}/dashboard/feasibility-analysis/${reminder.projectId}`,
         projectReport: projectReport,
       };
 

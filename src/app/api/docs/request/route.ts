@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     const docId = `doc-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
     // Generate secure upload token
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.urbanova.life';
     const uploadUrl = jwtService.generateUploadUrl(
       baseUrl,
       docId as string,

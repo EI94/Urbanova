@@ -329,7 +329,7 @@ export class DataSourceValidator {
     const source: DataSource = {
       id: 'custom-sources',
       name: 'Fonti Personalizzate Urbanova',
-      url: 'https://urbanova.life/api/data',
+      url: 'https://www.urbanova.life/api/data',
       type: 'CUSTOM',
       completeness: 0,
       accuracy: 0,
