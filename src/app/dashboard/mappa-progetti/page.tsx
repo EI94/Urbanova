@@ -51,8 +51,8 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
-import { InteractiveMap, MapMarker } from '@/components/map/InteractiveMap';
-import { useMapData } from '@/hooks/useMapData';
+// TEMPORANEAMENTE DISABILITATO: import { InteractiveMap, MapMarker } from '@/components/map/InteractiveMap';
+// TEMPORANEAMENTE DISABILITATO: import { useMapData } from '@/hooks/useMapData';
 
 // ============================================================================
 // TYPES
@@ -97,18 +97,19 @@ export default function MappaProgettiPage() {
   const [selectedProject, setSelectedProject] = useState<ProjectLocation | null>(null);
   
   // Hook per dati mappa geografica
-  const {
-    markers: geographicMarkers,
-    filteredMarkers,
-    loading: mapDataLoading,
-    error: mapDataError,
-    updateFilters,
-    getStatistics
-  } = useMapData({
-    autoLoad: true,
-    maxMarkers: 5000,
-    enableClustering: true
-  });
+  // TEMPORANEAMENTE DISABILITATO: Hook per dati mappa
+  // const {
+  //   markers: geographicMarkers,
+  //   filteredMarkers,
+  //   loading: mapDataLoading,
+  //   error: mapDataError,
+  //   updateFilters,
+  //   getStatistics
+  // } = useMapData({
+  //   autoLoad: true,
+  //   maxMarkers: 5000,
+  //   enableClustering: true
+  // });
 
   useEffect(() => {
     loadData();
@@ -206,7 +207,7 @@ export default function MappaProgettiPage() {
   }));
 
   // Combina markers geografici e progetti
-  const allMarkers = [...geographicMarkers, ...projectMarkers];
+  // TEMPORANEAMENTE DISABILITATO: const allMarkers = [...geographicMarkers, ...projectMarkers];
 
   const filterProjects = () => {
     let filtered = projects;
@@ -358,6 +359,7 @@ export default function MappaProgettiPage() {
         {/* Map View */}
         {viewMode === 'map' && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            {/* TEMPORANEAMENTE DISABILITATO: InteractiveMap
             <InteractiveMap
               height="600px"
               initialCenter={[41.9028, 12.4964]} // Centro Italia
@@ -384,6 +386,18 @@ export default function MappaProgettiPage() {
                 console.log('Mappa cliccata:', { lat, lng });
               }}
             />
+            */}
+            <div className="flex items-center justify-center h-96 bg-gray-100 dark:bg-gray-700">
+              <div className="text-center">
+                <MapIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500 dark:text-gray-400 text-lg">
+                  Mappa temporaneamente disabilitata
+                </p>
+                <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">
+                  Per risolvere problemi di performance
+                </p>
+              </div>
+            </div>
           </div>
         )}
 

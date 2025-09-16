@@ -68,54 +68,55 @@ export function useMapData(options: UseMapDataOptions = {}) {
     setState(prev => ({ ...prev, loading: true, error: null }));
 
     try {
-      // Carica comuni
-      const comuniResponse = await fetch('/api/geographic/search?type=comune&limit=5000&includeCoordinates=true&includeMetadata=true');
-      const comuniData = await comuniResponse.json();
+      // TEMPORANEAMENTE DISABILITATO: Carica comuni con limite ridotto per evitare loop infiniti
+      // const comuniResponse = await fetch('/api/geographic/search?type=comune&limit=5000&includeCoordinates=true&includeMetadata=true');
+      // const comuniData = await comuniResponse.json();
 
-      if (!comuniData.success) {
-        throw new Error(comuniData.error || 'Errore caricamento comuni');
-      }
+      // if (!comuniData.success) {
+      //   throw new Error(comuniData.error || 'Errore caricamento comuni');
+      // }
 
-      // Carica zone
-      const zoneResponse = await fetch('/api/geographic/search?type=zona&limit=5000&includeCoordinates=true&includeMetadata=true');
-      const zoneData = await zoneResponse.json();
+      // TEMPORANEAMENTE DISABILITATO: Carica zone con limite ridotto per evitare loop infiniti
+      // const zoneResponse = await fetch('/api/geographic/search?type=zona&limit=5000&includeCoordinates=true&includeMetadata=true');
+      // const zoneData = await zoneResponse.json();
 
-      if (!zoneData.success) {
-        throw new Error(zoneData.error || 'Errore caricamento zone');
-      }
+      // if (!zoneData.success) {
+      //   throw new Error(zoneData.error || 'Errore caricamento zone');
+      // }
 
-      // Converte dati in markers
-      const comuniMarkers: MapMarker[] = comuniData.results.map((comune: any) => ({
-        id: comune.id,
-        position: [comune.latitudine, comune.longitudine],
-        type: 'comune' as const,
-        nome: comune.nome,
-        provincia: comune.provincia,
-        regione: comune.regione,
-        popolazione: comune.popolazione,
-        superficie: comune.superficie,
-        metadata: comune.metadata
-      }));
+      // TEMPORANEAMENTE DISABILITATO: Converte dati in markers
+      // const comuniMarkers: MapMarker[] = comuniData.results.map((comune: any) => ({
+      //   id: comune.id,
+      //   position: [comune.latitudine, comune.longitudine],
+      //   type: 'comune' as const,
+      //   nome: comune.nome,
+      //   provincia: comune.provincia,
+      //   regione: comune.regione,
+      //   popolazione: comune.popolazione,
+      //   superficie: comune.superficie,
+      //   metadata: comune.metadata
+      // }));
 
-      const zoneMarkers: MapMarker[] = zoneData.results.map((zona: any) => ({
-        id: zona.id,
-        position: [zona.latitudine, zona.longitudine],
-        type: 'zona' as const,
-        nome: zona.nome,
-        provincia: zona.provincia,
-        regione: zona.regione,
-        popolazione: zona.popolazione,
-        superficie: zona.superficie,
-        metadata: zona.metadata
-      }));
+      // const zoneMarkers: MapMarker[] = zoneData.results.map((zona: any) => ({
+      //   id: zona.id,
+      //   position: [zona.latitudine, zona.longitudine],
+      //   type: 'zona' as const,
+      //   nome: zona.nome,
+      //   provincia: zona.provincia,
+      //   regione: zona.regione,
+      //   popolazione: zona.popolazione,
+      //   superficie: zona.superficie,
+      //   metadata: zona.metadata
+      // }));
 
-      const allMarkers = [...comuniMarkers, ...zoneMarkers].slice(0, maxMarkers);
+      // const allMarkers = [...comuniMarkers, ...zoneMarkers].slice(0, maxMarkers);
 
+      // Ritorna dati vuoti temporaneamente per evitare loop infiniti
       setState(prev => ({
         ...prev,
-        markers: allMarkers,
+        markers: [],
         loading: false,
-        totalCount: allMarkers.length,
+        totalCount: 0,
         lastUpdate: new Date()
       }));
 

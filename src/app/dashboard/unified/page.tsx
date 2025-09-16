@@ -53,8 +53,8 @@ import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
 import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 import MarkdownRenderer from '@/components/ui/MarkdownRenderer';
 import { GeographicSearch, GeographicSearchResult } from '@/components/ui/GeographicSearch';
-import { InteractiveMap, MapMarker } from '@/components/map/InteractiveMap';
-import { useMapData } from '@/hooks/useMapData';
+// TEMPORANEAMENTE DISABILITATO: import { InteractiveMap, MapMarker } from '@/components/map/InteractiveMap';
+// TEMPORANEAMENTE DISABILITATO: import { useMapData } from '@/hooks/useMapData';
 
 // I dati mock sono stati rimossi - ora utilizziamo dati reali dal database
 
@@ -125,18 +125,18 @@ export default function UnifiedDashboardPage() {
   const [showGeographicSearch, setShowGeographicSearch] = useState(false);
   const [showInteractiveMap, setShowInteractiveMap] = useState(false);
   
-  // Hook per dati mappa
-  const {
-    markers: mapMarkers,
-    filteredMarkers,
-    loading: mapLoading,
-    error: mapError,
-    getStatistics: getMapStatistics
-  } = useMapData({
-    autoLoad: true,
-    maxMarkers: 2000,
-    enableClustering: true
-  });
+  // TEMPORANEAMENTE DISABILITATO: Hook per dati mappa
+  // const {
+  //   markers: mapMarkers,
+  //   filteredMarkers,
+  //   loading: mapLoading,
+  //   error: mapError,
+  //   getStatistics: getMapStatistics
+  // } = useMapData({
+  //   autoLoad: true,
+  //   maxMarkers: 2000,
+  //   enableClustering: true
+  // });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -1085,6 +1085,7 @@ export default function UnifiedDashboardPage() {
                           <X className="w-4 h-4" />
                         </button>
                       </div>
+                      {/* TEMPORANEAMENTE DISABILITATO: InteractiveMap
                       <InteractiveMap
                         height="400px"
                         initialCenter={[41.9028, 12.4964]} // Centro Italia
@@ -1103,7 +1104,13 @@ export default function UnifiedDashboardPage() {
                           console.log('Mappa cliccata:', { lat, lng });
                         }}
                       />
-                      {mapMarkers.length > 0 && (
+                      */}
+                      <div className="flex items-center justify-center h-64 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                        <p className="text-gray-500 dark:text-gray-400">
+                          Mappa temporaneamente disabilitata per risolvere problemi di performance
+                        </p>
+                      </div>
+                      {/* TEMPORANEAMENTE DISABILITATO: {mapMarkers.length > 0 && (
                         <div className="mt-3">
                           <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                             {mapMarkers.length} elementi geografici caricati
