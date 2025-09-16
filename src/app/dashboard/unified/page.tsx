@@ -52,6 +52,9 @@ import { ProjectPreview as ProjectPreviewType } from '@/lib/intentService';
 import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
 import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 import MarkdownRenderer from '@/components/ui/MarkdownRenderer';
+import { GeographicSearch, GeographicSearchResult } from '@/components/ui/GeographicSearch';
+import { InteractiveMap, MapMarker } from '@/components/map/InteractiveMap';
+import { useMapData } from '@/hooks/useMapData';
 
 // I dati mock sono stati rimossi - ora utilizziamo dati reali dal database
 
@@ -116,6 +119,24 @@ export default function UnifiedDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Stato per ricerca geografica
+  const [geographicSearchResults, setGeographicSearchResults] = useState<GeographicSearchResult[]>([]);
+  const [showGeographicSearch, setShowGeographicSearch] = useState(false);
+  const [showInteractiveMap, setShowInteractiveMap] = useState(false);
+  
+  // Hook per dati mappa
+  const {
+    markers: mapMarkers,
+    filteredMarkers,
+    loading: mapLoading,
+    error: mapError,
+    getStatistics: getMapStatistics
+  } = useMapData({
+    autoLoad: true,
+    maxMarkers: 2000,
+    enableClustering: true
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -841,14 +862,14 @@ export default function UnifiedDashboardPage() {
                               "Crea un nuovo studio di fattibilità"
                             </button>
                             <button
-                              onClick={() => setInputValue('Cerca terreni e immobili')}
+                              onClick={() => setShowGeographicSearch(true)}
                               className={`w-full p-3 text-left border rounded-lg transition-colors ${
                                 darkMode 
                                   ? 'bg-gray-700 border-gray-600 hover:bg-gray-600 text-gray-300' 
                                   : 'bg-white border-gray-200 hover:bg-gray-50 text-gray-700'
                               }`}
                             >
-                              "Cerca terreni e immobili"
+                              "Cerca comuni e zone italiane"
                             </button>
                             <button
                               onClick={() => setInputValue('Crea un nuovo progetto')}
@@ -859,6 +880,16 @@ export default function UnifiedDashboardPage() {
                               }`}
                             >
                               "Crea un nuovo progetto"
+                            </button>
+                            <button
+                              onClick={() => setShowInteractiveMap(true)}
+                              className={`w-full p-3 text-left border rounded-lg transition-colors ${
+                                darkMode 
+                                  ? 'bg-gray-700 border-gray-600 hover:bg-gray-600 text-gray-300' 
+                                  : 'bg-white border-gray-200 hover:bg-gray-50 text-gray-700'
+                              }`}
+                            >
+                              "Visualizza mappa interattiva"
                             </button>
                           </div>
                         </div>
@@ -999,6 +1030,89 @@ export default function UnifiedDashboardPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Ricerca Geografica */}
+                {showGeographicSearch && (
+                  <div className="mb-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          Ricerca Geografica
+                        </h3>
+                        <button
+                          onClick={() => setShowGeographicSearch(false)}
+                          className="p-1 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <GeographicSearch
+                        onResultSelect={(result) => {
+                          console.log('Risultato selezionato:', result);
+                          setInputValue(`Analizza il comune di ${result.nome} in ${result.provincia}, ${result.regione}`);
+                          setShowGeographicSearch(false);
+                        }}
+                        onResultsChange={setGeographicSearchResults}
+                        placeholder="Cerca comuni, zone, quartieri..."
+                        showFilters={true}
+                        maxResults={10}
+                        includeCoordinates={true}
+                        includeMetadata={true}
+                      />
+                      {geographicSearchResults.length > 0 && (
+                        <div className="mt-3">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                            {geographicSearchResults.length} risultati trovati
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Mappa Interattiva */}
+                {showInteractiveMap && (
+                  <div className="mb-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          Mappa Interattiva Italia
+                        </h3>
+                        <button
+                          onClick={() => setShowInteractiveMap(false)}
+                          className="p-1 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <InteractiveMap
+                        height="400px"
+                        initialCenter={[41.9028, 12.4964]} // Centro Italia
+                        initialZoom={6}
+                        markers={mapMarkers}
+                        loading={mapLoading}
+                        showSearch={true}
+                        showFilters={true}
+                        showLegend={true}
+                        showControls={true}
+                        onMarkerClick={(marker) => {
+                          console.log('Marker cliccato:', marker);
+                          setInputValue(`Analizza ${marker.nome} in ${marker.provincia}, ${marker.regione}`);
+                        }}
+                        onMapClick={(lat, lng) => {
+                          console.log('Mappa cliccata:', { lat, lng });
+                        }}
+                      />
+                      {mapMarkers.length > 0 && (
+                        <div className="mt-3">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                            {mapMarkers.length} elementi geografici caricati
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Quick Stats - Compact */}
                 <div className="grid grid-cols-4 gap-3">

@@ -51,6 +51,8 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
+import { InteractiveMap, MapMarker } from '@/components/map/InteractiveMap';
+import { useMapData } from '@/hooks/useMapData';
 
 // ============================================================================
 // TYPES
@@ -92,26 +94,29 @@ export default function MappaProgettiPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
-  const [mapLoaded, setMapLoaded] = useState(false);
   const [selectedProject, setSelectedProject] = useState<ProjectLocation | null>(null);
-  const mapRef = useRef<HTMLDivElement>(null);
-  const googleMapRef = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<google.maps.Marker[]>([]);
+  
+  // Hook per dati mappa geografica
+  const {
+    markers: geographicMarkers,
+    filteredMarkers,
+    loading: mapDataLoading,
+    error: mapDataError,
+    updateFilters,
+    getStatistics
+  } = useMapData({
+    autoLoad: true,
+    maxMarkers: 5000,
+    enableClustering: true
+  });
 
   useEffect(() => {
     loadData();
-    loadGoogleMaps();
   }, []);
 
   useEffect(() => {
     filterProjects();
   }, [projects, searchTerm, selectedStatus]);
-
-  useEffect(() => {
-    if (mapLoaded && filteredProjects.length > 0) {
-      updateMapMarkers();
-    }
-  }, [mapLoaded, filteredProjects]);
 
   const loadData = async () => {
     try {
@@ -179,131 +184,29 @@ export default function MappaProgettiPage() {
     }
   };
 
-  const loadGoogleMaps = () => {
-    if (typeof window === 'undefined') return;
-
-    const script = document.createElement('script');
-    // Usa una chiave API temporanea per il test
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyBvOkBw7cG6hY7v8x9z0a1b2c3d4e5f6g7h8';
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      initializeMap();
-    };
-    script.onerror = () => {
-      console.warn('Google Maps non caricato. Usando mappa mock.');
-      setMapLoaded(true);
-    };
-    document.head.appendChild(script);
-  };
-
-  const initializeMap = () => {
-    if (!mapRef.current) return;
-
-    const map = new google.maps.Map(mapRef.current, {
-      zoom: 6,
-      center: { lat: 41.9028, lng: 12.4964 }, // Centro Italia
-      mapTypeId: google.maps.MapTypeId.ROADMAP,
-      styles: [
-        {
-          featureType: 'poi',
-          elementType: 'labels',
-          stylers: [{ visibility: 'off' }]
-        }
-      ]
-    });
-
-    googleMapRef.current = map;
-    setMapLoaded(true);
-  };
-
-  const updateMapMarkers = () => {
-    if (!googleMapRef.current) return;
-
-    // Rimuovi marcatori esistenti
-    markersRef.current.forEach(marker => marker.setMap(null));
-    markersRef.current = [];
-
-    // Aggiungi nuovi marcatori
-    filteredProjects.forEach(project => {
-      const marker = new google.maps.Marker({
-        position: project.coordinates,
-        map: googleMapRef.current,
-        title: project.name,
-        icon: {
-          url: getMarkerIcon(project.status),
-          scaledSize: new google.maps.Size(32, 32),
-        }
-      });
-
-      const infoWindow = new google.maps.InfoWindow({
-        content: createInfoWindowContent(project)
-      });
-
-      marker.addListener('click', () => {
-        setSelectedProject(project);
-        infoWindow.open(googleMapRef.current, marker);
-      });
-
-      markersRef.current.push(marker);
-    });
-
-    // Centra la mappa sui progetti
-    if (filteredProjects.length > 0) {
-      const bounds = new google.maps.LatLngBounds();
-      filteredProjects.forEach(project => {
-        bounds.extend(project.coordinates);
-      });
-      googleMapRef.current.fitBounds(bounds);
+  // Converte progetti in markers per la mappa
+  const projectMarkers: MapMarker[] = filteredProjects.map(project => ({
+    id: parseInt(project.id),
+    position: [project.coordinates.lat, project.coordinates.lng],
+    type: 'comune' as const,
+    nome: project.name,
+    provincia: project.address.split(',')[1]?.trim() || 'N/A',
+    regione: project.address.split(',')[2]?.trim() || 'N/A',
+    popolazione: 0,
+    superficie: 0,
+    metadata: {
+      status: project.status,
+      budget: project.budget,
+      progress: project.progress,
+      startDate: project.startDate,
+      endDate: project.endDate,
+      team: project.team,
+      tags: project.tags
     }
-  };
+  }));
 
-  const getMarkerIcon = (status: string) => {
-    const colors = {
-      planning: '#3B82F6', // blue
-      in_progress: '#10B981', // green
-      completed: '#6B7280', // gray
-      on_hold: '#F59E0B', // yellow
-    };
-    
-    const color = colors[status as keyof typeof colors] || '#6B7280';
-    
-    return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
-      <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="16" cy="16" r="12" fill="${color}" stroke="white" stroke-width="2"/>
-        <path d="M16 8l4 8-4 8-4-8z" fill="white"/>
-      </svg>
-    `)}`;
-  };
-
-  const createInfoWindowContent = (project: ProjectLocation) => {
-    return `
-      <div class="p-4 max-w-xs">
-        <h3 class="font-semibold text-gray-900 mb-2">${project.name}</h3>
-        <p class="text-sm text-gray-600 mb-2">${project.address}</p>
-        <div class="space-y-1 text-sm">
-          <div class="flex justify-between">
-            <span class="text-gray-600">Stato:</span>
-            <span class="font-medium">${getStatusLabel(project.status)}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-600">Budget:</span>
-            <span class="font-medium">${formatCurrency(project.budget)}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-600">Progresso:</span>
-            <span class="font-medium">${project.progress}%</span>
-          </div>
-        </div>
-        <div class="mt-3">
-          <div class="w-full bg-gray-200 rounded-full h-2">
-            <div class="bg-blue-600 h-2 rounded-full" style="width: ${project.progress}%"></div>
-          </div>
-        </div>
-      </div>
-    `;
-  };
+  // Combina markers geografici e progetti
+  const allMarkers = [...geographicMarkers, ...projectMarkers];
 
   const filterProjects = () => {
     let filtered = projects;
@@ -455,77 +358,32 @@ export default function MappaProgettiPage() {
         {/* Map View */}
         {viewMode === 'map' && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="h-96 relative">
-              {!mapLoaded ? (
-                <div className="flex items-center justify-center h-full bg-gray-100">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Caricamento Google Maps...</p>
-                  </div>
-                </div>
-              ) : typeof google !== 'undefined' && google.maps ? (
-                <div ref={mapRef} className="w-full h-full" />
-              ) : (
-                <div className="flex items-center justify-center h-full bg-gradient-to-br from-blue-50 to-indigo-100">
-                  <div className="text-center">
-                    <MapIcon className="w-16 h-16 text-blue-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Mappa Interattiva</h3>
-                    <p className="text-gray-600 mb-4">Visualizza i tuoi progetti sulla mappa</p>
-                    <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
-                      {filteredProjects.map(project => (
-                        <div key={project.id} className="bg-white p-3 rounded-lg shadow-sm border">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <div className={`w-3 h-3 rounded-full ${
-                              project.status === 'planning' ? 'bg-blue-500' :
-                              project.status === 'in_progress' ? 'bg-green-500' :
-                              project.status === 'completed' ? 'bg-gray-500' : 'bg-yellow-500'
-                            }`}></div>
-                            <span className="text-sm font-medium text-gray-900">{project.name}</span>
-                          </div>
-                          <p className="text-xs text-gray-600">{project.address}</p>
-                          <div className="mt-2">
-                            <div className="w-full bg-gray-200 rounded-full h-1">
-                              <div 
-                                className="bg-blue-600 h-1 rounded-full"
-                                style={{ width: `${project.progress}%` }}
-                              ></div>
-                            </div>
-                            <p className="text-xs text-gray-500 mt-1">{project.progress}% completato</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Legend */}
-            <div className="p-4 border-t border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-6">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-                    <span className="text-sm text-gray-600">Pianificazione</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-                    <span className="text-sm text-gray-600">In Corso</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 bg-gray-500 rounded-full"></div>
-                    <span className="text-sm text-gray-600">Completato</span>
-              </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
-                    <span className="text-sm text-gray-600">In Pausa</span>
-              </div>
-                </div>
-                <div className="text-sm text-gray-500">
-                  {filteredProjects.length} progetti visualizzati
-                </div>
-              </div>
-            </div>
+            <InteractiveMap
+              height="600px"
+              initialCenter={[41.9028, 12.4964]} // Centro Italia
+              initialZoom={6}
+              markers={allMarkers}
+              loading={mapDataLoading}
+              showSearch={true}
+              showFilters={true}
+              showLegend={true}
+              showControls={true}
+              onMarkerClick={(marker) => {
+                if (marker.metadata?.status) {
+                  // È un progetto
+                  const project = projects.find(p => p.id === marker.id.toString());
+                  if (project) {
+                    setSelectedProject(project);
+                  }
+                } else {
+                  // È un elemento geografico
+                  console.log('Elemento geografico selezionato:', marker);
+                }
+              }}
+              onMapClick={(lat, lng) => {
+                console.log('Mappa cliccata:', { lat, lng });
+              }}
+            />
           </div>
         )}
 
