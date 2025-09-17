@@ -8,6 +8,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Search, MapPin, Building, Map, Filter, X, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { istatApiService } from '@/lib/geographic/istatApiService';
 
 export interface GeographicSearchResult {
   id: number;
@@ -82,31 +83,45 @@ export function GeographicSearch({
     setError(null);
 
     try {
-      const params = new URLSearchParams({
-        q: query,
-        type: filters.type,
-        limit: maxResults.toString(),
-        includeCoordinates: includeCoordinates.toString(),
-        includeMetadata: includeMetadata.toString()
+      // CHIRURGICO: Usa direttamente istatApiService invece di chiamate API
+      console.log('🔍 [GeographicSearch] Ricerca tramite istatApiService:', query);
+      
+      const results = await istatApiService.searchComuni({
+        query: query,
+        limit: maxResults,
+        includeCoordinates: includeCoordinates,
+        includeMetadata: includeMetadata,
+        regione: filters.region,
+        provincia: filters.province
       });
 
-      if (filters.region) params.append('region', filters.region);
-      if (filters.province) params.append('province', filters.province);
+      // Converte risultati nel formato atteso
+      const formattedResults: GeographicSearchResult[] = results.comuni.map((comune, index) => ({
+        id: parseInt(comune.codiceIstat),
+        nome: comune.nome,
+        tipo: 'comune' as const,
+        provincia: comune.provincia,
+        regione: comune.regione,
+        latitudine: includeCoordinates ? comune.latitudine : undefined,
+        longitudine: includeCoordinates ? comune.longitudine : undefined,
+        popolazione: comune.popolazione,
+        superficie: comune.superficie,
+        score: 250 - index, // Score decrescente
+        metadata: includeMetadata ? {
+          codiceIstat: comune.codiceIstat,
+          altitudine: comune.altitudine,
+          zonaClimatica: comune.zonaClimatica,
+          cap: comune.cap,
+          prefisso: comune.prefisso
+        } : undefined
+      }));
 
-      const response = await fetch(`/api/geographic/search?${params}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setResults(data.results || []);
-        setShowResults(true);
-        onResultsChange?.(data.results || []);
-      } else {
-        setError(data.error || 'Errore durante la ricerca');
-        setResults([]);
-        setShowResults(false);
-      }
+      setResults(formattedResults);
+      setShowResults(true);
+      onResultsChange?.(formattedResults);
     } catch (err) {
-      setError('Errore di connessione');
+      console.error('❌ [GeographicSearch] Errore ricerca:', err);
+      setError('Errore durante la ricerca');
       setResults([]);
       setShowResults(false);
     } finally {
