@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { firestoreGeographicService } from '@/lib/geographic/firestoreGeographicService';
+import { lazyIstatService } from '@/lib/geographic/lazyIstatService';
 
 // Production-ready rate limiting per Next.js API Routes
 interface RateLimitEntry {
@@ -206,24 +207,45 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const params = validationResult.data;
 
-    // Inizializza dati geografici se necessario
-    await firestoreGeographicService.initializeGeographicData();
-
-    // Esegui ricerca production level con Firestore
-    const searchResults = await firestoreGeographicService.searchGeographicData({
+    // CHIRURGICO: Usa lazy loading per risolvere problemi Vercel
+    console.log('🔍 [LazySearch] Ricerca con lazy loading:', params);
+    
+    // Prova prima il servizio lazy loading
+    const lazyResults = await lazyIstatService.searchComuni({
       query: params.q,
-      type: params.type,
-      region: params.region || undefined,
-      province: params.province || undefined,
-      lat: params.lat || undefined,
-      lng: params.lng || undefined,
-      radius: params.radius,
+      regione: params.region,
+      provincia: params.provincia,
       limit: params.limit,
-      offset: params.offset,
-      includeCoordinates: params.includeCoordinates,
-      includeMetadata: params.includeMetadata,
-      sortBy: params.sortBy
+      lat: params.lat,
+      lng: params.lng,
+      radius: params.radius
     });
+
+    // Converti risultati lazy in formato API
+    const searchResults = {
+      results: lazyResults.comuni.map((comune, index) => ({
+        id: `${comune.codiceIstat}-${index}`,
+        nome: comune.nome,
+        tipo: 'comune' as const,
+        provincia: comune.provincia,
+        regione: comune.regione,
+        popolazione: comune.popolazione,
+        superficie: comune.superficie,
+        latitudine: params.includeCoordinates ? comune.latitudine : 0,
+        longitudine: params.includeCoordinates ? comune.longitudine : 0,
+        score: 250 - index, // Score decrescente
+        metadata: params.includeMetadata ? {
+          codiceIstat: comune.codiceIstat,
+          altitudine: comune.altitudine,
+          zonaClimatica: comune.zonaClimatica,
+          cap: comune.cap,
+          prefisso: comune.prefisso
+        } : undefined
+      })),
+      total: lazyResults.total,
+      hasMore: lazyResults.hasMore,
+      executionTime: lazyResults.executionTime
+    };
 
     const responseData = {
       results: searchResults.results,
