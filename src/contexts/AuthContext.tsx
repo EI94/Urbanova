@@ -26,25 +26,44 @@ AuthContext.displayName = 'AuthContext';
 
 // Hook personalizzato per utilizzare il contesto - VERSIONE ULTRA-ROBUSTA CON PROTEZIONE AGGIUNTIVA
 export function useAuth() {
+  console.log('🔍 [useAuth] Hook chiamato...');
+  
   try {
+    // CHIRURGICO: Verifica che React sia disponibile
+    if (typeof useContext !== 'function') {
+      console.error('❌ [useAuth] useContext non disponibile');
+      return createFallbackAuth();
+    }
+    
+    // CHIRURGICO: Verifica che AuthContext sia definito
+    if (!AuthContext) {
+      console.error('❌ [useAuth] AuthContext non definito');
+      return createFallbackAuth();
+    }
+    
+    console.log('🔍 [useAuth] Chiamando useContext...');
+    
     // Controllo diretto del contesto
     const context = useContext(AuthContext);
+    
+    console.log('🔍 [useAuth] Context ricevuto:', context ? 'Definito' : 'Undefined');
     
     // Se il contesto è null o undefined, restituisci un oggetto di fallback
     if (!context) {
       console.warn("⚠️ [useAuth] Contesto non disponibile, usando fallback sicuro");
-      return {
-        currentUser: null,
-        loading: false,
-        login: async () => { throw new Error("Auth context not available"); },
-        signup: async () => { throw new Error("Auth context not available"); },
-        logout: async () => { throw new Error("Auth context not available"); },
-        resetPassword: async () => { throw new Error("Auth context not available"); }
-      };
+      return createFallbackAuth();
     }
     
+    // CHIRURGICO: Verifica che il context sia un oggetto valido
+    if (typeof context !== 'object') {
+      console.error('❌ [useAuth] Context non è un oggetto:', typeof context);
+      return createFallbackAuth();
+    }
+    
+    console.log('🔍 [useAuth] Context valido, creando return object...');
+    
     // Assicurati che tutte le proprietà siano definite
-    return {
+    const authObject = {
       currentUser: context.currentUser || null,
       loading: context.loading || false,
       login: context.login || (async () => { throw new Error("Login function not available"); }),
@@ -52,18 +71,27 @@ export function useAuth() {
       logout: context.logout || (async () => { throw new Error("Logout function not available"); }),
       resetPassword: context.resetPassword || (async () => { throw new Error("Reset password function not available"); })
     };
+    
+    console.log('✅ [useAuth] Auth object creato con successo');
+    return authObject;
   } catch (error) {
     console.error("❌ [useAuth] Errore critico nel hook:", error);
     // Restituisci sempre un oggetto valido, mai undefined
-    return {
-      currentUser: null,
-      loading: false,
-      login: async () => { throw new Error("Auth context error"); },
-      signup: async () => { throw new Error("Auth context error"); },
-      logout: async () => { throw new Error("Auth context error"); },
-      resetPassword: async () => { throw new Error("Auth context error"); }
-    };
+    return createFallbackAuth();
   }
+}
+
+// CHIRURGICO: Funzione helper per creare oggetto auth di fallback
+function createFallbackAuth() {
+  console.log('🆘 [useAuth] Creando auth di fallback...');
+  return {
+    currentUser: null,
+    loading: false,
+    login: async () => { throw new Error("Auth context error"); },
+    signup: async () => { throw new Error("Auth context error"); },
+    logout: async () => { throw new Error("Auth context error"); },
+    resetPassword: async () => { throw new Error("Auth context error"); }
+  };
 }
 
 // Props per il provider

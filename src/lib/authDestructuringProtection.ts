@@ -1,174 +1,106 @@
-// 🛡️ PROTEZIONE GLOBALE CONTRO DESTRUCTURING AUTH
-// Intercetta e gestisce l'errore "Cannot destructure property 'auth' of 'e' as it is undefined"
+// CHIRURGICO: Protezione ultra-sicura contro auth destructuring
+// Questo file deve essere importato prima di qualsiasi componente che usa useAuth
 
-class AuthDestructuringProtection {
-  private static instance: AuthDestructuringProtection;
-  private isActive = false;
+console.log('🛡️ [AUTH PROTECTION] Inizializzazione protezione auth destructuring...');
 
-  private constructor() {}
-
-  static getInstance(): AuthDestructuringProtection {
-    if (!AuthDestructuringProtection.instance) {
-      AuthDestructuringProtection.instance = new AuthDestructuringProtection();
+// Intercetta errori di destructuring auth
+if (typeof window !== 'undefined') {
+  // Wrapper sicuro per useAuth
+  const originalConsoleError = console.error;
+  console.error = function(...args: any[]) {
+    const message = args.join(' ');
+    
+    if (message.includes('Cannot destructure property') && message.includes('auth')) {
+      console.error('🚨 [AUTH PROTECTION] ERRORE DESTRUCTURING AUTH INTERCETTATO:', {
+        args,
+        stack: new Error().stack
+      });
+      
+      // Prova a identificare il componente che causa il problema
+      const stack = new Error().stack || '';
+      const lines = stack.split('\n');
+      const relevantLines = lines.filter(line => 
+        line.includes('src/') && 
+        !line.includes('authDestructuringProtection')
+      );
+      
+      console.error('🎯 [AUTH PROTECTION] COMPONENTI SOSPETTI:', relevantLines);
     }
-    return AuthDestructuringProtection.instance;
-  }
-
-  activate() {
-    if (this.isActive) return;
-    this.isActive = true;
-
-    console.log('🛡️ [Auth Destructuring Protection] Attivato');
-
-    // Intercetta errori globali
-    window.addEventListener('error', this.handleGlobalError.bind(this));
-    window.addEventListener('unhandledrejection', this.handleUnhandledRejection.bind(this));
-
-    // Intercetta errori React (se disponibile)
-    if (typeof window !== 'undefined' && (window as any).__REACT_ERROR_OVERLAY_GLOBAL_HOOK__) {
-      const originalCaptureException = (window as any).__REACT_ERROR_OVERLAY_GLOBAL_HOOK__.captureException;
-      (window as any).__REACT_ERROR_OVERLAY_GLOBAL_HOOK__.captureException = (error: Error) => {
-        this.handleReactError(error);
-        if (originalCaptureException) {
-          originalCaptureException(error);
-        }
-      };
+    
+    originalConsoleError.apply(console, args);
+  };
+  
+  // Protezione aggiuntiva per React error boundary
+  window.addEventListener('error', (event) => {
+    if (event.error && event.error.message && 
+        event.error.message.includes('Cannot destructure property') &&
+        event.error.message.includes('auth')) {
+      
+      console.error('🚨 [AUTH PROTECTION] ERRORE WINDOW INTERCEPTATO:', {
+        message: event.error.message,
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno,
+        stack: event.error.stack
+      });
+      
+      // Analizza lo stack trace per trovare il componente
+      if (event.error.stack) {
+        const stackLines = event.error.stack.split('\n');
+        const componentLines = stackLines.filter(line => 
+          line.includes('src/') && 
+          (line.includes('.tsx') || line.includes('.ts') || line.includes('.jsx') || line.includes('.js'))
+        );
+        
+        console.error('🎯 [AUTH PROTECTION] FILE SOSPETTI:', componentLines);
+      }
     }
-  }
-
-  private handleGlobalError(event: ErrorEvent) {
-    const error = event.error;
-    const message = event.message || error?.message || '';
-
-    if (this.isAuthDestructuringError(message)) {
-      console.error('🚨 [Auth Destructuring Protection] ERRORE INTERCETTATO:', message);
-      console.error('🚨 [Auth Destructuring Protection] Stack:', error?.stack);
-      console.error('🚨 [Auth Destructuring Protection] Filename:', event.filename);
-      console.error('🚨 [Auth Destructuring Protection] Line:', event.lineno);
-      console.error('🚨 [Auth Destructuring Protection] Column:', event.colno);
-
-      // Prova a identificare il componente problematico
-      this.identifyProblematicComponent(error?.stack);
-
-      // Previeni il crash dell'app
-      event.preventDefault();
-      event.stopPropagation();
-
-      // Mostra notifica all'utente
-      this.showUserNotification();
-
-      return false;
-    }
-  }
-
-  private handleUnhandledRejection(event: PromiseRejectionEvent) {
-    const error = event.reason;
-    const message = error?.message || String(error);
-
-    if (this.isAuthDestructuringError(message)) {
-      console.error('🚨 [Auth Destructuring Protection] PROMISE REJECTION INTERCETTATA:', message);
-      console.error('🚨 [Auth Destructuring Protection] Reason:', event.reason);
-
-      // Previeni il crash dell'app
-      event.preventDefault();
-
-      // Mostra notifica all'utente
-      this.showUserNotification();
-    }
-  }
-
-  private handleReactError(error: Error) {
-    const message = error.message || '';
-
-    if (this.isAuthDestructuringError(message)) {
-      console.error('🚨 [Auth Destructuring Protection] REACT ERROR INTERCETTATO:', message);
-      console.error('🚨 [Auth Destructuring Protection] Stack:', error.stack);
-
-      // Prova a identificare il componente problematico
-      this.identifyProblematicComponent(error.stack);
-
-      // Mostra notifica all'utente
-      this.showUserNotification();
-    }
-  }
-
-  private isAuthDestructuringError(message: string): boolean {
-    return message.includes('Cannot destructure property') && 
-           message.includes('auth') && 
-           message.includes('undefined');
-  }
-
-  private identifyProblematicComponent(stack?: string) {
-    if (!stack) return;
-
-    console.log('🔍 [Auth Destructuring Protection] Analizzando stack trace...');
-
-    // Cerca pattern di componenti React
-    const reactComponentPattern = /at\s+(\w+)\s+\(/g;
-    const matches = [...stack.matchAll(reactComponentPattern)];
-
-    if (matches.length > 0) {
-      console.log('🔍 [Auth Destructuring Protection] Componenti sospetti:', matches.map(m => m[1]));
-    }
-
-    // Cerca file sospetti
-    const filePattern = /at\s+.*\/([\w-]+\.(?:tsx?|jsx?))/g;
-    const fileMatches = [...stack.matchAll(filePattern)];
-
-    if (fileMatches.length > 0) {
-      console.log('🔍 [Auth Destructuring Protection] File sospetti:', fileMatches.map(m => m[1]));
-    }
-  }
-
-  private showUserNotification() {
-    // Mostra una notifica discreta all'utente
-    if (typeof window !== 'undefined' && window.document) {
-      const notification = document.createElement('div');
-      notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #fee2e2;
-        border: 1px solid #fecaca;
-        color: #991b1b;
-        padding: 12px 16px;
-        border-radius: 8px;
-        font-size: 14px;
-        z-index: 10000;
-        max-width: 400px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      `;
-      notification.innerHTML = `
-        <div style="font-weight: 600; margin-bottom: 4px;">⚠️ Errore temporaneo rilevato</div>
-        <div style="font-size: 12px;">L'applicazione continua a funzionare normalmente. Se il problema persiste, ricarica la pagina.</div>
-      `;
-
-      document.body.appendChild(notification);
-
-      // Rimuovi la notifica dopo 5 secondi
-      setTimeout(() => {
-        if (notification.parentNode) {
-          notification.parentNode.removeChild(notification);
-        }
-      }, 5000);
-    }
-  }
-
-  deactivate() {
-    if (!this.isActive) return;
-    this.isActive = false;
-
-    console.log('🛡️ [Auth Destructuring Protection] Disattivato');
-
-    window.removeEventListener('error', this.handleGlobalError.bind(this));
-    window.removeEventListener('unhandledrejection', this.handleUnhandledRejection.bind(this));
-  }
+  });
 }
 
-// Esporta l'istanza singleton
-export const authDestructuringProtection = AuthDestructuringProtection.getInstance();
-
-// Auto-attivazione in produzione
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
-  authDestructuringProtection.activate();
+// Esporta una funzione di utilità per verificare auth object
+export function safeAuthCheck(authObject: any): boolean {
+  if (!authObject) {
+    console.warn('⚠️ [AUTH PROTECTION] Auth object is null/undefined');
+    return false;
+  }
+  
+  if (typeof authObject !== 'object') {
+    console.warn('⚠️ [AUTH PROTECTION] Auth object is not an object:', typeof authObject);
+    return false;
+  }
+  
+  return true;
 }
+
+// Esporta wrapper sicuro per destructuring
+export function safeAuthDestructure(authObject: any): {
+  currentUser: any;
+  loading: boolean;
+  login: Function;
+  signup: Function;
+  logout: Function;
+  resetPassword: Function;
+} {
+  if (!safeAuthCheck(authObject)) {
+    return {
+      currentUser: null,
+      loading: false,
+      login: async () => { throw new Error("Auth not available"); },
+      signup: async () => { throw new Error("Auth not available"); },
+      logout: async () => { throw new Error("Auth not available"); },
+      resetPassword: async () => { throw new Error("Auth not available"); }
+    };
+  }
+  
+  return {
+    currentUser: authObject.currentUser || null,
+    loading: authObject.loading || false,
+    login: authObject.login || (async () => { throw new Error("Login not available"); }),
+    signup: authObject.signup || (async () => { throw new Error("Signup not available"); }),
+    logout: authObject.logout || (async () => { throw new Error("Logout not available"); }),
+    resetPassword: authObject.resetPassword || (async () => { throw new Error("Reset password not available"); })
+  };
+}
+
+console.log('✅ [AUTH PROTECTION] Protezione auth destructuring attiva');

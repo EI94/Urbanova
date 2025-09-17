@@ -55,6 +55,30 @@ if (typeof window !== 'undefined') {
 if (typeof window !== 'undefined') {
   // Gestione errori Firebase più robusta
   window.addEventListener('error', (event) => {
+    const errorMessage = event.error?.message || event.message || 'Unknown error';
+    
+    // CHIRURGICO: CATTURA ERRORE SPECIFICO AUTH DESTRUCTURING
+    if (errorMessage.includes('Cannot destructure property') && 
+        errorMessage.includes('auth')) {
+      console.error('🚨 [AUTH DESTRUCTURING] ERRORE CRITICO IDENTIFICATO:', {
+        message: errorMessage,
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno,
+        stack: event.error?.stack,
+        componentStack: event.error?.componentStack
+      });
+      
+      // Prova a identificare il componente
+      const stack = event.error?.stack || '';
+      const componentMatch = stack.match(/at\s+(\w+)/g);
+      if (componentMatch) {
+        console.error('🎯 [AUTH DESTRUCTURING] POSSIBILI COMPONENTI COINVOLTI:', componentMatch);
+      }
+      
+      // NON PREVENIRE IL CRASH - VOGLIAMO VEDERE L'ERRORE COMPLETO
+    }
+    
     // Ignora errori Firebase 400 che non bloccano l'app
     if (event.error && event.error.message && 
         (event.error.message.includes('collection') || 
