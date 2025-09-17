@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { firestoreGeographicService } from '@/lib/geographic/firestoreGeographicService';
 import { lazyIstatService } from '@/lib/geographic/lazyIstatService';
+import { staticIstatData } from '@/lib/geographic/staticIstatData';
 
 // Production-ready rate limiting per Next.js API Routes
 interface RateLimitEntry {
@@ -207,23 +208,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const params = validationResult.data;
 
-    // CHIRURGICO: Usa lazy loading per risolvere problemi Vercel
-    console.log('🔍 [LazySearch] Ricerca con lazy loading:', params);
+    // CHIRURGICO: Test diretto senza lazy loading
+    console.log('🔍 [DirectSearch] Ricerca diretta senza lazy loading:', params);
     
-    // Prova prima il servizio lazy loading
-    const lazyResults = await lazyIstatService.searchComuni({
-      query: params.q,
-      regione: params.region,
-      provincia: params.provincia,
-      limit: params.limit,
-      lat: params.lat,
-      lng: params.lng,
-      radius: params.radius
-    });
+    // BYPASS LAZY LOADING: Usa direttamente il dataset statico
+    const directResults = await searchDirectStatic(params);
 
-    // Converti risultati lazy in formato API
+    // Converti risultati diretti in formato API
     const searchResults = {
-      results: lazyResults.comuni.map((comune, index) => ({
+      results: directResults.comuni.map((comune, index) => ({
         id: `${comune.codiceIstat}-${index}`,
         nome: comune.nome,
         tipo: 'comune' as const,
@@ -242,9 +235,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           prefisso: comune.prefisso
         } : undefined
       })),
-      total: lazyResults.total,
-      hasMore: lazyResults.hasMore,
-      executionTime: lazyResults.executionTime
+      total: directResults.total,
+      hasMore: directResults.hasMore,
+      executionTime: directResults.executionTime
     };
 
     const responseData = {
@@ -296,4 +289,83 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 export async function POST(request: NextRequest): Promise<NextResponse> {
   // Per ora POST usa la stessa logica di GET
   return GET(request);
+}
+
+/**
+ * CHIRURGICO: Ricerca diretta senza lazy loading
+ * Usa direttamente il dataset statico ISTAT
+ */
+async function searchDirectStatic(params: any): Promise<{
+  comuni: any[];
+  total: number;
+  hasMore: boolean;
+  executionTime: number;
+}> {
+  const startTime = Date.now();
+  
+  try {
+    console.log('🔍 [DirectStatic] Ricerca diretta dataset statico:', params);
+    
+    // Usa direttamente il dataset statico
+    let filteredComuni = staticIstatData.comuni;
+    
+    // Filtri
+    if (params.q) {
+      const query = params.q.toLowerCase();
+      filteredComuni = filteredComuni.filter(comune => 
+        comune.nome.toLowerCase().includes(query) ||
+        comune.provincia.toLowerCase().includes(query) ||
+        comune.regione.toLowerCase().includes(query)
+      );
+    }
+    
+    if (params.regione) {
+      filteredComuni = filteredComuni.filter(comune => 
+        comune.regione.toLowerCase() === params.regione.toLowerCase()
+      );
+    }
+    
+    if (params.provincia) {
+      filteredComuni = filteredComuni.filter(comune => 
+        comune.provincia.toLowerCase() === params.provincia.toLowerCase()
+      );
+    }
+    
+    // Ordinamento
+    filteredComuni.sort((a, b) => {
+      if (params.sortBy === 'population') {
+        return b.popolazione - a.popolazione;
+      } else if (params.sortBy === 'name') {
+        return a.nome.localeCompare(b.nome);
+      } else {
+        // Default: relevance (per ora alfabetico)
+        return a.nome.localeCompare(b.nome);
+      }
+    });
+    
+    // Limite
+    const limit = params.limit || 20;
+    const offset = params.offset || 0;
+    const paginatedComuni = filteredComuni.slice(offset, offset + limit);
+    
+    const executionTime = Date.now() - startTime;
+    
+    console.log(`✅ [DirectStatic] Trovati ${paginatedComuni.length} comuni su ${filteredComuni.length} totali`);
+    
+    return {
+      comuni: paginatedComuni,
+      total: filteredComuni.length,
+      hasMore: offset + limit < filteredComuni.length,
+      executionTime
+    };
+    
+  } catch (error) {
+    console.error('❌ [DirectStatic] Errore ricerca diretta:', error);
+    return {
+      comuni: [],
+      total: 0,
+      hasMore: false,
+      executionTime: Date.now() - startTime
+    };
+  }
 }
