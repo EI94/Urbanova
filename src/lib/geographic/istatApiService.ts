@@ -156,12 +156,16 @@ class IstatApiService {
       const lines = csvData.split('\n');
       const comuni: IstatComuneData[] = [];
       
+      console.log('🔍 [IstatAPI] Parsing CSV ISTAT, righe totali:', lines.length);
+      
       // Skip header line
-      for (let i = 1; i < lines.length; i++) {
+      for (let i = 1; i < Math.min(lines.length, 100); i++) { // Limita a 100 per debug
         const line = lines[i].trim();
         if (!line) continue;
         
         const columns = line.split(';');
+        console.log(`🔍 [IstatAPI] Riga ${i}, colonne: ${columns.length}, nome: ${columns[6]}`);
+        
         if (columns.length < 10) continue;
         
         const comune: IstatComuneData = {
