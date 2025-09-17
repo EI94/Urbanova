@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     console.log('📊 Verifica stato dati ISTAT...');
+    console.log('🔧 [DEBUG DEPLOY] Versione: 0.1.1-deploy-fix - Fix contraddizione applicato');
     
     const comuniCount = await getComuniCount();
     

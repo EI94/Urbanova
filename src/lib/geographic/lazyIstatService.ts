@@ -137,6 +137,7 @@ export class LazyIstatService {
     
     try {
       console.log('🔍 [LazyIstat] Ricerca comuni:', params);
+      console.log('🔧 [DEBUG DEPLOY] Versione: 0.1.1-deploy-fix - Fix lazy loading applicato');
       
       // 1. Prova cache prima
       const cacheKey = this.generateCacheKey(params);
