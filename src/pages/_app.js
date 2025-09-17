@@ -2,11 +2,11 @@ import '@/styles/reset.css';
 import '@/app/globals.css';
 import { Toaster } from 'react-hot-toast';
 
-import { AuthProvider } from '@/contexts/AuthContext';
+import { UltraSafeAuthProvider } from '@/contexts/UltraSafeAuthContext';
 
 export default function App({ Component, pageProps }) {
   return (
-    <AuthProvider>
+    <UltraSafeAuthProvider>
       <Component {...pageProps} />
       <Toaster
         position="top-right"
@@ -28,6 +28,6 @@ export default function App({ Component, pageProps }) {
           },
         }}
       />
-    </AuthProvider>
+    </UltraSafeAuthProvider>
   );
 }

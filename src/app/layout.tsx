@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 
 import Toaster from '@/components/ui/Toaster';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { UltraSafeAuthProvider } from '@/contexts/UltraSafeAuthContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { DarkModeProvider } from '@/contexts/DarkModeContext';
 import '@/lib/authDestructuringProtection';
@@ -71,13 +71,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={inter.className}>
         <LanguageProvider>
-          <AuthProvider>
+          <UltraSafeAuthProvider>
             <DarkModeProvider>
               <EnvironmentBanner />
               <CommandPaletteWrapper>{children}</CommandPaletteWrapper>
               <Toaster />
             </DarkModeProvider>
-          </AuthProvider>
+          </UltraSafeAuthProvider>
         </LanguageProvider>
       </body>
     </html>
