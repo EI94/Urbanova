@@ -309,22 +309,25 @@ export class NotificationService {
       orderBy('createdAt', 'desc')
     );
 
-    // CHIRURGICO: Riabilitato onSnapshot con protezione per evitare loop infiniti
-    const unsubscribe = onSnapshot(q, snapshot => {
-      try {
-        const notifications: Notification[] = [];
-        snapshot.forEach(doc => {
-          notifications.push({ id: doc.id, ...doc.data() } as Notification);
-        });
-        callback(notifications);
-      } catch (error) {
-        console.error('❌ [NotificationService] Errore onSnapshot:', error);
-        // Non propagare l'errore per evitare loop infiniti
-      }
-    }, error => {
-      console.error('❌ [NotificationService] Errore listener notifiche:', error);
-      // Non propagare l'errore per evitare loop infiniti
-    });
+    // CHIRURGICO: Disabilitato onSnapshot temporaneamente per evitare Firebase 400 error
+    // const unsubscribe = onSnapshot(q, snapshot => {
+    //   try {
+    //     const notifications: Notification[] = [];
+    //     snapshot.forEach(doc => {
+    //       notifications.push({ id: doc.id, ...doc.data() } as Notification);
+    //     });
+    //     callback(notifications);
+    //   } catch (error) {
+    //     console.error('❌ [NotificationService] Errore onSnapshot:', error);
+    //     // Non propagare l'errore per evitare loop infiniti
+    //   }
+    // }, error => {
+    //   console.error('❌ [NotificationService] Errore listener notifiche:', error);
+    //   // Non propagare l'errore per evitare loop infiniti
+    // });
+    
+    // CHIRURGICO: Callback vuoto per evitare Firebase 400 error
+    const unsubscribe = () => {};
 
     return unsubscribe;
   }
