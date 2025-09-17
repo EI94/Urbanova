@@ -118,15 +118,34 @@ export class FirestoreIstatImporter {
   private async downloadIstatData(): Promise<string> {
     try {
       console.log('📥 Scaricando dataset ISTAT...');
-      const response = await axios.get(this.ISTAT_URLS.csv, {
-        timeout: 30000,
-        headers: {
-          'User-Agent': 'Urbanova/1.0 (https://urbanova.life)'
-        }
-      });
       
-      console.log(`✅ Dataset scaricato: ${response.data.length} caratteri`);
-      return response.data;
+      // CHIRURGICO: Prova URL alternativi ISTAT
+      const urls = [
+        'https://www.istat.it/storage/codici-unita-amministrative/Elenco-comuni-italiani.csv',
+        'https://raw.githubusercontent.com/italia/anpr/master/anpr-service/src/main/resources/anagrafenaz.txt',
+        'https://www.istat.it/it/files//2011/01/Elenco-comuni-italiani.csv'
+      ];
+      
+      for (const url of urls) {
+        try {
+          console.log(`🔄 Tentativo URL: ${url}`);
+          const response = await axios.get(url, {
+            timeout: 60000,
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (compatible; Urbanova/1.0)',
+              'Accept': 'text/csv,text/plain,*/*'
+            }
+          });
+          
+          console.log(`✅ Dataset scaricato da ${url}: ${response.data.length} caratteri`);
+          return response.data;
+        } catch (urlError) {
+          console.log(`❌ URL fallito: ${url} - ${urlError.message}`);
+          continue;
+        }
+      }
+      
+      throw new Error('Tutti gli URL ISTAT sono falliti');
     } catch (error) {
       console.error('❌ Errore download ISTAT:', error);
       throw new Error(`Errore download dataset ISTAT: ${error}`);
