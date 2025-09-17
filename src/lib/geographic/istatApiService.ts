@@ -113,39 +113,40 @@ class IstatApiService {
   }
 
   /**
-   * Fetch dati da API ISTAT SDMX
+   * Fetch dati da API OpenAPI.it (più affidabile)
    */
   private async fetchFromIstatApi(params: any): Promise<IstatComuneData[]> {
     try {
-      // CHIRURGICO: Usa API ISTAT SDMX invece di CSV
-      const istatSdmxUrl = 'https://sdmx.istat.it/SDMXWS/rest/data/22_289/IT1,1.0/ALL?format=jsondata';
+      // CHIRURGICO: Usa OpenAPI.it invece di ISTAT diretto
+      const openApiUrl = 'https://api.openapi.it/comuni-base';
       
-      console.log('🌐 [IstatAPI] Fetching dati da API SDMX:', istatSdmxUrl);
+      console.log('🌐 [IstatAPI] Fetching dati da OpenAPI.it:', openApiUrl);
       
-      const response = await fetch(istatSdmxUrl, {
+      const response = await fetch(openApiUrl, {
         method: 'GET',
         headers: {
           'User-Agent': 'Urbanova-Geographic-Service/1.0',
           'Accept': 'application/json',
+          'Authorization': 'Bearer ' + (process.env.OPENAPI_KEY || 'demo-key'),
         },
         // Timeout per evitare blocchi
-        signal: AbortSignal.timeout(15000) // 15 secondi
+        signal: AbortSignal.timeout(10000) // 10 secondi
       });
 
       if (!response.ok) {
-        console.log('⚠️ [IstatAPI] API SDMX non disponibile, provo CSV fallback');
-        return this.fetchFromCsvFallback(params);
+        console.log('⚠️ [IstatAPI] OpenAPI non disponibile, provo fallback locale');
+        return this.getFallbackData(params);
       }
 
       const jsonData = await response.json();
-      const comuni = this.parseSdmxData(jsonData, params);
+      const comuni = this.parseOpenApiData(jsonData, params);
       
-      console.log(`✅ [IstatAPI] Parsati ${comuni.length} comuni da API SDMX ISTAT`);
+      console.log(`✅ [IstatAPI] Parsati ${comuni.length} comuni da OpenAPI.it`);
       return comuni;
       
     } catch (error) {
-      console.error('❌ [IstatAPI] Errore fetch SDMX, provo CSV fallback:', error);
-      return this.fetchFromCsvFallback(params);
+      console.error('❌ [IstatAPI] Errore fetch OpenAPI, provo fallback locale:', error);
+      return this.getFallbackData(params);
     }
   }
 
@@ -179,6 +180,63 @@ class IstatApiService {
       
     } catch (error) {
       console.error('❌ [IstatAPI] Errore fetch CSV fallback:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Parse OpenAPI data
+   */
+  private parseOpenApiData(jsonData: any, params: any): IstatComuneData[] {
+    try {
+      console.log('🔍 [IstatAPI] Parsing OpenAPI data:', Object.keys(jsonData));
+      
+      const comuni: IstatComuneData[] = [];
+      
+      // OpenAPI structure analysis
+      if (jsonData.data && Array.isArray(jsonData.data)) {
+        console.log('🔍 [IstatAPI] OpenAPI data count:', jsonData.data.length);
+        
+        // Parse data array
+        for (const item of jsonData.data) {
+          if (typeof item === 'object' && item !== null) {
+            const comune: IstatComuneData = {
+              nome: item.nome || item.name || '',
+              provincia: item.provincia || item.province || '',
+              regione: item.regione || item.region || '',
+              codiceIstat: item.codiceIstat || item.code || '',
+              popolazione: parseInt(item.popolazione || item.population || '0') || 0,
+              superficie: parseFloat(item.superficie || item.area || '0') || 0,
+              latitudine: parseFloat(item.latitudine || item.lat || '0') || 0,
+              longitudine: parseFloat(item.longitudine || item.lng || '0') || 0,
+              altitudine: parseInt(item.altitudine || item.altitude || '0') || 0,
+              zonaClimatica: item.zonaClimatica || item.climate || '',
+              cap: item.cap || item.postalCode || '',
+              prefisso: item.prefisso || item.prefix || ''
+            };
+            
+            // Filtri
+            if (this.matchesFilters(comune, params)) {
+              comuni.push(comune);
+            }
+          }
+        }
+      }
+      
+      // Ordinamento
+      comuni.sort((a, b) => {
+        if (params.sortBy === 'population') {
+          return b.popolazione - a.popolazione;
+        } else {
+          return a.nome.localeCompare(b.nome);
+        }
+      });
+      
+      console.log(`✅ [IstatAPI] Parsati ${comuni.length} comuni da OpenAPI`);
+      return comuni;
+      
+    } catch (error) {
+      console.error('❌ [IstatAPI] Errore parse OpenAPI:', error);
       return [];
     }
   }
