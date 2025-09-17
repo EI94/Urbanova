@@ -158,6 +158,23 @@ class IstatApiService {
       
       console.log('🔍 [IstatAPI] Parsing CSV ISTAT, righe totali:', lines.length);
       
+      // ANALISI MANIACALE: Log header per capire struttura
+      if (lines.length > 0) {
+        const header = lines[0].trim();
+        const headerColumns = header.split(';');
+        console.log('🔍 [IstatAPI] HEADER CSV:', headerColumns);
+        console.log('🔍 [IstatAPI] Numero colonne header:', headerColumns.length);
+        
+        // Log prime 3 righe per analisi
+        for (let i = 0; i < Math.min(3, lines.length); i++) {
+          const line = lines[i].trim();
+          if (line) {
+            const columns = line.split(';');
+            console.log(`🔍 [IstatAPI] Riga ${i}:`, columns.slice(0, 10)); // Prime 10 colonne
+          }
+        }
+      }
+      
       // Skip header line
       for (let i = 1; i < Math.min(lines.length, 100); i++) { // Limita a 100 per debug
         const line = lines[i].trim();
