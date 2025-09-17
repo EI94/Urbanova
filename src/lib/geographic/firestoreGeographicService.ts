@@ -3,9 +3,9 @@
  * Gestisce comuni e zone italiane per utenti paganti
  */
 
+import { safeCollection } from '@/lib/firebaseUtils';
 import { db } from '@/lib/firebase';
 import { 
-  collection, 
   doc, 
   getDocs, 
   query, 
@@ -325,7 +325,7 @@ export class FirestoreGeographicService {
 
       console.log(`🔍 Ricerca comuni: "${searchQuery}", regione: ${region}, provincia: ${province}, limit: ${limitParam}`);
 
-      let q = query(collection(db, this.comuniCollection));
+      let q = query(safeCollection(this.comuniCollection));
 
     // Filtri base
     const filters: any[] = [];
@@ -444,7 +444,7 @@ export class FirestoreGeographicService {
         includeMetadata
       } = params;
 
-      let q = query(collection(db, this.zoneCollection));
+      let q = query(safeCollection(this.zoneCollection));
 
     // Filtri base
     const filters: any[] = [];
@@ -545,7 +545,7 @@ export class FirestoreGeographicService {
     try {
       const { query: searchQuery, region, province, limit: limitParam, includeCoordinates, fuzzy } = params;
 
-      let q = query(collection(db, this.comuniCollection));
+      let q = query(safeCollection(this.comuniCollection));
 
     // Filtri base
     const filters: any[] = [];
@@ -630,7 +630,7 @@ export class FirestoreGeographicService {
     try {
       const { query: searchQuery, region, province, limit: limitParam, includeCoordinates, fuzzy } = params;
 
-    let q = query(collection(db, this.zoneCollection));
+    let q = query(safeCollection(this.zoneCollection));
 
     // Filtri base
     const filters: any[] = [];
@@ -916,7 +916,7 @@ export class FirestoreGeographicService {
       console.log('🔄 Inizializzazione dati geografici italiani...');
       
       // Verifica se i dati esistono già
-      const comuniSnapshot = await getDocs(collection(db, this.comuniCollection));
+      const comuniSnapshot = await getDocs(safeCollection(this.comuniCollection));
       console.log(`📊 Comuni esistenti in Firestore: ${comuniSnapshot.size}`);
       
       if (comuniSnapshot.size > 5) {
@@ -937,7 +937,7 @@ export class FirestoreGeographicService {
       const batch = writeBatch(db);
 
       comuniPrincipali.forEach((comune, index) => {
-        const docRef = doc(collection(db, this.comuniCollection));
+        const docRef = doc(safeCollection(this.comuniCollection));
         batch.set(docRef, {
           ...comune,
           dataCreazione: new Date(),
@@ -973,7 +973,7 @@ export class FirestoreGeographicService {
    */
   async getComuniCount(): Promise<number> {
     try {
-      const snapshot = await getDocs(collection(db, this.comuniCollection));
+      const snapshot = await getDocs(safeCollection(this.comuniCollection));
       return snapshot.size;
     } catch (error: any) {
       console.error('❌ Errore conteggio comuni:', error);
@@ -986,7 +986,7 @@ export class FirestoreGeographicService {
    */
   async getZoneCount(): Promise<number> {
     try {
-      const snapshot = await getDocs(collection(db, this.zoneCollection));
+      const snapshot = await getDocs(safeCollection(this.zoneCollection));
       return snapshot.size;
     } catch (error: any) {
       console.error('❌ Errore conteggio zone:', error);
