@@ -37,7 +37,7 @@ import {
 } from 'lucide-react';
 
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/UltraSafeAuthContext';
 import { useDarkMode } from '@/contexts/DarkModeContext';
 import { dashboardService, DashboardStats } from '@/lib/dashboardService';
 import { chatHistoryService, ChatSession } from '@/lib/chatHistoryService';

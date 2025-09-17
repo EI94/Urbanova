@@ -4,7 +4,7 @@ import { format, addDays, startOfDay } from 'date-fns';
 import { it } from 'date-fns/locale';
 import React, { useState, useEffect } from 'react';
 
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/UltraSafeAuthContext';
 import { reminderService, ProjectReminder } from '@/lib/reminderService';
 
 interface ProjectReminderModalProps {

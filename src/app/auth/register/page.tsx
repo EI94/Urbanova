@@ -10,7 +10,7 @@ import { MailIcon, LockIcon, UserIcon } from '@/components/icons';
 import Alert from '@/components/ui/Alert';
 import Button from '@/components/ui/Button';
 import FormInput from '@/components/ui/FormInput';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/UltraSafeAuthContext';
 
 export default function RegisterPage() {
   const router = useRouter();

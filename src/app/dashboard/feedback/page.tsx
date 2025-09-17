@@ -20,7 +20,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/UltraSafeAuthContext';
 import { feedbackService } from '@/lib/feedbackService';
 
 interface Feedback {

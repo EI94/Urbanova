@@ -23,7 +23,7 @@ import {
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/UltraSafeAuthContext';
 import collaborationService, {
   DesignComment,
   DesignVersion,

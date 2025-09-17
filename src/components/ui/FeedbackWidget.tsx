@@ -13,7 +13,7 @@ import {
 import React, { useState, useRef, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/UltraSafeAuthContext';
 
 interface FeedbackData {
   type: 'bug' | 'improvement' | 'feature' | 'other';

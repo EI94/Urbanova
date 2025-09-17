@@ -20,7 +20,7 @@ import {
   RocketIcon,
 } from '@/components/icons';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/UltraSafeAuthContext';
 import {
   projectTimelineService,
   ProjectTask,

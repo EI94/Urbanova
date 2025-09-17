@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, Mail, Phone, Building, MapPin, Globe, Linkedin, Github, Camera, Save, Eye, EyeOff, Shield, Key, Settings } from 'lucide-react';
 import { XIcon } from '@/components/icons';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/UltraSafeAuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 import { UserProfile, ProfileUpdate } from '@/types/userProfile';

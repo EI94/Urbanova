@@ -32,7 +32,7 @@ import NotificationsPanel from '@/components/ui/NotificationsPanel';
 import UserProfilePanelFixed from '@/components/ui/UserProfilePanelFixed';
 import WorkspaceManager from '@/components/workspace/WorkspaceManager';
 import SettingsPanel from '@/components/ui/SettingsPanel';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/UltraSafeAuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
 import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';

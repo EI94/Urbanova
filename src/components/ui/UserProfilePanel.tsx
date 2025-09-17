@@ -5,7 +5,7 @@ import { toast } from 'react-hot-toast';
 
 import { UserIcon, XIcon, TrashIcon, CheckIcon, EyeIcon } from '@/components/icons';
 import { ImageIcon } from '@/components/icons/index';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/UltraSafeAuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   firebaseUserProfileService,

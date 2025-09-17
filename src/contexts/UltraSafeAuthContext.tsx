@@ -117,16 +117,21 @@ export function UltraSafeAuthProvider({ children }: UltraSafeAuthProviderProps) 
   }
 
   async function login(email: string, password: string) {
+    console.log('🛡️ [UltraSafeAuthProvider] Tentativo login per:', email);
+    
     try {
       const result = await firebaseAuthService.login(email, password);
+      console.log('🛡️ [UltraSafeAuthProvider] Risultato login:', result);
 
       if (result.success) {
+        console.log('✅ [UltraSafeAuthProvider] Login riuscito per:', email);
         setCurrentUser(result.user);
       } else {
+        console.error('❌ [UltraSafeAuthProvider] Login fallito:', result.error);
         throw new Error(result.error || 'Errore durante il login');
       }
     } catch (error: any) {
-      console.error('Errore durante il login:', error);
+      console.error('❌ [UltraSafeAuthProvider] Errore durante il login:', error);
       throw error;
     }
   }
@@ -155,12 +160,22 @@ export function UltraSafeAuthProvider({ children }: UltraSafeAuthProviderProps) 
     console.log('🛡️ [UltraSafeAuthProvider] useEffect onAuthStateChanged...');
     
     try {
+      // Verifica che firebaseAuthService sia disponibile
+      if (!firebaseAuthService) {
+        console.error('❌ [UltraSafeAuthProvider] firebaseAuthService non disponibile');
+        setLoading(false);
+        return () => {};
+      }
+      
+      console.log('🛡️ [UltraSafeAuthProvider] Chiamando onAuthStateChanged...');
+      
       const unsubscribe = firebaseAuthService.onAuthStateChanged((user: User | null) => {
-        console.log('🛡️ [UltraSafeAuthProvider] onAuthStateChanged:', user ? 'User logged in' : 'User logged out');
+        console.log('🛡️ [UltraSafeAuthProvider] onAuthStateChanged callback:', user ? `User logged in: ${user.email}` : 'User logged out');
         setCurrentUser(user);
         setLoading(false);
       });
 
+      console.log('✅ [UltraSafeAuthProvider] onAuthStateChanged configurato');
       return unsubscribe;
     } catch (error) {
       console.error('❌ [UltraSafeAuthProvider] Errore in onAuthStateChanged:', error);

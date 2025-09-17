@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/UltraSafeAuthContext';
 import { 
   Calculator, 
   TrendingUp, 
