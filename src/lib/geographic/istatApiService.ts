@@ -113,37 +113,136 @@ class IstatApiService {
   }
 
   /**
-   * Fetch dati da API ISTAT
+   * Fetch dati da API ISTAT SDMX
    */
   private async fetchFromIstatApi(params: any): Promise<IstatComuneData[]> {
     try {
-      // API ISTAT per comuni italiani
-      const istatUrl = 'https://www.istat.it/storage/codici-unita-amministrative/Elenco-comuni-italiani.csv';
+      // CHIRURGICO: Usa API ISTAT SDMX invece di CSV
+      const istatSdmxUrl = 'https://sdmx.istat.it/SDMXWS/rest/data/22_289/IT1,1.0/ALL?format=jsondata';
       
-      console.log('🌐 [IstatAPI] Fetching dati da:', istatUrl);
+      console.log('🌐 [IstatAPI] Fetching dati da API SDMX:', istatSdmxUrl);
       
-      const response = await fetch(istatUrl, {
+      const response = await fetch(istatSdmxUrl, {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'Urbanova-Geographic-Service/1.0',
+          'Accept': 'application/json',
+        },
+        // Timeout per evitare blocchi
+        signal: AbortSignal.timeout(15000) // 15 secondi
+      });
+
+      if (!response.ok) {
+        console.log('⚠️ [IstatAPI] API SDMX non disponibile, provo CSV fallback');
+        return this.fetchFromCsvFallback(params);
+      }
+
+      const jsonData = await response.json();
+      const comuni = this.parseSdmxData(jsonData, params);
+      
+      console.log(`✅ [IstatAPI] Parsati ${comuni.length} comuni da API SDMX ISTAT`);
+      return comuni;
+      
+    } catch (error) {
+      console.error('❌ [IstatAPI] Errore fetch SDMX, provo CSV fallback:', error);
+      return this.fetchFromCsvFallback(params);
+    }
+  }
+
+  /**
+   * Fallback CSV se SDMX non disponibile
+   */
+  private async fetchFromCsvFallback(params: any): Promise<IstatComuneData[]> {
+    try {
+      const istatCsvUrl = 'https://www.istat.it/storage/codici-unita-amministrative/Elenco-comuni-italiani.csv';
+      
+      console.log('🌐 [IstatAPI] Fallback CSV da:', istatCsvUrl);
+      
+      const response = await fetch(istatCsvUrl, {
         method: 'GET',
         headers: {
           'User-Agent': 'Urbanova-Geographic-Service/1.0',
           'Accept': 'text/csv, application/csv',
         },
-        // Timeout per evitare blocchi
-        signal: AbortSignal.timeout(10000) // 10 secondi
+        signal: AbortSignal.timeout(10000)
       });
 
       if (!response.ok) {
-        throw new Error(`API ISTAT non disponibile: ${response.status}`);
+        throw new Error(`CSV ISTAT non disponibile: ${response.status}`);
       }
 
       const csvData = await response.text();
       const comuni = this.parseCsvData(csvData, params);
       
-      console.log(`✅ [IstatAPI] Parsati ${comuni.length} comuni da CSV ISTAT`);
+      console.log(`✅ [IstatAPI] Parsati ${comuni.length} comuni da CSV fallback`);
       return comuni;
       
     } catch (error) {
-      console.error('❌ [IstatAPI] Errore fetch ISTAT:', error);
+      console.error('❌ [IstatAPI] Errore fetch CSV fallback:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Parse SDMX data da ISTAT
+   */
+  private parseSdmxData(jsonData: any, params: any): IstatComuneData[] {
+    try {
+      console.log('🔍 [IstatAPI] Parsing SDMX data:', Object.keys(jsonData));
+      
+      const comuni: IstatComuneData[] = [];
+      
+      // SDMX structure analysis
+      if (jsonData.data && jsonData.data.dataSets && jsonData.data.dataSets[0]) {
+        const dataset = jsonData.data.dataSets[0];
+        const observations = dataset.observations || {};
+        
+        console.log('🔍 [IstatAPI] SDMX dataset keys:', Object.keys(dataset));
+        console.log('🔍 [IstatAPI] Observations count:', Object.keys(observations).length);
+        
+        // Parse observations
+        for (const [key, value] of Object.entries(observations)) {
+          if (Array.isArray(value) && value.length > 0) {
+            const observation = value[0];
+            if (typeof observation === 'object' && observation !== null) {
+              const comune: IstatComuneData = {
+                nome: observation.name || '',
+                provincia: observation.province || '',
+                regione: observation.region || '',
+                codiceIstat: observation.code || '',
+                popolazione: parseInt(observation.population || '0') || 0,
+                superficie: parseFloat(observation.area || '0') || 0,
+                latitudine: parseFloat(observation.lat || '0') || 0,
+                longitudine: parseFloat(observation.lng || '0') || 0,
+                altitudine: parseInt(observation.altitude || '0') || 0,
+                zonaClimatica: observation.climate || '',
+                cap: observation.postalCode || '',
+                prefisso: observation.prefix || ''
+              };
+              
+              // Filtri
+              if (this.matchesFilters(comune, params)) {
+                comuni.push(comune);
+              }
+            }
+          }
+        }
+      }
+      
+      // Ordinamento
+      comuni.sort((a, b) => {
+        if (params.sortBy === 'population') {
+          return b.popolazione - a.popolazione;
+        } else {
+          return a.nome.localeCompare(b.nome);
+        }
+      });
+      
+      console.log(`✅ [IstatAPI] Parsati ${comuni.length} comuni da SDMX`);
+      return comuni;
+      
+    } catch (error) {
+      console.error('❌ [IstatAPI] Errore parse SDMX:', error);
       return [];
     }
   }
@@ -340,6 +439,30 @@ class IstatApiService {
     }
     
     return filtered;
+  }
+
+  /**
+   * Helper per filtri comuni
+   */
+  private matchesFilters(comune: IstatComuneData, params: any): boolean {
+    if (params.q) {
+      const query = params.q.toLowerCase();
+      if (!comune.nome.toLowerCase().includes(query) &&
+          !comune.provincia.toLowerCase().includes(query) &&
+          !comune.regione.toLowerCase().includes(query)) {
+        return false;
+      }
+    }
+    
+    if (params.regione && comune.regione.toLowerCase() !== params.regione.toLowerCase()) {
+      return false;
+    }
+    
+    if (params.provincia && comune.provincia.toLowerCase() !== params.provincia.toLowerCase()) {
+      return false;
+    }
+    
+    return true;
   }
 
   /**
