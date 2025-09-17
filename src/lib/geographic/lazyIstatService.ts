@@ -154,8 +154,9 @@ export class LazyIstatService {
 
       // 2. Prova Firestore
       const firestoreResults = await this.searchFirestore(params);
-      if (firestoreResults.length > 0) {
-        console.log(`✅ [LazyIstat] Trovati ${firestoreResults.length} comuni in Firestore`);
+      if (firestoreResults.length >= 50) {
+        // CHIRURGICO: Solo se Firestore ha almeno 50 comuni, usa solo quello
+        console.log(`✅ [LazyIstat] Trovati ${firestoreResults.length} comuni in Firestore (sufficienti)`);
         this.setCache(cacheKey, firestoreResults);
         return {
           comuni: firestoreResults,
@@ -164,24 +165,36 @@ export class LazyIstatService {
           loadedFrom: 'firestore',
           executionTime: Date.now() - startTime
         };
+      } else if (firestoreResults.length > 0) {
+        // CHIRURGICO: Se Firestore ha pochi comuni, combina con dataset statico
+        console.log(`⚠️ [LazyIstat] Firestore ha solo ${firestoreResults.length} comuni, combinando con dataset statico`);
       }
 
-      // 3. Fallback su dataset statico
-      console.log('⚠️ [LazyIstat] Firestore vuoto, usando dataset statico');
+      // 3. Usa dataset statico (sempre, anche se Firestore ha pochi comuni)
+      console.log('📊 [LazyIstat] Usando dataset statico per risultati completi');
       const staticResults = this.searchStatic(params);
       
-      // 4. Genera comuni aggiuntivi se necessario
-      const generatedResults = this.generateAdditionalComuni(params, staticResults);
+      // 4. Combina con risultati Firestore se disponibili
+      let allResults = [...staticResults];
+      if (firestoreResults.length > 0) {
+        // CHIRURGICO: Combina Firestore + Static, evitando duplicati
+        const firestoreNomi = new Set(firestoreResults.map(c => c.nome.toLowerCase()));
+        const staticUnici = staticResults.filter(c => !firestoreNomi.has(c.nome.toLowerCase()));
+        allResults = [...firestoreResults, ...staticUnici];
+        console.log(`🔄 [LazyIstat] Combinati: ${firestoreResults.length} Firestore + ${staticUnici.length} statici unici`);
+      }
       
-      const allResults = [...staticResults, ...generatedResults];
+      // 5. Genera comuni aggiuntivi se necessario
+      const generatedResults = this.generateAdditionalComuni(params, allResults);
+      allResults = [...allResults, ...generatedResults];
       
-      console.log(`✅ [LazyIstat] Totale ${allResults.length} comuni (${staticResults.length} statici + ${generatedResults.length} generati)`);
+      console.log(`✅ [LazyIstat] Totale ${allResults.length} comuni (${firestoreResults.length} Firestore + ${staticResults.length} statici + ${generatedResults.length} generati)`);
       
       return {
         comuni: allResults,
         total: allResults.length,
         hasMore: allResults.length >= (params.limit || 50),
-        loadedFrom: 'static',
+        loadedFrom: firestoreResults.length > 0 ? 'firestore' : 'static',
         executionTime: Date.now() - startTime
       };
       

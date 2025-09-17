@@ -86,13 +86,14 @@ export async function GET(request: NextRequest) {
 async function getComuniCount(): Promise<number> {
   try {
     const { safeCollection } = await import('@/lib/firebaseUtils');
-    const { getDocs, query, limit } = await import('firebase/firestore');
+    const { getDocs } = await import('firebase/firestore');
     
-    const q = query(safeCollection('comuni_italiani'), limit(1));
-    const snapshot = await getDocs(q);
+    // CHIRURGICO: Conta REALMENTE tutti i documenti invece di stima hardcoded
+    const snapshot = await getDocs(safeCollection('comuni_italiani'));
+    const realCount = snapshot.size;
     
-    // Per ora restituiamo una stima basata sulla presenza di documenti
-    return snapshot.size > 0 ? 1000 : 0; // Stima approssimativa
+    console.log(`🔢 [getComuniCount] Conteggio reale: ${realCount} documenti`);
+    return realCount;
   } catch (error) {
     console.error('❌ Errore conteggio comuni:', error);
     return 0;
