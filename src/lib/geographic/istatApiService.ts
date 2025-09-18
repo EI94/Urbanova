@@ -113,36 +113,85 @@ class IstatApiService {
   }
 
   /**
-   * Fetch dati da API OpenAPI.it (più affidabile)
+   * Fetch dati da API ISTAT ufficiale (8000+ comuni)
    */
   private async fetchFromIstatApi(params: any): Promise<IstatComuneData[]> {
     try {
-      // CHIRURGICO: Usa OpenAPI.it invece di ISTAT diretto
-      const openApiUrl = 'https://api.openapi.it/comuni-base';
+      // CHIRURGICO: Comunicazione diretta con API ISTAT ufficiale
+      console.log('🌐 [IstatAPI] Comunicazione diretta con API ISTAT ufficiale...');
       
-      console.log('🌐 [IstatAPI] Fetching dati da OpenAPI.it:', openApiUrl);
+      // 1. Prova API ISTAT SDMX per dati completi
+      const istatSdmxUrl = 'https://sdmx.istat.it/SDMXWS/rest/data/IT1,DF_DCCV_1,1.0/ALL?format=jsondata';
       
-      const response = await fetch(openApiUrl, {
+      console.log('📊 [IstatAPI] Tentativo API ISTAT SDMX:', istatSdmxUrl);
+      
+      const sdmxResponse = await fetch(istatSdmxUrl, {
         method: 'GET',
         headers: {
           'User-Agent': 'Urbanova-Geographic-Service/1.0',
           'Accept': 'application/json',
-          'Authorization': 'Bearer ' + (process.env.OPENAPI_KEY || 'demo-key'),
         },
-        // Timeout per evitare blocchi
-        signal: AbortSignal.timeout(10000) // 10 secondi
+        signal: AbortSignal.timeout(15000) // 15 secondi
       });
 
-      if (!response.ok) {
-        console.log('⚠️ [IstatAPI] OpenAPI non disponibile, provo fallback locale');
-        return this.getFallbackData(params);
+      if (sdmxResponse.ok) {
+        const sdmxData = await sdmxResponse.json();
+        const comuni = this.parseIstatSdmxData(sdmxData, params);
+        
+        if (comuni.length > 0) {
+          console.log(`✅ [IstatAPI] Caricati ${comuni.length} comuni da API ISTAT SDMX`);
+          return comuni;
+        }
       }
 
-      const jsonData = await response.json();
-      const comuni = this.parseOpenApiData(jsonData, params);
+      // 2. Prova CSV ISTAT completo
+      console.log('📊 [IstatAPI] Tentativo CSV ISTAT completo...');
+      const csvUrl = 'https://www.istat.it/storage/codici-unita-amministrative/Elenco-comuni-italiani.csv';
       
-      console.log(`✅ [IstatAPI] Parsati ${comuni.length} comuni da OpenAPI.it`);
-      return comuni;
+      const csvResponse = await fetch(csvUrl, {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'Urbanova-Geographic-Service/1.0',
+          'Accept': 'text/csv, application/csv',
+        },
+        signal: AbortSignal.timeout(20000) // 20 secondi
+      });
+
+      if (csvResponse.ok) {
+        const csvData = await csvResponse.text();
+        const comuni = this.parseCompleteIstatCsv(csvData, params);
+        
+        if (comuni.length > 0) {
+          console.log(`✅ [IstatAPI] Caricati ${comuni.length} comuni da CSV ISTAT completo`);
+          return comuni;
+        }
+      }
+
+      // 3. Prova API ISTAT territoriali
+      console.log('📊 [IstatAPI] Tentativo API ISTAT territoriali...');
+      const territorialUrl = 'https://www.istat.it/it/files/2023/03/Elenco-comuni-italiani.csv';
+      
+      const territorialResponse = await fetch(territorialUrl, {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'Urbanova-Geographic-Service/1.0',
+          'Accept': 'text/csv, application/csv',
+        },
+        signal: AbortSignal.timeout(15000) // 15 secondi
+      });
+
+      if (territorialResponse.ok) {
+        const territorialData = await territorialResponse.text();
+        const comuni = this.parseCompleteIstatCsv(territorialData, params);
+        
+        if (comuni.length > 0) {
+          console.log(`✅ [IstatAPI] Caricati ${comuni.length} comuni da API ISTAT territoriali`);
+          return comuni;
+        }
+      }
+
+      console.log('⚠️ [IstatAPI] Tutte le API ISTAT non disponibili, uso fallback esteso');
+      return this.getExtendedFallbackData(params);
       
     } catch (error) {
       console.error('❌ [IstatAPI] Errore fetch OpenAPI, provo fallback locale:', error);
