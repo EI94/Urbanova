@@ -136,12 +136,19 @@ class IstatApiService {
 
       if (response.ok) {
         const csvData = await response.text();
+        console.log(`📊 [IstatAPI] CSV ISTAT ricevuto: ${csvData.length} caratteri`);
+        console.log(`📊 [IstatAPI] Prime 200 caratteri CSV:`, csvData.substring(0, 200));
+        
         const comuni = this.parseCompleteIstatCsv(csvData, params);
         
         if (comuni.length > 0) {
           console.log(`✅ [IstatAPI] Caricati ${comuni.length} comuni reali dal CSV ISTAT`);
           return comuni;
+        } else {
+          console.log(`⚠️ [IstatAPI] Nessun comune parsato dal CSV ISTAT`);
         }
+      } else {
+        console.log(`❌ [IstatAPI] Errore HTTP ${response.status}: ${response.statusText}`);
       }
 
       // 2. Prova API ISTAT territoriali
@@ -261,6 +268,7 @@ class IstatApiService {
       const comuni: IstatComuneData[] = [];
       
       console.log(`📊 [IstatAPI] Parsing CSV ISTAT con ${lines.length} linee`);
+      console.log(`📊 [IstatAPI] Header CSV:`, lines[0]?.substring(0, 200));
       
       // Skip header line
       for (let i = 1; i < lines.length; i++) {
@@ -269,6 +277,12 @@ class IstatApiService {
         
         try {
           const columns = this.parseCsvLine(line);
+          
+          // Debug prima linea
+          if (i === 1) {
+            console.log(`📊 [IstatAPI] Prima linea CSV:`, line.substring(0, 100));
+            console.log(`📊 [IstatAPI] Colonne parsate:`, columns.length, columns.slice(0, 6));
+          }
           
           // Verifica che abbiamo abbastanza colonne (CSV ISTAT ha molte colonne)
           if (columns.length >= 6) {
