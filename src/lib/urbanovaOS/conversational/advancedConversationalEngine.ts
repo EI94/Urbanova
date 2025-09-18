@@ -500,8 +500,11 @@ export class AdvancedConversationalEngine {
       });
       
       // Importa il servizio di project manager
+      console.log('🔧 [Advanced Engine] Importando ProjectManagerService...');
       const { ProjectManagerService } = await import('../../projectManagerService.ts');
+      console.log('🔧 [Advanced Engine] ProjectManagerService importato:', !!ProjectManagerService);
       const projectManagerService = new ProjectManagerService();
+      console.log('🔧 [Advanced Engine] Istanza ProjectManagerService creata:', !!projectManagerService);
       
       console.log('🔧 [Advanced Engine] ProjectManagerService importato con successo');
       

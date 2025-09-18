@@ -27,10 +27,12 @@ export class ProjectManagerService {
     userId?: string
   ): Promise<ProjectSaveResult> {
     try {
-      console.log('🧠 Salvataggio intelligente progetto...', {
+      console.log('🧠 [ProjectManagerService] INIZIO salvataggio intelligente progetto...', {
         name: projectData.name,
         address: projectData.address,
         userId,
+        totalArea: projectData.totalArea,
+        hasCosts: !!projectData.costs
       });
 
       // Verifica se esiste già un progetto con lo stesso nome e indirizzo
