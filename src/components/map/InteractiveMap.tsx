@@ -39,7 +39,7 @@ Icon.Default.mergeOptions({
 });
 
 export interface MapMarker {
-  id: number;
+  id: string | number;
   position: [number, number];
   type: 'comune' | 'zona';
   nome: string;

@@ -98,15 +98,15 @@ export function useMapData(options: UseMapDataOptions = {}) {
 
       // Converte dati in markers
       const comuniMarkers: MapMarker[] = apiResponse.data.results.map((result: any, index: number) => ({
-        id: result.id,
+        id: result.id || `marker-${index}`,
         position: [result.latitudine || 0, result.longitudine || 0],
-        type: result.tipo,
-        nome: result.nome,
-        provincia: result.provincia,
-        regione: result.regione,
-        popolazione: result.popolazione,
-        superficie: result.superficie,
-        metadata: result.metadata
+        type: result.tipo || 'comune',
+        nome: result.nome || 'Sconosciuto',
+        provincia: result.provincia || 'Sconosciuta',
+        regione: result.regione || 'Sconosciuta',
+        popolazione: result.popolazione || 0,
+        superficie: result.superficie || 0,
+        metadata: result.metadata || {}
       }));
 
       // Per ora non carichiamo zone (focus sui comuni)
