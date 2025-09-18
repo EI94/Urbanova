@@ -910,11 +910,29 @@ export class AdvancedConversationalEngine {
       console.error('❌ [Advanced Engine] Errore Project Manager:', error);
     }
 
-    // 🏗️ DESIGN CENTER SERVICE - TEMPORANEAMENTE DISABILITATO PER DEBUG
+    // 🏗️ DESIGN CENTER SERVICE - RIATTIVATO PER TEST
     try {
-      console.log('🏗️ [Advanced Engine] DESIGN CENTER DISABILITATO PER DEBUG');
-      // Design Center temporaneamente disabilitato per identificare se causa timeout OS
+      console.log('🏗️ [Advanced Engine] Attivando Design Center Service...');
+      const { DesignCenterService } = await import('../../designCenterService.ts');
+      const designCenterService = new DesignCenterService();
       
+      const templates = await designCenterService.getTemplatesByCriteria({
+        category: 'RESIDENTIAL',
+        budget: finalProjectData.constructionCostPerSqm > 2000 ? 'HIGH' : 'MEDIUM',
+        area: finalProjectData.buildableArea,
+        zone: 'SUBURBAN'
+      });
+      
+      if (templates && templates.length > 0) {
+        result += `## 🏗️ Template Design Consigliati\n\n`;
+        templates.slice(0, 2).forEach(template => {
+          result += `### ${template.name}\n`;
+          result += `**Categoria**: ${template.category}\n`;
+          result += `**Budget**: ${template.budget}\n`;
+          result += `**ROI Stimato**: ${template.estimatedROI}%\n`;
+          result += `**Tempo Costruzione**: ${template.constructionTime} mesi\n\n`;
+        });
+      }
     } catch (error) {
       console.error('❌ [Advanced Engine] Errore Design Center:', error);
     }
