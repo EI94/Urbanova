@@ -107,28 +107,29 @@ export async function POST(request: NextRequest) {
           });
           
           // 🎯 REDIRECT CREATIVO: Invia richieste di fattibilità al nuovo endpoint
-          const messageText = message.toLowerCase();
-          if (messageText.includes('analisi di fattibilità') || messageText.includes('studio di fattibilità') || 
-              messageText.includes('fattibilità') || (messageText.includes('terreno') && messageText.includes('edificabili'))) {
-            console.log('🎯 [REDIRECT CREATIVO] Rilevata richiesta di fattibilità, redirigendo al nuovo endpoint...');
-            
-            // Chiama il nuovo endpoint dedicato
-            try {
-              const feasibilityResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://www.urbanova.life'}/api/feasibility-smart`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message, userId, userEmail })
-              });
-              
-              if (feasibilityResponse.ok) {
-                const feasibilityData = await feasibilityResponse.json();
-                console.log('✅ [REDIRECT CREATIVO] Risposta ricevuta dal nuovo endpoint');
-                return NextResponse.json(feasibilityData);
-              }
-            } catch (error) {
-              console.error('❌ [REDIRECT CREATIVO] Errore chiamata endpoint:', error);
-            }
-          }
+          // COMMENTATO: Usa OS completo per salvare progetti
+          // const messageText = message.toLowerCase();
+          // if (messageText.includes('analisi di fattibilità') || messageText.includes('studio di fattibilità') || 
+          //     messageText.includes('fattibilità') || (messageText.includes('terreno') && messageText.includes('edificabili'))) {
+          //   console.log('🎯 [REDIRECT CREATIVO] Rilevata richiesta di fattibilità, redirigendo al nuovo endpoint...');
+          //   
+          //   // Chiama il nuovo endpoint dedicato
+          //   try {
+          //     const feasibilityResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://www.urbanova.life'}/api/feasibility-smart`, {
+          //       method: 'POST',
+          //       headers: { 'Content-Type': 'application/json' },
+          //       body: JSON.stringify({ message, userId, userEmail })
+          //     });
+          //     
+          //     if (feasibilityResponse.ok) {
+          //       const feasibilityData = await feasibilityResponse.json();
+          //       console.log('✅ [REDIRECT CREATIVO] Risposta ricevuta dal nuovo endpoint');
+          //       return NextResponse.json(feasibilityData);
+          //     }
+          //   } catch (error) {
+          //     console.error('❌ [REDIRECT CREATIVO] Errore chiamata endpoint:', error);
+          //   }
+          // }
           
           try {
             urbanovaResponse = await urbanovaOSOrchestrator.processRequest(urbanovaRequest);
