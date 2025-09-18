@@ -194,9 +194,137 @@ class IstatApiService {
       return this.getExtendedFallbackData(params);
       
     } catch (error) {
-      console.error('❌ [IstatAPI] Errore fetch OpenAPI, provo fallback locale:', error);
+      console.error('❌ [IstatAPI] Errore fetch API ISTAT, provo fallback locale:', error);
       return this.getFallbackData(params);
     }
+  }
+
+  /**
+   * Parse dati API ISTAT SDMX
+   */
+  private parseIstatSdmxData(sdmxData: any, params: any): IstatComuneData[] {
+    try {
+      const comuni: IstatComuneData[] = [];
+      
+      if (sdmxData.data && sdmxData.data.dataSets && sdmxData.data.dataSets[0]) {
+        const dataset = sdmxData.data.dataSets[0];
+        const observations = dataset.observations || {};
+        
+        // Estrai dimensioni per mappare i dati
+        const dimensions = sdmxData.data.structure?.dimensions?.observation || [];
+        
+        for (const [key, value] of Object.entries(observations)) {
+          try {
+            const observation = value as any;
+            const values = Array.isArray(observation) ? observation : [observation];
+            
+            // Mappa i valori alle dimensioni
+            const comune: IstatComuneData = {
+              nome: values[0]?.toString() || '',
+              provincia: values[1]?.toString() || '',
+              regione: values[2]?.toString() || '',
+              codiceIstat: key,
+              popolazione: parseInt(values[3]?.toString()) || 0,
+              superficie: parseFloat(values[4]?.toString()) || 0,
+              latitudine: parseFloat(values[5]?.toString()) || 0,
+              longitudine: parseFloat(values[6]?.toString()) || 0,
+              altitudine: parseInt(values[7]?.toString()) || 0,
+              zonaClimatica: values[8]?.toString() || 'D',
+              cap: values[9]?.toString() || '',
+              prefisso: values[10]?.toString() || ''
+            };
+            
+            if (comune.nome && comune.codiceIstat) {
+              comuni.push(comune);
+            }
+          } catch (error) {
+            console.warn('⚠️ [IstatAPI] Errore parsing osservazione SDMX:', key);
+          }
+        }
+      }
+      
+      console.log(`📊 [IstatAPI] Parsati ${comuni.length} comuni da SDMX`);
+      return comuni;
+      
+    } catch (error) {
+      console.error('❌ [IstatAPI] Errore parsing SDMX:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Parse CSV ISTAT completo (8000+ comuni)
+   */
+  private parseCompleteIstatCsv(csvData: string, params: any): IstatComuneData[] {
+    try {
+      const lines = csvData.split('\n');
+      const comuni: IstatComuneData[] = [];
+      
+      // Skip header line
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        
+        try {
+          const columns = this.parseCsvLine(line);
+          if (columns.length >= 6) {
+            const comune: IstatComuneData = {
+              nome: columns[5] || '', // Denominazione
+              provincia: columns[11] || '', // Provincia
+              regione: columns[9] || '', // Regione
+              codiceIstat: columns[4] || '', // Codice Comune
+              popolazione: 0, // Non disponibile nel CSV base
+              superficie: 0, // Non disponibile nel CSV base
+              latitudine: 0, // Non disponibile nel CSV base
+              longitudine: 0, // Non disponibile nel CSV base
+              altitudine: 0, // Non disponibile nel CSV base
+              zonaClimatica: 'D', // Default
+              cap: '', // Non disponibile nel CSV base
+              prefisso: '' // Non disponibile nel CSV base
+            };
+            
+            // Filtra solo comuni validi
+            if (comune.nome && comune.codiceIstat) {
+              comuni.push(comune);
+            }
+          }
+        } catch (error) {
+          console.warn('⚠️ [IstatAPI] Errore parsing linea CSV:', line);
+        }
+      }
+      
+      console.log(`📊 [IstatAPI] Parsati ${comuni.length} comuni dal CSV ISTAT completo`);
+      return comuni;
+      
+    } catch (error) {
+      console.error('❌ [IstatAPI] Errore parsing CSV completo:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Parse linea CSV con gestione virgolette robusta
+   */
+  private parseCsvLine(line: string): string[] {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    
+    result.push(current.trim());
+    return result;
   }
 
   /**
@@ -442,6 +570,111 @@ class IstatApiService {
       console.error('❌ [IstatAPI] Errore parse CSV:', error);
       return [];
     }
+  }
+
+  /**
+   * Fallback esteso con molti più comuni italiani
+   */
+  private getExtendedFallbackData(params: any): IstatComuneData[] {
+    // Usa il dataset base e aggiungi molti più comuni
+    const baseData = this.getFallbackData(params);
+    
+    // Aggiungi comuni da tutte le regioni italiane
+    const additionalComuni: IstatComuneData[] = [
+      // Comuni Abruzzo
+      { nome: "L'Aquila", provincia: "L'Aquila", regione: "Abruzzo", codiceIstat: "066049", popolazione: 70000, superficie: 466.96, latitudine: 42.3500, longitudine: 13.4000, altitudine: 714, zonaClimatica: "E", cap: "67100", prefisso: "0862" },
+      { nome: "Chieti", provincia: "Chieti", regione: "Abruzzo", codiceIstat: "069022", popolazione: 54000, superficie: 58.55, latitudine: 42.3500, longitudine: 14.1667, altitudine: 330, zonaClimatica: "E", cap: "66100", prefisso: "0871" },
+      { nome: "Pescara", provincia: "Pescara", regione: "Abruzzo", codiceIstat: "068028", popolazione: 120000, superficie: 33.62, latitudine: 42.4667, longitudine: 14.2167, altitudine: 4, zonaClimatica: "E", cap: "65100", prefisso: "085" },
+      { nome: "Teramo", provincia: "Teramo", regione: "Abruzzo", codiceIstat: "067041", popolazione: 55000, superficie: 151.88, latitudine: 42.6667, longitudine: 13.7000, altitudine: 265, zonaClimatica: "E", cap: "64100", prefisso: "0861" },
+      
+      // Comuni Basilicata
+      { nome: "Potenza", provincia: "Potenza", regione: "Basilicata", codiceIstat: "076063", popolazione: 67000, superficie: 173.97, latitudine: 40.6333, longitudine: 15.8000, altitudine: 819, zonaClimatica: "D", cap: "85100", prefisso: "0971" },
+      { nome: "Matera", provincia: "Matera", regione: "Basilicata", codiceIstat: "077014", popolazione: 60000, superficie: 387.40, latitudine: 40.6667, longitudine: 16.6000, altitudine: 401, zonaClimatica: "D", cap: "75100", prefisso: "0835" },
+      
+      // Comuni Calabria
+      { nome: "Catanzaro", provincia: "Catanzaro", regione: "Calabria", codiceIstat: "079023", popolazione: 90000, superficie: 112.72, latitudine: 38.9000, longitudine: 16.6000, altitudine: 342, zonaClimatica: "C", cap: "88100", prefisso: "0961" },
+      { nome: "Cosenza", provincia: "Cosenza", regione: "Calabria", codiceIstat: "078030", popolazione: 70000, superficie: 37.86, latitudine: 39.3000, longitudine: 16.2500, altitudine: 238, zonaClimatica: "C", cap: "87100", prefisso: "0984" },
+      { nome: "Crotone", provincia: "Crotone", regione: "Calabria", codiceIstat: "101010", popolazione: 62000, superficie: 179.83, latitudine: 39.0833, longitudine: 17.1167, altitudine: 8, zonaClimatica: "C", cap: "88900", prefisso: "0962" },
+      { nome: "Reggio Calabria", provincia: "Reggio Calabria", regione: "Calabria", codiceIstat: "080063", popolazione: 180000, superficie: 236.02, latitudine: 38.1167, longitudine: 15.6500, altitudine: 31, zonaClimatica: "C", cap: "89100", prefisso: "0965" },
+      { nome: "Vibo Valentia", provincia: "Vibo Valentia", regione: "Calabria", codiceIstat: "102046", popolazione: 34000, superficie: 46.23, latitudine: 38.6667, longitudine: 16.1000, altitudine: 476, zonaClimatica: "C", cap: "89900", prefisso: "0963" },
+      
+      // Comuni Marche
+      { nome: "Ancona", provincia: "Ancona", regione: "Marche", codiceIstat: "042002", popolazione: 100000, superficie: 123.71, latitudine: 43.6167, longitudine: 13.5167, altitudine: 16, zonaClimatica: "D", cap: "60100", prefisso: "071" },
+      { nome: "Ascoli Piceno", provincia: "Ascoli Piceno", regione: "Marche", codiceIstat: "044005", popolazione: 50000, superficie: 160.51, latitudine: 42.8500, longitudine: 13.5667, altitudine: 154, zonaClimatica: "D", cap: "63100", prefisso: "0736" },
+      { nome: "Fermo", provincia: "Fermo", regione: "Marche", codiceIstat: "109006", popolazione: 37000, superficie: 124.53, latitudine: 43.1667, longitudine: 13.7167, altitudine: 319, zonaClimatica: "D", cap: "63900", prefisso: "0734" },
+      { nome: "Macerata", provincia: "Macerata", regione: "Marche", codiceIstat: "043020", popolazione: 42000, superficie: 92.53, latitudine: 43.3000, longitudine: 13.4500, altitudine: 315, zonaClimatica: "D", cap: "62100", prefisso: "0733" },
+      { nome: "Pesaro", provincia: "Pesaro e Urbino", regione: "Marche", codiceIstat: "041048", popolazione: 95000, superficie: 126.77, latitudine: 43.9167, longitudine: 12.9167, altitudine: 11, zonaClimatica: "D", cap: "61100", prefisso: "0721" },
+      { nome: "Urbino", provincia: "Pesaro e Urbino", regione: "Marche", codiceIstat: "041053", popolazione: 15000, superficie: 228.07, latitudine: 43.7167, longitudine: 12.6333, altitudine: 451, zonaClimatica: "D", cap: "61029", prefisso: "0722" },
+      
+      // Comuni Molise
+      { nome: "Campobasso", provincia: "Campobasso", regione: "Molise", codiceIstat: "070004", popolazione: 49000, superficie: 55.65, latitudine: 41.5667, longitudine: 14.6667, altitudine: 701, zonaClimatica: "D", cap: "86100", prefisso: "0874" },
+      { nome: "Isernia", provincia: "Isernia", regione: "Molise", codiceIstat: "094023", popolazione: 22000, superficie: 68.74, latitudine: 41.6000, longitudine: 14.2333, altitudine: 423, zonaClimatica: "D", cap: "86170", prefisso: "0865" },
+      
+      // Comuni Umbria
+      { nome: "Perugia", provincia: "Perugia", regione: "Umbria", codiceIstat: "054039", popolazione: 170000, superficie: 449.92, latitudine: 43.1167, longitudine: 12.3833, altitudine: 493, zonaClimatica: "D", cap: "06100", prefisso: "075" },
+      { nome: "Terni", provincia: "Terni", regione: "Umbria", codiceIstat: "055032", popolazione: 110000, superficie: 212.43, latitudine: 42.5667, longitudine: 12.6500, altitudine: 130, zonaClimatica: "D", cap: "05100", prefisso: "0744" },
+      
+      // Comuni Valle d'Aosta
+      { nome: "Aosta", provincia: "Aosta", regione: "Valle d'Aosta", codiceIstat: "007003", popolazione: 35000, superficie: 21.38, latitudine: 45.7333, longitudine: 7.3167, altitudine: 583, zonaClimatica: "F", cap: "11100", prefisso: "0165" },
+      
+      // Comuni Puglia
+      { nome: "Bari", provincia: "Bari", regione: "Puglia", codiceIstat: "072006", popolazione: 320000, superficie: 116.20, latitudine: 41.1167, longitudine: 16.8667, altitudine: 5, zonaClimatica: "C", cap: "70100", prefisso: "080" },
+      { nome: "Barletta", provincia: "Barletta-Andria-Trani", regione: "Puglia", codiceIstat: "110004", popolazione: 95000, superficie: 146.91, latitudine: 41.3167, longitudine: 16.2833, altitudine: 15, zonaClimatica: "C", cap: "76121", prefisso: "0883" },
+      { nome: "Brindisi", provincia: "Brindisi", regione: "Puglia", codiceIstat: "074001", popolazione: 87000, superficie: 328.46, latitudine: 40.6333, longitudine: 17.9500, altitudine: 15, zonaClimatica: "C", cap: "72100", prefisso: "0831" },
+      { nome: "Foggia", provincia: "Foggia", regione: "Puglia", codiceIstat: "071024", popolazione: 150000, superficie: 507.78, latitudine: 41.4667, longitudine: 15.5500, altitudine: 76, zonaClimatica: "C", cap: "71100", prefisso: "0881" },
+      { nome: "Lecce", provincia: "Lecce", regione: "Puglia", codiceIstat: "075035", popolazione: 95000, superficie: 238.39, latitudine: 40.3500, longitudine: 18.1667, altitudine: 49, zonaClimatica: "C", cap: "73100", prefisso: "0832" },
+      { nome: "Taranto", provincia: "Taranto", regione: "Puglia", codiceIstat: "073027", popolazione: 200000, superficie: 217.00, latitudine: 40.4667, longitudine: 17.2333, altitudine: 15, zonaClimatica: "C", cap: "74100", prefisso: "099" },
+      
+      // Comuni Sicilia
+      { nome: "Palermo", provincia: "Palermo", regione: "Sicilia", codiceIstat: "082053", popolazione: 650000, superficie: 160.59, latitudine: 38.1167, longitudine: 13.3667, altitudine: 14, zonaClimatica: "B", cap: "90100", prefisso: "091" },
+      { nome: "Catania", provincia: "Catania", regione: "Sicilia", codiceIstat: "087015", popolazione: 310000, superficie: 180.88, latitudine: 37.5000, longitudine: 15.0833, altitudine: 7, zonaClimatica: "B", cap: "95100", prefisso: "095" },
+      { nome: "Messina", provincia: "Messina", regione: "Sicilia", codiceIstat: "083048", popolazione: 240000, superficie: 211.70, latitudine: 38.1833, longitudine: 15.5500, altitudine: 3, zonaClimatica: "B", cap: "98100", prefisso: "090" },
+      { nome: "Siracusa", provincia: "Siracusa", regione: "Sicilia", codiceIstat: "089017", popolazione: 120000, superficie: 207.78, latitudine: 37.0667, longitudine: 15.2833, altitudine: 17, zonaClimatica: "B", cap: "96100", prefisso: "0931" },
+      { nome: "Trapani", provincia: "Trapani", regione: "Sicilia", codiceIstat: "081021", popolazione: 70000, superficie: 271.72, latitudine: 38.0167, longitudine: 12.5167, altitudine: 3, zonaClimatica: "B", cap: "91100", prefisso: "0923" },
+      { nome: "Agrigento", provincia: "Agrigento", regione: "Sicilia", codiceIstat: "084001", popolazione: 59000, superficie: 244.57, latitudine: 37.3167, longitudine: 13.5833, altitudine: 230, zonaClimatica: "B", cap: "92100", prefisso: "0922" },
+      { nome: "Caltanissetta", provincia: "Caltanissetta", regione: "Sicilia", codiceIstat: "085007", popolazione: 62000, superficie: 416.90, latitudine: 37.4833, longitudine: 14.0667, altitudine: 568, zonaClimatica: "B", cap: "93100", prefisso: "0934" },
+      { nome: "Enna", provincia: "Enna", regione: "Sicilia", codiceIstat: "086011", popolazione: 27000, superficie: 357.18, latitudine: 37.5667, longitudine: 14.2667, altitudine: 931, zonaClimatica: "B", cap: "94100", prefisso: "0935" },
+      { nome: "Ragusa", provincia: "Ragusa", regione: "Sicilia", codiceIstat: "088009", popolazione: 73000, superficie: 442.46, latitudine: 36.9167, longitudine: 14.7167, altitudine: 502, zonaClimatica: "B", cap: "97100", prefisso: "0932" },
+      
+      // Comuni Sardegna
+      { nome: "Cagliari", provincia: "Cagliari", regione: "Sardegna", codiceIstat: "092009", popolazione: 150000, superficie: 85.01, latitudine: 39.2167, longitudine: 9.1167, altitudine: 4, zonaClimatica: "C", cap: "09100", prefisso: "070" },
+      { nome: "Sassari", provincia: "Sassari", regione: "Sardegna", codiceIstat: "090064", popolazione: 130000, superficie: 546.08, latitudine: 40.7333, longitudine: 8.5667, altitudine: 225, zonaClimatica: "C", cap: "07100", prefisso: "079" },
+      { nome: "Nuoro", provincia: "Nuoro", regione: "Sardegna", codiceIstat: "091051", popolazione: 36000, superficie: 192.27, latitudine: 40.3167, longitudine: 9.3333, altitudine: 554, zonaClimatica: "C", cap: "08100", prefisso: "0784" },
+      { nome: "Oristano", provincia: "Oristano", regione: "Sardegna", codiceIstat: "095038", popolazione: 32000, superficie: 84.63, latitudine: 39.9000, longitudine: 8.5833, altitudine: 9, zonaClimatica: "C", cap: "09170", prefisso: "0783" },
+      { nome: "Carbonia", provincia: "Sud Sardegna", regione: "Sardegna", codiceIstat: "111009", popolazione: 28000, superficie: 145.54, latitudine: 39.1667, longitudine: 8.5167, altitudine: 111, zonaClimatica: "C", cap: "09013", prefisso: "0781" },
+      { nome: "Iglesias", provincia: "Sud Sardegna", regione: "Sardegna", codiceIstat: "111025", popolazione: 27000, superficie: 207.63, latitudine: 39.3167, longitudine: 8.5333, altitudine: 200, zonaClimatica: "C", cap: "09016", prefisso: "0781" },
+      { nome: "Villacidro", provincia: "Sud Sardegna", regione: "Sardegna", codiceIstat: "111092", popolazione: 14000, superficie: 183.56, latitudine: 39.4500, longitudine: 8.7333, altitudine: 432, zonaClimatica: "C", cap: "09039", prefisso: "070" }
+    ];
+    
+    // Combina dataset base con comuni aggiuntivi
+    const extendedData = [...baseData, ...additionalComuni];
+    
+    // Applica filtri
+    let filtered = extendedData;
+    
+    if (params.query || params.q) {
+      const query = (params.query || params.q).toLowerCase();
+      filtered = filtered.filter(comune => 
+        comune.nome.toLowerCase().includes(query) ||
+        comune.provincia.toLowerCase().includes(query) ||
+        comune.regione.toLowerCase().includes(query)
+      );
+    }
+    
+    if (params.regione) {
+      filtered = filtered.filter(comune => 
+        comune.regione.toLowerCase() === params.regione.toLowerCase()
+      );
+    }
+    
+    if (params.provincia) {
+      filtered = filtered.filter(comune => 
+        comune.provincia.toLowerCase() === params.provincia.toLowerCase()
+      );
+    }
+    
+    console.log(`📊 [IstatAPI] Dataset esteso con ${filtered.length} comuni su ${extendedData.length} totali`);
+    return filtered;
   }
 
   /**
