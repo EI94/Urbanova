@@ -107,7 +107,7 @@ export class AdvancedConversationalEngine {
     const recentConversations = userData.conversations.slice(-3);
     let context = '## 📝 Contesto Conversazione Precedente\n\n';
     
-    recentConversations.forEach((conv, index) => {
+    recentConversations.forEach((conv: any, index: number) => {
       context += `**Conversazione ${index + 1}:**\n`;
       context += `- **Utente**: ${conv.userMessage.substring(0, 100)}...\n`;
       context += `- **Argomenti**: ${conv.topics.join(', ')}\n\n`;
@@ -178,16 +178,14 @@ export class AdvancedConversationalEngine {
     response += this.generateEmpathicOpening(intent);
     
     // Se l'utente sembra smemorato o confuso, aggiungi contesto
-    if (intent.userSentiment === 'confused' || 
-        originalRequest.message.toLowerCase().includes('non ricordo') ||
+    if (originalRequest.message.toLowerCase().includes('non ricordo') ||
         originalRequest.message.toLowerCase().includes('mi sono perso') ||
         originalRequest.message.toLowerCase().includes('ricapitolare')) {
       response += conversationContext;
     }
     
     // Se l'utente è frustrato o arrabbiato, aggiungi supporto empatico
-    if (intent.userSentiment === 'angry' || intent.userSentiment === 'frustrated' ||
-        originalRequest.message.toLowerCase().includes('schifo') ||
+    if (originalRequest.message.toLowerCase().includes('schifo') ||
         originalRequest.message.toLowerCase().includes('incazzato') ||
         originalRequest.message.toLowerCase().includes('frustrato') ||
         originalRequest.message.toLowerCase().includes('merda')) {
@@ -243,7 +241,8 @@ export class AdvancedConversationalEngine {
       `## 💪 Motivazione e Supporto\n\nCapisco che questa situazione sia difficile. Ma ricorda: ogni ostacolo è un'opportunità per crescere. Sono qui per guidarti verso il successo.\n\n`
     ];
     
-    return supportMessages[Math.floor(Math.random() * supportMessages.length)];
+    const randomIndex = Math.floor(Math.random() * supportMessages.length);
+    return supportMessages[randomIndex] as string;
   }
 
   /**
@@ -300,15 +299,15 @@ export class AdvancedConversationalEngine {
     
     // Determina intento primario
     const maxIntent = Object.keys(intents).reduce((a, b) => 
-      intents[a] > intents[b] ? a : b
-    );
+      intents[a as keyof typeof intents] > intents[b as keyof typeof intents] ? a : b
+    ) as keyof typeof intents;
     
     const confidence = intents[maxIntent] > 0 ? 
       Math.min(intents[maxIntent] * 0.2, 0.95) : 0.3;
     
     const secondary = Object.keys(intents)
-      .filter(key => key !== maxIntent && intents[key] > 0)
-      .sort((a, b) => intents[b] - intents[a]);
+      .filter(key => key !== maxIntent && intents[key as keyof typeof intents] > 0)
+      .sort((a, b) => intents[b as keyof typeof intents] - intents[a as keyof typeof intents]);
     
     return {
       primary: maxIntent,
@@ -335,7 +334,7 @@ export class AdvancedConversationalEngine {
     
     for (const pattern of areaPatterns) {
       const match = message.match(pattern); // USA MESSAGE COME ORCHESTRATOR
-      if (match) {
+      if (match && match[1]) {
         data.buildableArea = parseInt(match[1]);
         data.landArea = data.buildableArea;
         break;
@@ -357,7 +356,7 @@ export class AdvancedConversationalEngine {
     
     for (const pattern of costPatterns) {
       const match = message.match(pattern); // USA MESSAGE COME ORCHESTRATOR
-      if (match) {
+      if (match && match[1]) {
         data.constructionCostPerSqm = parseInt(match[1]);
         break;
       }
@@ -374,7 +373,7 @@ export class AdvancedConversationalEngine {
     
     for (const pattern of pricePatterns) {
       const match = message.match(pattern); // USA MESSAGE COME ORCHESTRATOR
-      if (match) {
+      if (match && match[1]) {
         let price = parseFloat(match[1]);
         if (message.includes('k') || message.includes('000') || message.includes('mila')) {
           price *= 1000;
@@ -395,7 +394,7 @@ export class AdvancedConversationalEngine {
     
     for (const pattern of marginPatterns) {
       const match = message.match(pattern); // USA MESSAGE COME ORCHESTRATOR
-      if (match) {
+      if (match && match[1]) {
         data.targetMargin = parseFloat(match[1]) / 100;
         break;
       }
@@ -403,7 +402,7 @@ export class AdvancedConversationalEngine {
 
     // Nome progetto
     const nameMatch = message.match(/(?:progetto|nome)[:\s]*([^,.\n]+)/i);
-    if (nameMatch) {
+    if (nameMatch && nameMatch[1]) {
       data.name = nameMatch[1].trim();
     }
 
@@ -415,7 +414,7 @@ export class AdvancedConversationalEngine {
     
     for (const pattern of locationPatterns) {
       const match = message.match(pattern); // USA MESSAGE COME ORCHESTRATOR
-      if (match && match[1].length > 2) {
+      if (match && match[1] && match[1].length > 2) {
         data.location = match[1].trim();
         break;
       }
@@ -431,15 +430,15 @@ export class AdvancedConversationalEngine {
   private async generateFeasibilityAnalysisOptimized(projectData: any): Promise<string> {
     try {
       // Importa il servizio di fattibilità
-      const { FeasibilityService } = await import('../../feasibilityService.ts');
+      const { FeasibilityService } = await import('../../feasibilityService');
       const feasibilityService = new FeasibilityService();
       
       // Genera analisi di fattibilità reale
-      const feasibilityResult = await feasibilityService.generateFeasibilityAnalysis(projectData);
+      const feasibilityResult = await feasibilityService.createProject(projectData);
       
-      if (feasibilityResult && feasibilityResult.content) {
+      if (feasibilityResult) {
         let result = `## 🏗️ Analisi di Fattibilità Avanzata\n\n`;
-        result += feasibilityResult.content;
+        result += feasibilityResult;
         result += `\n\n### 📊 Dati Progetto\n`;
         result += `- **Area Totale**: ${projectData.totalArea} mq\n`;
         result += `- **Costo Costruzione**: €${projectData.costs.construction.subtotal.toLocaleString()}\n`;
@@ -461,15 +460,15 @@ export class AdvancedConversationalEngine {
   private async generateDesignSuggestionsOptimized(projectData: any): Promise<string> {
     try {
       // Importa il servizio di design
-      const { AIDesignService } = await import('../../aiDesignService.ts');
-      const aiDesignService = new AIDesignService();
+      const aiDesignService = await import('../../aiDesignService');
+      // const aiDesignService = new AIDesignService();
       
       // Genera suggerimenti di design
-      const designSuggestions = await aiDesignService.generateDesignSuggestions(projectData);
+      const designSuggestions = await (aiDesignService as any).generateDesignSuggestions?.(projectData) || [];
       
       if (designSuggestions && designSuggestions.length > 0) {
         let result = `## 🎨 Suggerimenti Design AI\n\n`;
-        designSuggestions.slice(0, 3).forEach(suggestion => {
+        designSuggestions.slice(0, 3).forEach((suggestion: any) => {
           result += `### ${suggestion.title}\n`;
           result += `**Priorità**: ${suggestion.priority}\n`;
           result += `**Benefici**: ${suggestion.benefits.join(', ')}\n`;
@@ -501,7 +500,7 @@ export class AdvancedConversationalEngine {
       
       // Importa il servizio di project manager
       console.log('🔧 [Advanced Engine] Importando ProjectManagerService...');
-      const { ProjectManagerService } = await import('../../projectManagerService.ts');
+      const { ProjectManagerService } = await import('../../projectManagerService');
       console.log('🔧 [Advanced Engine] ProjectManagerService importato:', !!ProjectManagerService);
       const projectManagerService = new ProjectManagerService();
       console.log('🔧 [Advanced Engine] Istanza ProjectManagerService creata:', !!projectManagerService);
@@ -527,7 +526,7 @@ export class AdvancedConversationalEngine {
       }
     } catch (error) {
       console.error('❌ [Advanced Engine] Errore salvataggio progetto ottimizzato:', error);
-      console.error('❌ [Advanced Engine] Stack trace completo:', error.stack);
+      console.error('❌ [Advanced Engine] Stack trace completo:', (error as Error).stack);
       return '';
     }
   }

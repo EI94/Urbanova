@@ -241,11 +241,11 @@ ${calculations.roi > 20 ? '✅ **FATTIBILE** - ROI eccellente' : calculations.ro
       });
       
       console.log('💾 [FEASIBILITY SMART] Chiamando feasibilityService.createProject...');
-      const savedProject = await feasibilityService.createProject(projectData);
-      console.log('✅ [FEASIBILITY SMART] Progetto salvato con successo:', savedProject.id);
+      const savedProjectId = await feasibilityService.createProject(projectData);
+      console.log('✅ [FEASIBILITY SMART] Progetto salvato con successo:', savedProjectId);
       
       // Aggiungi messaggio di salvataggio alla risposta
-      const responseWithSave = response + `\n\n## 💾 SALVATAGGIO AUTOMATICO\n\n✅ **Progetto salvato automaticamente** nella pagina Analisi Fattibilità!\n- **ID Progetto**: ${savedProject.id}\n- **Nome**: ${projectData.name}\n- **Data**: ${new Date().toLocaleString('it-IT')}\n\n*Il progetto è ora consultabile sia nella pagina Analisi Fattibilità che tramite l'OS.*`;
+      const responseWithSave = response + `\n\n## 💾 SALVATAGGIO AUTOMATICO\n\n✅ **Progetto salvato automaticamente** nella pagina Analisi Fattibilità!\n- **ID Progetto**: ${savedProjectId}\n- **Nome**: ${projectData.name}\n- **Data**: ${new Date().toLocaleString('it-IT')}\n\n*Il progetto è ora consultabile sia nella pagina Analisi Fattibilità che tramite l'OS.*`;
       
       return NextResponse.json({
         success: true,
@@ -263,7 +263,7 @@ ${calculations.roi > 20 ? '✅ **FATTIBILE** - ROI eccellente' : calculations.ro
             calculations: calculations,
             extractedData: extractedData,
             savedProject: {
-              id: savedProject.id,
+              id: savedProjectId,
               name: projectData.name,
               savedAt: new Date().toISOString()
             }
