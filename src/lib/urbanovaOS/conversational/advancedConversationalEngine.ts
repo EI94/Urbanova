@@ -490,24 +490,41 @@ export class AdvancedConversationalEngine {
    */
   private async saveProjectOptimized(projectData: any, userId: string): Promise<string> {
     try {
+      console.log('🔧 [Advanced Engine] Inizio salvataggio progetto ottimizzato...');
+      console.log('🔧 [Advanced Engine] ProjectData ricevuto:', {
+        name: projectData.name,
+        address: projectData.address,
+        totalArea: projectData.totalArea,
+        costs: projectData.costs,
+        userId
+      });
+      
       // Importa il servizio di project manager
       const { ProjectManagerService } = await import('../../projectManagerService.ts');
       const projectManagerService = new ProjectManagerService();
       
+      console.log('🔧 [Advanced Engine] ProjectManagerService importato con successo');
+      
       // Salva il progetto
+      console.log('🔧 [Advanced Engine] Chiamando smartSaveProject...');
       const saveResult = await projectManagerService.smartSaveProject(projectData, userId);
+      
+      console.log('🔧 [Advanced Engine] Risultato smartSaveProject:', saveResult);
       
       if (saveResult.success) {
         let result = `## 📊 Gestione Progetto\n\n`;
         result += `✅ **Progetto salvato**: ${saveResult.message}\n`;
         result += `🆔 **ID Progetto**: ${saveResult.projectId}\n`;
         result += `📝 **Stato**: ${saveResult.isNew ? 'Nuovo progetto' : 'Progetto aggiornato'}\n\n`;
+        console.log('🔧 [Advanced Engine] Progetto salvato con successo:', saveResult.projectId);
         return result;
       } else {
+        console.log('🔧 [Advanced Engine] Salvataggio fallito:', saveResult);
         return '';
       }
     } catch (error) {
       console.error('❌ [Advanced Engine] Errore salvataggio progetto ottimizzato:', error);
+      console.error('❌ [Advanced Engine] Stack trace completo:', error.stack);
       return '';
     }
   }
@@ -884,18 +901,26 @@ export class AdvancedConversationalEngine {
     // 📊 PROJECT MANAGER SERVICE - Gestione progetto (OTTIMIZZATO)
     try {
       console.log('📊 [Advanced Engine] Attivando Project Manager Service OTTIMIZZATO...');
+      console.log('📊 [Advanced Engine] Dati progetto da salvare:', {
+        name: finalProjectData.name,
+        address: finalProjectData.address,
+        totalArea: finalProjectData.totalArea,
+        userId: originalRequest.userId
+      });
       
       // TIMEOUT PROTECTION: Limita tempo di attesa
       const projectPromise = this.saveProjectOptimized(finalProjectData, originalRequest.userId);
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout')), 2000) // 2 secondi max
+        setTimeout(() => reject(new Error('Timeout')), 10000) // 10 secondi max
       );
       
       const projectResult = await Promise.race([projectPromise, timeoutPromise]);
+      console.log('📊 [Advanced Engine] Risultato salvataggio progetto:', projectResult);
       result += projectResult;
       
     } catch (error) {
       console.error('❌ [Advanced Engine] Errore Project Manager:', error);
+      console.error('❌ [Advanced Engine] Stack trace:', error.stack);
     }
 
     // 🏗️ DESIGN CENTER SERVICE - Template e layout
