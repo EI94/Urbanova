@@ -23,7 +23,8 @@ import {
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 
-import { useAuth } from '@/contexts/UltraSafeAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
+import '@/lib/osProtection'; // OS Protection per realtime collaboration
 import collaborationService, {
   DesignComment,
   DesignVersion,

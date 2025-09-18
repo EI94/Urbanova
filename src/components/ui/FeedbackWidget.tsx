@@ -13,7 +13,8 @@ import {
 import React, { useState, useRef, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 
-import { useAuth } from '@/contexts/UltraSafeAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
+import '@/lib/osProtection'; // OS Protection per feedback widget
 
 interface FeedbackData {
   type: 'bug' | 'improvement' | 'feature' | 'other';

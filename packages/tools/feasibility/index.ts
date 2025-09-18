@@ -1,5 +1,8 @@
 // Feasibility Analysis Tool for @urbanova/tools
 
+// 🛡️ OS PROTECTION - Importa protezione CSS per il feasibility tool
+import '@/lib/osProtection';
+
 import type { ToolManifest, ToolActionSpec } from '@urbanova/types';
 
 // Mock service since the real one doesn't exist

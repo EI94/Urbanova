@@ -10,18 +10,11 @@ import { MailIcon, LockIcon } from '@/components/icons';
 import Alert from '@/components/ui/Alert';
 import Button from '@/components/ui/Button';
 import FormInput from '@/components/ui/FormInput';
-import { useAuth } from '@/contexts/UltraSafeAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
-  let authContext;
-  try {
-    authContext = useAuth();
-  } catch (error) {
-    console.error('❌ [LoginPage] Errore useAuth:', error);
-    authContext = { login: null };
-  }
-  const login = authContext?.login;
+  const { login } = useAuth();
 
   const [formData, setFormData] = useState({
     email: '',

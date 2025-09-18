@@ -4,6 +4,9 @@
  * Superpotere per sviluppatori immobiliari
  */
 
+// 🛡️ OS PROTECTION - Importa protezione CSS per il market intelligence OS
+import '@/lib/osProtection';
+
 import { UserMemoryProfile } from './userMemoryService';
 
 export interface LandSearchCriteria {

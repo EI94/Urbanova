@@ -209,10 +209,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const params = validationResult.data;
 
-    // CHIRURGICO: Usa istatApiService ma senza fetch CSV (CORS issues)
-    console.log('🌐 [GeographicAPI] Ricerca tramite istatApiService (senza CSV):', params);
+    // CHIRURGICO: Usa istatApiService per TUTTI i comuni italiani reali
+    console.log('🌐 [GeographicAPI] Ricerca tramite istatApiService:', params);
     
-    // Usa il servizio ISTAT ma senza fetch CSV per evitare errori CORS
+    // Usa il servizio ISTAT per caricare TUTTI i comuni italiani reali
     const istatResults = await istatApiService.searchComuni({
       query: params.q,
       regione: params.region,
@@ -223,25 +223,30 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       radius: params.radius
     });
 
-    // Converti risultati Firestore in formato API
+    // Converti risultati ISTAT in formato API
     const searchResults = {
-      results: firestoreResults.results.map((result, index) => ({
-        id: result.id,
-        nome: result.nome,
-        tipo: result.tipo,
-        provincia: result.provincia,
-        regione: result.regione,
-        popolazione: result.popolazione,
-        superficie: result.superficie,
-        latitudine: params.includeCoordinates ? result.latitudine : undefined,
-        longitudine: params.includeCoordinates ? result.longitudine : undefined,
-        score: result.score,
-        distance: result.distance,
-        metadata: params.includeMetadata ? result.metadata : undefined
+      results: istatResults.comuni.map((comune, index) => ({
+        id: `${comune.codiceIstat}-${index}`,
+        nome: comune.nome,
+        tipo: 'comune' as const,
+        provincia: comune.provincia,
+        regione: comune.regione,
+        popolazione: comune.popolazione,
+        superficie: comune.superficie,
+        latitudine: params.includeCoordinates ? comune.latitudine : 0,
+        longitudine: params.includeCoordinates ? comune.longitudine : 0,
+        score: 250 - index, // Score decrescente
+        metadata: params.includeMetadata ? {
+          codiceIstat: comune.codiceIstat,
+          altitudine: comune.altitudine,
+          zonaClimatica: comune.zonaClimatica,
+          cap: comune.cap,
+          prefisso: comune.prefisso
+        } : undefined
       })),
-      total: firestoreResults.total,
-      hasMore: firestoreResults.hasMore,
-      executionTime: firestoreResults.executionTime
+      total: istatResults.total,
+      hasMore: istatResults.hasMore,
+      executionTime: istatResults.executionTime
     };
 
     const responseData = {

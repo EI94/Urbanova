@@ -192,6 +192,9 @@ export interface Entity {
 // URBANOVA OS ORCHESTRATORE
 // ============================================================================
 
+// 🛡️ OS PROTECTION - Importa protezione CSS per l'orchestrator
+import '@/lib/osProtection';
+
 export class UrbanovaOSOrchestrator {
   private classificationEngine: UrbanovaOSClassificationEngine;
   private vectorStore: UrbanovaOSVectorStore;

@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { User, Mail, Phone, Building, MapPin, Camera, Save, Eye, EyeOff, Shield, Key, Settings } from 'lucide-react';
 import { XIcon } from '@/components/icons';
-import { useAuth } from '@/contexts/UltraSafeAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
+import '@/lib/osProtection'; // OS Protection per user profile panel fixed
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { ProfileUpdate } from '@/types/userProfile';

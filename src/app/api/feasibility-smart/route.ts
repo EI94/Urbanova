@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import '@/lib/osProtection'; // OS Protection per API
 
 export async function POST(request: NextRequest) {
   try {

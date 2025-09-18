@@ -17,7 +17,8 @@ import {
   X
 } from 'lucide-react';
 import { Workspace, WorkspaceMember } from '@/types/workspace';
-import { useAuth } from '@/contexts/UltraSafeAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
+import '@/lib/osProtection'; // OS Protection per workspace manager
 
 interface WorkspaceManagerProps {
   isOpen: boolean;

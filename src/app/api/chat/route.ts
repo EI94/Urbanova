@@ -5,6 +5,7 @@ import { userMemoryService, UserMemoryProfile } from '@/lib/userMemoryService';
 import { naturalQueryProcessor } from '@/lib/naturalQueryProcessor';
 import { intelligentResponseService, IntelligentResponse } from '@/lib/intelligentResponseService';
 import { urbanovaOSOrchestrator, UrbanovaOSRequest, UrbanovaOSResponse } from '@/lib/urbanovaOS/orchestrator';
+import '@/lib/osProtection'; // OS Protection per API
 import { responseCache, logCacheStats } from '@/lib/responseCache';
 import { retryLogic, logRetryStats } from '@/lib/retryLogic';
 import { OpenAIOptimizer } from '@/lib/openaiOptimizer';

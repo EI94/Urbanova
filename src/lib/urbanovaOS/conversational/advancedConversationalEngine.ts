@@ -1,6 +1,9 @@
 // 🧠 ADVANCED CONVERSATIONAL ENGINE - Ispirato a ChatGPT-5
 // Sistema conversazionale avanzato con stati, empatia e capacità superiori
 
+// 🛡️ OS PROTECTION - Importa protezione CSS per l'engine
+import '@/lib/osProtection';
+
 export interface ConversationalState {
   current: 'listening' | 'thinking' | 'analyzing' | 'calculating' | 'responding';
   emotion: 'neutral' | 'empathetic' | 'professional' | 'encouraging' | 'problem_solving';

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
-import { useAuth } from '@/contexts/UltraSafeAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   Calculator, 
   TrendingUp, 
@@ -35,19 +35,11 @@ import FeedbackWidget from '@/components/ui/FeedbackWidget';
 import ShareProjectModal from '@/components/workspace/ShareProjectModal';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Workspace } from '@/types/workspace';
+import '@/lib/cssErrorHandler'; // CSS Error Handler per analisi fattibilità
 
 export default function FeasibilityAnalysisPage() {
   const { t, formatCurrency: fmtCurrency } = useLanguage();
-  // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
-  let authContext;
-  try {
-    authContext = useAuth();
-  } catch (error) {
-    console.error('❌ [FeasibilityAnalysis] Errore useAuth:', error);
-    authContext = { currentUser: null, loading: false };
-  }
-  const currentUser = (authContext && typeof authContext === 'object' && 'currentUser' in authContext) ? authContext.currentUser : null;
-  const authLoading = (authContext && typeof authContext === 'object' && 'loading' in authContext) ? authContext.loading : false;
+  const { currentUser, loading: authLoading } = useAuth();
   const [projects, setProjects] = useState<FeasibilityProject[]>([]);
   const [ranking, setRanking] = useState<FeasibilityProject[]>([]);
   const [statistics, setStatistics] = useState<any>(null);

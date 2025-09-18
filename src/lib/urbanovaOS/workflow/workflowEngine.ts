@@ -155,6 +155,9 @@ export interface WorkflowError {
 // URBANOVA OS WORKFLOW ENGINE
 // ============================================================================
 
+// 🛡️ OS PROTECTION - Importa protezione CSS per il workflow engine
+import '@/lib/osProtection';
+
 export class UrbanovaOSWorkflowEngine {
   private workflows: Map<string, WorkflowDefinition> = new Map();
   private executions: Map<string, WorkflowExecution> = new Map();

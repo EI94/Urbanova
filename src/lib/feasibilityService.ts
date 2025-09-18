@@ -1,4 +1,7 @@
 // Servizio Analisi di Fattibilità - Urbanova AI
+
+// 🛡️ OS PROTECTION - Importa protezione CSS per il feasibility service
+import '@/lib/osProtection';
 import {addDoc,
   getDocs,
   updateDoc,

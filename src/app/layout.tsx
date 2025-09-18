@@ -3,14 +3,11 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 
 import Toaster from '@/components/ui/Toaster';
-import { UltraSafeAuthProvider } from '@/contexts/UltraSafeAuthContext';
+import { AuthProvider } from '@/contexts/AuthContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { DarkModeProvider } from '@/contexts/DarkModeContext';
-import '@/lib/authDestructuringProtection';
-import '@/lib/safeAuthDestructuring';
-import '@/lib/globalAuthProtection';
-import '@/lib/universalAuthProtection';
-import '@/lib/superNuclearAuthProtection'; // SUPER NUCLEAR PROTECTION
+import '@/lib/cssErrorHandler'; // CSS Error Handler
+import '@/lib/osProtection'; // OS Protection
 import CommandPaletteWrapper from '@/components/CommandPaletteWrapper';
 import { EnvironmentBanner } from '@/components/ui/EnvironmentBanner';
 
@@ -75,13 +72,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={inter.className}>
         <LanguageProvider>
-          <UltraSafeAuthProvider>
+          <AuthProvider>
             <DarkModeProvider>
               <EnvironmentBanner />
               <CommandPaletteWrapper>{children}</CommandPaletteWrapper>
               <Toaster />
             </DarkModeProvider>
-          </UltraSafeAuthProvider>
+          </AuthProvider>
         </LanguageProvider>
       </body>
     </html>
