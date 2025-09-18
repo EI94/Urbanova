@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// 🛡️ GLOBAL ERROR INTERCEPTOR - DEVE ESSERE PRIMO
+import '@/lib/globalErrorInterceptor';
+
 /**
  * Middleware per catturare errori 5xx e inviare alert Slack
  * 

@@ -4,6 +4,8 @@ import { getAuth, connectAuthEmulator } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 
+// 🛡️ GLOBAL ERROR INTERCEPTOR - DEVE ESSERE PRIMO
+import '@/lib/globalErrorInterceptor';
 // 🛡️ OS PROTECTION - Importa protezione CSS per firebase
 import '@/lib/osProtection';
 

@@ -3,12 +3,13 @@ require('./src/polyfills.js');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 🛡️ OS PROTECTION - Importa protezione CSS per next config
+  // 🛡️ GLOBAL ERROR INTERCEPTOR - DEVE ESSERE PRIMO
   webpack: (config, { isServer }) => {
-    // Importa protezione CSS
+    // Importa protezione globale
     if (!isServer) {
       config.resolve.alias = {
         ...config.resolve.alias,
+        '@/lib/globalErrorInterceptor': require.resolve('./src/lib/globalErrorInterceptor.ts'),
         '@/lib/osProtection': require.resolve('./src/lib/osProtection.ts')
       };
     }

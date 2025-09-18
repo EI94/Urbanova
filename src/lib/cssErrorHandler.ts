@@ -14,7 +14,10 @@ if (typeof window !== 'undefined') {
     // Solo errori CSS-in-JS specifici
     if (message.includes('@import rules are not allowed here') || 
         message.includes('construct-stylesheets') ||
-        message.includes('chunk-mgcl')) {
+        message.includes('chunk-mgcl') ||
+        message.includes('CSS-in-JS') ||
+        message.includes('styled-components') ||
+        message.includes('emotion')) {
       
       console.log('🎯 [CSS ERROR HANDLER] Errore CSS intercettato e silenziato:', message);
       

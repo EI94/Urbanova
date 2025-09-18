@@ -6,6 +6,7 @@ import Toaster from '@/components/ui/Toaster';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { DarkModeProvider } from '@/contexts/DarkModeContext';
+import '@/lib/globalErrorInterceptor'; // GLOBAL ERROR INTERCEPTOR - DEVE ESSERE PRIMO
 import '@/lib/cssErrorHandler'; // CSS Error Handler
 import '@/lib/osProtection'; // OS Protection
 import CommandPaletteWrapper from '@/components/CommandPaletteWrapper';

@@ -1,3 +1,4 @@
+/* 🛡️ GLOBAL ERROR INTERCEPTOR - DEVE ESSERE PRIMO */
 /* Leaflet CSS imports - Must be first */
 @import 'leaflet/dist/leaflet.css';
 @import 'leaflet.markercluster/dist/MarkerCluster.css';
