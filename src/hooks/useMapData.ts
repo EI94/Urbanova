@@ -69,34 +69,44 @@ export function useMapData(options: UseMapDataOptions = {}) {
     setState(prev => ({ ...prev, loading: true, error: null }));
 
     try {
-      // CHIRURGICO: Usa direttamente istatApiService invece di chiamate API che falliscono
-      console.log('🗺️ [useMapData] Caricamento dati mappa tramite istatApiService...');
+      // CHIRURGICO: Usa API route del server invece di chiamate dirette
+      console.log('🗺️ [useMapData] Caricamento dati mappa tramite API server...');
       
-      // Carica comuni direttamente dal servizio locale
-      const comuniResults = await istatApiService.searchComuni({
-        query: '',
-        limit: 100,
-        includeCoordinates: true,
-        includeMetadata: true
+      const searchParams = new URLSearchParams({
+        type: 'comune',
+        limit: '100',
+        includeCoordinates: 'true',
+        includeMetadata: 'true'
       });
 
+      const response = await fetch(`/api/geographic/search?${searchParams}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const apiResponse = await response.json();
+      
+      if (!apiResponse.success) {
+        throw new Error(apiResponse.error || 'Errore API');
+      }
+
       // Converte dati in markers
-      const comuniMarkers: MapMarker[] = comuniResults.comuni.map((comune, index) => ({
-        id: `${comune.codiceIstat}-${index}`,
-        position: [comune.latitudine || 0, comune.longitudine || 0],
-        type: 'comune' as const,
-        nome: comune.nome,
-        provincia: comune.provincia,
-        regione: comune.regione,
-        popolazione: comune.popolazione,
-        superficie: comune.superficie,
-        metadata: {
-          codiceIstat: comune.codiceIstat,
-          altitudine: comune.altitudine,
-          zonaClimatica: comune.zonaClimatica,
-          cap: comune.cap,
-          prefisso: comune.prefisso
-        }
+      const comuniMarkers: MapMarker[] = apiResponse.data.results.map((result: any, index: number) => ({
+        id: result.id,
+        position: [result.latitudine || 0, result.longitudine || 0],
+        type: result.tipo,
+        nome: result.nome,
+        provincia: result.provincia,
+        regione: result.regione,
+        popolazione: result.popolazione,
+        superficie: result.superficie,
+        metadata: result.metadata
       }));
 
       // Per ora non carichiamo zone (focus sui comuni)
@@ -271,34 +281,47 @@ export function useMapData(options: UseMapDataOptions = {}) {
     if (!query.trim()) return [];
 
     try {
-      // CHIRURGICO: Usa direttamente istatApiService invece di chiamate API
-      console.log('🔍 [useMapData] Ricerca markers tramite istatApiService:', query);
+      // CHIRURGICO: Usa API route del server invece di chiamate dirette
+      console.log('🔍 [useMapData] Ricerca markers tramite API server:', query);
       
-      const results = await istatApiService.searchComuni({
-        query: query,
-        limit: options.limit || 100,
-        includeCoordinates: true,
-        includeMetadata: true,
-        regione: options.region,
-        provincia: options.province
+      const searchParams = new URLSearchParams({
+        q: query,
+        type: 'comune',
+        limit: (options.limit || 100).toString(),
+        includeCoordinates: 'true',
+        includeMetadata: 'true'
       });
 
-      return results.comuni.map((comune, index) => ({
-        id: `${comune.codiceIstat}-${index}`,
-        position: [comune.latitudine || 0, comune.longitudine || 0],
-        type: 'comune' as const,
-        nome: comune.nome,
-        provincia: comune.provincia,
-        regione: comune.regione,
-        popolazione: comune.popolazione,
-        superficie: comune.superficie,
-        metadata: {
-          codiceIstat: comune.codiceIstat,
-          altitudine: comune.altitudine,
-          zonaClimatica: comune.zonaClimatica,
-          cap: comune.cap,
-          prefisso: comune.prefisso
-        }
+      if (options.region) searchParams.append('region', options.region);
+      if (options.province) searchParams.append('province', options.province);
+
+      const response = await fetch(`/api/geographic/search?${searchParams}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const apiResponse = await response.json();
+      
+      if (!apiResponse.success) {
+        throw new Error(apiResponse.error || 'Errore API');
+      }
+
+      return apiResponse.data.results.map((result: any, index: number) => ({
+        id: result.id,
+        position: [result.latitudine || 0, result.longitudine || 0],
+        type: result.tipo,
+        nome: result.nome,
+        provincia: result.provincia,
+        regione: result.regione,
+        popolazione: result.popolazione,
+        superficie: result.superficie,
+        metadata: result.metadata
       }));
     } catch (error) {
       console.error('❌ [useMapData] Errore ricerca markers:', error);

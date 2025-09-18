@@ -1,6 +1,7 @@
 /**
  * API Endpoint Ricerca Geografica Production Level
  * Utilizza API ISTAT reale per dati sempre aggiornati e scalabili
+ * 
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -208,10 +209,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const params = validationResult.data;
 
-    // CHIRURGICO: Usa API ISTAT reale per dati sempre aggiornati
-    console.log('🌐 [IstatAPI] Ricerca tramite API ISTAT reale:', params);
+    // CHIRURGICO: Usa istatApiService ma senza fetch CSV (CORS issues)
+    console.log('🌐 [GeographicAPI] Ricerca tramite istatApiService (senza CSV):', params);
     
-    // Usa il servizio API ISTAT reale
+    // Usa il servizio ISTAT ma senza fetch CSV per evitare errori CORS
     const istatResults = await istatApiService.searchComuni({
       query: params.q,
       regione: params.region,
@@ -222,30 +223,25 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       radius: params.radius
     });
 
-    // Converti risultati ISTAT in formato API
+    // Converti risultati Firestore in formato API
     const searchResults = {
-      results: istatResults.comuni.map((comune, index) => ({
-        id: `${comune.codiceIstat}-${index}`,
-        nome: comune.nome,
-        tipo: 'comune' as const,
-        provincia: comune.provincia,
-        regione: comune.regione,
-        popolazione: comune.popolazione,
-        superficie: comune.superficie,
-        latitudine: params.includeCoordinates ? comune.latitudine : 0,
-        longitudine: params.includeCoordinates ? comune.longitudine : 0,
-        score: 250 - index, // Score decrescente
-      metadata: params.includeMetadata ? {
-          codiceIstat: comune.codiceIstat,
-          altitudine: comune.altitudine,
-          zonaClimatica: comune.zonaClimatica,
-          cap: comune.cap,
-          prefisso: comune.prefisso
-        } : undefined
+      results: firestoreResults.results.map((result, index) => ({
+        id: result.id,
+        nome: result.nome,
+        tipo: result.tipo,
+        provincia: result.provincia,
+        regione: result.regione,
+        popolazione: result.popolazione,
+        superficie: result.superficie,
+        latitudine: params.includeCoordinates ? result.latitudine : undefined,
+        longitudine: params.includeCoordinates ? result.longitudine : undefined,
+        score: result.score,
+        distance: result.distance,
+        metadata: params.includeMetadata ? result.metadata : undefined
       })),
-      total: istatResults.total,
-      hasMore: istatResults.hasMore,
-      executionTime: istatResults.executionTime
+      total: firestoreResults.total,
+      hasMore: firestoreResults.hasMore,
+      executionTime: firestoreResults.executionTime
     };
 
     const responseData = {

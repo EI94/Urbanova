@@ -83,37 +83,49 @@ export function GeographicSearch({
     setError(null);
 
     try {
-      // CHIRURGICO: Usa direttamente istatApiService invece di chiamate API
-      console.log('🔍 [GeographicSearch] Ricerca tramite istatApiService:', query);
+      // CHIRURGICO: Usa API route del server invece di chiamate dirette
+      console.log('🔍 [GeographicSearch] Ricerca tramite API server:', query);
       
-      const results = await istatApiService.searchComuni({
-        query: query,
-        limit: maxResults,
-        includeCoordinates: includeCoordinates,
-        includeMetadata: includeMetadata,
-        regione: filters.region,
-        provincia: filters.province
+      const searchParams = new URLSearchParams({
+        q: query,
+        type: 'comune',
+        limit: maxResults.toString(),
+        includeCoordinates: includeCoordinates.toString(),
+        includeMetadata: includeMetadata.toString()
       });
 
-      // Converte risultati nel formato atteso
-      const formattedResults: GeographicSearchResult[] = results.comuni.map((comune, index) => ({
-        id: parseInt(comune.codiceIstat),
-        nome: comune.nome,
-        tipo: 'comune' as const,
-        provincia: comune.provincia,
-        regione: comune.regione,
-        latitudine: includeCoordinates ? comune.latitudine : undefined,
-        longitudine: includeCoordinates ? comune.longitudine : undefined,
-        popolazione: comune.popolazione,
-        superficie: comune.superficie,
-        score: 250 - index, // Score decrescente
-        metadata: includeMetadata ? {
-          codiceIstat: comune.codiceIstat,
-          altitudine: comune.altitudine,
-          zonaClimatica: comune.zonaClimatica,
-          cap: comune.cap,
-          prefisso: comune.prefisso
-        } : undefined
+      if (filters.region) searchParams.append('region', filters.region);
+      if (filters.province) searchParams.append('province', filters.province);
+
+      const response = await fetch(`/api/geographic/search?${searchParams}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const apiResponse = await response.json();
+      
+      if (!apiResponse.success) {
+        throw new Error(apiResponse.error || 'Errore API');
+      }
+
+      const formattedResults: GeographicSearchResult[] = apiResponse.data.results.map((result: any, index: number) => ({
+        id: result.id,
+        nome: result.nome,
+        tipo: result.tipo,
+        provincia: result.provincia,
+        regione: result.regione,
+        latitudine: result.latitudine,
+        longitudine: result.longitudine,
+        popolazione: result.popolazione,
+        superficie: result.superficie,
+        score: result.score || (250 - index),
+        metadata: result.metadata
       }));
 
       setResults(formattedResults);
