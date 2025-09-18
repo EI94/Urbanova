@@ -2111,8 +2111,8 @@ class IstatApiService {
     // Applica filtri
     let filtered = comuniItaliani;
     
-    if (params.query) {
-      const query = params.query.toLowerCase();
+    if (params.query || params.q) {
+      const query = (params.query || params.q).toLowerCase();
       filtered = filtered.filter(comune => 
         comune.nome.toLowerCase().includes(query) ||
         comune.provincia.toLowerCase().includes(query) ||
