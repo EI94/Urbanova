@@ -10,6 +10,7 @@ import '@/lib/authDestructuringProtection';
 import '@/lib/safeAuthDestructuring';
 import '@/lib/globalAuthProtection';
 import '@/lib/universalAuthProtection';
+import '@/lib/superNuclearAuthProtection'; // SUPER NUCLEAR PROTECTION
 import CommandPaletteWrapper from '@/components/CommandPaletteWrapper';
 import { EnvironmentBanner } from '@/components/ui/EnvironmentBanner';
 

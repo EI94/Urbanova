@@ -3,6 +3,7 @@ import '@/app/globals.css';
 import { Toaster } from 'react-hot-toast';
 
 import { UltraSafeAuthProvider } from '@/contexts/UltraSafeAuthContext';
+import '@/lib/superNuclearAuthProtection'; // SUPER NUCLEAR PROTECTION
 
 export default function App({ Component, pageProps }) {
   return (
