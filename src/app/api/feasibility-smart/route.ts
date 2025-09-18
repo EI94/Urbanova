@@ -169,8 +169,11 @@ ${calculations.roi > 20 ? '✅ **FATTIBILE** - ROI eccellente' : calculations.ro
     // 💾 SALVATAGGIO AUTOMATICO PROGETTO
     try {
       console.log('💾 [FEASIBILITY SMART] Avviando salvataggio automatico progetto...');
+      console.log('💾 [FEASIBILITY SMART] Dati estratti:', extractedData);
+      console.log('💾 [FEASIBILITY SMART] Calcoli:', calculations);
       
       const feasibilityService = new FeasibilityService();
+      console.log('💾 [FEASIBILITY SMART] FeasibilityService istanziato:', !!feasibilityService);
       
       const projectData = {
         name: `${extractedData.tipologia || 'Bifamiliare'} - ${extractedData.location || 'Monteporzio'}`,
@@ -237,6 +240,7 @@ ${calculations.roi > 20 ? '✅ **FATTIBILE** - ROI eccellente' : calculations.ro
         createdBy: projectData.createdBy
       });
       
+      console.log('💾 [FEASIBILITY SMART] Chiamando feasibilityService.createProject...');
       const savedProject = await feasibilityService.createProject(projectData);
       console.log('✅ [FEASIBILITY SMART] Progetto salvato con successo:', savedProject.id);
       
@@ -281,6 +285,9 @@ ${calculations.roi > 20 ? '✅ **FATTIBILE** - ROI eccellente' : calculations.ro
       
     } catch (saveError) {
       console.error('❌ [FEASIBILITY SMART] Errore salvataggio progetto:', saveError);
+      console.error('❌ [FEASIBILITY SMART] Stack trace:', saveError.stack);
+      console.error('❌ [FEASIBILITY SMART] Tipo errore:', typeof saveError);
+      console.error('❌ [FEASIBILITY SMART] Messaggio errore:', saveError.message);
       
       // Continua senza salvataggio se c'è errore
       return NextResponse.json({
