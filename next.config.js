@@ -3,6 +3,17 @@ require('./src/polyfills.js');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // 🛡️ OS PROTECTION - Importa protezione CSS per next config
+  webpack: (config, { isServer }) => {
+    // Importa protezione CSS
+    if (!isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        '@/lib/osProtection': require.resolve('./src/lib/osProtection.ts')
+      };
+    }
+    return config;
+  },
   reactStrictMode: false,
   experimental: {
     // Next.js 13.4 e superiori hanno App Router abilitato di default

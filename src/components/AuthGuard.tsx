@@ -2,7 +2,8 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/UltraSafeAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
+import '@/lib/osProtection'; // OS Protection per auth guard
 
 interface AuthGuardProps {
   children: React.ReactNode;

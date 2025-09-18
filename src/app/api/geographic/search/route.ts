@@ -213,15 +213,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     console.log('🌐 [GeographicAPI] Ricerca tramite istatApiService:', params);
     
     // Usa il servizio ISTAT per caricare TUTTI i comuni italiani reali
-    const istatResults = await istatApiService.searchComuni({
-      query: params.q,
-      regione: params.region,
-      provincia: params.provincia,
+    const istatSearchParams: any = {
+      query: params.q || '',
       limit: params.limit,
       lat: params.lat,
       lng: params.lng,
       radius: params.radius
-    });
+    };
+    
+    if (params.region) istatSearchParams.regione = params.region;
+    if (params.province) istatSearchParams.provincia = params.province;
+    
+    const istatResults = await istatApiService.searchComuni(istatSearchParams);
 
     // Converti risultati ISTAT in formato API
     const searchResults = {
@@ -236,7 +239,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         latitudine: params.includeCoordinates ? comune.latitudine : 0,
         longitudine: params.includeCoordinates ? comune.longitudine : 0,
         score: 250 - index, // Score decrescente
-        metadata: params.includeMetadata ? {
+      metadata: params.includeMetadata ? {
           codiceIstat: comune.codiceIstat,
           altitudine: comune.altitudine,
           zonaClimatica: comune.zonaClimatica,

@@ -27,7 +27,8 @@ import {
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 
-import { useAuth } from '@/contexts/UltraSafeAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
+import '@/lib/osProtection'; // OS Protection per approval workflow
 import collaborationService, {
   ApprovalWorkflow as WorkflowType,
   ApprovalStep,

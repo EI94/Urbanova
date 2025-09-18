@@ -20,7 +20,8 @@ import {
   RocketIcon,
 } from '@/components/icons';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { useAuth } from '@/contexts/UltraSafeAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
+import '@/lib/osProtection'; // OS Protection per project timeline AI page
 import {
   projectTimelineService,
   ProjectTask,

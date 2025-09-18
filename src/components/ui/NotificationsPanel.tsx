@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 
 import { BellIcon, CheckIcon, ClockIcon, CheckCircleIcon } from '@/components/icons';
-import { useAuth } from '@/contexts/UltraSafeAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
+import '@/lib/osProtection'; // OS Protection per notifications panel
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   firebaseNotificationService,

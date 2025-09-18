@@ -1,7 +1,8 @@
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
-import { useAuth } from '@/contexts/UltraSafeAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
+import '@/lib/osProtection'; // OS Protection per index page
 
 export default function HomePage() {
   const router = useRouter();

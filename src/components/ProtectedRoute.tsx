@@ -3,7 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-import { useAuth } from '../contexts/UltraSafeAuthContext';
+import { useAuth } from '../contexts/AuthContext';
+import '@/lib/osProtection'; // OS Protection per protected route
 
 interface ProtectedRouteProps {
   children: React.ReactNode;

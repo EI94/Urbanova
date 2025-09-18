@@ -9,6 +9,9 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 
+// 🛡️ OS PROTECTION - Importa protezione CSS per firebase auth service
+import '@/lib/osProtection';
+
 import { auth, db } from './firebase';
 
 // Interfaccia per l'utente
