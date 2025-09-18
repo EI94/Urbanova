@@ -441,10 +441,10 @@ export class AdvancedConversationalEngine {
         let result = `## 🏗️ Analisi di Fattibilità Avanzata\n\n`;
         result += feasibilityResult.content;
         result += `\n\n### 📊 Dati Progetto\n`;
-        result += `- **Area Terreno**: ${projectData.buildableArea} mq\n`;
-        result += `- **Costo Costruzione**: €${projectData.constructionCostPerSqm.toLocaleString()}/mq\n`;
-        result += `- **Prezzo Acquisto**: €${projectData.purchasePrice.toLocaleString()}\n`;
-        result += `- **Target Margine**: ${(projectData.targetMargin * 100).toFixed(1)}%\n\n`;
+        result += `- **Area Totale**: ${projectData.totalArea} mq\n`;
+        result += `- **Costo Costruzione**: €${projectData.costs.construction.subtotal.toLocaleString()}\n`;
+        result += `- **Prezzo Acquisto**: €${projectData.costs.land.purchasePrice.toLocaleString()}\n`;
+        result += `- **Target Margine**: ${projectData.targetMargin.toFixed(1)}%\n\n`;
         return result;
       } else {
         return this.generateFeasibilityAnalysis(projectData);
@@ -775,20 +775,63 @@ export class AdvancedConversationalEngine {
     const data = intent.dataExtracted;
     console.log('🔍 [DEBUG CRASH] Data estratta:', data);
     
-    // Crea sempre un progetto dai dati estratti
+    // Crea sempre un progetto dai dati estratti nel formato FeasibilityProject
     const projectData = {
-      id: `project_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      name: data.name || 'Progetto Automatico',
-      landArea: data.landArea || data.buildableArea || 0,
-      buildableArea: data.buildableArea || data.landArea || 0,
-      constructionCostPerSqm: data.constructionCostPerSqm || 0,
-      purchasePrice: data.purchasePrice || 0,
-      targetMargin: data.targetMargin || 0.25,
-      insuranceRate: 0.015,
-      type: 'residenziale',
-      status: 'draft',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      name: data.name || 'Progetto Automatico OS',
+      address: data.address || data.location || 'Indirizzo da definire',
+      status: 'PIANIFICAZIONE' as const,
+      startDate: new Date(),
+      constructionStartDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 giorni da ora
+      duration: 18, // mesi
+      totalArea: data.buildableArea || data.landArea || 0,
+      targetMargin: (data.targetMargin || 0.25) * 100, // Converti in percentuale
+      createdBy: originalRequest.userId || 'anonymous',
+      notes: `Progetto creato automaticamente dall'OS - ${new Date().toISOString()}`,
+      
+      // Costi
+      costs: {
+        land: {
+          purchasePrice: data.purchasePrice || 0,
+          purchaseTaxes: (data.purchasePrice || 0) * 0.1, // 10% tasse
+          intermediationFees: (data.purchasePrice || 0) * 0.03, // 3% commissioni
+          subtotal: (data.purchasePrice || 0) * 1.13
+        },
+        construction: {
+          excavation: data.buildableArea * (data.constructionCostPerSqm || 0) * 0.1,
+          structures: data.buildableArea * (data.constructionCostPerSqm || 0) * 0.4,
+          systems: data.buildableArea * (data.constructionCostPerSqm || 0) * 0.2,
+          finishes: data.buildableArea * (data.constructionCostPerSqm || 0) * 0.3,
+          subtotal: data.buildableArea * (data.constructionCostPerSqm || 0)
+        },
+        externalWorks: data.buildableArea * (data.constructionCostPerSqm || 0) * 0.1,
+        concessionFees: data.buildableArea * (data.constructionCostPerSqm || 0) * 0.05,
+        design: data.buildableArea * (data.constructionCostPerSqm || 0) * 0.08,
+        bankCharges: data.buildableArea * (data.constructionCostPerSqm || 0) * 0.02,
+        exchange: 0,
+        insurance: data.buildableArea * (data.constructionCostPerSqm || 0) * 0.015,
+        total: (data.purchasePrice || 0) * 1.13 + data.buildableArea * (data.constructionCostPerSqm || 0) * 1.25 // Calcolo totale
+      },
+      
+      // Ricavi
+      revenues: {
+        units: data.units || Math.floor((data.buildableArea || 0) / 100), // Stima unità
+        averageArea: data.areaPerApartment || 100,
+        pricePerSqm: data.pricePerSqm || 0,
+        revenuePerUnit: (data.pricePerSqm || 0) * (data.areaPerApartment || 100),
+        totalSales: (data.pricePerSqm || 0) * (data.buildableArea || 0),
+        otherRevenues: 0,
+        total: (data.pricePerSqm || 0) * (data.buildableArea || 0)
+      },
+      
+      // Risultati
+      results: {
+        profit: 0, // Sarà calcolato
+        margin: 0, // Sarà calcolato
+        roi: 0, // Sarà calcolato
+        paybackPeriod: 0 // Sarà calcolato
+      },
+      
+      isTargetAchieved: false
     };
 
     console.log('🔧 [Advanced Engine] Attivando TUTTI I TOOL con dati:', projectData);
@@ -797,25 +840,12 @@ export class AdvancedConversationalEngine {
     let result = '';
     
     // 🔧 USA PROJECTDATA PASSATO SE DISPONIBILE
-    const finalProjectData = projectData || {
-      id: `project_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      name: data.name || 'Progetto Automatico',
-      landArea: data.landArea || data.buildableArea || 0,
-      buildableArea: data.buildableArea || 0,
-      constructionCostPerSqm: data.constructionCostPerSqm || 0,
-      purchasePrice: data.purchasePrice || 0,
-      targetMargin: data.targetMargin || 0.25,
-      insuranceRate: 0.015,
-      type: 'residenziale',
-      status: 'draft',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+    const finalProjectData = projectData;
     
     console.log('🔧 [Advanced Engine] ProjectData finale:', finalProjectData);
     
     // OTTIMIZZATO: Attiva analisi di fattibilità solo se necessario
-    if (finalProjectData.buildableArea > 0 || finalProjectData.constructionCostPerSqm > 0 || finalProjectData.purchasePrice > 0) {
+    if (finalProjectData.totalArea > 0 || finalProjectData.costs.construction.subtotal > 0 || finalProjectData.costs.land.purchasePrice > 0) {
       console.log('🔧 [Advanced Engine] Attivando analisi di fattibilità OTTIMIZZATA...');
       
       try {
@@ -915,20 +945,20 @@ export class AdvancedConversationalEngine {
    * 📊 GENERAZIONE ANALISI DI SENSIBILITÀ
    */
   private generateSensitivityAnalysis(projectData: any): string {
-    const baseCost = projectData.buildableArea * projectData.constructionCostPerSqm;
-    const totalCost = projectData.purchasePrice + baseCost * 1.015;
-    const requiredRevenue = totalCost / (1 - projectData.targetMargin);
+    const baseCost = projectData.costs.construction.subtotal;
+    const totalCost = projectData.costs.land.purchasePrice + baseCost + projectData.costs.insurance;
+    const requiredRevenue = totalCost / (1 - projectData.targetMargin / 100);
     
     return `## 📊 Analisi di Sensibilità
 
 ### 🔄 Scenari di Variazione
 - **Scenario Pessimistico (-10%)**: Prezzo vendita €${(requiredRevenue * 0.9).toLocaleString()}/mq
-- **Scenario Base**: Prezzo vendita €${(requiredRevenue / projectData.buildableArea).toLocaleString()}/mq  
+- **Scenario Base**: Prezzo vendita €${(requiredRevenue / projectData.totalArea).toLocaleString()}/mq  
 - **Scenario Ottimistico (+10%)**: Prezzo vendita €${(requiredRevenue * 1.1).toLocaleString()}/mq
 
 ### 📈 Sensibilità Parametri
-- **Costo costruzione**: ±€100/mq = ±€${(projectData.buildableArea * 100).toLocaleString()} impatto totale
-- **Prezzo acquisto**: ±€10,000 = ±€${(10000 * (1 - projectData.targetMargin)).toLocaleString()} impatto profitto
+- **Costo costruzione**: ±€100/mq = ±€${(projectData.totalArea * 100).toLocaleString()} impatto totale
+- **Prezzo acquisto**: ±€10,000 = ±€${(10000 * (1 - projectData.targetMargin / 100)).toLocaleString()} impatto profitto
 - **Target margine**: ±5% = ±€${(totalCost * 0.05).toLocaleString()} impatto profitto
 
 ### 💡 Raccomandazioni
@@ -973,9 +1003,9 @@ export class AdvancedConversationalEngine {
 - **Domanda**: Media-Alta per residenziale
 
 ### 📊 Confronto Progetto
-- **Prezzo target**: €${(projectData.purchasePrice / projectData.buildableArea).toLocaleString()}/mq
-- **Posizionamento**: ${(projectData.purchasePrice / projectData.buildableArea) < 3000 ? 'Sotto mercato' : 'In linea con mercato'}
-- **Competitività**: ${(projectData.purchasePrice / projectData.buildableArea) < 3500 ? 'Alta' : 'Media'}
+- **Prezzo target**: €${(projectData.costs.land.purchasePrice / projectData.totalArea).toLocaleString()}/mq
+- **Posizionamento**: ${(projectData.costs.land.purchasePrice / projectData.totalArea) < 3000 ? 'Sotto mercato' : 'In linea con mercato'}
+- **Competitività**: ${(projectData.costs.land.purchasePrice / projectData.totalArea) < 3500 ? 'Alta' : 'Media'}
 
 ### 🎯 Raccomandazioni
 - Verifica prezzi recenti nella zona specifica
@@ -987,9 +1017,9 @@ export class AdvancedConversationalEngine {
    * 💰 GENERAZIONE VALUTAZIONE INVESTIMENTO
    */
   private generateInvestmentValuation(projectData: any): string {
-    const baseCost = projectData.buildableArea * projectData.constructionCostPerSqm;
-    const totalCost = projectData.purchasePrice + baseCost * 1.015;
-    const requiredRevenue = totalCost / (1 - projectData.targetMargin);
+    const baseCost = projectData.costs.construction.subtotal;
+    const totalCost = projectData.costs.land.purchasePrice + baseCost + projectData.costs.insurance;
+    const requiredRevenue = totalCost / (1 - projectData.targetMargin / 100);
     const profit = requiredRevenue - totalCost;
     const roi = (profit / totalCost) * 100;
     
@@ -1006,8 +1036,8 @@ export class AdvancedConversationalEngine {
 - **Raccomandazione**: ${roi > 25 ? 'Procedi' : roi > 15 ? 'Valuta attentamente' : 'Rivedi parametri'}
 
 ### 📈 Proiezioni
-- **Break-even**: Vendita a €${(totalCost / projectData.buildableArea).toLocaleString()}/mq
-- **Target profitto**: Vendita a €${(requiredRevenue / projectData.buildableArea).toLocaleString()}/mq`;
+- **Break-even**: Vendita a €${(totalCost / projectData.totalArea).toLocaleString()}/mq
+- **Target profitto**: Vendita a €${(requiredRevenue / projectData.totalArea).toLocaleString()}/mq`;
   }
 
   /**
@@ -1018,11 +1048,11 @@ export class AdvancedConversationalEngine {
 
 ### 📋 Dettagli Progetto
 - **Nome**: ${projectData.name}
-- **ID**: ${projectData.id}
-- **Area**: ${projectData.buildableArea}mq
-- **Costo costruzione**: €${projectData.constructionCostPerSqm}/mq
-- **Prezzo acquisto**: €${projectData.purchasePrice.toLocaleString()}
-- **Target margine**: ${(projectData.targetMargin * 100).toFixed(1)}%
+- **Indirizzo**: ${projectData.address}
+- **Area**: ${projectData.totalArea}mq
+- **Costo costruzione**: €${projectData.costs.construction.subtotal.toLocaleString()}
+- **Prezzo acquisto**: €${projectData.costs.land.purchasePrice.toLocaleString()}
+- **Target margine**: ${projectData.targetMargin.toFixed(1)}%
 
 ### 🚀 Prossimi Passi
 1. Verifica permessi urbanistici
@@ -1044,8 +1074,8 @@ export class AdvancedConversationalEngine {
     return `## 🎨 Design Center
 
 ### 🏠 Concept Progettuale
-- **Tipologia**: ${projectData.type}
-- **Superficie**: ${projectData.buildableArea}mq
+- **Tipologia**: Residenziale
+- **Superficie**: ${projectData.totalArea}mq
 - **Layout ottimale**: Residenziale con spazi comuni
 
 ### 🎯 Obiettivi Design
@@ -1075,9 +1105,9 @@ export class AdvancedConversationalEngine {
 
 ### 📊 Dati Progetto
 - **Nome**: ${projectData.name}
-- **Area**: ${projectData.buildableArea}mq
-- **Costo**: €${projectData.constructionCostPerSqm}/mq
-- **Investimento**: €${projectData.purchasePrice.toLocaleString()}
+- **Area**: ${projectData.totalArea}mq
+- **Costo**: €${projectData.costs.construction.subtotal.toLocaleString()}
+- **Investimento**: €${projectData.costs.land.purchasePrice.toLocaleString()}
 
 ### 💡 Informazioni
 Tool specifico per ${tool} in fase di sviluppo. Contattaci per maggiori dettagli.`;
@@ -1087,22 +1117,22 @@ Tool specifico per ${tool} in fase di sviluppo. Contattaci per maggiori dettagli
    * 📊 GENERAZIONE ANALISI DI FATTIBILITÀ
    */
   private generateFeasibilityAnalysis(projectData: any): string {
-    const baseCost = projectData.buildableArea * projectData.constructionCostPerSqm;
-    const totalCost = projectData.purchasePrice + baseCost * 1.015; // Include assicurazioni
-    const requiredRevenue = totalCost / (1 - projectData.targetMargin);
+    const baseCost = projectData.costs.construction.subtotal;
+    const totalCost = projectData.costs.land.purchasePrice + baseCost + projectData.costs.insurance;
+    const requiredRevenue = totalCost / (1 - projectData.targetMargin / 100);
     const profit = requiredRevenue - totalCost;
-    const pricePerSqm = requiredRevenue / projectData.buildableArea;
+    const pricePerSqm = requiredRevenue / projectData.totalArea;
 
     return `## 📊 Analisi di Fattibilità Completa
 
 ### 💰 Analisi Economica
-- **Costo terreno**: €${projectData.purchasePrice.toLocaleString()}
-- **Costo costruzione**: €${baseCost.toLocaleString()} (${projectData.buildableArea}mq × €${projectData.constructionCostPerSqm}/mq)
-- **Assicurazioni (1.5%)**: €${(baseCost * 0.015).toLocaleString()}
+- **Costo terreno**: €${projectData.costs.land.purchasePrice.toLocaleString()}
+- **Costo costruzione**: €${baseCost.toLocaleString()} (${projectData.totalArea}mq)
+- **Assicurazioni**: €${projectData.costs.insurance.toLocaleString()}
 - **Costo totale**: €${totalCost.toLocaleString()}
 
 ### 🎯 Obiettivi di Profitto
-- **Target margine**: ${(projectData.targetMargin * 100).toFixed(1)}%
+- **Target margine**: ${projectData.targetMargin.toFixed(1)}%
 - **Profitto necessario**: €${profit.toLocaleString()}
 - **Ricavo totale richiesto**: €${requiredRevenue.toLocaleString()}
 
