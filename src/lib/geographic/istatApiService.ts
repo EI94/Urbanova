@@ -292,15 +292,24 @@ class IstatApiService {
           
           // Verifica che abbiamo abbastanza colonne (CSV ISTAT ha molte colonne)
           if (columns.length >= 12) {
+            const nomeComune = columns[5]?.trim() || '';
+            const nomeProvincia = columns[11]?.trim() || '';
+            const coordinate = this.getCoordinateForComune(nomeComune, nomeProvincia);
+            
+            // Debug coordinate
+            if (i <= 3) {
+              console.log(`🗺️ [IstatAPI] Coordinate per ${nomeComune}, ${nomeProvincia}:`, coordinate);
+            }
+            
             const comune: IstatComuneData = {
-              nome: columns[5]?.trim() || '', // Denominazione (colonna 6)
-              provincia: columns[11]?.trim() || '', // Provincia (colonna 12)
+              nome: nomeComune, // Denominazione (colonna 6)
+              provincia: nomeProvincia, // Provincia (colonna 12)
               regione: columns[9]?.trim() || '', // Regione (colonna 10)
               codiceIstat: columns[4]?.trim() || '', // Codice Comune (colonna 5)
               popolazione: 0, // Non disponibile nel CSV base
               superficie: 0, // Non disponibile nel CSV base
-              latitudine: this.getCoordinateForComune(columns[5]?.trim() || '', columns[11]?.trim() || '').lat,
-              longitudine: this.getCoordinateForComune(columns[5]?.trim() || '', columns[11]?.trim() || '').lng,
+              latitudine: coordinate.lat,
+              longitudine: coordinate.lng,
               altitudine: 0, // Non disponibile nel CSV base
               zonaClimatica: 'D', // Default
               cap: '', // Non disponibile nel CSV base
