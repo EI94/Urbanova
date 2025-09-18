@@ -22,9 +22,11 @@ import ProjectReminderModal from '@/components/ui/ProjectReminderModal';
 import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
 import { firebaseDebugService } from '@/lib/firebaseDebugService';
 import { projectManagerService } from '@/lib/projectManagerService';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function NewFeasibilityProjectPage() {
   const router = useRouter();
+  const { currentUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [marketDataLoading, setMarketDataLoading] = useState(false);
   const [marketData, setMarketData] = useState<any>(null);

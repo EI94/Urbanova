@@ -20,10 +20,12 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import FeasibilityReportGenerator from '@/components/ui/FeasibilityReportGenerator';
 import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
 import { firebaseDebugService } from '@/lib/firebaseDebugService';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function FeasibilityProjectPage() {
   const router = useRouter();
   const params = useParams();
+  const { currentUser } = useAuth();
   const [isEditMode, setIsEditMode] = useState(false);
   const [projectId, setProjectId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);

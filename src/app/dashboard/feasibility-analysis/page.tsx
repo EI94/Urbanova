@@ -57,8 +57,14 @@ export default function FeasibilityAnalysisPage() {
     // SEMPRE carica i dati reali, indipendentemente dall'autenticazione
     console.log('🔄 Caricamento dati reali da Firebase...');
     loadDataForTest();
-    loadWorkspaces();
   }, []);
+
+  useEffect(() => {
+    // Carica workspace solo quando currentUser è disponibile
+    if (currentUser) {
+      loadWorkspaces();
+    }
+  }, [currentUser]);
 
   // Carica workspace dell'utente
   const loadWorkspaces = async () => {
