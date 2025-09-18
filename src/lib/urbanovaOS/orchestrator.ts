@@ -268,9 +268,10 @@ export class UrbanovaOSOrchestrator {
       console.log('⚡ [UrbanovaOS Orchestrator] Avviando processamento parallelo ottimizzato');
       
       // 🧠 GESTIONE MEMORIA CONVERSAZIONALE
+      console.log('🔄 [DEBUG] STEP 1: Recuperando memoria conversazionale...');
       const memory = this.getOrCreateMemory(request.sessionId, request.userId);
       
-      console.log('🧠 [DEBUG] Memoria recuperata:', {
+      console.log('✅ [DEBUG] STEP 1 COMPLETATO: Memoria recuperata:', {
         sessionId: request.sessionId,
         hasProjectContext: !!memory.projectContext,
         projectName: memory.projectContext?.name,
@@ -303,10 +304,17 @@ export class UrbanovaOSOrchestrator {
       });
       
       // 1. VALIDAZIONE E SICUREZZA (parallela con classificazione)
+      console.log('🔄 [DEBUG] STEP 2: Avviando validazione e classificazione...');
       const [validationResult, classification] = await Promise.all([
         this.validateAndSecureRequest(request),
         this.classifyRequest(request)
       ]);
+      
+      console.log('✅ [DEBUG] STEP 2 COMPLETATO: Validazione e classificazione:', {
+        validationPassed: validationResult.isValid,
+        classificationType: classification.type,
+        confidence: classification.confidence
+      });
       
       // 2. RICERCA E WORKFLOW IN PARALLELO (se classification confidence è alta)
       let vectorMatches: any[] = [];
@@ -4349,12 +4357,22 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
         
         console.log('🔍 [DEBUG] ProjectData creato:', projectData);
         
+        console.log('🔄 [DEBUG] STEP 3: Chiamando generateAdvancedResponse...');
+        console.log('🔄 [DEBUG] Parametri:', {
+          userIntent: userIntent,
+          hasMemory: !!memory,
+          hasRequest: !!request,
+          hasProjectData: !!projectData
+        });
+        
         const conversationalResponse = await this.conversationalEngine.generateAdvancedResponse(
           userIntent, 
           memory, 
           request,
           projectData
         );
+        
+        console.log('✅ [DEBUG] STEP 3 COMPLETATO: generateAdvancedResponse completato');
         
         console.log('🔍 [DEBUG] Risposta generata:', conversationalResponse);
         
