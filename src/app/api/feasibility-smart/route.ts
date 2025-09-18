@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import '@/lib/osProtection'; // OS Protection per API
+import { FeasibilityService } from '@/lib/feasibilityService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -165,36 +166,154 @@ ${calculations.roi > 20 ? '✅ **FATTIBILE** - ROI eccellente' : calculations.ro
 *📊 Tool Attivato: Analisi di Fattibilità Avanzata*
 *⏰ Generato: ${new Date().toLocaleString('it-IT')}*`;
 
-    return NextResponse.json({
-      success: true,
-      response: response,
-      timestamp: new Date().toISOString(),
-      metadata: {
-        agentType: 'feasibility-smart',
-        provider: 'urbanova-os',
-        confidence: 0.98,
-        urbanovaOS: {
-          systemsUsed: ['feasibility-smart', 'data-extraction', 'financial-analysis'],
-          pluginsExecuted: ['feasibility_analysis'],
-          workflowsTriggered: ['feasibility-workflow'],
-          toolsActivated: ['feasibility_analysis'],
-          calculations: calculations,
-          extractedData: extractedData
-        }
-      },
-      intent: {
-        type: 'feasibility_analysis',
-        confidence: 0.98,
-        missingFields: []
-      },
-      projectPreview: {
+    // 💾 SALVATAGGIO AUTOMATICO PROGETTO
+    try {
+      console.log('💾 [FEASIBILITY SMART] Avviando salvataggio automatico progetto...');
+      
+      const feasibilityService = new FeasibilityService();
+      
+      const projectData = {
         name: `${extractedData.tipologia || 'Bifamiliare'} - ${extractedData.location || 'Monteporzio'}`,
-        area: extractedData.area || 240,
-        investment: calculations.investimentoTotale,
-        revenue: calculations.ricavoVendita,
-        roi: calculations.roi
-      }
-    });
+        address: extractedData.indirizzo || 'Indirizzo da definire',
+        status: 'PIANIFICAZIONE' as const,
+        startDate: new Date(),
+        constructionStartDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 giorni da ora
+        duration: 18, // mesi
+        totalArea: extractedData.area || 240,
+        targetMargin: 25, // 25% default
+        createdBy: userId || 'anonymous',
+        notes: `Progetto creato automaticamente dall'OS - ${new Date().toISOString()}`,
+        
+        // Costi calcolati
+        costs: {
+          land: {
+            purchasePrice: calculations.investimentoTotale * 0.3, // 30% terreno
+            purchaseTaxes: calculations.investimentoTotale * 0.03,
+            intermediationFees: calculations.investimentoTotale * 0.01,
+            subtotal: calculations.investimentoTotale * 0.34
+          },
+          construction: {
+            excavation: calculations.investimentoTotale * 0.1,
+            structures: calculations.investimentoTotale * 0.4,
+            systems: calculations.investimentoTotale * 0.2,
+            finishes: calculations.investimentoTotale * 0.3,
+            subtotal: calculations.investimentoTotale * 0.6
+          },
+          externalWorks: calculations.investimentoTotale * 0.05,
+          concessionFees: calculations.investimentoTotale * 0.02,
+          design: calculations.investimentoTotale * 0.03,
+          bankCharges: calculations.investimentoTotale * 0.01,
+          exchange: 0,
+          insurance: calculations.investimentoTotale * 0.01,
+          total: calculations.investimentoTotale
+        },
+        
+        // Ricavi calcolati
+        revenues: {
+          units: 1,
+          averageArea: extractedData.area || 240,
+          pricePerSqm: calculations.prezzoPerMq,
+          revenuePerUnit: calculations.prezzoPerMq * (extractedData.area || 240),
+          totalSales: calculations.ricavoVendita,
+          otherRevenues: 0,
+          total: calculations.ricavoVendita
+        },
+        
+        // Risultati calcolati
+        results: {
+          profit: calculations.margineLordo,
+          margin: calculations.roi,
+          roi: calculations.roi,
+          paybackPeriod: 0
+        },
+        
+        isTargetAchieved: calculations.roi >= 25
+      };
+      
+      console.log('💾 [FEASIBILITY SMART] Dati progetto da salvare:', {
+        name: projectData.name,
+        address: projectData.address,
+        totalArea: projectData.totalArea,
+        createdBy: projectData.createdBy
+      });
+      
+      const savedProject = await feasibilityService.createProject(projectData);
+      console.log('✅ [FEASIBILITY SMART] Progetto salvato con successo:', savedProject.id);
+      
+      // Aggiungi messaggio di salvataggio alla risposta
+      const responseWithSave = response + `\n\n## 💾 SALVATAGGIO AUTOMATICO\n\n✅ **Progetto salvato automaticamente** nella pagina Analisi Fattibilità!\n- **ID Progetto**: ${savedProject.id}\n- **Nome**: ${projectData.name}\n- **Data**: ${new Date().toLocaleString('it-IT')}\n\n*Il progetto è ora consultabile sia nella pagina Analisi Fattibilità che tramite l'OS.*`;
+      
+      return NextResponse.json({
+        success: true,
+        response: responseWithSave,
+        timestamp: new Date().toISOString(),
+        metadata: {
+          agentType: 'feasibility-smart',
+          provider: 'urbanova-os',
+          confidence: 0.98,
+          urbanovaOS: {
+            systemsUsed: ['feasibility-smart', 'data-extraction', 'financial-analysis', 'project-save'],
+            pluginsExecuted: ['feasibility_analysis', 'project_save'],
+            workflowsTriggered: ['feasibility-workflow', 'project-save-workflow'],
+            toolsActivated: ['feasibility_analysis', 'project_save'],
+            calculations: calculations,
+            extractedData: extractedData,
+            savedProject: {
+              id: savedProject.id,
+              name: projectData.name,
+              savedAt: new Date().toISOString()
+            }
+          }
+        },
+        intent: {
+          type: 'feasibility_analysis',
+          confidence: 0.98,
+          missingFields: []
+        },
+        projectPreview: {
+          name: projectData.name,
+          area: projectData.totalArea,
+          investment: calculations.investimentoTotale,
+          revenue: calculations.ricavoVendita,
+          roi: calculations.roi
+        }
+      });
+      
+    } catch (saveError) {
+      console.error('❌ [FEASIBILITY SMART] Errore salvataggio progetto:', saveError);
+      
+      // Continua senza salvataggio se c'è errore
+      return NextResponse.json({
+        success: true,
+        response: response,
+        timestamp: new Date().toISOString(),
+        metadata: {
+          agentType: 'feasibility-smart',
+          provider: 'urbanova-os',
+          confidence: 0.98,
+          urbanovaOS: {
+            systemsUsed: ['feasibility-smart', 'data-extraction', 'financial-analysis'],
+            pluginsExecuted: ['feasibility_analysis'],
+            workflowsTriggered: ['feasibility-workflow'],
+            toolsActivated: ['feasibility_analysis'],
+            calculations: calculations,
+            extractedData: extractedData
+          }
+        },
+        intent: {
+          type: 'feasibility_analysis',
+          confidence: 0.98,
+          missingFields: []
+        },
+        projectPreview: {
+          name: `${extractedData.tipologia || 'Bifamiliare'} - ${extractedData.location || 'Monteporzio'}`,
+          area: extractedData.area || 240,
+          investment: calculations.investimentoTotale,
+          revenue: calculations.ricavoVendita,
+          roi: calculations.roi
+        }
+      });
+    }
     
   } catch (error) {
     console.error('❌ [FEASIBILITY SMART] Errore:', error);
