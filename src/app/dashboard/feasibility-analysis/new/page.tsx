@@ -487,7 +487,17 @@ export default function NewFeasibilityProjectPage() {
 
     setLoading(true);
     try {
-      console.log('🔄 Avvio salvataggio progetto fattibilità...');
+      console.log('🔄 [HANDLE SAVE] Avvio salvataggio progetto fattibilità...');
+      console.log('🔄 [HANDLE SAVE] CurrentUser:', {
+        uid: currentUser?.uid,
+        email: currentUser?.email,
+        isAuthenticated: !!currentUser
+      });
+      console.log('🔄 [HANDLE SAVE] Project data:', {
+        name: project.name,
+        address: project.address,
+        createdBy: project.createdBy
+      });
 
       // Test connessione Firebase prima del salvataggio
       console.log('🔍 Test connessione Firebase...');
@@ -505,9 +515,17 @@ export default function NewFeasibilityProjectPage() {
         revenues: calculatedRevenues,
         results: calculatedResults,
         isTargetAchieved: calculatedResults.margin >= (project.targetMargin || 30),
+        // Assicurati che createdBy sia impostato correttamente
+        createdBy: currentUser?.uid || project.createdBy || 'anonymous'
       } as Omit<FeasibilityProject, 'id' | 'createdAt' | 'updatedAt'>;
 
-      console.log('📝 Dati progetto da salvare:', finalProject);
+      console.log('📝 [HANDLE SAVE] Dati progetto da salvare:', {
+        name: finalProject.name,
+        address: finalProject.address,
+        createdBy: finalProject.createdBy,
+        hasCosts: !!finalProject.costs,
+        hasRevenues: !!finalProject.revenues
+      });
 
       // Prova prima con il metodo standard
       let projectId: string;

@@ -103,15 +103,23 @@ export class FeasibilityService {
     projectData: Omit<FeasibilityProject, 'id' | 'createdAt' | 'updatedAt'>
   ): Promise<string> {
     try {
-      console.log('🔄 Creazione progetto fattibilità:', projectData);
+      console.log('🔄 [FEASIBILITY SERVICE] Creazione progetto fattibilità:', {
+        name: projectData.name,
+        address: projectData.address,
+        createdBy: projectData.createdBy,
+        hasCosts: !!projectData.costs,
+        hasRevenues: !!projectData.revenues
+      });
 
       // Verifica che i dati siano validi
       if (!projectData.name || !projectData.address) {
+        console.error('❌ [FEASIBILITY SERVICE] Nome e indirizzo sono obbligatori');
         throw new Error('Nome e indirizzo sono obbligatori');
       }
 
       // Verifica che l'utente sia autenticato
       if (!projectData.createdBy) {
+        console.error('❌ [FEASIBILITY SERVICE] Utente non autenticato');
         throw new Error('Utente non autenticato');
       }
 
@@ -121,8 +129,13 @@ export class FeasibilityService {
         updatedAt: new Date(),
       };
 
+      console.log('🔄 [FEASIBILITY SERVICE] Salvataggio in Firestore...', {
+        collection: this.COLLECTION,
+        projectName: project.name
+      });
+
       const docRef = await addDoc(safeCollection(this.COLLECTION), project);
-      console.log(`✅ Progetto fattibilità creato: ${project.name} con ID: ${docRef.id}`);
+      console.log(`✅ [FEASIBILITY SERVICE] Progetto fattibilità creato: ${project.name} con ID: ${docRef.id}`);
       return docRef.id;
     } catch (error) {
       console.error('❌ Errore creazione progetto:', error);
