@@ -117,7 +117,7 @@ export default function NewFeasibilityProjectPage() {
       paybackPeriod: 0,
     },
     isTargetAchieved: false,
-    createdBy: 'user123',
+    createdBy: currentUser?.uid || 'anonymous',
     notes: '',
   });
 
@@ -205,6 +205,16 @@ export default function NewFeasibilityProjectPage() {
       }
     };
   }, [autoSaveTimeout, recalculateTimeout]);
+
+  // Aggiorna createdBy quando l'utente cambia
+  useEffect(() => {
+    if (currentUser?.uid) {
+      setProject(prev => ({
+        ...prev,
+        createdBy: currentUser.uid
+      }));
+    }
+  }, [currentUser]);
 
   // Gestisce la modalità edit
   useEffect(() => {
@@ -441,7 +451,7 @@ export default function NewFeasibilityProjectPage() {
       } as Omit<FeasibilityProject, 'id' | 'createdAt' | 'updatedAt'>;
 
       // Usa il servizio intelligente che evita duplicati
-      const result = await projectManagerService.smartSaveProject(finalProject);
+      const result = await projectManagerService.smartSaveProject(finalProject, currentUser?.uid);
 
       if (result.success) {
         setSavedProjectId(result.projectId);

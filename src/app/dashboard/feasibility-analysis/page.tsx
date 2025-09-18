@@ -167,17 +167,43 @@ export default function FeasibilityAnalysisPage() {
     setError(null);
     
     try {
-      // Carica dati reali - nessun mock
+      console.log('🔄 [FEASIBILITY] Caricamento progetti reali da Firebase...');
+      
+      // Carica dati reali da Firebase
+      const [projectsData, rankingData] = await Promise.all([
+        feasibilityService.getAllProjects(), // Carica TUTTI i progetti, non solo per utente
+        feasibilityService.getProjectsRanking()
+      ]);
+      
+      const statisticsData = {
+        totalProjects: projectsData.length,
+        totalInvestment: projectsData.reduce((sum, p) => sum + (p.costs?.total || 0), 0),
+        averageReturn: projectsData.length > 0 ? projectsData.reduce((sum, p) => sum + (p.results?.margin || 0), 0) / projectsData.length : 0,
+        averageROI: projectsData.length > 0 ? projectsData.reduce((sum, p) => sum + (p.results?.roi || 0), 0) / projectsData.length : 0
+      };
+
+      setProjects(projectsData);
+      setRanking(rankingData);
+      setStatistics(statisticsData);
+      
+      console.log('✅ [FEASIBILITY] Progetti caricati con successo:', {
+        projects: projectsData.length,
+        ranking: rankingData.length,
+        statistics: statisticsData
+      });
+    } catch (error) {
+      console.error('❌ [FEASIBILITY] Errore caricamento progetti:', error);
+      setError('Errore nel caricamento dei progetti');
+      
+      // Fallback: imposta dati vuoti
       setProjects([]);
       setRanking([]);
-          setStatistics({
-            totalProjects: 0,
-            totalInvestment: 0,
+      setStatistics({
+        totalProjects: 0,
+        totalInvestment: 0,
         averageReturn: 0,
         averageROI: 0
       });
-      
-      console.log('✅ [FEASIBILITY] Nessun progetto trovato - lista vuota');
     } finally {
       setLoading(false);
     }

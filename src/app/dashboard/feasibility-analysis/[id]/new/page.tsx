@@ -102,7 +102,7 @@ export default function FeasibilityProjectPage() {
       paybackPeriod: 0,
     },
     isTargetAchieved: false,
-    createdBy: 'user123',
+    createdBy: currentUser?.uid || 'anonymous',
     notes: '',
   });
 
@@ -233,6 +233,16 @@ export default function FeasibilityProjectPage() {
       }
     };
   }, [project.name, project.address, savedProjectId]); // Solo dipendenze essenziali
+
+  // Aggiorna createdBy quando l'utente cambia
+  useEffect(() => {
+    if (currentUser?.uid) {
+      setProject(prev => ({
+        ...prev,
+        createdBy: currentUser.uid
+      }));
+    }
+  }, [currentUser]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
