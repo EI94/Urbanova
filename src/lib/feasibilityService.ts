@@ -229,21 +229,29 @@ export class FeasibilityService {
   // Ottieni tutti i progetti di fattibilità
   async getAllProjects(): Promise<FeasibilityProject[]> {
     try {
-      console.log('🔄 Caricamento tutti i progetti fattibilità...');
+      console.log('🔄 [FEASIBILITY SERVICE] Caricamento tutti i progetti fattibilità...');
 
       const projectsRef = safeCollection(this.COLLECTION);
       const q = query(projectsRef, orderBy('createdAt', 'desc'));
       const snapshot = await getDocs(q);
+
+      console.log('🔄 [FEASIBILITY SERVICE] Snapshot ricevuto:', {
+        size: snapshot.size,
+        empty: snapshot.empty,
+        docs: snapshot.docs.length
+      });
 
       const projects = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       })) as FeasibilityProject[];
 
-      console.log(`✅ Progetti fattibilità caricati: ${projects.length}`);
+      console.log(`✅ [FEASIBILITY SERVICE] Progetti fattibilità caricati: ${projects.length}`, {
+        projects: projects.map(p => ({ id: p.id, name: p.name, createdBy: p.createdBy }))
+      });
       return projects;
     } catch (error) {
-      console.error('❌ Errore caricamento progetti:', error);
+      console.error('❌ [FEASIBILITY SERVICE] Errore caricamento progetti:', error);
       return [];
     }
   }
