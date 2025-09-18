@@ -9,6 +9,7 @@ import { DarkModeProvider } from '@/contexts/DarkModeContext';
 import '@/lib/authDestructuringProtection';
 import '@/lib/safeAuthDestructuring';
 import '@/lib/globalAuthProtection';
+import '@/lib/universalAuthProtection';
 import CommandPaletteWrapper from '@/components/CommandPaletteWrapper';
 import { EnvironmentBanner } from '@/components/ui/EnvironmentBanner';
 

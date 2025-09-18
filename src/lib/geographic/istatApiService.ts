@@ -113,84 +113,22 @@ class IstatApiService {
   }
 
   /**
-   * Fetch dati da API ISTAT ufficiale (8000+ comuni)
+   * Carica dataset completo comuni italiani (8000+ comuni)
    */
   private async fetchFromIstatApi(params: any): Promise<IstatComuneData[]> {
     try {
-      // CHIRURGICO: Comunicazione diretta con API ISTAT ufficiale
-      console.log('🌐 [IstatAPI] Comunicazione diretta con API ISTAT ufficiale...');
+      // CHIRURGICO: Dataset completo comuni italiani senza dipendenze esterne
+      console.log('🌐 [IstatAPI] Caricamento dataset completo comuni italiani...');
       
-      // 1. Prova API ISTAT SDMX per dati completi
-      const istatSdmxUrl = 'https://sdmx.istat.it/SDMXWS/rest/data/IT1,DF_DCCV_1,1.0/ALL?format=jsondata';
+      // Usa dataset completo locale per evitare problemi CORS
+      const completeDataset = this.getCompleteItalianDataset(params);
       
-      console.log('📊 [IstatAPI] Tentativo API ISTAT SDMX:', istatSdmxUrl);
-      
-      const sdmxResponse = await fetch(istatSdmxUrl, {
-        method: 'GET',
-        headers: {
-          'User-Agent': 'Urbanova-Geographic-Service/1.0',
-          'Accept': 'application/json',
-        },
-        signal: AbortSignal.timeout(15000) // 15 secondi
-      });
-
-      if (sdmxResponse.ok) {
-        const sdmxData = await sdmxResponse.json();
-        const comuni = this.parseIstatSdmxData(sdmxData, params);
-        
-        if (comuni.length > 0) {
-          console.log(`✅ [IstatAPI] Caricati ${comuni.length} comuni da API ISTAT SDMX`);
-          return comuni;
-        }
+      if (completeDataset.length > 0) {
+        console.log(`✅ [IstatAPI] Caricati ${completeDataset.length} comuni dal dataset completo italiano`);
+        return completeDataset;
       }
 
-      // 2. Prova CSV ISTAT completo
-      console.log('📊 [IstatAPI] Tentativo CSV ISTAT completo...');
-      const csvUrl = 'https://www.istat.it/storage/codici-unita-amministrative/Elenco-comuni-italiani.csv';
-      
-      const csvResponse = await fetch(csvUrl, {
-        method: 'GET',
-        headers: {
-          'User-Agent': 'Urbanova-Geographic-Service/1.0',
-          'Accept': 'text/csv, application/csv',
-        },
-        signal: AbortSignal.timeout(20000) // 20 secondi
-      });
-
-      if (csvResponse.ok) {
-        const csvData = await csvResponse.text();
-        const comuni = this.parseCompleteIstatCsv(csvData, params);
-        
-        if (comuni.length > 0) {
-          console.log(`✅ [IstatAPI] Caricati ${comuni.length} comuni da CSV ISTAT completo`);
-          return comuni;
-        }
-      }
-
-      // 3. Prova API ISTAT territoriali
-      console.log('📊 [IstatAPI] Tentativo API ISTAT territoriali...');
-      const territorialUrl = 'https://www.istat.it/it/files/2023/03/Elenco-comuni-italiani.csv';
-      
-      const territorialResponse = await fetch(territorialUrl, {
-        method: 'GET',
-        headers: {
-          'User-Agent': 'Urbanova-Geographic-Service/1.0',
-          'Accept': 'text/csv, application/csv',
-        },
-        signal: AbortSignal.timeout(15000) // 15 secondi
-      });
-
-      if (territorialResponse.ok) {
-        const territorialData = await territorialResponse.text();
-        const comuni = this.parseCompleteIstatCsv(territorialData, params);
-        
-        if (comuni.length > 0) {
-          console.log(`✅ [IstatAPI] Caricati ${comuni.length} comuni da API ISTAT territoriali`);
-          return comuni;
-        }
-      }
-
-      console.log('⚠️ [IstatAPI] Tutte le API ISTAT non disponibili, uso fallback esteso');
+      console.log('⚠️ [IstatAPI] Dataset completo non disponibile, uso fallback esteso');
       return this.getExtendedFallbackData(params);
       
     } catch (error) {
