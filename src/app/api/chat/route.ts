@@ -107,29 +107,29 @@ export async function POST(request: NextRequest) {
           });
           
           // 🎯 REDIRECT CREATIVO: Invia richieste di fattibilità al nuovo endpoint
-          // COMMENTATO: Ora uso OS completo per identificare dove si blocca
-          // const messageText = message.toLowerCase();
-          // if (messageText.includes('analisi di fattibilità') || messageText.includes('studio di fattibilità') || 
-          //     messageText.includes('fattibilità') || (messageText.includes('terreno') && messageText.includes('edificabili'))) {
-          //   console.log('🎯 [DEBUG] Rilevata richiesta di fattibilità, redirigendo al endpoint semplificato...');
-          //   
-          //   // Chiama il nuovo endpoint dedicato
-          //   try {
-          //     const feasibilityResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://www.urbanova.life'}/api/feasibility-smart`, {
-          //       method: 'POST',
-          //       headers: { 'Content-Type': 'application/json' },
-          //       body: JSON.stringify({ message, userId, userEmail })
-          //     });
-          //     
-          //     if (feasibilityResponse.ok) {
-          //       const feasibilityData = await feasibilityResponse.json();
-          //       console.log('✅ [DEBUG] Risposta ricevuta dal endpoint semplificato');
-          //       return NextResponse.json(feasibilityData);
-          //     }
-          //   } catch (error) {
-          //     console.error('❌ [DEBUG] Errore chiamata endpoint:', error);
-          //   }
-          // }
+          // RIATTIVATO TEMPORANEAMENTE: Usa endpoint semplificato che funziona
+          const messageText = message.toLowerCase();
+          if (messageText.includes('analisi di fattibilità') || messageText.includes('studio di fattibilità') || 
+              messageText.includes('fattibilità') || (messageText.includes('terreno') && messageText.includes('edificabili'))) {
+            console.log('🎯 [SOLUZIONE TEMPORANEA] Rilevata richiesta di fattibilità, redirigendo al endpoint semplificato...');
+            
+            // Chiama il nuovo endpoint dedicato
+            try {
+              const feasibilityResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://www.urbanova.life'}/api/feasibility-smart`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message, userId, userEmail })
+              });
+              
+              if (feasibilityResponse.ok) {
+                const feasibilityData = await feasibilityResponse.json();
+                console.log('✅ [SOLUZIONE TEMPORANEA] Risposta ricevuta dal endpoint semplificato');
+                return NextResponse.json(feasibilityData);
+              }
+            } catch (error) {
+              console.error('❌ [SOLUZIONE TEMPORANEA] Errore chiamata endpoint:', error);
+            }
+          }
           
           try {
             console.log('🔄 [Chat API] INIZIO processRequest UrbanovaOS...');
