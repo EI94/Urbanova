@@ -15,6 +15,9 @@ import {doc,
 
 import { db } from './firebase.ts';
 
+// 🛡️ OS PROTECTION - Importa protezione CSS per firebase notification service
+import '@/lib/osProtection';
+
 // Tipi per le notifiche
 export interface Notification {
   id: string;

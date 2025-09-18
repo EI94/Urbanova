@@ -1,4 +1,7 @@
 // Servizio per gestire la chat history persistente
+
+// 🛡️ OS PROTECTION - Importa protezione CSS per chat history service
+import '@/lib/osProtection';
 export interface ChatMessage {
   id: string;
   type: 'user' | 'assistant';

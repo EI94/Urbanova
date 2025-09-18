@@ -8,6 +8,9 @@
  * - Metriche dettagliate per monitoring
  */
 
+// 🛡️ OS PROTECTION - Importa protezione CSS per retry logic
+import '@/lib/osProtection';
+
 interface RetryConfig {
   maxRetries: number;
   baseDelay: number;

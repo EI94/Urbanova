@@ -1,6 +1,9 @@
 // 🧠 USER MEMORY SERVICE - ANGELO CUSTODE IRRINUNCIABILE
 // Sistema unificato per memoria contestuale, query intelligenti e insights proattivi
 
+// 🛡️ OS PROTECTION - Importa protezione CSS per user memory service
+import '@/lib/osProtection';
+
 import { 
   collection, 
   query, 

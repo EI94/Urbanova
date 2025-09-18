@@ -8,6 +8,9 @@
  * - Cache invalidation automatica
  */
 
+// 🛡️ OS PROTECTION - Importa protezione CSS per response cache
+import '@/lib/osProtection';
+
 interface CacheEntry {
   response: string;
   metadata: any;

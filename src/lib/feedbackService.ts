@@ -8,6 +8,9 @@ import {query,
   where } from 'firebase/firestore';
 
 import { db } from '@/lib/firebase';
+
+// 🛡️ OS PROTECTION - Importa protezione CSS per feedback service
+import '@/lib/osProtection';
 import { safeCollection } from './firebaseUtils';
 
 export interface Feedback {

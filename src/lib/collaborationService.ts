@@ -19,6 +19,9 @@ import {doc,
 import { db } from '@/lib/firebase';
 import { safeCollection } from './firebaseUtils';
 
+// 🛡️ OS PROTECTION - Importa protezione CSS per collaboration service
+import '@/lib/osProtection';
+
 // ===== INTERFACES =====
 export interface DesignComment {
   id: string;

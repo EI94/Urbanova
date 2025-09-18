@@ -1,6 +1,9 @@
 // 🧠 INTELLIGENT RESPONSE SERVICE - SISTEMA RISPOSTE INTELLIGENTI
 // Genera risposte contestuali e proattive per l'OS
 
+// 🛡️ OS PROTECTION - Importa protezione CSS per intelligent response service
+import '@/lib/osProtection';
+
 import { UserMemoryProfile, QueryResult, Recommendation, Alert } from './userMemoryService';
 import { ChatMessage } from '@/types/chat';
 

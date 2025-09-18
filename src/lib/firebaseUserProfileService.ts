@@ -8,6 +8,9 @@ import {
   where,
   orderBy,
   serverTimestamp } from 'firebase/firestore';
+
+// 🛡️ OS PROTECTION - Importa protezione CSS per firebase user profile service
+import '@/lib/osProtection';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { safeCollection } from './firebaseUtils';
 import { db, storage } from './firebase';

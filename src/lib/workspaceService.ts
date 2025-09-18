@@ -18,6 +18,9 @@ import {
 } from 'firebase/firestore';
 import { safeCollection } from './firebaseUtils';
 import { db } from './firebase.ts';
+
+// 🛡️ OS PROTECTION - Importa protezione CSS per workspace service
+import '@/lib/osProtection';
 import {
   Workspace,
   WorkspaceMember,

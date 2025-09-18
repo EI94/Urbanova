@@ -2,6 +2,9 @@ import { addDays, addHours, addMinutes, isAfter, isBefore, startOfDay } from 'da
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 
+// 🛡️ OS PROTECTION - Importa protezione CSS per reminder service
+import '@/lib/osProtection';
+
 export interface ProjectReminder {
   id: string;
   projectId: string;

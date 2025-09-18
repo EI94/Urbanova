@@ -2,6 +2,9 @@
 import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
 import { workspaceService } from '@/lib/workspaceService';
 
+// 🛡️ OS PROTECTION - Importa protezione CSS per intent service
+import '@/lib/osProtection';
+
 export interface UserIntent {
   type: 'feasibility' | 'business-plan' | 'market-intelligence' | 'design' | 'general';
   confidence: number;

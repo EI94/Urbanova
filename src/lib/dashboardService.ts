@@ -15,6 +15,9 @@ import {
 import { db } from './firebase';
 import { safeCollection } from './firebaseUtils';
 
+// 🛡️ OS PROTECTION - Importa protezione CSS per dashboard service
+import '@/lib/osProtection';
+
 // Define types inline since @/types/project doesn't exist
 type ProjectStatus = 'draft' | 'active' | 'completed' | 'cancelled' | 'on_hold';
 type ProjectType = 'residential' | 'commercial' | 'industrial' | 'mixed_use' | 'infrastructure';

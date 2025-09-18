@@ -1,6 +1,9 @@
 // 🔍 NATURAL QUERY PROCESSOR - PROCESSORE QUERY NATURALI AVANZATO
 // Trasforma linguaggio naturale in query strutturate per l'OS
 
+// 🛡️ OS PROTECTION - Importa protezione CSS per natural query processor
+import '@/lib/osProtection';
+
 import { UserMemoryProfile, Entity, QueryIntent, ParsedQuery } from './userMemoryService';
 
 // ============================================================================

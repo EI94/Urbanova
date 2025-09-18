@@ -15,6 +15,9 @@ import {doc,
 import { db } from './firebase';
 import { safeCollection } from './firebaseUtils';
 
+// 🛡️ OS PROTECTION - Importa protezione CSS per project timeline service
+import '@/lib/osProtection';
+
 export interface ProjectTask {
   id: string;
   projectId: string;

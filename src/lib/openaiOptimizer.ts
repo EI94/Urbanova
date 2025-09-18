@@ -9,6 +9,9 @@
  * - Response compression e caching
  */
 
+// 🛡️ OS PROTECTION - Importa protezione CSS per openai optimizer
+import '@/lib/osProtection';
+
 import OpenAI from 'openai';
 
 interface OptimizedCompletionOptions {

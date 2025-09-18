@@ -145,7 +145,13 @@ class IstatApiService {
           console.log(`✅ [IstatAPI] Caricati ${comuni.length} comuni reali dal CSV ISTAT`);
           return comuni;
         } else {
-          console.log(`⚠️ [IstatAPI] Nessun comune parsato dal CSV ISTAT`);
+          console.log(`⚠️ [IstatAPI] Nessun comune parsato dal CSV ISTAT - provo parsing alternativo`);
+          // Prova parsing alternativo senza filtri
+          const allComuni = this.parseCompleteIstatCsv(csvData, {});
+          if (allComuni.length > 0) {
+            console.log(`✅ [IstatAPI] Parsing alternativo riuscito: ${allComuni.length} comuni totali`);
+            return allComuni;
+          }
         }
       } else {
         console.log(`❌ [IstatAPI] Errore HTTP ${response.status}: ${response.statusText}`);
@@ -285,7 +291,7 @@ class IstatApiService {
           }
           
           // Verifica che abbiamo abbastanza colonne (CSV ISTAT ha molte colonne)
-          if (columns.length >= 6) {
+          if (columns.length >= 12) {
             const comune: IstatComuneData = {
               nome: columns[5]?.trim() || '', // Denominazione (colonna 6)
               provincia: columns[11]?.trim() || '', // Provincia (colonna 12)
