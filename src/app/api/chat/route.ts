@@ -107,27 +107,34 @@ export async function POST(request: NextRequest) {
           });
           
           // 🎯 REDIRECT CREATIVO: Invia richieste di fattibilità al nuovo endpoint
-          // RIATTIVATO TEMPORANEAMENTE: Usa endpoint semplificato che funziona
+          // 🎯 REDIRECT OTTIMIZZATO: Usa endpoint semplificato con timeout protection
           const messageText = message.toLowerCase();
           if (messageText.includes('analisi di fattibilità') || messageText.includes('studio di fattibilità') || 
               messageText.includes('fattibilità') || (messageText.includes('terreno') && messageText.includes('edificabili'))) {
-            console.log('🎯 [SOLUZIONE TEMPORANEA] Rilevata richiesta di fattibilità, redirigendo al endpoint semplificato...');
+            console.log('🎯 [REDIRECT OTTIMIZZATO] Rilevata richiesta di fattibilità, redirigendo al endpoint semplificato...');
             
-            // Chiama il nuovo endpoint dedicato
+            // Chiama il nuovo endpoint dedicato con timeout protection
             try {
-              const feasibilityResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://www.urbanova.life'}/api/feasibility-smart`, {
+              const feasibilityPromise = fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://www.urbanova.life'}/api/feasibility-smart`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message, userId, userEmail })
               });
               
+              const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Feasibility endpoint timeout')), 5000) // 5 secondi max
+              );
+              
+              const feasibilityResponse = await Promise.race([feasibilityPromise, timeoutPromise]);
+              
               if (feasibilityResponse.ok) {
                 const feasibilityData = await feasibilityResponse.json();
-                console.log('✅ [SOLUZIONE TEMPORANEA] Risposta ricevuta dal endpoint semplificato');
+                console.log('✅ [REDIRECT OTTIMIZZATO] Risposta ricevuta dal endpoint semplificato');
                 return NextResponse.json(feasibilityData);
               }
             } catch (error) {
-              console.error('❌ [SOLUZIONE TEMPORANEA] Errore chiamata endpoint:', error);
+              console.error('❌ [REDIRECT OTTIMIZZATO] Errore chiamata endpoint:', error);
+              // Continua con OS completo se endpoint semplificato fallisce
             }
           }
           

@@ -901,11 +901,30 @@ export class AdvancedConversationalEngine {
       console.error('❌ [Advanced Engine] Errore Design Center:', error);
     }
 
-    // 📊 PROJECT MANAGER SERVICE - DISABILITATO (CAUSA TIMEOUT)
+    // 📊 PROJECT MANAGER SERVICE - RIATTIVATO CON TIMEOUT ULTRA-RIDOTTO
     try {
-      console.log('📊 [Advanced Engine] PROJECT MANAGER DISABILITATO - CAUSA TIMEOUT');
-      // Project Manager causa timeout anche con 2 secondi, disabilitato permanentemente
-      // L'OS funziona perfettamente senza salvataggio automatico
+      console.log('📊 [Advanced Engine] Attivando Project Manager Service con timeout ultra-ridotto...');
+      console.log('📊 [Advanced Engine] Dati progetto da salvare:', {
+        name: finalProjectData.name,
+        address: finalProjectData.address,
+        totalArea: finalProjectData.totalArea,
+        userId: originalRequest.userId
+      });
+      
+      // TIMEOUT PROTECTION: Limita tempo di attesa a 1 secondo
+      const projectPromise = this.saveProjectOptimized(finalProjectData, originalRequest.userId);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), 1000) // 1 secondo max
+      );
+      
+      try {
+        const projectResult = await Promise.race([projectPromise, timeoutPromise]);
+        console.log('📊 [Advanced Engine] Risultato salvataggio progetto:', projectResult);
+        result += projectResult;
+      } catch (timeoutError) {
+        console.warn('⚠️ [Advanced Engine] Timeout salvataggio progetto (1s), continuo senza salvataggio');
+        // Continua senza bloccare l'OS
+      }
       
     } catch (error) {
       console.error('❌ [Advanced Engine] Errore Project Manager:', error);
