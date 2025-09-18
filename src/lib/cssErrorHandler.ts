@@ -4,6 +4,7 @@
 console.log('🎯 [CSS ERROR HANDLER] Inizializzazione handler CSS...');
 
 if (typeof window !== 'undefined') {
+  console.log('🎯 [CSS ERROR HANDLER] Window disponibile, attivando handler...');
   
   // 🎯 INTERCETTA SOLO ERRORI CSS SPECIFICI
   const originalConsoleError = console.error;
