@@ -107,11 +107,14 @@ export async function POST(request: NextRequest) {
           });
           
           // 🎯 REDIRECT CREATIVO: Invia richieste di fattibilità al nuovo endpoint
-          // 🎯 REDIRECT OTTIMIZZATO: Usa endpoint semplificato con timeout protection
+          // 🎯 REDIRECT INTELLIGENTE: Usa OS completo per salvataggio, semplificato per analisi
           const messageText = message.toLowerCase();
-          if (messageText.includes('analisi di fattibilità') || messageText.includes('studio di fattibilità') || 
-              messageText.includes('fattibilità') || (messageText.includes('terreno') && messageText.includes('edificabili'))) {
-            console.log('🎯 [REDIRECT OTTIMIZZATO] Rilevata richiesta di fattibilità, redirigendo al endpoint semplificato...');
+          const isFeasibilityRequest = messageText.includes('analisi di fattibilità') || messageText.includes('studio di fattibilità') || 
+              messageText.includes('fattibilità') || (messageText.includes('terreno') && messageText.includes('edificabili'));
+          const isSaveRequest = messageText.includes('salva') || messageText.includes('salvare') || messageText.includes('memorizza');
+          
+          if (isFeasibilityRequest && !isSaveRequest) {
+            console.log('🎯 [REDIRECT INTELLIGENTE] Analisi fattibilità senza salvataggio, usando endpoint semplificato...');
             
             // Chiama il nuovo endpoint dedicato con timeout protection
             try {
@@ -129,13 +132,16 @@ export async function POST(request: NextRequest) {
               
               if (feasibilityResponse.ok) {
                 const feasibilityData = await feasibilityResponse.json();
-                console.log('✅ [REDIRECT OTTIMIZZATO] Risposta ricevuta dal endpoint semplificato');
+                console.log('✅ [REDIRECT INTELLIGENTE] Risposta ricevuta dal endpoint semplificato');
                 return NextResponse.json(feasibilityData);
               }
             } catch (error) {
-              console.error('❌ [REDIRECT OTTIMIZZATO] Errore chiamata endpoint:', error);
+              console.error('❌ [REDIRECT INTELLIGENTE] Errore chiamata endpoint:', error);
               // Continua con OS completo se endpoint semplificato fallisce
             }
+          } else if (isFeasibilityRequest && isSaveRequest) {
+            console.log('🎯 [REDIRECT INTELLIGENTE] Analisi fattibilità CON salvataggio, usando OS completo...');
+            // Continua con OS completo per salvataggio
           }
           
           try {
