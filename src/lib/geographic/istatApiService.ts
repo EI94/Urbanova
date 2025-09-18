@@ -113,23 +113,85 @@ class IstatApiService {
   }
 
   /**
-   * Carica dataset completo comuni italiani (8000+ comuni)
+   * Carica TUTTI i comuni italiani reali via API ISTAT server
    */
   private async fetchFromIstatApi(params: any): Promise<IstatComuneData[]> {
     try {
-      // CHIRURGICO: Dataset completo comuni italiani senza dipendenze esterne
-      console.log('🌐 [IstatAPI] Caricamento dataset completo comuni italiani...');
+      // CHIRURGICO: Chiamata API ISTAT dal server per TUTTI i comuni italiani
+      console.log('🌐 [IstatAPI] Caricamento TUTTI i comuni italiani via API ISTAT server...');
       
-      // Usa dataset completo locale per evitare problemi CORS
-      const completeDataset = this.getCompleteItalianDataset(params);
+      // 1. Prova API ISTAT CSV completo dal server
+      const csvUrl = 'https://www.istat.it/storage/codici-unita-amministrative/Elenco-comuni-italiani.csv';
       
-      if (completeDataset.length > 0) {
-        console.log(`✅ [IstatAPI] Caricati ${completeDataset.length} comuni dal dataset completo italiano`);
-        return completeDataset;
+      console.log('📊 [IstatAPI] Fetch CSV ISTAT completo dal server:', csvUrl);
+      
+      const response = await fetch(csvUrl, {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'Urbanova-Server/1.0',
+          'Accept': 'text/csv, application/csv',
+        },
+        signal: AbortSignal.timeout(30000) // 30 secondi
+      });
+
+      if (response.ok) {
+        const csvData = await response.text();
+        const comuni = this.parseCompleteIstatCsv(csvData, params);
+        
+        if (comuni.length > 0) {
+          console.log(`✅ [IstatAPI] Caricati ${comuni.length} comuni reali dal CSV ISTAT`);
+          return comuni;
+        }
       }
 
-      console.log('⚠️ [IstatAPI] Dataset completo non disponibile, uso fallback esteso');
-      return this.getExtendedFallbackData(params);
+      // 2. Prova API ISTAT territoriali
+      console.log('📊 [IstatAPI] Tentativo API ISTAT territoriali...');
+      const territorialUrl = 'https://www.istat.it/it/files/2023/03/Elenco-comuni-italiani.csv';
+      
+      const territorialResponse = await fetch(territorialUrl, {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'Urbanova-Server/1.0',
+          'Accept': 'text/csv, application/csv',
+        },
+        signal: AbortSignal.timeout(30000) // 30 secondi
+      });
+
+      if (territorialResponse.ok) {
+        const territorialData = await territorialResponse.text();
+        const comuni = this.parseCompleteIstatCsv(territorialData, params);
+        
+        if (comuni.length > 0) {
+          console.log(`✅ [IstatAPI] Caricati ${comuni.length} comuni reali da API territoriali`);
+          return comuni;
+        }
+      }
+
+      // 3. Prova API ISTAT SDMX via server
+      console.log('📊 [IstatAPI] Tentativo API ISTAT SDMX via server...');
+      const sdmxUrl = 'https://sdmx.istat.it/SDMXWS/rest/data/IT1,DF_DCCV_1,1.0/ALL?format=jsondata';
+      
+      const sdmxResponse = await fetch(sdmxUrl, {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'Urbanova-Server/1.0',
+          'Accept': 'application/json',
+        },
+        signal: AbortSignal.timeout(30000) // 30 secondi
+      });
+
+      if (sdmxResponse.ok) {
+        const sdmxData = await sdmxResponse.json();
+        const comuni = this.parseIstatSdmxData(sdmxData, params);
+        
+        if (comuni.length > 0) {
+          console.log(`✅ [IstatAPI] Caricati ${comuni.length} comuni reali da SDMX`);
+          return comuni;
+        }
+      }
+
+      console.log('⚠️ [IstatAPI] Tutte le API ISTAT non disponibili, uso fallback minimo');
+      return this.getMinimalFallbackData(params);
       
     } catch (error) {
       console.error('❌ [IstatAPI] Errore fetch API ISTAT, provo fallback locale:', error);
@@ -191,12 +253,14 @@ class IstatApiService {
   }
 
   /**
-   * Parse CSV ISTAT completo (8000+ comuni)
+   * Parse CSV ISTAT completo (TUTTI i comuni italiani)
    */
   private parseCompleteIstatCsv(csvData: string, params: any): IstatComuneData[] {
     try {
       const lines = csvData.split('\n');
       const comuni: IstatComuneData[] = [];
+      
+      console.log(`📊 [IstatAPI] Parsing CSV ISTAT con ${lines.length} linee`);
       
       // Skip header line
       for (let i = 1; i < lines.length; i++) {
@@ -205,12 +269,14 @@ class IstatApiService {
         
         try {
           const columns = this.parseCsvLine(line);
-          if (columns.length >= 6) {
+          
+          // Verifica che abbiamo abbastanza colonne
+          if (columns.length >= 12) {
             const comune: IstatComuneData = {
-              nome: columns[5] || '', // Denominazione
-              provincia: columns[11] || '', // Provincia
-              regione: columns[9] || '', // Regione
-              codiceIstat: columns[4] || '', // Codice Comune
+              nome: columns[5]?.trim() || '', // Denominazione
+              provincia: columns[11]?.trim() || '', // Provincia
+              regione: columns[9]?.trim() || '', // Regione
+              codiceIstat: columns[4]?.trim() || '', // Codice Comune
               popolazione: 0, // Non disponibile nel CSV base
               superficie: 0, // Non disponibile nel CSV base
               latitudine: 0, // Non disponibile nel CSV base
@@ -222,17 +288,41 @@ class IstatApiService {
             };
             
             // Filtra solo comuni validi
-            if (comune.nome && comune.codiceIstat) {
+            if (comune.nome && comune.codiceIstat && comune.provincia && comune.regione) {
               comuni.push(comune);
             }
           }
         } catch (error) {
-          console.warn('⚠️ [IstatAPI] Errore parsing linea CSV:', line);
+          console.warn('⚠️ [IstatAPI] Errore parsing linea CSV:', line.substring(0, 50) + '...');
         }
       }
       
-      console.log(`📊 [IstatAPI] Parsati ${comuni.length} comuni dal CSV ISTAT completo`);
-      return comuni;
+      // Applica filtri se specificati
+      let filteredComuni = comuni;
+      
+      if (params.query || params.q) {
+        const query = (params.query || params.q).toLowerCase();
+        filteredComuni = filteredComuni.filter(comune => 
+          comune.nome.toLowerCase().includes(query) ||
+          comune.provincia.toLowerCase().includes(query) ||
+          comune.regione.toLowerCase().includes(query)
+        );
+      }
+      
+      if (params.regione) {
+        filteredComuni = filteredComuni.filter(comune => 
+          comune.regione.toLowerCase() === params.regione.toLowerCase()
+        );
+      }
+      
+      if (params.provincia) {
+        filteredComuni = filteredComuni.filter(comune => 
+          comune.provincia.toLowerCase() === params.provincia.toLowerCase()
+        );
+      }
+      
+      console.log(`✅ [IstatAPI] Parsati ${filteredComuni.length} comuni dal CSV ISTAT completo (${comuni.length} totali)`);
+      return filteredComuni;
       
     } catch (error) {
       console.error('❌ [IstatAPI] Errore parsing CSV completo:', error);
@@ -508,6 +598,17 @@ class IstatApiService {
       console.error('❌ [IstatAPI] Errore parse CSV:', error);
       return [];
     }
+  }
+
+  /**
+   * Fallback minimo con solo dati essenziali (NO HARDCODED)
+   */
+  private getMinimalFallbackData(params: any): IstatComuneData[] {
+    // CHIRURGICO: Solo dati essenziali, NO hardcoded
+    console.log('⚠️ [IstatAPI] Fallback minimo - solo dati essenziali');
+    
+    // Ritorna array vuoto se non ci sono dati reali
+    return [];
   }
 
   /**
