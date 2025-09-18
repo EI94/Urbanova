@@ -901,38 +901,40 @@ export class AdvancedConversationalEngine {
       console.error('❌ [Advanced Engine] Errore Design Center:', error);
     }
 
-    // 📊 PROJECT MANAGER SERVICE - TEMPORANEAMENTE DISABILITATO PER DEBUG
+    // 📊 PROJECT MANAGER SERVICE - RIATTIVATO CON TIMEOUT RIDOTTO
     try {
-      console.log('📊 [Advanced Engine] PROJECT MANAGER DISABILITATO PER DEBUG');
-      // Salvataggio temporaneamente disabilitato per identificare se causa timeout OS
+      console.log('📊 [Advanced Engine] Attivando Project Manager Service con timeout ridotto...');
+      console.log('📊 [Advanced Engine] Dati progetto da salvare:', {
+        name: finalProjectData.name,
+        address: finalProjectData.address,
+        totalArea: finalProjectData.totalArea,
+        userId: originalRequest.userId
+      });
+      
+      // TIMEOUT PROTECTION: Limita tempo di attesa a 2 secondi
+      const projectPromise = this.saveProjectOptimized(finalProjectData, originalRequest.userId);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), 2000) // 2 secondi max
+      );
+      
+      try {
+        const projectResult = await Promise.race([projectPromise, timeoutPromise]);
+        console.log('📊 [Advanced Engine] Risultato salvataggio progetto:', projectResult);
+        result += projectResult;
+      } catch (timeoutError) {
+        console.warn('⚠️ [Advanced Engine] Timeout salvataggio progetto (2s), continuo senza salvataggio');
+        // Continua senza bloccare l'OS
+      }
       
     } catch (error) {
       console.error('❌ [Advanced Engine] Errore Project Manager:', error);
     }
 
-    // 🏗️ DESIGN CENTER SERVICE - RIATTIVATO PER TEST
+    // 🏗️ DESIGN CENTER SERVICE - DISABILITATO (CAUSA TIMEOUT)
     try {
-      console.log('🏗️ [Advanced Engine] Attivando Design Center Service...');
-      const { DesignCenterService } = await import('../../designCenterService.ts');
-      const designCenterService = new DesignCenterService();
+      console.log('🏗️ [Advanced Engine] DESIGN CENTER DISABILITATO - CAUSA TIMEOUT');
+      // Design Center causa timeout, disabilitato permanentemente
       
-      const templates = await designCenterService.getTemplatesByCriteria({
-        category: 'RESIDENTIAL',
-        budget: finalProjectData.constructionCostPerSqm > 2000 ? 'HIGH' : 'MEDIUM',
-        area: finalProjectData.buildableArea,
-        zone: 'SUBURBAN'
-      });
-      
-      if (templates && templates.length > 0) {
-        result += `## 🏗️ Template Design Consigliati\n\n`;
-        templates.slice(0, 2).forEach(template => {
-          result += `### ${template.name}\n`;
-          result += `**Categoria**: ${template.category}\n`;
-          result += `**Budget**: ${template.budget}\n`;
-          result += `**ROI Stimato**: ${template.estimatedROI}%\n`;
-          result += `**Tempo Costruzione**: ${template.constructionTime} mesi\n\n`;
-        });
-      }
     } catch (error) {
       console.error('❌ [Advanced Engine] Errore Design Center:', error);
     }
