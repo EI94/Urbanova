@@ -37,7 +37,10 @@ if (typeof window !== 'undefined') {
     
     if (errorMessage.includes('@import rules are not allowed here') || 
         errorMessage.includes('construct-stylesheets') ||
-        errorMessage.includes('chunk-mgcl')) {
+        errorMessage.includes('chunk-mgcl') ||
+        errorMessage.includes('CSS-in-JS') ||
+        errorMessage.includes('styled-components') ||
+        errorMessage.includes('emotion')) {
       
       console.log('🎯 [CSS ERROR HANDLER] Errore CSS globale intercettato e silenziato:', errorMessage);
       console.log('🛡️ [CSS ERROR HANDLER] Source:', source, 'Line:', lineno);
