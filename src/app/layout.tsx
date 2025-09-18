@@ -7,6 +7,7 @@ import { UltraSafeAuthProvider } from '@/contexts/UltraSafeAuthContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { DarkModeProvider } from '@/contexts/DarkModeContext';
 import '@/lib/authDestructuringProtection';
+import '@/lib/safeAuthDestructuring';
 import CommandPaletteWrapper from '@/components/CommandPaletteWrapper';
 import { EnvironmentBanner } from '@/components/ui/EnvironmentBanner';
 
