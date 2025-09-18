@@ -270,13 +270,13 @@ class IstatApiService {
         try {
           const columns = this.parseCsvLine(line);
           
-          // Verifica che abbiamo abbastanza colonne
-          if (columns.length >= 12) {
+          // Verifica che abbiamo abbastanza colonne (CSV ISTAT ha molte colonne)
+          if (columns.length >= 6) {
             const comune: IstatComuneData = {
-              nome: columns[5]?.trim() || '', // Denominazione
-              provincia: columns[11]?.trim() || '', // Provincia
-              regione: columns[9]?.trim() || '', // Regione
-              codiceIstat: columns[4]?.trim() || '', // Codice Comune
+              nome: columns[5]?.trim() || '', // Denominazione (colonna 6)
+              provincia: columns[11]?.trim() || '', // Provincia (colonna 12)
+              regione: columns[9]?.trim() || '', // Regione (colonna 10)
+              codiceIstat: columns[4]?.trim() || '', // Codice Comune (colonna 5)
               popolazione: 0, // Non disponibile nel CSV base
               superficie: 0, // Non disponibile nel CSV base
               latitudine: 0, // Non disponibile nel CSV base
@@ -343,7 +343,7 @@ class IstatApiService {
       
       if (char === '"') {
         inQuotes = !inQuotes;
-      } else if (char === ',' && !inQuotes) {
+      } else if (char === ';' && !inQuotes) {
         result.push(current.trim());
         current = '';
       } else {
