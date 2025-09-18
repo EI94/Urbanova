@@ -914,12 +914,17 @@ export class AdvancedConversationalEngine {
       // TIMEOUT PROTECTION: Limita tempo di attesa
       const projectPromise = this.saveProjectOptimized(finalProjectData, originalRequest.userId);
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout')), 10000) // 10 secondi max
+        setTimeout(() => reject(new Error('Timeout')), 3000) // 3 secondi max
       );
       
-      const projectResult = await Promise.race([projectPromise, timeoutPromise]);
-      console.log('📊 [Advanced Engine] Risultato salvataggio progetto:', projectResult);
-      result += projectResult;
+      try {
+        const projectResult = await Promise.race([projectPromise, timeoutPromise]);
+        console.log('📊 [Advanced Engine] Risultato salvataggio progetto:', projectResult);
+        result += projectResult;
+      } catch (timeoutError) {
+        console.warn('⚠️ [Advanced Engine] Timeout salvataggio progetto, continuo senza salvataggio');
+        // Continua senza bloccare l'OS
+      }
       
     } catch (error) {
       console.error('❌ [Advanced Engine] Errore Project Manager:', error);
