@@ -112,19 +112,6 @@
     "@types/morgan": "^1.9.10",
     "@types/pg": "^8.15.5",
     "@types/supertest": "^6.0.3",
-    "@urbanova/agents": "file:packages/agents",
-    "@urbanova/compliance": "file:packages/compliance",
-    "@urbanova/data": "file:packages/data",
-    "@urbanova/infra": "file:packages/infra",
-    "@urbanova/interactive": "file:packages/interactive",
-    "@urbanova/leads": "file:packages/leads",
-    "@urbanova/messaging": "file:packages/messaging",
-    "@urbanova/os": "file:packages/os",
-    "@urbanova/pdf": "file:packages/pdf",
-    "@urbanova/projects": "file:packages/projects",
-    "@urbanova/storage": "file:packages/storage",
-    "@urbanova/tools": "file:packages/tools",
-    "@urbanova/types": "file:packages/types",
     "autoprefixer": "^10.4.21",
     "axios": "^1.11.0",
     "chart.js": "^4.5.0",
@@ -204,14 +191,5 @@
     "ts-jest": "^29.4.1",
     "tsx": "^4.7.1",
     "typescript": "5.8.2"
-  },
-  "workspaces": [
-    "packages/*"
-  ],
-  "pnpm": {
-    "overrides": {
-      "debug": "4.3.4",
-      "simple-swizzle": "0.2.2"
-    }
   }
 }
