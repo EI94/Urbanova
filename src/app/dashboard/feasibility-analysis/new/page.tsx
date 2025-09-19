@@ -479,11 +479,30 @@ export default function NewFeasibilityProjectPage() {
         setLastSaved(new Date());
         console.log('✅ Progetto aggiornato automaticamente:', savedProjectId);
       } else {
-        // Crea nuovo progetto
-        const projectId = await feasibilityService.createProject(finalProject);
-        setSavedProjectId(projectId);
-        setLastSaved(new Date());
-        console.log('✅ Nuovo progetto salvato automaticamente:', projectId);
+        // Crea nuovo progetto usando l'endpoint API
+        const response = await fetch('/api/feasibility-smart', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...finalProject,
+            createdBy: currentUser?.uid || 'anonymous'
+          }),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            setSavedProjectId(result.projectId);
+            setLastSaved(new Date());
+            console.log('✅ Nuovo progetto salvato automaticamente:', result.projectId);
+          } else {
+            console.error('❌ Errore salvataggio automatico:', result.error);
+          }
+        } else {
+          console.error('❌ Errore salvataggio automatico:', response.statusText);
+        }
       }
 
     } catch (error: any) {
@@ -700,8 +719,28 @@ export default function NewFeasibilityProjectPage() {
                       createdBy: currentUser?.uid || 'anonymous'
                     } as Omit<FeasibilityProject, 'id' | 'createdAt' | 'updatedAt'>;
 
-                    const projectId = await feasibilityService.createProject(finalProject);
-                    setSavedProjectId(projectId);
+                    // Usa l'endpoint API invece del servizio diretto
+                    const response = await fetch('/api/feasibility-smart', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({
+                        ...finalProject,
+                        createdBy: currentUser?.uid || 'anonymous'
+                      }),
+                    });
+
+                    if (!response.ok) {
+                      throw new Error('Errore nel salvataggio del progetto');
+                    }
+
+                    const result = await response.json();
+                    if (!result.success) {
+                      throw new Error(result.error || 'Errore nel salvataggio del progetto');
+                    }
+
+                    setSavedProjectId(result.projectId);
                   }
 
                   toast('✅ Progetto salvato con successo!', { icon: '✅' });
