@@ -106,38 +106,9 @@ export async function POST(request: NextRequest) {
             sessionId: urbanovaRequest.sessionId
           });
           
-          // 🎯 REDIRECT RIATTIVATO: OS completo va in timeout, usa endpoint semplificato
-          const messageText = message.toLowerCase();
-          const isFeasibilityRequest = messageText.includes('analisi di fattibilità') || messageText.includes('studio di fattibilità') || 
-              messageText.includes('fattibilità') || (messageText.includes('terreno') && messageText.includes('edificabili'));
-          
-          if (isFeasibilityRequest) {
-            console.log('🎯 [REDIRECT RIATTIVATO] Analisi fattibilità, usando endpoint semplificato...');
-            
-            // Chiama il nuovo endpoint dedicato con timeout protection
-            try {
-              const feasibilityPromise = fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://www.urbanova.life'}/api/feasibility-smart`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message, userId, userEmail })
-              });
-              
-              const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Feasibility endpoint timeout')), 5000) // 5 secondi max
-              );
-              
-              const feasibilityResponse = await Promise.race([feasibilityPromise, timeoutPromise]);
-              
-              if (feasibilityResponse.ok) {
-                const feasibilityData = await feasibilityResponse.json();
-                console.log('✅ [REDIRECT RIATTIVATO] Risposta ricevuta dal endpoint semplificato');
-                return NextResponse.json(feasibilityData);
-              }
-            } catch (error) {
-              console.error('❌ [REDIRECT RIATTIVATO] Errore chiamata endpoint:', error);
-              // Continua con OS completo se endpoint semplificato fallisce
-            }
-          }
+          // 🎯 REDIRECT DISABILITATO: Usa sempre OS completo per consultazione progetti
+          // Il redirect impediva la consultazione progetti esistenti
+          console.log('🎯 [OS COMPLETO] Usando sempre OS completo per tutte le richieste');
           
           try {
             console.log('🔄 [Chat API] INIZIO processRequest UrbanovaOS...');
