@@ -1,0 +1,1 @@
+🧪 Test Firebase CI workflow after secret configuration
