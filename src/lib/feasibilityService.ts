@@ -14,7 +14,6 @@ import {addDoc,
   serverTimestamp,
   DocumentData,
   getDoc,
-  writeBatch,
   runTransaction } from 'firebase/firestore';
 
 import { db } from './firebase';
@@ -202,24 +201,19 @@ export class FeasibilityService {
         throw new Error('Utente non autenticato');
       }
 
-      const batch = writeBatch(db);
-
+      // Usa addDoc invece di writeBatch per compatibilità con l'endpoint
       const project: Omit<FeasibilityProject, 'id'> = {
         ...projectData,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
 
-      const docRef = doc(collection(db, this.COLLECTION));
-      batch.set(docRef, project);
+      const docRef = await addDoc(collection(db, this.COLLECTION), project);
 
-      // Commit del batch
-      await batch.commit();
-
-      console.log(`✅ Progetto fattibilità creato con batch: ${project.name} con ID: ${docRef.id}`);
+      console.log(`✅ Progetto fattibilità creato con addDoc: ${project.name} con ID: ${docRef.id}`);
       return docRef.id;
     } catch (error) {
-      console.error('❌ Errore creazione progetto con batch:', error);
+      console.error('❌ Errore creazione progetto con addDoc:', error);
       throw new Error(
         `Impossibile creare il progetto: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`
       );
