@@ -139,7 +139,7 @@ class IstatApiService {
         console.log(`📊 [IstatAPI] CSV ISTAT ricevuto: ${csvData.length} caratteri`);
         console.log(`📊 [IstatAPI] Prime 200 caratteri CSV:`, csvData.substring(0, 200));
         
-        const comuni = this.parseCompleteIstatCsv(csvData, params);
+                  const comuni = await this.parseCompleteIstatCsv(csvData, params);
         
         if (comuni.length > 0) {
           console.log(`✅ [IstatAPI] Caricati ${comuni.length} comuni reali dal CSV ISTAT`);
@@ -147,7 +147,7 @@ class IstatApiService {
         } else {
           console.log(`⚠️ [IstatAPI] Nessun comune parsato dal CSV ISTAT - provo parsing alternativo`);
           // Prova parsing alternativo senza filtri
-          const allComuni = this.parseCompleteIstatCsv(csvData, {});
+                    const allComuni = await this.parseCompleteIstatCsv(csvData, {});
           if (allComuni.length > 0) {
             console.log(`✅ [IstatAPI] Parsing alternativo riuscito: ${allComuni.length} comuni totali`);
             return allComuni;
@@ -268,7 +268,7 @@ class IstatApiService {
   /**
    * Parse CSV ISTAT completo (TUTTI i comuni italiani)
    */
-  private parseCompleteIstatCsv(csvData: string, params: any): IstatComuneData[] {
+  private async parseCompleteIstatCsv(csvData: string, params: any): Promise<IstatComuneData[]> {
     try {
       const lines = csvData.split('\n');
       const comuni: IstatComuneData[] = [];
@@ -294,7 +294,7 @@ class IstatApiService {
           if (columns.length >= 12) {
             const nomeComune = columns[5]?.trim() || '';
             const nomeProvincia = columns[11]?.trim() || '';
-            const coordinate = this.getCoordinateForComune(nomeComune, nomeProvincia);
+            const coordinate = await this.getCoordinateForComune(nomeComune, nomeProvincia);
             
             // Debug coordinate
             if (i <= 3) {
