@@ -64,8 +64,8 @@ export function useMapData(options: UseMapDataOptions = {}) {
 
   // Carica dati geografici
   const loadMapData = useCallback(async (forceRefresh = false) => {
-    // Rimuovo controllo state.loading per evitare loop infinito
-    if (!forceRefresh) return;
+    // Evita chiamate multiple simultanee
+    if (!forceRefresh && state.loading) return;
 
     setState(prev => ({ ...prev, loading: true, error: null }));
 
@@ -132,7 +132,7 @@ export function useMapData(options: UseMapDataOptions = {}) {
         error: error instanceof Error ? error.message : 'Errore sconosciuto'
       }));
     }
-  }, [maxMarkers]);
+  }, [maxMarkers, state.loading]);
 
   // Filtra markers basato sui filtri
   const filteredMarkers = useMemo(() => {
