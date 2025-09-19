@@ -493,15 +493,17 @@ export default function NewFeasibilityProjectPage() {
 
         if (response.ok) {
           const result = await response.json();
-          if (result.success) {
+          console.log('🔍 [AUTO SAVE] Risposta endpoint:', result);
+          
+          if (result.success && result.projectId) {
             setSavedProjectId(result.projectId);
             setLastSaved(new Date());
             console.log('✅ Nuovo progetto salvato automaticamente:', result.projectId);
           } else {
-            console.error('❌ Errore salvataggio automatico:', result.error);
+            console.error('❌ [AUTO SAVE] Endpoint restituisce success: false o projectId mancante:', result);
           }
         } else {
-          console.error('❌ Errore salvataggio automatico:', response.statusText);
+          console.error('❌ [AUTO SAVE] Errore HTTP:', response.status, response.statusText);
         }
       }
 
@@ -732,15 +734,25 @@ export default function NewFeasibilityProjectPage() {
                     });
 
                     if (!response.ok) {
-                      throw new Error('Errore nel salvataggio del progetto');
+                      console.error('❌ [SALVA E ESCI] Errore HTTP:', response.status, response.statusText);
+                      throw new Error(`Errore HTTP ${response.status}: ${response.statusText}`);
                     }
 
                     const result = await response.json();
+                    console.log('🔍 [SALVA E ESCI] Risposta endpoint:', result);
+                    
                     if (!result.success) {
+                      console.error('❌ [SALVA E ESCI] Endpoint restituisce success: false:', result.error);
                       throw new Error(result.error || 'Errore nel salvataggio del progetto');
                     }
 
+                    if (!result.projectId) {
+                      console.error('❌ [SALVA E ESCI] Endpoint non restituisce projectId');
+                      throw new Error('ID progetto non ricevuto dal server');
+                    }
+
                     setSavedProjectId(result.projectId);
+                    console.log('✅ [SALVA E ESCI] Progetto salvato con ID:', result.projectId);
                   }
 
                   toast('✅ Progetto salvato con successo!', { icon: '✅' });
