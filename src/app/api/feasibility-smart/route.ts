@@ -3,9 +3,74 @@ import '@/lib/osProtection'; // OS Protection per API
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, userId, userEmail } = await request.json();
+    const requestData = await request.json();
     
-    console.log('🎯 [FEASIBILITY SMART] Richiesta ricevuta:', { message: message.substring(0, 50) });
+    // Gestisce sia richieste OS (con message) che richieste dirette (con dati progetto)
+    const { message, userId, userEmail, name, address, totalArea, costs, revenues, results, targetMargin, duration, status, createdBy } = requestData;
+    
+    console.log('🎯 [FEASIBILITY SMART] Richiesta ricevuta:', { 
+      hasMessage: !!message, 
+      hasProjectData: !!(name && address),
+      message: message ? message.substring(0, 50) : 'N/A'
+    });
+    
+    // Se è una richiesta diretta con dati progetto, salva direttamente
+    if (name && address && costs && revenues && results) {
+      console.log('💾 [FEASIBILITY SMART] Salvataggio diretto progetto:', { name, address });
+      
+      try {
+        // Import dinamico per evitare errori di build
+        const { db } = await import('@/lib/firebase');
+        const { addDoc, serverTimestamp } = await import('firebase/firestore');
+        const { collection } = await import('firebase/firestore');
+        
+        const projectData = {
+          name,
+          address,
+          status: status || 'PIANIFICAZIONE',
+          startDate: new Date(),
+          constructionStartDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+          duration: duration || 18,
+          totalArea: totalArea || 0,
+          targetMargin: targetMargin || 30,
+          createdBy: createdBy || userId || 'anonymous',
+          notes: `Progetto salvato automaticamente - ${new Date().toISOString()}`,
+          costs,
+          revenues,
+          results,
+          isTargetAchieved: results.margin >= (targetMargin || 30),
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        };
+        
+        console.log('💾 [FEASIBILITY SMART] Salvataggio su Firebase...');
+        const projectRef = await addDoc(collection(db, 'feasibilityProjects'), projectData);
+        console.log('✅ [FEASIBILITY SMART] Progetto salvato con ID:', projectRef.id);
+        
+        return NextResponse.json({
+          success: true,
+          projectId: projectRef.id,
+          message: 'Progetto salvato con successo',
+          timestamp: new Date().toISOString()
+        });
+        
+      } catch (saveError) {
+        console.error('❌ [FEASIBILITY SMART] Errore salvataggio progetto:', saveError);
+        return NextResponse.json({
+          success: false,
+          error: 'Errore nel salvataggio del progetto',
+          details: (saveError as Error).message
+        }, { status: 500 });
+      }
+    }
+    
+    // Se è una richiesta OS con message, procedi con l'analisi
+    if (!message) {
+      return NextResponse.json({
+        success: false,
+        error: 'Richiesta non valida: manca message o dati progetto'
+      });
+    }
     
     // 🧠 ANALISI INTELLIGENTE DELLA RICHIESTA
     const text = message.toLowerCase();
