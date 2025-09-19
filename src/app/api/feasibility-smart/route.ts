@@ -165,16 +165,16 @@ ${calculations.roi > 20 ? '✅ **FATTIBILE** - ROI eccellente' : calculations.ro
 *📊 Tool Attivato: Analisi di Fattibilità Avanzata*
 *⏰ Generato: ${new Date().toLocaleString('it-IT')}*`;
 
-    // 💾 SALVATAGGIO AUTOMATICO PROGETTO - SEMPLIFICATO
+    // 💾 SALVATAGGIO AUTOMATICO PROGETTO CON FIREBASE
     try {
       console.log('💾 [FEASIBILITY SMART] Avviando salvataggio automatico progetto...');
       
-      // Genera ID progetto univoco
-      const projectId = `feasibility_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      // Import dinamico per evitare errori di build
+      const { db } = await import('@/lib/firebase');
+      const { addDoc, serverTimestamp } = await import('firebase/firestore');
+      const { safeCollection } = await import('@/lib/firebaseUtils');
       
-      // Crea progetto semplificato
       const projectData = {
-        id: projectId,
         name: `${extractedData.tipologia || 'Bifamiliare'} - ${extractedData.location || 'Monteporzio'}`,
         address: extractedData.indirizzo || 'Indirizzo da definire',
         status: 'PIANIFICAZIONE' as const,
@@ -223,14 +223,16 @@ ${calculations.roi > 20 ? '✅ **FATTIBILE** - ROI eccellente' : calculations.ro
           paybackPeriod: 0
         },
         isTargetAchieved: calculations.roi >= 25,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
       };
       
-      console.log('💾 [FEASIBILITY SMART] Progetto creato con ID:', projectId);
+      console.log('💾 [FEASIBILITY SMART] Salvataggio su Firebase...');
+      const projectRef = await addDoc(safeCollection('feasibilityProjects'), projectData);
+      console.log('✅ [FEASIBILITY SMART] Progetto salvato con ID:', projectRef.id);
       
       // Aggiungi messaggio di salvataggio alla risposta
-      const responseWithSave = response + `\n\n## 💾 SALVATAGGIO AUTOMATICO\n\n✅ **Progetto salvato automaticamente** nella pagina Analisi Fattibilità!\n- **ID Progetto**: ${projectId}\n- **Nome**: ${projectData.name}\n- **Data**: ${new Date().toLocaleString('it-IT')}\n\n*Il progetto è ora consultabile sia nella pagina Analisi Fattibilità che tramite l'OS.*`;
+      const responseWithSave = response + `\n\n## 💾 SALVATAGGIO AUTOMATICO\n\n✅ **Progetto salvato automaticamente** nella pagina Analisi Fattibilità!\n- **ID Progetto**: ${projectRef.id}\n- **Nome**: ${projectData.name}\n- **Data**: ${new Date().toLocaleString('it-IT')}\n\n*Il progetto è ora consultabile sia nella pagina Analisi Fattibilità che tramite l'OS.*`;
       
       return NextResponse.json({
         success: true,
@@ -248,7 +250,7 @@ ${calculations.roi > 20 ? '✅ **FATTIBILE** - ROI eccellente' : calculations.ro
             calculations: calculations,
             extractedData: extractedData,
             savedProject: {
-              id: projectId,
+              id: projectRef.id,
               name: projectData.name,
               savedAt: new Date().toISOString()
             }
