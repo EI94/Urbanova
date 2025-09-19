@@ -196,7 +196,19 @@ export class AdvancedConversationalEngine {
     this.currentState.current = 'analyzing';
     
     // 🔍 ANALISI E ATTIVAZIONE TOOL - LOGICA INTELLIGENTE CHATGPT-5
-    if (intent.toolsRequired.length > 0) {
+    if (intent.primary === 'consultation') {
+      // 🗂️ CONSULTAZIONE PROGETTI ESISTENTI
+      response += this.generateThinkingState(intent);
+      
+      // 🧠 STATO: CALCULATING
+      this.currentState.current = 'calculating';
+      
+      // 🛠️ ATTIVAZIONE TOOL CONSULTAZIONE
+      const consultationResults = await this.activateConsultationTool(intent, context, originalRequest);
+      toolsActivated = ['project_consultation'];
+      
+      response += consultationResults;
+    } else if (intent.toolsRequired.length > 0) {
       response += this.generateThinkingState(intent);
       
       // 🧠 STATO: CALCULATING
@@ -283,8 +295,19 @@ export class AdvancedConversationalEngine {
       'costruzione', 'investimento', 'margine', 'profitto', 'roi'
     ];
     
+    // Pattern per consultazione progetti
+    const consultationPatterns = [
+      'mostrami', 'mostra', 'elenca', 'lista', 'progetti creati',
+      'progetti salvati', 'miei progetti', 'progetti fattibilità',
+      'consultazione', 'visualizza', 'vedi progetti'
+    ];
+    
     feasibilityPatterns.forEach(pattern => {
       if (text.includes(pattern)) intents.feasibility += 1;
+    });
+    
+    consultationPatterns.forEach(pattern => {
+      if (text.includes(pattern)) intents.consultation += 1;
     });
     
     // Pattern per analisi di sensibilità
@@ -562,6 +585,12 @@ export class AdvancedConversationalEngine {
       return tools;
     }
     
+    // 🎯 RICHIESTE DI CONSULTAZIONE PROGETTI - Sempre attiva
+    if (this.isConsultationRequest(text)) {
+      tools.push('project_consultation');
+      return tools;
+    }
+    
     // 🎯 RICHIESTE DI FATTIBILITÀ - Sempre attiva se contiene keyword
     if (this.isFeasibilityRequest(text, intents)) {
       tools.push('feasibility_analysis');
@@ -679,6 +708,30 @@ export class AdvancedConversationalEngine {
     });
     
     return result;
+  }
+
+  /**
+   * 🗂️ RICONOSCIMENTO RICHIESTE CONSULTAZIONE PROGETTI
+   */
+  private isConsultationRequest(text: string): boolean {
+    const consultationKeywords = [
+      'mostrami', 'mostra', 'elenca', 'lista', 'progetti creati',
+      'progetti salvati', 'miei progetti', 'progetti fattibilità',
+      'consultazione', 'visualizza', 'vedi progetti', 'progetti esistenti',
+      'quali progetti', 'progetti precedenti', 'storico progetti'
+    ];
+    
+    const keywordMatches = consultationKeywords.filter(keyword => text.includes(keyword));
+    const hasKeywordMatch = keywordMatches.length > 0;
+    
+    console.log('🔍 [DEBUG] isConsultationRequest:', {
+      text: text.substring(0, 100) + '...',
+      keywordMatches,
+      hasKeywordMatch,
+      result: hasKeywordMatch
+    });
+    
+    return hasKeywordMatch;
   }
   
   /**
@@ -1255,5 +1308,61 @@ Vuoi che approfondisca qualche aspetto specifico o generi un'analisi di sensibil
    */
   private generateConversationalResponse(intent: UserIntent, context: any): string {
     return "Ti aiuto volentieri! Per fornirti un'analisi precisa, ho bisogno di alcuni dati specifici del tuo progetto. Puoi condividere dettagli come superficie del terreno, costi di costruzione, prezzo di acquisto e obiettivi di marginalità?";
+  }
+
+  /**
+   * 🗂️ ATTIVAZIONE TOOL CONSULTAZIONE PROGETTI
+   */
+  private async activateConsultationTool(intent: UserIntent, context: any, originalRequest: any): Promise<string> {
+    try {
+      console.log('🗂️ [Advanced Engine] Attivando tool consultazione progetti...');
+      
+      // Import dinamico per evitare errori di build
+      const { db } = await import('@/lib/firebase');
+      const { getDocs, query, orderBy, limit } = await import('firebase/firestore');
+      const { safeCollection } = await import('@/lib/firebaseUtils');
+      
+      // Query per ottenere i progetti di fattibilità
+      const projectsQuery = query(
+        safeCollection('feasibilityProjects'),
+        orderBy('createdAt', 'desc'),
+        limit(10)
+      );
+      
+      console.log('🗂️ [Advanced Engine] Eseguendo query progetti...');
+      const snapshot = await getDocs(projectsQuery);
+      
+      if (snapshot.empty) {
+        return `\n\n## 📋 I Tuoi Progetti di Fattibilità\n\n❌ **Nessun progetto trovato**\n\nNon hai ancora creato progetti di fattibilità. Puoi crearne uno nuovo chiedendomi di fare un'analisi di fattibilità!\n\n*Esempio: "Aiutami a fare uno studio di fattibilità per un terreno di 1000mq a Milano"*`;
+      }
+      
+      let result = `\n\n## 📋 I Tuoi Progetti di Fattibilità\n\n✅ **Trovati ${snapshot.size} progetti**\n\n`;
+      
+      snapshot.forEach((doc, index) => {
+        const project = doc.data();
+        const createdAt = project.createdAt?.toDate?.() || new Date(project.createdAt);
+        
+        result += `### ${index + 1}. ${project.name}\n`;
+        result += `- **ID**: ${doc.id}\n`;
+        result += `- **Indirizzo**: ${project.address}\n`;
+        result += `- **Area**: ${project.totalArea} mq\n`;
+        result += `- **Stato**: ${project.status}\n`;
+        result += `- **ROI**: ${project.results?.roi?.toFixed(2)}%\n`;
+        result += `- **Creato**: ${createdAt.toLocaleDateString('it-IT')}\n`;
+        result += `- **Fattibile**: ${project.isTargetAchieved ? '✅ Sì' : '❌ No'}\n\n`;
+      });
+      
+      result += `\n💡 **Suggerimenti:**\n`;
+      result += `- Puoi chiedermi di modificare un progetto specifico\n`;
+      result += `- Puoi creare un nuovo progetto di fattibilità\n`;
+      result += `- Puoi confrontare progetti diversi\n\n`;
+      
+      console.log('✅ [Advanced Engine] Consultazione progetti completata');
+      return result;
+      
+    } catch (error) {
+      console.error('❌ [Advanced Engine] Errore consultazione progetti:', error);
+      return `\n\n## 📋 I Tuoi Progetti di Fattibilità\n\n❌ **Errore nel caricamento dei progetti**\n\nSi è verificato un errore tecnico. Riprova più tardi o contatta il supporto tecnico.\n\n*Errore: ${(error as Error).message}*`;
+    }
   }
 }
