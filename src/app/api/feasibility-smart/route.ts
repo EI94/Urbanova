@@ -171,6 +171,13 @@ ${calculations.roi > 20 ? '✅ **FATTIBILE** - ROI eccellente' : calculations.ro
       console.log('💾 [FEASIBILITY SMART] Avviando salvataggio automatico progetto...');
       console.log('💾 [FEASIBILITY SMART] Dati estratti:', extractedData);
       console.log('💾 [FEASIBILITY SMART] Calcoli:', calculations);
+      console.log('💾 [FEASIBILITY SMART] Calcoli validi:', {
+        investimentoTotale: calculations.investimentoTotale,
+        ricavoVendita: calculations.ricavoVendita,
+        margineLordo: calculations.margineLordo,
+        roi: calculations.roi,
+        isNaN: isNaN(calculations.investimentoTotale)
+      });
       
       const feasibilityService = new FeasibilityService();
       console.log('💾 [FEASIBILITY SMART] FeasibilityService istanziato:', !!feasibilityService);
@@ -237,7 +244,11 @@ ${calculations.roi > 20 ? '✅ **FATTIBILE** - ROI eccellente' : calculations.ro
         name: projectData.name,
         address: projectData.address,
         totalArea: projectData.totalArea,
-        createdBy: projectData.createdBy
+        createdBy: projectData.createdBy,
+        hasCosts: !!projectData.costs,
+        hasRevenues: !!projectData.revenues,
+        costsTotal: projectData.costs?.total,
+        revenuesTotal: projectData.revenues?.total
       });
       
       console.log('💾 [FEASIBILITY SMART] Chiamando feasibilityService.createProject...');

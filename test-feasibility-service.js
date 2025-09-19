@@ -1,91 +1,71 @@
-// Test script per verificare il servizio di fattibilità
-const { initializeApp } = require('firebase/app');
-const { getFirestore, collection, query, where, getDocs, orderBy } = require('firebase/firestore');
-
-// Configurazione Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyBvOkBw7cG6hY7v8x9z0a1b2c3d4e5f6g7h8",
-  authDomain: "urbanova-b623e.firebaseapp.com",
-  projectId: "urbanova-b623e",
-  storageBucket: "urbanova-b623e.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abcdef123456789"
-};
-
-// Inizializza Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+// Test diretto FeasibilityService per verificare se funziona
+const { FeasibilityService } = require('./src/lib/feasibilityService.ts');
 
 async function testFeasibilityService() {
   try {
-    console.log('🔄 Test servizio fattibilità...');
+    console.log('🧪 [TEST] Inizializzando FeasibilityService...');
+    const feasibilityService = new FeasibilityService();
+    console.log('✅ [TEST] FeasibilityService inizializzato:', !!feasibilityService);
     
-    // Simula un utente mock
-    const mockUser = {
-      uid: 'mock-user-123',
-      email: 'pierpaolo.laurito@gmail.com'
+    const testProject = {
+      name: 'Test Project',
+      address: 'Via Test 123',
+      status: 'PIANIFICAZIONE',
+      startDate: new Date(),
+      constructionStartDate: new Date(),
+      duration: 18,
+      totalArea: 1000,
+      targetMargin: 25,
+      createdBy: 'test-user',
+      notes: 'Test project',
+      costs: {
+        land: {
+          purchasePrice: 100000,
+          purchaseTaxes: 10000,
+          intermediationFees: 3000,
+          subtotal: 113000
+        },
+        construction: {
+          excavation: 10000,
+          structures: 40000,
+          systems: 20000,
+          finishes: 30000,
+          subtotal: 100000
+        },
+        externalWorks: 5000,
+        concessionFees: 2000,
+        design: 3000,
+        bankCharges: 1000,
+        exchange: 0,
+        insurance: 1500,
+        total: 221500
+      },
+      revenues: {
+        units: 1,
+        averageArea: 1000,
+        pricePerSqm: 2500,
+        revenuePerUnit: 2500000,
+        totalSales: 2500000,
+        otherRevenues: 0,
+        total: 2500000
+      },
+      results: {
+        profit: 285000,
+        margin: 12.86,
+        roi: 12.86,
+        paybackPeriod: 0
+      },
+      isTargetAchieved: false
     };
     
-    console.log(`👤 Test con utente mock: ${mockUser.email}`);
-    
-    // Test 1: Recupera progetti per utente
-    console.log('\n📊 Test 1: Progetti per utente');
-    const projectsRef = collection(db, 'feasibilityProjects');
-    const userQuery = query(
-      projectsRef,
-      where('createdBy', '==', mockUser.email),
-      orderBy('createdAt', 'desc')
-    );
-    
-    const userSnapshot = await getDocs(userQuery);
-    console.log(`✅ Trovati ${userSnapshot.size} progetti per ${mockUser.email}`);
-    
-    if (userSnapshot.size > 0) {
-      console.log('\n📋 Dettagli progetti:');
-      userSnapshot.forEach((doc, index) => {
-        const data = doc.data();
-        console.log(`\n  ${index + 1}. ${data.name || 'Senza nome'}`);
-        console.log(`     ID: ${doc.id}`);
-        console.log(`     Indirizzo: ${data.address || 'Nessuno'}`);
-        console.log(`     Creato: ${data.createdAt?.toDate?.() || data.createdAt}`);
-        console.log(`     Status: ${data.status || 'Nessuno'}`);
-        console.log(`     Utente: ${data.createdBy || 'Nessuno'}`);
-        
-        // Cerca specificamente "Ciliegie"
-        if (data.name && data.name.toLowerCase().includes('ciliegie')) {
-          console.log(`     🍒 TROVATO PROGETTO CILIEGIE!`);
-          console.log(`     Dati completi:`, JSON.stringify(data, null, 2));
-        }
-      });
-    } else {
-      console.log('❌ Nessun progetto trovato per questo utente');
-    }
-    
-    // Test 2: Cerca tutti i progetti (per debug)
-    console.log('\n🔍 Test 2: Tutti i progetti (debug)');
-    const allQuery = query(projectsRef, orderBy('createdAt', 'desc'));
-    const allSnapshot = await getDocs(allQuery);
-    console.log(`📊 Totale progetti nel database: ${allSnapshot.size}`);
-    
-    if (allSnapshot.size > 0) {
-      console.log('\n📋 Primi 5 progetti:');
-      allSnapshot.docs.slice(0, 5).forEach((doc, index) => {
-        const data = doc.data();
-        console.log(`  ${index + 1}. ${data.name || 'Senza nome'} (${data.createdBy || 'Nessun utente'})`);
-      });
-    }
-    
-    console.log('\n✅ Test completato!');
+    console.log('🧪 [TEST] Testando createProject...');
+    const result = await feasibilityService.createProject(testProject);
+    console.log('✅ [TEST] Progetto creato con successo:', result);
     
   } catch (error) {
-    console.error('❌ Errore durante il test:', error);
-    
-    if (error.code === 'permission-denied') {
-      console.log('💡 Suggerimento: Il database potrebbe richiedere autenticazione');
-      console.log('💡 Prova ad accedere all\'app e controlla i log del browser');
-    }
+    console.error('❌ [TEST] Errore:', error);
+    console.error('❌ [TEST] Stack:', error.stack);
   }
 }
 
-// Esegui il test
 testFeasibilityService();
