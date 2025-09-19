@@ -44,7 +44,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      - name: Install dependencies and build packages
+      - name: Install dependencies and build application
         run: |
           echo "📦 Installing dependencies..."
           pnpm install --no-frozen-lockfile
@@ -52,58 +52,6 @@ jobs:
           echo "🔍 Debugging workspace structure..."
           pwd
           ls -la
-          echo "📁 Packages directory:"
-          ls -la packages/
-          
-          echo "🚀 Building essential packages for Next.js module resolution..."
-          
-          # 1. Build types package first (no dependencies)
-          echo "📦 Building @urbanova/types..."
-          cd packages/types
-          echo "Current directory: $(pwd)"
-          echo "Package.json exists: $(test -f package.json && echo 'YES' || echo 'NO')"
-          pnpm build
-          echo "✅ Types build completed"
-          ls -la dist/ || echo "No dist folder found"
-          cd ../..
-          
-          # 2. Build infra package (depends on types)
-          echo "📦 Building @urbanova/infra..."
-          cd packages/infra
-          echo "Current directory: $(pwd)"
-          pnpm build
-          echo "✅ Infra build completed"
-          ls -la dist/ || echo "No dist folder found"
-          cd ../..
-          
-          # 3. Build toolos package (depends on types)
-          echo "📦 Building @urbanova/toolos..."
-          cd packages/toolos
-          echo "Current directory: $(pwd)"
-          pnpm build
-          echo "✅ Toolos build completed"
-          ls -la dist/ || echo "No dist folder found"
-          cd ../..
-          
-          # 4. Build data package (depends on types and infra)
-          echo "📦 Building @urbanova/data..."
-          cd packages/data
-          echo "Current directory: $(pwd)"
-          pnpm build
-          echo "✅ Data build completed"
-          ls -la dist/ || echo "No dist folder found"
-          cd ../..
-          
-          # 5. Build os package (depends on types and toolos)
-          echo "📦 Building @urbanova/os..."
-          cd packages/os
-          echo "Current directory: $(pwd)"
-          pnpm build
-          echo "✅ OS build completed"
-          ls -la dist/ || echo "No dist folder found"
-          cd ../..
-          
-          echo "🎉 Essential packages build completed"
           
           echo "🏗️ Building Next.js application..."
           SKIP_ENV_VALIDATION=true pnpm build
