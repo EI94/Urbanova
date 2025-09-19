@@ -21,8 +21,7 @@ export async function POST(request: NextRequest) {
       try {
         // Import dinamico per evitare errori di build
         const { db } = await import('@/lib/firebase');
-        const { addDoc, serverTimestamp } = await import('firebase/firestore');
-        const { collection } = await import('firebase/firestore');
+        const { addDoc, serverTimestamp, collection } = await import('firebase/firestore');
         
         const projectData = {
           name,
@@ -236,8 +235,7 @@ ${calculations.roi > 20 ? '✅ **FATTIBILE** - ROI eccellente' : calculations.ro
       
       // Import dinamico per evitare errori di build
       const { db } = await import('@/lib/firebase');
-      const { addDoc, serverTimestamp } = await import('firebase/firestore');
-      const { safeCollection } = await import('@/lib/firebaseUtils');
+      const { addDoc, serverTimestamp, collection } = await import('firebase/firestore');
       
       const projectData = {
         name: `${extractedData.tipologia || 'Bifamiliare'} - ${extractedData.location || 'Monteporzio'}`,
@@ -293,7 +291,7 @@ ${calculations.roi > 20 ? '✅ **FATTIBILE** - ROI eccellente' : calculations.ro
       };
       
       console.log('💾 [FEASIBILITY SMART] Salvataggio su Firebase...');
-      const projectRef = await addDoc(safeCollection('feasibilityProjects'), projectData);
+      const projectRef = await addDoc(collection(db, 'feasibilityProjects'), projectData);
       console.log('✅ [FEASIBILITY SMART] Progetto salvato con ID:', projectRef.id);
       
       // Aggiungi messaggio di salvataggio alla risposta
