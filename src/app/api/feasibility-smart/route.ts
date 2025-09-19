@@ -285,14 +285,24 @@ ${calculations.roi > 20 ? '✅ **FATTIBILE** - ROI eccellente' : calculations.ro
       
     } catch (saveError) {
       console.error('❌ [FEASIBILITY SMART] Errore salvataggio progetto:', saveError);
-      console.error('❌ [FEASIBILITY SMART] Stack trace:', saveError.stack);
+      console.error('❌ [FEASIBILITY SMART] Stack trace:', (saveError as Error).stack);
       console.error('❌ [FEASIBILITY SMART] Tipo errore:', typeof saveError);
-      console.error('❌ [FEASIBILITY SMART] Messaggio errore:', saveError.message);
+      console.error('❌ [FEASIBILITY SMART] Messaggio errore:', (saveError as Error).message);
+      console.error('❌ [FEASIBILITY SMART] Dati progetto che hanno causato errore:', {
+        name: projectData.name,
+        address: projectData.address,
+        totalArea: projectData.totalArea,
+        createdBy: projectData.createdBy,
+        hasCosts: !!projectData.costs,
+        hasRevenues: !!projectData.revenues
+      });
       
       // Continua senza salvataggio se c'è errore
+      const responseWithError = response + `\n\n## ⚠️ ERRORE SALVATAGGIO\n\n❌ **Il progetto non è stato salvato automaticamente** a causa di un errore tecnico.\n- **Errore**: ${(saveError as Error).message}\n- **Data**: ${new Date().toLocaleString('it-IT')}\n\n*Contatta il supporto tecnico se il problema persiste.*`;
+      
       return NextResponse.json({
         success: true,
-        response: response,
+        response: responseWithError,
         timestamp: new Date().toISOString(),
         metadata: {
           agentType: 'feasibility-smart',
