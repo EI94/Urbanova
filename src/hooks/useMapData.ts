@@ -64,7 +64,8 @@ export function useMapData(options: UseMapDataOptions = {}) {
 
   // Carica dati geografici
   const loadMapData = useCallback(async (forceRefresh = false) => {
-    if (state.loading && !forceRefresh) return;
+    // Rimuovo controllo state.loading per evitare loop infinito
+    if (!forceRefresh) return;
 
     setState(prev => ({ ...prev, loading: true, error: null }));
 
@@ -131,7 +132,7 @@ export function useMapData(options: UseMapDataOptions = {}) {
         error: error instanceof Error ? error.message : 'Errore sconosciuto'
       }));
     }
-  }, [state.loading, maxMarkers]);
+  }, [maxMarkers]);
 
   // Filtra markers basato sui filtri
   const filteredMarkers = useMemo(() => {
@@ -181,7 +182,7 @@ export function useMapData(options: UseMapDataOptions = {}) {
   // Carica dati automaticamente
   useEffect(() => {
     if (autoLoad) {
-      loadMapData();
+      loadMapData(true); // Force refresh per caricamento iniziale
     }
   }, [autoLoad, loadMapData]);
 

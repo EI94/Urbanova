@@ -407,6 +407,12 @@ service cloud.firestore {
                      get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.ownerId == request.auth.uid;
     }
     
+    // Collezione progetti di fattibilità - accesso pubblico per salvataggio automatico OS
+    match /feasibilityProjects/{projectId} {
+      // Accesso completo per salvataggio automatico OS
+      allow read, write: if true;
+    }
+    
     // ============================================================================
     // GEOGRAPHIC DATA COLLECTIONS
     // ============================================================================
