@@ -177,6 +177,26 @@ export default function NewFeasibilityProjectPage() {
     };
   }, [project, calculatedCosts, calculatedRevenues, calculatedResults]);
 
+  // Salvataggio automatico periodico
+  useEffect(() => {
+    if (project.name && project.address && !loading) {
+      // Salva automaticamente ogni 30 secondi se ci sono modifiche
+      const timeout = setTimeout(() => {
+        autoSaveProject();
+      }, 30000);
+
+      setAutoSaveTimeout(timeout);
+
+      return () => {
+        if (timeout) {
+          clearTimeout(timeout);
+        }
+      };
+    }
+    
+    return undefined;
+  }, [project.name, project.address, calculatedCosts, calculatedRevenues, calculatedResults, loading]);
+
   // Cleanup timeout on unmount e navigazione
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -442,7 +462,7 @@ export default function NewFeasibilityProjectPage() {
 
     setAutoSaving(true);
     try {
-      console.log('🧠 Salvataggio intelligente in corso...');
+      console.log('🧠 Salvataggio automatico progetto fattibilità in corso...');
 
       const finalProject = {
         ...project,
@@ -450,29 +470,24 @@ export default function NewFeasibilityProjectPage() {
         revenues: calculatedRevenues,
         results: calculatedResults,
         isTargetAchieved: calculatedResults.margin >= (project.targetMargin || 30),
+        createdBy: currentUser?.uid || 'anonymous'
       } as Omit<FeasibilityProject, 'id' | 'createdAt' | 'updatedAt'>;
 
-      // Usa il servizio intelligente che evita duplicati
-      const result = await projectManagerService.smartSaveProject(finalProject, currentUser?.uid);
-
-      if (result.success) {
-        setSavedProjectId(result.projectId);
+      // Se il progetto è già stato salvato, aggiorna
+      if (savedProjectId) {
+        await feasibilityService.updateProject(savedProjectId, finalProject);
         setLastSaved(new Date());
-
-        // Toast discreta per il salvataggio automatico
-        const message = result.isNew
-          ? '💾 Nuovo progetto salvato automaticamente'
-          : '🔄 Progetto aggiornato automaticamente';
-
-        toast(message, {
-          duration: 2000,
-          position: 'bottom-right',
-        });
-
-        console.log('✅ Salvataggio intelligente completato:', result);
+        console.log('✅ Progetto aggiornato automaticamente:', savedProjectId);
+      } else {
+        // Crea nuovo progetto
+        const projectId = await feasibilityService.createProject(finalProject);
+        setSavedProjectId(projectId);
+        setLastSaved(new Date());
+        console.log('✅ Nuovo progetto salvato automaticamente:', projectId);
       }
+
     } catch (error: any) {
-      console.error('❌ Errore salvataggio intelligente:', error);
+      console.error('❌ Errore salvataggio automatico:', error);
       // Non mostrare errori per il salvataggio automatico per non disturbare l'utente
     } finally {
       setAutoSaving(false);
@@ -667,17 +682,50 @@ export default function NewFeasibilityProjectPage() {
           <div className="flex space-x-2">
             <button
               onClick={async () => {
+                if (!project.name || !project.address) {
+                  toast('Compila nome e indirizzo prima di salvare', { icon: '❌' });
+                  return;
+                }
+
+                setLoading(true);
                 try {
-                  await autoSaveProject();
-                  toast('✅ Progetto salvato!', { icon: '✅' });
+                  // Salva il progetto se non è già stato salvato
+                  if (!savedProjectId) {
+                    const finalProject = {
+                      ...project,
+                      costs: calculatedCosts,
+                      revenues: calculatedRevenues,
+                      results: calculatedResults,
+                      isTargetAchieved: calculatedResults.margin >= (project.targetMargin || 30),
+                      createdBy: currentUser?.uid || 'anonymous'
+                    } as Omit<FeasibilityProject, 'id' | 'createdAt' | 'updatedAt'>;
+
+                    const projectId = await feasibilityService.createProject(finalProject);
+                    setSavedProjectId(projectId);
+                  }
+
+                  toast('✅ Progetto salvato con successo!', { icon: '✅' });
+                  
+                  // Reindirizza alla pagina analisi di fattibilità
                   router.push('/dashboard/feasibility-analysis');
-                } catch (error) {
-                  toast('❌ Errore nel salvataggio', { icon: '❌' });
+                } catch (error: any) {
+                  console.error('❌ Errore nel salvataggio:', error);
+                  toast('❌ Errore nel salvataggio del progetto', { icon: '❌' });
+                } finally {
+                  setLoading(false);
                 }
               }}
+              disabled={loading || !project.name || !project.address}
               className="btn btn-primary btn-sm"
             >
-              💾 Salva e Esci
+              {loading ? (
+                <>
+                  <div className="loading loading-spinner loading-xs mr-2"></div>
+                  Salvataggio...
+                </>
+              ) : (
+                '💾 Salva e Esci'
+              )}
             </button>
             <button
               onClick={() => setShowReportGenerator(true)}

@@ -7,6 +7,7 @@ import {addDoc,
   updateDoc,
   deleteDoc,
   doc,
+  collection,
   query,
   where,
   orderBy,
@@ -17,7 +18,6 @@ import {addDoc,
   runTransaction } from 'firebase/firestore';
 
 import { db } from './firebase';
-import { safeCollection } from './firebaseUtils';
 
 export interface FeasibilityProject {
   id?: string;
@@ -134,7 +134,7 @@ export class FeasibilityService {
         projectName: project.name
       });
 
-      const docRef = await addDoc(safeCollection(this.COLLECTION), project);
+      const docRef = await addDoc(collection(db, this.COLLECTION), project);
       console.log(`✅ [FEASIBILITY SERVICE] Progetto fattibilità creato: ${project.name} con ID: ${docRef.id}`);
       return docRef.id;
     } catch (error) {
@@ -169,7 +169,7 @@ export class FeasibilityService {
           updatedAt: new Date(),
         };
 
-        const docRef = doc(safeCollection(this.COLLECTION));
+        const docRef = doc(collection(db, this.COLLECTION));
         transaction.set(docRef, project);
 
         console.log(
@@ -210,7 +210,7 @@ export class FeasibilityService {
         updatedAt: new Date(),
       };
 
-      const docRef = doc(safeCollection(this.COLLECTION));
+      const docRef = doc(collection(db, this.COLLECTION));
       batch.set(docRef, project);
 
       // Commit del batch
@@ -231,7 +231,7 @@ export class FeasibilityService {
     try {
       console.log('🔄 [FEASIBILITY SERVICE] Caricamento tutti i progetti fattibilità...');
 
-      const projectsRef = safeCollection(this.COLLECTION);
+      const projectsRef = collection(db, this.COLLECTION);
       const q = query(projectsRef, orderBy('createdAt', 'desc'));
       const snapshot = await getDocs(q);
 
@@ -266,7 +266,7 @@ export class FeasibilityService {
         return [];
       }
 
-      const projectsRef = safeCollection(this.COLLECTION);
+      const projectsRef = collection(db, this.COLLECTION);
       const q = query(projectsRef, where('createdBy', '==', userId), orderBy('createdAt', 'desc'));
 
       const snapshot = await getDocs(q);
@@ -872,7 +872,7 @@ export class FeasibilityService {
       };
 
       // Salva confronto in Firestore
-      const comparisonRef = safeCollection('feasibilityComparisons');
+      const comparisonRef = collection(db, 'feasibilityComparisons');
       await addDoc(comparisonRef, comparison);
 
       console.log(`✅ Confronto progetti creato: ${comparison.id}`);
