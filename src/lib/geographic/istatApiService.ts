@@ -362,9 +362,30 @@ class IstatApiService {
   /**
    * Ottiene coordinate per comune (fallback su coordinate approssimative)
    */
-  private getCoordinateForComune(nome: string, provincia: string): { lat: number; lng: number } {
-    // Coordinate approssimative per i comuni principali italiani
-    const coordinateComuni: { [key: string]: { lat: number; lng: number } } = {
+  private async getCoordinateForComune(nome: string, provincia: string): Promise<{ lat: number; lng: number }> {
+    try {
+      // Usa Nominatim (OpenStreetMap) per geocoding gratuito
+      const query = encodeURIComponent(`${nome}, ${provincia}, Italia`);
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1&countrycodes=it`, {
+        headers: {
+          'User-Agent': 'Urbanova-Geocoding/1.0'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const result = data[0];
+          console.log(`🗺️ [Geocoding] Coordinate per ${nome}, ${provincia}:`, { lat: parseFloat(result.lat), lng: parseFloat(result.lon) });
+          return { lat: parseFloat(result.lat), lng: parseFloat(result.lon) };
+        }
+      }
+    } catch (error) {
+      console.warn(`⚠️ [Geocoding] Errore geocoding per ${nome}, ${provincia}:`, error);
+    }
+
+    // Fallback su coordinate approssimative per provincia (solo per province principali)
+    const coordinateProvince: { [key: string]: { lat: number; lng: number } } = {
       'Roma': { lat: 41.9028, lng: 12.4964 },
       'Milano': { lat: 45.4642, lng: 9.1900 },
       'Napoli': { lat: 40.8518, lng: 14.2681 },
@@ -383,7 +404,6 @@ class IstatApiService {
       'Brescia': { lat: 45.5416, lng: 10.2118 },
       'Parma': { lat: 44.8015, lng: 10.3279 },
       'Taranto': { lat: 40.4693, lng: 17.2400 },
-      'Prato': { lat: 43.8808, lng: 11.0966 },
       'Modena': { lat: 44.6471, lng: 10.9252 },
       'Reggio Calabria': { lat: 38.1105, lng: 15.6613 },
       'Reggio Emilia': { lat: 44.6989, lng: 10.6297 },
@@ -426,7 +446,6 @@ class IstatApiService {
       'Mantova': { lat: 45.1564, lng: 10.7914 },
       'Massa': { lat: 44.0225, lng: 10.1146 },
       'Pistoia': { lat: 43.9333, lng: 10.9167 },
-      'Prato': { lat: 43.8808, lng: 11.0966 },
       'Grosseto': { lat: 42.7606, lng: 11.1139 },
       'Terni': { lat: 42.5607, lng: 12.6468 },
       'Rovigo': { lat: 45.0713, lng: 11.7903 },
@@ -456,7 +475,129 @@ class IstatApiService {
       'Guspini': { lat: 39.5417, lng: 8.5417 },
       'Quartu Sant\'Elena': { lat: 39.2417, lng: 9.1833 },
       'Alghero': { lat: 40.5589, lng: 8.3156 },
-      'Cagliari': { lat: 39.2238, lng: 9.1217 }
+      'Palestrina': { lat: 41.8333, lng: 12.8833 },
+      'Zagarolo': { lat: 41.8333, lng: 12.8333 },
+      'San Cesareo': { lat: 41.8167, lng: 12.8167 },
+      'Gallicano nel Lazio': { lat: 41.8667, lng: 12.8667 },
+      'Polí': { lat: 41.8833, lng: 12.8833 },
+      'Cave': { lat: 41.8167, lng: 12.9333 },
+      'Genazzano': { lat: 41.8333, lng: 12.9667 },
+      'Olevano Romano': { lat: 41.8667, lng: 13.0333 },
+      'Pisoniano': { lat: 41.8833, lng: 12.9667 },
+      'Capranica Prenestina': { lat: 41.8667, lng: 12.9500 },
+      'Roiate': { lat: 41.8667, lng: 13.0667 },
+      'Affile': { lat: 41.8833, lng: 13.1000 },
+      'Arsoli': { lat: 41.8833, lng: 13.0167 },
+      'Bellegra': { lat: 41.8833, lng: 13.0333 },
+      'Ciciliano': { lat: 41.9000, lng: 12.9333 },
+      'Gerano': { lat: 41.9000, lng: 12.9500 },
+      'Piglio': { lat: 41.8333, lng: 13.1333 },
+      'Rocca Santo Stefano': { lat: 41.9167, lng: 13.0167 },
+      'San Vito Romano': { lat: 41.8833, lng: 13.0167 },
+      'Serrone': { lat: 41.8333, lng: 13.1833 },
+      'Subiaco': { lat: 41.9167, lng: 13.1000 },
+      'Trevi nel Lazio': { lat: 41.8667, lng: 13.2500 },
+      'Vallepietra': { lat: 41.9167, lng: 13.2167 },
+      'Vallinfreda': { lat: 41.9000, lng: 13.0167 },
+      'Vicovaro': { lat: 41.8833, lng: 12.9000 },
+      'Vivaro Romano': { lat: 41.9000, lng: 13.0167 },
+      'Agosta': { lat: 41.9167, lng: 13.0333 },
+      'Anticoli Corrado': { lat: 41.9167, lng: 12.9833 },
+      'Arcinazzo Romano': { lat: 41.8833, lng: 13.1167 },
+      'Arsoli': { lat: 41.8833, lng: 13.0167 },
+      'Camerata Nuova': { lat: 41.9167, lng: 13.1500 },
+      'Canterano': { lat: 41.9167, lng: 13.0333 },
+      'Capranica Prenestina': { lat: 41.8667, lng: 12.9500 },
+      'Carsoli': { lat: 41.9167, lng: 13.0833 },
+      'Castel Madama': { lat: 41.8833, lng: 12.8667 },
+      'Castel San Pietro Romano': { lat: 41.8333, lng: 12.9167 },
+      'Castelnuovo di Porto': { lat: 42.1167, lng: 12.5000 },
+      'Cerreto Laziale': { lat: 41.9167, lng: 13.0167 },
+      'Ciciliano': { lat: 41.9000, lng: 12.9333 },
+      'Cineto Romano': { lat: 41.9167, lng: 12.9667 },
+      'Civitella San Paolo': { lat: 42.2000, lng: 12.5833 },
+      'Colleferro': { lat: 41.7333, lng: 13.0167 },
+      'Colonna': { lat: 41.8333, lng: 12.7500 },
+      'Fiamignano': { lat: 42.2667, lng: 13.1167 },
+      'Fonte Nuova': { lat: 41.9833, lng: 12.6167 },
+      'Formello': { lat: 42.0833, lng: 12.4000 },
+      'Frascati': { lat: 41.8067, lng: 12.6792 },
+      'Gallicano nel Lazio': { lat: 41.8667, lng: 12.8667 },
+      'Gavignano': { lat: 41.7000, lng: 13.0500 },
+      'Genazzano': { lat: 41.8333, lng: 12.9667 },
+      'Gerano': { lat: 41.9000, lng: 12.9500 },
+      'Gorga': { lat: 41.6500, lng: 13.1167 },
+      'Grottaferrata': { lat: 41.7833, lng: 12.6667 },
+      'Guidonia Montecelio': { lat: 41.9833, lng: 12.7167 },
+      'Jenne': { lat: 41.8833, lng: 13.1667 },
+      'Labico': { lat: 41.7833, lng: 12.8833 },
+      'Lanuvio': { lat: 41.6833, lng: 12.7000 },
+      'Lariano': { lat: 41.7167, lng: 12.8333 },
+      'Licenza': { lat: 41.9167, lng: 12.9000 },
+      'Magliano Romano': { lat: 42.1500, lng: 12.4333 },
+      'Mandela': { lat: 41.9167, lng: 12.9167 },
+      'Manziana': { lat: 42.1333, lng: 12.1167 },
+      'Marano Equo': { lat: 41.9167, lng: 13.0167 },
+      'Marcellina': { lat: 41.9167, lng: 12.7833 },
+      'Marino': { lat: 41.7667, lng: 12.6500 },
+      'Mazzano Romano': { lat: 42.2000, lng: 12.4000 },
+      'Mentana': { lat: 41.9833, lng: 12.6333 },
+      'Monte Compatri': { lat: 41.8167, lng: 12.7167 },
+      'Monte Porzio Catone': { lat: 41.8167, lng: 12.7167 },
+      'Monteflavio': { lat: 41.9167, lng: 12.8333 },
+      'Montelanico': { lat: 41.6500, lng: 13.0333 },
+      'Montelibretti': { lat: 42.1333, lng: 12.7333 },
+      'Monterotondo': { lat: 42.0500, lng: 12.6167 },
+      'Montorio Romano': { lat: 41.9167, lng: 12.8000 },
+      'Moricone': { lat: 41.9167, lng: 12.7667 },
+      'Morlupo': { lat: 42.1500, lng: 12.5000 },
+      'Nazzano': { lat: 42.2333, lng: 12.6000 },
+      'Nemi': { lat: 41.7167, lng: 12.7167 },
+      'Nerola': { lat: 41.9167, lng: 12.7833 },
+      'Nettuno': { lat: 41.4578, lng: 12.6506 },
+      'Olevano Romano': { lat: 41.8667, lng: 13.0333 },
+      'Palestrina': { lat: 41.8333, lng: 12.8833 },
+      'Palombara Sabina': { lat: 41.9167, lng: 12.7667 },
+      'Percile': { lat: 41.9167, lng: 12.9167 },
+      'Pisoniano': { lat: 41.8833, lng: 12.9667 },
+      'Poli': { lat: 41.8833, lng: 12.8833 },
+      'Pomezia': { lat: 41.6667, lng: 12.5000 },
+      'Ponzano Romano': { lat: 42.2500, lng: 12.5667 },
+      'Riano': { lat: 42.1000, lng: 12.5167 },
+      'Rignano Flaminio': { lat: 42.2000, lng: 12.4833 },
+      'Riofreddo': { lat: 41.9167, lng: 13.0167 },
+      'Rocca Canterano': { lat: 41.9167, lng: 13.0167 },
+      'Rocca di Cave': { lat: 41.8500, lng: 12.9500 },
+      'Rocca di Papa': { lat: 41.7667, lng: 12.7667 },
+      'Rocca Priora': { lat: 41.7833, lng: 12.7667 },
+      'Rocca Santo Stefano': { lat: 41.9167, lng: 13.0167 },
+      'Roiate': { lat: 41.8667, lng: 13.0667 },
+      'Roma': { lat: 41.9028, lng: 12.4964 },
+      'Roviano': { lat: 41.9167, lng: 12.9833 },
+      'Sacrofano': { lat: 42.1000, lng: 12.4333 },
+      'Sambuci': { lat: 41.9167, lng: 12.9333 },
+      'San Cesareo': { lat: 41.8167, lng: 12.8167 },
+      'San Gregorio da Sassola': { lat: 41.9167, lng: 12.8667 },
+      'San Polo dei Cavalieri': { lat: 41.9167, lng: 12.8333 },
+      'San Vito Romano': { lat: 41.8833, lng: 13.0167 },
+      'Sant\'Angelo Romano': { lat: 41.9167, lng: 12.7167 },
+      'Sant\'Oreste': { lat: 42.2333, lng: 12.5167 },
+      'Santa Marinella': { lat: 42.0333, lng: 11.8500 },
+      'Sarzana': { lat: 44.1167, lng: 9.9667 },
+      'Serrone': { lat: 41.8333, lng: 13.1833 },
+      'Stazzano': { lat: 44.7167, lng: 8.8667 },
+      'Subiaco': { lat: 41.9167, lng: 13.1000 },
+      'Tivoli': { lat: 41.9667, lng: 12.8000 },
+      'Tolfa': { lat: 42.1500, lng: 11.9333 },
+      'Torrita Tiberina': { lat: 42.2333, lng: 12.6167 },
+      'Trevignano Romano': { lat: 42.1500, lng: 12.2500 },
+      'Vallepietra': { lat: 41.9167, lng: 13.2167 },
+      'Vallinfreda': { lat: 41.9000, lng: 13.0167 },
+      'Valmontone': { lat: 41.7833, lng: 12.9167 },
+      'Velletri': { lat: 41.6833, lng: 12.7667 },
+      'Vicovaro': { lat: 41.8833, lng: 12.9000 },
+      'Vivaro Romano': { lat: 41.9000, lng: 13.0167 },
+      'Zagarolo': { lat: 41.8333, lng: 12.8333 }
     };
 
     // Cerca coordinate esatte per il comune
