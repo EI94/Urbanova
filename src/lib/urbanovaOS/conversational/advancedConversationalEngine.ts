@@ -1338,11 +1338,11 @@ Vuoi che approfondisca qualche aspetto specifico o generi un'analisi di sensibil
       
       let result = `\n\n## 📋 I Tuoi Progetti di Fattibilità\n\n✅ **Trovati ${snapshot.size} progetti**\n\n`;
       
-      snapshot.forEach((doc, index) => {
+      snapshot.forEach((doc: any) => {
         const project = doc.data();
         const createdAt = project.createdAt?.toDate?.() || new Date(project.createdAt);
         
-        result += `### ${index + 1}. ${project.name}\n`;
+        result += `### ${snapshot.docs.indexOf(doc) + 1}. ${project.name}\n`;
         result += `- **ID**: ${doc.id}\n`;
         result += `- **Indirizzo**: ${project.address}\n`;
         result += `- **Area**: ${project.totalArea} mq\n`;
