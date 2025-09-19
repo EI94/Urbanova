@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import '@/lib/osProtection'; // OS Protection per API
-import { FeasibilityService } from '@/lib/feasibilityService';
 
 export async function POST(request: NextRequest) {
   try {
