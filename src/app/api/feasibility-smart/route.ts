@@ -87,84 +87,7 @@ export async function POST(request: NextRequest) {
     const projectIdMatch = text.match(/[a-zA-Z0-9]{20,}/); // Pattern per ID progetto Firebase
     const isProjectDetailsRequest = projectIdMatch || text.includes('progetto') && (text.includes('dettagli') || text.includes('dettaglio'));
     
-    // 🗂️ GESTIONE RICHIESTE DI CONSULTAZIONE PROGETTI
-    if (isConsultationRequest) {
-      console.log('🗂️ [FEASIBILITY SMART] Richiesta consultazione progetti');
-      
-      try {
-        // Import dinamico per evitare errori di build
-        const { db } = await import('@/lib/firebase');
-        const { getDocs, query, orderBy, limit, collection } = await import('firebase/firestore');
-        
-        // Query per ottenere i progetti di fattibilità
-        const projectsQuery = query(
-          collection(db, 'feasibilityProjects'),
-          orderBy('createdAt', 'desc'),
-          limit(10)
-        );
-        
-        console.log('🗂️ [FEASIBILITY SMART] Eseguendo query progetti...');
-        const snapshot = await getDocs(projectsQuery);
-        
-        if (snapshot.empty) {
-          return NextResponse.json({
-            success: true,
-            response: `\n\n## 📋 I Tuoi Progetti di Fattibilità\n\n❌ **Nessun progetto trovato**\n\nNon hai ancora creato progetti di fattibilità. Puoi crearne uno nuovo chiedendomi di fare un'analisi di fattibilità!\n\n*Esempio: "Aiutami a fare uno studio di fattibilità per un terreno di 1000mq a Milano"*`,
-            timestamp: new Date().toISOString(),
-            metadata: {
-              agentType: 'feasibility-smart',
-              provider: 'urbanova-os',
-              systemsUsed: ['project-consultation'],
-              projectsFound: 0
-            }
-          });
-        }
-        
-        let result = `\n\n## 📋 I Tuoi Progetti di Fattibilità\n\n✅ **Trovati ${snapshot.size} progetti**\n\n`;
-        
-        snapshot.forEach((doc: any) => {
-          const project = doc.data();
-          const projectId = doc.id;
-          
-          result += `### 📊 ${project.name || 'Progetto senza nome'}\n`;
-          result += `- **ID**: ${projectId}\n`;
-          result += `- **Indirizzo**: ${project.address || 'Non specificato'}\n`;
-          result += `- **Area**: ${project.totalArea || 0} mq\n`;
-          result += `- **Stato**: ${project.status || 'PIANIFICAZIONE'}\n`;
-          result += `- **Margine**: ${project.results?.margin?.toFixed(1) || 'N/A'}%\n`;
-          result += `- **ROI**: ${project.results?.roi?.toFixed(1) || 'N/A'}%\n`;
-          result += `- **Creato**: ${project.createdAt?.toDate?.()?.toLocaleDateString() || 'N/A'}\n\n`;
-        });
-        
-        result += `💡 **Cosa puoi fare:**\n`;
-        result += `• Chiedi dettagli su un progetto specifico\n`;
-        result += `• Modifica un progetto esistente\n`;
-        result += `• Crea un nuovo progetto\n`;
-        result += `• Confronta progetti diversi\n\n`;
-        
-        return NextResponse.json({
-          success: true,
-          response: result,
-          timestamp: new Date().toISOString(),
-          metadata: {
-            agentType: 'feasibility-smart',
-            provider: 'urbanova-os',
-            systemsUsed: ['project-consultation'],
-            projectsFound: snapshot.size
-          }
-        });
-        
-      } catch (error) {
-        console.error('❌ [FEASIBILITY SMART] Errore consultazione progetti:', error);
-        return NextResponse.json({
-          success: false,
-          error: 'Errore nella consultazione dei progetti',
-          details: (error as Error).message
-        }, { status: 500 });
-      }
-    }
-    
-    // 🔍 GESTIONE RICHIESTE DETTAGLI PROGETTO SPECIFICO
+    // 🔍 GESTIONE RICHIESTE DETTAGLI PROGETTO SPECIFICO (PRIORITÀ ALTA)
     if (isProjectDetailsRequest) {
       console.log('🔍 [FEASIBILITY SMART] Richiesta dettagli progetto specifico');
       
@@ -271,6 +194,83 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: false,
           error: 'Errore nel recupero dei dettagli del progetto',
+          details: (error as Error).message
+        }, { status: 500 });
+      }
+    }
+    
+    // 🗂️ GESTIONE RICHIESTE DI CONSULTAZIONE PROGETTI
+    if (isConsultationRequest) {
+      console.log('🗂️ [FEASIBILITY SMART] Richiesta consultazione progetti');
+      
+      try {
+        // Import dinamico per evitare errori di build
+        const { db } = await import('@/lib/firebase');
+        const { getDocs, query, orderBy, limit, collection } = await import('firebase/firestore');
+        
+        // Query per ottenere i progetti di fattibilità
+        const projectsQuery = query(
+          collection(db, 'feasibilityProjects'),
+          orderBy('createdAt', 'desc'),
+          limit(10)
+        );
+        
+        console.log('🗂️ [FEASIBILITY SMART] Eseguendo query progetti...');
+        const snapshot = await getDocs(projectsQuery);
+        
+        if (snapshot.empty) {
+          return NextResponse.json({
+            success: true,
+            response: `\n\n## 📋 I Tuoi Progetti di Fattibilità\n\n❌ **Nessun progetto trovato**\n\nNon hai ancora creato progetti di fattibilità. Puoi crearne uno nuovo chiedendomi di fare un'analisi di fattibilità!\n\n*Esempio: "Aiutami a fare uno studio di fattibilità per un terreno di 1000mq a Milano"*`,
+            timestamp: new Date().toISOString(),
+            metadata: {
+              agentType: 'feasibility-smart',
+              provider: 'urbanova-os',
+              systemsUsed: ['project-consultation'],
+              projectsFound: 0
+            }
+          });
+        }
+        
+        let result = `\n\n## 📋 I Tuoi Progetti di Fattibilità\n\n✅ **Trovati ${snapshot.size} progetti**\n\n`;
+        
+        snapshot.forEach((doc: any) => {
+          const project = doc.data();
+          const projectId = doc.id;
+          
+          result += `### 📊 ${project.name || 'Progetto senza nome'}\n`;
+          result += `- **ID**: ${projectId}\n`;
+          result += `- **Indirizzo**: ${project.address || 'Non specificato'}\n`;
+          result += `- **Area**: ${project.totalArea || 0} mq\n`;
+          result += `- **Stato**: ${project.status || 'PIANIFICAZIONE'}\n`;
+          result += `- **Margine**: ${project.results?.margin?.toFixed(1) || 'N/A'}%\n`;
+          result += `- **ROI**: ${project.results?.roi?.toFixed(1) || 'N/A'}%\n`;
+          result += `- **Creato**: ${project.createdAt?.toDate?.()?.toLocaleDateString() || 'N/A'}\n\n`;
+        });
+        
+        result += `💡 **Cosa puoi fare:**\n`;
+        result += `• Chiedi dettagli su un progetto specifico\n`;
+        result += `• Modifica un progetto esistente\n`;
+        result += `• Crea un nuovo progetto\n`;
+        result += `• Confronta progetti diversi\n\n`;
+        
+        return NextResponse.json({
+          success: true,
+          response: result,
+          timestamp: new Date().toISOString(),
+          metadata: {
+            agentType: 'feasibility-smart',
+            provider: 'urbanova-os',
+            systemsUsed: ['project-consultation'],
+            projectsFound: snapshot.size
+          }
+        });
+        
+      } catch (error) {
+        console.error('❌ [FEASIBILITY SMART] Errore consultazione progetti:', error);
+        return NextResponse.json({
+          success: false,
+          error: 'Errore nella consultazione dei progetti',
           details: (error as Error).message
         }, { status: 500 });
       }
