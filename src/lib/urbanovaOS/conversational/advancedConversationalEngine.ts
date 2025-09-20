@@ -216,7 +216,7 @@ export class AdvancedConversationalEngine {
       
       // 🛠️ ATTIVAZIONE TOOL GARANTITA
       const toolResults = await this.activateToolsGuaranteed(intent, context, originalRequest);
-      toolsActivated = ['feasibility_analysis']; // SEMPRE attiva analisi fattibilità
+      toolsActivated = intent.toolsRequired; // Usa i tool determinati dall'intent
       
       response += toolResults;
     } else {
@@ -352,7 +352,10 @@ export class AdvancedConversationalEngine {
     const areaPatterns = [
       /(\d+)\s*(?:metri quadrati|mq|m²)/i,
       /terreno.*?(\d+)\s*(?:metri quadrati|mq|m²)/i,
-      /(\d+)\s*(?:metri quadrati|mq|m²).*?terreno/i
+      /(\d+)\s*(?:metri quadrati|mq|m²).*?terreno/i,
+      /(\d+)\s*metri quadrati/i,
+      /terreno.*?(\d+)\s*metri/i,
+      /(\d+)\s*metri.*?terreno/i
     ];
     
     for (const pattern of areaPatterns) {
@@ -374,7 +377,9 @@ export class AdvancedConversationalEngine {
       /costruzion[:\s]*(\d+)/i,
       /costruzione[:\s]*(\d+)/i,
       /costo\s*costruzione[:\s]*(\d+)/i,
-      /costo[:\s]*(\d+)\s*euro/i
+      /costo[:\s]*(\d+)\s*euro/i,
+      /consto[:\s]*(\d+)\s*euro/i, // Tolleranza errore di battitura "consto"
+      /consto[:\s]*(\d+)/i
     ];
     
     for (const pattern of costPatterns) {
@@ -427,6 +432,30 @@ export class AdvancedConversationalEngine {
     const nameMatch = message.match(/(?:progetto|nome)[:\s]*([^,.\n]+)/i);
     if (nameMatch && nameMatch[1]) {
       data.name = nameMatch[1].trim();
+    }
+
+    // Tipologia progetto
+    if (text.includes('bifamiliare')) {
+      data.projectType = 'bifamiliare';
+      data.units = 2;
+    } else if (text.includes('villa')) {
+      data.projectType = 'villa';
+      data.units = 1;
+    } else if (text.includes('appartamento')) {
+      data.projectType = 'appartamento';
+      data.units = 1;
+    }
+
+    // Parcheggi
+    const parkingMatch = message.match(/(\d+)\s*parcheggi/i);
+    if (parkingMatch && parkingMatch[1]) {
+      data.parkingSpaces = parseInt(parkingMatch[1]);
+    }
+
+    // Area per unità
+    const unitAreaMatch = message.match(/(\d+)\s*metri.*?appartamento/i);
+    if (unitAreaMatch && unitAreaMatch[1]) {
+      data.areaPerUnit = parseInt(unitAreaMatch[1]);
     }
 
     // Location - Pattern più flessibili (UNIFICATO CON ORCHESTRATOR)
@@ -594,12 +623,15 @@ export class AdvancedConversationalEngine {
     // 🎯 RICHIESTE DI FATTIBILITÀ - Sempre attiva se contiene keyword
     if (this.isFeasibilityRequest(text, intents)) {
       tools.push('feasibility_analysis');
+      console.log('🔍 [DEBUG] Attivato feasibility_analysis per richiesta esplicita');
       return tools;
     }
     
-    
-    if (!hasProjectData) {
-      return tools; // Nessun tool se non ci sono dati di progetto
+    // 🎯 RICHIESTE CON DATI PROGETTO - Attiva tool anche senza dati completi
+    if (hasProjectData) {
+      console.log('🔍 [DEBUG] Trovati dati progetto, attivando tool appropriati');
+    } else {
+      console.log('🔍 [DEBUG] Nessun dato progetto trovato, ma continuando con logica intelligente');
     }
     
     // 🎯 ANALISI CONTESTUALE: Riconosce l'intento specifico dell'utente
@@ -688,7 +720,8 @@ export class AdvancedConversationalEngine {
       'roi', 'ritorno investimento', 'redditività', 'convenienza',
       'analisi', 'studio', 'valutazione', 'calcolo', 'calcola',
       'quanto costa', 'costo totale', 'spesa totale', 'investimento',
-      'terreno', 'progetto', 'immobile', 'costruzione'
+      'terreno', 'progetto', 'immobile', 'costruzione', 'crea una analisi',
+      'crea un analisi', 'fai una analisi', 'fai un analisi'
     ];
     
     const keywordMatches = feasibilityKeywords.filter(keyword => text.includes(keyword));
@@ -696,7 +729,11 @@ export class AdvancedConversationalEngine {
     const hasIntentMatch = intents.primary === 'feasibility';
     const hasConfidenceMatch = intents.confidence > 0.5 && (text.includes('terreno') || text.includes('progetto') || text.includes('immobile'));
     
-    const result = hasKeywordMatch || hasIntentMatch || hasConfidenceMatch;
+    // 🎯 RICONOSCIMENTO PATTERN SPECIFICI PER L'UTENTE
+    const hasCreatePattern = text.includes('crea') && (text.includes('analisi') || text.includes('fattibilità'));
+    const hasDoPattern = text.includes('fai') && (text.includes('analisi') || text.includes('fattibilità'));
+    
+    const result = hasKeywordMatch || hasIntentMatch || hasConfidenceMatch || hasCreatePattern || hasDoPattern;
     
     console.log('🔍 [DEBUG] isFeasibilityRequest:', {
       text: text.substring(0, 100) + '...',
@@ -704,6 +741,8 @@ export class AdvancedConversationalEngine {
       hasKeywordMatch,
       hasIntentMatch,
       hasConfidenceMatch,
+      hasCreatePattern,
+      hasDoPattern,
       result
     });
     
