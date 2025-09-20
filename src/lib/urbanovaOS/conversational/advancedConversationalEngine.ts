@@ -4,6 +4,9 @@
 // 🛡️ OS PROTECTION - Importa protezione CSS per l'engine
 import '@/lib/osProtection';
 
+// 🧠 GOAL-ORIENTED INTENT RECOGNIZER
+import { GoalOrientedIntentRecognizer, GoalOrientedIntent, ConversationContext } from '../intelligence/goalOrientedIntentRecognizer';
+
 export interface ConversationalState {
   current: 'listening' | 'thinking' | 'analyzing' | 'calculating' | 'responding';
   emotion: 'neutral' | 'empathetic' | 'professional' | 'encouraging' | 'problem_solving';
@@ -34,6 +37,8 @@ export class AdvancedConversationalEngine {
   private currentState: ConversationalState;
   private conversationHistory: any[] = [];
   private static userMemory: Map<string, any> = new Map(); // STATIC per persistenza
+  private goalOrientedRecognizer: GoalOrientedIntentRecognizer;
+  private conversationContext: Map<string, ConversationContext> = new Map(); // CONTESTO PER UTENTE
   
   constructor() {
     this.currentState = {
@@ -43,6 +48,9 @@ export class AdvancedConversationalEngine {
       contextDepth: 0,
       reliability: 95
     };
+    
+    // 🧠 INIZIALIZZA GOAL-ORIENTED RECOGNIZER
+    this.goalOrientedRecognizer = GoalOrientedIntentRecognizer.getInstance();
   }
 
   /**
