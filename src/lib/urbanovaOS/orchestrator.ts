@@ -4366,7 +4366,7 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
         });
         
         const conversationalResponse = await this.conversationalEngine.generateAdvancedResponse(
-          userIntent, 
+          request.message, 
           memory, 
           request,
           projectData
@@ -4590,7 +4590,7 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
           console.log('🔍 [DEBUG] isFeasibilityQuery:', isFeasibilityQuery);
           
           const conversationalResponse = await this.conversationalEngine.generateAdvancedResponse(
-            userIntent, 
+            request.message, 
             memory, 
             request
           );
@@ -4743,7 +4743,7 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
           console.log('🧠 [Advanced Conversational] FALLBACK - Attivando sistema avanzato...');
           
           const conversationalResponse = await this.conversationalEngine.generateAdvancedResponse(
-            userIntent, 
+            request.message, 
             memory, 
             request
           );

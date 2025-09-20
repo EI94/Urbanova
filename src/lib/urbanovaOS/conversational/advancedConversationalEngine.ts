@@ -125,10 +125,63 @@ export class AdvancedConversationalEngine {
   }
 
   /**
-   * 🎯 ANALISI AVANZATA DELL'INTENTO UTENTE
-   * Analizza il messaggio con capacità superiori a ChatGPT-5
+   * 🎯 ANALISI AVANZATA DELL'INTENTO UTENTE CON GOAL-ORIENTED LLM
+   * Analizza il messaggio con capacità superiori a ChatGPT-5 usando LLM
    */
-  analyzeUserIntent(message: string, context: any): UserIntent {
+  async analyzeUserIntent(message: string, context: any, userId: string = 'anonymous'): Promise<UserIntent> {
+    console.log('🧠 [GOAL-ORIENTED] Analizzando intent utente con LLM...');
+    
+    try {
+      // 🧠 USA GOAL-ORIENTED RECOGNIZER CON LLM
+      const conversationContext = this.conversationContext.get(userId) || { 
+        previousMessages: [], 
+        currentProject: null,
+        userPreferences: {},
+        sessionGoals: []
+      };
+      
+      const goalOrientedIntent = await this.goalOrientedRecognizer.analyzeIntentWithLLM(message, conversationContext);
+      
+      // 🔄 AGGIORNA CONTESTO CONVERSAZIONALE
+      const updatedContext = this.goalOrientedRecognizer.updateConversationContext(
+        conversationContext, 
+        message, 
+        goalOrientedIntent
+      );
+      this.conversationContext.set(userId, updatedContext);
+      
+      // 🔄 CONVERTI GOAL-ORIENTED INTENT IN USERINTENT
+      const userIntent: UserIntent = {
+        primary: goalOrientedIntent.primaryGoal,
+        secondary: goalOrientedIntent.secondaryGoals,
+        confidence: goalOrientedIntent.confidence,
+        urgency: goalOrientedIntent.urgency,
+        complexity: goalOrientedIntent.complexity,
+        dataExtracted: goalOrientedIntent.extractedData,
+        toolsRequired: goalOrientedIntent.requiredTools
+      };
+      
+      console.log('✅ [GOAL-ORIENTED] Intent analizzato con LLM:', {
+        primary: userIntent.primary,
+        confidence: userIntent.confidence,
+        toolsRequired: userIntent.toolsRequired,
+        extractedData: userIntent.dataExtracted
+      });
+      
+      return userIntent;
+      
+    } catch (error) {
+      console.error('❌ [GOAL-ORIENTED] Errore analisi intent, usando fallback:', error);
+      
+      // 🔄 FALLBACK: Usa riconoscimento tradizionale
+      return this.fallbackIntentAnalysis(message, context);
+    }
+  }
+
+  /**
+   * 🔄 FALLBACK INTENT ANALYSIS
+   */
+  private fallbackIntentAnalysis(message: string, context: any): UserIntent {
     const text = message.toLowerCase();
     
     // 🔍 ANALISI SENTIMENT AVANZATA
@@ -163,11 +216,15 @@ export class AdvancedConversationalEngine {
    * Genera risposte con empatia, stati e capacità superiori
    */
   async generateAdvancedResponse(
-    intent: UserIntent, 
+    message: string,
     context: any,
     originalRequest: any,
     projectData?: any
   ): Promise<ConversationalResponse> {
+    
+    // 🧠 ANALISI INTENT CON GOAL-ORIENTED LLM
+    const userId = originalRequest.userId || 'anonymous';
+    const intent = await this.analyzeUserIntent(message, context, userId);
     
     // 🎭 ADATTA STATO EMOTIVO
     this.adaptEmotionalState(intent);
@@ -179,8 +236,8 @@ export class AdvancedConversationalEngine {
     let toolsActivated: string[] = [];
     
     // 🧠 RECUPERA CONTESTO CONVERSAZIONALE PER UTENTI SMEMORATI
-    const userId = originalRequest.userId || 'anonymous';
-    const conversationContext = this.getConversationContext(userId);
+    const conversationUserId = originalRequest.userId || 'anonymous';
+    const conversationContext = this.getConversationContext(conversationUserId);
     
     // 💝 RISPOSTA EMPATICA INIZIALE CON CONTESTO
     response += this.generateEmpathicOpening(intent);
