@@ -275,6 +275,7 @@ class IstatApiService {
       
       console.log(`📊 [IstatAPI] Parsing CSV ISTAT con ${lines.length} linee`);
       console.log(`📊 [IstatAPI] Header CSV:`, lines[0]?.substring(0, 200));
+      console.log(`📊 [IstatAPI] Prime 3 linee CSV:`, lines.slice(0, 3));
       
       // Skip header line
       for (let i = 1; i < lines.length; i++) {
@@ -299,6 +300,7 @@ class IstatApiService {
             // Debug coordinate
             if (i <= 3) {
               console.log(`🗺️ [IstatAPI] Coordinate per ${nomeComune}, ${nomeProvincia}:`, coordinate);
+              console.log(`🗺️ [IstatAPI] Comune creato:`, { nome: nomeComune, provincia: nomeProvincia, regione: columns[9]?.trim() });
             }
             
             const comune: IstatComuneData = {
@@ -319,6 +321,13 @@ class IstatApiService {
             // Filtra solo comuni validi
             if (comune.nome && comune.codiceIstat && comune.provincia && comune.regione) {
               comuni.push(comune);
+              if (i <= 3) {
+                console.log(`✅ [IstatAPI] Comune aggiunto:`, comune.nome);
+              }
+            } else {
+              if (i <= 3) {
+                console.log(`❌ [IstatAPI] Comune scartato:`, { nome: comune.nome, codiceIstat: comune.codiceIstat, provincia: comune.provincia, regione: comune.regione });
+              }
             }
           }
         } catch (error) {
