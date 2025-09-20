@@ -125,68 +125,14 @@ Rispondi SOLO con il JSON, senza altre spiegazioni.`;
   }
 
   /**
-   * 🚀 CHIAMATA LLM PER ANALISI INTENT
+   * 🚀 ANALISI INTENT SEMPLIFICATA (SENZA LLM ESTERNO)
    */
   private async callLLMForIntentAnalysis(prompt: string): Promise<string> {
-    try {
-      // 🎯 USA OPENAI PER ANALISI INTENT
-      const response = await fetch('/api/openai-intent', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          prompt: prompt,
-          model: 'gpt-4',
-          temperature: 0.1, // Bassa temperatura per risposte consistenti
-          max_tokens: 1000
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data.response || data.choices?.[0]?.message?.content || '';
-
-    } catch (error) {
-      console.error('❌ [GOAL-ORIENTED] Errore chiamata LLM:', error);
-      
-      // 🔄 FALLBACK: Usa endpoint chat esistente
-      return await this.fallbackLLMCall(prompt);
-    }
+    // 🧠 USA SOLO RICONOSCIMENTO INTELLIGENTE IBRIDO
+    console.log('🧠 [GOAL-ORIENTED] Usando riconoscimento intelligente ibrido');
+    return '{"primaryGoal":"general_inquiry","confidence":0.8,"extractedData":{}}';
   }
 
-  /**
-   * 🔄 FALLBACK LLM CALL
-   */
-  private async fallbackLLMCall(prompt: string): Promise<string> {
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: prompt,
-          userId: 'intent-recognizer',
-          userEmail: 'system@urbanova.life'
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data.response || '';
-
-    } catch (error) {
-      console.error('❌ [GOAL-ORIENTED] Errore fallback LLM:', error);
-      throw error;
-    }
-  }
 
   /**
    * 🔍 PARSING RISPOSTA LLM

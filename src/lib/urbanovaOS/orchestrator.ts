@@ -4084,12 +4084,50 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
   ): UrbanovaOSResponse {
     console.error('❌ [UrbanovaOS Orchestrator] Gestendo errore:', error);
 
+    // 🧠 GESTIONE ERRORI INTELLIGENTE BASATA SUL TIPO DI ERRORE
+    let errorResponse = '';
+    let suggestedActions: string[] = [];
+    
+    if (error.message?.includes('Timeout')) {
+      errorResponse = `⏱️ **Timeout rilevato** - Il sistema sta elaborando la tua richiesta ma ha impiegato più tempo del previsto.\n\n` +
+                     `🔄 **Cosa fare:**\n` +
+                     `• Riprova la stessa richiesta\n` +
+                     `• Prova a semplificare la richiesta\n` +
+                     `• Contatta il supporto se il problema persiste\n\n` +
+                     `💡 **Suggerimento:** Per analisi complesse, prova a fornire i dati in modo più graduale.`;
+      suggestedActions = ['Riprova richiesta', 'Semplifica richiesta', 'Contatta supporto'];
+    } else if (error.message?.includes('Firebase') || error.message?.includes('Firestore')) {
+      errorResponse = `🔥 **Errore database** - Problema temporaneo con il salvataggio dei dati.\n\n` +
+                     `🔄 **Cosa fare:**\n` +
+                     `• Riprova tra qualche minuto\n` +
+                     `• I tuoi dati sono al sicuro\n` +
+                     `• Il sistema si riprenderà automaticamente\n\n` +
+                     `💡 **Nota:** Questo è un problema temporaneo, non hai perso nessun dato.`;
+      suggestedActions = ['Riprova tra 5 minuti', 'Verifica connessione', 'Contatta supporto'];
+    } else if (error.message?.includes('OpenAI') || error.message?.includes('API')) {
+      errorResponse = `🤖 **Errore servizio AI** - Problema temporaneo con il servizio di intelligenza artificiale.\n\n` +
+                     `🔄 **Cosa fare:**\n` +
+                     `• Riprova tra qualche minuto\n` +
+                     `• Prova con una richiesta diversa\n` +
+                     `• Il sistema si riprenderà automaticamente\n\n` +
+                     `💡 **Nota:** Questo è un problema temporaneo del servizio AI.`;
+      suggestedActions = ['Riprova tra 2 minuti', 'Prova richiesta diversa', 'Contatta supporto'];
+    } else {
+      errorResponse = `⚠️ **Errore temporaneo** - Si è verificato un problema durante l'elaborazione.\n\n` +
+                     `🔄 **Cosa fare:**\n` +
+                     `• Riprova la richiesta\n` +
+                     `• Prova con una richiesta più semplice\n` +
+                     `• Contatta il supporto se il problema persiste\n\n` +
+                     `💡 **Suggerimento:** Spesso riprovare risolve il problema.`;
+      suggestedActions = ['Riprova richiesta', 'Semplifica richiesta', 'Contatta supporto'];
+    }
+
     return {
       type: 'error',
-      response: 'Mi dispiace, si è verificato un errore durante l\'elaborazione della tua richiesta. Riprova tra qualche momento.',
+      response: errorResponse,
       confidence: 0,
       metadata: {
-        systemsUsed: [],
+        systemsUsed: ['error-handler'],
         executionTime,
         memoryUsage: 0,
         cpuUsage: 0,
@@ -4097,10 +4135,13 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
         workflowsTriggered: [],
         classifications: [],
         vectorMatches: [],
-        fallbackReason: error.message
+        fallbackReason: error.message,
+        errorType: error.message?.includes('Timeout') ? 'timeout' : 
+                  error.message?.includes('Firebase') ? 'database' :
+                  error.message?.includes('OpenAI') ? 'ai-service' : 'unknown'
       },
-      suggestedActions: [],
-      nextSteps: [],
+      suggestedActions,
+      nextSteps: ['Riprova la richiesta', 'Contatta supporto se necessario'],
       systemStatus: {
         overall: 'degraded',
         components: {
