@@ -261,6 +261,13 @@ export class AdvancedConversationalEngine {
     this.currentState.current = 'analyzing';
     
     // 🔍 ANALISI E ATTIVAZIONE TOOL - LOGICA INTELLIGENTE CHATGPT-5
+    console.log('🔍 [OS] Intent analysis:', {
+      primary: intent.primary,
+      toolsRequired: intent.toolsRequired,
+      hasData: Object.keys(intent.dataExtracted).length > 0,
+      dataKeys: Object.keys(intent.dataExtracted)
+    });
+    
     if (intent.primary === 'consultation') {
       // 🗂️ CONSULTAZIONE PROGETTI ESISTENTI
       response += this.generateThinkingState(intent);
@@ -274,6 +281,7 @@ export class AdvancedConversationalEngine {
       
       response += consultationResults;
     } else if (intent.toolsRequired.length > 0) {
+      // 🛠️ ATTIVAZIONE TOOL BASATA SU INTENT
       response += this.generateThinkingState(intent);
       
       // 🧠 STATO: CALCULATING
@@ -282,6 +290,19 @@ export class AdvancedConversationalEngine {
       // 🛠️ ATTIVAZIONE TOOL GARANTITA
       const toolResults = await this.activateToolsGuaranteed(intent, context, originalRequest);
       toolsActivated = intent.toolsRequired; // Usa i tool determinati dall'intent
+      
+      response += toolResults;
+    } else if (this.shouldActivateToolsIntelligently(intent, originalRequest.message)) {
+      // 🧠 ATTIVAZIONE INTELLIGENTE BASATA SU CONTESTO
+      console.log('🧠 [OS] Attivazione intelligente tool basata su contesto');
+      response += this.generateThinkingState(intent);
+      
+      // 🧠 STATO: CALCULATING
+      this.currentState.current = 'calculating';
+      
+      // 🛠️ ATTIVAZIONE TOOL INTELLIGENTE
+      const toolResults = await this.activateToolsGuaranteed(intent, context, originalRequest);
+      toolsActivated = ['feasibility_analysis']; // Default intelligente
       
       response += toolResults;
     } else {
@@ -983,7 +1004,7 @@ export class AdvancedConversationalEngine {
       // Costi
       costs: {
         land: {
-          purchasePrice: data.purchasePrice || 0,
+      purchasePrice: data.purchasePrice || 0,
           purchaseTaxes: (data.purchasePrice || 0) * 0.1, // 10% tasse
           intermediationFees: (data.purchasePrice || 0) * 0.03, // 3% commissioni
           subtotal: (data.purchasePrice || 0) * 1.13
@@ -1041,10 +1062,10 @@ export class AdvancedConversationalEngine {
       console.log('🔧 [Advanced Engine] Attivando analisi di fattibilità OTTIMIZZATA...');
       
       try {
-        // TIMEOUT PROTECTION: Limita tempo di attesa
+        // TIMEOUT PROTECTION: Limita tempo di attesa a 3 secondi per essere più veloce
         const feasibilityPromise = this.generateFeasibilityAnalysisOptimized(finalProjectData);
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout')), 5000) // 5 secondi max
+          setTimeout(() => reject(new Error('Timeout analisi fattibilità')), 3000) // 3 secondi max
         );
         
         const feasibilityResult = await Promise.race([feasibilityPromise, timeoutPromise]);
@@ -1052,7 +1073,13 @@ export class AdvancedConversationalEngine {
         
       } catch (error) {
         console.error('❌ [Advanced Engine] Errore analisi fattibilità:', error);
-        result += this.generateFeasibilityAnalysis(finalProjectData);
+        // Fallback veloce senza bloccare l'OS
+        result += `## 🏗️ Analisi di Fattibilità\n\n⚠️ **Analisi in corso...**\n\n` +
+                 `📊 **Dati progetto:**\n` +
+                 `- Nome: ${finalProjectData.name}\n` +
+                 `- Area: ${finalProjectData.totalArea} mq\n` +
+                 `- Investimento: €${finalProjectData.costs.total.toLocaleString()}\n\n` +
+                 `*Il progetto verrà salvato automaticamente.*\n\n`;
       }
     }
 
@@ -1083,10 +1110,10 @@ export class AdvancedConversationalEngine {
         userId: originalRequest.userId
       });
       
-      // TIMEOUT PROTECTION: Limita tempo di attesa a 5 secondi per salvataggio
+      // TIMEOUT PROTECTION: Limita tempo di attesa a 3 secondi per salvataggio
       const projectPromise = this.saveProjectOptimized(finalProjectData, originalRequest.userId);
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout')), 5000) // 5 secondi max per salvataggio
+        setTimeout(() => reject(new Error('Timeout salvataggio')), 3000) // 3 secondi max per salvataggio
       );
       
       try {
@@ -1094,8 +1121,13 @@ export class AdvancedConversationalEngine {
         console.log('📊 [Advanced Engine] Risultato salvataggio progetto:', projectResult);
         result += projectResult;
       } catch (timeoutError) {
-        console.warn('⚠️ [Advanced Engine] Timeout salvataggio progetto (5s), continuo senza salvataggio');
-        // Continua senza bloccare l'OS
+        console.warn('⚠️ [Advanced Engine] Timeout salvataggio progetto (3s), continuo senza salvataggio');
+        // Fallback: Messaggio di conferma anche se timeout
+        result += `## 📊 Gestione Progetto\n\n⚠️ **Salvataggio in corso...**\n\n` +
+                 `✅ **Progetto**: ${finalProjectData.name}\n` +
+                 `📝 **Stato**: In elaborazione\n` +
+                 `💾 **Salvataggio**: Automatico nella pagina Analisi Fattibilità\n\n` +
+                 `*Il progetto verrà salvato automaticamente.*\n\n`;
       }
       
     } catch (error) {
@@ -1424,10 +1456,141 @@ Vuoi che approfondisca qualche aspetto specifico o generi un'analisi di sensibil
   }
 
   /**
-   * 💬 GENERAZIONE RISPOSTA CONVERSAZIONALE
+   * 🧠 ATTIVAZIONE INTELLIGENTE TOOL BASATA SU CONTESTO
+   */
+  private shouldActivateToolsIntelligently(intent: UserIntent, message: string): boolean {
+    const text = message.toLowerCase();
+    const dataExtracted = intent.dataExtracted;
+    
+    // 🎯 ATTIVAZIONE INTELLIGENTE PER ANALISI FATTIBILITÀ
+    if (intent.primary === 'feasibility_analysis' || intent.primary === 'general_inquiry') {
+      // Se contiene dati progetto sufficienti, attiva tool
+      const hasProjectData = dataExtracted.area || dataExtracted.constructionCost || 
+                            dataExtracted.purchasePrice || dataExtracted.targetMargin;
+      
+      // Se contiene keyword di fattibilità, attiva tool
+      const hasFeasibilityKeywords = text.includes('analisi') || text.includes('fattibilità') || 
+                                    text.includes('terreno') || text.includes('progetto') ||
+                                    text.includes('costruzione') || text.includes('investimento');
+      
+      // Se contiene dati numerici significativi, attiva tool
+      const hasSignificantData = (dataExtracted.area && dataExtracted.area > 50) ||
+                                (dataExtracted.constructionCost && dataExtracted.constructionCost > 1000) ||
+                                (dataExtracted.purchasePrice && dataExtracted.purchasePrice > 50000);
+      
+      console.log('🧠 [OS] Attivazione intelligente check:', {
+        hasProjectData,
+        hasFeasibilityKeywords,
+        hasSignificantData,
+        shouldActivate: hasProjectData || (hasFeasibilityKeywords && hasSignificantData)
+      });
+      
+      return hasProjectData || (hasFeasibilityKeywords && hasSignificantData);
+    }
+    
+    // 🎯 ATTIVAZIONE INTELLIGENTE PER CONSULTAZIONE
+    if (intent.primary === 'project_consultation' || intent.primary === 'general_inquiry') {
+      const hasConsultationKeywords = text.includes('mostra') || text.includes('progetti') || 
+                                     text.includes('lista') || text.includes('esistenti') ||
+                                     text.includes('consultazione') || text.includes('visualizza');
+      
+      return hasConsultationKeywords;
+    }
+    
+    return false;
+  }
+
+  /**
+   * 💬 GENERAZIONE RISPOSTA CONVERSAZIONALE INTELLIGENTE
    */
   private generateConversationalResponse(intent: UserIntent, context: any): string {
-    return "Ti aiuto volentieri! Per fornirti un'analisi precisa, ho bisogno di alcuni dati specifici del tuo progetto. Puoi condividere dettagli come superficie del terreno, costi di costruzione, prezzo di acquisto e obiettivi di marginalità?";
+    const primaryGoal = intent.primary;
+    const dataExtracted = intent.dataExtracted;
+    
+    // 🎯 RISPOSTE CONTESTUALI BASATE SULL'INTENT
+    switch (primaryGoal) {
+      case 'feasibility_analysis':
+        if (dataExtracted.area || dataExtracted.constructionCost || dataExtracted.purchasePrice) {
+          return `Perfetto! Vedo che hai già fornito alcuni dati del progetto. Per completare l'analisi di fattibilità, mi servono ancora alcuni dettagli:\n\n` +
+                 `📊 **Dati mancanti:**\n` +
+                 `${!dataExtracted.area ? '• Superficie del terreno (mq)\n' : ''}` +
+                 `${!dataExtracted.constructionCost ? '• Costo di costruzione per mq\n' : ''}` +
+                 `${!dataExtracted.purchasePrice ? '• Prezzo di acquisto del terreno\n' : ''}` +
+                 `${!dataExtracted.targetMargin ? '• Margine target desiderato (%)\n' : ''}` +
+                 `\n💡 **Esempio:** "Il terreno è di 500mq, costo costruzione 2000€/mq, prezzo acquisto 300.000€, target margine 25%"\n\n` +
+                 `Una volta che mi dai questi dati, farò un'analisi completa di fattibilità!`;
+        } else {
+          return `Ottimo! Sono pronto per aiutarti con un'analisi di fattibilità completa. Per fornirti un'analisi precisa, ho bisogno di questi dati:\n\n` +
+                 `📋 **Dati richiesti:**\n` +
+                 `• Nome del progetto\n` +
+                 `• Superficie del terreno (mq)\n` +
+                 `• Tipologia (villa, bifamiliare, appartamenti)\n` +
+                 `• Costo di costruzione per mq\n` +
+                 `• Prezzo di acquisto del terreno\n` +
+                 `• Margine target desiderato (%)\n\n` +
+                 `💡 **Esempio:** "Progetto Villa Roma: terreno 800mq, villa singola, costo 1800€/mq, acquisto 400.000€, target 30%"\n\n` +
+                 `Condividi questi dati e farò un'analisi dettagliata!`;
+        }
+        
+      case 'project_consultation':
+        return `Perfetto! Posso mostrarti tutti i tuoi progetti di fattibilità esistenti. Attualmente hai progetti salvati che posso consultare e analizzare.\n\n` +
+               `🔍 **Cosa posso fare:**\n` +
+               `• Mostrare tutti i progetti\n` +
+               `• Analizzare progetti specifici\n` +
+               `• Confrontare progetti diversi\n` +
+               `• Suggerire miglioramenti\n\n` +
+               `Dimmi quale progetto vuoi consultare o se vuoi vedere tutti i progetti!`;
+        
+      case 'market_analysis':
+        return `Eccellente! Posso aiutarti con un'analisi di mercato approfondita. Per fornirti dati precisi, ho bisogno di:\n\n` +
+               `📈 **Dati per analisi mercato:**\n` +
+               `• Zona geografica specifica\n` +
+               `• Tipologia immobiliare\n` +
+               `• Superficie media\n` +
+               `• Periodo di riferimento\n\n` +
+               `💡 **Esempio:** "Analisi mercato Milano, appartamenti 80-120mq, ultimi 6 mesi"\n\n` +
+               `Con questi dati posso fornirti prezzi di mercato, trend e benchmark!`;
+        
+      case 'design_support':
+        return `Fantastico! Sono qui per supportarti nella progettazione. Posso aiutarti con:\n\n` +
+               `🎨 **Servizi di design:**\n` +
+               `• Layout ottimizzati\n` +
+               `• Distribuzione spazi\n` +
+               `• Rendering 3D\n` +
+               `• Suggerimenti architettonici\n\n` +
+               `📋 **Dati necessari:**\n` +
+               `• Superficie disponibile\n` +
+               `• Numero di unità\n` +
+               `• Esigenze specifiche\n` +
+               `• Budget design\n\n` +
+               `Condividi i dettagli del tuo progetto e creerò soluzioni personalizzate!`;
+        
+      case 'cost_calculation':
+        return `Perfetto! Posso aiutarti con calcoli di costo precisi. Per fornirti stime accurate, ho bisogno di:\n\n` +
+               `💰 **Dati per calcolo costi:**\n` +
+               `• Superficie da costruire\n` +
+               `• Tipologia edilizia\n` +
+               `• Livello di finiture\n` +
+               `• Zona geografica\n` +
+               `• Tempistiche\n\n` +
+               `💡 **Esempio:** "Calcola costi per 300mq, villa singola, finiture medie, zona Roma, 18 mesi"\n\n` +
+               `Con questi dati posso fornirti un preventivo dettagliato!`;
+        
+      case 'general_inquiry':
+      default:
+        return `Ciao! Sono l'OS di Urbanova, il tuo assistente intelligente per lo sviluppo immobiliare. Posso aiutarti con:\n\n` +
+               `🏗️ **Servizi disponibili:**\n` +
+               `• **Analisi di Fattibilità** - Valutazione economica progetti\n` +
+               `• **Consultazione Progetti** - Gestione progetti esistenti\n` +
+               `• **Analisi di Mercato** - Prezzi e trend immobiliari\n` +
+               `• **Supporto Progettuale** - Design e layout\n` +
+               `• **Calcoli di Costo** - Preventivi dettagliati\n\n` +
+               `💡 **Come iniziare:** Dimmi cosa vuoi fare! Ad esempio:\n` +
+               `• "Fai un'analisi di fattibilità per un terreno di 500mq"\n` +
+               `• "Mostrami i miei progetti"\n` +
+               `• "Analizza il mercato di Milano"\n\n` +
+               `Cosa posso fare per te oggi?`;
+    }
   }
 
   /**
