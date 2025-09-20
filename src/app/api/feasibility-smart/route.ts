@@ -80,7 +80,12 @@ export async function POST(request: NextRequest) {
     
     const isConsultationRequest = text.includes('mostra') || text.includes('progetti') || 
                                  text.includes('lista') || text.includes('esistenti') ||
-                                 text.includes('consultazione') || text.includes('visualizza');
+                                 text.includes('consultazione') || text.includes('visualizza') ||
+                                 text.includes('dettagli') || text.includes('dettaglio');
+    
+    // 🔍 RICONOSCIMENTO RICHIESTE DETTAGLI PROGETTO SPECIFICO
+    const projectIdMatch = text.match(/[a-zA-Z0-9]{20,}/); // Pattern per ID progetto Firebase
+    const isProjectDetailsRequest = projectIdMatch || text.includes('progetto') && (text.includes('dettagli') || text.includes('dettaglio'));
     
     // 🗂️ GESTIONE RICHIESTE DI CONSULTAZIONE PROGETTI
     if (isConsultationRequest) {
@@ -159,10 +164,122 @@ export async function POST(request: NextRequest) {
       }
     }
     
+    // 🔍 GESTIONE RICHIESTE DETTAGLI PROGETTO SPECIFICO
+    if (isProjectDetailsRequest) {
+      console.log('🔍 [FEASIBILITY SMART] Richiesta dettagli progetto specifico');
+      
+      try {
+        // Import dinamico per evitare errori di build
+        const { db } = await import('@/lib/firebase');
+        const { getDoc, doc, collection } = await import('firebase/firestore');
+        
+        let projectId = '';
+        if (projectIdMatch) {
+          projectId = projectIdMatch[0];
+        } else {
+          // Se non c'è ID specifico, prendi l'ultimo progetto creato
+          const { getDocs, query, orderBy, limit } = await import('firebase/firestore');
+          const projectsQuery = query(
+            collection(db, 'feasibilityProjects'),
+            orderBy('createdAt', 'desc'),
+            limit(1)
+          );
+          const snapshot = await getDocs(projectsQuery);
+          if (!snapshot.empty) {
+            projectId = snapshot.docs[0].id;
+          }
+        }
+        
+        if (!projectId) {
+          return NextResponse.json({
+            success: false,
+            error: 'Nessun progetto trovato per i dettagli richiesti'
+          });
+        }
+        
+        console.log('🔍 [FEASIBILITY SMART] Recuperando progetto:', projectId);
+        const projectDoc = await getDoc(doc(db, 'feasibilityProjects', projectId));
+        
+        if (!projectDoc.exists()) {
+          return NextResponse.json({
+            success: false,
+            error: 'Progetto non trovato'
+          });
+        }
+        
+        const project = projectDoc.data();
+        
+        let result = `\n\n## 📊 Dettagli Progetto Completo\n\n`;
+        result += `### 🏗️ ${project.name || 'Progetto senza nome'}\n`;
+        result += `- **ID**: ${projectId}\n`;
+        result += `- **Indirizzo**: ${project.address || 'Non specificato'}\n`;
+        result += `- **Stato**: ${project.status || 'PIANIFICAZIONE'}\n`;
+        result += `- **Area Totale**: ${project.totalArea || 0} mq\n`;
+        result += `- **Durata**: ${project.duration || 18} mesi\n`;
+        result += `- **Target Margine**: ${project.targetMargin || 30}%\n`;
+        result += `- **Creato da**: ${project.createdBy || 'anonymous'}\n`;
+        result += `- **Data creazione**: ${project.createdAt?.toDate?.()?.toLocaleDateString() || 'N/A'}\n`;
+        result += `- **Ultimo aggiornamento**: ${project.updatedAt?.toDate?.()?.toLocaleDateString() || 'N/A'}\n\n`;
+        
+        // Dettagli costi
+        if (project.costs) {
+          result += `### 💰 Analisi Costi\n`;
+          result += `- **Costo terreno**: €${project.costs.land?.purchasePrice?.toLocaleString() || 0}\n`;
+          result += `- **Costo costruzione**: €${project.costs.construction?.subtotal?.toLocaleString() || 0}\n`;
+          result += `- **Costo totale**: €${project.costs.total?.toLocaleString() || 0}\n\n`;
+        }
+        
+        // Dettagli ricavi
+        if (project.revenues) {
+          result += `### 💵 Analisi Ricavi\n`;
+          result += `- **Unità**: ${project.revenues.units || 0}\n`;
+          result += `- **Area media**: ${project.revenues.averageArea || 0} mq\n`;
+          result += `- **Prezzo per mq**: €${project.revenues.pricePerSqm?.toLocaleString() || 0}\n`;
+          result += `- **Ricavi totali**: €${project.revenues.total?.toLocaleString() || 0}\n\n`;
+        }
+        
+        // Dettagli risultati
+        if (project.results) {
+          result += `### 📈 Risultati Analisi\n`;
+          result += `- **Utile**: €${project.results.profit?.toLocaleString() || 0}\n`;
+          result += `- **Margine**: ${project.results.margin?.toFixed(1) || 'N/A'}%\n`;
+          result += `- **ROI**: ${project.results.roi?.toFixed(1) || 'N/A'}%\n`;
+          result += `- **Payback Period**: ${project.results.paybackPeriod || 'N/A'} mesi\n`;
+          result += `- **Target raggiunto**: ${project.isTargetAchieved ? '✅ Sì' : '❌ No'}\n\n`;
+        }
+        
+        result += `💡 **Azioni disponibili:**\n`;
+        result += `• Modifica questo progetto\n`;
+        result += `• Crea una nuova analisi\n`;
+        result += `• Confronta con altri progetti\n`;
+        result += `• Esporta i dati\n\n`;
+        
+        return NextResponse.json({
+          success: true,
+          response: result,
+          timestamp: new Date().toISOString(),
+          metadata: {
+            agentType: 'feasibility-smart',
+            provider: 'urbanova-os',
+            systemsUsed: ['project-details'],
+            projectId: projectId
+          }
+        });
+        
+      } catch (error) {
+        console.error('❌ [FEASIBILITY SMART] Errore dettagli progetto:', error);
+        return NextResponse.json({
+          success: false,
+          error: 'Errore nel recupero dei dettagli del progetto',
+          details: (error as Error).message
+        }, { status: 500 });
+      }
+    }
+    
     if (!isFeasibilityRequest) {
       return NextResponse.json({
         success: false,
-        error: 'Richiesta non riconosciuta come analisi di fattibilità o consultazione progetti'
+        error: 'Richiesta non riconosciuta come analisi di fattibilità, consultazione progetti o dettagli progetto'
       });
     }
     
