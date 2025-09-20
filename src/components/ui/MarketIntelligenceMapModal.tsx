@@ -221,6 +221,13 @@ export default function MarketIntelligenceMapModal({
               <li>• <strong>Zoomma e naviga</strong> sulla mappa per esplorare diverse zone</li>
               <li>• <strong>Conferma la selezione</strong> per utilizzare la localizzazione nella ricerca terreni</li>
             </ul>
+            {!selectedLocation && (
+              <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <p className="text-sm text-blue-700 dark:text-blue-300 font-medium">
+                  ⚠️ Clicca su un marker arancione sulla mappa per selezionare un comune
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Azioni */}
@@ -236,7 +243,7 @@ export default function MarketIntelligenceMapModal({
               disabled={!selectedLocation}
               className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
             >
-              Conferma Selezione
+              {selectedLocation ? 'Conferma Selezione' : 'Seleziona un Comune'}
             </button>
           </div>
         </div>
