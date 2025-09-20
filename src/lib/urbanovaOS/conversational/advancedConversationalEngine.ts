@@ -546,25 +546,40 @@ export class AdvancedConversationalEngine {
    */
   private async generateFeasibilityAnalysisOptimized(projectData: any): Promise<string> {
     try {
-      // Importa il servizio di fattibilità
-      const { FeasibilityService } = await import('../../feasibilityService');
-      const feasibilityService = new FeasibilityService();
+      // Genera solo l'analisi, NON salvare qui (viene salvato dopo)
+      let result = `## 🏗️ Analisi di Fattibilità Avanzata\n\n`;
       
-      // Genera analisi di fattibilità reale
-      const feasibilityResult = await feasibilityService.createProject(projectData);
+      // Calcoli di fattibilità
+      const totalCosts = projectData.costs.total;
+      const totalRevenues = projectData.revenues.total;
+      const profit = totalRevenues - totalCosts;
+      const margin = totalCosts > 0 ? (profit / totalCosts) * 100 : 0;
+      const roi = totalCosts > 0 ? (profit / totalCosts) * 100 : 0;
       
-      if (feasibilityResult) {
-        let result = `## 🏗️ Analisi di Fattibilità Avanzata\n\n`;
-        result += feasibilityResult;
-        result += `\n\n### 📊 Dati Progetto\n`;
-        result += `- **Area Totale**: ${projectData.totalArea} mq\n`;
-        result += `- **Costo Costruzione**: €${projectData.costs.construction.subtotal.toLocaleString()}\n`;
-        result += `- **Prezzo Acquisto**: €${projectData.costs.land.purchasePrice.toLocaleString()}\n`;
-        result += `- **Target Margine**: ${projectData.targetMargin.toFixed(1)}%\n\n`;
-        return result;
+      result += `### 💰 Analisi Economica\n`;
+      result += `- **Investimento Totale**: €${totalCosts.toLocaleString()}\n`;
+      result += `- **Ricavi Attesi**: €${totalRevenues.toLocaleString()}\n`;
+      result += `- **Utile Previsto**: €${profit.toLocaleString()}\n`;
+      result += `- **Margine**: ${margin.toFixed(1)}%\n`;
+      result += `- **ROI**: ${roi.toFixed(1)}%\n\n`;
+      
+      result += `### 📊 Dati Progetto\n`;
+      result += `- **Nome**: ${projectData.name}\n`;
+      result += `- **Indirizzo**: ${projectData.address}\n`;
+      result += `- **Area Totale**: ${projectData.totalArea} mq\n`;
+      result += `- **Costo Costruzione**: €${projectData.costs.construction.subtotal.toLocaleString()}\n`;
+      result += `- **Prezzo Acquisto**: €${projectData.costs.land.purchasePrice.toLocaleString()}\n`;
+      result += `- **Target Margine**: ${projectData.targetMargin.toFixed(1)}%\n\n`;
+      
+      result += `### 🎯 Valutazione Fattibilità\n`;
+      if (margin >= projectData.targetMargin) {
+        result += `✅ **PROGETTO FATTIBILE** - Margine ${margin.toFixed(1)}% supera target ${projectData.targetMargin.toFixed(1)}%\n\n`;
       } else {
-        return this.generateFeasibilityAnalysis(projectData);
+        result += `⚠️ **PROGETTO DA VALUTARE** - Margine ${margin.toFixed(1)}% sotto target ${projectData.targetMargin.toFixed(1)}%\n\n`;
       }
+      
+      return result;
+      
     } catch (error) {
       console.error('❌ [Advanced Engine] Errore analisi fattibilità ottimizzata:', error);
       return this.generateFeasibilityAnalysis(projectData);
@@ -615,30 +630,31 @@ export class AdvancedConversationalEngine {
         userId
       });
       
-      // Importa il servizio di project manager
-      console.log('🔧 [Advanced Engine] Importando ProjectManagerService...');
-      const { ProjectManagerService } = await import('../../projectManagerService');
-      console.log('🔧 [Advanced Engine] ProjectManagerService importato:', !!ProjectManagerService);
-      const projectManagerService = new ProjectManagerService();
-      console.log('🔧 [Advanced Engine] Istanza ProjectManagerService creata:', !!projectManagerService);
+      // Importa il servizio di fattibilità CORRETTO
+      console.log('🔧 [Advanced Engine] Importando FeasibilityService...');
+      const { FeasibilityService } = await import('../../feasibilityService');
+      console.log('🔧 [Advanced Engine] FeasibilityService importato:', !!FeasibilityService);
+      const feasibilityService = new FeasibilityService();
+      console.log('🔧 [Advanced Engine] Istanza FeasibilityService creata:', !!feasibilityService);
       
-      console.log('🔧 [Advanced Engine] ProjectManagerService importato con successo');
+      console.log('🔧 [Advanced Engine] FeasibilityService importato con successo');
       
-      // Salva il progetto
-      console.log('🔧 [Advanced Engine] Chiamando smartSaveProject...');
-      const saveResult = await projectManagerService.smartSaveProject(projectData, userId);
+      // Salva il progetto nella collezione CORRETTA
+      console.log('🔧 [Advanced Engine] Chiamando createProject...');
+      const projectId = await feasibilityService.createProject(projectData);
       
-      console.log('🔧 [Advanced Engine] Risultato smartSaveProject:', saveResult);
+      console.log('🔧 [Advanced Engine] Risultato createProject:', projectId);
       
-      if (saveResult.success) {
+      if (projectId) {
         let result = `## 📊 Gestione Progetto\n\n`;
-        result += `✅ **Progetto salvato**: ${saveResult.message}\n`;
-        result += `🆔 **ID Progetto**: ${saveResult.projectId}\n`;
-        result += `📝 **Stato**: ${saveResult.isNew ? 'Nuovo progetto' : 'Progetto aggiornato'}\n\n`;
-        console.log('🔧 [Advanced Engine] Progetto salvato con successo:', saveResult.projectId);
+        result += `✅ **Progetto salvato automaticamente**\n`;
+        result += `🆔 **ID Progetto**: ${projectId}\n`;
+        result += `📝 **Stato**: Nuovo progetto di fattibilità\n`;
+        result += `💾 **Salvataggio**: Automatico nella pagina Analisi Fattibilità\n\n`;
+        console.log('🔧 [Advanced Engine] Progetto salvato con successo:', projectId);
         return result;
       } else {
-        console.log('🔧 [Advanced Engine] Salvataggio fallito:', saveResult);
+        console.log('🔧 [Advanced Engine] Salvataggio fallito: projectId vuoto');
         return '';
       }
     } catch (error) {
