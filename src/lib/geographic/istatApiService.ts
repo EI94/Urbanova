@@ -260,7 +260,7 @@ class IstatApiService {
           
           // Verifica che abbiamo abbastanza colonne (CSV ISTAT ha molte colonne)
           if (columns.length >= 12) {
-            const nomeComune = columns[5]?.trim() || ''; // Denominazione (Italiana e straniera) - colonna 6
+            const nomeComune = columns[6]?.trim() || ''; // Denominazione (Italiana e straniera) - colonna 7
             const nomeProvincia = columns[11]?.trim() || ''; // Denominazione Unit� territoriale - colonna 12
             const nomeRegione = columns[10]?.trim() || ''; // Denominazione Regione - colonna 11
             
