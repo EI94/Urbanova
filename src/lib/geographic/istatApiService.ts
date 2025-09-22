@@ -175,8 +175,8 @@ class IstatApiService {
 
       const comuni: IstatComuneData[] = [];
       
-      // Parsing dati (salta header) - LIMITIAMO A 500 per bilanciare velocità e completezza
-      const maxLines = Math.min(lines.length, 501); // 1 header + 500 comuni
+      // Parsing dati (salta header) - LIMITIAMO A 1000 per includere Roma e Milano
+      const maxLines = Math.min(lines.length, 1001); // 1 header + 1000 comuni
       for (let i = 4; i < maxLines; i++) { // Salta le prime 4 righe (header multi-linea complesso)
         try {
           const line = lines[i]?.trim();
