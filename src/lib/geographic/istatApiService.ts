@@ -282,11 +282,9 @@ class IstatApiService {
             // Filtra solo comuni validi
             if (comune.nome && comune.codiceIstat && comune.provincia && comune.regione) {
               comuni.push(comune);
-                console.log(`✅ [IstatAPI] Comune aggiunto:`, comune.nome);
-              }
+              console.log(`✅ [IstatAPI] Comune aggiunto:`, comune.nome);
             } else {
-                console.log(`❌ [IstatAPI] Comune scartato:`, { nome: comune.nome, codiceIstat: comune.codiceIstat, provincia: comune.provincia, regione: comune.regione });
-              }
+              console.log(`❌ [IstatAPI] Comune scartato:`, { nome: comune.nome, codiceIstat: comune.codiceIstat, provincia: comune.provincia, regione: comune.regione });
             }
           }
         } catch (error) {
