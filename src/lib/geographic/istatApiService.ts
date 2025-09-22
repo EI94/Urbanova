@@ -317,25 +317,33 @@ class IstatApiService {
         const query = (params.query || params.q).toLowerCase().trim();
         console.log(`🔍 [IstatAPI] Ricerca intelligente per: "${query}"`);
         
-        // 1. MATCH ESATTI (priorità massima)
-        const exactMatches = comuni.filter(comune => 
-          comune.nome.toLowerCase() === query ||
-          comune.provincia.toLowerCase() === query ||
-          comune.regione.toLowerCase() === query
+        // 1. MATCH ESATTI SUL NOME (priorità massima)
+        const exactNameMatches = comuni.filter(comune => 
+          comune.nome.toLowerCase() === query
         );
         
-        // 2. INIZI CON (priorità alta)
+        // 2. MATCH ESATTI SU PROVINCIA/REGIONE (priorità alta)
+        const exactLocationMatches = comuni.filter(comune => 
+          !exactNameMatches.includes(comune) && (
+            comune.provincia.toLowerCase() === query ||
+            comune.regione.toLowerCase() === query
+          )
+        );
+        
+        // 3. INIZI CON (priorità media)
         const startsWithMatches = comuni.filter(comune => 
-          !exactMatches.includes(comune) && (
+          !exactNameMatches.includes(comune) && 
+          !exactLocationMatches.includes(comune) && (
             comune.nome.toLowerCase().startsWith(query) ||
             comune.provincia.toLowerCase().startsWith(query) ||
             comune.regione.toLowerCase().startsWith(query)
           )
         );
         
-        // 3. CONTIENE (priorità normale)
+        // 4. CONTIENE (priorità normale)
         const containsMatches = comuni.filter(comune => 
-          !exactMatches.includes(comune) && 
+          !exactNameMatches.includes(comune) && 
+          !exactLocationMatches.includes(comune) && 
           !startsWithMatches.includes(comune) && (
             comune.nome.toLowerCase().includes(query) ||
             comune.provincia.toLowerCase().includes(query) ||
@@ -343,10 +351,10 @@ class IstatApiService {
           )
         );
         
-        // Combina i risultati in ordine di priorità
-        filteredComuni = [...exactMatches, ...startsWithMatches, ...containsMatches];
+        // Combina i risultati in ordine di priorità: NOME ESATTO → PROVINCIA/REGIONE ESATTA → INIZI CON → CONTIENE
+        filteredComuni = [...exactNameMatches, ...exactLocationMatches, ...startsWithMatches, ...containsMatches];
         
-        console.log(`🔍 [IstatAPI] Risultati intelligenti: ${exactMatches.length} esatti, ${startsWithMatches.length} iniziano, ${containsMatches.length} contengono`);
+        console.log(`🔍 [IstatAPI] Risultati intelligenti: ${exactNameMatches.length} nomi esatti, ${exactLocationMatches.length} province/regioni esatte, ${startsWithMatches.length} iniziano, ${containsMatches.length} contengono`);
         console.log(`🔍 [IstatAPI] Primi 5 risultati:`, filteredComuni.slice(0, 5).map(c => c.nome));
       }
       if (params.regione) {
