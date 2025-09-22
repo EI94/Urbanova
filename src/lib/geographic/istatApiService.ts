@@ -537,15 +537,25 @@ class IstatApiService {
   private parseCsvLine(line: string): string[] {
     // Il CSV ISTAT usa ';' come delimitatore e ha caratteri speciali
     // Gestione robusta per caratteri speciali e encoding
-    return line
-      .split(';')
-      .map(field => field
-        .trim()
-        .replace(/"/g, '')
-        .replace(/�/g, '')
-        .replace(/\uFFFD/g, '') // Sostituisce caratteri di sostituzione Unicode
-        .replace(/[^\x20-\x7E\u00C0-\u017F]/g, '') // Rimuove caratteri non ASCII/Latin
-      );
+    try {
+      // Prima prova con split semplice
+      const simpleSplit = line.split(';');
+      if (simpleSplit.length >= 12) {
+        return simpleSplit.map(field => field.trim().replace(/"/g, ''));
+      }
+      
+      // Se fallisce, prova con regex più robusta
+      const regexSplit = line.match(/(?:[^;"]|"[^"]*")+/g) || [];
+      if (regexSplit.length >= 12) {
+        return regexSplit.map(field => field.trim().replace(/"/g, ''));
+      }
+      
+      // Ultima risorsa: split forzato
+      return line.split(';').map(field => field.trim().replace(/"/g, ''));
+    } catch (error) {
+      console.warn('⚠️ [IstatAPI] Errore parsing linea CSV:', error);
+      return line.split(';').map(field => field.trim().replace(/"/g, ''));
+    }
   }
   /**
    * Fallback CSV se SDMX non disponibile
