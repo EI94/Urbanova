@@ -293,8 +293,17 @@ class IstatApiService {
           
           // Verifica che abbiamo abbastanza colonne (CSV ISTAT ha molte colonne)
           if (columns.length >= 12) {
-            const nomeComune = columns[5]?.trim() || '';
-            const nomeProvincia = columns[11]?.trim() || '';
+            const nomeComune = columns[5]?.trim() || ''; // Denominazione (colonna 6)
+            const nomeProvincia = columns[11]?.trim() || ''; // Provincia (colonna 12)
+            const nomeRegione = columns[9]?.trim() || ''; // Regione (colonna 10)
+            
+            // Debug parsing
+            if (i <= 3) {
+              console.log(`📊 [IstatAPI] Linea ${i}:`, line.substring(0, 100));
+              console.log(`📊 [IstatAPI] Colonne parsate:`, columns.length);
+              console.log(`📊 [IstatAPI] Nome: "${nomeComune}", Provincia: "${nomeProvincia}", Regione: "${nomeRegione}"`);
+            }
+            
             // Usa geocoding reale con Nominatim per coordinate accurate
             const coordinate = await this.getCoordinateForComune(nomeComune, nomeProvincia);
             
@@ -307,7 +316,7 @@ class IstatApiService {
             const comune: IstatComuneData = {
               nome: nomeComune, // Denominazione (colonna 6)
               provincia: nomeProvincia, // Provincia (colonna 12)
-              regione: columns[9]?.trim() || '', // Regione (colonna 10)
+              regione: nomeRegione, // Regione (colonna 10)
               codiceIstat: columns[4]?.trim() || '', // Codice Comune (colonna 5)
               popolazione: 0, // Non disponibile nel CSV base
               superficie: 0, // Non disponibile nel CSV base
