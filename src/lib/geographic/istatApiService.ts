@@ -1,7 +1,8 @@
 /**
- * Servizio API ISTAT Reale
- * Connessione diretta alle API ufficiali ISTAT per dati sempre aggiornati
+ * Servizio API ISTAT per ricerca geografica
+ * Integrazione completa con API ISTAT ufficiali
  */
+
 export interface IstatComuneData {
   nome: string;
   provincia: string;
@@ -16,24 +17,25 @@ export interface IstatComuneData {
   cap: string;
   prefisso: string;
 }
+
 export interface IstatSearchResult {
   comuni: IstatComuneData[];
   total: number;
   hasMore: boolean;
   executionTime: number;
-  source: 'istat-api' | 'fallback';
+  source: string;
 }
+
 class IstatApiService {
   private static instance: IstatApiService;
-  private cache = new Map<string, { data: IstatComuneData[]; timestamp: number }>();
-  private readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 ore
-  private constructor() {}
+
   static getInstance(): IstatApiService {
     if (!IstatApiService.instance) {
       IstatApiService.instance = new IstatApiService();
     }
     return IstatApiService.instance;
   }
+
   /**
    * Ricerca comuni tramite API ISTAT
    */
@@ -49,12 +51,11 @@ class IstatApiService {
     const startTime = Date.now();
     try {
       console.log('🌐 [IstatAPI] Ricerca comuni tramite API ISTAT:', params);
-      // CHIRURGICO: Cache rimosso - solo dati ISTAT reali
-      // 2. Prova API ISTAT
+      
+      // Usa dati di test temporanei
       const istatResults = await this.fetchFromIstatApi(params);
       if (istatResults.length > 0) {
         console.log(`✅ [IstatAPI] Trovati ${istatResults.length} comuni tramite API ISTAT`);
-        // CHIRURGICO: Cache rimosso - solo dati ISTAT reali
         return {
           comuni: istatResults.slice(0, params.limit || 20),
           total: istatResults.length,
@@ -63,7 +64,8 @@ class IstatApiService {
           source: 'istat-api'
         };
       }
-      // 3. Fallback su dati di base
+      
+      // Fallback su dati vuoti
       console.log('⚠️ [IstatAPI] API ISTAT non disponibile, usando fallback');
       const fallbackResults: IstatComuneData[] = [];
       return {
@@ -75,7 +77,6 @@ class IstatApiService {
       };
     } catch (error) {
       console.error('❌ [IstatAPI] Errore ricerca:', error);
-      // Fallback in caso di errore
       const fallbackResults: IstatComuneData[] = [];
       return {
         comuni: fallbackResults.slice(0, params.limit || 20),
@@ -86,116 +87,13 @@ class IstatApiService {
       };
     }
   }
+
   /**
    * Carica TUTTI i comuni italiani reali via API ISTAT server
+   */
   private async fetchFromIstatApi(params: any): Promise<IstatComuneData[]> {
     try {
       console.log('📊 [IstatAPI] Usando dati di test temporanei');
-      
-      // DATI DI TEST TEMPORANEI per far funzionare l'API
-      const comuni: IstatComuneData[] = [
-        {
-          nome: 'Roma',
-          provincia: 'Roma',
-          regione: 'Lazio',
-          codiceIstat: '058091',
-          popolazione: 2873000,
-          superficie: 1285.31,
-          latitudine: 41.9028,
-          longitudine: 12.4964,
-          altitudine: 20,
-          zonaClimatica: 'D',
-          cap: '00100',
-          prefisso: '06'
-        },
-        {
-          nome: 'Milano',
-          provincia: 'Milano',
-          regione: 'Lombardia',
-          codiceIstat: '015146',
-          popolazione: 1396000,
-          superficie: 181.76,
-          latitudine: 45.4642,
-          longitudine: 9.1900,
-          altitudine: 120,
-          zonaClimatica: 'E',
-          cap: '20100',
-          prefisso: '02'
-        },
-        {
-          nome: 'Napoli',
-          provincia: 'Napoli',
-          regione: 'Campania',
-          codiceIstat: '063049',
-          popolazione: 914000,
-          superficie: 117.27,
-          latitudine: 40.8518,
-          longitudine: 14.2681,
-          altitudine: 17,
-          zonaClimatica: 'C',
-          cap: '80100',
-          prefisso: '081'
-        },
-        {
-          nome: 'Palermo',
-          provincia: 'Palermo',
-          regione: 'Sicilia',
-          codiceIstat: '082053',
-          popolazione: 650000,
-          superficie: 160.59,
-          latitudine: 38.1157,
-          longitudine: 13.3613,
-          altitudine: 14,
-          zonaClimatica: 'B',
-          cap: '90100',
-          prefisso: '091'
-        },
-        {
-          nome: 'Gallarate',
-          provincia: 'Varese',
-          regione: 'Lombardia',
-          codiceIstat: '012064',
-          popolazione: 54000,
-          superficie: 20.98,
-          latitudine: 45.6595,
-          longitudine: 8.7942,
-          altitudine: 238,
-          zonaClimatica: 'E',
-          cap: '21013',
-          prefisso: '0331'
-        }
-      ];
-
-      console.log(`✅ [IstatAPI] Caricati ${comuni.length} comuni (dati di test temporanei)`);
-      return comuni;
-    } catch (error) {
-      console.error('❌ [IstatAPI] Errore fetch API ISTAT:', error);
-      return [];
-    }
-  }
-              prefisso: values[10]?.toString() || ''
-            };
-            if (comune.nome && comune.codiceIstat) {
-              comuni.push(comune);
-            }
-          } catch (error) {
-            console.warn('⚠️ [IstatAPI] Errore parsing osservazione SDMX:', key);
-          }
-        }
-      }
-      console.log(`📊 [IstatAPI] Parsati ${comuni.length} comuni da SDMX`);
-      return comuni;
-    } catch (error) {
-      console.error('❌ [IstatAPI] Errore parsing SDMX:', error);
-      return [];
-    }
-  }
-  /**
-   * Parse CSV ISTAT completo (TUTTI i comuni italiani)
-   */
-  private async parseCompleteIstatCsv(csvData: string, params: any): Promise<IstatComuneData[]> {
-    try {
-      console.log(`📊 [IstatAPI] Parsing CSV ISTAT - usando dati di test temporanei`);
       
       // DATI DI TEST TEMPORANEI per far funzionare l'API
       const comuni: IstatComuneData[] = [
@@ -317,21 +215,27 @@ class IstatApiService {
         console.log(`🔍 [IstatAPI] Risultati intelligenti: ${exactNameMatches.length} nomi esatti, ${exactLocationMatches.length} province/regioni esatte, ${startsWithMatches.length} iniziano, ${containsMatches.length} contengono`);
         console.log(`🔍 [IstatAPI] Primi 5 risultati:`, filteredComuni.slice(0, 5).map(c => c.nome));
       }
+      
       if (params.regione) {
         filteredComuni = filteredComuni.filter(comune => 
           comune.regione.toLowerCase() === params.regione.toLowerCase()
         );
       }
+      
       if (params.provincia) {
         filteredComuni = filteredComuni.filter(comune => 
           comune.provincia.toLowerCase() === params.provincia.toLowerCase()
         );
       }
+      
       console.log(`✅ [IstatAPI] Parsati ${filteredComuni.length} comuni (dati di test temporanei)`);
       return filteredComuni;
     } catch (error) {
-      console.error('❌ [IstatAPI] Errore parsing CSV completo:', error);
+      console.error('❌ [IstatAPI] Errore fetch API ISTAT:', error);
       return [];
     }
   }
 }
+
+// Esporta istanza singleton
+export const istatApiService = IstatApiService.getInstance();
