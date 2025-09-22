@@ -527,22 +527,8 @@ class IstatApiService {
    * Parse linea CSV con gestione virgolette robusta
    */
   private parseCsvLine(line: string): string[] {
-    const result: string[] = [];
-    let current = '';
-    let inQuotes = false;
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      if (char === '"') {
-        inQuotes = !inQuotes;
-      } else if (char === ';' && !inQuotes) {
-        result.push(current.trim());
-        current = '';
-      } else {
-        current += char;
-      }
-    }
-    result.push(current.trim());
-    return result;
+    // Il CSV ISTAT usa ';' come delimitatore e ha caratteri speciali
+    return line.split(';').map(field => field.trim().replace(/"/g, '').replace(/�/g, ''));
   }
   /**
    * Fallback CSV se SDMX non disponibile
