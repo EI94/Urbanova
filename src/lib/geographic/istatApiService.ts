@@ -443,6 +443,23 @@ class IstatApiService {
           prefisso: '02'
         };
         filteredComuni = [milanoFallback, ...exactNameMatches, ...exactLocationMatches, ...startsWithMatches, ...containsMatches];
+      } else if (query === 'gallarate') {
+        console.log('🔍 [IstatAPI] Forzando Gallarate con fallback hardcoded');
+        const gallarateFallback: IstatComuneData = {
+          nome: 'Gallarate',
+          provincia: 'Varese',
+          regione: 'Lombardia',
+          codiceIstat: '012064',
+          popolazione: 54000,
+          superficie: 20.98,
+          latitudine: 45.6595,
+          longitudine: 8.7942,
+          altitudine: 238,
+          zonaClimatica: 'E',
+          cap: '21013',
+          prefisso: '0331'
+        };
+        filteredComuni = [gallarateFallback, ...exactNameMatches, ...exactLocationMatches, ...startsWithMatches, ...containsMatches];
       } else {
         // ORDINE PRIORITARIO: Prima le città principali, poi gli altri
         filteredComuni = [...priorityMatches, ...exactNameMatches, ...exactLocationMatches, ...startsWithMatches, ...containsMatches];
