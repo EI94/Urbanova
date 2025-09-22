@@ -359,6 +359,16 @@ class IstatApiService {
         )
       );
       
+      // DEBUG: Log dei risultati per capire cosa succede
+      console.log(`🔍 [IstatAPI] DEBUG Ricerca "${query}":`);
+      console.log(`  - Esatti: ${exactNameMatches.length}`);
+      console.log(`  - Province/Regioni: ${exactLocationMatches.length}`);
+      console.log(`  - Iniziano: ${startsWithMatches.length}`);
+      console.log(`  - Contengono: ${containsMatches.length}`);
+      if (exactNameMatches.length > 0) {
+        console.log(`  - Primi esatti:`, exactNameMatches.slice(0, 3).map(c => c.nome));
+      }
+      
       filteredComuni = [...exactNameMatches, ...exactLocationMatches, ...startsWithMatches, ...containsMatches];
       
       console.log(`🔍 [IstatAPI] Risultati: ${exactNameMatches.length} esatti, ${exactLocationMatches.length} province/regioni, ${startsWithMatches.length} iniziano, ${containsMatches.length} contengono`);
