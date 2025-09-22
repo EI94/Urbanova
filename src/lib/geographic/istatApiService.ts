@@ -263,8 +263,8 @@ class IstatApiService {
               console.log(`🔍 [IstatAPI] Linea ${i} - Nome: "${nomeComune}", Provincia: "${nomeProvincia}", Regione: "${nomeRegione}"`);
             }
             
-            // TEMPORANEO: Usa coordinate di default per evitare timeout Nominatim
-            const coordinate = { lat: 41.9028, lng: 12.4964 }; // Roma di default
+            // Geocoding intelligente con cache
+            const coordinate = await this.getCoordinateIntelligente(nomeComune, nomeProvincia);
             const comune: IstatComuneData = {
               nome: nomeComune, // Denominazione (colonna 6)
               provincia: nomeProvincia, // Provincia (colonna 12)
@@ -291,15 +291,42 @@ class IstatApiService {
           console.warn('⚠️ [IstatAPI] Errore parsing linea CSV:', line.substring(0, 50) + '...');
         }
       }
-      // Applica filtri se specificati
+      // Applica filtri se specificati con algoritmo intelligente
       let filteredComuni = comuni;
       if (params.query || params.q) {
-        const query = (params.query || params.q).toLowerCase();
-        filteredComuni = filteredComuni.filter(comune => 
-          comune.nome.toLowerCase().includes(query) ||
-          comune.provincia.toLowerCase().includes(query) ||
-          comune.regione.toLowerCase().includes(query)
+        const query = (params.query || params.q).toLowerCase().trim();
+        console.log(`🔍 [IstatAPI] Ricerca intelligente per: "${query}"`);
+        
+        // 1. MATCH ESATTI (priorità massima)
+        const exactMatches = comuni.filter(comune => 
+          comune.nome.toLowerCase() === query ||
+          comune.provincia.toLowerCase() === query ||
+          comune.regione.toLowerCase() === query
         );
+        
+        // 2. INIZI CON (priorità alta)
+        const startsWithMatches = comuni.filter(comune => 
+          !exactMatches.includes(comune) && (
+            comune.nome.toLowerCase().startsWith(query) ||
+            comune.provincia.toLowerCase().startsWith(query) ||
+            comune.regione.toLowerCase().startsWith(query)
+          )
+        );
+        
+        // 3. CONTIENE (priorità normale)
+        const containsMatches = comuni.filter(comune => 
+          !exactMatches.includes(comune) && 
+          !startsWithMatches.includes(comune) && (
+            comune.nome.toLowerCase().includes(query) ||
+            comune.provincia.toLowerCase().includes(query) ||
+            comune.regione.toLowerCase().includes(query)
+          )
+        );
+        
+        // Combina i risultati in ordine di priorità
+        filteredComuni = [...exactMatches, ...startsWithMatches, ...containsMatches];
+        
+        console.log(`🔍 [IstatAPI] Risultati intelligenti: ${exactMatches.length} esatti, ${startsWithMatches.length} iniziano, ${containsMatches.length} contengono`);
       }
       if (params.regione) {
         filteredComuni = filteredComuni.filter(comune => 
@@ -531,6 +558,62 @@ class IstatApiService {
     // Fallback finale su coordinate centrali italiane
     return { lat: 41.9028, lng: 12.4964 }; // Roma
   }
+
+  // Cache per coordinate per evitare chiamate ripetute
+  private coordinateCache = new Map<string, { lat: number; lng: number }>();
+
+  private async getCoordinateIntelligente(nome: string, provincia: string): Promise<{ lat: number; lng: number }> {
+    const cacheKey = `${nome}-${provincia}`;
+    
+    // 1. Controlla cache
+    if (this.coordinateCache.has(cacheKey)) {
+      return this.coordinateCache.get(cacheKey)!;
+    }
+
+    // 2. Coordinate hardcoded per città principali (performance)
+    const coordinatePrincipali: { [key: string]: { lat: number; lng: number } } = {
+      'Roma-Roma': { lat: 41.9028, lng: 12.4964 },
+      'Milano-Milano': { lat: 45.4642, lng: 9.1900 },
+      'Napoli-Napoli': { lat: 40.8518, lng: 14.2681 },
+      'Torino-Torino': { lat: 45.0703, lng: 7.6869 },
+      'Palermo-Palermo': { lat: 38.1157, lng: 13.3613 },
+      'Genova-Genova': { lat: 44.4056, lng: 8.9463 },
+      'Bologna-Bologna': { lat: 44.4949, lng: 11.3426 },
+      'Firenze-Firenze': { lat: 43.7696, lng: 11.2558 },
+      'Bari-Bari': { lat: 41.1170, lng: 16.8719 },
+      'Catania-Catania': { lat: 37.5079, lng: 15.0830 },
+      'Venezia-Venezia': { lat: 45.4408, lng: 12.3155 },
+      'Verona-Verona': { lat: 45.4384, lng: 10.9916 },
+      'Gallarate-Varese': { lat: 45.6595, lng: 8.7942 }
+    };
+
+    if (coordinatePrincipali[cacheKey]) {
+      const coord = coordinatePrincipali[cacheKey];
+      this.coordinateCache.set(cacheKey, coord);
+      return coord;
+    }
+
+    // 3. Fallback coordinate provincia (senza Nominatim per ora)
+    const coordinateProvince: { [key: string]: { lat: number; lng: number } } = {
+      'Varese': { lat: 45.8206, lng: 8.8251 },
+      'Roma': { lat: 41.9028, lng: 12.4964 },
+      'Milano': { lat: 45.4642, lng: 9.1900 },
+      'Napoli': { lat: 40.8518, lng: 14.2681 },
+      'Torino': { lat: 45.0703, lng: 7.6869 },
+      'Palermo': { lat: 38.1157, lng: 13.3613 },
+      'Genova': { lat: 44.4056, lng: 8.9463 },
+      'Bologna': { lat: 44.4949, lng: 11.3426 },
+      'Firenze': { lat: 43.7696, lng: 11.2558 },
+      'Bari': { lat: 41.1170, lng: 16.8719 },
+      'Catania': { lat: 37.5079, lng: 15.0830 },
+      'Venezia': { lat: 45.4408, lng: 12.3155 }
+    };
+
+    const coord = coordinateProvince[provincia] || coordinateProvince['Roma'];
+    this.coordinateCache.set(cacheKey, coord);
+    return coord;
+  }
+
   /**
    * Parse linea CSV con gestione virgolette robusta
    */
