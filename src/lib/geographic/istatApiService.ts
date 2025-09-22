@@ -261,6 +261,7 @@ class IstatApiService {
             // DEBUG MANIACALE: Log specifico per Roma
             if (nomeComune === 'Roma') {
               console.log(`🎯 [IstatAPI] ROMA PARSATA:`, { nomeComune, nomeProvincia, nomeRegione, columns: columns.slice(0, 15) });
+              console.log(`🎯 [IstatAPI] ROMA COLONNE:`, columns);
             }
             
             // Debug: Verifica campi
