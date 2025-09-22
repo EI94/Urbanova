@@ -177,7 +177,7 @@ class IstatApiService {
       
       // Parsing dati (salta header) - LIMITIAMO A 500 per bilanciare velocità e completezza
       const maxLines = Math.min(lines.length, 501); // 1 header + 500 comuni
-      for (let i = 1; i < maxLines; i++) {
+      for (let i = 3; i < maxLines; i++) { // Salta le prime 3 righe (header multi-linea)
         try {
           const line = lines[i]?.trim();
           if (!line) continue;
@@ -190,9 +190,9 @@ class IstatApiService {
           }
 
           const comune: IstatComuneData = {
-            nome: columns[5] || 'Sconosciuto',
-            provincia: columns[11] || 'Sconosciuta',
-            regione: columns[10] || 'Sconosciuta',
+            nome: columns[6] || 'Sconosciuto', // Nome comune
+            provincia: columns[11] || 'Sconosciuta', // Provincia
+            regione: columns[10] || 'Sconosciuta', // Regione
             codiceIstat: columns[0] || '',
             popolazione: parseInt(columns[8] || '0') || 0,
             superficie: parseFloat(columns[9] || '0') || 0,
