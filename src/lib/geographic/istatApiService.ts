@@ -203,6 +203,17 @@ class IstatApiService {
             cap: '', // Non disponibile nel CSV
             prefisso: '' // Non disponibile nel CSV
           };
+          
+          // DEBUG: Log del parsing per capire cosa succede
+          if (comune.nome.toLowerCase().includes('roma') || comune.nome.toLowerCase().includes('milano') || comune.nome.toLowerCase().includes('gallarate')) {
+            console.log(`🔍 [IstatAPI] DEBUG Parsing ${comune.nome}:`, {
+              nome: comune.nome,
+              provincia: comune.provincia,
+              regione: comune.regione,
+              codiceIstat: comune.codiceIstat,
+              columns: columns.slice(0, 15) // Prime 15 colonne per debug
+            });
+          }
 
           // Geocoding disabilitato per velocità MASSIMA
           const coordinates = this.getProvinceCoordinates(comune.provincia);
