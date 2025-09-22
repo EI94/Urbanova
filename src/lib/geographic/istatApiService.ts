@@ -177,7 +177,7 @@ class IstatApiService {
       
       // Parsing dati (salta header) - LIMITIAMO A 500 per bilanciare velocità e completezza
       const maxLines = Math.min(lines.length, 501); // 1 header + 500 comuni
-      for (let i = 3; i < maxLines; i++) { // Salta le prime 3 righe (header multi-linea)
+      for (let i = 4; i < maxLines; i++) { // Salta le prime 4 righe (header multi-linea complesso)
         try {
           const line = lines[i]?.trim();
           if (!line) continue;
@@ -190,18 +190,18 @@ class IstatApiService {
           }
 
           const comune: IstatComuneData = {
-            nome: columns[6] || 'Sconosciuto', // Nome comune
-            provincia: columns[11] || 'Sconosciuta', // Provincia
-            regione: columns[10] || 'Sconosciuta', // Regione
-            codiceIstat: columns[0] || '',
-            popolazione: parseInt(columns[8] || '0') || 0,
-            superficie: parseFloat(columns[9] || '0') || 0,
+            nome: columns[6] || 'Sconosciuto', // Denominazione in italiano
+            provincia: columns[12] || 'Sconosciuta', // Denominazione dell'Unità territoriale sovracomunale
+            regione: columns[10] || 'Sconosciuta', // Denominazione Regione
+            codiceIstat: columns[4] || '', // Codice Comune formato alfanumerico
+            popolazione: 0, // Non disponibile nel CSV
+            superficie: 0, // Non disponibile nel CSV
             latitudine: 0, // Da geocoding
             longitudine: 0, // Da geocoding
-            altitudine: parseInt(columns[7] || '0') || 0,
-            zonaClimatica: columns[6] || 'D',
-            cap: columns[12] || '',
-            prefisso: columns[13] || ''
+            altitudine: 0, // Non disponibile nel CSV
+            zonaClimatica: 'D', // Default
+            cap: '', // Non disponibile nel CSV
+            prefisso: '' // Non disponibile nel CSV
           };
 
           // Geocoding disabilitato per velocità MASSIMA
