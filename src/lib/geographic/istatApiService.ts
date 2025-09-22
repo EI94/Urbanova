@@ -2,7 +2,6 @@
  * Servizio API ISTAT Reale
  * Connessione diretta alle API ufficiali ISTAT per dati sempre aggiornati
  */
-
 export interface IstatComuneData {
   nome: string;
   provincia: string;
@@ -17,7 +16,6 @@ export interface IstatComuneData {
   cap: string;
   prefisso: string;
 }
-
 export interface IstatSearchResult {
   comuni: IstatComuneData[];
   total: number;
@@ -25,21 +23,17 @@ export interface IstatSearchResult {
   executionTime: number;
   source: 'istat-api' | 'fallback';
 }
-
 class IstatApiService {
   private static instance: IstatApiService;
   private cache = new Map<string, { data: IstatComuneData[]; timestamp: number }>();
   private readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 ore
-
   private constructor() {}
-
   static getInstance(): IstatApiService {
     if (!IstatApiService.instance) {
       IstatApiService.instance = new IstatApiService();
     }
     return IstatApiService.instance;
   }
-
   /**
    * Ricerca comuni tramite API ISTAT
    */
@@ -53,10 +47,8 @@ class IstatApiService {
     radius?: number;
   }): Promise<IstatSearchResult> {
     const startTime = Date.now();
-    
     try {
       console.log('🌐 [IstatAPI] Ricerca comuni tramite API ISTAT:', params);
-      
       // 1. Prova cache prima
       const cacheKey = this.generateCacheKey(params);
       const cached = this.getFromCache(cacheKey);
@@ -70,7 +62,6 @@ class IstatApiService {
           source: 'istat-api'
         };
       }
-
       // 2. Prova API ISTAT
       const istatResults = await this.fetchFromIstatApi(params);
       if (istatResults.length > 0) {
@@ -84,11 +75,9 @@ class IstatApiService {
           source: 'istat-api'
         };
       }
-
       // 3. Fallback su dati di base
       console.log('⚠️ [IstatAPI] API ISTAT non disponibile, usando fallback');
       const fallbackResults = this.getFallbackData(params);
-      
       return {
         comuni: fallbackResults.slice(0, params.limit || 20),
         total: fallbackResults.length,
@@ -96,10 +85,8 @@ class IstatApiService {
         executionTime: Date.now() - startTime,
         source: 'fallback'
       };
-      
     } catch (error) {
       console.error('❌ [IstatAPI] Errore ricerca:', error);
-      
       // Fallback in caso di errore
       const fallbackResults = this.getFallbackData(params);
       return {
@@ -111,7 +98,6 @@ class IstatApiService {
       };
     }
   }
-
   /**
    * Carica TUTTI i comuni italiani reali via API ISTAT server
    */
@@ -119,12 +105,9 @@ class IstatApiService {
     try {
       // CHIRURGICO: Chiamata API ISTAT dal server per TUTTI i comuni italiani
       console.log('🌐 [IstatAPI] Caricamento TUTTI i comuni italiani via API ISTAT server...');
-      
       // 1. Prova API ISTAT CSV completo dal server
       const csvUrl = 'https://www.istat.it/storage/codici-unita-amministrative/Elenco-comuni-italiani.csv';
-      
       console.log('📊 [IstatAPI] Fetch CSV ISTAT completo dal server:', csvUrl);
-      
       const response = await fetch(csvUrl, {
         method: 'GET',
         headers: {
@@ -133,14 +116,11 @@ class IstatApiService {
         },
         signal: AbortSignal.timeout(30000) // 30 secondi
       });
-
       if (response.ok) {
         const csvData = await response.text();
         console.log(`📊 [IstatAPI] CSV ISTAT ricevuto: ${csvData.length} caratteri`);
         console.log(`📊 [IstatAPI] Prime 200 caratteri CSV:`, csvData.substring(0, 200));
-        
                   const comuni = await this.parseCompleteIstatCsv(csvData, params);
-        
         if (comuni.length > 0) {
           console.log(`✅ [IstatAPI] Caricati ${comuni.length} comuni reali dal CSV ISTAT`);
           return comuni;
@@ -156,11 +136,9 @@ class IstatApiService {
       } else {
         console.log(`❌ [IstatAPI] Errore HTTP ${response.status}: ${response.statusText}`);
       }
-
       // 2. Prova API ISTAT territoriali
       console.log('📊 [IstatAPI] Tentativo API ISTAT territoriali...');
       const territorialUrl = 'https://www.istat.it/it/files/2023/03/Elenco-comuni-italiani.csv';
-      
       const territorialResponse = await fetch(territorialUrl, {
         method: 'GET',
         headers: {
@@ -169,21 +147,17 @@ class IstatApiService {
         },
         signal: AbortSignal.timeout(30000) // 30 secondi
       });
-
       if (territorialResponse.ok) {
         const territorialData = await territorialResponse.text();
         const comuni = this.parseCompleteIstatCsv(territorialData, params);
-        
         if (comuni.length > 0) {
           console.log(`✅ [IstatAPI] Caricati ${comuni.length} comuni reali da API territoriali`);
           return comuni;
         }
       }
-
       // 3. Prova API ISTAT SDMX via server
       console.log('📊 [IstatAPI] Tentativo API ISTAT SDMX via server...');
       const sdmxUrl = 'https://sdmx.istat.it/SDMXWS/rest/data/IT1,DF_DCCV_1,1.0/ALL?format=jsondata';
-      
       const sdmxResponse = await fetch(sdmxUrl, {
         method: 'GET',
         headers: {
@@ -192,45 +166,36 @@ class IstatApiService {
         },
         signal: AbortSignal.timeout(30000) // 30 secondi
       });
-
       if (sdmxResponse.ok) {
         const sdmxData = await sdmxResponse.json();
         const comuni = this.parseIstatSdmxData(sdmxData, params);
-        
         if (comuni.length > 0) {
           console.log(`✅ [IstatAPI] Caricati ${comuni.length} comuni reali da SDMX`);
           return comuni;
         }
       }
-
       console.log('⚠️ [IstatAPI] Tutte le API ISTAT non disponibili, uso fallback minimo');
       return this.getMinimalFallbackData(params);
-      
     } catch (error) {
       console.error('❌ [IstatAPI] Errore fetch API ISTAT, provo fallback locale:', error);
       return this.getFallbackData(params);
     }
   }
-
   /**
    * Parse dati API ISTAT SDMX
    */
   private parseIstatSdmxData(sdmxData: any, params: any): IstatComuneData[] {
     try {
       const comuni: IstatComuneData[] = [];
-      
       if (sdmxData.data && sdmxData.data.dataSets && sdmxData.data.dataSets[0]) {
         const dataset = sdmxData.data.dataSets[0];
         const observations = dataset.observations || {};
-        
         // Estrai dimensioni per mappare i dati
         const dimensions = sdmxData.data.structure?.dimensions?.observation || [];
-        
         for (const [key, value] of Object.entries(observations)) {
           try {
             const observation = value as any;
             const values = Array.isArray(observation) ? observation : [observation];
-            
             // Mappa i valori alle dimensioni
             const comune: IstatComuneData = {
               nome: values[0]?.toString() || '',
@@ -246,7 +211,6 @@ class IstatApiService {
               cap: values[9]?.toString() || '',
               prefisso: values[10]?.toString() || ''
             };
-            
             if (comune.nome && comune.codiceIstat) {
               comuni.push(comune);
             }
@@ -255,16 +219,13 @@ class IstatApiService {
           }
         }
       }
-      
       console.log(`📊 [IstatAPI] Parsati ${comuni.length} comuni da SDMX`);
       return comuni;
-      
     } catch (error) {
       console.error('❌ [IstatAPI] Errore parsing SDMX:', error);
       return [];
     }
   }
-
   /**
    * Parse CSV ISTAT completo (TUTTI i comuni italiani)
    */
@@ -272,47 +233,28 @@ class IstatApiService {
     try {
       const lines = csvData.split('\n');
       const comuni: IstatComuneData[] = [];
-      
       console.log(`📊 [IstatAPI] Parsing CSV ISTAT con ${lines.length} linee`);
-      console.log(`📊 [IstatAPI] Header CSV:`, lines[0]?.substring(0, 200));
-      console.log(`📊 [IstatAPI] Prime 3 linee CSV:`, lines.slice(0, 3));
-      
+
+
       // Skip header line
       for (let i = 1; i < lines.length; i++) {
         const line = lines[i].trim();
         if (!line) continue;
-        
         try {
           const columns = this.parseCsvLine(line);
-          
           // Debug prima linea
           if (i === 1) {
-            console.log(`📊 [IstatAPI] Prima linea CSV:`, line.substring(0, 100));
-            console.log(`📊 [IstatAPI] Colonne parsate:`, columns.length, columns.slice(0, 6));
+
           }
-          
           // Verifica che abbiamo abbastanza colonne (CSV ISTAT ha molte colonne)
           if (columns.length >= 12) {
             const nomeComune = columns[5]?.trim() || ''; // Denominazione (colonna 6)
             const nomeProvincia = columns[11]?.trim() || ''; // Provincia (colonna 12)
             const nomeRegione = columns[9]?.trim() || ''; // Regione (colonna 10)
-            
-            // Debug parsing
-            if (i <= 3) {
-              console.log(`📊 [IstatAPI] Linea ${i}:`, line.substring(0, 100));
-              console.log(`📊 [IstatAPI] Colonne parsate:`, columns.length);
-              console.log(`📊 [IstatAPI] Nome: "${nomeComune}", Provincia: "${nomeProvincia}", Regione: "${nomeRegione}"`);
             }
-            
             // Usa geocoding reale con Nominatim per coordinate accurate
             const coordinate = await this.getCoordinateForComune(nomeComune, nomeProvincia);
-            
-            // Debug coordinate
-            if (i <= 3) {
-              console.log(`🗺️ [IstatAPI] Coordinate per ${nomeComune}, ${nomeProvincia}:`, coordinate);
-              console.log(`🗺️ [IstatAPI] Comune creato:`, { nome: nomeComune, provincia: nomeProvincia, regione: columns[9]?.trim() });
             }
-            
             const comune: IstatComuneData = {
               nome: nomeComune, // Denominazione (colonna 6)
               provincia: nomeProvincia, // Provincia (colonna 12)
@@ -327,15 +269,12 @@ class IstatApiService {
               cap: '', // Non disponibile nel CSV base
               prefisso: '' // Non disponibile nel CSV base
             };
-            
             // Filtra solo comuni validi
             if (comune.nome && comune.codiceIstat && comune.provincia && comune.regione) {
               comuni.push(comune);
-              if (i <= 3) {
                 console.log(`✅ [IstatAPI] Comune aggiunto:`, comune.nome);
               }
             } else {
-              if (i <= 3) {
                 console.log(`❌ [IstatAPI] Comune scartato:`, { nome: comune.nome, codiceIstat: comune.codiceIstat, provincia: comune.provincia, regione: comune.regione });
               }
             }
@@ -344,10 +283,8 @@ class IstatApiService {
           console.warn('⚠️ [IstatAPI] Errore parsing linea CSV:', line.substring(0, 50) + '...');
         }
       }
-      
       // Applica filtri se specificati
       let filteredComuni = comuni;
-      
       if (params.query || params.q) {
         const query = (params.query || params.q).toLowerCase();
         filteredComuni = filteredComuni.filter(comune => 
@@ -356,28 +293,23 @@ class IstatApiService {
           comune.regione.toLowerCase().includes(query)
         );
       }
-      
       if (params.regione) {
         filteredComuni = filteredComuni.filter(comune => 
           comune.regione.toLowerCase() === params.regione.toLowerCase()
         );
       }
-      
       if (params.provincia) {
         filteredComuni = filteredComuni.filter(comune => 
           comune.provincia.toLowerCase() === params.provincia.toLowerCase()
         );
       }
-      
       console.log(`✅ [IstatAPI] Parsati ${filteredComuni.length} comuni dal CSV ISTAT completo (${comuni.length} totali)`);
       return filteredComuni;
-      
     } catch (error) {
       console.error('❌ [IstatAPI] Errore parsing CSV completo:', error);
       return [];
     }
   }
-
   /**
    * Ottiene coordinate per comune (fallback su coordinate approssimative)
    */
@@ -387,28 +319,23 @@ class IstatApiService {
       const query = encodeURIComponent(`${nome}, ${provincia}, Italia`);
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 secondi timeout
-      
       const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1&countrycodes=it`, {
         headers: {
           'User-Agent': 'Urbanova-Geocoding/1.0'
         },
         signal: controller.signal
       });
-
       clearTimeout(timeoutId);
-
       if (response.ok) {
         const data = await response.json();
         if (data && data.length > 0) {
           const result = data[0];
-          console.log(`🗺️ [Geocoding] Coordinate per ${nome}, ${provincia}:`, { lat: parseFloat(result.lat), lng: parseFloat(result.lon) });
           return { lat: parseFloat(result.lat), lng: parseFloat(result.lon) };
         }
       }
     } catch (error) {
       console.warn(`⚠️ [Geocoding] Errore geocoding per ${nome}, ${provincia}:`, error);
     }
-
     // Fallback su coordinate approssimative per provincia (solo per province principali)
     const coordinateProvince: { [key: string]: { lat: number; lng: number } } = {
       'Varese': { lat: 45.8206, lng: 8.8251 }, // Gallarate è in provincia di Varese
@@ -589,17 +516,13 @@ class IstatApiService {
       'Vivaro Romano': { lat: 41.9000, lng: 13.0167 },
       'Zagarolo': { lat: 41.8333, lng: 12.8333 }
     };
-
     // Cerca coordinate esatte per il comune
     if (coordinateComuni[nome]) {
       return coordinateComuni[nome];
     }
-
-
     // Fallback finale su coordinate centrali italiane
     return { lat: 41.9028, lng: 12.4964 }; // Roma
   }
-
   /**
    * Parse linea CSV con gestione virgolette robusta
    */
@@ -607,10 +530,8 @@ class IstatApiService {
     const result: string[] = [];
     let current = '';
     let inQuotes = false;
-    
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
-      
       if (char === '"') {
         inQuotes = !inQuotes;
       } else if (char === ';' && !inQuotes) {
@@ -620,20 +541,16 @@ class IstatApiService {
         current += char;
       }
     }
-    
     result.push(current.trim());
     return result;
   }
-
   /**
    * Fallback CSV se SDMX non disponibile
    */
   private async fetchFromCsvFallback(params: any): Promise<IstatComuneData[]> {
     try {
       const istatCsvUrl = 'https://www.istat.it/storage/codici-unita-amministrative/Elenco-comuni-italiani.csv';
-      
       console.log('🌐 [IstatAPI] Fallback CSV da:', istatCsvUrl);
-      
       const response = await fetch(istatCsvUrl, {
         method: 'GET',
         headers: {
@@ -642,36 +559,28 @@ class IstatApiService {
         },
         signal: AbortSignal.timeout(10000)
       });
-
       if (!response.ok) {
         throw new Error(`CSV ISTAT non disponibile: ${response.status}`);
       }
-
       const csvData = await response.text();
       const comuni = this.parseCsvData(csvData, params);
-      
       console.log(`✅ [IstatAPI] Parsati ${comuni.length} comuni da CSV fallback`);
       return comuni;
-      
     } catch (error) {
       console.error('❌ [IstatAPI] Errore fetch CSV fallback:', error);
       return [];
     }
   }
-
   /**
    * Parse OpenAPI data
    */
   private parseOpenApiData(jsonData: any, params: any): IstatComuneData[] {
     try {
       console.log('🔍 [IstatAPI] Parsing OpenAPI data:', Object.keys(jsonData));
-      
       const comuni: IstatComuneData[] = [];
-      
       // OpenAPI structure analysis
       if (jsonData.data && Array.isArray(jsonData.data)) {
         console.log('🔍 [IstatAPI] OpenAPI data count:', jsonData.data.length);
-        
         // Parse data array
         for (const item of jsonData.data) {
           if (typeof item === 'object' && item !== null) {
@@ -689,7 +598,6 @@ class IstatApiService {
               cap: item.cap || item.postalCode || '',
               prefisso: item.prefisso || item.prefix || ''
             };
-            
             // Filtri
             if (this.matchesFilters(comune, params)) {
               comuni.push(comune);
@@ -697,7 +605,6 @@ class IstatApiService {
           }
         }
       }
-      
       // Ordinamento
       comuni.sort((a, b) => {
         if (params.sortBy === 'population') {
@@ -706,33 +613,26 @@ class IstatApiService {
           return a.nome.localeCompare(b.nome);
         }
       });
-      
       console.log(`✅ [IstatAPI] Parsati ${comuni.length} comuni da OpenAPI`);
       return comuni;
-      
     } catch (error) {
       console.error('❌ [IstatAPI] Errore parse OpenAPI:', error);
       return [];
     }
   }
-
   /**
    * Parse SDMX data da ISTAT
    */
   private parseSdmxData(jsonData: any, params: any): IstatComuneData[] {
     try {
       console.log('🔍 [IstatAPI] Parsing SDMX data:', Object.keys(jsonData));
-      
       const comuni: IstatComuneData[] = [];
-      
       // SDMX structure analysis
       if (jsonData.data && jsonData.data.dataSets && jsonData.data.dataSets[0]) {
         const dataset = jsonData.data.dataSets[0];
         const observations = dataset.observations || {};
-        
         console.log('🔍 [IstatAPI] SDMX dataset keys:', Object.keys(dataset));
         console.log('🔍 [IstatAPI] Observations count:', Object.keys(observations).length);
-        
         // Parse observations
         for (const [key, value] of Object.entries(observations)) {
           if (Array.isArray(value) && value.length > 0) {
@@ -752,7 +652,6 @@ class IstatApiService {
                 cap: observation.postalCode || '',
                 prefisso: observation.prefix || ''
               };
-              
               // Filtri
               if (this.matchesFilters(comune, params)) {
                 comuni.push(comune);
@@ -761,7 +660,6 @@ class IstatApiService {
           }
         }
       }
-      
       // Ordinamento
       comuni.sort((a, b) => {
         if (params.sortBy === 'population') {
@@ -770,16 +668,13 @@ class IstatApiService {
           return a.nome.localeCompare(b.nome);
         }
       });
-      
       console.log(`✅ [IstatAPI] Parsati ${comuni.length} comuni da SDMX`);
       return comuni;
-      
     } catch (error) {
       console.error('❌ [IstatAPI] Errore parse SDMX:', error);
       return [];
     }
   }
-
   /**
    * Parse CSV data da ISTAT
    */
@@ -787,16 +682,13 @@ class IstatApiService {
     try {
       const lines = csvData.split('\n');
       const comuni: IstatComuneData[] = [];
-      
       console.log('🔍 [IstatAPI] Parsing CSV ISTAT, righe totali:', lines.length);
-      
       // ANALISI MANIACALE: Log header per capire struttura
       if (lines.length > 0) {
         const header = lines[0].trim();
         const headerColumns = header.split(';');
         console.log('🔍 [IstatAPI] HEADER CSV:', headerColumns);
         console.log('🔍 [IstatAPI] Numero colonne header:', headerColumns.length);
-        
         // Log prime 3 righe per analisi
         for (let i = 0; i < Math.min(3, lines.length); i++) {
           const line = lines[i].trim();
@@ -806,17 +698,13 @@ class IstatApiService {
           }
         }
       }
-      
       // Skip header line
       for (let i = 1; i < Math.min(lines.length, 100); i++) { // Limita a 100 per debug
         const line = lines[i].trim();
         if (!line) continue;
-        
         const columns = line.split(';');
         console.log(`🔍 [IstatAPI] Riga ${i}, colonne: ${columns.length}, nome: ${columns[6]}`);
-        
         if (columns.length < 10) continue;
-        
         const comune: IstatComuneData = {
           nome: columns[6]?.trim() || '',
           provincia: columns[3]?.trim() || '',
@@ -831,7 +719,6 @@ class IstatApiService {
           cap: columns[26]?.trim() || '',
           prefisso: columns[27]?.trim() || ''
         };
-        
         // Filtri
         if (params.q) {
           const query = params.q.toLowerCase();
@@ -841,18 +728,14 @@ class IstatApiService {
             continue;
           }
         }
-        
         if (params.regione && comune.regione.toLowerCase() !== params.regione.toLowerCase()) {
           continue;
         }
-        
         if (params.provincia && comune.provincia.toLowerCase() !== params.provincia.toLowerCase()) {
           continue;
         }
-        
         comuni.push(comune);
       }
-      
       // Ordinamento
       comuni.sort((a, b) => {
         if (params.sortBy === 'population') {
@@ -861,33 +744,27 @@ class IstatApiService {
           return a.nome.localeCompare(b.nome);
         }
       });
-      
       return comuni;
-      
     } catch (error) {
       console.error('❌ [IstatAPI] Errore parse CSV:', error);
       return [];
     }
   }
-
   /**
    * Fallback minimo con solo dati essenziali (NO HARDCODED)
    */
   private getMinimalFallbackData(params: any): IstatComuneData[] {
     // CHIRURGICO: Solo dati essenziali, NO hardcoded
     console.log('⚠️ [IstatAPI] Fallback minimo - solo dati essenziali');
-    
     // Ritorna array vuoto se non ci sono dati reali
     return [];
   }
-
   /**
    * Dataset completo comuni italiani (TUTTI i comuni principali)
    */
   private getCompleteItalianDataset(params: any): IstatComuneData[] {
     // Dataset completo con TUTTI i comuni italiani principali (8000+ comuni)
     const allComuni = this.getExtendedFallbackData(params);
-    
     // Aggiungi molti più comuni per copertura completa Italia
     const additionalComuni: IstatComuneData[] = [
       // Lombardia - TUTTI i capoluoghi e comuni principali
@@ -901,7 +778,6 @@ class IstatApiService {
       { nome: "Saronno", provincia: "Varese", regione: "Lombardia", codiceIstat: "012115", popolazione: 39000, superficie: 10.86, latitudine: 45.6264, longitudine: 9.0356, altitudine: 212, zonaClimatica: "E", cap: "21047", prefisso: "02" },
       { nome: "Seregno", provincia: "Monza e Brianza", regione: "Lombardia", codiceIstat: "108040", popolazione: 45000, superficie: 12.99, latitudine: 45.6500, longitudine: 9.2000, altitudine: 222, zonaClimatica: "E", cap: "20831", prefisso: "0362" },
       { nome: "Vigevano", provincia: "Pavia", regione: "Lombardia", codiceIstat: "018175", popolazione: 64000, superficie: 82.62, latitudine: 45.3139, longitudine: 8.8544, altitudine: 116, zonaClimatica: "E", cap: "27029", prefisso: "0381" },
-      
       // Veneto - TUTTI i capoluoghi e comuni principali  
       { nome: "Bassano del Grappa", provincia: "Vicenza", regione: "Veneto", codiceIstat: "024009", popolazione: 43000, superficie: 46.79, latitudine: 45.7667, longitudine: 11.7333, altitudine: 129, zonaClimatica: "E", cap: "36061", prefisso: "0424" },
       { nome: "Castelfranco Veneto", provincia: "Treviso", regione: "Veneto", codiceIstat: "026017", popolazione: 33000, superficie: 51.62, latitudine: 45.6667, longitudine: 11.9333, altitudine: 43, zonaClimatica: "E", cap: "31033", prefisso: "0423" },
@@ -913,7 +789,6 @@ class IstatApiService {
       { nome: "Thiene", provincia: "Vicenza", regione: "Veneto", codiceIstat: "024103", popolazione: 23000, superficie: 20.18, latitudine: 45.7083, longitudine: 11.4806, altitudine: 132, zonaClimatica: "E", cap: "36016", prefisso: "0445" },
       { nome: "Valdagno", provincia: "Vicenza", regione: "Veneto", codiceIstat: "024106", popolazione: 26000, superficie: 59.64, latitudine: 45.6500, longitudine: 11.3000, altitudine: 267, zonaClimatica: "E", cap: "36078", prefisso: "0445" },
       { nome: "Vittorio Veneto", provincia: "Treviso", regione: "Veneto", codiceIstat: "026100", popolazione: 28000, superficie: 82.8, latitudine: 45.9833, longitudine: 12.3000, altitudine: 138, zonaClimatica: "E", cap: "31029", prefisso: "0438" },
-      
       // Piemonte - TUTTI i capoluoghi e comuni principali
       { nome: "Alba", provincia: "Cuneo", regione: "Piemonte", codiceIstat: "004003", popolazione: 31000, superficie: 54.31, latitudine: 44.7000, longitudine: 8.0333, altitudine: 172, zonaClimatica: "E", cap: "12051", prefisso: "0173" },
       { nome: "Biella", provincia: "Biella", regione: "Piemonte", codiceIstat: "096004", popolazione: 45000, superficie: 46.68, latitudine: 45.5667, longitudine: 8.0500, altitudine: 420, zonaClimatica: "E", cap: "13900", prefisso: "015" },
@@ -925,7 +800,6 @@ class IstatApiService {
       { nome: "Nichelino", provincia: "Torino", regione: "Piemonte", codiceIstat: "001165", popolazione: 48000, superficie: 20.66, latitudine: 44.9833, longitudine: 7.6500, altitudine: 229, zonaClimatica: "E", cap: "10042", prefisso: "011" },
       { nome: "Pinerolo", provincia: "Torino", regione: "Piemonte", codiceIstat: "001174", popolazione: 36000, superficie: 50.57, latitudine: 44.8833, longitudine: 7.3333, altitudine: 376, zonaClimatica: "E", cap: "10064", prefisso: "0121" },
       { nome: "Rivoli", provincia: "Torino", regione: "Piemonte", codiceIstat: "001201", popolazione: 49000, superficie: 29.53, latitudine: 45.0667, longitudine: 7.5167, altitudine: 390, zonaClimatica: "E", cap: "10098", prefisso: "011" },
-      
       // Lazio - TUTTI i comuni principali oltre Roma
       { nome: "Aprilia", provincia: "Latina", regione: "Lazio", codiceIstat: "059003", popolazione: 75000, superficie: 177.55, latitudine: 41.5833, longitudine: 12.6500, altitudine: 80, zonaClimatica: "D", cap: "04011", prefisso: "06" },
       { nome: "Guidonia Montecelio", provincia: "Roma", regione: "Lazio", codiceIstat: "058046", popolazione: 89000, superficie: 79.32, latitudine: 42.0167, longitudine: 12.7333, altitudine: 95, zonaClimatica: "D", cap: "00012", prefisso: "0774" },
@@ -934,13 +808,10 @@ class IstatApiService {
       { nome: "Rieti", provincia: "Rieti", regione: "Lazio", codiceIstat: "057059", popolazione: 47000, superficie: 206.52, latitudine: 42.4000, longitudine: 12.8667, altitudine: 405, zonaClimatica: "D", cap: "02100", prefisso: "0746" },
       { nome: "Viterbo", provincia: "Viterbo", regione: "Lazio", codiceIstat: "056059", popolazione: 67000, superficie: 84.22, latitudine: 42.4167, longitudine: 12.1000, altitudine: 326, zonaClimatica: "D", cap: "01100", prefisso: "0761" }
     ];
-    
     // Combina tutti i dataset
     const completeDataset = [...allComuni, ...additionalComuni];
-    
     // Applica filtri
     let filtered = completeDataset;
-    
     if (params.query || params.q) {
       const query = (params.query || params.q).toLowerCase();
       filtered = filtered.filter(comune => 
@@ -949,30 +820,25 @@ class IstatApiService {
         comune.regione.toLowerCase().includes(query)
       );
     }
-    
     if (params.regione) {
       filtered = filtered.filter(comune => 
         comune.regione.toLowerCase() === params.regione.toLowerCase()
       );
     }
-    
     if (params.provincia) {
       filtered = filtered.filter(comune => 
         comune.provincia.toLowerCase() === params.provincia.toLowerCase()
       );
     }
-    
     console.log(`📊 [IstatAPI] Dataset completo italiano con ${filtered.length} comuni su ${completeDataset.length} totali`);
     return filtered;
   }
-
   /**
    * Fallback esteso con molti più comuni italiani
    */
   private getExtendedFallbackData(params: any): IstatComuneData[] {
     // Usa il dataset base e aggiungi molti più comuni
     const baseData = this.getFallbackData(params);
-    
     // Aggiungi comuni da tutte le regioni italiane
     const additionalComuni: IstatComuneData[] = [
       // Comuni Abruzzo
@@ -980,18 +846,15 @@ class IstatApiService {
       { nome: "Chieti", provincia: "Chieti", regione: "Abruzzo", codiceIstat: "069022", popolazione: 54000, superficie: 58.55, latitudine: 42.3500, longitudine: 14.1667, altitudine: 330, zonaClimatica: "E", cap: "66100", prefisso: "0871" },
       { nome: "Pescara", provincia: "Pescara", regione: "Abruzzo", codiceIstat: "068028", popolazione: 120000, superficie: 33.62, latitudine: 42.4667, longitudine: 14.2167, altitudine: 4, zonaClimatica: "E", cap: "65100", prefisso: "085" },
       { nome: "Teramo", provincia: "Teramo", regione: "Abruzzo", codiceIstat: "067041", popolazione: 55000, superficie: 151.88, latitudine: 42.6667, longitudine: 13.7000, altitudine: 265, zonaClimatica: "E", cap: "64100", prefisso: "0861" },
-      
       // Comuni Basilicata
       { nome: "Potenza", provincia: "Potenza", regione: "Basilicata", codiceIstat: "076063", popolazione: 67000, superficie: 173.97, latitudine: 40.6333, longitudine: 15.8000, altitudine: 819, zonaClimatica: "D", cap: "85100", prefisso: "0971" },
       { nome: "Matera", provincia: "Matera", regione: "Basilicata", codiceIstat: "077014", popolazione: 60000, superficie: 387.40, latitudine: 40.6667, longitudine: 16.6000, altitudine: 401, zonaClimatica: "D", cap: "75100", prefisso: "0835" },
-      
       // Comuni Calabria
       { nome: "Catanzaro", provincia: "Catanzaro", regione: "Calabria", codiceIstat: "079023", popolazione: 90000, superficie: 112.72, latitudine: 38.9000, longitudine: 16.6000, altitudine: 342, zonaClimatica: "C", cap: "88100", prefisso: "0961" },
       { nome: "Cosenza", provincia: "Cosenza", regione: "Calabria", codiceIstat: "078030", popolazione: 70000, superficie: 37.86, latitudine: 39.3000, longitudine: 16.2500, altitudine: 238, zonaClimatica: "C", cap: "87100", prefisso: "0984" },
       { nome: "Crotone", provincia: "Crotone", regione: "Calabria", codiceIstat: "101010", popolazione: 62000, superficie: 179.83, latitudine: 39.0833, longitudine: 17.1167, altitudine: 8, zonaClimatica: "C", cap: "88900", prefisso: "0962" },
       { nome: "Reggio Calabria", provincia: "Reggio Calabria", regione: "Calabria", codiceIstat: "080063", popolazione: 180000, superficie: 236.02, latitudine: 38.1167, longitudine: 15.6500, altitudine: 31, zonaClimatica: "C", cap: "89100", prefisso: "0965" },
       { nome: "Vibo Valentia", provincia: "Vibo Valentia", regione: "Calabria", codiceIstat: "102046", popolazione: 34000, superficie: 46.23, latitudine: 38.6667, longitudine: 16.1000, altitudine: 476, zonaClimatica: "C", cap: "89900", prefisso: "0963" },
-      
       // Comuni Marche
       { nome: "Ancona", provincia: "Ancona", regione: "Marche", codiceIstat: "042002", popolazione: 100000, superficie: 123.71, latitudine: 43.6167, longitudine: 13.5167, altitudine: 16, zonaClimatica: "D", cap: "60100", prefisso: "071" },
       { nome: "Ascoli Piceno", provincia: "Ascoli Piceno", regione: "Marche", codiceIstat: "044005", popolazione: 50000, superficie: 160.51, latitudine: 42.8500, longitudine: 13.5667, altitudine: 154, zonaClimatica: "D", cap: "63100", prefisso: "0736" },
@@ -999,18 +862,14 @@ class IstatApiService {
       { nome: "Macerata", provincia: "Macerata", regione: "Marche", codiceIstat: "043020", popolazione: 42000, superficie: 92.53, latitudine: 43.3000, longitudine: 13.4500, altitudine: 315, zonaClimatica: "D", cap: "62100", prefisso: "0733" },
       { nome: "Pesaro", provincia: "Pesaro e Urbino", regione: "Marche", codiceIstat: "041048", popolazione: 95000, superficie: 126.77, latitudine: 43.9167, longitudine: 12.9167, altitudine: 11, zonaClimatica: "D", cap: "61100", prefisso: "0721" },
       { nome: "Urbino", provincia: "Pesaro e Urbino", regione: "Marche", codiceIstat: "041053", popolazione: 15000, superficie: 228.07, latitudine: 43.7167, longitudine: 12.6333, altitudine: 451, zonaClimatica: "D", cap: "61029", prefisso: "0722" },
-      
       // Comuni Molise
       { nome: "Campobasso", provincia: "Campobasso", regione: "Molise", codiceIstat: "070004", popolazione: 49000, superficie: 55.65, latitudine: 41.5667, longitudine: 14.6667, altitudine: 701, zonaClimatica: "D", cap: "86100", prefisso: "0874" },
       { nome: "Isernia", provincia: "Isernia", regione: "Molise", codiceIstat: "094023", popolazione: 22000, superficie: 68.74, latitudine: 41.6000, longitudine: 14.2333, altitudine: 423, zonaClimatica: "D", cap: "86170", prefisso: "0865" },
-      
       // Comuni Umbria
       { nome: "Perugia", provincia: "Perugia", regione: "Umbria", codiceIstat: "054039", popolazione: 170000, superficie: 449.92, latitudine: 43.1167, longitudine: 12.3833, altitudine: 493, zonaClimatica: "D", cap: "06100", prefisso: "075" },
       { nome: "Terni", provincia: "Terni", regione: "Umbria", codiceIstat: "055032", popolazione: 110000, superficie: 212.43, latitudine: 42.5667, longitudine: 12.6500, altitudine: 130, zonaClimatica: "D", cap: "05100", prefisso: "0744" },
-      
       // Comuni Valle d'Aosta
       { nome: "Aosta", provincia: "Aosta", regione: "Valle d'Aosta", codiceIstat: "007003", popolazione: 35000, superficie: 21.38, latitudine: 45.7333, longitudine: 7.3167, altitudine: 583, zonaClimatica: "F", cap: "11100", prefisso: "0165" },
-      
       // Comuni Puglia
       { nome: "Bari", provincia: "Bari", regione: "Puglia", codiceIstat: "072006", popolazione: 320000, superficie: 116.20, latitudine: 41.1167, longitudine: 16.8667, altitudine: 5, zonaClimatica: "C", cap: "70100", prefisso: "080" },
       { nome: "Barletta", provincia: "Barletta-Andria-Trani", regione: "Puglia", codiceIstat: "110004", popolazione: 95000, superficie: 146.91, latitudine: 41.3167, longitudine: 16.2833, altitudine: 15, zonaClimatica: "C", cap: "76121", prefisso: "0883" },
@@ -1018,7 +877,6 @@ class IstatApiService {
       { nome: "Foggia", provincia: "Foggia", regione: "Puglia", codiceIstat: "071024", popolazione: 150000, superficie: 507.78, latitudine: 41.4667, longitudine: 15.5500, altitudine: 76, zonaClimatica: "C", cap: "71100", prefisso: "0881" },
       { nome: "Lecce", provincia: "Lecce", regione: "Puglia", codiceIstat: "075035", popolazione: 95000, superficie: 238.39, latitudine: 40.3500, longitudine: 18.1667, altitudine: 49, zonaClimatica: "C", cap: "73100", prefisso: "0832" },
       { nome: "Taranto", provincia: "Taranto", regione: "Puglia", codiceIstat: "073027", popolazione: 200000, superficie: 217.00, latitudine: 40.4667, longitudine: 17.2333, altitudine: 15, zonaClimatica: "C", cap: "74100", prefisso: "099" },
-      
       // Comuni Sicilia
       { nome: "Palermo", provincia: "Palermo", regione: "Sicilia", codiceIstat: "082053", popolazione: 650000, superficie: 160.59, latitudine: 38.1167, longitudine: 13.3667, altitudine: 14, zonaClimatica: "B", cap: "90100", prefisso: "091" },
       { nome: "Catania", provincia: "Catania", regione: "Sicilia", codiceIstat: "087015", popolazione: 310000, superficie: 180.88, latitudine: 37.5000, longitudine: 15.0833, altitudine: 7, zonaClimatica: "B", cap: "95100", prefisso: "095" },
@@ -1029,7 +887,6 @@ class IstatApiService {
       { nome: "Caltanissetta", provincia: "Caltanissetta", regione: "Sicilia", codiceIstat: "085007", popolazione: 62000, superficie: 416.90, latitudine: 37.4833, longitudine: 14.0667, altitudine: 568, zonaClimatica: "B", cap: "93100", prefisso: "0934" },
       { nome: "Enna", provincia: "Enna", regione: "Sicilia", codiceIstat: "086011", popolazione: 27000, superficie: 357.18, latitudine: 37.5667, longitudine: 14.2667, altitudine: 931, zonaClimatica: "B", cap: "94100", prefisso: "0935" },
       { nome: "Ragusa", provincia: "Ragusa", regione: "Sicilia", codiceIstat: "088009", popolazione: 73000, superficie: 442.46, latitudine: 36.9167, longitudine: 14.7167, altitudine: 502, zonaClimatica: "B", cap: "97100", prefisso: "0932" },
-      
       // Comuni Sardegna
       { nome: "Cagliari", provincia: "Cagliari", regione: "Sardegna", codiceIstat: "092009", popolazione: 150000, superficie: 85.01, latitudine: 39.2167, longitudine: 9.1167, altitudine: 4, zonaClimatica: "C", cap: "09100", prefisso: "070" },
       { nome: "Sassari", provincia: "Sassari", regione: "Sardegna", codiceIstat: "090064", popolazione: 130000, superficie: 546.08, latitudine: 40.7333, longitudine: 8.5667, altitudine: 225, zonaClimatica: "C", cap: "07100", prefisso: "079" },
@@ -1039,13 +896,10 @@ class IstatApiService {
       { nome: "Iglesias", provincia: "Sud Sardegna", regione: "Sardegna", codiceIstat: "111025", popolazione: 27000, superficie: 207.63, latitudine: 39.3167, longitudine: 8.5333, altitudine: 200, zonaClimatica: "C", cap: "09016", prefisso: "0781" },
       { nome: "Villacidro", provincia: "Sud Sardegna", regione: "Sardegna", codiceIstat: "111092", popolazione: 14000, superficie: 183.56, latitudine: 39.4500, longitudine: 8.7333, altitudine: 432, zonaClimatica: "C", cap: "09039", prefisso: "070" }
     ];
-    
     // Combina dataset base con comuni aggiuntivi
     const extendedData = [...baseData, ...additionalComuni];
-    
     // Applica filtri
     let filtered = extendedData;
-    
     if (params.query || params.q) {
       const query = (params.query || params.q).toLowerCase();
       filtered = filtered.filter(comune => 
@@ -1054,23 +908,19 @@ class IstatApiService {
         comune.regione.toLowerCase().includes(query)
       );
     }
-    
     if (params.regione) {
       filtered = filtered.filter(comune => 
         comune.regione.toLowerCase() === params.regione.toLowerCase()
       );
     }
-    
     if (params.provincia) {
       filtered = filtered.filter(comune => 
         comune.provincia.toLowerCase() === params.provincia.toLowerCase()
       );
     }
-    
     console.log(`📊 [IstatAPI] Dataset esteso con ${filtered.length} comuni su ${extendedData.length} totali`);
     return filtered;
   }
-
   /**
    * Dati completi comuni italiani (soluzione definitiva)
    */
@@ -2783,10 +2633,8 @@ class IstatApiService {
         prefisso: "0171"
       }
     ];
-
     // Applica filtri
     let filtered = comuniItaliani;
-    
     if (params.query || params.q) {
       const query = (params.query || params.q).toLowerCase();
       filtered = filtered.filter(comune => 
@@ -2795,22 +2643,18 @@ class IstatApiService {
         comune.regione.toLowerCase().includes(query)
       );
     }
-    
     if (params.regione) {
       filtered = filtered.filter(comune => 
         comune.regione.toLowerCase() === params.regione.toLowerCase()
       );
     }
-    
     if (params.provincia) {
       filtered = filtered.filter(comune => 
         comune.provincia.toLowerCase() === params.provincia.toLowerCase()
       );
     }
-    
     return filtered;
   }
-
   /**
    * Helper per filtri comuni
    */
@@ -2823,25 +2667,20 @@ class IstatApiService {
         return false;
       }
     }
-    
     if (params.regione && comune.regione.toLowerCase() !== params.regione.toLowerCase()) {
       return false;
     }
-    
     if (params.provincia && comune.provincia.toLowerCase() !== params.provincia.toLowerCase()) {
       return false;
     }
-    
     return true;
   }
-
   /**
    * Cache management
    */
   private generateCacheKey(params: any): string {
     return JSON.stringify(params);
   }
-
   private getFromCache(key: string): IstatComuneData[] | null {
     const cached = this.cache.get(key);
     if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
@@ -2849,7 +2688,6 @@ class IstatApiService {
     }
     return null;
   }
-
   private setCache(key: string, data: IstatComuneData[]): void {
     this.cache.set(key, {
       data,
@@ -2857,5 +2695,4 @@ class IstatApiService {
     });
   }
 }
-
 export const istatApiService = IstatApiService.getInstance();
