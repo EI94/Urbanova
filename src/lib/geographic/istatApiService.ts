@@ -254,9 +254,9 @@ class IstatApiService {
           
           // Verifica che abbiamo abbastanza colonne (CSV ISTAT ha molte colonne)
           if (columns.length >= 12) {
-            const nomeComune = columns[5]?.trim() || ''; // Denominazione (colonna 6)
-            const nomeProvincia = columns[11]?.trim() || ''; // Provincia (colonna 12)
-            const nomeRegione = columns[9]?.trim() || ''; // Regione (colonna 10)
+            const nomeComune = columns[5]?.trim() || ''; // Denominazione (Italiana e straniera) - colonna 6
+            const nomeProvincia = columns[11]?.trim() || ''; // Denominazione Unit� territoriale - colonna 12
+            const nomeRegione = columns[10]?.trim() || ''; // Denominazione Regione - colonna 11
             
             // Debug: Verifica campi
             if (i <= 3) {
