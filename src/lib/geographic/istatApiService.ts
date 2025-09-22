@@ -243,6 +243,12 @@ class IstatApiService {
       for (let i = 3; i < lines.length; i++) {
         const line = lines[i].trim();
         if (!line) continue;
+        
+        // DEBUG MANIACALE: Log ogni linea che contiene Roma
+        if (line.includes('Roma')) {
+          console.log(`🎯 [IstatAPI] LINEA CON ROMA TROVATA ${i}:`, line.substring(0, 100) + '...');
+        }
+        
         try {
           const columns = this.parseCsvLine(line);
           
@@ -1032,96 +1038,54 @@ class IstatApiService {
     return filtered;
   }
   /**
-   * Dati completi comuni italiani (soluzione definitiva)
+   * Fallback minimo - SOLO dati ISTAT reali
    */
   private getFallbackData(params: any): IstatComuneData[] {
-    const comuniItaliani: IstatComuneData[] = [
-      {
-        nome: "Roma",
-        provincia: "Roma",
-        regione: "Lazio",
-        codiceIstat: "058091",
-        popolazione: 2873000,
-        superficie: 1285.31,
-        latitudine: 41.9028,
-        longitudine: 12.4964,
-        altitudine: 21,
-        zonaClimatica: "D",
-        cap: "00100",
-        prefisso: "06"
-      },
-      {
-        nome: "Frascati",
-        provincia: "Roma",
-        regione: "Lazio",
-        codiceIstat: "058039",
-        popolazione: 22000,
-        superficie: 22.41,
-        latitudine: 41.8067,
-        longitudine: 12.6792,
-        altitudine: 320,
-        zonaClimatica: "D",
-        cap: "00044",
-        prefisso: "06"
-      },
-      {
-        nome: "Fregene",
-        provincia: "Roma",
-        regione: "Lazio",
-        codiceIstat: "058040",
-        popolazione: 12000,
-        superficie: 15.20,
-        latitudine: 41.8500,
-        longitudine: 12.2000,
-        altitudine: 5,
-        zonaClimatica: "D",
-        cap: "00050",
-        prefisso: "06"
-      },
-      {
-        nome: "Tivoli",
-        provincia: "Roma",
-        regione: "Lazio",
-        codiceIstat: "058104",
-        popolazione: 56000,
-        superficie: 68.50,
-        latitudine: 41.9639,
-        longitudine: 12.7981,
-        altitudine: 235,
-        zonaClimatica: "D",
-        cap: "00019",
-        prefisso: "0774"
-      },
-      {
-        nome: "Anzio",
-        provincia: "Roma",
-        regione: "Lazio",
-        codiceIstat: "058007",
-        popolazione: 58000,
-        superficie: 43.46,
-        latitudine: 41.4500,
-        longitudine: 12.6167,
-        altitudine: 3,
-        zonaClimatica: "D",
-        cap: "00042",
-        prefisso: "06"
-      },
-      {
-        nome: "Nettuno",
-        provincia: "Roma",
-        regione: "Lazio",
-        codiceIstat: "058070",
-        popolazione: 49000,
-        superficie: 71.46,
-        latitudine: 41.4500,
-        longitudine: 12.6500,
-        altitudine: 11,
-        zonaClimatica: "D",
-        cap: "00048",
-        prefisso: "06"
-      },
-      {
-        nome: "Velletri",
+    // CHIRURGICO: Eliminati TUTTI i dati hardcoded
+    console.log('⚠️ [IstatAPI] Fallback minimo - solo dati ISTAT reali');
+    return [];
+  }
+  /**
+   * Helper per filtri comuni
+   */
+  private matchesFilters(comune: IstatComuneData, params: any): boolean {
+    if (params.q) {
+      const query = params.q.toLowerCase();
+      if (!comune.nome.toLowerCase().includes(query) &&
+          !comune.provincia.toLowerCase().includes(query) &&
+          !comune.regione.toLowerCase().includes(query)) {
+        return false;
+      }
+    }
+    if (params.regione && comune.regione.toLowerCase() !== params.regione.toLowerCase()) {
+      return false;
+    }
+    if (params.provincia && comune.provincia.toLowerCase() !== params.provincia.toLowerCase()) {
+      return false;
+    }
+    return true;
+  }
+  /**
+   * Cache management
+   */
+  private generateCacheKey(params: any): string {
+    return JSON.stringify(params);
+  }
+  private getFromCache(key: string): IstatComuneData[] | null {
+    const cached = this.cache.get(key);
+    if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+      return cached.data;
+    }
+    return null;
+  }
+  private setCache(key: string, data: IstatComuneData[]): void {
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now()
+    });
+  }
+}
+export const istatApiService = IstatApiService.getInstance();
         provincia: "Roma",
         regione: "Lazio",
         codiceIstat: "058110",
