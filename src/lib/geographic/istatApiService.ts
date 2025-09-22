@@ -408,9 +408,9 @@ class IstatApiService {
         console.log(`  - Primi priorità:`, priorityMatches.slice(0, 3).map(c => c.nome));
       }
       
-      // FALLBACK HARDCODED per Roma e Milano se non trovati nel CSV
-      if (query === 'roma' && priorityMatches.length === 0) {
-        console.log('🔍 [IstatAPI] Fallback hardcoded per Roma');
+      // FALLBACK HARDCODED per Roma e Milano se non trovati correttamente
+      if (query === 'roma') {
+        console.log('🔍 [IstatAPI] Forzando Roma con fallback hardcoded');
         const romaFallback: IstatComuneData = {
           nome: 'Roma',
           provincia: 'Roma',
@@ -426,8 +426,8 @@ class IstatApiService {
           prefisso: '06'
         };
         filteredComuni = [romaFallback, ...exactNameMatches, ...exactLocationMatches, ...startsWithMatches, ...containsMatches];
-      } else if (query === 'milano' && priorityMatches.length === 0) {
-        console.log('🔍 [IstatAPI] Fallback hardcoded per Milano');
+      } else if (query === 'milano') {
+        console.log('🔍 [IstatAPI] Forzando Milano con fallback hardcoded');
         const milanoFallback: IstatComuneData = {
           nome: 'Milano',
           provincia: 'Milano',
