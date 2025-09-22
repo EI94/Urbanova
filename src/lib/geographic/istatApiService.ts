@@ -263,8 +263,8 @@ class IstatApiService {
               console.log(`🔍 [IstatAPI] Linea ${i} - Nome: "${nomeComune}", Provincia: "${nomeProvincia}", Regione: "${nomeRegione}"`);
             }
             
-            // Geocoding intelligente con cache
-            const coordinate = await this.getCoordinateIntelligente(nomeComune, nomeProvincia);
+            // Geocoding temporaneamente disabilitato per debug
+            const coordinate = { lat: 41.9028, lng: 12.4964 }; // Roma di default
             const comune: IstatComuneData = {
               nome: nomeComune, // Denominazione (colonna 6)
               provincia: nomeProvincia, // Provincia (colonna 12)
