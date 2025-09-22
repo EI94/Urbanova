@@ -258,6 +258,11 @@ class IstatApiService {
             const nomeProvincia = columns[11]?.trim() || ''; // Denominazione Unit� territoriale - colonna 12
             const nomeRegione = columns[10]?.trim() || ''; // Denominazione Regione - colonna 11
             
+            // DEBUG MANIACALE: Log specifico per Roma
+            if (nomeComune === 'Roma') {
+              console.log(`🎯 [IstatAPI] ROMA PARSATA:`, { nomeComune, nomeProvincia, nomeRegione, columns: columns.slice(0, 15) });
+            }
+            
             // Debug: Verifica campi
             if (i <= 3) {
               console.log(`🔍 [IstatAPI] Linea ${i} - Nome: "${nomeComune}", Provincia: "${nomeProvincia}", Regione: "${nomeRegione}"`);
@@ -282,8 +287,16 @@ class IstatApiService {
             // Filtra solo comuni validi
             if (comune.nome && comune.codiceIstat && comune.provincia && comune.regione) {
               comuni.push(comune);
+              // DEBUG MANIACALE: Log specifico per Roma
+              if (comune.nome === 'Roma') {
+                console.log(`🎯 [IstatAPI] ROMA TROVATA E AGGIUNTA:`, comune);
+              }
               console.log(`✅ [IstatAPI] Comune aggiunto:`, comune.nome);
             } else {
+              // DEBUG MANIACALE: Log specifico per Roma scartata
+              if (comune.nome === 'Roma') {
+                console.log(`🎯 [IstatAPI] ROMA SCARTATA:`, { nome: comune.nome, codiceIstat: comune.codiceIstat, provincia: comune.provincia, regione: comune.regione });
+              }
               console.log(`❌ [IstatAPI] Comune scartato:`, { nome: comune.nome, codiceIstat: comune.codiceIstat, provincia: comune.provincia, regione: comune.regione });
             }
           }
