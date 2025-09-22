@@ -263,8 +263,8 @@ class IstatApiService {
               console.log(`🔍 [IstatAPI] Linea ${i} - Nome: "${nomeComune}", Provincia: "${nomeProvincia}", Regione: "${nomeRegione}"`);
             }
             
-            // Usa geocoding reale con Nominatim per coordinate accurate
-            const coordinate = await this.getCoordinateForComune(nomeComune, nomeProvincia);
+            // TEMPORANEO: Usa coordinate di default per evitare timeout Nominatim
+            const coordinate = { lat: 41.9028, lng: 12.4964 }; // Roma di default
             const comune: IstatComuneData = {
               nome: nomeComune, // Denominazione (colonna 6)
               provincia: nomeProvincia, // Provincia (colonna 12)
