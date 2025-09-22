@@ -315,17 +315,16 @@ export default function UnifiedDashboardPage() {
     setIsLoading(true);
 
     try {
-      // Chiama l'API reale del chatbot
-      const response = await fetch('/api/chat', {
+      // Chiama l'API OS funzionante (feasibility-smart)
+      const response = await fetch('/api/feasibility-smart', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           message: inputValue,
-          history: newMessages.slice(-10), // Invia solo gli ultimi 10 messaggi come contesto
-          userId: currentUser?.uid,
-          userEmail: currentUser?.email,
+          userId: currentUser?.uid || 'anonymous',
+          userEmail: currentUser?.email || 'user@urbanova.life',
         }),
       });
 
