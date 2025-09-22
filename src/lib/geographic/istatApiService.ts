@@ -239,8 +239,8 @@ class IstatApiService {
       console.log('🔍 [IstatAPI] Header CSV:', lines[0].substring(0, 200) + '...');
       console.log('🔍 [IstatAPI] Prima linea dati:', lines[1].substring(0, 200) + '...');
 
-      // Skip header line
-      for (let i = 1; i < lines.length; i++) {
+      // Skip header lines (header multi-linea)
+      for (let i = 2; i < lines.length; i++) {
         const line = lines[i].trim();
         if (!line) continue;
         try {
