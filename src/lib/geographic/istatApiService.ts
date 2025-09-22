@@ -376,11 +376,17 @@ class IstatApiService {
     try {
       // Usa Nominatim (OpenStreetMap) per geocoding gratuito
       const query = encodeURIComponent(`${nome}, ${provincia}, Italia`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 secondi timeout
+      
       const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1&countrycodes=it`, {
         headers: {
           'User-Agent': 'Urbanova-Geocoding/1.0'
-        }
+        },
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
@@ -396,6 +402,7 @@ class IstatApiService {
 
     // Fallback su coordinate approssimative per provincia (solo per province principali)
     const coordinateProvince: { [key: string]: { lat: number; lng: number } } = {
+      'Varese': { lat: 45.8206, lng: 8.8251 }, // Gallarate è in provincia di Varese
       'Roma': { lat: 41.9028, lng: 12.4964 },
       'Milano': { lat: 45.4642, lng: 9.1900 },
       'Napoli': { lat: 40.8518, lng: 14.2681 },
