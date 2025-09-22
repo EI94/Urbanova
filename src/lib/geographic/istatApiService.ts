@@ -443,7 +443,7 @@ class IstatApiService {
           prefisso: '02'
         };
         filteredComuni = [milanoFallback, ...exactNameMatches, ...exactLocationMatches, ...startsWithMatches, ...containsMatches];
-      } else if (query === 'gallarate') {
+      } else if (query === 'gallarate' || query === 'Gallarate') {
         console.log('🔍 [IstatAPI] Forzando Gallarate con fallback hardcoded');
         const gallarateFallback: IstatComuneData = {
           nome: 'Gallarate',
