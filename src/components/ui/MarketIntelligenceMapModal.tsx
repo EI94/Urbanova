@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { X, MapPin, Search, Filter } from 'lucide-react';
 import { InteractiveMap, MapMarker } from '@/components/map/InteractiveMap';
 import { useMapData } from '@/hooks/useMapData';
-import { GeographicSearchResult } from '@/components/ui/GeographicSearch';
+import { GeographicSearchResult, GeographicSearch } from '@/components/ui/GeographicSearch';
 
 interface MarketIntelligenceMapModalProps {
   isOpen: boolean;
@@ -52,6 +52,10 @@ export default function MarketIntelligenceMapModal({
     setSelectedLocation(location);
   };
 
+  const handleSearchResultClick = (result: GeographicSearchResult) => {
+    setSelectedLocation(result);
+  };
+
   const handleConfirmSelection = () => {
     if (selectedLocation) {
       // Formatta la localizzazione per il sistema esistente
@@ -86,40 +90,14 @@ export default function MarketIntelligenceMapModal({
 
         {/* Contenuto */}
         <div className="p-6">
-          {/* Statistiche */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl">
-              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                {mapStats?.totalComuni?.toLocaleString() || '0'}
-              </div>
-              <div className="text-sm text-blue-600 dark:text-blue-400">
-                Comuni Italiani
-              </div>
-            </div>
-            <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-xl">
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                {mapStats?.totalZone?.toLocaleString() || '0'}
-              </div>
-              <div className="text-sm text-green-600 dark:text-green-400">
-                Zone Geografiche
-              </div>
-            </div>
-            <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-xl">
-              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                {mapStats?.totalRegioni || '0'}
-              </div>
-              <div className="text-sm text-purple-600 dark:text-purple-400">
-                Regioni
-              </div>
-            </div>
-            <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-xl">
-              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                {mapStats?.totalProvince || '0'}
-              </div>
-              <div className="text-sm text-orange-600 dark:text-orange-400">
-                Province
-              </div>
-            </div>
+          {/* Barra di ricerca */}
+          <div className="mb-6">
+            <GeographicSearch
+              onResultSelect={handleSearchResultClick}
+              placeholder="Cerca comuni italiani (es. Gallarate, Roma, Milano...)"
+              showFilters={true}
+              maxResults={10}
+            />
           </div>
 
           {/* Mappa */}

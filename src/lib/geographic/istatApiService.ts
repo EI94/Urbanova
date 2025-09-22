@@ -295,8 +295,8 @@ class IstatApiService {
           if (columns.length >= 12) {
             const nomeComune = columns[5]?.trim() || '';
             const nomeProvincia = columns[11]?.trim() || '';
-            // Temporaneamente usa coordinate di default per evitare timeout geocoding
-            const coordinate = { lat: 41.9028, lng: 12.4964 }; // Roma come default
+            // Usa geocoding reale con Nominatim per coordinate accurate
+            const coordinate = await this.getCoordinateForComune(nomeComune, nomeProvincia);
             
             // Debug coordinate
             if (i <= 3) {
