@@ -236,8 +236,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         regione: comune.regione,
         popolazione: comune.popolazione,
         superficie: comune.superficie,
-        latitudine: params.includeCoordinates ? comune.latitudine : 0,
-        longitudine: params.includeCoordinates ? comune.longitudine : 0,
+        latitudine: comune.latitudine,
+        longitudine: comune.longitudine,
         score: 250 - index, // Score decrescente
       metadata: params.includeMetadata ? {
           codiceIstat: comune.codiceIstat,
