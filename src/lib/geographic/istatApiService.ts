@@ -528,7 +528,16 @@ class IstatApiService {
    */
   private parseCsvLine(line: string): string[] {
     // Il CSV ISTAT usa ';' come delimitatore e ha caratteri speciali
-    return line.split(';').map(field => field.trim().replace(/"/g, '').replace(/�/g, ''));
+    // Gestione robusta per caratteri speciali e encoding
+    return line
+      .split(';')
+      .map(field => field
+        .trim()
+        .replace(/"/g, '')
+        .replace(/�/g, '')
+        .replace(/\uFFFD/g, '') // Sostituisce caratteri di sostituzione Unicode
+        .replace(/[^\x20-\x7E\u00C0-\u017F]/g, '') // Rimuove caratteri non ASCII/Latin
+      );
   }
   /**
    * Fallback CSV se SDMX non disponibile
