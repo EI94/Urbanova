@@ -582,32 +582,46 @@ class IstatApiService {
       return this.coordinateCache.get(cacheKey)!;
     }
 
-    // 2. Coordinate hardcoded per città principali (performance)
-    const coordinatePrincipali: { [key: string]: { lat: number; lng: number } } = {
-      'Roma-Roma': { lat: 41.9028, lng: 12.4964 },
-      'Milano-Milano': { lat: 45.4642, lng: 9.1900 },
-      'Napoli-Napoli': { lat: 40.8518, lng: 14.2681 },
-      'Torino-Torino': { lat: 45.0703, lng: 7.6869 },
-      'Palermo-Palermo': { lat: 38.1157, lng: 13.3613 },
-      'Genova-Genova': { lat: 44.4056, lng: 8.9463 },
-      'Bologna-Bologna': { lat: 44.4949, lng: 11.3426 },
-      'Firenze-Firenze': { lat: 43.7696, lng: 11.2558 },
-      'Bari-Bari': { lat: 41.1170, lng: 16.8719 },
-      'Catania-Catania': { lat: 37.5079, lng: 15.0830 },
-      'Venezia-Venezia': { lat: 45.4408, lng: 12.3155 },
-      'Verona-Verona': { lat: 45.4384, lng: 10.9916 },
-      'Gallarate-Varese': { lat: 45.6595, lng: 8.7942 }
-    };
-
-    if (coordinatePrincipali[cacheKey]) {
-      const coord = coordinatePrincipali[cacheKey];
-      this.coordinateCache.set(cacheKey, coord);
-      return coord;
+    // 2. Geocoding reale con Nominatim (OpenStreetMap)
+    try {
+      console.log(`🌍 [IstatAPI] Geocoding Nominatim per: ${nome}, ${provincia}`);
+      
+      const query = encodeURIComponent(`${nome}, ${provincia}, Italia`);
+      const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1&countrycodes=it&addressdetails=1`;
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 secondi timeout
+      
+      const response = await fetch(nominatimUrl, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Urbanova/1.0 (https://www.urbanova.life)',
+          'Accept': 'application/json'
+        }
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const result = data[0];
+          const coord = {
+            lat: parseFloat(result.lat),
+            lng: parseFloat(result.lon)
+          };
+          
+          console.log(`✅ [IstatAPI] Geocoding Nominatim riuscito per ${nome}:`, coord);
+          this.coordinateCache.set(cacheKey, coord);
+          return coord;
+        }
+      }
+    } catch (error) {
+      console.warn(`⚠️ [IstatAPI] Geocoding Nominatim fallito per ${nome}:`, error);
     }
 
-    // 3. Fallback coordinate provincia (senza Nominatim per ora)
+    // 3. Fallback coordinate provincia approssimative
     const coordinateProvince: { [key: string]: { lat: number; lng: number } } = {
-      'Varese': { lat: 45.8206, lng: 8.8251 },
       'Roma': { lat: 41.9028, lng: 12.4964 },
       'Milano': { lat: 45.4642, lng: 9.1900 },
       'Napoli': { lat: 40.8518, lng: 14.2681 },
@@ -618,10 +632,12 @@ class IstatApiService {
       'Firenze': { lat: 43.7696, lng: 11.2558 },
       'Bari': { lat: 41.1170, lng: 16.8719 },
       'Catania': { lat: 37.5079, lng: 15.0830 },
-      'Venezia': { lat: 45.4408, lng: 12.3155 }
+      'Venezia': { lat: 45.4408, lng: 12.3155 },
+      'Varese': { lat: 45.8206, lng: 8.8251 }
     };
 
-    const coord = coordinateProvince[provincia] || coordinateProvince['Roma'] || { lat: 41.9028, lng: 12.4964 };
+    const coord = coordinateProvince[provincia] || { lat: 41.9028, lng: 12.4964 };
+    console.log(`📍 [IstatAPI] Fallback coordinate provincia per ${nome}:`, coord);
     this.coordinateCache.set(cacheKey, coord);
     return coord;
   }
