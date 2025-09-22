@@ -582,43 +582,9 @@ class IstatApiService {
       return this.coordinateCache.get(cacheKey)!;
     }
 
-    // 2. Geocoding reale con Nominatim (OpenStreetMap)
-    try {
-      console.log(`🌍 [IstatAPI] Geocoding Nominatim per: ${nome}, ${provincia}`);
-      
-      const query = encodeURIComponent(`${nome}, ${provincia}, Italia`);
-      const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1&countrycodes=it&addressdetails=1`;
-      
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 secondi timeout
-      
-      const response = await fetch(nominatimUrl, {
-        signal: controller.signal,
-        headers: {
-          'User-Agent': 'Urbanova/1.0 (https://www.urbanova.life)',
-          'Accept': 'application/json'
-        }
-      });
-      
-      clearTimeout(timeoutId);
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data && data.length > 0) {
-          const result = data[0];
-          const coord = {
-            lat: parseFloat(result.lat),
-            lng: parseFloat(result.lon)
-          };
-          
-          console.log(`✅ [IstatAPI] Geocoding Nominatim riuscito per ${nome}:`, coord);
-          this.coordinateCache.set(cacheKey, coord);
-          return coord;
-        }
-      }
-    } catch (error) {
-      console.warn(`⚠️ [IstatAPI] Geocoding Nominatim fallito per ${nome}:`, error);
-    }
+    // 2. Geocoding reale con Nominatim (OpenStreetMap) - TEMPORANEAMENTE DISABILITATO
+    // TODO: Implementare geocoding reale quando il parsing CSV funziona perfettamente
+    console.log(`📍 [IstatAPI] Geocoding temporaneamente disabilitato per: ${nome}, ${provincia}`);
 
     // 3. Fallback coordinate provincia approssimative
     const coordinateProvince: { [key: string]: { lat: number; lng: number } } = {
