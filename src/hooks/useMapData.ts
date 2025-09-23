@@ -75,7 +75,7 @@ export function useMapData(options: UseMapDataOptions = {}) {
       
       const searchParams = new URLSearchParams({
         type: 'comune',
-        limit: '1000', // Aumentato per mostrare più comuni
+        limit: '100', // Ridotto per rispettare il limite API
         includeCoordinates: 'true',
         includeMetadata: 'true'
       });
