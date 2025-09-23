@@ -547,14 +547,7 @@ export function InteractiveMap({
         />
       )}
 
-      {/* Ricerca mappa */}
-      {showSearch && (
-        <MapSearch
-          onResultSelect={handleSearchResultSelect}
-          onResultsChange={setSearchResults}
-          darkMode={darkMode}
-        />
-      )}
+      {/* Ricerca mappa RIMOSSA - ora gestita dalla modale */}
 
       {/* Filtri mappa */}
       {showFilters && (

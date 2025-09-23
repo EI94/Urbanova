@@ -96,7 +96,7 @@ export default function MarketIntelligenceMapModal({
 
         {/* Contenuto */}
         <div className="p-6 max-h-[80vh] overflow-y-auto">
-          {/* Barra di ricerca */}
+          {/* Barra di ricerca SEMPLIFICATA */}
           <div className="mb-6">
             <div className="relative">
               <input
@@ -106,8 +106,8 @@ export default function MarketIntelligenceMapModal({
                 onChange={(e) => {
                   const query = e.target.value;
                   if (query.trim()) {
-                    // Ricerca immediata
-                    fetch(`/api/geographic/search?q=${encodeURIComponent(query)}&type=comune&limit=5`)
+                    // Ricerca immediata e selezione automatica
+                    fetch(`/api/geographic/search?q=${encodeURIComponent(query)}&type=comune&limit=1`)
                       .then(res => res.json())
                       .then(data => {
                         if (data.success && data.data.results.length > 0) {
@@ -124,9 +124,12 @@ export default function MarketIntelligenceMapModal({
                             longitudine: result.longitudine
                           };
                           setSelectedLocation(location);
+                          console.log('🔍 [MarketIntelligenceMapModal] Comune selezionato:', location);
                         }
                       })
                       .catch(err => console.error('Errore ricerca:', err));
+                  } else {
+                    setSelectedLocation(null);
                   }
                 }}
               />
@@ -137,21 +140,20 @@ export default function MarketIntelligenceMapModal({
             </p>
           </div>
 
-          {/* Istruzioni per l'utente */}
-          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 mb-6">
-            <h3 className="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-2">
-              💡 Come utilizzare la mappa
+          {/* Istruzioni SEMPLIFICATE */}
+          <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 mb-6">
+            <h3 className="text-lg font-semibold text-green-600 dark:text-green-400 mb-2">
+              ✅ Come utilizzare la mappa
             </h3>
-            <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-              <li>• <strong>Cerca nella barra sopra</strong> per trovare rapidamente un comune</li>
-              <li>• <strong>Clicca su un marker arancione</strong> sulla mappa per selezionare un comune</li>
-              <li>• <strong>Zoomma e naviga</strong> sulla mappa per esplorare diverse zone</li>
-              <li>• <strong>Conferma la selezione</strong> per utilizzare la localizzazione nella ricerca terreni</li>
+            <ul className="text-sm text-green-700 dark:text-green-300 space-y-1">
+              <li>• <strong>Digita il nome di un comune</strong> nella barra sopra per selezionarlo</li>
+              <li>• <strong>La mappa si centrerà</strong> automaticamente sulla localizzazione</li>
+              <li>• <strong>Clicca "Seleziona Luogo e Continua"</strong> per confermare</li>
             </ul>
             {!selectedLocation && (
-              <div className="mt-3 p-3 bg-blue-100 dark:bg-blue-800/30 rounded-lg border border-blue-300 dark:border-blue-700">
-                <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
-                  ⚠️ Cerca un comune nella barra sopra o clicca su un marker arancione sulla mappa
+              <div className="mt-3 p-3 bg-yellow-100 dark:bg-yellow-800/30 rounded-lg border border-yellow-300 dark:border-yellow-700">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200 font-medium">
+                  ⚠️ Digita il nome di un comune nella barra sopra per selezionarlo
                 </p>
               </div>
             )}

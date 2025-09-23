@@ -37,7 +37,7 @@ import {
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import AdvancedFilters from '@/components/ui/AdvancedFilters';
-import AdvancedLocationSelector from '@/components/ui/AdvancedLocationSelector';
+import { GeographicSearch } from '@/components/ui/GeographicSearch';
 import LandCard from '@/components/ui/LandCard';
 import ProgressBar from '@/components/ui/ProgressBar';
 import PerformanceStats from '@/components/ui/PerformanceStats';
@@ -1248,24 +1248,25 @@ export default function LandScrapingPage() {
                 📍 Localizzazione
               </label>
               <div className="space-y-2">
-                <div className="flex flex-col space-y-2">
-                  <input
-                    type="text"
-                    value={searchCriteria.location}
-                    onChange={e => setSearchCriteria(prev => ({ ...prev, location: e.target.value }))}
-                    placeholder="Cerca localizzazioni (es. Garbatella, Pomezia, Roma...)"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  <button
-                    onClick={() => setShowMapModal(true)}
-                    className="w-full px-3 py-2 text-sm bg-blue-600 text-white border border-blue-600 rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-                  >
-                    <MapIcon className="w-4 h-4" />
-                    Mappa ISTAT
-                  </button>
-                </div>
+                <GeographicSearch
+                  onResultSelect={(result) => {
+                    const locationString = `${result.nome}, ${result.provincia}, ${result.regione}`;
+                    setSearchCriteria(prev => ({ ...prev, location: locationString }));
+                  }}
+                  placeholder="Cerca comuni italiani (es. Roma, Milano, Gallarate...)"
+                  className="w-full"
+                  showFilters={true}
+                  maxResults={20}
+                />
+                <button
+                  onClick={() => setShowMapModal(true)}
+                  className="w-full px-3 py-2 text-sm bg-blue-600 text-white border border-blue-600 rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                >
+                  <MapIcon className="w-4 h-4" />
+                  Mappa ISTAT
+                </button>
                 <p className="text-xs text-gray-500">
-                  💡 Usa il pulsante "Mappa ISTAT" per una ricerca geografica avanzata con tutti i comuni italiani
+                  💡 Seleziona direttamente dal menu sopra o usa la mappa per una ricerca geografica avanzata
                 </p>
               </div>
             </div>
