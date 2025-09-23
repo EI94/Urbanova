@@ -1,18 +1,19 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { firebaseUserProfileService, UserProfile, ProfileUpdate, PasswordChange } from '@/lib/firebaseUserProfileService';
-import { 
-  UserIcon, 
-  XIcon, 
-  ImageIcon,
-  TrashIcon,
-  CheckIcon,
-  EyeIcon
-} from '@/components/icons';
 import { toast } from 'react-hot-toast';
+
+import { UserIcon, XIcon, TrashIcon, CheckIcon, EyeIcon } from '@/components/icons';
+import { ImageIcon } from '@/components/icons/index';
+import { useAuth } from '@/contexts/AuthContext';
+import '@/lib/osProtection'; // OS Protection per user profile panel
+import { useLanguage } from '@/contexts/LanguageContext';
+import {
+  firebaseUserProfileService,
+  UserProfile,
+  ProfileUpdate,
+  PasswordChange,
+} from '@/lib/firebaseUserProfileService';
 
 interface UserProfilePanelProps {
   isOpen: boolean;
@@ -21,12 +22,21 @@ interface UserProfilePanelProps {
 
 export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelProps) {
   const { t } = useLanguage();
-  const { currentUser } = useAuth();
+  // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    console.error('❌ [UserProfilePanel] Errore useAuth:', error);
+    authContext = { currentUser: null, loading: false };
+  }
+  const auth = (authContext && typeof authContext === 'object') ? authContext : { currentUser: null, loading: false };
+  const currentUser = (auth && typeof auth === 'object' && 'currentUser' in auth) ? auth.currentUser : null;
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'preferences'>('profile');
   const [editing, setEditing] = useState(false);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarFile, setAvatarFile] = useState<{ name: string; size: number; type: string } | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -40,18 +50,18 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
   const fileInputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  const userId = currentUser?.uid || 'demo-user';
+  const userId = currentUser?.uid;
 
   useEffect(() => {
-    if (isOpen && currentUser) {
+    if (isOpen) {
       loadProfile();
     }
-  }, [isOpen, currentUser]);
+  }, [isOpen]);
 
   // Rimuovo il listener per ora - Firebase ha real-time updates nativi
   // useEffect(() => {
   //   const unsubscribe = userProfileService.subscribe((event) => {
-  //     if (event.detail.type === 'profile_updated' || 
+  //     if (event.detail.type === 'profile_updated' ||
   //         event.detail.type === 'avatar_updated' ||
   //         event.detail.type === 'password_changed') {
   //       loadProfile();
@@ -64,53 +74,73 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
   const loadProfile = async () => {
     try {
       setLoading(true);
-      let userProfile = await firebaseUserProfileService.getUserProfile(userId);
       
+      // Se non c'è utente autenticato, non caricare il profilo
+      if (!currentUser || !userId) {
+        console.warn('No authenticated user - cannot load profile');
+        setLoading(false);
+        return;
+      }
+
+      let userProfile = await firebaseUserProfileService.getUserProfile(userId);
+
       if (!userProfile && currentUser) {
-        // Crea profilo di default per l'utente
-        userProfile = await firebaseUserProfileService.createUserProfile(userId, {
+        // Crea profilo per l'utente autenticato
+        const defaultProfile = {
           email: currentUser.email || '',
           displayName: currentUser.displayName || 'Utente',
           firstName: currentUser.firstName || '',
-          lastName: currentUser.lastName || ''
+          lastName: currentUser.lastName || '',
+        };
+        
+        userProfile = await firebaseUserProfileService.createUserProfile(userId, defaultProfile);
+      }
+
+      setProfile(userProfile);
+      if (userProfile) {
+        setProfileUpdate({
+          firstName: userProfile.firstName,
+          lastName: userProfile.lastName,
+          displayName: userProfile.displayName,
+          ...(userProfile.phone && { phone: userProfile.phone }),
+          ...(userProfile.company && { company: userProfile.company }),
+          ...(userProfile.role && { role: userProfile.role }),
+          timezone: userProfile.timezone,
+          language: userProfile.language,
+          dateFormat: userProfile.dateFormat,
+          currency: userProfile.currency,
         });
       }
-      
-      setProfile(userProfile);
-      setProfileUpdate({
-        firstName: userProfile.firstName,
-        lastName: userProfile.lastName,
-        displayName: userProfile.displayName,
-        phone: userProfile.phone,
-        company: userProfile.company,
-        role: userProfile.role,
-        timezone: userProfile.timezone,
-        language: userProfile.language,
-        dateFormat: userProfile.dateFormat,
-        currency: userProfile.currency,
-      });
     } catch (error) {
       console.error('Error loading profile:', error);
-      toast.error(t('errorLoadingProfile', 'userProfile'));
+      toast(t('errorLoadingProfile', 'userProfile'), { icon: '❌' });
     } finally {
       setLoading(false);
     }
   };
 
   const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        toast.error('L\'immagine deve essere inferiore a 5MB');
+    const fileInput = event.target.files?.[0];
+    if (fileInput) {
+      if (fileInput.size > 5 * 1024 * 1024) {
+        // 5MB limit
+        toast("L'immagine deve essere inferiore a 5MB", { icon: '❌' });
         return;
       }
 
-      setAvatarFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setAvatarPreview(e.target?.result as string);
+      // Create custom file object to avoid File type issues
+      const file = {
+        name: fileInput.name,
+        size: fileInput.size,
+        type: fileInput.type
       };
-      reader.readAsDataURL(file);
+
+      setAvatarFile(file);
+      // Create preview URL only on client side
+      if (typeof window !== 'undefined') {
+        const previewUrl = URL.createObjectURL(fileInput);
+        setAvatarPreview(previewUrl);
+      }
     }
   };
 
@@ -123,13 +153,13 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
         setAvatarFile(null);
         setAvatarPreview('');
         loadProfile(); // Ricarica il profilo per mostrare il nuovo avatar
-        toast.success(t('avatarUpdated', 'userProfile'));
+        toast(t('avatarUpdated', 'userProfile'), { icon: '✅' });
       } else {
         throw new Error('Upload failed');
       }
     } catch (error) {
       console.error('Error uploading avatar:', error);
-      toast.error(t('avatarUploadError', 'userProfile'));
+      toast(t('avatarUploadError', 'userProfile'), { icon: '❌' });
     }
   };
 
@@ -140,36 +170,39 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
         setAvatarFile(null);
         setAvatarPreview('');
         loadProfile(); // Ricarica il profilo
-        toast.success(t('avatarRemoved', 'userProfile'));
+        toast(t('avatarRemoved', 'userProfile'), { icon: '✅' });
       } else {
         throw new Error('Remove failed');
       }
     } catch (error) {
       console.error('Error removing avatar:', error);
-      toast.error(t('avatarRemoveError', 'userProfile'));
+      toast(t('avatarRemoveError', 'userProfile'), { icon: '❌' });
     }
   };
 
   const handleProfileSave = async () => {
     try {
-      const updatedProfile = await firebaseUserProfileService.updateUserProfile(userId, profileUpdate);
+      const updatedProfile = await firebaseUserProfileService.updateUserProfile(
+        userId,
+        profileUpdate
+      );
       setProfile(updatedProfile);
       setEditing(false);
-      toast.success(t('changesSaved', 'userProfile'));
+      toast(t('changesSaved', 'userProfile'), { icon: '✅' });
     } catch (error) {
       console.error('Error saving profile:', error);
-      toast.error(t('errorSaving', 'userProfile'));
+      toast(t('errorSaving', 'userProfile'), { icon: '❌' });
     }
   };
 
   const handlePasswordChange = async () => {
     if (passwordChange.newPassword !== passwordChange.confirmPassword) {
-      toast.error('Le password non coincidono');
+      toast('Le password non coincidono', { icon: '❌' });
       return;
     }
 
     if (passwordChange.newPassword.length < 8) {
-      toast.error('La nuova password deve essere di almeno 8 caratteri');
+      toast('La nuova password deve essere di almeno 8 caratteri', { icon: '❌' });
       return;
     }
 
@@ -181,10 +214,10 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
         newPassword: '',
         confirmPassword: '',
       });
-      toast.success(t('passwordChanged', 'userProfile'));
+      toast(t('passwordChanged', 'userProfile'), { icon: '✅' });
     } catch (error) {
       console.error('Error changing password:', error);
-      toast.error(t('passwordError', 'userProfile'));
+      toast(t('passwordError', 'userProfile'), { icon: '❌' });
     }
   };
 
@@ -195,14 +228,17 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
       const newValue = await firebaseUserProfileService.toggleTwoFactor(userId);
       const updatedProfile = await firebaseUserProfileService.getUserProfile(userId);
       setProfile(updatedProfile);
-      toast.success(
-        updatedProfile.security.twoFactorEnabled 
-          ? '2FA abilitato con successo' 
-          : '2FA disabilitato con successo'
-      );
+      if (updatedProfile) {
+        toast(
+          updatedProfile.security.twoFactorEnabled
+            ? '2FA abilitato con successo'
+            : '2FA disabilitato con successo',
+          { icon: '✅' }
+        );
+      }
     } catch (error) {
       console.error('Error toggling 2FA:', error);
-      toast.error('Errore nella gestione 2FA');
+      toast('Errore nella gestione 2FA', { icon: '❌' });
     }
   };
 
@@ -211,8 +247,8 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
   return (
     <>
       <div className="fixed inset-0 bg-black/20 z-40" onClick={onClose} />
-      
-      <div 
+
+      <div
         ref={panelRef}
         className="fixed right-0 top-0 h-full w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out overflow-y-auto"
         style={{ transform: isOpen ? 'translateX(0)' : 'translateX(100%)' }}
@@ -226,7 +262,7 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
             onClick={onClose}
             className="p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
           >
-                            <XIcon className="h-5 w-5" />
+            <XIcon className="h-5 w-5" />
           </button>
         </div>
 
@@ -278,16 +314,16 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                     <div className="relative inline-block">
                       <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-4 border-white shadow-lg">
                         {profile.avatar ? (
-                          <img 
-                            src={profile.avatar} 
-                            alt="Avatar" 
+                          <img
+                            src={profile.avatar}
+                            alt="Avatar"
                             className="w-full h-full object-cover"
                           />
                         ) : (
                           <UserIcon className="w-full h-full text-gray-400 p-4" />
                         )}
                       </div>
-                      
+
                       <button
                         onClick={() => fileInputRef.current?.click()}
                         className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full shadow-lg hover:bg-blue-600 transition-colors"
@@ -295,7 +331,7 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                         <ImageIcon className="h-4 w-4" />
                       </button>
                     </div>
-                    
+
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -303,12 +339,12 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                       onChange={handleAvatarChange}
                       className="hidden"
                     />
-                    
+
                     {avatarFile && (
                       <div className="mt-3 space-y-2">
-                        <img 
-                          src={avatarPreview} 
-                          alt="Preview" 
+                        <img
+                          src={avatarPreview}
+                          alt="Preview"
                           className="w-16 h-16 rounded mx-auto object-cover border"
                         />
                         <div className="flex space-x-2 justify-center">
@@ -331,7 +367,7 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                         </div>
                       </div>
                     )}
-                    
+
                     {profile.avatar && !avatarFile && (
                       <button
                         onClick={handleAvatarRemove}
@@ -353,7 +389,9 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                         <input
                           type="text"
                           value={profileUpdate.firstName || ''}
-                          onChange={(e) => setProfileUpdate({...profileUpdate, firstName: e.target.value})}
+                          onChange={e =>
+                            setProfileUpdate({ ...profileUpdate, firstName: e.target.value })
+                          }
                           disabled={!editing}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
                         />
@@ -365,7 +403,9 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                         <input
                           type="text"
                           value={profileUpdate.lastName || ''}
-                          onChange={(e) => setProfileUpdate({...profileUpdate, lastName: e.target.value})}
+                          onChange={e =>
+                            setProfileUpdate({ ...profileUpdate, lastName: e.target.value })
+                          }
                           disabled={!editing}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
                         />
@@ -379,7 +419,9 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                       <input
                         type="text"
                         value={profileUpdate.displayName || ''}
-                        onChange={(e) => setProfileUpdate({...profileUpdate, displayName: e.target.value})}
+                        onChange={e =>
+                          setProfileUpdate({ ...profileUpdate, displayName: e.target.value })
+                        }
                         disabled={!editing}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
                       />
@@ -404,7 +446,9 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                       <input
                         type="tel"
                         value={profileUpdate.phone || ''}
-                        onChange={(e) => setProfileUpdate({...profileUpdate, phone: e.target.value})}
+                        onChange={e =>
+                          setProfileUpdate({ ...profileUpdate, phone: e.target.value })
+                        }
                         disabled={!editing}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
                       />
@@ -418,7 +462,9 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                         <input
                           type="text"
                           value={profileUpdate.company || ''}
-                          onChange={(e) => setProfileUpdate({...profileUpdate, company: e.target.value})}
+                          onChange={e =>
+                            setProfileUpdate({ ...profileUpdate, company: e.target.value })
+                          }
                           disabled={!editing}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
                         />
@@ -430,7 +476,9 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                         <input
                           type="text"
                           value={profileUpdate.role || ''}
-                          onChange={(e) => setProfileUpdate({...profileUpdate, role: e.target.value})}
+                          onChange={e =>
+                            setProfileUpdate({ ...profileUpdate, role: e.target.value })
+                          }
                           disabled={!editing}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md disabled:bg-gray-100"
                         />
@@ -473,7 +521,9 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
               {activeTab === 'security' && (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">{t('changePassword', 'userProfile')}</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                      {t('changePassword', 'userProfile')}
+                    </h3>
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -483,7 +533,12 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                           <input
                             type={showPassword ? 'text' : 'password'}
                             value={passwordChange.currentPassword}
-                            onChange={(e) => setPasswordChange({...passwordChange, currentPassword: e.target.value})}
+                            onChange={e =>
+                              setPasswordChange({
+                                ...passwordChange,
+                                currentPassword: e.target.value,
+                              })
+                            }
                             className="w-full px-3 py-2 border border-gray-300 rounded-md pr-10"
                           />
                           <button
@@ -508,7 +563,9 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                           <input
                             type={showNewPassword ? 'text' : 'password'}
                             value={passwordChange.newPassword}
-                            onChange={(e) => setPasswordChange({...passwordChange, newPassword: e.target.value})}
+                            onChange={e =>
+                              setPasswordChange({ ...passwordChange, newPassword: e.target.value })
+                            }
                             className="w-full px-3 py-2 border border-gray-300 rounded-md pr-10"
                           />
                           <button
@@ -533,7 +590,12 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                           <input
                             type={showConfirmPassword ? 'text' : 'password'}
                             value={passwordChange.confirmPassword}
-                            onChange={(e) => setPasswordChange({...passwordChange, confirmPassword: e.target.value})}
+                            onChange={e =>
+                              setPasswordChange({
+                                ...passwordChange,
+                                confirmPassword: e.target.value,
+                              })
+                            }
                             className="w-full px-3 py-2 border border-gray-300 rounded-md pr-10"
                           />
                           <button
@@ -560,14 +622,15 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                   </div>
 
                   <div className="border-t pt-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">{t('twoFactorAuth', 'userProfile')}</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                      {t('twoFactorAuth', 'userProfile')}
+                    </h3>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-gray-600">
-                          {profile.security.twoFactorEnabled 
+                          {profile.security.twoFactorEnabled
                             ? '2FA è attualmente abilitato per il tuo account'
-                            : 'Abilita l\'autenticazione a due fattori per maggiore sicurezza'
-                          }
+                            : "Abilita l'autenticazione a due fattori per maggiore sicurezza"}
                         </p>
                       </div>
                       <button
@@ -578,10 +641,9 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                             : 'bg-green-500 text-white hover:bg-green-600'
                         }`}
                       >
-                        {profile.security.twoFactorEnabled 
+                        {profile.security.twoFactorEnabled
                           ? t('disable2FA', 'userProfile')
-                          : t('enable2FA', 'userProfile')
-                        }
+                          : t('enable2FA', 'userProfile')}
                       </button>
                     </div>
                   </div>
@@ -592,7 +654,9 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
               {activeTab === 'preferences' && (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Impostazioni Generali</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                      Impostazioni Generali
+                    </h3>
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -600,7 +664,9 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                         </label>
                         <select
                           value={profileUpdate.timezone || profile.timezone}
-                          onChange={(e) => setProfileUpdate({...profileUpdate, timezone: e.target.value})}
+                          onChange={e =>
+                            setProfileUpdate({ ...profileUpdate, timezone: e.target.value })
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-md"
                         >
                           <option value="Europe/Rome">Europe/Rome (UTC+1)</option>
@@ -616,7 +682,9 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                         </label>
                         <select
                           value={profileUpdate.language || profile.language}
-                          onChange={(e) => setProfileUpdate({...profileUpdate, language: e.target.value})}
+                          onChange={e =>
+                            setProfileUpdate({ ...profileUpdate, language: e.target.value })
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-md"
                         >
                           <option value="it">Italiano</option>
@@ -631,7 +699,9 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                         </label>
                         <select
                           value={profileUpdate.dateFormat || profile.dateFormat}
-                          onChange={(e) => setProfileUpdate({...profileUpdate, dateFormat: e.target.value})}
+                          onChange={e =>
+                            setProfileUpdate({ ...profileUpdate, dateFormat: e.target.value })
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-md"
                         >
                           <option value="dd/MM/yyyy">dd/MM/yyyy</option>
@@ -646,7 +716,9 @@ export default function UserProfilePanel({ isOpen, onClose }: UserProfilePanelPr
                         </label>
                         <select
                           value={profileUpdate.currency || profile.currency}
-                          onChange={(e) => setProfileUpdate({...profileUpdate, currency: e.target.value})}
+                          onChange={e =>
+                            setProfileUpdate({ ...profileUpdate, currency: e.target.value })
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-md"
                         >
                           <option value="EUR">EUR (€)</option>

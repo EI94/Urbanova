@@ -1,17 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  UsersIcon, 
-  PlayIcon, 
-  PauseIcon, 
+
+import {
+  UsersIcon,
+  PlayIcon,
+  PauseIcon,
   StopIcon,
   ShareIcon,
   LockIcon,
   UnlockIcon,
   EyeIcon,
-  MessageCircleIcon
+  MessageCircleIcon,
 } from '@/components/icons';
+
 import { Badge } from './Badge';
 import Button from './Button';
 
@@ -43,7 +45,7 @@ export default function CollaborativeSearchSession({
   currentSearchCriteria,
   onCreateSession,
   onJoinSession,
-  onShareSession
+  onShareSession,
 }: CollaborativeSearchSessionProps) {
   const [activeTab, setActiveTab] = useState<'active' | 'create' | 'join' | 'history'>('active');
   const [newSessionName, setNewSessionName] = useState('');
@@ -62,7 +64,7 @@ export default function CollaborativeSearchSession({
       participants: ['Marco Rossi', 'Laura Bianchi', 'Giuseppe Verdi'],
       isPublic: true,
       currentResults: 45,
-      maxResults: 100
+      maxResults: 100,
     },
     {
       id: 'session-2',
@@ -74,8 +76,8 @@ export default function CollaborativeSearchSession({
       participants: ['Laura Bianchi', 'Marco Rossi'],
       isPublic: false,
       currentResults: 23,
-      maxResults: 50
-    }
+      maxResults: 50,
+    },
   ];
 
   const handleCreateSession = () => {
@@ -87,7 +89,7 @@ export default function CollaborativeSearchSession({
         createdBy: 'Current User',
         participants: ['Current User'],
         isPublic,
-        maxResults
+        maxResults,
       });
       setNewSessionName('');
       setActiveTab('active');
@@ -96,21 +98,31 @@ export default function CollaborativeSearchSession({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'success';
-      case 'paused': return 'warning';
-      case 'completed': return 'info';
-      case 'shared': return 'secondary';
-      default: return 'outline';
+      case 'active':
+        return 'success';
+      case 'paused':
+        return 'warning';
+      case 'completed':
+        return 'info';
+      case 'shared':
+        return 'secondary';
+      default:
+        return 'outline';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'active': return '▶️';
-      case 'paused': return '⏸️';
-      case 'completed': return '✅';
-      case 'shared': return '📤';
-      default: return '⏹️';
+      case 'active':
+        return '▶️';
+      case 'paused':
+        return '⏸️';
+      case 'completed':
+        return '✅';
+      case 'shared':
+        return '📤';
+      default:
+        return '⏹️';
     }
   };
 
@@ -131,10 +143,7 @@ export default function CollaborativeSearchSession({
                 Lavora insieme al team per trovare le migliori opportunità immobiliari
               </p>
             </div>
-            <button
-              onClick={onClose}
-              className="text-white hover:text-blue-200 transition-colors"
-            >
+            <button onClick={onClose} className="text-white hover:text-blue-200 transition-colors">
               <span className="sr-only">Chiudi</span>
               <div className="w-8 h-8 flex items-center justify-center text-2xl">×</div>
             </button>
@@ -148,8 +157,8 @@ export default function CollaborativeSearchSession({
               { id: 'active', name: 'Sessioni Attive', icon: '▶️', count: activeSessions.length },
               { id: 'create', name: 'Crea Sessione', icon: '➕' },
               { id: 'join', name: 'Unisciti', icon: '🤝' },
-              { id: 'history', name: 'Cronologia', icon: '📚' }
-            ].map((tab) => (
+              { id: 'history', name: 'Cronologia', icon: '📚' },
+            ].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
@@ -163,7 +172,9 @@ export default function CollaborativeSearchSession({
                   <span>{tab.icon}</span>
                   <span>{tab.name}</span>
                   {tab.count !== undefined && (
-                    <Badge variant="secondary" className="ml-1">{tab.count}</Badge>
+                    <Badge variant="secondary" className="ml-1">
+                      {tab.count}
+                    </Badge>
                   )}
                 </span>
               </button>
@@ -178,14 +189,17 @@ export default function CollaborativeSearchSession({
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">Sessioni Attive</h3>
-                <Badge variant="success" className="text-sm">
+                <Badge variant="default" className="text-sm">
                   {activeSessions.filter(s => s.status === 'active').length} Attive
                 </Badge>
               </div>
 
               <div className="grid gap-4">
-                {activeSessions.map((session) => (
-                  <div key={session.id} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+                {activeSessions.map(session => (
+                  <div
+                    key={session.id}
+                    className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
+                  >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
@@ -205,7 +219,7 @@ export default function CollaborativeSearchSession({
                             </Badge>
                           )}
                         </div>
-                        
+
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                           <div>
                             <p className="text-sm text-gray-500">Creato da</p>
@@ -213,7 +227,9 @@ export default function CollaborativeSearchSession({
                           </div>
                           <div>
                             <p className="text-sm text-gray-500">Partecipanti</p>
-                            <p className="font-medium text-gray-900">{session.participants.length}</p>
+                            <p className="font-medium text-gray-900">
+                              {session.participants.length}
+                            </p>
                           </div>
                           <div>
                             <p className="text-sm text-gray-500">Risultati</p>
@@ -308,8 +324,10 @@ export default function CollaborativeSearchSession({
           {/* Create Session Tab */}
           {activeTab === 'create' && (
             <div className="max-w-2xl mx-auto">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">Crea Nuova Sessione Collaborativa</h3>
-              
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">
+                Crea Nuova Sessione Collaborativa
+              </h3>
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -320,7 +338,7 @@ export default function CollaborativeSearchSession({
                     placeholder="Es: Ricerca Roma Centro - Team A"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     value={newSessionName}
-                    onChange={(e) => setNewSessionName(e.target.value)}
+                    onChange={e => setNewSessionName(e.target.value)}
                   />
                 </div>
 
@@ -350,7 +368,7 @@ export default function CollaborativeSearchSession({
                       type="checkbox"
                       id="isPublic"
                       checked={isPublic}
-                      onChange={(e) => setIsPublic(e.target.checked)}
+                      onChange={e => setIsPublic(e.target.checked)}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                     <label htmlFor="isPublic" className="ml-2 text-sm text-gray-700">
@@ -368,7 +386,7 @@ export default function CollaborativeSearchSession({
                     min="10"
                     max="1000"
                     value={maxResults}
-                    onChange={(e) => setMaxResults(Number(e.target.value))}
+                    onChange={e => setMaxResults(Number(e.target.value))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -401,31 +419,35 @@ export default function CollaborativeSearchSession({
           {activeTab === 'join' && (
             <div className="max-w-2xl mx-auto text-center">
               <h3 className="text-lg font-semibold text-gray-900 mb-6">Unisciti a una Sessione</h3>
-              
+
               <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
                 <UsersIcon className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-                <h4 className="text-lg font-medium text-blue-900 mb-2">Sessioni Pubbliche Disponibili</h4>
+                <h4 className="text-lg font-medium text-blue-900 mb-2">
+                  Sessioni Pubbliche Disponibili
+                </h4>
                 <p className="text-blue-700 mb-4">
-                  Le sessioni pubbliche sono visibili a tutti i membri del team.
-                  Clicca su "Visualizza" per unirti a una sessione attiva.
+                  Le sessioni pubbliche sono visibili a tutti i membri del team. Clicca su
+                  "Visualizza" per unirti a una sessione attiva.
                 </p>
-                
+
                 <div className="text-left">
-                  {activeSessions.filter(s => s.isPublic).map((session) => (
-                    <div key={session.id} className="bg-white p-3 rounded border mb-2">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">{session.name}</span>
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          onClick={() => onJoinSession(session.id)}
-                        >
-                          <EyeIcon className="h-4 w-4 mr-1" />
-                          Unisciti
-                        </Button>
+                  {activeSessions
+                    .filter(s => s.isPublic)
+                    .map(session => (
+                      <div key={session.id} className="bg-white p-3 rounded border mb-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{session.name}</span>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => onJoinSession(session.id)}
+                          >
+                            <EyeIcon className="h-4 w-4 mr-1" />
+                            Unisciti
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </div>
             </div>
@@ -435,10 +457,12 @@ export default function CollaborativeSearchSession({
           {activeTab === 'history' && (
             <div className="max-w-2xl mx-auto text-center">
               <h3 className="text-lg font-semibold text-gray-900 mb-6">Cronologia Sessioni</h3>
-              
+
               <div className="bg-gray-50 p-6 rounded-lg border">
                 <MessageCircleIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h4 className="text-lg font-medium text-gray-700 mb-2">Nessuna Sessione Completata</h4>
+                <h4 className="text-lg font-medium text-gray-700 mb-2">
+                  Nessuna Sessione Completata
+                </h4>
                 <p className="text-gray-600">
                   Le sessioni completate appariranno qui per riferimento futuro.
                 </p>

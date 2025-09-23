@@ -1,0 +1,116 @@
+# Product Requirements Documents - Urbanova
+
+## Template PRD
+### Problem
+[Describe the problem being solved]
+
+### Outcome
+[What will be achieved]
+
+### Users
+[Who will use this feature]
+
+### Scope
+[What is included and excluded]
+
+### Non-Goals
+[What is explicitly not included]
+
+### Metrics
+[How success will be measured]
+
+### Acceptance Criteria
+[What constitutes completion]
+
+---
+
+## PRD: Deal → Offer in 24h (v1)
+
+## Problem
+Developers waste time moving from a listing to a signed offer pack. Manual scraping, Excel proforma, emails.
+
+## Outcome
+From a listing URL, produce: (1) feasibility (base + sensitivity ±5/±10%), (2) Deal Memo PDF, (3) vendor contact pack.
+
+## Users
+SME developers & agencies. Role: Owner/PM.
+
+## Scope
+- Input: annuncio/link o parametri (city, budget, SL).
+- Steps: scrape → normalize → feasibility → memo PDF → notify (WA) → create project.
+- Guardrails: approval step before sending external emails.
+
+## Non-Goals
+Procurement, SAL. (Other PRDs will cover these.)
+
+## Metrics
+TTO (time-to-offer), errors avoided, completeness of memo.
+
+## Acceptance Criteria
+- ✅ Valid Twilio request → 200 in <500ms (excluding async jobs)
+- ✅ Reply contains ROI, Payback, PDF signed URL (valid 15m), deeplink progetto
+- ✅ Firestore: documents in `projects`, `deals`, `feasibility`, `auditEvents`
+- ✅ Rate limit triggers after 10 msgs/3 min per sender
+- ✅ Tests: typecheck+unit+integration green
+
+## Real-World Acceptance
+- Message arrives on WhatsApp within <5s
+- Memo link works and PDF downloads correctly
+- All artifacts persisted in Firestore with proper audit trail
+- Rate limiting prevents abuse while maintaining UX
+
+## PRD: Doc Hunter v1
+
+### Problem
+Project managers waste hours manually collecting and validating construction documents (CDU, DURC, planimetrie) from vendors. No centralized tracking of document completeness or validation status.
+
+### Outcome
+Automated document collection workflow: request → upload → OCR extraction → validation → checklist tracking. Reduce document collection time from days to hours.
+
+### Users
+Project managers, construction coordinators. Role: PM, Site Manager.
+
+### Scope
+- Document types: CDU, VISURA, DURC, PLANIMETRIA, PROGETTO
+- Workflow: Request → Upload → OCR → Validate → Checklist
+- Control: WhatsApp ChatOps + in-app dashboard
+- Storage: GCS with secure upload links (JWT, 48h expiry)
+
+### Non-Goals
+Direct vendor email integration, complex approval workflows, document editing.
+
+### Metrics
+- Time-to-complete-docs (target: <48h)
+- Document completeness percentage (target: >90%)
+- OCR accuracy rate (target: >85%)
+- Upload-to-validation time (target: <2h)
+
+### Acceptance Criteria
+- ✅ `/doc request kind:CDU project:XYZ vendor:+39...` returns templated message with secure link
+- ✅ Uploading PDF updates status to UPLOADED, runs OCR, sets EXTRACTED/VALIDATED
+- ✅ `/doc status project:XYZ` returns checklist (e.g., 3/5 complete, missing: DURC expires, Visura missing oggetto sociale)
+- ✅ Tests green (types, unit, integration); manual path works on dev
+- ✅ Secure upload links expire in 48h with JWT validation
+- ✅ OCR extracts relevant fields per document type
+- ✅ Checklist automatically updates based on document status
+
+### Technical Requirements
+- JWT-based secure upload links (48h expiry)
+- Google Document AI integration with Tesseract fallback
+- GCS storage under `projects/{id}/docs/{docId}`
+- Firestore for document metadata and checklist
+- WhatsApp ChatOps integration
+- Zod validation for all document types
+- Audit trail for document lifecycle changes
+
+### Technical Requirements
+- Zod validation for all inputs
+- Audit trail for all operations
+- Error handling with fallbacks
+- PDF generation with templates
+- WhatsApp integration via Twilio
+- Firebase integration for persistence
+description:
+globs:
+alwaysApply: true
+---

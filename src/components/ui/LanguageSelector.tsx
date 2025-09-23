@@ -1,24 +1,20 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+
+import { GlobeIcon, CheckIcon, ChevronDownIcon, SettingsIcon } from '@/components/icons';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getSupportedLanguages } from '@/lib/languageConfig';
 import { SupportedLanguage } from '@/types/language';
-import { 
-  GlobeIcon, 
-  CheckIcon, 
-  ChevronDownIcon,
-  SettingsIcon
-} from '@/components/icons';
 
 interface LanguageSelectorProps {
   variant?: 'header' | 'sidebar' | 'settings';
   className?: string;
 }
 
-export default function LanguageSelector({ 
-  variant = 'header', 
-  className = '' 
+export default function LanguageSelector({
+  variant = 'header',
+  className = '',
 }: LanguageSelectorProps) {
   const { currentLanguage, languageConfig, changeLanguage, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
@@ -53,14 +49,13 @@ export default function LanguageSelector({
     try {
       setIsChanging(true);
       setIsOpen(false);
-      
+
       console.log(`🔄 [LanguageSelector] Cambio lingua a: ${language}`);
-      
+
       await changeLanguage(language);
-      
+
       // Non serve più il reload forzato - la lingua cambia dinamicamente
       console.log(`✅ [LanguageSelector] Lingua cambiata con successo: ${language}`);
-      
     } catch (error) {
       console.error('❌ [LanguageSelector] Errore cambio lingua:', error);
     } finally {
@@ -121,30 +116,30 @@ export default function LanguageSelector({
         <span className={`text-sm font-medium ${getTextColor()}`}>
           {languageConfig.flag} {languageConfig.nativeName}
         </span>
-        <ChevronDownIcon className={`h-4 w-4 transition-transform duration-200 ${getTextColor()} ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDownIcon
+          className={`h-4 w-4 transition-transform duration-200 ${getTextColor()} ${isOpen ? 'rotate-180' : ''}`}
+        />
       </button>
 
       {/* Dropdown */}
       {isOpen && (
-        <div className={`
+        <div
+          className={`
           absolute top-full left-0 mt-1 w-64 rounded-md shadow-lg z-50
           ${getDropdownStyles()}
           ${variant === 'sidebar' ? 'text-white' : 'text-gray-700'}
-        `}>
+        `}
+        >
           <div className="py-1">
             {/* Header */}
             <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-sm font-medium">
-                {t('language', 'common')}
-              </h3>
-              <p className="text-xs text-gray-500 mt-1">
-                {t('selectLanguage', 'common')}
-              </p>
+              <h3 className="text-sm font-medium">{t('language', 'common')}</h3>
+              <p className="text-xs text-gray-500 mt-1">{t('selectLanguage', 'common')}</p>
             </div>
 
             {/* Lista lingue */}
             <div className="max-h-60 overflow-y-auto">
-              {supportedLanguages.map((lang) => (
+              {supportedLanguages.map(lang => (
                 <button
                   key={lang.code}
                   onClick={() => handleLanguageChange(lang.code)}
@@ -152,15 +147,17 @@ export default function LanguageSelector({
                   className={`
                     w-full flex items-center justify-between px-3 py-2 text-sm
                     transition-colors duration-150
-                    ${variant === 'sidebar' 
-                      ? 'hover:bg-blue-700/50 text-white' 
-                      : 'hover:bg-gray-100 text-gray-700'
+                    ${
+                      variant === 'sidebar'
+                        ? 'hover:bg-blue-700/50 text-white'
+                        : 'hover:bg-gray-100 text-gray-700'
                     }
-                    ${currentLanguage === lang.code 
-                      ? variant === 'sidebar' 
-                        ? 'bg-blue-600 text-white' 
-                        : 'bg-blue-50 text-blue-700'
-                      : ''
+                    ${
+                      currentLanguage === lang.code
+                        ? variant === 'sidebar'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-blue-50 text-blue-700'
+                        : ''
                     }
                     ${isChanging ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                   `}
@@ -169,15 +166,15 @@ export default function LanguageSelector({
                     <span className="text-lg">{lang.flag}</span>
                     <div className="text-left">
                       <div className="font-medium">{lang.nativeName}</div>
-                      <div className={`text-xs ${variant === 'sidebar' ? 'text-blue-200' : 'text-gray-500'}`}>
+                      <div
+                        className={`text-xs ${variant === 'sidebar' ? 'text-blue-200' : 'text-gray-500'}`}
+                      >
                         {lang.name}
                       </div>
                     </div>
                   </div>
-                  
-                  {currentLanguage === lang.code && (
-                    <CheckIcon className="h-4 w-4" />
-                  )}
+
+                  {currentLanguage === lang.code && <CheckIcon className="h-4 w-4" />}
                 </button>
               ))}
             </div>
@@ -192,9 +189,10 @@ export default function LanguageSelector({
                 className={`
                   w-full flex items-center justify-center gap-2 px-3 py-2 text-sm
                   rounded-md transition-colors duration-150
-                  ${variant === 'sidebar' 
-                    ? 'hover:bg-blue-700/50 text-blue-200' 
-                    : 'hover:bg-gray-100 text-gray-600'
+                  ${
+                    variant === 'sidebar'
+                      ? 'hover:bg-blue-700/50 text-blue-200'
+                      : 'hover:bg-gray-100 text-gray-600'
                   }
                 `}
               >
@@ -207,12 +205,7 @@ export default function LanguageSelector({
       )}
 
       {/* Overlay per chiudere */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 z-40" 
-          onClick={() => setIsOpen(false)}
-        />
-      )}
+      {isOpen && <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />}
     </div>
   );
-} 
+}

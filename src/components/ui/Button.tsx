@@ -13,19 +13,21 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({
-    variant = 'primary',
-    size = 'md',
-    isLoading = false,
-    fullWidth = false,
-    leftIcon,
-    rightIcon,
-    className = '',
-    children,
-    disabled,
-    ...props
-  }, ref) => {
-
+  (
+    {
+      variant = 'primary',
+      size = 'md',
+      isLoading = false,
+      fullWidth = false,
+      leftIcon,
+      rightIcon,
+      className = '',
+      children,
+      disabled,
+      ...props
+    },
+    ref
+  ) => {
     const getVariantClasses = () => {
       switch (variant) {
         case 'primary':
@@ -79,6 +81,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   }
 );
 
-Button.displayName = 'Button';
+(Button as any).displayName = 'Button';
 
-export default Button; 
+export default Button;

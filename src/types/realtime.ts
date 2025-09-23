@@ -60,11 +60,11 @@ export type CollaborationSession = {
   description: string;
   type: CollaborationType;
   status: 'active' | 'paused' | 'completed' | 'archived';
-  
+
   // Partecipanti
   participants: CollaborationParticipant[];
   maxParticipants: number;
-  
+
   // Contenuto condiviso
   sharedContent: {
     documentId?: string;
@@ -72,18 +72,18 @@ export type CollaborationSession = {
     analysisData?: any;
     workflowId?: string;
   };
-  
+
   // Timeline
   createdAt: Date;
   startedAt: Date;
   lastActivity: Date;
   endedAt?: Date;
-  
+
   // Impostazioni
   isPublic: boolean;
   allowAnonymous: boolean;
   requireApproval: boolean;
-  
+
   // Permessi
   permissions: {
     canEdit: string[];
@@ -91,7 +91,7 @@ export type CollaborationSession = {
     canInvite: string[];
     canManage: string[];
   };
-  
+
   // Metadata
   tags: string[];
   attachments: string[];
@@ -107,14 +107,14 @@ export interface CollaborationParticipant {
   lastSeen: Date;
   isActive: boolean;
   currentActivity: string;
-  
+
   // Presenza e cursore
   presence: UserPresence;
   cursorPosition?: CursorPosition;
-  
+
   // Permessi specifici
   permissions: string[];
-  
+
   // Performance
   contributions: {
     changesCount: number;
@@ -126,7 +126,14 @@ export interface CollaborationParticipant {
 export interface RealtimeMessage {
   id: string;
   sessionId: string;
-  type: 'cursor_move' | 'document_change' | 'comment' | 'presence_update' | 'user_joined' | 'user_left' | 'session_update';
+  type:
+    | 'cursor_move'
+    | 'document_change'
+    | 'comment'
+    | 'presence_update'
+    | 'user_joined'
+    | 'user_left'
+    | 'session_update';
   userId: string;
   userName: string;
   userAvatar: string;
@@ -192,7 +199,13 @@ export interface RealtimeNotification {
   id: string;
   userId: string;
   sessionId: string;
-  type: 'user_joined' | 'user_left' | 'document_changed' | 'comment_added' | 'cursor_moved' | 'presence_changed';
+  type:
+    | 'user_joined'
+    | 'user_left'
+    | 'document_changed'
+    | 'comment_added'
+    | 'cursor_moved'
+    | 'presence_changed';
   title: string;
   message: string;
   priority: 'low' | 'medium' | 'high' | 'critical';

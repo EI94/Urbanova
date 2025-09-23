@@ -31,7 +31,7 @@ export const en = {
     user: 'User',
     lastUpdate: 'Last update',
     selectLanguage: 'Select language',
-    languageSettings: 'Language settings'
+    languageSettings: 'Language settings',
   },
   navigation: {
     dashboard: 'Dashboard',
@@ -57,7 +57,7 @@ export const en = {
     permits: 'Permits',
     clients: 'Clients',
     notifications: 'Notifications',
-    settings: 'Settings'
+    settings: 'Settings',
   },
   navigationSections: {
     dashboard: 'Dashboard',
@@ -68,7 +68,7 @@ export const en = {
     marketing: 'Marketing & Sales',
     epc: 'Construction (EPC)',
     businessPlan: 'Business Plan',
-    other: 'Other'
+    other: 'Other',
   },
   dashboard: {
     title: 'Dashboard',
@@ -93,7 +93,7 @@ export const en = {
     onHold: 'On Hold',
     completed: 'Completed',
     errorLoadingStats: 'Error loading statistics',
-    loadingStats: 'Loading statistics...'
+    loadingStats: 'Loading statistics...',
   },
   feasibility: {
     title: 'Feasibility Analysis',
@@ -106,7 +106,7 @@ export const en = {
       averageMargin: 'Average Margin',
       totalInvestment: 'Total Investment',
       onTarget: 'On Target',
-      fromMostProfitable: 'From most profitable'
+      fromMostProfitable: 'From most profitable',
     },
     emptyRankingTitle: 'No feasibility projects',
     emptyRankingSubtitle: 'Create your first feasibility project to get started',
@@ -124,13 +124,13 @@ export const en = {
       actions: 'Actions',
       view: 'View',
       edit: 'Edit',
-      delete: 'Delete'
+      delete: 'Delete',
     },
     modal: {
       compareProjects: 'Compare Projects',
       firstProject: 'First Project',
       secondProject: 'Second Project',
-      selectProject: 'Select project...'
+      selectProject: 'Select project...',
     },
     toasts: {
       loadError: 'Error loading data',
@@ -138,9 +138,9 @@ export const en = {
       deleteError: 'Error deleting project',
       selectTwo: 'Select two projects to compare',
       compareCreated: 'Comparison created successfully',
-      compareError: 'Error creating comparison'
+      compareError: 'Error creating comparison',
     },
-    confirmDelete: 'Are you sure you want to delete this project?'
+    confirmDelete: 'Are you sure you want to delete this project?',
   },
   landScraping: {
     title: 'AI Land Scraping',
@@ -162,7 +162,7 @@ export const en = {
     analysis: 'Analysis',
     favorites: 'Favorites',
     scheduledSearches: 'Scheduled Searches',
-    searchHistory: 'Recent Searches'
+    searchHistory: 'Recent Searches',
   },
   marketIntelligence: {
     title: 'Market Intelligence',
@@ -179,7 +179,7 @@ export const en = {
     newAISearch: 'New AI Search',
     noOpportunitiesFound: 'No opportunities found',
     startNewSearch: 'Start a new AI search to discover market opportunities',
-    startFirstSearch: 'Start First Search'
+    startFirstSearch: 'Start First Search',
   },
   aiLandScraping: {
     title: 'AI Land Scraping',
@@ -214,7 +214,7 @@ export const en = {
     resultsCount: 'results',
     online: 'Online',
     scraping: 'Scraping',
-    ai: 'AI'
+    ai: 'AI',
   },
   newProject: {
     title: 'New Project',
@@ -236,25 +236,25 @@ export const en = {
       datePlaceholder: 'dd/mm/yyyy',
       validation: {
         requiredFields: 'Fill in all required fields',
-        saveError: 'An error occurred while saving the project'
-      }
+        saveError: 'An error occurred while saving the project',
+      },
     },
     statuses: {
       planning: 'Planning',
       inProgress: 'In Progress',
       onHold: 'On Hold',
-      completed: 'Completed'
+      completed: 'Completed',
     },
     types: {
       residential: 'Residential',
       commercial: 'Commercial',
       mixed: 'Mixed',
-      industrial: 'Industrial'
+      industrial: 'Industrial',
     },
     buttons: {
       cancel: 'Cancel',
-      saveProject: 'Save Project'
-    }
+      saveProject: 'Save Project',
+    },
   },
   permitsCompliance: {
     title: 'Intelligent Permit System',
@@ -263,7 +263,7 @@ export const en = {
       overview: 'Overview',
       permits: 'Permits',
       timeline: 'Timeline',
-      alerts: 'Alerts'
+      alerts: 'Alerts',
     },
     stats: {
       totalPermits: 'Total Permits',
@@ -271,19 +271,19 @@ export const en = {
       inProgress: 'In Progress',
       critical: 'Critical',
       totalCost: 'Total Cost',
-      averageProgress: 'Average Progress'
+      averageProgress: 'Average Progress',
     },
     quickActions: {
       newPermit: 'New Permit',
       generateReport: 'Generate Compliance Report',
       scheduleInspection: 'Schedule Inspection',
-      updateTimeline: 'Update Project Timeline'
+      updateTimeline: 'Update Project Timeline',
     },
     categories: {
       urban: 'URBAN PLANNING',
       environmental: 'ENVIRONMENTAL',
       safety: 'SAFETY',
-      energy: 'ENERGY'
+      energy: 'ENERGY',
     },
     criticalAlerts: {
       title: 'Critical Alerts',
@@ -291,8 +291,8 @@ export const en = {
       buildingPermitMessage: 'Submit extension request within 10 days',
       viaDelay: 'VIA Delay',
       viaMessage: 'Expedite collection of missing documentation',
-      seeAllAlerts: 'See all alerts →'
-    }
+      seeAllAlerts: 'See all alerts →',
+    },
   },
   projectTimeline: {
     title: 'Project Timeline AI',
@@ -306,14 +306,14 @@ export const en = {
       ganttChart: 'Gantt Chart',
       kanbanBoard: 'Kanban Board',
       milestoneTimeline: 'Milestone Timeline',
-      resources: 'Resources'
+      resources: 'Resources',
     },
     filters: {
       all: 'All',
       design: 'DESIGN',
       permits: 'PERMITS',
       construction: 'CONSTRUCTION',
-      marketing: 'MARKETING'
+      marketing: 'MARKETING',
     },
     months: {
       jan: 'Jan',
@@ -327,13 +327,13 @@ export const en = {
       sep: 'Sep',
       oct: 'Oct',
       nov: 'Nov',
-      dec: 'Dec'
+      dec: 'Dec',
     },
     timelineViews: {
       threeMonths: '3M',
       sixMonths: '6M',
-      oneYear: '1Y'
-    }
+      oneYear: '1Y',
+    },
   },
   notifications: {
     title: 'Notifications',
@@ -354,19 +354,19 @@ export const en = {
       permit: 'Permit',
       task: 'Task',
       system: 'System',
-      marketing: 'Marketing'
+      marketing: 'Marketing',
     },
     priorities: {
       low: 'Low',
       medium: 'Medium',
       high: 'High',
-      critical: 'Critical'
+      critical: 'Critical',
     },
     actions: {
       view: 'View',
       dismiss: 'Dismiss',
-      snooze: 'Snooze'
-    }
+      snooze: 'Snooze',
+    },
   },
   userProfile: {
     title: 'User Profile',
@@ -405,7 +405,7 @@ export const en = {
     enable2FA: 'Enable 2FA',
     disable2FA: 'Disable 2FA',
     backupCodes: 'Backup Codes',
-    generateBackupCodes: 'Generate New Codes'
+    generateBackupCodes: 'Generate New Codes',
   },
   projects: {
     title: 'Projects',
@@ -423,7 +423,7 @@ export const en = {
     progress: 'Progress',
     budget: 'Budget',
     units: 'units',
-    details: 'Details'
+    details: 'Details',
   },
   settings: {
     title: 'Settings',
@@ -433,21 +433,21 @@ export const en = {
       subtitle: 'Manage personal data and preferences',
       personalData: 'Personal Data',
       languagePreferences: 'Language Preferences',
-      timezone: 'Time Zone'
+      timezone: 'Time Zone',
     },
     security: {
       title: 'Security',
       subtitle: 'Configure security and privacy',
       password: 'Password',
       twoFactorAuth: '2FA Authentication',
-      privacy: 'Privacy'
+      privacy: 'Privacy',
     },
     system: {
       title: 'System',
       subtitle: 'System and API configuration',
       apiKeys: 'API Keys',
       integrations: 'Integrations',
-      backup: 'Backup'
-    }
-  }
-}; 
+      backup: 'Backup',
+    },
+  },
+};

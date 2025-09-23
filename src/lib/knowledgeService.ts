@@ -1,5 +1,5 @@
 // Service per la gestione del Knowledge Management & Documentation
-import {
+import type {
   DocumentMetadata,
   DocumentVersion,
   DocumentCategory,
@@ -23,12 +23,12 @@ import {
   AccessLevel,
   ContentLanguage,
   SearchScope,
-  SortOrder
+  SortOrder,
 } from '@/types/knowledge';
 import { TeamRole } from '@/types/team';
 
 export class KnowledgeService {
-  private knowledgeBase: KnowledgeBase;
+  private knowledgeBase!: KnowledgeBase;
   private documents: Map<string, DocumentMetadata> = new Map();
   private categories: Map<string, DocumentCategory> = new Map();
   private templates: Map<string, DocumentTemplate> = new Map();
@@ -55,7 +55,13 @@ export class KnowledgeService {
       name: 'Urbanova Knowledge Base',
       description: 'Base di conoscenza completa per Urbanova e sviluppo immobiliare',
       isPublic: false,
-      allowedRoles: ['PROJECT_MANAGER', 'FINANCIAL_ANALYST', 'ARCHITECT', 'DEVELOPER', 'TEAM_MEMBER'],
+      allowedRoles: [
+        'PROJECT_MANAGER',
+        'FINANCIAL_ANALYST',
+        'ARCHITECT',
+        'DEVELOPER',
+        'TEAM_MEMBER',
+      ],
       defaultLanguage: 'it',
       supportedLanguages: ['it', 'en', 'es'],
       categories: [],
@@ -65,14 +71,14 @@ export class KnowledgeService {
         enableFullTextSearch: true,
         enableAutoComplete: true,
         enableSuggestions: true,
-        enableFacetedSearch: true
+        enableFacetedSearch: true,
       },
       requiresReview: true,
       autoPublish: false,
       versioningEnabled: true,
       createdAt: new Date(),
       updatedAt: new Date(),
-      createdBy: 'system'
+      createdBy: 'system',
     };
   }
 
@@ -82,7 +88,7 @@ export class KnowledgeService {
       {
         id: 'land-analysis',
         name: 'Analisi Terreni',
-        description: 'Documenti relativi all\'analisi e valutazione dei terreni',
+        description: "Documenti relativi all'analisi e valutazione dei terreni",
         slug: 'analisi-terreni',
         childrenIds: ['land-analysis-methods', 'land-analysis-tools'],
         path: ['land-analysis'],
@@ -93,12 +99,12 @@ export class KnowledgeService {
         color: '#10B981',
         documentCount: 0,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       },
       {
         id: 'land-analysis-methods',
         name: 'Metodologie di Analisi',
-        description: 'Metodologie e procedure per l\'analisi dei terreni',
+        description: "Metodologie e procedure per l'analisi dei terreni",
         slug: 'metodologie-analisi',
         parentId: 'land-analysis',
         childrenIds: [],
@@ -110,7 +116,7 @@ export class KnowledgeService {
         color: '#3B82F6',
         documentCount: 0,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       },
       {
         id: 'land-analysis-tools',
@@ -127,7 +133,7 @@ export class KnowledgeService {
         color: '#8B5CF6',
         documentCount: 0,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       },
       {
         id: 'collaboration',
@@ -143,7 +149,7 @@ export class KnowledgeService {
         color: '#F59E0B',
         documentCount: 0,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       },
       {
         id: 'collaboration-tools',
@@ -160,7 +166,7 @@ export class KnowledgeService {
         color: '#EF4444',
         documentCount: 0,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       },
       {
         id: 'api-documentation',
@@ -176,7 +182,7 @@ export class KnowledgeService {
         color: '#6B7280',
         documentCount: 0,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       },
       {
         id: 'best-practices',
@@ -192,8 +198,8 @@ export class KnowledgeService {
         color: '#10B981',
         documentCount: 0,
         createdAt: new Date(),
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      },
     ];
 
     categories.forEach(category => {
@@ -262,18 +268,53 @@ export class KnowledgeService {
           { key: 'area', label: 'Superficie (mq)', type: 'number', required: true },
           { key: 'analysis_date', label: 'Data Analisi', type: 'date', required: true },
           { key: 'analyst_name', label: 'Nome Analista', type: 'text', required: true },
-          { key: 'morphology_description', label: 'Descrizione Morfologia', type: 'textarea', required: true },
-          { key: 'exposure_details', label: 'Dettagli Esposizione', type: 'textarea', required: true },
-          { key: 'accessibility_notes', label: 'Note Accessibilità', type: 'textarea', required: true },
+          {
+            key: 'morphology_description',
+            label: 'Descrizione Morfologia',
+            type: 'textarea',
+            required: true,
+          },
+          {
+            key: 'exposure_details',
+            label: 'Dettagli Esposizione',
+            type: 'textarea',
+            required: true,
+          },
+          {
+            key: 'accessibility_notes',
+            label: 'Note Accessibilità',
+            type: 'textarea',
+            required: true,
+          },
           { key: 'price_per_sqm', label: 'Prezzo al mq (€)', type: 'number', required: true },
           { key: 'total_price', label: 'Prezzo Totale (€)', type: 'number', required: true },
-          { key: 'market_variation', label: 'Variazione Mercato (%)', type: 'number', required: false },
-          { key: 'comparables_analysis', label: 'Analisi Comparables', type: 'textarea', required: true },
-          { key: 'urban_planning_notes', label: 'Note Destinazione Urbanistica', type: 'textarea', required: true },
+          {
+            key: 'market_variation',
+            label: 'Variazione Mercato (%)',
+            type: 'number',
+            required: false,
+          },
+          {
+            key: 'comparables_analysis',
+            label: 'Analisi Comparables',
+            type: 'textarea',
+            required: true,
+          },
+          {
+            key: 'urban_planning_notes',
+            label: 'Note Destinazione Urbanistica',
+            type: 'textarea',
+            required: true,
+          },
           { key: 'constraints_list', label: 'Lista Vincoli', type: 'textarea', required: false },
-          { key: 'opportunities_list', label: 'Lista Opportunità', type: 'textarea', required: true },
+          {
+            key: 'opportunities_list',
+            label: 'Lista Opportunità',
+            type: 'textarea',
+            required: true,
+          },
           { key: 'conclusions', label: 'Conclusioni', type: 'textarea', required: true },
-          { key: 'recommendations', label: 'Raccomandazioni', type: 'textarea', required: true }
+          { key: 'recommendations', label: 'Raccomandazioni', type: 'textarea', required: true },
         ],
         categoryId: 'land-analysis',
         accessLevel: 'internal',
@@ -281,7 +322,7 @@ export class KnowledgeService {
         usageCount: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
-        createdBy: 'system'
+        createdBy: 'system',
       },
       {
         id: 'collaboration-guide',
@@ -317,12 +358,32 @@ export class KnowledgeService {
           { key: 'title', label: 'Titolo della Guida', type: 'text', required: true },
           { key: 'overview', label: 'Panoramica', type: 'textarea', required: true },
           { key: 'objectives', label: 'Obiettivi', type: 'textarea', required: true },
-          { key: 'required_tools', label: 'Strumenti Necessari', type: 'textarea', required: false },
-          { key: 'step_by_step_procedure', label: 'Procedura Passo-Passo', type: 'textarea', required: true },
+          {
+            key: 'required_tools',
+            label: 'Strumenti Necessari',
+            type: 'textarea',
+            required: false,
+          },
+          {
+            key: 'step_by_step_procedure',
+            label: 'Procedura Passo-Passo',
+            type: 'textarea',
+            required: true,
+          },
           { key: 'best_practices', label: 'Best Practices', type: 'textarea', required: true },
-          { key: 'troubleshooting_tips', label: 'Suggerimenti Troubleshooting', type: 'textarea', required: false },
-          { key: 'additional_resources', label: 'Risorse Aggiuntive', type: 'textarea', required: false },
-          { key: 'author', label: 'Autore', type: 'text', required: true }
+          {
+            key: 'troubleshooting_tips',
+            label: 'Suggerimenti Troubleshooting',
+            type: 'textarea',
+            required: false,
+          },
+          {
+            key: 'additional_resources',
+            label: 'Risorse Aggiuntive',
+            type: 'textarea',
+            required: false,
+          },
+          { key: 'author', label: 'Autore', type: 'text', required: true },
         ],
         categoryId: 'collaboration',
         accessLevel: 'internal',
@@ -330,7 +391,7 @@ export class KnowledgeService {
         usageCount: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
-        createdBy: 'system'
+        createdBy: 'system',
       },
       {
         id: 'api-documentation',
@@ -387,19 +448,51 @@ export class KnowledgeService {
 *Documentazione aggiornata il {{last_updated}}*`,
         placeholders: [
           { key: 'api_name', label: 'Nome API', type: 'text', required: true },
-          { key: 'method', label: 'Metodo HTTP', type: 'select', required: true, options: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'] },
+          {
+            key: 'method',
+            label: 'Metodo HTTP',
+            type: 'select',
+            required: true,
+            options: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+          },
           { key: 'endpoint_url', label: 'URL Endpoint', type: 'text', required: true },
           { key: 'description', label: 'Descrizione', type: 'textarea', required: true },
-          { key: 'authentication_details', label: 'Dettagli Autenticazione', type: 'textarea', required: true },
+          {
+            key: 'authentication_details',
+            label: 'Dettagli Autenticazione',
+            type: 'textarea',
+            required: true,
+          },
           { key: 'path_parameters', label: 'Parametri Path', type: 'textarea', required: false },
           { key: 'query_parameters', label: 'Parametri Query', type: 'textarea', required: false },
-          { key: 'request_body_example', label: 'Esempio Request Body', type: 'textarea', required: false },
-          { key: 'success_code', label: 'Codice Successo', type: 'text', required: true, defaultValue: '200' },
-          { key: 'success_response_example', label: 'Esempio Risposta Successo', type: 'textarea', required: true },
+          {
+            key: 'request_body_example',
+            label: 'Esempio Request Body',
+            type: 'textarea',
+            required: false,
+          },
+          {
+            key: 'success_code',
+            label: 'Codice Successo',
+            type: 'text',
+            required: true,
+            defaultValue: '200',
+          },
+          {
+            key: 'success_response_example',
+            label: 'Esempio Risposta Successo',
+            type: 'textarea',
+            required: true,
+          },
           { key: 'error_responses', label: 'Risposte di Errore', type: 'textarea', required: true },
           { key: 'curl_example', label: 'Esempio cURL', type: 'textarea', required: true },
-          { key: 'javascript_example', label: 'Esempio JavaScript', type: 'textarea', required: true },
-          { key: 'additional_notes', label: 'Note Aggiuntive', type: 'textarea', required: false }
+          {
+            key: 'javascript_example',
+            label: 'Esempio JavaScript',
+            type: 'textarea',
+            required: true,
+          },
+          { key: 'additional_notes', label: 'Note Aggiuntive', type: 'textarea', required: false },
         ],
         categoryId: 'api-documentation',
         accessLevel: 'restricted',
@@ -407,8 +500,8 @@ export class KnowledgeService {
         usageCount: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
-        createdBy: 'system'
-      }
+        createdBy: 'system',
+      },
     ];
 
     templates.forEach(template => {
@@ -473,10 +566,22 @@ Buon lavoro con Urbanova! 🚀`,
         keywords: ['urbanova', 'guida', 'introduzione', 'getting-started'],
         tags: ['introduzione', 'guida', 'primi-passi'],
         accessLevel: 'internal',
-        allowedRoles: ['PROJECT_MANAGER', 'FINANCIAL_ANALYST', 'ARCHITECT', 'DEVELOPER', 'TEAM_MEMBER'],
+        allowedRoles: [
+          'PROJECT_MANAGER',
+          'FINANCIAL_ANALYST',
+          'ARCHITECT',
+          'DEVELOPER',
+          'TEAM_MEMBER',
+        ],
         allowedUsers: [],
         language: 'it',
-        translations: {},
+        translations: {
+          it: '',
+          en: '',
+          es: '',
+          fr: '',
+          de: '',
+        },
         categoryId: 'best-practices',
         categoryPath: ['best-practices'],
         childrenIds: [],
@@ -498,10 +603,20 @@ Buon lavoro con Urbanova! 🚀`,
         publishedAt: new Date(),
         lastAccessedAt: new Date(),
         slug: 'guida-introduttiva-urbanova',
-        searchableContent: 'benvenuto urbanova piattaforma completa analisi sviluppo immobiliare decisioni informate terreni',
-        searchKeywords: ['urbanova', 'guida', 'introduzione', 'immobiliare', 'terreni', 'analytics', 'collaborazione'],
+        searchableContent:
+          'benvenuto urbanova piattaforma completa analisi sviluppo immobiliare decisioni informate terreni',
+        searchKeywords: [
+          'urbanova',
+          'guida',
+          'introduzione',
+          'immobiliare',
+          'terreni',
+          'analytics',
+          'collaborazione',
+        ],
         seoTitle: 'Guida Introduttiva a Urbanova - Come Iniziare',
-        seoDescription: 'Scopri come utilizzare Urbanova per l\'analisi immobiliare, la collaborazione in team e la gestione della conoscenza.'
+        seoDescription:
+          "Scopri come utilizzare Urbanova per l'analisi immobiliare, la collaborazione in team e la gestione della conoscenza.",
       },
       {
         id: 'collaboration-best-practices',
@@ -586,10 +701,22 @@ Buon lavoro con Urbanova! 🚀`,
         keywords: ['collaborazione', 'best-practices', 'team', 'workflow'],
         tags: ['best-practices', 'collaborazione', 'team', 'workflow'],
         accessLevel: 'internal',
-        allowedRoles: ['PROJECT_MANAGER', 'FINANCIAL_ANALYST', 'ARCHITECT', 'DEVELOPER', 'TEAM_MEMBER'],
+        allowedRoles: [
+          'PROJECT_MANAGER',
+          'FINANCIAL_ANALYST',
+          'ARCHITECT',
+          'DEVELOPER',
+          'TEAM_MEMBER',
+        ],
         allowedUsers: [],
         language: 'it',
-        translations: {},
+        translations: {
+          it: '',
+          en: '',
+          es: '',
+          fr: '',
+          de: '',
+        },
         categoryId: 'collaboration',
         categoryPath: ['collaboration'],
         childrenIds: [],
@@ -611,11 +738,13 @@ Buon lavoro con Urbanova! 🚀`,
         publishedAt: new Date(),
         lastAccessedAt: new Date(),
         slug: 'collaboration-best-practices',
-        searchableContent: 'best practices collaborazione team workflow comunicazione tempo reale asincrono documentazione',
+        searchableContent:
+          'best practices collaborazione team workflow comunicazione tempo reale asincrono documentazione',
         searchKeywords: ['collaborazione', 'team', 'workflow', 'comunicazione', 'best-practices'],
         seoTitle: 'Best Practices per la Collaborazione in Team - Urbanova',
-        seoDescription: 'Scopri le migliori pratiche per collaborare efficacemente con il tuo team su Urbanova.'
-      }
+        seoDescription:
+          'Scopri le migliori pratiche per collaborare efficacemente con il tuo team su Urbanova.',
+      },
     ];
 
     documents.forEach(document => {
@@ -657,7 +786,13 @@ Buon lavoro con Urbanova! 🚀`,
       allowedRoles: options.allowedRoles || ['PROJECT_MANAGER', 'TEAM_MEMBER'],
       allowedUsers: [],
       language: options.language || 'it',
-      translations: {},
+              translations: {
+          it: '',
+          en: '',
+          es: '',
+          fr: '',
+          de: '',
+        },
       categoryId,
       categoryPath: this.getCategoryPath(categoryId),
       childrenIds: [],
@@ -679,7 +814,7 @@ Buon lavoro con Urbanova! 🚀`,
       lastAccessedAt: new Date(),
       slug: this.generateSlug(title),
       searchableContent: this.generateSearchableContent(title, description, content),
-      searchKeywords: this.extractKeywords(title + ' ' + description + ' ' + content)
+      searchKeywords: this.extractKeywords(title + ' ' + description + ' ' + content),
     };
 
     this.documents.set(document.id, document);
@@ -713,9 +848,9 @@ Buon lavoro con Urbanova! 🚀`,
         authorId,
         authorName,
         createdAt: new Date(),
-        isActive: false
+        isActive: false,
       };
-      
+
       document.versionHistory.push(newVersion);
       document.version = newVersion.version;
     }
@@ -723,16 +858,32 @@ Buon lavoro con Urbanova! 🚀`,
     // Applica gli aggiornamenti
     Object.assign(document, updates, {
       updatedAt: new Date(),
-      searchableContent: updates.content ? 
-        this.generateSearchableContent(updates.title || document.title, updates.description || document.description, updates.content) :
-        document.searchableContent,
-      searchKeywords: updates.content ?
-        this.extractKeywords((updates.title || document.title) + ' ' + (updates.description || document.description) + ' ' + updates.content) :
-        document.searchKeywords
+      searchableContent: updates.content
+        ? this.generateSearchableContent(
+            updates.title || document.title,
+            updates.description || document.description,
+            updates.content
+          )
+        : document.searchableContent,
+      searchKeywords: updates.content
+        ? this.extractKeywords(
+            (updates.title || document.title) +
+              ' ' +
+              (updates.description || document.description) +
+              ' ' +
+              updates.content
+          )
+        : document.searchKeywords,
     });
 
-    this.logActivity(documentId, 'updated', `Documento "${document.title}" aggiornato`, authorId, authorName);
-    
+    this.logActivity(
+      documentId,
+      'updated',
+      `Documento "${document.title}" aggiornato`,
+      authorId,
+      authorName
+    );
+
     return document;
   }
 
@@ -745,7 +896,13 @@ Buon lavoro con Urbanova! 🚀`,
 
     this.documents.delete(documentId);
     this.updateCategoryDocumentCount(document.categoryId, -1);
-    this.logActivity(documentId, 'archived', `Documento "${document.title}" eliminato`, authorId, authorName);
+    this.logActivity(
+      documentId,
+      'archived',
+      `Documento "${document.title}" eliminato`,
+      authorId,
+      authorName
+    );
 
     return true;
   }
@@ -757,91 +914,99 @@ Buon lavoro con Urbanova! 🚀`,
     const allDocuments = Array.from(this.documents.values());
 
     // Filtra documenti in base ai filtri
-    let filteredDocuments = allDocuments.filter(doc => {
+    const filteredDocuments = allDocuments.filter(doc => {
       if (query.filters.types && !query.filters.types.includes(doc.type)) return false;
-      if (query.filters.categories && !query.filters.categories.includes(doc.categoryId)) return false;
+      if (query.filters.categories && !query.filters.categories.includes(doc.categoryId))
+        return false;
       if (query.filters.authors && !query.filters.authors.includes(doc.authorId)) return false;
       if (query.filters.status && !query.filters.status.includes(doc.status)) return false;
-      if (query.filters.accessLevel && !query.filters.accessLevel.includes(doc.accessLevel)) return false;
+      if (query.filters.accessLevel && !query.filters.accessLevel.includes(doc.accessLevel))
+        return false;
       if (query.filters.language && doc.language !== query.filters.language) return false;
       if (query.filters.dateRange) {
         const docDate = new Date(doc.createdAt);
-        if (docDate < query.filters.dateRange.start || docDate > query.filters.dateRange.end) return false;
+        if (docDate < query.filters.dateRange.start || docDate > query.filters.dateRange.end)
+          return false;
       }
       return true;
     });
 
     // Ricerca full-text
     if (query.query.trim()) {
-      const searchTerms = query.query.toLowerCase().split(' ').filter(term => term.length > 2);
-      
-      results = filteredDocuments.map(doc => {
-        let score = 0;
-        const highlights: Array<{ field: string; text: string; matchedText: string }> = [];
-        
-        // Cerca nel titolo (peso maggiore)
-        searchTerms.forEach(term => {
-          if (doc.title.toLowerCase().includes(term)) {
-            score += 10;
-            highlights.push({
-              field: 'title',
-              text: doc.title,
-              matchedText: term
-            });
-          }
-        });
+      const searchTerms = query.query
+        .toLowerCase()
+        .split(' ')
+        .filter(term => term.length > 2);
 
-        // Cerca nella descrizione
-        searchTerms.forEach(term => {
-          if (doc.description.toLowerCase().includes(term)) {
-            score += 5;
-            highlights.push({
-              field: 'description',
-              text: doc.description,
-              matchedText: term
-            });
-          }
-        });
+      results = filteredDocuments
+        .map(doc => {
+          let score = 0;
+          const highlights: Array<{ field: string; text: string; matchedText: string }> = [];
 
-        // Cerca nel contenuto
-        searchTerms.forEach(term => {
-          if (doc.searchableContent.toLowerCase().includes(term)) {
-            score += 2;
-            highlights.push({
-              field: 'content',
-              text: doc.searchableContent.substring(0, 200) + '...',
-              matchedText: term
-            });
-          }
-        });
-
-        // Cerca nei tag
-        searchTerms.forEach(term => {
-          doc.tags.forEach(tag => {
-            if (tag.toLowerCase().includes(term)) {
-              score += 3;
+          // Cerca nel titolo (peso maggiore)
+          searchTerms.forEach(term => {
+            if (doc.title.toLowerCase().includes(term)) {
+              score += 10;
               highlights.push({
-                field: 'tags',
-                text: tag,
-                matchedText: term
+                field: 'title',
+                text: doc.title,
+                matchedText: term,
               });
             }
           });
-        });
 
-        return {
-          document: doc,
-          score,
-          highlights,
-          snippet: this.generateSnippet(doc.content, searchTerms)
-        };
-      }).filter(result => result.score > 0);
+          // Cerca nella descrizione
+          searchTerms.forEach(term => {
+            if (doc.description.toLowerCase().includes(term)) {
+              score += 5;
+              highlights.push({
+                field: 'description',
+                text: doc.description,
+                matchedText: term,
+              });
+            }
+          });
+
+          // Cerca nel contenuto
+          searchTerms.forEach(term => {
+            if (doc.searchableContent.toLowerCase().includes(term)) {
+              score += 2;
+              highlights.push({
+                field: 'content',
+                text: doc.searchableContent.substring(0, 200) + '...',
+                matchedText: term,
+              });
+            }
+          });
+
+          // Cerca nei tag
+          searchTerms.forEach(term => {
+            doc.tags.forEach(tag => {
+              if (tag.toLowerCase().includes(term)) {
+                score += 3;
+                highlights.push({
+                  field: 'tags',
+                  text: tag,
+                  matchedText: term,
+                });
+              }
+            });
+          });
+
+          return {
+            document: doc,
+            score,
+            highlights,
+            snippet: this.generateSnippet(doc.content, searchTerms),
+          };
+        })
+        .filter(result => result.score > 0);
     } else {
       results = filteredDocuments.map(doc => ({
         document: doc,
         score: 1,
         highlights: [],
-        snippet: doc.summary || doc.description
+        snippet: doc.summary || doc.description,
       }));
     }
 
@@ -851,21 +1016,21 @@ Buon lavoro con Urbanova! 🚀`,
         case 'relevance':
           return query.sortDirection === 'asc' ? a.score - b.score : b.score - a.score;
         case 'date_created':
-          return query.sortDirection === 'asc' ? 
-            a.document.createdAt.getTime() - b.document.createdAt.getTime() :
-            b.document.createdAt.getTime() - a.document.createdAt.getTime();
+          return query.sortDirection === 'asc'
+            ? a.document.createdAt.getTime() - b.document.createdAt.getTime()
+            : b.document.createdAt.getTime() - a.document.createdAt.getTime();
         case 'date_updated':
-          return query.sortDirection === 'asc' ?
-            a.document.updatedAt.getTime() - b.document.updatedAt.getTime() :
-            b.document.updatedAt.getTime() - a.document.updatedAt.getTime();
+          return query.sortDirection === 'asc'
+            ? a.document.updatedAt.getTime() - b.document.updatedAt.getTime()
+            : b.document.updatedAt.getTime() - a.document.updatedAt.getTime();
         case 'title':
-          return query.sortDirection === 'asc' ?
-            a.document.title.localeCompare(b.document.title) :
-            b.document.title.localeCompare(a.document.title);
+          return query.sortDirection === 'asc'
+            ? a.document.title.localeCompare(b.document.title)
+            : b.document.title.localeCompare(a.document.title);
         case 'popularity':
-          return query.sortDirection === 'asc' ?
-            a.document.viewCount - b.document.viewCount :
-            b.document.viewCount - a.document.viewCount;
+          return query.sortDirection === 'asc'
+            ? a.document.viewCount - b.document.viewCount
+            : b.document.viewCount - a.document.viewCount;
         default:
           return b.score - a.score;
       }
@@ -893,7 +1058,7 @@ Buon lavoro con Urbanova! 🚀`,
       totalPages,
       facets,
       suggestions,
-      executionTime
+      executionTime,
     };
   }
 
@@ -927,7 +1092,7 @@ Buon lavoro con Urbanova! 🚀`,
       usageCount: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
-      createdBy
+      createdBy,
     };
 
     this.templates.set(template.id, template);
@@ -970,7 +1135,7 @@ Buon lavoro con Urbanova! 🚀`,
       authorName,
       {
         accessLevel: template.accessLevel,
-        language: template.language
+        language: template.language,
       }
     );
 
@@ -995,25 +1160,25 @@ Buon lavoro con Urbanova! 🚀`,
       selection?: { start: number; end: number };
     }
   ): DocumentComment {
-    const comment: DocumentComment = {
+    const comment = {
       id: `comment-${Date.now()}`,
       documentId,
-      parentId,
+      parentId: parentId ?? undefined,
       content,
       isResolved: false,
-      position,
+      position: position ?? undefined,
       authorId,
       authorName,
       authorAvatar,
       reactions: [],
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     if (!this.comments.has(documentId)) {
       this.comments.set(documentId, []);
     }
-    this.comments.get(documentId)!.push(comment);
+    this.comments.get(documentId)!.push(comment as any);
 
     // Aggiorna il contatore di commenti del documento
     const document = this.documents.get(documentId);
@@ -1024,7 +1189,7 @@ Buon lavoro con Urbanova! 🚀`,
 
     this.logActivity(documentId, 'commented', `Nuovo commento aggiunto`, authorId, authorName);
 
-    return comment;
+    return comment as DocumentComment;
   }
 
   // Ottieni commenti per documento
@@ -1046,32 +1211,32 @@ Buon lavoro con Urbanova! 🚀`,
     const totalDownloads = documents.reduce((sum, doc) => sum + doc.downloadCount, 0);
 
     // Breakdown per tipo
-    const documentsByType = Object.values(DocumentType).map(type => {
+    const documentsByType = Object.values(DocumentType as unknown as Record<string, string>).map(type => {
       const count = documents.filter(doc => doc.type === type).length;
       return {
         type,
         count,
-        percentage: totalDocuments > 0 ? Math.round((count / totalDocuments) * 100) : 0
+        percentage: totalDocuments > 0 ? Math.round((count / totalDocuments) * 100) : 0,
       };
     });
 
     // Breakdown per stato
-    const documentsByStatus = Object.values(DocumentStatus).map(status => {
+    const documentsByStatus = ['draft', 'published', 'archived'].map(status => {
       const count = documents.filter(doc => doc.status === status).length;
       return {
         status,
         count,
-        percentage: totalDocuments > 0 ? Math.round((count / totalDocuments) * 100) : 0
+        percentage: totalDocuments > 0 ? Math.round((count / totalDocuments) * 100) : 0,
       };
     });
 
     // Breakdown per lingua
-    const documentsByLanguage = Object.values(ContentLanguage).map(language => {
+    const documentsByLanguage = ['it', 'en', 'es'].map(language => {
       const count = documents.filter(doc => doc.language === language).length;
       return {
         language,
         count,
-        percentage: totalDocuments > 0 ? Math.round((count / totalDocuments) * 100) : 0
+        percentage: totalDocuments > 0 ? Math.round((count / totalDocuments) * 100) : 0,
       };
     });
 
@@ -1083,19 +1248,22 @@ Buon lavoro con Urbanova! 🚀`,
         documentId: doc.id,
         title: doc.title,
         views: doc.viewCount,
-        engagement: doc.likeCount + doc.commentCount + doc.shareCount
+        engagement: doc.likeCount + doc.commentCount + doc.shareCount,
       }));
 
     // Top authors
-    const authorStats = Array.from(authors).map(authorId => {
-      const authorDocs = documents.filter(doc => doc.authorId === authorId);
-      return {
-        authorId,
-        authorName: authorDocs[0]?.authorName || 'Unknown',
-        documentCount: authorDocs.length,
-        totalViews: authorDocs.reduce((sum, doc) => sum + doc.viewCount, 0)
-      };
-    }).sort((a, b) => b.documentCount - a.documentCount).slice(0, 10);
+    const topAuthors = Array.from(authors)
+      .map(authorId => {
+        const authorDocs = documents.filter(doc => doc.authorId === authorId);
+        return {
+          authorId,
+          authorName: authorDocs[0]?.authorName || 'Unknown',
+          documentCount: authorDocs.length,
+          totalViews: authorDocs.reduce((sum, doc) => sum + doc.viewCount, 0),
+        };
+      })
+      .sort((a, b) => b.documentCount - a.documentCount)
+      .slice(0, 10);
 
     // Top categories
     const topCategories = categories
@@ -1107,7 +1275,7 @@ Buon lavoro con Urbanova! 🚀`,
         documentCount: cat.documentCount,
         totalViews: documents
           .filter(doc => doc.categoryId === cat.id)
-          .reduce((sum, doc) => sum + doc.viewCount, 0)
+          .reduce((sum, doc) => sum + doc.viewCount, 0),
       }));
 
     // Activity trend (ultimi 30 giorni)
@@ -1117,12 +1285,12 @@ Buon lavoro con Urbanova! 🚀`,
       const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
       const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
 
-      const documentsCreated = documents.filter(doc => 
-        doc.createdAt >= dayStart && doc.createdAt < dayEnd
+      const documentsCreated = documents.filter(
+        doc => doc.createdAt >= dayStart && doc.createdAt < dayEnd
       ).length;
 
-      const documentsUpdated = documents.filter(doc => 
-        doc.updatedAt >= dayStart && doc.updatedAt < dayEnd && doc.createdAt < dayStart
+      const documentsUpdated = documents.filter(
+        doc => doc.updatedAt >= dayStart && doc.updatedAt < dayEnd && doc.createdAt < dayStart
       ).length;
 
       return {
@@ -1130,7 +1298,7 @@ Buon lavoro con Urbanova! 🚀`,
         documentsCreated,
         documentsUpdated,
         totalViews: 0, // Simulato
-        totalEngagement: 0 // Simulato
+        totalEngagement: 0, // Simulato
       };
     }).reverse();
 
@@ -1144,8 +1312,8 @@ Buon lavoro con Urbanova! 🚀`,
         excellent: Math.round(totalDocuments * 0.3),
         good: Math.round(totalDocuments * 0.45),
         average: Math.round(totalDocuments * 0.2),
-        poor: Math.round(totalDocuments * 0.05)
-      }
+        poor: Math.round(totalDocuments * 0.05),
+      },
     };
 
     const now = new Date();
@@ -1157,9 +1325,9 @@ Buon lavoro con Urbanova! 🚀`,
       totalAuthors,
       totalViews,
       totalDownloads,
-      documentsByType,
-      documentsByStatus,
-      documentsByLanguage,
+      documentsByType: documentsByType as any,
+      documentsByStatus: documentsByStatus as any,
+      documentsByLanguage: documentsByLanguage as any,
       topDocuments,
       topAuthors,
       topCategories,
@@ -1167,7 +1335,7 @@ Buon lavoro con Urbanova! 🚀`,
       qualityMetrics,
       generatedAt: now,
       periodStart: thirtyDaysAgo,
-      periodEnd: now
+      periodEnd: now,
     };
   }
 
@@ -1193,7 +1361,7 @@ Buon lavoro con Urbanova! 🚀`,
       progress: 0,
       requestedAt: new Date(),
       startedAt: new Date(),
-      requestedBy: 'system'
+      requestedBy: 'system',
     };
 
     this.exports.set(exportData.id, exportData);
@@ -1237,11 +1405,12 @@ Buon lavoro con Urbanova! 🚀`,
   }
 
   private extractKeywords(text: string): string[] {
-    const words = text.toLowerCase()
+    const words = text
+      .toLowerCase()
       .replace(/[^\w\s]/g, ' ')
       .split(/\s+/)
       .filter(word => word.length > 3);
-    
+
     const wordCount = new Map<string, number>();
     words.forEach(word => {
       wordCount.set(word, (wordCount.get(word) || 0) + 1);
@@ -1264,7 +1433,7 @@ Buon lavoro con Urbanova! 🚀`,
   private getCategoryPath(categoryId: string): string[] {
     const category = this.categories.get(categoryId);
     if (!category) return [];
-    
+
     const path = [...category.path];
     return path;
   }
@@ -1285,7 +1454,15 @@ Buon lavoro con Urbanova! 🚀`,
 
   private logActivity(
     documentId: string,
-    type: 'created' | 'updated' | 'published' | 'archived' | 'commented' | 'shared' | 'viewed' | 'downloaded',
+    type:
+      | 'created'
+      | 'updated'
+      | 'published'
+      | 'archived'
+      | 'commented'
+      | 'shared'
+      | 'viewed'
+      | 'downloaded',
     description: string,
     userId: string,
     userName: string
@@ -1299,7 +1476,7 @@ Buon lavoro con Urbanova! 🚀`,
       userId,
       userName,
       userAvatar: '👤',
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     if (!this.activities.has(documentId)) {
@@ -1310,7 +1487,7 @@ Buon lavoro con Urbanova! 🚀`,
 
   private generateSnippet(content: string, searchTerms: string[]): string {
     let snippet = content.substring(0, 300);
-    
+
     // Cerca il primo termine di ricerca nel contenuto
     for (const term of searchTerms) {
       const index = content.toLowerCase().indexOf(term.toLowerCase());
@@ -1323,7 +1500,7 @@ Buon lavoro con Urbanova! 🚀`,
         break;
       }
     }
-    
+
     return snippet;
   }
 
@@ -1339,7 +1516,7 @@ Buon lavoro con Urbanova! 🚀`,
       categories.set(doc.categoryId, (categories.get(doc.categoryId) || 0) + 1);
       authors.set(doc.authorName, (authors.get(doc.authorName) || 0) + 1);
       languages.set(doc.language, (languages.get(doc.language) || 0) + 1);
-      
+
       doc.tags.forEach(tag => {
         tags.set(tag, (tags.get(tag) || 0) + 1);
       });
@@ -1349,8 +1526,10 @@ Buon lavoro con Urbanova! 🚀`,
       types: Array.from(types.entries()).map(([value, count]) => ({ value, count })),
       categories: Array.from(categories.entries()).map(([value, count]) => ({ value, count })),
       authors: Array.from(authors.entries()).map(([value, count]) => ({ value, count })),
-      tags: Array.from(tags.entries()).map(([value, count]) => ({ value, count })).slice(0, 20),
-      languages: Array.from(languages.entries()).map(([value, count]) => ({ value, count }))
+      tags: Array.from(tags.entries())
+        .map(([value, count]) => ({ value, count }))
+        .slice(0, 20),
+      languages: Array.from(languages.entries()).map(([value, count]) => ({ value, count })),
     };
   }
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import { FilterIcon, RefreshIcon, ChevronUpIcon, ChevronDownIcon } from '@/components/icons';
 
 interface FilterState {
@@ -26,15 +27,16 @@ export default function AdvancedFilters({
   onFiltersChange,
   isOpen,
   onToggle,
-  onReset
+  onReset,
 }: AdvancedFiltersProps) {
   const getActiveFiltersCount = () => {
     if (!filters) return 0;
-    
+
     let count = 0;
     if (filters.priceRange?.[0] > 0 || filters.priceRange?.[1] < 1000000) count++;
     if (filters.areaRange?.[0] > 500 || filters.areaRange?.[1] < 10000) count++;
-    if (filters.propertyTypes?.length !== 1 || filters.propertyTypes?.[0] !== 'residenziale') count++;
+    if (filters.propertyTypes?.length !== 1 || filters.propertyTypes?.[0] !== 'residenziale')
+      count++;
     if (filters.hasPermits) count++;
     if (filters.minAIScore > 70) count++;
     if (filters.riskLevel !== 'all') count++;
@@ -50,14 +52,14 @@ export default function AdvancedFilters({
     { value: 'commerciale', label: 'Commerciale' },
     { value: 'industriale', label: 'Industriale' },
     { value: 'agricolo', label: 'Agricolo' },
-    { value: 'misto', label: 'Misto' }
+    { value: 'misto', label: 'Misto' },
   ];
 
   const riskLevelOptions = [
     { value: 'all', label: 'Tutti i livelli' },
     { value: 'low', label: 'Basso' },
     { value: 'medium', label: 'Medio' },
-    { value: 'high', label: 'Alto' }
+    { value: 'high', label: 'Alto' },
   ];
 
   return (
@@ -83,7 +85,6 @@ export default function AdvancedFilters({
       {isOpen && (
         <div className="p-4 bg-gray-50">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            
             {/* Range Prezzo */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -94,7 +95,12 @@ export default function AdvancedFilters({
                   <input
                     type="number"
                     value={filters.priceRange?.[0] || 0}
-                    onChange={(e) => updateFilter('priceRange', [parseInt(e.target.value) || 0, filters.priceRange?.[1] || 1000000])}
+                    onChange={e =>
+                      updateFilter('priceRange', [
+                        parseInt(e.target.value) || 0,
+                        filters.priceRange?.[1] || 1000000,
+                      ])
+                    }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     placeholder="Min"
                   />
@@ -102,13 +108,19 @@ export default function AdvancedFilters({
                   <input
                     type="number"
                     value={filters.priceRange?.[1] || 1000000}
-                    onChange={(e) => updateFilter('priceRange', [filters.priceRange?.[0] || 0, parseInt(e.target.value) || 1000000])}
+                    onChange={e =>
+                      updateFilter('priceRange', [
+                        filters.priceRange?.[0] || 0,
+                        parseInt(e.target.value) || 1000000,
+                      ])
+                    }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     placeholder="Max"
                   />
                 </div>
                 <div className="text-xs text-gray-500">
-                  {filters.priceRange[0].toLocaleString()} - {filters.priceRange[1].toLocaleString()} €
+                  {filters.priceRange[0].toLocaleString()} -{' '}
+                  {filters.priceRange[1].toLocaleString()} €
                 </div>
               </div>
             </div>
@@ -123,7 +135,12 @@ export default function AdvancedFilters({
                   <input
                     type="number"
                     value={filters.areaRange?.[0] || 500}
-                    onChange={(e) => updateFilter('areaRange', [parseInt(e.target.value) || 500, filters.areaRange?.[1] || 10000])}
+                    onChange={e =>
+                      updateFilter('areaRange', [
+                        parseInt(e.target.value) || 500,
+                        filters.areaRange?.[1] || 10000,
+                      ])
+                    }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     placeholder="Min"
                   />
@@ -131,7 +148,12 @@ export default function AdvancedFilters({
                   <input
                     type="number"
                     value={filters.areaRange?.[1] || 10000}
-                    onChange={(e) => updateFilter('areaRange', [filters.areaRange?.[0] || 500, parseInt(e.target.value) || 10000])}
+                    onChange={e =>
+                      updateFilter('areaRange', [
+                        filters.areaRange?.[0] || 500,
+                        parseInt(e.target.value) || 10000,
+                      ])
+                    }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     placeholder="Max"
                   />
@@ -153,11 +175,17 @@ export default function AdvancedFilters({
                     <input
                       type="checkbox"
                       checked={filters.propertyTypes?.includes(option.value) || false}
-                      onChange={(e) => {
+                      onChange={e => {
                         if (e.target.checked) {
-                          updateFilter('propertyTypes', [...(filters.propertyTypes || []), option.value]);
+                          updateFilter('propertyTypes', [
+                            ...(filters.propertyTypes || []),
+                            option.value,
+                          ]);
                         } else {
-                          updateFilter('propertyTypes', (filters.propertyTypes || []).filter(t => t !== option.value));
+                          updateFilter(
+                            'propertyTypes',
+                            (filters.propertyTypes || []).filter(t => t !== option.value)
+                          );
                         }
                       }}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
@@ -170,14 +198,12 @@ export default function AdvancedFilters({
 
             {/* Permessi */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Permessi
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-3">Permessi</label>
               <label className="flex items-center">
                 <input
                   type="checkbox"
                   checked={filters.hasPermits}
-                  onChange={(e) => updateFilter('hasPermits', e.target.checked)}
+                  onChange={e => updateFilter('hasPermits', e.target.checked)}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <span className="ml-2 text-sm text-gray-700">
@@ -196,7 +222,7 @@ export default function AdvancedFilters({
                 min="0"
                 max="100"
                 value={filters.minAIScore}
-                onChange={(e) => updateFilter('minAIScore', parseInt(e.target.value))}
+                onChange={e => updateFilter('minAIScore', parseInt(e.target.value))}
                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
               />
               <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -215,7 +241,7 @@ export default function AdvancedFilters({
               </label>
               <select
                 value={filters.riskLevel}
-                onChange={(e) => updateFilter('riskLevel', e.target.value as any)}
+                onChange={e => updateFilter('riskLevel', e.target.value as any)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               >
                 {riskLevelOptions.map(option => (
@@ -241,4 +267,4 @@ export default function AdvancedFilters({
       )}
     </div>
   );
-} 
+}

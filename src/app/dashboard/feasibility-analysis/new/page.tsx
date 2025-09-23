@@ -1,30 +1,32 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
-import { firebaseDebugService } from '@/lib/firebaseDebugService';
-import { projectManagerService } from '@/lib/projectManagerService';
-import FeasibilityReportGenerator from '@/components/ui/FeasibilityReportGenerator';
-import ProjectReminderModal from '@/components/ui/ProjectReminderModal';
-import { 
-  CalculatorIcon, 
-  BuildingIcon, 
-  EuroIcon, 
+import { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
+
+import {
+  CalculatorIcon,
+  BuildingIcon,
+  EuroIcon,
   CalendarIcon,
   LocationIcon,
-
   ArrowLeftIcon,
   TrendingUpIcon,
   SearchIcon,
-  AlertTriangleIcon
+  AlertTriangleIcon,
 } from '@/components/icons';
-import { toast } from 'react-hot-toast';
-import Link from 'next/link';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import FeasibilityReportGenerator from '@/components/ui/FeasibilityReportGenerator';
+import ProjectReminderModal from '@/components/ui/ProjectReminderModal';
+import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
+import { firebaseDebugService } from '@/lib/firebaseDebugService';
+import { projectManagerService } from '@/lib/projectManagerService';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function NewFeasibilityProjectPage() {
   const router = useRouter();
+  const { currentUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [marketDataLoading, setMarketDataLoading] = useState(false);
   const [marketData, setMarketData] = useState<any>(null);
@@ -35,26 +37,40 @@ export default function NewFeasibilityProjectPage() {
   const [editProjectId, setEditProjectId] = useState<string | null>(null);
   const [insuranceFlags, setInsuranceFlags] = useState({
     constructionInsurance: false,
-    financingInsurance: false
+    financingInsurance: false,
   });
   const [financingData, setFinancingData] = useState({
     loanAmount: 0,
     interestRate: 3.5,
-    loanTermYears: 15
+    loanTermYears: 15,
   });
-  
+
   // Nuovo stato per gestire i costi di costruzione
   const [constructionCostMode, setConstructionCostMode] = useState<'perSqm' | 'total'>('total');
   const [constructionCostsPerSqm, setConstructionCostsPerSqm] = useState({
     excavation: 0,
     structures: 0,
     systems: 0,
-    finishes: 0
+    finishes: 0,
   });
 
   const [autoSaving, setAutoSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [recalculateTimeout, setRecalculateTimeout] = useState<NodeJS.Timeout | null>(null);
+
+  // Helper function per gestire i timeout in modo sicuro
+  const safeSetTimeout = (callback: () => void, delay: number) => {
+    // Pulisce il timeout precedente se esiste
+    if (recalculateTimeout) {
+      clearTimeout(recalculateTimeout);
+    }
+    
+    // Imposta il nuovo timeout
+    const timeout = setTimeout(callback, delay);
+    setRecalculateTimeout(timeout);
+    return timeout;
+  };
 
   const [project, setProject] = useState<Partial<FeasibilityProject>>({
     name: '',
@@ -70,14 +86,14 @@ export default function NewFeasibilityProjectPage() {
         purchasePrice: 0,
         purchaseTaxes: 0,
         intermediationFees: 0,
-        subtotal: 0
+        subtotal: 0,
       },
       construction: {
         excavation: 0,
         structures: 0,
         systems: 0,
         finishes: 0,
-        subtotal: 0
+        subtotal: 0,
       },
       externalWorks: 0,
       concessionFees: 0,
@@ -85,7 +101,7 @@ export default function NewFeasibilityProjectPage() {
       bankCharges: 0,
       exchange: 0,
       insurance: 0,
-      total: 0
+      total: 0,
     },
     revenues: {
       units: 0,
@@ -94,17 +110,17 @@ export default function NewFeasibilityProjectPage() {
       revenuePerUnit: 0,
       totalSales: 0,
       otherRevenues: 0,
-      total: 0
+      total: 0,
     },
     results: {
       profit: 0,
       margin: 0,
       roi: 0,
-      paybackPeriod: 0
+      paybackPeriod: 0,
     },
     isTargetAchieved: false,
-    createdBy: 'user123',
-    notes: ''
+    createdBy: currentUser?.uid || 'anonymous',
+    notes: '',
   });
 
   const [calculatedCosts, setCalculatedCosts] = useState({
@@ -112,14 +128,14 @@ export default function NewFeasibilityProjectPage() {
       purchasePrice: 0,
       purchaseTaxes: 0,
       intermediationFees: 0,
-      subtotal: 0
+      subtotal: 0,
     },
     construction: {
       excavation: 0,
       structures: 0,
       systems: 0,
       finishes: 0,
-      subtotal: 0
+      subtotal: 0,
     },
     externalWorks: 0,
     concessionFees: 0,
@@ -127,9 +143,9 @@ export default function NewFeasibilityProjectPage() {
     bankCharges: 0,
     exchange: 0,
     insurance: 0,
-    total: 0
+    total: 0,
   });
-  
+
   const [calculatedRevenues, setCalculatedRevenues] = useState({
     units: 0,
     averageArea: 0,
@@ -137,14 +153,14 @@ export default function NewFeasibilityProjectPage() {
     revenuePerUnit: 0,
     totalSales: 0,
     otherRevenues: 0,
-    total: 0
+    total: 0,
   });
-  
+
   const [calculatedResults, setCalculatedResults] = useState({
     profit: 0,
     margin: 0,
     roi: 0,
-    paybackPeriod: 0
+    paybackPeriod: 0,
   });
 
   // Ricalcola automaticamente quando cambiano i dati del progetto
@@ -152,7 +168,7 @@ export default function NewFeasibilityProjectPage() {
     if (project && Object.keys(project).length > 0) {
       recalculateAll();
     }
-    
+
     // Cleanup function
     return () => {
       if (autoSaveTimeout) {
@@ -161,36 +177,89 @@ export default function NewFeasibilityProjectPage() {
     };
   }, [project, calculatedCosts, calculatedRevenues, calculatedResults]);
 
-  // Cleanup timeout on unmount
+  // Salvataggio automatico periodico
   useEffect(() => {
-    return () => {
+    if (project.name && project.address && !loading) {
+      // Salva automaticamente ogni 30 secondi se ci sono modifiche
+      const timeout = setTimeout(() => {
+        autoSaveProject();
+      }, 30000);
+
+      setAutoSaveTimeout(timeout);
+
+      return () => {
+        if (timeout) {
+          clearTimeout(timeout);
+        }
+      };
+    }
+    
+    return undefined;
+  }, [project.name, project.address, calculatedCosts, calculatedRevenues, calculatedResults, loading]);
+
+  // Cleanup timeout on unmount e navigazione
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // Pulisce tutti i timeout quando l'utente naviga via
       if (autoSaveTimeout) {
         clearTimeout(autoSaveTimeout);
       }
+      if (recalculateTimeout) {
+        clearTimeout(recalculateTimeout);
+      }
     };
-  }, []);
+
+    // Aggiunge listener per beforeunload
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      // Rimuove listener
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      
+      // Pulisce timeout
+      if (autoSaveTimeout) {
+        clearTimeout(autoSaveTimeout);
+        setAutoSaveTimeout(null);
+      }
+      if (recalculateTimeout) {
+        clearTimeout(recalculateTimeout);
+        setRecalculateTimeout(null);
+      }
+    };
+  }, [autoSaveTimeout, recalculateTimeout]);
+
+  // Aggiorna createdBy quando l'utente cambia
+  useEffect(() => {
+    if (currentUser?.uid) {
+      setProject(prev => ({
+        ...prev,
+        createdBy: currentUser.uid
+      }));
+    }
+  }, [currentUser]);
 
   // Gestisce la modalità edit
   useEffect(() => {
     const checkEditMode = async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const editId = urlParams.get('edit');
-      
+
       if (editId) {
         setIsEditMode(true);
         setEditProjectId(editId);
-        
+        setSavedProjectId(editId); // FORZO L'IMPOSTAZIONE PER FAR FUNZIONARE I BOTTONI
+
         try {
           // Carica il progetto esistente
           const existingProject = await feasibilityService.getProjectById(editId);
           if (existingProject) {
             setProject(existingProject);
-            setSavedProjectId(editId);
+            setSavedProjectId(editId); // RICONFERMO L'ID
             toast('✅ Progetto caricato per la modifica');
           }
         } catch (error) {
           console.error('❌ Errore caricamento progetto per edit:', error);
-          toast.error('❌ Errore nel caricamento del progetto');
+          toast('❌ Errore nel caricamento del progetto');
         }
       }
     };
@@ -209,15 +278,17 @@ export default function NewFeasibilityProjectPage() {
   const handleInputChange = (section: string, field: string, value: any) => {
     setProject(prev => {
       const updated = { ...prev };
-      
+
       if (section === 'basic') {
         (updated as any)[field] = value;
       } else if (section === 'costs') {
         if (!updated.costs) updated.costs = {} as any;
         if (field.includes('.')) {
           const [subSection, subField] = field.split('.');
-          if (!(updated.costs as any)[subSection]) (updated.costs as any)[subSection] = {};
-          (updated.costs as any)[subSection][subField] = value;
+          if (subSection && subField) {
+            if (!(updated.costs as any)[subSection]) (updated.costs as any)[subSection] = {};
+            (updated.costs as any)[subSection][subField] = value;
+          }
         } else {
           (updated.costs as any)[field] = value;
         }
@@ -225,106 +296,110 @@ export default function NewFeasibilityProjectPage() {
         if (!updated.revenues) updated.revenues = {} as any;
         (updated.revenues as any)[field] = value;
       }
-      
+
       return updated;
     });
 
     // Ricalcola automaticamente
-    setTimeout(() => recalculateAll(), 100);
+    safeSetTimeout(() => recalculateAll(), 100);
   };
 
   const handleFinancingChange = (field: string, value: any) => {
     setFinancingData(prev => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
-    
+
     // Ricalcola automaticamente per aggiornare assicurazioni
-    setTimeout(() => recalculateAll(), 100);
+    safeSetTimeout(() => recalculateAll(), 100);
   };
 
   // Nuove funzioni per gestire i costi di costruzione
   const handleConstructionCostModeChange = (mode: 'perSqm' | 'total') => {
     setConstructionCostMode(mode);
-    
+
     // Se si passa da perSqm a total, calcola i totali
     if (mode === 'total' && project.totalArea && project.totalArea > 0) {
       const totalCosts = {
         excavation: constructionCostsPerSqm.excavation * project.totalArea,
         structures: constructionCostsPerSqm.structures * project.totalArea,
         systems: constructionCostsPerSqm.systems * project.totalArea,
-        finishes: constructionCostsPerSqm.finishes * project.totalArea
+        finishes: constructionCostsPerSqm.finishes * project.totalArea,
       };
-      
+
       setProject(prev => ({
         ...prev,
         costs: {
           ...prev.costs,
           construction: {
             ...prev.costs?.construction,
-            ...totalCosts
-          }
-        }
-      }));
+            ...totalCosts,
+          },
+        },
+      } as Partial<FeasibilityProject>));
     }
-    
+
     // Se si passa da total a perSqm, calcola i costi per mq
     if (mode === 'perSqm' && project.totalArea && project.totalArea > 0) {
       const costsPerSqm = {
         excavation: (project.costs?.construction?.excavation || 0) / project.totalArea,
         structures: (project.costs?.construction?.structures || 0) / project.totalArea,
         systems: (project.costs?.construction?.systems || 0) / project.totalArea,
-        finishes: (project.costs?.construction?.finishes || 0) / project.totalArea
+        finishes: (project.costs?.construction?.finishes || 0) / project.totalArea,
       };
-      
+
       setConstructionCostsPerSqm(costsPerSqm);
     }
-    
-    setTimeout(() => recalculateAll(), 100);
+
+    safeSetTimeout(() => recalculateAll(), 100);
   };
 
   const handleConstructionCostPerSqmChange = (field: string, value: number) => {
     setConstructionCostsPerSqm(prev => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
-    
+
     // Calcola automaticamente il totale se i mq sono definiti
     if (project.totalArea && project.totalArea > 0) {
       const totalValue = value * project.totalArea;
-      
+
       setProject(prev => ({
         ...prev,
         costs: {
           ...prev.costs,
           construction: {
             ...prev.costs?.construction,
-            [field]: totalValue
-          }
-        }
-      }));
+            [field]: totalValue,
+          },
+        },
+      } as Partial<FeasibilityProject>));
     }
-    
-    setTimeout(() => recalculateAll(), 100);
+
+    safeSetTimeout(() => recalculateAll(), 100);
   };
 
   const recalculateAll = () => {
     try {
       const costs = feasibilityService.calculateCosts(project, constructionCostMode);
-      
+
       // Calcola assicurazioni se i flag sono attivi
       let insuranceCost = 0;
       if (insuranceFlags.constructionInsurance && costs.construction?.subtotal) {
-        insuranceCost += (costs.construction.subtotal * 0.015); // 1.5% del costo costruzione
+        insuranceCost += costs.construction.subtotal * 0.015; // 1.5% del costo costruzione
       }
       if (insuranceFlags.financingInsurance) {
-        insuranceCost += (financingData.loanAmount * 0.01); // 1% dell'importo finanziato
+        insuranceCost += financingData.loanAmount * 0.01; // 1% dell'importo finanziato
       }
       costs.insurance = insuranceCost;
-      
+
       const revenues = feasibilityService.calculateRevenues(project);
-      const results = feasibilityService.calculateResults(costs, revenues, project.targetMargin || 30);
-      
+      const results = feasibilityService.calculateResults(
+        costs,
+        revenues,
+        project.targetMargin || 30
+      );
+
       setCalculatedCosts(costs);
       setCalculatedRevenues(revenues);
       setCalculatedResults(results);
@@ -337,7 +412,7 @@ export default function NewFeasibilityProjectPage() {
   // Funzione per ottenere dati di mercato dal borsino immobiliare
   const fetchMarketData = async () => {
     if (!project.address) {
-      toast.error('Inserisci prima l\'indirizzo del progetto');
+      toast("Inserisci prima l'indirizzo del progetto", { icon: '❌' });
       return;
     }
 
@@ -350,25 +425,25 @@ export default function NewFeasibilityProjectPage() {
         },
         body: JSON.stringify({
           address: project.address,
-          projectType: 'RESIDENZIALE'
+          projectType: 'RESIDENZIALE',
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
         setMarketData(data);
-        
+
         // Aggiorna automaticamente il prezzo al mq se disponibile
         if (data.suggestedPricePerSqm) {
           handleInputChange('revenues', 'pricePerSqm', data.suggestedPricePerSqm);
-          toast.success(`✅ Prezzo suggerito: ${data.suggestedPricePerSqm}€/m²`);
+          toast(`✅ Prezzo suggerito: ${data.suggestedPricePerSqm}€/m²`, { icon: '✅' });
         }
       } else {
         throw new Error('Errore nel recupero dati di mercato');
       }
     } catch (error) {
       console.error('Errore fetch market data:', error);
-      toast.error('❌ Errore nel recupero dati di mercato');
+              toast('❌ Errore nel recupero dati di mercato', { icon: '❌' });
     } finally {
       setMarketDataLoading(false);
     }
@@ -380,40 +455,60 @@ export default function NewFeasibilityProjectPage() {
       return;
     }
 
+    // Non salvare se è già in corso un salvataggio manuale
+    if (loading) {
+      return;
+    }
+
     setAutoSaving(true);
     try {
-      console.log('🧠 Salvataggio intelligente in corso...');
-      
+      console.log('🧠 Salvataggio automatico progetto fattibilità in corso...');
+
       const finalProject = {
         ...project,
         costs: calculatedCosts,
         revenues: calculatedRevenues,
         results: calculatedResults,
-        isTargetAchieved: calculatedResults.margin >= (project.targetMargin || 30)
+        isTargetAchieved: calculatedResults.margin >= (project.targetMargin || 30),
+        createdBy: currentUser?.uid || 'anonymous'
       } as Omit<FeasibilityProject, 'id' | 'createdAt' | 'updatedAt'>;
 
-      // Usa il servizio intelligente che evita duplicati
-      const result = await projectManagerService.smartSaveProject(finalProject);
-      
-      if (result.success) {
-        setSavedProjectId(result.projectId);
+      // Se il progetto è già stato salvato, aggiorna
+      if (savedProjectId) {
+        await feasibilityService.updateProject(savedProjectId, finalProject);
         setLastSaved(new Date());
-        
-        // Toast discreta per il salvataggio automatico
-        const message = result.isNew 
-          ? '💾 Nuovo progetto salvato automaticamente'
-          : '🔄 Progetto aggiornato automaticamente';
-          
-        toast.success(message, { 
-          duration: 2000,
-          position: 'bottom-right' 
+        console.log('✅ Progetto aggiornato automaticamente:', savedProjectId);
+      } else {
+        // Crea nuovo progetto usando l'endpoint API
+        const response = await fetch('/api/feasibility-smart', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...finalProject,
+            createdBy: currentUser?.uid || 'anonymous'
+          }),
         });
-        
-        console.log('✅ Salvataggio intelligente completato:', result);
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('🔍 [AUTO SAVE] Risposta endpoint:', result);
+          
+          if (result.success && result.projectId) {
+            setSavedProjectId(result.projectId);
+            setLastSaved(new Date());
+            console.log('✅ Nuovo progetto salvato automaticamente:', result.projectId);
+          } else {
+            console.error('❌ [AUTO SAVE] Endpoint restituisce success: false o projectId mancante:', result);
+          }
+        } else {
+          console.error('❌ [AUTO SAVE] Errore HTTP:', response.status, response.statusText);
+        }
       }
-      
+
     } catch (error: any) {
-      console.error('❌ Errore salvataggio intelligente:', error);
+      console.error('❌ Errore salvataggio automatico:', error);
       // Non mostrare errori per il salvataggio automatico per non disturbare l'utente
     } finally {
       setAutoSaving(false);
@@ -422,34 +517,52 @@ export default function NewFeasibilityProjectPage() {
 
   const handleSave = async () => {
     if (!project.name || !project.address) {
-      toast.error('Compila i campi obbligatori');
+      toast('Compila i campi obbligatori', { icon: '❌' });
       return;
     }
 
     setLoading(true);
     try {
-      console.log('🔄 Avvio salvataggio progetto fattibilità...');
-      
+      console.log('🔄 [HANDLE SAVE] Avvio salvataggio progetto fattibilità...');
+      console.log('🔄 [HANDLE SAVE] CurrentUser:', {
+        uid: currentUser?.uid,
+        email: currentUser?.email,
+        isAuthenticated: !!currentUser
+      });
+      console.log('🔄 [HANDLE SAVE] Project data:', {
+        name: project.name,
+        address: project.address,
+        createdBy: project.createdBy
+      });
+
       // Test connessione Firebase prima del salvataggio
       console.log('🔍 Test connessione Firebase...');
       const diagnostic = await firebaseDebugService.runFullDiagnostic();
-      
+
       if (diagnostic.overall === 'failed') {
         console.error('❌ Problemi di connessione Firebase rilevati:', diagnostic);
-        toast.error('❌ Problemi di connessione Firebase. Controlla la console per dettagli.');
+        toast('❌ Problemi di connessione Firebase. Controlla la console per dettagli.', { icon: '❌' });
         return;
       }
-      
+
       const finalProject = {
         ...project,
         costs: calculatedCosts,
         revenues: calculatedRevenues,
         results: calculatedResults,
-        isTargetAchieved: calculatedResults.margin >= (project.targetMargin || 30)
+        isTargetAchieved: calculatedResults.margin >= (project.targetMargin || 30),
+        // Assicurati che createdBy sia impostato correttamente
+        createdBy: currentUser?.uid || project.createdBy || 'anonymous'
       } as Omit<FeasibilityProject, 'id' | 'createdAt' | 'updatedAt'>;
 
-      console.log('📝 Dati progetto da salvare:', finalProject);
-      
+      console.log('📝 [HANDLE SAVE] Dati progetto da salvare:', {
+        name: finalProject.name,
+        address: finalProject.address,
+        createdBy: finalProject.createdBy,
+        hasCosts: !!finalProject.costs,
+        hasRevenues: !!finalProject.revenues
+      });
+
       // Prova prima con il metodo standard
       let projectId: string;
       try {
@@ -457,14 +570,14 @@ export default function NewFeasibilityProjectPage() {
         console.log('✅ Progetto creato con metodo standard:', projectId);
       } catch (standardError) {
         console.warn('⚠️ Metodo standard fallito, prova con transazione:', standardError);
-        
+
         // Fallback: prova con transazione
         try {
           projectId = await feasibilityService.createProjectWithTransaction(finalProject);
           console.log('✅ Progetto creato con transazione:', projectId);
         } catch (transactionError) {
           console.error('❌ Anche la transazione è fallita:', transactionError);
-          
+
           // Fallback finale: prova con batch
           try {
             projectId = await feasibilityService.createProjectWithBatch(finalProject);
@@ -475,41 +588,47 @@ export default function NewFeasibilityProjectPage() {
           }
         }
       }
-      
+
       setSavedProjectId(projectId);
-      toast.success('✅ Progetto creato con successo! Ora puoi generare il report.');
+      toast('✅ Progetto creato con successo! Ora puoi generare il report.', { icon: '✅' });
+      
+      // Attendi un momento per assicurarsi che il salvataggio sia completato
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Mostra il report generator
       setShowReportGenerator(true);
     } catch (error: any) {
       console.error('❌ Errore creazione progetto:', error);
-      
+
       // Log dettagliato dell'errore
       firebaseDebugService.logFirebaseError(error, 'Creazione progetto fattibilità');
-      
+
       // Messaggio di errore più specifico
       let errorMessage = '❌ Errore nella creazione del progetto';
-      
+
       if (error.code === 'permission-denied') {
         errorMessage = '❌ Errore permessi: Verifica le regole di sicurezza Firestore';
       } else if (error.code === 'unavailable') {
-        errorMessage = '❌ Errore connessione: Verifica la connessione internet e lo stato Firebase';
+        errorMessage =
+          '❌ Errore connessione: Verifica la connessione internet e lo stato Firebase';
       } else if (error.code === 'unauthenticated') {
         errorMessage = '❌ Errore autenticazione: Effettua nuovamente il login';
       } else if (error.message) {
         errorMessage = `❌ Errore: ${error.message}`;
       }
-      
-      toast.error(errorMessage);
+
+      toast(errorMessage, { icon: '❌' });
     } finally {
       setLoading(false);
     }
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('it-IT', { 
-      style: 'currency', 
+    return new Intl.NumberFormat('it-IT', {
+      style: 'currency',
       currency: 'EUR',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(value);
   };
 
@@ -529,7 +648,7 @@ export default function NewFeasibilityProjectPage() {
     const n = financingData.loanTermYears * 12; // Numero di pagamenti
 
     if (r === 0) return P / n; // Pagamento rateale se tasso 0
-    return P * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+    return (P * (r * Math.pow(1 + r, n))) / (Math.pow(1 + r, n) - 1);
   };
 
   const calculateTotalInterest = () => {
@@ -544,15 +663,27 @@ export default function NewFeasibilityProjectPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <Link href="/dashboard/feasibility-analysis">
-              <button className="btn btn-ghost btn-sm">
+            <div className="flex space-x-2">
+              <button
+                onClick={() => {
+                  if (loading || autoSaving) {
+                    toast('⏳ Attendere il completamento del salvataggio...', { icon: '⏳' });
+                    return;
+                  }
+                  router.back();
+                }}
+                disabled={loading || autoSaving}
+                className="btn btn-ghost btn-sm hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <ArrowLeftIcon className="h-4 w-4 mr-2" />
                 Indietro
               </button>
-            </Link>
+            </div>
             <div>
               <div className="flex items-center space-x-3">
-                <h1 className="text-3xl font-bold text-gray-900">🏗️ Nuovo Progetto di Fattibilità</h1>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  🏗️ Nuovo Progetto di Fattibilità
+                </h1>
                 {autoSaving && (
                   <div className="flex items-center space-x-2 text-sm text-blue-600">
                     <div className="loading loading-spinner loading-sm"></div>
@@ -566,15 +697,88 @@ export default function NewFeasibilityProjectPage() {
                   </div>
                 )}
               </div>
-              <p className="text-gray-600 mt-1">
-                Crea un nuovo studio di fattibilità immobiliare
-              </p>
+              <p className="text-gray-600 mt-1">Crea un nuovo studio di fattibilità immobiliare</p>
             </div>
           </div>
           <div className="flex space-x-2">
+            <button
+              onClick={async () => {
+                if (!project.name || !project.address) {
+                  toast('Compila nome e indirizzo prima di salvare', { icon: '❌' });
+                  return;
+                }
 
+                setLoading(true);
+                try {
+                  // Salva il progetto se non è già stato salvato
+                  if (!savedProjectId) {
+                    const finalProject = {
+                      ...project,
+                      costs: calculatedCosts,
+                      revenues: calculatedRevenues,
+                      results: calculatedResults,
+                      isTargetAchieved: calculatedResults.margin >= (project.targetMargin || 30),
+                      createdBy: currentUser?.uid || 'anonymous'
+                    } as Omit<FeasibilityProject, 'id' | 'createdAt' | 'updatedAt'>;
 
-            <button 
+                    // Usa l'endpoint API invece del servizio diretto
+                    const response = await fetch('/api/feasibility-smart', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({
+                        ...finalProject,
+                        createdBy: currentUser?.uid || 'anonymous'
+                      }),
+                    });
+
+                    if (!response.ok) {
+                      console.error('❌ [SALVA E ESCI] Errore HTTP:', response.status, response.statusText);
+                      throw new Error(`Errore HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+                    console.log('🔍 [SALVA E ESCI] Risposta endpoint:', result);
+                    
+                    if (!result.success) {
+                      console.error('❌ [SALVA E ESCI] Endpoint restituisce success: false:', result.error);
+                      throw new Error(result.error || 'Errore nel salvataggio del progetto');
+                    }
+
+                    if (!result.projectId) {
+                      console.error('❌ [SALVA E ESCI] Endpoint non restituisce projectId');
+                      throw new Error('ID progetto non ricevuto dal server');
+                    }
+
+                    setSavedProjectId(result.projectId);
+                    console.log('✅ [SALVA E ESCI] Progetto salvato con ID:', result.projectId);
+                  }
+
+                  toast('✅ Progetto salvato con successo!', { icon: '✅' });
+                  
+                  // Reindirizza alla pagina analisi di fattibilità
+                  router.push('/dashboard/feasibility-analysis');
+                } catch (error: any) {
+                  console.error('❌ Errore nel salvataggio:', error);
+                  toast('❌ Errore nel salvataggio del progetto', { icon: '❌' });
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              disabled={loading || !project.name || !project.address}
+              className="btn btn-primary btn-sm"
+            >
+              {loading ? (
+                <>
+                  <div className="loading loading-spinner loading-xs mr-2"></div>
+                  Salvataggio...
+                </>
+              ) : (
+                '💾 Salva e Esci'
+              )}
+            </button>
+            <button
               onClick={() => setShowReportGenerator(true)}
               disabled={!project.name || !project.address}
               className="btn btn-secondary"
@@ -593,7 +797,7 @@ export default function NewFeasibilityProjectPage() {
                 <BuildingIcon className="h-5 w-5 mr-2 text-blue-600" />
                 Dati Base Progetto
               </h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="label">
@@ -602,12 +806,12 @@ export default function NewFeasibilityProjectPage() {
                   <input
                     type="text"
                     value={project.name || ''}
-                    onChange={(e) => handleInputChange('basic', 'name', e.target.value)}
+                    onChange={e => handleInputChange('basic', 'name', e.target.value)}
                     className="input input-bordered w-full"
                     placeholder="Es. Residenza Milano Centro"
                   />
                 </div>
-                
+
                 <div>
                   <label className="label">
                     <span className="label-text font-medium">Indirizzo *</span>
@@ -616,7 +820,7 @@ export default function NewFeasibilityProjectPage() {
                     <input
                       type="text"
                       value={project.address || ''}
-                      onChange={(e) => handleInputChange('basic', 'address', e.target.value)}
+                      onChange={e => handleInputChange('basic', 'address', e.target.value)}
                       className="input input-bordered flex-1"
                       placeholder="Es. Via Roma 123, Milano"
                     />
@@ -642,7 +846,7 @@ export default function NewFeasibilityProjectPage() {
                   <input
                     type="text"
                     value={project.totalArea || ''}
-                    onChange={(e) => handleInputChange('basic', 'totalArea', handleNumberInput(e))}
+                    onChange={e => handleInputChange('basic', 'totalArea', handleNumberInput(e))}
                     className="input input-bordered w-full"
                     placeholder="Es. 500"
                   />
@@ -650,14 +854,14 @@ export default function NewFeasibilityProjectPage() {
                     Superficie totale del progetto in metri quadri
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="label">
                     <span className="label-text font-medium">Stato Progetto</span>
                   </label>
                   <select
                     value={project.status || 'PIANIFICAZIONE'}
-                    onChange={(e) => handleInputChange('basic', 'status', e.target.value)}
+                    onChange={e => handleInputChange('basic', 'status', e.target.value)}
                     className="select select-bordered w-full"
                   >
                     <option value="PIANIFICAZIONE">Pianificazione</option>
@@ -666,14 +870,14 @@ export default function NewFeasibilityProjectPage() {
                     <option value="SOSPESO">Sospeso</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="label">
                     <span className="label-text font-medium">Durata (mesi)</span>
                   </label>
                   <select
                     value={project.duration || 18}
-                    onChange={(e) => handleInputChange('basic', 'duration', parseInt(e.target.value))}
+                    onChange={e => handleInputChange('basic', 'duration', parseInt(e.target.value))}
                     className="select select-bordered w-full"
                   >
                     <option value={12}>12 mesi</option>
@@ -683,7 +887,7 @@ export default function NewFeasibilityProjectPage() {
                     <option value={36}>36 mesi</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="label">
                     <span className="label-text font-medium">Marginalità Target (%)</span>
@@ -691,7 +895,7 @@ export default function NewFeasibilityProjectPage() {
                   <input
                     type="text"
                     value={project.targetMargin || ''}
-                    onChange={(e) => handleInputChange('basic', 'targetMargin', handleNumberInput(e))}
+                    onChange={e => handleInputChange('basic', 'targetMargin', handleNumberInput(e))}
                     className="input input-bordered w-full"
                     placeholder="30"
                   />
@@ -708,12 +912,17 @@ export default function NewFeasibilityProjectPage() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div>
                       <div className="text-blue-600 font-medium">Prezzo Medio</div>
-                      <div className="text-lg font-bold">{formatCurrency(marketData.averagePrice)}/m²</div>
+                      <div className="text-lg font-bold">
+                        {formatCurrency(marketData.averagePrice)}/m²
+                      </div>
                     </div>
                     <div>
                       <div className="text-blue-600 font-medium">Variazione</div>
-                      <div className={`text-lg font-bold ${marketData.priceChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {marketData.priceChange >= 0 ? '+' : ''}{marketData.priceChange}%
+                      <div
+                        className={`text-lg font-bold ${marketData.priceChange >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                      >
+                        {marketData.priceChange >= 0 ? '+' : ''}
+                        {marketData.priceChange}%
                       </div>
                     </div>
                     <div>
@@ -725,23 +934,30 @@ export default function NewFeasibilityProjectPage() {
                       <div className="text-lg font-bold">{marketData.demandLevel}</div>
                     </div>
                   </div>
-                  
+
                   {marketData.similarProjects && marketData.similarProjects.length > 0 && (
                     <div className="mt-4">
                       <h4 className="font-medium text-blue-900 mb-2">Progetti Simili nella Zona</h4>
                       <div className="space-y-2">
-                        {marketData.similarProjects.slice(0, 3).map((project: any, index: number) => (
-                          <div key={index} className="flex justify-between items-center p-2 bg-white rounded">
-                            <div>
-                              <div className="font-medium">{project.title}</div>
-                              <div className="text-xs text-gray-600">{project.address}</div>
+                        {marketData.similarProjects
+                          .slice(0, 3)
+                          .map((project: any, index: number) => (
+                            <div
+                              key={index}
+                              className="flex justify-between items-center p-2 bg-white rounded"
+                            >
+                              <div>
+                                <div className="font-medium">{project.title}</div>
+                                <div className="text-xs text-gray-600">{project.address}</div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-bold">
+                                  {formatCurrency(project.pricePerSqm)}/m²
+                                </div>
+                                <div className="text-xs text-gray-600">{project.area}m²</div>
+                              </div>
                             </div>
-                            <div className="text-right">
-                              <div className="font-bold">{formatCurrency(project.pricePerSqm)}/m²</div>
-                              <div className="text-xs text-gray-600">{project.area}m²</div>
-                            </div>
-                          </div>
-                        ))}
+                          ))}
                       </div>
                     </div>
                   )}
@@ -755,7 +971,7 @@ export default function NewFeasibilityProjectPage() {
                 <EuroIcon className="h-5 w-5 mr-2 text-red-600" />
                 Costi
               </h2>
-              
+
               <div className="space-y-6">
                 {/* Costi Terreno */}
                 <div>
@@ -768,7 +984,9 @@ export default function NewFeasibilityProjectPage() {
                       <input
                         type="text"
                         value={project.costs?.land?.purchasePrice || ''}
-                        onChange={(e) => handleInputChange('costs', 'land.purchasePrice', handleNumberInput(e))}
+                        onChange={e =>
+                          handleInputChange('costs', 'land.purchasePrice', handleNumberInput(e))
+                        }
                         className="input input-bordered w-full"
                         placeholder="Inserisci importo"
                       />
@@ -780,7 +998,9 @@ export default function NewFeasibilityProjectPage() {
                       <input
                         type="text"
                         value={project.costs?.land?.purchaseTaxes || ''}
-                        onChange={(e) => handleInputChange('costs', 'land.purchaseTaxes', handleNumberInput(e))}
+                        onChange={e =>
+                          handleInputChange('costs', 'land.purchaseTaxes', handleNumberInput(e))
+                        }
                         className="input input-bordered w-full"
                         placeholder="Inserisci importo"
                       />
@@ -792,7 +1012,13 @@ export default function NewFeasibilityProjectPage() {
                       <input
                         type="text"
                         value={project.costs?.land?.intermediationFees || ''}
-                        onChange={(e) => handleInputChange('costs', 'land.intermediationFees', handleNumberInput(e))}
+                        onChange={e =>
+                          handleInputChange(
+                            'costs',
+                            'land.intermediationFees',
+                            handleNumberInput(e)
+                          )
+                        }
                         className="input input-bordered w-full"
                         placeholder="Inserisci importo"
                       />
@@ -800,7 +1026,9 @@ export default function NewFeasibilityProjectPage() {
                   </div>
                   <div className="mt-2 text-right">
                     <span className="text-sm text-gray-500">Subtotale: </span>
-                    <span className="font-medium">{formatCurrency(calculatedCosts.land.subtotal)}</span>
+                    <span className="font-medium">
+                      {formatCurrency(calculatedCosts.land.subtotal)}
+                    </span>
                   </div>
                 </div>
 
@@ -808,7 +1036,7 @@ export default function NewFeasibilityProjectPage() {
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-medium text-gray-900">2. Costruzione</h3>
-                    
+
                     {/* Toggle per modalità costi */}
                     <div className="flex items-center space-x-2">
                       <span className="text-sm text-gray-600">Modalità:</span>
@@ -838,33 +1066,37 @@ export default function NewFeasibilityProjectPage() {
                   </div>
 
                   {/* Avviso se mancano i mq */}
-                  {constructionCostMode === 'perSqm' && (!project.totalArea || project.totalArea <= 0) && (
-                    <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <div className="flex items-center">
-                        <AlertTriangleIcon className="h-4 w-4 text-yellow-600 mr-2" />
-                        <span className="text-sm text-yellow-800">
-                          Inserisci la superficie totale nella sezione "Dati Base Progetto" per calcolare automaticamente i costi totali
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Informazioni calcolo */}
-                  {constructionCostMode === 'perSqm' && project.totalArea && project.totalArea > 0 && (
-                    <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <div className="flex items-center justify-between">
+                  {constructionCostMode === 'perSqm' &&
+                    (!project.totalArea || project.totalArea <= 0) && (
+                      <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                         <div className="flex items-center">
-                          <span className="h-4 w-4 text-blue-600 mr-2">✅</span>
-                          <span className="text-sm text-blue-800">
-                            Calcolo automatico: {project.totalArea} mq × costo per mq = totale
+                          <AlertTriangleIcon className="h-4 w-4 text-yellow-600 mr-2" />
+                          <span className="text-sm text-yellow-800">
+                            Inserisci la superficie totale nella sezione "Dati Base Progetto" per
+                            calcolare automaticamente i costi totali
                           </span>
                         </div>
-                        <div className="text-sm text-blue-600 font-medium">
-                          Totale: {formatCurrency(calculatedCosts.construction.subtotal)}
+                      </div>
+                    )}
+
+                  {/* Informazioni calcolo */}
+                  {constructionCostMode === 'perSqm' &&
+                    project.totalArea &&
+                    project.totalArea > 0 && (
+                      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <span className="h-4 w-4 text-blue-600 mr-2">✅</span>
+                            <span className="text-sm text-blue-800">
+                              Calcolo automatico: {project.totalArea} mq × costo per mq = totale
+                            </span>
+                          </div>
+                          <div className="text-sm text-blue-600 font-medium">
+                            Totale: {formatCurrency(calculatedCosts.construction.subtotal)}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
@@ -880,7 +1112,9 @@ export default function NewFeasibilityProjectPage() {
                         <input
                           type="text"
                           value={constructionCostsPerSqm.excavation || ''}
-                          onChange={(e) => handleConstructionCostPerSqmChange('excavation', handleNumberInput(e))}
+                          onChange={e =>
+                            handleConstructionCostPerSqmChange('excavation', handleNumberInput(e))
+                          }
                           className="input input-bordered w-full"
                           placeholder="Es. 25"
                         />
@@ -888,16 +1122,25 @@ export default function NewFeasibilityProjectPage() {
                         <input
                           type="text"
                           value={project.costs?.construction?.excavation || ''}
-                          onChange={(e) => handleInputChange('costs', 'construction.excavation', handleNumberInput(e))}
+                          onChange={e =>
+                            handleInputChange(
+                              'costs',
+                              'construction.excavation',
+                              handleNumberInput(e)
+                            )
+                          }
                           className="input input-bordered w-full"
                           placeholder="Inserisci importo"
                         />
                       )}
-                      {constructionCostMode === 'perSqm' && project.totalArea && project.totalArea > 0 && (
-                        <div className="text-xs text-gray-500 mt-1">
-                          Totale: {formatCurrency(constructionCostsPerSqm.excavation * project.totalArea)}
-                        </div>
-                      )}
+                      {constructionCostMode === 'perSqm' &&
+                        project.totalArea &&
+                        project.totalArea > 0 && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            Totale:{' '}
+                            {formatCurrency(constructionCostsPerSqm.excavation * project.totalArea)}
+                          </div>
+                        )}
                     </div>
 
                     <div>
@@ -913,7 +1156,9 @@ export default function NewFeasibilityProjectPage() {
                         <input
                           type="text"
                           value={constructionCostsPerSqm.structures || ''}
-                          onChange={(e) => handleConstructionCostPerSqmChange('structures', handleNumberInput(e))}
+                          onChange={e =>
+                            handleConstructionCostPerSqmChange('structures', handleNumberInput(e))
+                          }
                           className="input input-bordered w-full"
                           placeholder="Es. 180"
                         />
@@ -921,16 +1166,25 @@ export default function NewFeasibilityProjectPage() {
                         <input
                           type="text"
                           value={project.costs?.construction?.structures || ''}
-                          onChange={(e) => handleInputChange('costs', 'construction.structures', handleNumberInput(e))}
+                          onChange={e =>
+                            handleInputChange(
+                              'costs',
+                              'construction.structures',
+                              handleNumberInput(e)
+                            )
+                          }
                           className="input input-bordered w-full"
                           placeholder="Inserisci importo"
                         />
                       )}
-                      {constructionCostMode === 'perSqm' && project.totalArea && project.totalArea > 0 && (
-                        <div className="text-xs text-gray-500 mt-1">
-                          Totale: {formatCurrency(constructionCostsPerSqm.structures * project.totalArea)}
-                        </div>
-                      )}
+                      {constructionCostMode === 'perSqm' &&
+                        project.totalArea &&
+                        project.totalArea > 0 && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            Totale:{' '}
+                            {formatCurrency(constructionCostsPerSqm.structures * project.totalArea)}
+                          </div>
+                        )}
                     </div>
 
                     <div>
@@ -946,7 +1200,9 @@ export default function NewFeasibilityProjectPage() {
                         <input
                           type="text"
                           value={constructionCostsPerSqm.systems || ''}
-                          onChange={(e) => handleConstructionCostPerSqmChange('systems', handleNumberInput(e))}
+                          onChange={e =>
+                            handleConstructionCostPerSqmChange('systems', handleNumberInput(e))
+                          }
                           className="input input-bordered w-full"
                           placeholder="Es. 120"
                         />
@@ -954,16 +1210,21 @@ export default function NewFeasibilityProjectPage() {
                         <input
                           type="text"
                           value={project.costs?.construction?.systems || ''}
-                          onChange={(e) => handleInputChange('costs', 'construction.systems', handleNumberInput(e))}
+                          onChange={e =>
+                            handleInputChange('costs', 'construction.systems', handleNumberInput(e))
+                          }
                           className="input input-bordered w-full"
                           placeholder="Inserisci importo"
                         />
                       )}
-                      {constructionCostMode === 'perSqm' && project.totalArea && project.totalArea > 0 && (
-                        <div className="text-xs text-gray-500 mt-1">
-                          Totale: {formatCurrency(constructionCostsPerSqm.systems * project.totalArea)}
-                        </div>
-                      )}
+                      {constructionCostMode === 'perSqm' &&
+                        project.totalArea &&
+                        project.totalArea > 0 && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            Totale:{' '}
+                            {formatCurrency(constructionCostsPerSqm.systems * project.totalArea)}
+                          </div>
+                        )}
                     </div>
 
                     <div>
@@ -979,7 +1240,9 @@ export default function NewFeasibilityProjectPage() {
                         <input
                           type="text"
                           value={constructionCostsPerSqm.finishes || ''}
-                          onChange={(e) => handleConstructionCostPerSqmChange('finishes', handleNumberInput(e))}
+                          onChange={e =>
+                            handleConstructionCostPerSqmChange('finishes', handleNumberInput(e))
+                          }
                           className="input input-bordered w-full"
                           placeholder="Es. 150"
                         />
@@ -987,54 +1250,79 @@ export default function NewFeasibilityProjectPage() {
                         <input
                           type="text"
                           value={project.costs?.construction?.finishes || ''}
-                          onChange={(e) => handleInputChange('costs', 'construction.finishes', handleNumberInput(e))}
+                          onChange={e =>
+                            handleInputChange(
+                              'costs',
+                              'construction.finishes',
+                              handleNumberInput(e)
+                            )
+                          }
                           className="input input-bordered w-full"
                           placeholder="Inserisci importo"
                         />
                       )}
-                      {constructionCostMode === 'perSqm' && project.totalArea && project.totalArea > 0 && (
-                        <div className="text-xs text-gray-500 mt-1">
-                          Totale: {formatCurrency(constructionCostsPerSqm.finishes * project.totalArea)}
-                        </div>
-                      )}
+                      {constructionCostMode === 'perSqm' &&
+                        project.totalArea &&
+                        project.totalArea > 0 && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            Totale:{' '}
+                            {formatCurrency(constructionCostsPerSqm.finishes * project.totalArea)}
+                          </div>
+                        )}
                     </div>
                   </div>
 
                   {/* Riepilogo costi per mq */}
-                  {constructionCostMode === 'perSqm' && project.totalArea && project.totalArea > 0 && (
-                    <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div>
-                          <div className="text-gray-600">Scavi e Fondazioni</div>
-                          <div className="font-medium">{constructionCostsPerSqm.excavation} €/mq</div>
+                  {constructionCostMode === 'perSqm' &&
+                    project.totalArea &&
+                    project.totalArea > 0 && (
+                      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <div className="text-gray-600">Scavi e Fondazioni</div>
+                            <div className="font-medium">
+                              {constructionCostsPerSqm.excavation} €/mq
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-gray-600">Strutture</div>
+                            <div className="font-medium">
+                              {constructionCostsPerSqm.structures} €/mq
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-gray-600">Impianti</div>
+                            <div className="font-medium">
+                              {constructionCostsPerSqm.systems} €/mq
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-gray-600">Finiture</div>
+                            <div className="font-medium">
+                              {constructionCostsPerSqm.finishes} €/mq
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <div className="text-gray-600">Strutture</div>
-                          <div className="font-medium">{constructionCostsPerSqm.structures} €/mq</div>
-                        </div>
-                        <div>
-                          <div className="text-gray-600">Impianti</div>
-                          <div className="font-medium">{constructionCostsPerSqm.systems} €/mq</div>
-                        </div>
-                        <div>
-                          <div className="text-gray-600">Finiture</div>
-                          <div className="font-medium">{constructionCostsPerSqm.finishes} €/mq</div>
+                        <div className="mt-2 pt-2 border-t border-gray-200">
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-600">Costo totale per mq:</span>
+                            <span className="font-bold text-lg">
+                              {constructionCostsPerSqm.excavation +
+                                constructionCostsPerSqm.structures +
+                                constructionCostsPerSqm.systems +
+                                constructionCostsPerSqm.finishes}{' '}
+                              €/mq
+                            </span>
+                          </div>
                         </div>
                       </div>
-                      <div className="mt-2 pt-2 border-t border-gray-200">
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-600">Costo totale per mq:</span>
-                          <span className="font-bold text-lg">
-                            {constructionCostsPerSqm.excavation + constructionCostsPerSqm.structures + constructionCostsPerSqm.systems + constructionCostsPerSqm.finishes} €/mq
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                    )}
 
                   <div className="mt-2 text-right">
                     <span className="text-sm text-gray-500">Subtotale: </span>
-                    <span className="font-medium">{formatCurrency(calculatedCosts.construction.subtotal)}</span>
+                    <span className="font-medium">
+                      {formatCurrency(calculatedCosts.construction.subtotal)}
+                    </span>
                   </div>
                 </div>
 
@@ -1047,12 +1335,12 @@ export default function NewFeasibilityProjectPage() {
                         <input
                           type="checkbox"
                           checked={insuranceFlags.constructionInsurance}
-                          onChange={(e) => {
+                          onChange={e => {
                             setInsuranceFlags(prev => ({
                               ...prev,
-                              constructionInsurance: e.target.checked
+                              constructionInsurance: e.target.checked,
                             }));
-                            setTimeout(() => recalculateAll(), 100);
+                            safeSetTimeout(() => recalculateAll(), 100);
                           }}
                           className="checkbox checkbox-primary"
                         />
@@ -1062,32 +1350,38 @@ export default function NewFeasibilityProjectPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-bold">{formatCurrency(calculatedCosts.construction.subtotal * 0.015)}</div>
+                        <div className="font-bold">
+                          {formatCurrency(calculatedCosts.construction.subtotal * 0.015)}
+                        </div>
                         <div className="text-xs text-gray-500">Calcolato automaticamente</div>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div className="flex items-center space-x-3">
                         <input
                           type="checkbox"
                           checked={insuranceFlags.financingInsurance}
-                          onChange={(e) => {
+                          onChange={e => {
                             setInsuranceFlags(prev => ({
                               ...prev,
-                              financingInsurance: e.target.checked
+                              financingInsurance: e.target.checked,
                             }));
-                            setTimeout(() => recalculateAll(), 100);
+                            safeSetTimeout(() => recalculateAll(), 100);
                           }}
                           className="checkbox checkbox-primary"
                         />
                         <div>
                           <div className="font-medium">Assicurazione sul Finanziamento</div>
-                          <div className="text-sm text-gray-600">1% sull'importo finanziato (Legge 210)</div>
+                          <div className="text-sm text-gray-600">
+                            1% sull'importo finanziato (Legge 210)
+                          </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-bold">{formatCurrency(financingData.loanAmount * 0.01)}</div>
+                        <div className="font-bold">
+                          {formatCurrency(financingData.loanAmount * 0.01)}
+                        </div>
                         <div className="text-xs text-gray-500">Calcolato automaticamente</div>
                       </div>
                     </div>
@@ -1108,7 +1402,7 @@ export default function NewFeasibilityProjectPage() {
                       <input
                         type="text"
                         value={financingData.loanAmount || ''}
-                        onChange={(e) => handleFinancingChange('loanAmount', handleNumberInput(e))}
+                        onChange={e => handleFinancingChange('loanAmount', handleNumberInput(e))}
                         className="input input-bordered w-full"
                         placeholder="Inserisci importo"
                       />
@@ -1120,7 +1414,7 @@ export default function NewFeasibilityProjectPage() {
                       <input
                         type="text"
                         value={financingData.interestRate || ''}
-                        onChange={(e) => handleFinancingChange('interestRate', handleNumberInput(e))}
+                        onChange={e => handleFinancingChange('interestRate', handleNumberInput(e))}
                         className="input input-bordered w-full"
                         placeholder="Inserisci tasso"
                       />
@@ -1132,13 +1426,13 @@ export default function NewFeasibilityProjectPage() {
                       <input
                         type="text"
                         value={financingData.loanTermYears || ''}
-                        onChange={(e) => handleFinancingChange('loanTermYears', handleNumberInput(e))}
+                        onChange={e => handleFinancingChange('loanTermYears', handleNumberInput(e))}
                         className="input input-bordered w-full"
                         placeholder="Inserisci anni"
                       />
                     </div>
                   </div>
-                  
+
                   {/* Calcolo Rate Mensili */}
                   {financingData.loanAmount > 0 && (
                     <div className="mt-3 p-3 bg-blue-50 rounded-lg">
@@ -1166,7 +1460,9 @@ export default function NewFeasibilityProjectPage() {
                       <input
                         type="text"
                         value={project.costs?.externalWorks || ''}
-                        onChange={(e) => handleInputChange('costs', 'externalWorks', handleNumberInput(e))}
+                        onChange={e =>
+                          handleInputChange('costs', 'externalWorks', handleNumberInput(e))
+                        }
                         className="input input-bordered w-full"
                         placeholder="Inserisci importo"
                       />
@@ -1178,7 +1474,9 @@ export default function NewFeasibilityProjectPage() {
                       <input
                         type="text"
                         value={project.costs?.concessionFees || ''}
-                        onChange={(e) => handleInputChange('costs', 'concessionFees', handleNumberInput(e))}
+                        onChange={e =>
+                          handleInputChange('costs', 'concessionFees', handleNumberInput(e))
+                        }
                         className="input input-bordered w-full"
                         placeholder="Inserisci importo"
                       />
@@ -1190,7 +1488,7 @@ export default function NewFeasibilityProjectPage() {
                       <input
                         type="text"
                         value={project.costs?.design || ''}
-                        onChange={(e) => handleInputChange('costs', 'design', handleNumberInput(e))}
+                        onChange={e => handleInputChange('costs', 'design', handleNumberInput(e))}
                         className="input input-bordered w-full"
                         placeholder="Inserisci importo"
                       />
@@ -1206,7 +1504,7 @@ export default function NewFeasibilityProjectPage() {
                 <TrendingUpIcon className="h-5 w-5 mr-2 text-green-600" />
                 Ricavi
               </h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="label">
@@ -1215,12 +1513,12 @@ export default function NewFeasibilityProjectPage() {
                   <input
                     type="number"
                     value={project.revenues?.units || ''}
-                    onChange={(e) => handleInputChange('revenues', 'units', parseInt(e.target.value))}
+                    onChange={e => handleInputChange('revenues', 'units', parseInt(e.target.value))}
                     className="input input-bordered w-full"
                     placeholder="Inserisci numero unità"
                   />
                 </div>
-                
+
                 <div>
                   <label className="label">
                     <span className="label-text">Superficie Media (m²)</span>
@@ -1228,12 +1526,14 @@ export default function NewFeasibilityProjectPage() {
                   <input
                     type="number"
                     value={project.revenues?.averageArea || ''}
-                    onChange={(e) => handleInputChange('revenues', 'averageArea', parseInt(e.target.value))}
+                    onChange={e =>
+                      handleInputChange('revenues', 'averageArea', parseInt(e.target.value))
+                    }
                     className="input input-bordered w-full"
                     placeholder="144"
                   />
                 </div>
-                
+
                 <div>
                   <label className="label">
                     <span className="label-text">Prezzo Vendita (€/m²)</span>
@@ -1241,12 +1541,14 @@ export default function NewFeasibilityProjectPage() {
                   <input
                     type="text"
                     value={project.revenues?.pricePerSqm || ''}
-                    onChange={(e) => handleInputChange('revenues', 'pricePerSqm', handleNumberInput(e))}
+                    onChange={e =>
+                      handleInputChange('revenues', 'pricePerSqm', handleNumberInput(e))
+                    }
                     className="input input-bordered w-full"
                     placeholder="Inserisci prezzo"
                   />
                 </div>
-                
+
                 <div>
                   <label className="label">
                     <span className="label-text">Altri Ricavi</span>
@@ -1254,7 +1556,9 @@ export default function NewFeasibilityProjectPage() {
                   <input
                     type="text"
                     value={project.revenues?.otherRevenues || ''}
-                    onChange={(e) => handleInputChange('revenues', 'otherRevenues', handleNumberInput(e))}
+                    onChange={e =>
+                      handleInputChange('revenues', 'otherRevenues', handleNumberInput(e))
+                    }
                     className="input input-bordered w-full"
                     placeholder="Inserisci importo"
                   />
@@ -1268,32 +1572,46 @@ export default function NewFeasibilityProjectPage() {
                 <SearchIcon className="h-5 w-5 mr-2 text-indigo-600" />
                 Note e Considerazioni per l'Analisi
               </h2>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="label">
                     <span className="label-text font-medium">Note Progetto</span>
-                    <span className="label-text-alt text-gray-500">Queste note verranno elaborate dall'AI per migliorare l'analisi</span>
+                    <span className="label-text-alt text-gray-500">
+                      Queste note verranno elaborate dall'AI per migliorare l'analisi
+                    </span>
                   </label>
                   <textarea
                     value={project.notes || ''}
-                    onChange={(e) => handleInputChange('basic', 'notes', e.target.value)}
+                    onChange={e => handleInputChange('basic', 'notes', e.target.value)}
                     className="textarea textarea-bordered w-full h-32"
                     placeholder="Inserisci note, considerazioni, vincoli, opportunità o qualsiasi informazione rilevante per l'analisi di fattibilità. L'AI utilizzerà queste informazioni per generare un report più accurato e personalizzato..."
                   />
                 </div>
-                
+
                 <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
                   <div className="flex items-start">
                     <SearchIcon className="h-4 w-4 text-indigo-600 mr-2 mt-1 flex-shrink-0" />
                     <div className="text-sm text-indigo-800">
                       <div className="font-medium mb-1">💡 Suggerimenti per le Note:</div>
                       <ul className="space-y-1 text-xs">
-                        <li>• <strong>Vincoli urbanistici:</strong> Zona, limiti di altezza, destinazione d'uso</li>
-                        <li>• <strong>Opportunità di mercato:</strong> Trend della zona, domanda specifica</li>
-                        <li>• <strong>Rischi:</strong> Problemi noti, limitazioni tecniche</li>
-                        <li>• <strong>Strategie:</strong> Approccio commerciale, target di vendita</li>
-                        <li>• <strong>Timing:</strong> Tempistiche di mercato, stagionalità</li>
+                        <li>
+                          • <strong>Vincoli urbanistici:</strong> Zona, limiti di altezza,
+                          destinazione d'uso
+                        </li>
+                        <li>
+                          • <strong>Opportunità di mercato:</strong> Trend della zona, domanda
+                          specifica
+                        </li>
+                        <li>
+                          • <strong>Rischi:</strong> Problemi noti, limitazioni tecniche
+                        </li>
+                        <li>
+                          • <strong>Strategie:</strong> Approccio commerciale, target di vendita
+                        </li>
+                        <li>
+                          • <strong>Timing:</strong> Tempistiche di mercato, stagionalità
+                        </li>
                       </ul>
                     </div>
                   </div>
@@ -1310,10 +1628,12 @@ export default function NewFeasibilityProjectPage() {
                 <CalculatorIcon className="h-5 w-5 mr-2 text-purple-600" />
                 Risultati
               </h2>
-              
+
               <div className="space-y-4">
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <div className={`text-3xl font-bold ${getMarginColor(calculatedResults.margin, project.targetMargin || 30)}`}>
+                  <div
+                    className={`text-3xl font-bold ${getMarginColor(calculatedResults.margin, project.targetMargin || 30)}`}
+                  >
                     {formatPercentage(calculatedResults.margin)}
                   </div>
                   <div className="text-sm text-gray-600">Marginalità</div>
@@ -1321,7 +1641,7 @@ export default function NewFeasibilityProjectPage() {
                     Target: {formatPercentage(project.targetMargin || 30)}
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center p-3 bg-blue-50 rounded-lg">
                     <div className="text-lg font-bold text-blue-600">
@@ -1329,7 +1649,7 @@ export default function NewFeasibilityProjectPage() {
                     </div>
                     <div className="text-xs text-gray-600">Utile</div>
                   </div>
-                  
+
                   <div className="text-center p-3 bg-green-50 rounded-lg">
                     <div className="text-lg font-bold text-green-600">
                       {formatPercentage(calculatedResults.roi)}
@@ -1337,7 +1657,7 @@ export default function NewFeasibilityProjectPage() {
                     <div className="text-xs text-gray-600">ROI</div>
                   </div>
                 </div>
-                
+
                 <div className="text-center p-3 bg-orange-50 rounded-lg">
                   <div className="text-lg font-bold text-orange-600">
                     {calculatedResults.paybackPeriod.toFixed(1)} mesi
@@ -1350,23 +1670,31 @@ export default function NewFeasibilityProjectPage() {
             {/* Riepilogo Costi */}
             <div className="bg-white shadow-sm rounded-lg p-6">
               <h3 className="font-semibold text-gray-900 mb-4">Riepilogo Costi</h3>
-              
+
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Terreno:</span>
-                  <span className="font-medium">{formatCurrency(calculatedCosts.land.subtotal)}</span>
+                  <span className="font-medium">
+                    {formatCurrency(calculatedCosts.land.subtotal)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Costruzione:</span>
-                  <span className="font-medium">{formatCurrency(calculatedCosts.construction.subtotal)}</span>
+                  <span className="font-medium">
+                    {formatCurrency(calculatedCosts.construction.subtotal)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Opere Esterne:</span>
-                  <span className="font-medium">{formatCurrency(calculatedCosts.externalWorks)}</span>
+                  <span className="font-medium">
+                    {formatCurrency(calculatedCosts.externalWorks)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Oneri Concessori:</span>
-                  <span className="font-medium">{formatCurrency(calculatedCosts.concessionFees)}</span>
+                  <span className="font-medium">
+                    {formatCurrency(calculatedCosts.concessionFees)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Progettazione:</span>
@@ -1387,7 +1715,7 @@ export default function NewFeasibilityProjectPage() {
             {/* Riepilogo Ricavi */}
             <div className="bg-white shadow-sm rounded-lg p-6">
               <h3 className="font-semibold text-gray-900 mb-4">Riepilogo Ricavi</h3>
-              
+
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Unità:</span>
@@ -1399,15 +1727,21 @@ export default function NewFeasibilityProjectPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Prezzo/m²:</span>
-                  <span className="font-medium">{formatCurrency(calculatedRevenues.pricePerSqm)}</span>
+                  <span className="font-medium">
+                    {formatCurrency(calculatedRevenues.pricePerSqm)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Ricavo per Unità:</span>
-                  <span className="font-medium">{formatCurrency(calculatedRevenues.revenuePerUnit)}</span>
+                  <span className="font-medium">
+                    {formatCurrency(calculatedRevenues.revenuePerUnit)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Altri Ricavi:</span>
-                  <span className="font-medium">{formatCurrency(calculatedRevenues.otherRevenues)}</span>
+                  <span className="font-medium">
+                    {formatCurrency(calculatedRevenues.otherRevenues)}
+                  </span>
                 </div>
                 <hr className="my-2" />
                 <div className="flex justify-between font-bold text-lg">
@@ -1422,7 +1756,7 @@ export default function NewFeasibilityProjectPage() {
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
                 🚀 Azioni Rapide
               </h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <button
                   onClick={() => setShowReportGenerator(true)}
@@ -1431,13 +1765,13 @@ export default function NewFeasibilityProjectPage() {
                 >
                   📊 Genera Report
                 </button>
-                
+
                 <button
                   onClick={() => {
                     if (savedProjectId) {
                       router.push(`/dashboard/feasibility-analysis/${savedProjectId}`);
                     } else {
-                      toast.error('Compila nome e indirizzo per abilitare la visualizzazione');
+                      toast('Compila nome e indirizzo per abilitare la visualizzazione', { icon: '❌' });
                     }
                   }}
                   disabled={!project.name || !project.address}
@@ -1445,16 +1779,16 @@ export default function NewFeasibilityProjectPage() {
                 >
                   👁️ Visualizza Progetto
                 </button>
-                
+
                 <button
                   onClick={() => {
                     if (savedProjectId) {
                       // Condividi link diretto
                       const url = `${window.location.origin}/dashboard/feasibility-analysis/${savedProjectId}`;
                       navigator.clipboard.writeText(url);
-                      toast.success('Link copiato negli appunti! 📋');
+                      toast('Link copiato negli appunti! 📋', { icon: '✅' });
                     } else {
-                      toast.error('Compila nome e indirizzo per abilitare la condivisione');
+                      toast('Compila nome e indirizzo per abilitare la condivisione', { icon: '❌' });
                     }
                   }}
                   disabled={!project.name || !project.address}
@@ -1471,12 +1805,16 @@ export default function NewFeasibilityProjectPage() {
                   ⏰ Crea Reminder
                 </button>
               </div>
-              
+
               <div className="mt-4 text-sm text-gray-600 text-center">
                 {savedProjectId ? (
-                  <span className="text-green-600">✅ Progetto salvato e pronto per la condivisione</span>
+                  <span className="text-green-600">
+                    ✅ Progetto salvato e pronto per la condivisione
+                  </span>
                 ) : (
-                  <span className="text-blue-600">💾 Salvataggio automatico attivo - Compila nome e indirizzo per iniziare</span>
+                  <span className="text-blue-600">
+                    💾 Salvataggio automatico attivo - Compila nome e indirizzo per iniziare
+                  </span>
                 )}
               </div>
             </div>
@@ -1490,7 +1828,9 @@ export default function NewFeasibilityProjectPage() {
           <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">🎯 Genera Report di Fattibilità</h2>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  🎯 Genera Report di Fattibilità
+                </h2>
                 <button
                   onClick={() => setShowReportGenerator(false)}
                   className="text-gray-400 hover:text-gray-600 text-2xl"
@@ -1498,10 +1838,10 @@ export default function NewFeasibilityProjectPage() {
                   ×
                 </button>
               </div>
-              
-                             <FeasibilityReportGenerator
-                 analysis={{
-                   id: savedProjectId || 'draft-project',
+
+              <FeasibilityReportGenerator
+                analysis={{
+                  id: savedProjectId || 'draft-project',
                   title: project.name || 'Studio di Fattibilità',
                   location: project.address || 'Località non specificata',
                   propertyType: 'Progetto Immobiliare',
@@ -1510,27 +1850,37 @@ export default function NewFeasibilityProjectPage() {
                   paybackPeriod: calculatedResults.paybackPeriod,
                   netPresentValue: calculatedResults.profit,
                   internalRateOfReturn: calculatedResults.roi,
-                  riskLevel: calculatedResults.margin < 0 ? 'HIGH' : calculatedResults.margin < 15 ? 'MEDIUM' : 'LOW',
-                  marketTrend: calculatedResults.margin > 20 ? 'POSITIVE' : calculatedResults.margin > 0 ? 'NEUTRAL' : 'NEGATIVE',
+                  riskLevel:
+                    calculatedResults.margin < 0
+                      ? 'HIGH'
+                      : calculatedResults.margin < 15
+                        ? 'MEDIUM'
+                        : 'LOW',
+                  marketTrend:
+                    calculatedResults.margin > 20
+                      ? 'POSITIVE'
+                      : calculatedResults.margin > 0
+                        ? 'NEUTRAL'
+                        : 'NEGATIVE',
                   recommendations: [
-                    calculatedResults.margin >= (project.targetMargin || 30) 
+                    calculatedResults.margin >= (project.targetMargin || 30)
                       ? 'Progetto fattibile con margine target raggiunto'
                       : 'Progetto richiede ottimizzazione per raggiungere il margine target',
                     `ROI previsto: ${calculatedResults.roi.toFixed(1)}%`,
                     `Periodo di recupero: ${calculatedResults.paybackPeriod.toFixed(1)} mesi`,
-                    calculatedResults.profit > 0 
+                    calculatedResults.profit > 0
                       ? 'Progetto redditizio con profitto positivo'
-                      : 'Progetto in perdita - valutare strategie di ottimizzazione'
+                      : 'Progetto in perdita - valutare strategie di ottimizzazione',
                   ],
                   notes: project.notes || '', // Note per l'analisi LLM
-                  createdAt: new Date().toISOString()
+                  createdAt: new Date().toISOString(),
                 }}
-                                 onGenerateReport={() => {
-                   setShowReportGenerator(false);
-                   if (savedProjectId) {
-                     router.push(`/dashboard/feasibility-analysis/${savedProjectId}`);
-                   }
-                 }}
+                onGenerateReport={() => {
+                  setShowReportGenerator(false);
+                  if (savedProjectId) {
+                    router.push(`/dashboard/feasibility-analysis/${savedProjectId}`);
+                  }
+                }}
               />
             </div>
           </div>
@@ -1548,4 +1898,4 @@ export default function NewFeasibilityProjectPage() {
       )}
     </DashboardLayout>
   );
-} 
+}

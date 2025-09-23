@@ -1,17 +1,17 @@
 'use client';
 
-import DashboardLayout from '@/components/layout/DashboardLayout';
 import { DocumentIcon, FolderIcon, UploadIcon } from '@/components/icons';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 
 export default function ProjectDocumentsPage() {
   return (
-    <DashboardLayout>
+    <DashboardLayout title="Documenti">
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">📄 Documenti Progetto</h1>
           <p className="text-gray-600 mt-1">Gestisci documentazione specifica del progetto</p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Documenti Progetto */}
           <div className="bg-white rounded-lg shadow-sm p-6">

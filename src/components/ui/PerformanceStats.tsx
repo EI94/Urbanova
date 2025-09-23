@@ -1,14 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  ZapIcon, 
-  ClockIcon, 
-  BrainIcon, 
+
+import {
+  ZapIcon,
+  ClockIcon,
+  BrainIcon,
   GlobeIcon,
   TrendingUpIcon,
   AlertIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
 } from '@/components/icons';
 
 interface PerformanceStatsProps {
@@ -26,13 +27,13 @@ export default function PerformanceStats({
   searchTime,
   resultsCount,
   cacheHit,
-  servicesStatus
+  servicesStatus,
 }: PerformanceStatsProps) {
   const [stats, setStats] = useState({
     cacheHitRate: 0.85,
     avgSearchTime: 2.3,
     totalSearches: 1247,
-    successRate: 0.98
+    successRate: 0.98,
   });
 
   useEffect(() => {
@@ -41,7 +42,7 @@ export default function PerformanceStats({
       setStats(prev => ({
         ...prev,
         cacheHitRate: prev.cacheHitRate + (Math.random() - 0.5) * 0.01,
-        avgSearchTime: prev.avgSearchTime + (Math.random() - 0.5) * 0.1
+        avgSearchTime: prev.avgSearchTime + (Math.random() - 0.5) * 0.1,
       }));
     }, 5000);
 
@@ -82,9 +83,7 @@ export default function PerformanceStats({
             <GlobeIcon className="h-6 w-6 text-green-600" />
           </div>
           <p className="text-sm text-gray-600 mb-1">Risultati</p>
-          <p className="font-bold text-lg text-green-600">
-            {resultsCount || 0}
-          </p>
+          <p className="font-bold text-lg text-green-600">{resultsCount || 0}</p>
         </div>
 
         {/* Cache Hit */}
@@ -93,9 +92,7 @@ export default function PerformanceStats({
             <BrainIcon className="h-6 w-6 text-purple-600" />
           </div>
           <p className="text-sm text-gray-600 mb-1">Cache Hit</p>
-          <p className="font-bold text-lg text-purple-600">
-            {cacheHit ? 'Sì' : 'No'}
-          </p>
+          <p className="font-bold text-lg text-purple-600">{cacheHit ? 'Sì' : 'No'}</p>
         </div>
 
         {/* Success Rate */}
@@ -135,15 +132,21 @@ export default function PerformanceStats({
           <h4 className="text-sm font-medium text-gray-700 mb-2">Stato Servizi</h4>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${servicesStatus.email ? 'bg-green-500' : 'bg-red-500'}`}></div>
+              <div
+                className={`w-2 h-2 rounded-full ${servicesStatus.email ? 'bg-green-500' : 'bg-red-500'}`}
+              ></div>
               <span className="text-xs text-gray-600">Email</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${servicesStatus.webScraping ? 'bg-green-500' : 'bg-red-500'}`}></div>
+              <div
+                className={`w-2 h-2 rounded-full ${servicesStatus.webScraping ? 'bg-green-500' : 'bg-red-500'}`}
+              ></div>
               <span className="text-xs text-gray-600">Web Scraping</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${servicesStatus.ai ? 'bg-green-500' : 'bg-red-500'}`}></div>
+              <div
+                className={`w-2 h-2 rounded-full ${servicesStatus.ai ? 'bg-green-500' : 'bg-red-500'}`}
+              ></div>
               <span className="text-xs text-gray-600">AI Analysis</span>
             </div>
           </div>
@@ -167,4 +170,4 @@ export default function PerformanceStats({
       </div>
     </div>
   );
-} 
+}

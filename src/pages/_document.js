@@ -6,7 +6,10 @@ export default function Document() {
       <Head>
         <meta charSet="utf-8" />
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Urbanova - Piattaforma per la gestione di progetti immobiliari" />
+        <meta
+          name="description"
+          content="Urbanova - Piattaforma per la gestione di progetti immobiliari"
+        />
       </Head>
       <body>
         <Main />
@@ -14,4 +17,4 @@ export default function Document() {
       </body>
     </Html>
   );
-} 
+}

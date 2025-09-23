@@ -1,15 +1,16 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+
+import { BellIcon, CheckIcon, ClockIcon, CheckCircleIcon } from '@/components/icons';
 import { useAuth } from '@/contexts/AuthContext';
+import '@/lib/osProtection'; // OS Protection per notifications panel
 import { useLanguage } from '@/contexts/LanguageContext';
-import { firebaseNotificationService, Notification, NotificationStats } from '@/lib/firebaseNotificationService';
-import { 
-  BellIcon, 
-  CheckIcon, 
-  ClockIcon,
-  CheckCircleIcon
-} from '@/components/icons';
+import {
+  firebaseNotificationService,
+  Notification,
+  NotificationStats,
+} from '@/lib/firebaseNotificationService';
 
 interface NotificationsPanelProps {
   isOpen: boolean;
@@ -18,7 +19,15 @@ interface NotificationsPanelProps {
 
 export default function NotificationsPanel({ isOpen, onClose }: NotificationsPanelProps) {
   const { t } = useLanguage();
-  const { currentUser } = useAuth();
+  // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    console.error('❌ [NotificationsPanel] Errore useAuth:', error);
+    authContext = { currentUser: null, loading: false };
+  }
+  const currentUser = (authContext && typeof authContext === 'object' && 'currentUser' in authContext) ? authContext.currentUser : null;
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [stats, setStats] = useState<NotificationStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -30,25 +39,50 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
   useEffect(() => {
     if (isOpen && currentUser) {
       loadNotifications();
-      // Crea notifica di benvenuto se è il primo accesso
+      // Crea notifiche demo se non ci sono notifiche
       if (notifications.length === 0) {
-        firebaseNotificationService.createWelcomeNotification(userId);
+        createDemoNotifications();
       }
     }
   }, [isOpen, currentUser]);
 
-  // Rimuovo il listener per ora - Firebase ha real-time updates nativi
-  // useEffect(() => {
-  //   const unsubscribe = notificationService.subscribe((event) => {
-  //     if (event.detail.type === 'notification_created' || 
-  //         event.detail.type === 'notification_updated' ||
-  //         event.detail.type === 'notification_deleted') {
-  //       loadNotifications();
-  //     }
-  //   });
+  const createDemoNotifications = async () => {
+    try {
+      // Crea notifica di benvenuto
+      await firebaseNotificationService.createWelcomeNotification(userId);
+      
+      // Crea notifiche demo per testare il sistema
+      const response = await fetch('/api/notifications/demo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId }),
+      });
 
-  //   return unsubscribe;
-  // }, []);
+      if (response.ok) {
+        console.log('✅ Notifiche demo create');
+        // Ricarica le notifiche dopo averle create
+        setTimeout(() => {
+          loadNotifications();
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('❌ Errore creazione notifiche demo:', error);
+    }
+  };
+
+  // CHIRURGICO: Riabilitato listener real-time per notifiche
+  useEffect(() => {
+    if (!userId) return;
+
+    const unsubscribe = firebaseNotificationService.getNotificationsRealtime(userId, (realtimeNotifications) => {
+      console.log('🔄 [NotificationsPanel] Notifiche real-time ricevute:', realtimeNotifications.length);
+      setNotifications(realtimeNotifications);
+    });
+
+    return unsubscribe;
+  }, [userId]);
 
   const loadNotifications = async () => {
     try {
@@ -58,7 +92,7 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
         firebaseNotificationService.getNotifications(userId, { unreadOnly: true }),
         firebaseNotificationService.getNotificationStats(userId),
       ]);
-      
+
       setNotifications(allNotifs);
       setStats(notifStats);
     } catch (error) {
@@ -106,49 +140,77 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'PROJECT': return <CheckCircleIcon className="h-4 w-4 text-blue-500" />;
-      case 'TASK': return <CheckIcon className="h-4 w-4 text-green-500" />;
-      case 'SYSTEM': return <span className="text-gray-500">ℹ️</span>;
-      case 'ALERT': return <span className="text-orange-500">⚠️</span>;
-      case 'SUCCESS': return <CheckCircleIcon className="h-4 w-4 text-green-500" />;
-      case 'WARNING': return <span className="text-orange-500">⚠️</span>;
-      case 'ERROR': return <span className="text-red-500">❌</span>;
-      case 'MESSAGE': return <span className="text-blue-500">💬</span>;
-      default: return <span className="text-gray-500">ℹ️</span>;
+      case 'PROJECT':
+        return <CheckCircleIcon className="h-4 w-4 text-blue-500" />;
+      case 'TASK':
+        return <CheckIcon className="h-4 w-4 text-green-500" />;
+      case 'SYSTEM':
+        return <span className="text-gray-500">ℹ️</span>;
+      case 'ALERT':
+        return <span className="text-orange-500">⚠️</span>;
+      case 'SUCCESS':
+        return <CheckCircleIcon className="h-4 w-4 text-green-500" />;
+      case 'WARNING':
+        return <span className="text-orange-500">⚠️</span>;
+      case 'ERROR':
+        return <span className="text-red-500">❌</span>;
+      case 'MESSAGE':
+        return <span className="text-blue-500">💬</span>;
+      default:
+        return <span className="text-gray-500">ℹ️</span>;
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'URGENT': return 'border-red-500 bg-red-50';
-      case 'HIGH': return 'border-orange-500 bg-orange-50';
-      case 'MEDIUM': return 'border-yellow-500 bg-yellow-50';
-      case 'LOW': return 'border-green-500 bg-green-50';
-      default: return 'border-gray-500 bg-gray-50';
+      case 'URGENT':
+        return 'border-red-500 bg-red-50';
+      case 'HIGH':
+        return 'border-orange-500 bg-orange-50';
+      case 'MEDIUM':
+        return 'border-yellow-500 bg-yellow-50';
+      case 'LOW':
+        return 'border-green-500 bg-green-50';
+      default:
+        return 'border-gray-500 bg-gray-50';
     }
   };
 
   const getPriorityText = (priority: string) => {
     switch (priority) {
-      case 'URGENT': return t('priorities.urgent', 'notifications');
-      case 'HIGH': return t('priorities.high', 'notifications');
-      case 'MEDIUM': return t('priorities.medium', 'notifications');
-      case 'LOW': return t('priorities.low', 'notifications');
-      default: return priority;
+      case 'URGENT':
+        return t('priorities.urgent', 'notifications');
+      case 'HIGH':
+        return t('priorities.high', 'notifications');
+      case 'MEDIUM':
+        return t('priorities.medium', 'notifications');
+      case 'LOW':
+        return t('priorities.low', 'notifications');
+      default:
+        return priority;
     }
   };
 
   const getTypeText = (type: string) => {
     switch (type) {
-      case 'PROJECT': return t('types.project', 'notifications');
-      case 'TASK': return t('types.task', 'notifications');
-      case 'SYSTEM': return t('types.system', 'notifications');
-      case 'ALERT': return t('types.alert', 'notifications');
-      case 'SUCCESS': return t('types.success', 'notifications');
-      case 'WARNING': return t('types.warning', 'notifications');
-      case 'ERROR': return t('types.error', 'notifications');
-      case 'MESSAGE': return t('types.message', 'notifications');
-      default: return type;
+      case 'PROJECT':
+        return t('types.project', 'notifications');
+      case 'TASK':
+        return t('types.task', 'notifications');
+      case 'SYSTEM':
+        return t('types.system', 'notifications');
+      case 'ALERT':
+        return t('types.alert', 'notifications');
+      case 'SUCCESS':
+        return t('types.success', 'notifications');
+      case 'WARNING':
+        return t('types.warning', 'notifications');
+      case 'ERROR':
+        return t('types.error', 'notifications');
+      case 'MESSAGE':
+        return t('types.message', 'notifications');
+      default:
+        return type;
     }
   };
 
@@ -166,17 +228,31 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
     return date.toLocaleDateString('it-IT');
   };
 
-  const filteredNotifications = activeTab === 'unread' 
-    ? notifications.filter(n => !n.isRead && !n.isDismissed)
-    : notifications.filter(n => !n.isDismissed);
+  // CHIRURGICO: Fix sincronizzazione conteggio vs contenuto notifiche
+  const filteredNotifications = useMemo(() => {
+    if (activeTab === 'unread') {
+      return notifications.filter(n => !n.isRead && !(n as any).isDismissed);
+    } else {
+      return notifications.filter(n => !(n as any).isDismissed);
+    }
+  }, [notifications, activeTab]);
+
+  // CHIRURGICO: Calcolo conteggio reale per sincronizzazione
+  const realUnreadCount = useMemo(() => {
+    return notifications.filter(n => !n.isRead && !(n as any).isDismissed).length;
+  }, [notifications]);
+
+  const realTotalCount = useMemo(() => {
+    return notifications.filter(n => !(n as any).isDismissed).length;
+  }, [notifications]);
 
   if (!isOpen) return null;
 
   return (
     <>
       <div className="fixed inset-0 bg-black/20 z-40" onClick={onClose} />
-      
-      <div 
+
+      <div
         ref={panelRef}
         className="fixed right-0 top-0 h-full w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out"
         style={{ transform: isOpen ? 'translateX(0)' : 'translateX(100%)' }}
@@ -185,9 +261,9 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
           <div className="flex items-center space-x-2">
             <BellIcon className="h-5 w-5 text-gray-600" />
             <h2 className="text-lg font-semibold text-gray-900">{t('title', 'notifications')}</h2>
-            {stats && stats.unread > 0 && (
+            {realUnreadCount > 0 && (
               <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                {stats.unread}
+                {realUnreadCount}
               </span>
             )}
           </div>
@@ -195,7 +271,7 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
             onClick={onClose}
             className="p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
           >
-                            ✕
+            ✕
           </button>
         </div>
 
@@ -209,9 +285,9 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
             }`}
           >
             {t('unread', 'notifications')}
-            {stats && stats.unread > 0 && (
+            {realUnreadCount > 0 && (
               <span className="ml-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                {stats.unread}
+                {realUnreadCount}
               </span>
             )}
           </button>
@@ -224,15 +300,15 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
             }`}
           >
             {t('all', 'notifications')}
-            {stats && (
+            {realTotalCount > 0 && (
               <span className="ml-2 bg-gray-500 text-white text-xs px-2 py-1 rounded-full">
-                {stats.total}
+                {realTotalCount}
               </span>
             )}
           </button>
         </div>
 
-        {stats && stats.unread > 0 && (
+        {realUnreadCount > 0 && (
           <div className="p-3 border-b bg-gray-50">
             <button
               onClick={handleMarkAllAsRead}
@@ -253,15 +329,14 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
             <div className="text-center py-8">
               <BellIcon className="h-12 w-12 mx-auto text-gray-300 mb-3" />
               <p className="text-gray-500">
-                {activeTab === 'unread' 
+                {activeTab === 'unread'
                   ? t('noUnreadNotifications', 'notifications')
-                  : t('noNotifications', 'notifications')
-                }
+                  : t('noNotifications', 'notifications')}
               </p>
             </div>
           ) : (
             <div className="divide-y">
-              {filteredNotifications.map((notification) => (
+              {filteredNotifications.map(notification => (
                 <div
                   key={notification.id}
                   className={`p-4 hover:bg-gray-50 transition-colors ${
@@ -274,7 +349,9 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
                       <span className="text-xs font-medium text-gray-500 uppercase">
                         {getTypeText(notification.type)}
                       </span>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(notification.priority)}`}>
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(notification.priority)}`}
+                      >
                         {getPriorityText(notification.priority)}
                       </span>
                     </div>

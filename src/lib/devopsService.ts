@@ -22,7 +22,7 @@ import {
   QualityGate,
   ReleaseStrategy,
   ResourceType,
-  ComplianceFramework
+  ComplianceFramework,
 } from '@/types/devops';
 
 export class DevOpsService {
@@ -32,7 +32,7 @@ export class DevOpsService {
   private infrastructures: Map<string, Infrastructure> = new Map();
   private releases: Map<string, Release> = new Map();
   private incidents: Map<string, Incident> = new Map();
-  private configuration: DevOpsConfiguration;
+  private configuration!: DevOpsConfiguration;
 
   constructor() {
     this.initializeConfiguration();
@@ -55,8 +55,8 @@ export class DevOpsService {
         workingHours: {
           start: '09:00',
           end: '18:00',
-          days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
-        }
+          days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+        },
       },
       git: {
         defaultProvider: 'github',
@@ -65,19 +65,19 @@ export class DevOpsService {
             type: 'github',
             config: {
               apiUrl: 'https://api.github.com',
-              webhookSecret: 'webhook-secret'
+              webhookSecret: 'webhook-secret',
             },
-            enabled: true
+            enabled: true,
           },
           {
             type: 'gitlab',
             config: {
               apiUrl: 'https://gitlab.com/api/v4',
-              webhookSecret: 'gitlab-webhook-secret'
+              webhookSecret: 'gitlab-webhook-secret',
             },
-            enabled: true
-          }
-        ]
+            enabled: true,
+          },
+        ],
       },
       cicd: {
         defaultRunner: 'kubernetes',
@@ -87,27 +87,27 @@ export class DevOpsService {
             type: 'kubernetes',
             config: {
               namespace: 'urbanova-ci',
-              serviceAccount: 'ci-runner'
+              serviceAccount: 'ci-runner',
             },
-            enabled: true
+            enabled: true,
           },
           {
             name: 'docker',
             type: 'docker',
             config: {
               registry: 'registry.urbanova.com',
-              network: 'ci-network'
+              network: 'ci-network',
             },
-            enabled: true
-          }
+            enabled: true,
+          },
         ],
         defaults: {
           timeout: 60,
           retryCount: 3,
           parallelism: 4,
           artifactRetention: 30,
-          logRetention: 90
-        }
+          logRetention: 90,
+        },
       },
       infrastructure: {
         defaultProvider: 'kubernetes',
@@ -116,18 +116,18 @@ export class DevOpsService {
             type: 'kubernetes',
             config: {
               cluster: 'urbanova-prod',
-              namespace: 'urbanova'
+              namespace: 'urbanova',
             },
-            enabled: true
+            enabled: true,
           },
           {
             type: 'aws',
             config: {
               region: 'eu-west-1',
-              accountId: '123456789012'
+              accountId: '123456789012',
             },
-            enabled: true
-          }
+            enabled: true,
+          },
         ],
         costTracking: {
           enabled: true,
@@ -137,10 +137,10 @@ export class DevOpsService {
               name: 'Monthly Infrastructure',
               limit: 5000,
               period: 'monthly',
-              alerts: [80, 90, 100]
-            }
-          ]
-        }
+              alerts: [80, 90, 100],
+            },
+          ],
+        },
       },
       security: {
         scanners: [
@@ -149,39 +149,39 @@ export class DevOpsService {
             tool: 'sonarqube',
             config: {
               url: 'https://sonar.urbanova.com',
-              qualityGate: 'Sonar way'
+              qualityGate: 'Sonar way',
             },
-            enabled: true
+            enabled: true,
           },
           {
             type: 'dependency',
             tool: 'snyk',
             config: {
               severity: 'high',
-              failOnIssues: true
+              failOnIssues: true,
             },
-            enabled: true
-          }
+            enabled: true,
+          },
         ],
         compliance: {
           frameworks: ['soc2', 'gdpr'],
           auditing: {
             enabled: true,
             retention: 365,
-            exportFormat: 'json'
-          }
+            exportFormat: 'json',
+          },
         },
         secrets: {
           provider: 'vault',
           config: {
             url: 'https://vault.urbanova.com',
-            namespace: 'urbanova'
+            namespace: 'urbanova',
           },
           rotation: {
             enabled: true,
-            interval: 90
-          }
-        }
+            interval: 90,
+          },
+        },
       },
       monitoring: {
         tools: [
@@ -189,18 +189,18 @@ export class DevOpsService {
             type: 'prometheus',
             config: {
               url: 'https://prometheus.urbanova.com',
-              retention: '30d'
+              retention: '30d',
             },
-            enabled: true
+            enabled: true,
           },
           {
             type: 'grafana',
             config: {
               url: 'https://grafana.urbanova.com',
-              orgId: 1
+              orgId: 1,
             },
-            enabled: true
-          }
+            enabled: true,
+          },
         ],
         alerting: {
           channels: [
@@ -208,20 +208,20 @@ export class DevOpsService {
               type: 'slack',
               config: {
                 webhook: 'https://hooks.slack.com/services/...',
-                channel: '#devops-alerts'
+                channel: '#devops-alerts',
               },
-              enabled: true
-            }
+              enabled: true,
+            },
           ],
           rules: [
             {
               name: 'High Error Rate',
               condition: 'error_rate > 5%',
               severity: 'critical',
-              enabled: true
-            }
-          ]
-        }
+              enabled: true,
+            },
+          ],
+        },
       },
       qualityGates: {
         defaults: [
@@ -229,14 +229,14 @@ export class DevOpsService {
             type: 'coverage',
             threshold: 80,
             operator: 'gte',
-            blocking: true
+            blocking: true,
           },
           {
             type: 'security',
             threshold: 0,
             operator: 'eq',
-            blocking: true
-          }
+            blocking: true,
+          },
         ],
         overrides: {
           production: [
@@ -244,63 +244,63 @@ export class DevOpsService {
               type: 'coverage',
               threshold: 90,
               operator: 'gte',
-              blocking: true
-            }
+              blocking: true,
+            },
           ],
           staging: [
             {
               type: 'coverage',
               threshold: 75,
               operator: 'gte',
-              blocking: false
-            }
+              blocking: false,
+            },
           ],
           development: [
             {
               type: 'coverage',
               threshold: 60,
               operator: 'gte',
-              blocking: false
-            }
+              blocking: false,
+            },
           ],
           testing: [],
           preview: [],
           canary: [],
           blue: [],
-          green: []
-        }
+          green: [],
+        },
       },
       approvals: {
         production: {
           required: true,
           approvers: ['tech-lead@urbanova.com', 'devops@urbanova.com'],
-          timeout: 24
+          timeout: 24,
         },
         staging: {
           required: false,
           approvers: ['tech-lead@urbanova.com'],
-          timeout: 4
+          timeout: 4,
         },
         emergency: {
           enabled: true,
           approvers: ['cto@urbanova.com'],
-          postApprovalRequired: true
-        }
+          postApprovalRequired: true,
+        },
       },
       retention: {
         pipelineRuns: 90,
         artifacts: 30,
         logs: 30,
         metrics: 365,
-        incidents: 730
+        incidents: 730,
       },
       features: {
         enableAdvancedSecurity: true,
         enableCostOptimization: true,
         enableMLOps: false,
         enableChaosEngineering: false,
-        enableProgressiveDelivery: true
-      }
+        enableProgressiveDelivery: true,
+      },
     };
   }
 
@@ -317,23 +317,23 @@ export class DevOpsService {
           namespace: 'urbanova-dev',
           cluster: 'dev-cluster',
           region: 'eu-west-1',
-          provider: 'kubernetes'
+          provider: 'kubernetes',
         },
         protection: {
           requireApproval: false,
-          allowedBranches: ['*']
+          allowedBranches: ['*'],
         },
         variables: {
-          'DATABASE_URL': {
+          DATABASE_URL: {
             value: 'postgres://dev-db:5432/urbanova_dev',
             encrypted: true,
-            description: 'Development database connection'
+            description: 'Development database connection',
           },
-          'API_BASE_URL': {
+          API_BASE_URL: {
             value: 'https://api-dev.urbanova.com',
             encrypted: false,
-            description: 'Development API base URL'
-          }
+            description: 'Development API base URL',
+          },
         },
         resources: {
           limits: {
@@ -344,7 +344,7 @@ export class DevOpsService {
             gpu: '0',
             database: '1',
             cache: '1',
-            queue: '1'
+            queue: '1',
           },
           requests: {
             cpu: '0.5',
@@ -354,14 +354,14 @@ export class DevOpsService {
             gpu: '0',
             database: '1',
             cache: '1',
-            queue: '1'
+            queue: '1',
           },
           autoScaling: {
             enabled: true,
             minReplicas: 1,
             maxReplicas: 3,
-            targetCPU: 70
-          }
+            targetCPU: 70,
+          },
         },
         monitoring: {
           enabled: true,
@@ -369,7 +369,7 @@ export class DevOpsService {
           dashboards: ['dev-dashboard'],
           alerts: ['dev-alerts'],
           healthCheckUrl: 'https://dev.urbanova.com/health',
-          metricsEndpoint: 'https://dev.urbanova.com/metrics'
+          metricsEndpoint: 'https://dev.urbanova.com/metrics',
         },
         status: 'active',
         health: 'healthy',
@@ -378,7 +378,7 @@ export class DevOpsService {
           deployedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
           deployedBy: 'ci-system',
           pipelineRunId: 'run-001',
-          commit: 'abc123'
+          commit: 'abc123',
         },
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
@@ -389,8 +389,8 @@ export class DevOpsService {
           failedDeployments: 15,
           averageDeploymentTime: 180,
           lastDeploymentAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-          uptime: 98.5
-        }
+          uptime: 98.5,
+        },
       },
       {
         id: 'staging',
@@ -402,23 +402,23 @@ export class DevOpsService {
           namespace: 'urbanova-staging',
           cluster: 'staging-cluster',
           region: 'eu-west-1',
-          provider: 'kubernetes'
+          provider: 'kubernetes',
         },
         protection: {
           requireApproval: false,
-          allowedBranches: ['main', 'release/*']
+          allowedBranches: ['main', 'release/*'],
         },
         variables: {
-          'DATABASE_URL': {
+          DATABASE_URL: {
             value: 'postgres://staging-db:5432/urbanova_staging',
             encrypted: true,
-            description: 'Staging database connection'
+            description: 'Staging database connection',
           },
-          'API_BASE_URL': {
+          API_BASE_URL: {
             value: 'https://api-staging.urbanova.com',
             encrypted: false,
-            description: 'Staging API base URL'
-          }
+            description: 'Staging API base URL',
+          },
         },
         resources: {
           limits: {
@@ -429,7 +429,7 @@ export class DevOpsService {
             gpu: '0',
             database: '1',
             cache: '1',
-            queue: '1'
+            queue: '1',
           },
           requests: {
             cpu: '1',
@@ -439,15 +439,15 @@ export class DevOpsService {
             gpu: '0',
             database: '1',
             cache: '1',
-            queue: '1'
+            queue: '1',
           },
           autoScaling: {
             enabled: true,
             minReplicas: 2,
             maxReplicas: 6,
             targetCPU: 70,
-            targetMemory: 80
-          }
+            targetMemory: 80,
+          },
         },
         monitoring: {
           enabled: true,
@@ -455,7 +455,7 @@ export class DevOpsService {
           dashboards: ['staging-dashboard', 'performance-dashboard'],
           alerts: ['staging-alerts', 'performance-alerts'],
           healthCheckUrl: 'https://staging.urbanova.com/health',
-          metricsEndpoint: 'https://staging.urbanova.com/metrics'
+          metricsEndpoint: 'https://staging.urbanova.com/metrics',
         },
         status: 'active',
         health: 'healthy',
@@ -464,7 +464,7 @@ export class DevOpsService {
           deployedAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
           deployedBy: 'release-manager',
           pipelineRunId: 'run-002',
-          commit: 'def456'
+          commit: 'def456',
         },
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
@@ -475,8 +475,8 @@ export class DevOpsService {
           failedDeployments: 3,
           averageDeploymentTime: 240,
           lastDeploymentAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
-          uptime: 99.2
-        }
+          uptime: 99.2,
+        },
       },
       {
         id: 'prod',
@@ -488,7 +488,7 @@ export class DevOpsService {
           namespace: 'urbanova-prod',
           cluster: 'prod-cluster',
           region: 'eu-west-1',
-          provider: 'kubernetes'
+          provider: 'kubernetes',
         },
         protection: {
           requireApproval: true,
@@ -498,20 +498,20 @@ export class DevOpsService {
           deploymentWindow: {
             days: ['monday', 'tuesday', 'wednesday', 'thursday'],
             hours: ['10:00', '16:00'],
-            timezone: 'Europe/Rome'
-          }
+            timezone: 'Europe/Rome',
+          },
         },
         variables: {
-          'DATABASE_URL': {
+          DATABASE_URL: {
             value: 'postgres://prod-db:5432/urbanova_prod',
             encrypted: true,
-            description: 'Production database connection'
+            description: 'Production database connection',
           },
-          'API_BASE_URL': {
+          API_BASE_URL: {
             value: 'https://api.urbanova.com',
             encrypted: false,
-            description: 'Production API base URL'
-          }
+            description: 'Production API base URL',
+          },
         },
         resources: {
           limits: {
@@ -522,7 +522,7 @@ export class DevOpsService {
             gpu: '0',
             database: '3',
             cache: '2',
-            queue: '2'
+            queue: '2',
           },
           requests: {
             cpu: '2',
@@ -532,15 +532,15 @@ export class DevOpsService {
             gpu: '0',
             database: '3',
             cache: '2',
-            queue: '2'
+            queue: '2',
           },
           autoScaling: {
             enabled: true,
             minReplicas: 3,
             maxReplicas: 20,
             targetCPU: 60,
-            targetMemory: 70
-          }
+            targetMemory: 70,
+          },
         },
         monitoring: {
           enabled: true,
@@ -548,7 +548,7 @@ export class DevOpsService {
           dashboards: ['prod-dashboard', 'business-metrics', 'sla-dashboard'],
           alerts: ['prod-alerts', 'sla-alerts', 'business-alerts'],
           healthCheckUrl: 'https://urbanova.com/health',
-          metricsEndpoint: 'https://urbanova.com/metrics'
+          metricsEndpoint: 'https://urbanova.com/metrics',
         },
         status: 'active',
         health: 'healthy',
@@ -557,7 +557,7 @@ export class DevOpsService {
           deployedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
           deployedBy: 'release-manager',
           pipelineRunId: 'run-003',
-          commit: 'ghi789'
+          commit: 'ghi789',
         },
         createdAt: new Date('2023-12-01'),
         updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
@@ -568,9 +568,9 @@ export class DevOpsService {
           failedDeployments: 1,
           averageDeploymentTime: 420,
           lastDeploymentAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-          uptime: 99.9
-        }
-      }
+          uptime: 99.9,
+        },
+      },
     ];
 
     environments.forEach(env => {
@@ -597,7 +597,7 @@ export class DevOpsService {
               count: 3,
               instanceType: 'm5.large',
               diskSize: '100Gi',
-              role: 'master'
+              role: 'master',
             },
             dependencies: [],
             status: 'active',
@@ -605,13 +605,13 @@ export class DevOpsService {
             cost: {
               hourly: 0.45,
               monthly: 324,
-              currency: 'EUR'
+              currency: 'EUR',
             },
             tags: {
               environment: 'production',
               team: 'devops',
-              project: 'urbanova'
-            }
+              project: 'urbanova',
+            },
           },
           {
             id: 'worker-nodes',
@@ -621,7 +621,7 @@ export class DevOpsService {
               count: 6,
               instanceType: 'm5.xlarge',
               diskSize: '200Gi',
-              role: 'worker'
+              role: 'worker',
             },
             dependencies: ['master-nodes'],
             status: 'active',
@@ -629,14 +629,14 @@ export class DevOpsService {
             cost: {
               hourly: 1.2,
               monthly: 864,
-              currency: 'EUR'
+              currency: 'EUR',
             },
             tags: {
               environment: 'production',
               team: 'devops',
-              project: 'urbanova'
-            }
-          }
+              project: 'urbanova',
+            },
+          },
         ],
         iac: {
           tool: 'terraform',
@@ -647,23 +647,23 @@ export class DevOpsService {
             backend: 's3',
             location: 's3://urbanova-terraform-state/k8s-cluster.tfstate',
             locked: false,
-            lastUpdate: new Date(Date.now() - 6 * 60 * 60 * 1000)
-          }
+            lastUpdate: new Date(Date.now() - 6 * 60 * 60 * 1000),
+          },
         },
         security: {
           compliance: ['soc2', 'gdpr'],
           scanResults: {
             lastScan: new Date(Date.now() - 24 * 60 * 60 * 1000),
             passed: true,
-            issues: []
+            issues: [],
           },
           networkPolicies: ['default-deny', 'allow-ingress'],
           firewallRules: ['allow-https', 'allow-ssh'],
           encryption: {
             inTransit: true,
             atRest: true,
-            keyManagement: 'aws-kms'
-          }
+            keyManagement: 'aws-kms',
+          },
         },
         monitoring: {
           enabled: true,
@@ -673,49 +673,49 @@ export class DevOpsService {
               name: 'cpu_usage',
               value: 45.2,
               unit: 'percent',
-              timestamp: new Date()
+              timestamp: new Date(),
             },
             {
               name: 'memory_usage',
               value: 62.8,
               unit: 'percent',
-              timestamp: new Date()
-            }
+              timestamp: new Date(),
+            },
           ],
           alerts: [
             {
               name: 'High CPU Usage',
               condition: 'cpu_usage > 80',
               severity: 'warning',
-              enabled: true
-            }
-          ]
+              enabled: true,
+            },
+          ],
         },
         costs: {
           current: {
             hourly: 1.65,
             daily: 39.6,
             monthly: 1188,
-            currency: 'EUR'
+            currency: 'EUR',
           },
           forecast: {
             monthly: 1200,
             quarterly: 3600,
-            yearly: 14400
+            yearly: 14400,
           },
           budget: {
             limit: 1500,
             alertThreshold: 80,
-            period: 'monthly'
-          }
+            period: 'monthly',
+          },
         },
         status: 'active',
         health: 'healthy',
         createdAt: new Date('2023-12-01'),
         updatedAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
         createdBy: 'devops-team',
-        lastDeployedAt: new Date(Date.now() - 24 * 60 * 60 * 1000)
-      }
+        lastDeployedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+      },
     ];
 
     infrastructures.forEach(infra => {
@@ -735,46 +735,46 @@ export class DevOpsService {
           url: 'https://github.com/urbanova/api',
           branch: 'main',
           path: '.github/workflows',
-          credentials: 'github-token'
+          credentials: 'github-token',
         },
         triggers: [
           {
             type: 'push',
             config: {
-              branches: ['main', 'develop']
+              branches: ['main', 'develop'],
             },
             enabled: true,
-            branches: ['main', 'develop']
+            branches: ['main', 'develop'],
           },
           {
             type: 'pull_request',
             config: {
-              branches: ['main']
+              branches: ['main'],
             },
             enabled: true,
-            branches: ['main']
+            branches: ['main'],
           },
           {
             type: 'schedule',
             config: {
-              cron: '0 2 * * *'
+              cron: '0 2 * * *',
             },
             enabled: true,
-            schedule: '0 2 * * *'
-          }
+            schedule: '0 2 * * *',
+          },
         ],
         variables: {
-          'DOCKER_REGISTRY': {
+          DOCKER_REGISTRY: {
             value: 'registry.urbanova.com',
             encrypted: false,
-            description: 'Docker registry URL'
+            description: 'Docker registry URL',
           },
-          'SONAR_TOKEN': {
+          SONAR_TOKEN: {
             value: 'sonar-token-encrypted',
             encrypted: true,
             environment: ['development', 'staging', 'production'],
-            description: 'SonarQube authentication token'
-          }
+            description: 'SonarQube authentication token',
+          },
         },
         stages: [
           {
@@ -793,8 +793,8 @@ export class DevOpsService {
                   image: 'node:18-alpine',
                   resources: {
                     cpu: '1',
-                    memory: '2Gi'
-                  }
+                    memory: '2Gi',
+                  },
                 },
                 steps: [
                   {
@@ -803,8 +803,8 @@ export class DevOpsService {
                     order: 1,
                     type: 'action',
                     config: {
-                      action: 'actions/checkout@v3'
-                    }
+                      action: 'actions/checkout@v3',
+                    },
                   },
                   {
                     id: 'install',
@@ -813,14 +813,14 @@ export class DevOpsService {
                     type: 'script',
                     config: {
                       command: 'npm ci',
-                      timeout: 300
+                      timeout: 300,
                     },
                     cache: [
                       {
                         key: 'npm-${{ hashFiles("package-lock.json") }}',
-                        paths: ['node_modules']
-                      }
-                    ]
+                        paths: ['node_modules'],
+                      },
+                    ],
                   },
                   {
                     id: 'test',
@@ -829,8 +829,8 @@ export class DevOpsService {
                     type: 'script',
                     config: {
                       command: 'npm run test:coverage',
-                      timeout: 600
-                    }
+                      timeout: 600,
+                    },
                   },
                   {
                     id: 'build',
@@ -839,20 +839,20 @@ export class DevOpsService {
                     type: 'script',
                     config: {
                       command: 'npm run build',
-                      timeout: 300
+                      timeout: 300,
                     },
                     artifacts: [
                       {
                         type: 'zip',
                         name: 'build-artifacts',
                         path: 'dist/',
-                        retention: 7
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
+                        retention: 7,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
           {
             id: 'security',
@@ -870,8 +870,8 @@ export class DevOpsService {
                   image: 'sonarqube/sonar-scanner-cli',
                   resources: {
                     cpu: '0.5',
-                    memory: '1Gi'
-                  }
+                    memory: '1Gi',
+                  },
                 },
                 steps: [
                   {
@@ -882,12 +882,12 @@ export class DevOpsService {
                     config: {
                       command: 'sonar-scanner',
                       env: {
-                        'SONAR_HOST_URL': 'https://sonar.urbanova.com',
-                        'SONAR_TOKEN': '${{ secrets.SONAR_TOKEN }}'
-                      }
-                    }
-                  }
-                ]
+                        SONAR_HOST_URL: 'https://sonar.urbanova.com',
+                        SONAR_TOKEN: '${{ secrets.SONAR_TOKEN }}',
+                      },
+                    },
+                  },
+                ],
               },
               {
                 id: 'dependency-scan',
@@ -898,8 +898,8 @@ export class DevOpsService {
                   image: 'snyk/snyk:node',
                   resources: {
                     cpu: '0.5',
-                    memory: '1Gi'
-                  }
+                    memory: '1Gi',
+                  },
                 },
                 steps: [
                   {
@@ -908,12 +908,12 @@ export class DevOpsService {
                     order: 1,
                     type: 'script',
                     config: {
-                      command: 'snyk test --severity-threshold=high'
-                    }
-                  }
-                ]
-              }
-            ]
+                      command: 'snyk test --severity-threshold=high',
+                    },
+                  },
+                ],
+              },
+            ],
           },
           {
             id: 'package',
@@ -931,8 +931,8 @@ export class DevOpsService {
                   image: 'docker:latest',
                   resources: {
                     cpu: '1',
-                    memory: '2Gi'
-                  }
+                    memory: '2Gi',
+                  },
                 },
                 steps: [
                   {
@@ -944,54 +944,54 @@ export class DevOpsService {
                       script: `
                         docker build -t $DOCKER_REGISTRY/urbanova-api:$BUILD_NUMBER .
                         docker push $DOCKER_REGISTRY/urbanova-api:$BUILD_NUMBER
-                      `
+                      `,
                     },
                     artifacts: [
                       {
                         type: 'docker',
                         name: 'urbanova-api',
                         path: '$DOCKER_REGISTRY/urbanova-api:$BUILD_NUMBER',
-                        retention: 30
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
+                        retention: 30,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
         ],
         qualityGates: [
           {
             type: 'coverage',
             threshold: 80,
             operator: 'gte',
-            blocking: true
+            blocking: true,
           },
           {
             type: 'security',
             threshold: 0,
             operator: 'eq',
-            blocking: true
-          }
+            blocking: true,
+          },
         ],
         notifications: [
           {
             channel: 'slack',
             config: {
               webhook: 'https://hooks.slack.com/services/...',
-              channel: '#ci-cd'
+              channel: '#ci-cd',
             },
             events: ['success', 'failed'],
-            enabled: true
+            enabled: true,
           },
           {
             channel: 'email',
             config: {
-              recipients: ['devops@urbanova.com']
+              recipients: ['devops@urbanova.com'],
             },
             events: ['failed'],
-            enabled: true
-          }
+            enabled: true,
+          },
         ],
         status: 'success',
         enabled: true,
@@ -1008,9 +1008,9 @@ export class DevOpsService {
           successRate: 91.0,
           lastRunAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
           lastSuccessAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-          lastFailureAt: new Date(Date.now() - 48 * 60 * 60 * 1000)
-        }
-      }
+          lastFailureAt: new Date(Date.now() - 48 * 60 * 60 * 1000),
+        },
+      },
     ];
 
     pipelines.forEach(pipeline => {
@@ -1031,7 +1031,7 @@ export class DevOpsService {
           pipelineRunId: 'run-156',
           commit: 'abc123def456',
           branch: 'main',
-          artifacts: ['urbanova-api:1.2.3']
+          artifacts: ['urbanova-api:1.2.3'],
         },
         environments: [
           {
@@ -1042,11 +1042,17 @@ export class DevOpsService {
               replicas: 2,
               resources: {
                 cpu: '1',
-                memory: '2Gi'
+                memory: '2Gi',
+                storage: '10Gi',
+                network: '1Gbps',
+                gpu: '0',
+                database: '1',
+                cache: '1',
+                queue: '1',
               },
               variables: {
-                'LOG_LEVEL': 'debug'
-              }
+                LOG_LEVEL: 'debug',
+              },
             },
             status: 'deployed',
             startedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
@@ -1058,15 +1064,15 @@ export class DevOpsService {
                 {
                   name: 'Health Check',
                   status: true,
-                  lastCheck: new Date()
+                  lastCheck: new Date(),
                 },
                 {
                   name: 'Database Connection',
                   status: true,
-                  lastCheck: new Date()
-                }
-              ]
-            }
+                  lastCheck: new Date(),
+                },
+              ],
+            },
           },
           {
             environmentId: 'prod',
@@ -1076,36 +1082,42 @@ export class DevOpsService {
               replicas: 6,
               resources: {
                 cpu: '2',
-                memory: '4Gi'
-              }
+                memory: '4Gi',
+                storage: '20Gi',
+                network: '2Gbps',
+                gpu: '0',
+                database: '2',
+                cache: '2',
+                queue: '2',
+              },
             },
             approval: {
               required: true,
               approvers: ['tech-lead@urbanova.com'],
               approvedBy: 'tech-lead@urbanova.com',
               approvedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
-              reason: 'All tests passed, ready for production'
+              reason: 'All tests passed, ready for production',
             },
             status: 'pending',
             health: {
               status: 'unknown',
-              checks: []
-            }
-          }
+              checks: [],
+            },
+          },
         ],
         qualityGates: [
           {
             type: 'coverage',
             passed: true,
             value: 85.2,
-            threshold: 80
+            threshold: 80,
           },
           {
             type: 'security',
             passed: true,
             value: 0,
-            threshold: 0
-          }
+            threshold: 0,
+          },
         ],
         status: 'in_progress',
         createdAt: new Date(Date.now() - 25 * 60 * 60 * 1000),
@@ -1114,24 +1126,24 @@ export class DevOpsService {
         notes: {
           features: [
             'Added new API endpoint for property search',
-            'Improved performance of data processing'
+            'Improved performance of data processing',
           ],
           bugFixes: [
             'Fixed memory leak in image processing',
-            'Resolved authentication timeout issues'
+            'Resolved authentication timeout issues',
           ],
           breakingChanges: [],
           knownIssues: [],
-          rollbackPlan: 'Rollback to v1.2.2 if issues detected'
+          rollbackPlan: 'Rollback to v1.2.2 if issues detected',
         },
         metrics: {
           deploymentTime: 3600,
           leadTime: 172800,
           meanTimeToRecovery: 0,
           changeFailureRate: 0,
-          deploymentFrequency: 2.5
-        }
-      }
+          deploymentFrequency: 2.5,
+        },
+      },
     ];
 
     releases.forEach(release => {
@@ -1154,7 +1166,7 @@ export class DevOpsService {
           environments: ['production'],
           services: ['urbanova-api'],
           users: 1500,
-          sla: true
+          sla: true,
         },
         detectedAt: new Date(Date.now() - 48 * 60 * 60 * 1000),
         acknowledgedAt: new Date(Date.now() - 47 * 60 * 60 * 1000),
@@ -1167,25 +1179,25 @@ export class DevOpsService {
           evidence: [
             'Database connection metrics showing 100% utilization',
             'Application logs showing connection timeouts',
-            'Traffic spike detected at 14:30 UTC'
-          ]
+            'Traffic spike detected at 14:30 UTC',
+          ],
         },
         resolution: {
           description: 'Increased database connection pool size and added connection monitoring',
           actions: [
             'Increased max_connections from 100 to 200',
             'Added connection pool monitoring alerts',
-            'Implemented connection retry logic'
+            'Implemented connection retry logic',
           ],
           preventionMeasures: [
             'Set up proactive connection pool monitoring',
             'Implement auto-scaling for database connections',
-            'Add load testing for connection limits'
+            'Add load testing for connection limits',
           ],
           followUpTasks: [
             'Review connection pool sizing for all environments',
-            'Implement connection pool metrics dashboard'
-          ]
+            'Implement connection pool metrics dashboard',
+          ],
         },
         communications: [
           {
@@ -1193,32 +1205,32 @@ export class DevOpsService {
             type: 'internal',
             message: 'Investigating API performance issues',
             author: 'devops-lead@urbanova.com',
-            channels: ['slack']
+            channels: ['slack'],
           },
           {
             timestamp: new Date(Date.now() - 46 * 60 * 60 * 1000),
             type: 'external',
             message: 'API performance has been restored to normal levels',
             author: 'devops-lead@urbanova.com',
-            channels: ['email']
-          }
+            channels: ['email'],
+          },
         ],
         metrics: {
           detectionTime: 5,
           responseTime: 60,
           resolutionTime: 120,
-          recoveryTime: 120
+          recoveryTime: 120,
         },
         related: {
           pipelines: [],
           deployments: [],
           releases: [],
-          alerts: ['alert-001']
+          alerts: ['alert-001'],
         },
         createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000),
         updatedAt: new Date(Date.now() - 46 * 60 * 60 * 1000),
-        createdBy: 'monitoring-system'
-      }
+        createdBy: 'monitoring-system',
+      },
     ];
 
     incidents.forEach(incident => {
@@ -1240,6 +1252,8 @@ export class DevOpsService {
 
     for (let i = 0; i < count; i++) {
       const pipeline = pipelines[Math.floor(Math.random() * pipelines.length)];
+      if (!pipeline) continue;
+      
       const isSuccess = Math.random() < 0.85; // 85% success rate
       const status = isSuccess ? 'success' : statuses[Math.floor(Math.random() * statuses.length)];
 
@@ -1248,40 +1262,40 @@ export class DevOpsService {
         pipelineId: pipeline.id,
         pipelineName: pipeline.name,
         number: pipeline.stats.totalRuns + i + 1,
-        status,
+        status: status || 'success',
         trigger: {
-          type: triggers[Math.floor(Math.random() * triggers.length)],
+          type: triggers[Math.floor(Math.random() * triggers.length)] || 'manual',
           commit: {
             hash: Math.random().toString(36).substring(2, 12),
             message: 'Fix: Update API endpoint validation',
             author: 'developer@urbanova.com',
-            timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000)
-          }
+            timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
+          },
         },
         environment: 'development',
         branch: 'main',
         variables: {
-          'BUILD_NUMBER': (pipeline.stats.totalRuns + i + 1).toString(),
-          'COMMIT_SHA': Math.random().toString(36).substring(2, 12)
+          BUILD_NUMBER: (pipeline.stats.totalRuns + i + 1).toString(),
+          COMMIT_SHA: Math.random().toString(36).substring(2, 12),
         },
         startedAt: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000),
         duration: Math.floor(Math.random() * 1800) + 300, // 5-35 minutes
         stages: pipeline.stages.map(stage => ({
           id: stage.id,
           name: stage.name,
-          status: status,
+          status: status || 'success',
           startedAt: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000),
           duration: Math.floor(Math.random() * 600) + 60,
           jobs: stage.jobs.map(job => ({
             id: job.id,
             name: job.name,
-            status: status,
+            status: status || 'success',
             startedAt: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000),
             duration: Math.floor(Math.random() * 300) + 30,
             steps: job.steps.map(step => ({
               id: step.id,
               name: step.name,
-              status: status,
+              status: status || 'success',
               startedAt: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000),
               duration: Math.floor(Math.random() * 120) + 10,
               exitCode: status === 'success' ? 0 : 1,
@@ -1290,18 +1304,18 @@ export class DevOpsService {
                   timestamp: new Date(),
                   level: 'info',
                   message: `Executing step: ${step.name}`,
-                  source: 'runner'
-                }
-              ]
-            }))
-          }))
+                  source: 'runner',
+                },
+              ],
+            })),
+          })),
         })),
         testResults: {
           total: 150,
           passed: 145,
           failed: 3,
           skipped: 2,
-          coverage: 82.5
+          coverage: 82.5,
         },
         artifacts: [
           {
@@ -1311,9 +1325,9 @@ export class DevOpsService {
             size: 15728640, // 15MB
             url: 'https://artifacts.urbanova.com/build-artifacts.zip',
             checksum: 'sha256:abc123...',
-            createdAt: new Date()
-          }
-        ]
+            createdAt: new Date(),
+          },
+        ],
       };
 
       if (status === 'success' || status === 'failed') {
@@ -1342,9 +1356,14 @@ export class DevOpsService {
   private updateEnvironmentHealth() {
     this.environments.forEach(env => {
       // Simula variazioni nella salute
-      if (Math.random() < 0.05) { // 5% chance
-        const healths: Array<'healthy' | 'degraded' | 'unhealthy'> = ['healthy', 'degraded', 'unhealthy'];
-        env.health = healths[Math.floor(Math.random() * healths.length)];
+      if (Math.random() < 0.05) {
+        // 5% chance
+        const healths: Array<'healthy' | 'degraded' | 'unhealthy'> = [
+          'healthy',
+          'degraded',
+          'unhealthy',
+        ];
+        env.health = healths[Math.floor(Math.random() * healths.length)] || 'unknown';
       }
     });
   }
@@ -1355,7 +1374,7 @@ export class DevOpsService {
       infra.monitoring.metrics = infra.monitoring.metrics.map(metric => ({
         ...metric,
         value: metric.value + (Math.random() - 0.5) * 10,
-        timestamp: new Date()
+        timestamp: new Date(),
       }));
     });
   }
@@ -1374,8 +1393,8 @@ export class DevOpsService {
         successfulRuns: 0,
         failedRuns: 0,
         averageDuration: 0,
-        successRate: 0
-      }
+        successRate: 0,
+      },
     };
 
     this.pipelines.set(newPipeline.id, newPipeline);
@@ -1390,7 +1409,7 @@ export class DevOpsService {
     const updatedPipeline = {
       ...pipeline,
       ...updates,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.pipelines.set(id, updatedPipeline);
@@ -1424,11 +1443,11 @@ export class DevOpsService {
           steps: job.steps.map(step => ({
             id: step.id,
             name: step.name,
-            status: 'pending'
-          }))
-        }))
+            status: 'pending',
+          })),
+        })),
       })),
-      artifacts: []
+      artifacts: [],
     };
 
     this.pipelineRuns.set(run.id, run);
@@ -1459,7 +1478,9 @@ export class DevOpsService {
   }
 
   // Crea ambiente
-  createEnvironment(environment: Omit<Environment, 'id' | 'createdAt' | 'updatedAt' | 'stats'>): Environment {
+  createEnvironment(
+    environment: Omit<Environment, 'id' | 'createdAt' | 'updatedAt' | 'stats'>
+  ): Environment {
     const newEnvironment: Environment = {
       ...environment,
       id: `env-${Date.now()}`,
@@ -1470,8 +1491,8 @@ export class DevOpsService {
         successfulDeployments: 0,
         failedDeployments: 0,
         averageDeploymentTime: 0,
-        uptime: 100
-      }
+        uptime: 100,
+      },
     };
 
     this.environments.set(newEnvironment.id, newEnvironment);
@@ -1479,11 +1500,7 @@ export class DevOpsService {
   }
 
   // Deploy su ambiente
-  deployToEnvironment(
-    environmentId: string,
-    version: string,
-    artifacts: string[]
-  ): boolean {
+  deployToEnvironment(environmentId: string, version: string, artifacts: string[]): boolean {
     const environment = this.environments.get(environmentId);
     if (!environment) return false;
 
@@ -1493,7 +1510,7 @@ export class DevOpsService {
       deployedAt: new Date(),
       deployedBy: 'ci-system',
       pipelineRunId: `run-${Date.now()}`,
-      commit: Math.random().toString(36).substring(2, 12)
+      commit: Math.random().toString(36).substring(2, 12),
     };
 
     environment.stats.totalDeployments++;
@@ -1510,7 +1527,7 @@ export class DevOpsService {
       ...release,
       id: `release-${Date.now()}`,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.releases.set(newRelease.id, newRelease);
@@ -1542,8 +1559,8 @@ export class DevOpsService {
       updatedAt: new Date(),
       metrics: {
         detectionTime: 0,
-        responseTime: 0
-      }
+        responseTime: 0,
+      },
     };
 
     this.incidents.set(newIncident.id, newIncident);
@@ -1579,14 +1596,15 @@ export class DevOpsService {
   // Genera metriche DevOps
   generateDevOpsMetrics(period?: { start: Date; end: Date }): DevOpsMetrics {
     const runs = Array.from(this.pipelineRuns.values());
-    const filteredRuns = period 
+    const filteredRuns = period
       ? runs.filter(r => r.startedAt && r.startedAt >= period.start && r.startedAt <= period.end)
       : runs;
 
     const totalRuns = filteredRuns.length;
     const successfulRuns = filteredRuns.filter(r => r.status === 'success').length;
     const successRate = totalRuns > 0 ? (successfulRuns / totalRuns) * 100 : 0;
-    const averageDuration = filteredRuns.reduce((sum, r) => sum + (r.duration || 0), 0) / totalRuns || 0;
+    const averageDuration =
+      filteredRuns.reduce((sum, r) => sum + (r.duration || 0), 0) / totalRuns || 0;
 
     return {
       dora: {
@@ -1594,27 +1612,27 @@ export class DevOpsService {
           value: 2.5,
           unit: 'per_day',
           trend: 'up',
-          target: 3
+          target: 3,
         },
         leadTime: {
           value: 48,
           p50: 36,
           p95: 72,
           trend: 'down',
-          target: 24
+          target: 24,
         },
         meanTimeToRecovery: {
           value: 2,
           p50: 1.5,
           p95: 4,
           trend: 'stable',
-          target: 1
+          target: 1,
         },
         changeFailureRate: {
           value: 15,
           trend: 'down',
-          target: 10
-        }
+          target: 10,
+        },
       },
       pipelines: {
         totalRuns,
@@ -1624,9 +1642,9 @@ export class DevOpsService {
           { reason: 'Test failures', count: 8, percentage: 40 },
           { reason: 'Build errors', count: 5, percentage: 25 },
           { reason: 'Security scan failures', count: 4, percentage: 20 },
-          { reason: 'Timeout', count: 3, percentage: 15 }
+          { reason: 'Timeout', count: 3, percentage: 15 },
         ],
-        trends: this.generateTrendData()
+        trends: this.generateTrendData(),
       },
       environments: Array.from(this.environments.values()).map(env => ({
         name: env.name,
@@ -1637,35 +1655,35 @@ export class DevOpsService {
         resources: {
           cpu: { usage: 45, limit: 100 },
           memory: { usage: 62, limit: 100 },
-          storage: { usage: 78, limit: 100 }
-        }
+          storage: { usage: 78, limit: 100 },
+        },
       })),
       quality: {
         testCoverage: 82.5,
         codeQuality: 8.7,
         securityScore: 9.2,
         performanceScore: 8.9,
-        trends: this.generateQualityTrends()
+        trends: this.generateQualityTrends(),
       },
       costs: {
         infrastructure: {
           current: 1188,
           forecast: 1200,
           budget: 1500,
-          currency: 'EUR'
+          currency: 'EUR',
         },
         ci_cd: {
           current: 245,
           forecast: 250,
           budget: 300,
-          currency: 'EUR'
+          currency: 'EUR',
         },
         costPerDeployment: 12.5,
         costPerEnvironment: [
           { environment: 'development', cost: 150 },
           { environment: 'staging', cost: 300 },
-          { environment: 'production', cost: 738 }
-        ]
+          { environment: 'production', cost: 738 },
+        ],
       },
       productivity: {
         commitsPerDay: 15.2,
@@ -1674,14 +1692,14 @@ export class DevOpsService {
         mergeTime: 2.1,
         buildWaitTime: 3.5,
         testWaitTime: 8.2,
-        deploymentWaitTime: 12.3
+        deploymentWaitTime: 12.3,
       },
       generatedAt: new Date(),
-      period: period || {
+      period: (period || {
         start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
         end: new Date(),
-        granularity: 'day'
-      }
+        granularity: 'day',
+      }) as any,
     };
   }
 
@@ -1705,7 +1723,7 @@ export class DevOpsService {
         openIncidents: incidents.filter(i => i.status !== 'closed').length,
         systemHealth: 'healthy',
         infrastructureHealth: 'healthy',
-        securityHealth: 'healthy'
+        securityHealth: 'healthy',
       },
       performance: {
         pipelineSuccessRate: 85.2,
@@ -1714,27 +1732,33 @@ export class DevOpsService {
         deploymentFrequency: 2.5,
         trends: {
           successRate: this.generateTrendData().map(t => ({ date: t.date, value: t.successRate })),
-          buildTime: this.generateTrendData().map(t => ({ date: t.date, value: t.averageDuration })),
-          deploymentTime: this.generateTrendData().map(t => ({ date: t.date, value: t.averageDuration * 0.4 })),
-          frequency: this.generateTrendData().map(t => ({ date: t.date, value: 2.5 }))
-        }
+          buildTime: this.generateTrendData().map(t => ({
+            date: t.date,
+            value: t.averageDuration,
+          })),
+          deploymentTime: this.generateTrendData().map(t => ({
+            date: t.date,
+            value: t.averageDuration * 0.4,
+          })),
+          frequency: this.generateTrendData().map(t => ({ date: t.date, value: 2.5 })),
+        },
       },
       resources: {
         compute: {
           cpu: { used: 45.2, total: 100, percentage: 45.2 },
           memory: { used: 62.8, total: 100, percentage: 62.8 },
-          storage: { used: 78.4, total: 100, percentage: 78.4 }
+          storage: { used: 78.4, total: 100, percentage: 78.4 },
         },
         network: {
           bandwidth: { used: 2.5, total: 10, percentage: 25 },
-          connections: { active: 150, total: 1000 }
+          connections: { active: 150, total: 1000 },
         },
         costs: {
           current: 1433,
           forecast: 1450,
           budget: 1800,
-          currency: 'EUR'
-        }
+          currency: 'EUR',
+        },
       },
       quality: {
         overallScore: 8.7,
@@ -1744,8 +1768,8 @@ export class DevOpsService {
         trends: {
           coverage: this.generateQualityTrends().map(t => ({ date: t.date, value: t.coverage })),
           quality: this.generateQualityTrends().map(t => ({ date: t.date, value: t.quality })),
-          security: this.generateQualityTrends().map(t => ({ date: t.date, value: t.security }))
-        }
+          security: this.generateQualityTrends().map(t => ({ date: t.date, value: t.security })),
+        },
       },
       top: {
         pipelines: pipelines.slice(0, 5).map(p => ({
@@ -1753,24 +1777,48 @@ export class DevOpsService {
           name: p.name,
           successRate: p.stats.successRate,
           averageDuration: p.stats.averageDuration,
-          totalRuns: p.stats.totalRuns
+          totalRuns: p.stats.totalRuns,
         })),
         environments: environments.slice(0, 5).map(e => ({
           id: e.id,
           name: e.name,
           uptime: e.stats.uptime,
           deployments: e.stats.totalDeployments,
-          issues: e.stats.failedDeployments
+          issues: e.stats.failedDeployments,
         })),
         failures: [
-          { pipeline: 'urbanova-api', stage: 'test', reason: 'Unit test failures', count: 8, percentage: 40 },
-          { pipeline: 'urbanova-web', stage: 'build', reason: 'Compilation errors', count: 5, percentage: 25 },
-          { pipeline: 'urbanova-api', stage: 'security', reason: 'Security vulnerabilities', count: 4, percentage: 20 },
-          { pipeline: 'urbanova-worker', stage: 'deploy', reason: 'Deployment timeout', count: 3, percentage: 15 }
-        ]
+          {
+            pipeline: 'urbanova-api',
+            stage: 'test',
+            reason: 'Unit test failures',
+            count: 8,
+            percentage: 40,
+          },
+          {
+            pipeline: 'urbanova-web',
+            stage: 'build',
+            reason: 'Compilation errors',
+            count: 5,
+            percentage: 25,
+          },
+          {
+            pipeline: 'urbanova-api',
+            stage: 'security',
+            reason: 'Security vulnerabilities',
+            count: 4,
+            percentage: 20,
+          },
+          {
+            pipeline: 'urbanova-worker',
+            stage: 'deploy',
+            reason: 'Deployment timeout',
+            count: 3,
+            percentage: 15,
+          },
+        ],
       },
       generatedAt: new Date(),
-      period: '30d'
+      period: '30d',
     };
   }
 
@@ -1782,7 +1830,7 @@ export class DevOpsService {
         date: new Date(Date.now() - i * 24 * 60 * 60 * 1000),
         runs: Math.floor(Math.random() * 20) + 10,
         successRate: Math.random() * 20 + 80,
-        averageDuration: Math.random() * 300 + 600
+        averageDuration: Math.random() * 300 + 600,
       });
     }
     return trends;
@@ -1797,7 +1845,7 @@ export class DevOpsService {
         coverage: Math.random() * 10 + 80,
         quality: Math.random() * 2 + 8,
         security: Math.random() * 1 + 9,
-        performance: Math.random() * 2 + 8
+        performance: Math.random() * 2 + 8,
       });
     }
     return trends;
@@ -1814,7 +1862,7 @@ export class DevOpsService {
 
   getPipelineRuns(pipelineId?: string): PipelineRun[] {
     const runs = Array.from(this.pipelineRuns.values());
-    return pipelineId 
+    return pipelineId
       ? runs.filter(r => r.pipelineId === pipelineId)
       : runs.sort((a, b) => (b.startedAt?.getTime() || 0) - (a.startedAt?.getTime() || 0));
   }
@@ -1840,8 +1888,8 @@ export class DevOpsService {
   }
 
   getReleases(): Release[] {
-    return Array.from(this.releases.values()).sort((a, b) => 
-      b.createdAt.getTime() - a.createdAt.getTime()
+    return Array.from(this.releases.values()).sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
 
@@ -1850,8 +1898,8 @@ export class DevOpsService {
   }
 
   getIncidents(): Incident[] {
-    return Array.from(this.incidents.values()).sort((a, b) => 
-      b.createdAt.getTime() - a.createdAt.getTime()
+    return Array.from(this.incidents.values()).sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
 
@@ -1868,24 +1916,28 @@ export class DevOpsService {
   }
 
   // Ricerca pipeline runs
-  searchPipelineRuns(query: string, filters?: {
-    pipelineId?: string;
-    status?: PipelineStatus;
-    trigger?: BuildTrigger;
-    environment?: DeploymentEnvironment;
-    dateFrom?: Date;
-    dateTo?: Date;
-  }): PipelineRun[] {
+  searchPipelineRuns(
+    query: string,
+    filters?: {
+      pipelineId?: string;
+      status?: PipelineStatus;
+      trigger?: BuildTrigger;
+      environment?: DeploymentEnvironment;
+      dateFrom?: Date;
+      dateTo?: Date;
+    }
+  ): PipelineRun[] {
     let results = Array.from(this.pipelineRuns.values());
 
     // Filtro per query testuale
     if (query.trim()) {
       const searchTerm = query.toLowerCase();
-      results = results.filter(run => 
-        run.pipelineName.toLowerCase().includes(searchTerm) ||
-        run.branch.toLowerCase().includes(searchTerm) ||
-        run.trigger.commit?.message.toLowerCase().includes(searchTerm) ||
-        run.trigger.commit?.author.toLowerCase().includes(searchTerm)
+      results = results.filter(
+        run =>
+          run.pipelineName.toLowerCase().includes(searchTerm) ||
+          run.branch.toLowerCase().includes(searchTerm) ||
+          run.trigger.commit?.message.toLowerCase().includes(searchTerm) ||
+          run.trigger.commit?.author.toLowerCase().includes(searchTerm)
       );
     }
 

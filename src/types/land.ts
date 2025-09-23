@@ -71,4 +71,4 @@ export interface RealLandScrapingResult {
     marketTrends: string;
     recommendations: string[];
   };
-} 
+}

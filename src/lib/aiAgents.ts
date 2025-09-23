@@ -41,9 +41,9 @@ export interface MarketOpportunity {
 }
 
 class AIMarketResearcher implements AIAgent {
-  name = "AI Ricercatore";
-  specialty = "Market Intelligence & Opportunity Discovery";
-  version = "1.0";
+  name = 'AI Ricercatore';
+  specialty = 'Market Intelligence & Opportunity Discovery';
+  version = '1.0';
 
   async execute(criteria: MarketSearchCriteria): Promise<MarketOpportunity[]> {
     // Simula ricerca mercato con algoritmi AI
@@ -59,13 +59,18 @@ class AIMarketResearcher implements AIAgent {
         buildingRights: '3.000 mc',
         aiScore: 94,
         tags: ['AI Scoperta', 'Alto potenziale', 'Zona emergente'],
-        description: 'Area identificata dall\'AI come ad altissimo potenziale di crescita nei prossimi 5 anni',
+        description:
+          "Area identificata dall'AI come ad altissimo potenziale di crescita nei prossimi 5 anni",
         coordinates: [45.4842, 9.2142],
         dateAdded: new Date(),
         source: 'AI Ricercatore',
-        marketTrends: ['Crescita +25% prezzi/anno', 'Nuove infrastrutture', 'Piano urbanistico favorevole'],
+        marketTrends: [
+          'Crescita +25% prezzi/anno',
+          'Nuove infrastrutture',
+          'Piano urbanistico favorevole',
+        ],
         competitorAnalysis: 'Bassa concorrenza, 3 sviluppatori attivi nella zona',
-        growthPotential: 85
+        growthPotential: 85,
       },
       {
         id: 'ai-opp-2',
@@ -79,13 +84,17 @@ class AIMarketResearcher implements AIAgent {
         aiScore: 89,
         tags: ['Riconversione urbana', 'Incentivi pubblici', 'Location premium'],
         description: 'Ex area industriale in fase di riqualificazione con incentivi del 40%',
-        coordinates: [41.8566, 12.4700],
+        coordinates: [41.8566, 12.47],
         dateAdded: new Date(),
         source: 'AI Ricercatore',
-        marketTrends: ['Riqualificazione urbana', 'Hub culturale emergente', 'Trasporti potenziati'],
+        marketTrends: [
+          'Riqualificazione urbana',
+          'Hub culturale emergente',
+          'Trasporti potenziati',
+        ],
         competitorAnalysis: 'Competizione media, progetti simili in zona hanno avuto successo',
-        growthPotential: 78
-      }
+        growthPotential: 78,
+      },
     ];
 
     // Simula tempo di elaborazione AI
@@ -96,7 +105,7 @@ class AIMarketResearcher implements AIAgent {
 }
 
 // ===========================================
-// 📊 AI ANALISTA - Feasibility Analysis  
+// 📊 AI ANALISTA - Feasibility Analysis
 // ===========================================
 
 export interface FeasibilityInput {
@@ -140,9 +149,9 @@ export interface AIFeasibilityAnalysis {
 }
 
 class AIFinancialAnalyst implements AIAgent {
-  name = "AI Analista";
-  specialty = "Financial Analysis & Risk Assessment";
-  version = "1.0";
+  name = 'AI Analista';
+  specialty = 'Financial Analysis & Risk Assessment';
+  version = '1.0';
 
   async execute(input: FeasibilityInput): Promise<AIFeasibilityAnalysis> {
     const totalInvestment = input.acquisitionCost + input.constructionCost + input.additionalCosts;
@@ -156,25 +165,40 @@ class AIFinancialAnalyst implements AIAgent {
       analysis: {
         roi: roi,
         npv: this.calculateNPV(netProfit, input.constructionTimeMonths),
-        irr: roi > 0 ? 12 + (roi * 0.3) : 5,
-        paybackPeriod: totalInvestment / (netProfit / (input.constructionTimeMonths + input.sellingTimeMonths)) / 12,
+        irr: roi > 0 ? 12 + roi * 0.3 : 5,
+        paybackPeriod:
+          totalInvestment /
+          (netProfit / (input.constructionTimeMonths + input.sellingTimeMonths)) /
+          12,
         riskScore: this.calculateRiskScore(input, roi),
-        confidenceLevel: this.calculateConfidence(input)
+        confidenceLevel: this.calculateConfidence(input),
       },
       marketContext: {
         localPriceIndex: this.getLocalPriceIndex(input.location),
         demandLevel: this.assessDemand(input.projectType, input.location),
         competitionLevel: this.assessCompetition(input.location),
-        trendDirection: this.getTrend(input.location)
+        trendDirection: this.getTrend(input.location),
       },
       scenarios: {
-        optimistic: { roi: roi * 1.4, npv: this.calculateNPV(netProfit * 1.4, input.constructionTimeMonths), probability: 20 },
-        realistic: { roi: roi, npv: this.calculateNPV(netProfit, input.constructionTimeMonths), probability: 60 },
-        pessimistic: { roi: roi * 0.6, npv: this.calculateNPV(netProfit * 0.6, input.constructionTimeMonths), probability: 20 }
+        optimistic: {
+          roi: roi * 1.4,
+          npv: this.calculateNPV(netProfit * 1.4, input.constructionTimeMonths),
+          probability: 20,
+        },
+        realistic: {
+          roi: roi,
+          npv: this.calculateNPV(netProfit, input.constructionTimeMonths),
+          probability: 60,
+        },
+        pessimistic: {
+          roi: roi * 0.6,
+          npv: this.calculateNPV(netProfit * 0.6, input.constructionTimeMonths),
+          probability: 20,
+        },
       },
       recommendations: this.generateRecommendations(input, roi),
       warningFlags: this.generateWarnings(input, roi),
-      aiInsights: this.generateAIInsights(input, roi)
+      aiInsights: this.generateAIInsights(input, roi),
     };
 
     return new Promise(resolve => {
@@ -206,15 +230,17 @@ class AIFinancialAnalyst implements AIAgent {
 
   private getLocalPriceIndex(location: string): number {
     const priceIndices = {
-      'Milano': 110,
-      'Roma': 95,
-      'Torino': 85,
-      'Napoli': 70,
-      'Firenze': 100
+      Milano: 110,
+      Roma: 95,
+      Torino: 85,
+      Napoli: 70,
+      Firenze: 100,
     };
-    return Object.entries(priceIndices).find(([city]) => 
-      location.toLowerCase().includes(city.toLowerCase())
-    )?.[1] || 85;
+    return (
+      Object.entries(priceIndices).find(([city]) =>
+        location.toLowerCase().includes(city.toLowerCase())
+      )?.[1] || 85
+    );
   }
 
   private assessDemand(type: string, location: string): 'HIGH' | 'MEDIUM' | 'LOW' {
@@ -236,7 +262,8 @@ class AIFinancialAnalyst implements AIAgent {
     const recs = [];
     if (roi > 15) recs.push('✅ Progetto altamente profittevole - Procedere con sviluppo');
     if (roi < 10) recs.push('⚠️ Profittabilità bassa - Rivedere costi o prezzi vendita');
-    if (input.constructionTimeMonths > 30) recs.push('⏱️ Tempi lunghi - Valutare ottimizzazione planning');
+    if (input.constructionTimeMonths > 30)
+      recs.push('⏱️ Tempi lunghi - Valutare ottimizzazione planning');
     recs.push('📊 Consigliato monitoraggio market sentiment trimestrale');
     return recs;
   }
@@ -245,7 +272,8 @@ class AIFinancialAnalyst implements AIAgent {
     const warnings = [];
     if (roi < 5) warnings.push('🚨 ROI troppo basso - Alto rischio investimento');
     if (input.constructionTimeMonths > 36) warnings.push('⚠️ Tempi realizzazione eccessivi');
-    if (input.sellingPricePerSqm < 2000) warnings.push('💰 Prezzo vendita potenzialmente sottostimato');
+    if (input.sellingPricePerSqm < 2000)
+      warnings.push('💰 Prezzo vendita potenzialmente sottostimato');
     return warnings;
   }
 
@@ -254,7 +282,7 @@ class AIFinancialAnalyst implements AIAgent {
       `L'AI rileva un potenziale di crescita del ${Math.round(roi * 0.1)}% nel mercato locale`,
       `Analizzando 500+ progetti simili, il tuo si posiziona nel ${roi > 15 ? 'top 20%' : 'percentile medio'}`,
       `Il sentiment di mercato per ${input.projectType} è attualmente positivo`,
-      `Raccomandazione AI: ${roi > 12 ? 'INVESTIMENTO CONSIGLIATO' : 'VALUTARE ALTERNATIVE'}`
+      `Raccomandazione AI: ${roi > 12 ? 'INVESTIMENTO CONSIGLIATO' : 'VALUTARE ALTERNATIVE'}`,
     ];
   }
 }
@@ -289,9 +317,9 @@ export interface AIDesignSuggestion {
 }
 
 class AIDesigner implements AIAgent {
-  name = "AI Designer";
-  specialty = "Architectural Design & Optimization";
-  version = "1.0";
+  name = 'AI Designer';
+  specialty = 'Architectural Design & Optimization';
+  version = '1.0';
 
   async execute(brief: DesignBrief): Promise<AIDesignSuggestion[]> {
     const suggestions: AIDesignSuggestion[] = [
@@ -304,30 +332,33 @@ class AIDesigner implements AIAgent {
         benefits: [
           'Incremento 18% spazio utilizzabile',
           'Miglioramento illuminazione naturale del 25%',
-          'Riduzione costi costruzione del 8%'
+          'Riduzione costi costruzione del 8%',
         ],
-        implementation: 'Rimozione pareti non portanti, creazione spazi fluidi, posizionamento strategico servizi',
+        implementation:
+          'Rimozione pareti non portanti, creazione spazi fluidi, posizionamento strategico servizi',
         estimatedCost: brief.budget * 0.02,
         timeImpact: -15, // risparmio di tempo
         sustainabilityScore: 85,
-        innovationScore: 78
+        innovationScore: 78,
       },
       {
         id: 'design-2',
         title: 'Sistema Building Automation Integrato',
         category: 'EFFICIENCY',
         priority: 'HIGH',
-        reasoning: 'Il budget disponibile permette integrazione sistemi smart per ottimizzazione energetica',
+        reasoning:
+          'Il budget disponibile permette integrazione sistemi smart per ottimizzazione energetica',
         benefits: [
           'Riduzione consumi energetici del 35%',
           'Aumento valore immobile del 15%',
-          'ROI sistema in 4.2 anni'
+          'ROI sistema in 4.2 anni',
         ],
-        implementation: 'Sensori IoT, HVAC intelligente, illuminazione LED adaptiva, controllo accessi digitale',
+        implementation:
+          'Sensori IoT, HVAC intelligente, illuminazione LED adaptiva, controllo accessi digitale',
         estimatedCost: brief.budget * 0.12,
         timeImpact: 10,
         sustainabilityScore: 95,
-        innovationScore: 90
+        innovationScore: 90,
       },
       {
         id: 'design-3',
@@ -338,31 +369,34 @@ class AIDesigner implements AIAgent {
         benefits: [
           'Certificazione LEED Platinum',
           'Incentivi fiscali fino a €150.000',
-          'Appeal marketing green del +22%'
+          'Appeal marketing green del +22%',
         ],
-        implementation: 'Legno FSC, isolanti naturali, vernici VOC-free, sistemi raccolta acqua piovana',
+        implementation:
+          'Legno FSC, isolanti naturali, vernici VOC-free, sistemi raccolta acqua piovana',
         estimatedCost: brief.budget * 0.08,
         timeImpact: 5,
         sustainabilityScore: 98,
-        innovationScore: 70
+        innovationScore: 70,
       },
       {
         id: 'design-4',
         title: 'Spazi Biofili per Benessere Utenti',
         category: 'FUNCTIONALITY',
         priority: brief.targetUsers.includes('famiglia') ? 'HIGH' : 'MEDIUM',
-        reasoning: 'Target utente e location beneficiano significativamente dall\'integrazione natura-architettura',
+        reasoning:
+          "Target utente e location beneficiano significativamente dall'integrazione natura-architettura",
         benefits: [
           'Miglioramento benessere psico-fisico del 30%',
           'Riduzione stress e aumento produttività',
-          'Purificazione aria naturale'
+          'Purificazione aria naturale',
         ],
-        implementation: 'Giardini verticali interni, lucernari strategici, cortili verdi, materiali naturali a vista',
+        implementation:
+          'Giardini verticali interni, lucernari strategici, cortili verdi, materiali naturali a vista',
         estimatedCost: brief.budget * 0.05,
         timeImpact: 8,
         sustainabilityScore: 88,
-        innovationScore: 75
-      }
+        innovationScore: 75,
+      },
     ];
 
     // Personalizzazione basata su brief specifico
@@ -374,14 +408,17 @@ class AIDesigner implements AIAgent {
     });
   }
 
-  private personalizeSuggestions(suggestions: AIDesignSuggestion[], brief: DesignBrief): AIDesignSuggestion[] {
+  private personalizeSuggestions(
+    suggestions: AIDesignSuggestion[],
+    brief: DesignBrief
+  ): AIDesignSuggestion[] {
     return suggestions.map(suggestion => {
       // Adatta suggerimenti in base al context
       if (brief.projectType === 'COMMERCIALE' && suggestion.category === 'LAYOUT') {
         suggestion.priority = 'HIGH';
         suggestion.benefits.push('Ottimizzazione flussi clienti');
       }
-      
+
       if (brief.style === 'SOSTENIBILE') {
         suggestion.sustainabilityScore += 10;
       }
@@ -408,11 +445,11 @@ export class AIAgentFactory {
     return new AIDesigner();
   }
 
-  static async getAgentCapabilities(): Promise<{[key: string]: string}> {
+  static async getAgentCapabilities(): Promise<{ [key: string]: string }> {
     return {
       'AI Ricercatore': 'Scansione mercato, identificazione opportunità, analisi competitor',
       'AI Analista': 'Valutazione finanziaria, calcolo ROI/VAN/TIR, analisi rischi',
-      'AI Designer': 'Suggerimenti architettonici, ottimizzazione layout, sostenibilità'
+      'AI Designer': 'Suggerimenti architettonici, ottimizzazione layout, sostenibilità',
     };
   }
 }
@@ -431,24 +468,24 @@ export class BusinessPlannerAgent {
     this.name = 'AI Business Planner';
     this.capabilities = [
       'Generazione business plan completi',
-      'Proiezioni finanziarie avanzate', 
+      'Proiezioni finanziarie avanzate',
       'Analisi ROI e NPV',
       'Strategie di finanziamento',
       'Analisi dei rischi',
       'Modelli cash flow',
       'Scenario planning',
-      'Valutazione fattibilità economica'
+      'Valutazione fattibilità economica',
     ];
   }
 
   async generateBusinessPlan(projectData: any): Promise<any> {
     // Simula l'elaborazione AI per business plan
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
+
     const roi = this.calculateROI(projectData.totalInvestment, projectData.expectedRevenue);
     const irr = this.calculateIRR(projectData);
     const riskLevel = this.assessRisk(projectData);
-    
+
     return {
       executiveSummary: this.generateExecutiveSummary(projectData),
       financialProjections: this.generateFinancialProjections(projectData),
@@ -456,7 +493,7 @@ export class BusinessPlannerAgent {
       riskAssessment: this.assessRisks(projectData),
       fundingStrategy: this.generateFundingStrategy(projectData),
       executionPlan: this.generateExecutionPlan(projectData),
-      keyMetrics: { roi, irr, riskLevel }
+      keyMetrics: { roi, irr, riskLevel },
     };
   }
 
@@ -476,11 +513,12 @@ export class BusinessPlannerAgent {
     const roi = this.calculateROI(projectData.totalInvestment, projectData.expectedRevenue);
     const complexity = projectData.projectType === 'MISTO' ? 1.5 : 1;
     const duration = projectData.projectDuration;
-    
-    const riskScore = (roi < 10 ? 3 : roi < 20 ? 2 : 1) + 
-                     (duration > 24 ? 2 : duration > 12 ? 1 : 0) + 
-                     (complexity - 1);
-    
+
+    const riskScore =
+      (roi < 10 ? 3 : roi < 20 ? 2 : 1) +
+      (duration > 24 ? 2 : duration > 12 ? 1 : 0) +
+      (complexity - 1);
+
     return riskScore >= 4 ? 'HIGH' : riskScore >= 2 ? 'MEDIUM' : 'LOW';
   }
 
@@ -494,47 +532,48 @@ export class BusinessPlannerAgent {
   private generateFinancialProjections(projectData: any): any[] {
     const projections = [];
     const projectYears = Math.ceil(projectData.projectDuration / 12) + 2;
-    
+
     for (let year = 1; year <= projectYears; year++) {
       const isConstructionYear = year <= Math.ceil(projectData.projectDuration / 12);
-      const cashOutflow = isConstructionYear 
-        ? (projectData.totalInvestment / Math.ceil(projectData.projectDuration / 12))
-        : (projectData.expectedRevenue * 0.1);
-      
-      const cashInflow = !isConstructionYear 
-        ? (projectData.expectedRevenue / (projectYears - Math.ceil(projectData.projectDuration / 12)))
+      const cashOutflow = isConstructionYear
+        ? projectData.totalInvestment / Math.ceil(projectData.projectDuration / 12)
+        : projectData.expectedRevenue * 0.1;
+
+      const cashInflow = !isConstructionYear
+        ? projectData.expectedRevenue / (projectYears - Math.ceil(projectData.projectDuration / 12))
         : 0;
-        
+
       projections.push({
         year,
         cashInflow,
         cashOutflow,
-        netCashFlow: cashInflow - cashOutflow
+        netCashFlow: cashInflow - cashOutflow,
       });
     }
-    
+
     return projections;
   }
 
   private generateMarketAnalysis(projectData: any): any {
     return {
       marketSize: `Mercato ${projectData.location} in crescita del 5-8% annuo`,
-      targetSegment: projectData.projectType === 'RESIDENZIALE' 
-        ? 'Famiglie giovani e professionisti' 
-        : 'Investitori istituzionali',
+      targetSegment:
+        projectData.projectType === 'RESIDENZIALE'
+          ? 'Famiglie giovani e professionisti'
+          : 'Investitori istituzionali',
       competitiveAdvantage: 'Posizionamento nel segmento premium con focus sostenibilità',
       marketTrends: [
         'Crescente attenzione alla sostenibilità',
         'Domanda di soluzioni smart home',
         'Preferenza per location ben servite',
-        'Aumento valore immobili nella zona'
-      ]
+        'Aumento valore immobili nella zona',
+      ],
     };
   }
 
   private assessRisks(projectData: any): any {
     const riskLevel = this.assessRisk(projectData);
-    
+
     return {
       level: riskLevel,
       factors: [
@@ -542,43 +581,43 @@ export class BusinessPlannerAgent {
         ...(projectData.projectDuration > 30 ? ['Tempi di realizzazione estesi'] : []),
         'Variazioni costi materie prime',
         'Fluttuazioni mercato immobiliare',
-        'Modifiche normative durante realizzazione'
+        'Modifiche normative durante realizzazione',
       ],
       mitigationStrategies: [
         'Contratti fixed-price con fornitori',
         'Pre-vendite per ridurre esposizione',
         'Diversificazione fornitori',
         'Buffer finanziario 10-15%',
-        'Assicurazione rischi cantiere'
-      ]
+        'Assicurazione rischi cantiere',
+      ],
     };
   }
 
   private generateFundingStrategy(projectData: any): any {
     const sources = [];
-    
+
     if (projectData.financingType === 'PROPRIO') {
       sources.push({
         source: 'Capitale Proprio',
         amount: projectData.totalInvestment,
         percentage: 100,
-        terms: 'Equity investment'
+        terms: 'Equity investment',
       });
     } else if (projectData.financingType === 'PRESTITO_BANCARIO') {
       sources.push({
         source: 'Finanziamento Bancario',
         amount: projectData.loanAmount || projectData.totalInvestment * 0.7,
         percentage: 70,
-        terms: `Tasso ${projectData.interestRate || 3.5}% per ${projectData.loanTermYears || 15} anni`
+        terms: `Tasso ${projectData.interestRate || 3.5}% per ${projectData.loanTermYears || 15} anni`,
       });
       sources.push({
         source: 'Capitale Proprio',
         amount: projectData.totalInvestment * 0.3,
         percentage: 30,
-        terms: 'Equity investment'
+        terms: 'Equity investment',
       });
     }
-    
+
     return { sources, totalFunding: projectData.totalInvestment };
   }
 
@@ -589,21 +628,21 @@ export class BusinessPlannerAgent {
           name: 'Progettazione e Permessi',
           duration: 6,
           budget: projectData.totalInvestment * 0.15,
-          milestones: ['Progetto approvato', 'Permessi ottenuti', 'Finanziamenti finalizzati']
+          milestones: ['Progetto approvato', 'Permessi ottenuti', 'Finanziamenti finalizzati'],
         },
         {
           name: 'Costruzione',
           duration: projectData.projectDuration - 6,
-          budget: projectData.totalInvestment * 0.70,
-          milestones: ['Fondazioni', 'Struttura', 'Finiture', 'Collaudo']
+          budget: projectData.totalInvestment * 0.7,
+          milestones: ['Fondazioni', 'Struttura', 'Finiture', 'Collaudo'],
         },
         {
           name: 'Commercializzazione',
           duration: 12,
           budget: projectData.totalInvestment * 0.15,
-          milestones: ['Lancio vendite', '50% venduto', 'Chiusura progetto']
-        }
-      ]
+          milestones: ['Lancio vendite', '50% venduto', 'Chiusura progetto'],
+        },
+      ],
     };
   }
 }
@@ -626,16 +665,16 @@ export class ComplianceAgent {
       'Generazione documentazione',
       'Workflow autorizzativi',
       'Reporting compliance',
-      'Aggiornamenti normativi real-time'
+      'Aggiornamenti normativi real-time',
     ];
   }
 
   async analyzePermitRequirements(projectData: any): Promise<any[]> {
     // Simula analisi AI dei permessi necessari
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
+
     const permits = [];
-    
+
     // Permessi base per tutti i progetti
     permits.push({
       name: 'Permesso di Costruire',
@@ -646,7 +685,7 @@ export class ComplianceAgent {
       authority: 'Comune - Ufficio Urbanistica',
       dependencies: [],
       documentation: ['Progetto architettonico', 'Relazione tecnica', 'Calcoli strutturali'],
-      aiRecommendations: ['Verificare conformità PRG prima della presentazione']
+      aiRecommendations: ['Verificare conformità PRG prima della presentazione'],
     });
 
     // Permessi specifici per tipologia
@@ -660,7 +699,7 @@ export class ComplianceAgent {
         authority: 'Certificatore Accreditato',
         dependencies: ['Permesso di Costruire'],
         documentation: ['APE', 'Calcoli energetici'],
-        aiRecommendations: ['Progettare per classe A+ per incentivi']
+        aiRecommendations: ['Progettare per classe A+ per incentivi'],
       });
     }
 
@@ -674,7 +713,7 @@ export class ComplianceAgent {
         authority: 'ARPA Regionale',
         dependencies: [],
         documentation: ['Studio impatto ambientale', 'Relazione geologica'],
-        aiRecommendations: ['Iniziare VIA il prima possibile - processo lungo']
+        aiRecommendations: ['Iniziare VIA il prima possibile - processo lungo'],
       });
     }
 
@@ -687,7 +726,7 @@ export class ComplianceAgent {
       authority: 'Vigili del Fuoco',
       dependencies: ['Permesso di Costruire'],
       documentation: ['Progetto antincendio', 'Planimetrie evacuazione'],
-      aiRecommendations: ['Consulenza specialistica consigliata']
+      aiRecommendations: ['Consulenza specialistica consigliata'],
     });
 
     return permits;
@@ -711,7 +750,7 @@ export class ComplianceAgent {
             description: `Il permesso scade tra ${daysUntilDeadline} giorni`,
             actionRequired: 'Accelerare iter o richiedere proroga',
             relatedPermits: [permit.id],
-            deadline: permit.requiredBy
+            deadline: permit.requiredBy,
           });
         }
       }
@@ -723,7 +762,7 @@ export class ComplianceAgent {
           title: `Ritardo ${permit.name}`,
           description: 'Permesso in ritardo sulla timeline progetto',
           actionRequired: 'Sollecitare ufficio competente',
-          relatedPermits: [permit.id]
+          relatedPermits: [permit.id],
         });
       }
     });
@@ -735,7 +774,7 @@ export class ComplianceAgent {
       title: 'Aggiornamento Bonus Edilizi',
       description: 'Nuove modifiche ai bonus edilizi in vigore dal prossimo mese',
       actionRequired: 'Verificare impatto su incentivi progetto',
-      relatedPermits: []
+      relatedPermits: [],
     });
 
     return alerts;
@@ -744,18 +783,17 @@ export class ComplianceAgent {
   async trackComplianceStatus(permits: any[]): Promise<any> {
     // Simula tracking compliance
     await new Promise(resolve => setTimeout(resolve, 800));
-    
+
     const total = permits.length;
     const approved = permits.filter(p => p.status === 'APPROVATO').length;
-    const inProgress = permits.filter(p => 
+    const inProgress = permits.filter(p =>
       ['IN_ESAME', 'PRESENTATO', 'IN_PREPARAZIONE'].includes(p.status)
     ).length;
     const critical = permits.filter(p => p.priority === 'CRITICO').length;
-    
+
     const complianceScore = Math.round((approved / total) * 100);
-    const riskLevel = complianceScore >= 80 ? 'LOW' : 
-                     complianceScore >= 60 ? 'MEDIUM' : 'HIGH';
-    
+    const riskLevel = complianceScore >= 80 ? 'LOW' : complianceScore >= 60 ? 'MEDIUM' : 'HIGH';
+
     return {
       totalPermits: total,
       approvedPermits: approved,
@@ -767,8 +805,8 @@ export class ComplianceAgent {
         ...(complianceScore < 60 ? ['Accelerare iter permessi critici'] : []),
         ...(inProgress > 3 ? ['Considerare consulenza specialistica'] : []),
         'Monitoraggio settimanale stato avanzamento',
-        'Backup plan per permessi a rischio'
-      ]
+        'Backup plan per permessi a rischio',
+      ],
     };
   }
 }
@@ -791,17 +829,17 @@ export class ProjectManagerAgent {
       'Ottimizzazione percorso critico',
       'Gestione milestone',
       'Risk mitigation planning',
-      'Resource leveling automatico'
+      'Resource leveling automatico',
     ];
   }
 
   async generateProjectTimeline(projectData: any, permits: any[]): Promise<any> {
     // Simula generazione timeline AI
     await new Promise(resolve => setTimeout(resolve, 2500));
-    
+
     const tasks: any[] = [];
     const milestones: any[] = [];
-    
+
     // Fase Progettazione
     tasks.push({
       id: 'design-1',
@@ -811,18 +849,18 @@ export class ProjectManagerAgent {
       dependencies: [],
       resources: ['Architetto Senior'],
       cost: 15000,
-      aiOptimization: 'Parallellizzare con rilievi topografici'
+      aiOptimization: 'Parallellizzare con rilievi topografici',
     });
 
     tasks.push({
-      id: 'design-2', 
+      id: 'design-2',
       name: 'Progetto Definitivo ed Esecutivo',
       category: 'PROGETTAZIONE',
       duration: 45,
       dependencies: ['design-1'],
       resources: ['Architetto', 'Ingegnere Strutturale'],
       cost: 25000,
-      aiOptimization: 'Utilizzare BIM per accelerare il processo'
+      aiOptimization: 'Utilizzare BIM per accelerare il processo',
     });
 
     // Fase Permessi (basata sui permessi richiesti)
@@ -835,7 +873,9 @@ export class ProjectManagerAgent {
         dependencies: permit.dependencies.length > 0 ? permit.dependencies : ['design-2'],
         resources: ['Consulente Tecnico'],
         cost: permit.cost || 1000,
-        aiOptimization: permit.aiRecommendations ? permit.aiRecommendations[0] : 'Monitoraggio attivo stato pratica'
+        aiOptimization: permit.aiRecommendations
+          ? permit.aiRecommendations[0]
+          : 'Monitoraggio attivo stato pratica',
       });
     });
 
@@ -845,7 +885,7 @@ export class ProjectManagerAgent {
       { name: 'Struttura Portante', duration: 60, cost: 120000, deps: ['Scavi e Fondazioni'] },
       { name: 'Tamponature', duration: 30, cost: 45000, deps: ['Struttura Portante'] },
       { name: 'Impianti', duration: 45, cost: 65000, deps: ['Tamponature'] },
-      { name: 'Finiture', duration: 60, cost: 80000, deps: ['Impianti'] }
+      { name: 'Finiture', duration: 60, cost: 80000, deps: ['Impianti'] },
     ];
 
     constructionTasks.forEach((task, idx) => {
@@ -854,10 +894,12 @@ export class ProjectManagerAgent {
         name: task.name,
         category: 'COSTRUZIONE',
         duration: task.duration,
-        dependencies: Array.isArray(task.deps) ? task.deps : [tasks.find(t => t.name === task.deps)?.id].filter(Boolean),
+        dependencies: Array.isArray(task.deps)
+          ? task.deps
+          : [tasks.find(t => t.name === task.deps)?.id].filter(Boolean),
         resources: ['Impresa Edile', 'Direttore Lavori'],
         cost: task.cost,
-        aiOptimization: 'Ottimizzazione sequenza lavorazioni per ridurre tempi morti'
+        aiOptimization: 'Ottimizzazione sequenza lavorazioni per ridurre tempi morti',
       });
     });
 
@@ -867,19 +909,19 @@ export class ProjectManagerAgent {
         name: 'Progetto Approvato',
         date: this.addDaysToDate(new Date(), 75),
         importance: 'CRITICO',
-        relatedTasks: ['design-1', 'design-2']
+        relatedTasks: ['design-1', 'design-2'],
       },
       {
-        name: 'Permessi Ottenuti', 
+        name: 'Permessi Ottenuti',
         date: this.addDaysToDate(new Date(), 135),
         importance: 'CRITICO',
-        relatedTasks: tasks.filter(t => t.category === 'PERMESSI').map(t => t.id)
+        relatedTasks: tasks.filter(t => t.category === 'PERMESSI').map(t => t.id),
       },
       {
         name: 'Struttura Completata',
         date: this.addDaysToDate(new Date(), 275),
         importance: 'IMPORTANTE',
-        relatedTasks: ['construct-1', 'construct-2']
+        relatedTasks: ['construct-1', 'construct-2'],
       }
     );
 
@@ -894,7 +936,7 @@ export class ProjectManagerAgent {
         totalDuration: Math.round(totalDuration),
         totalCost,
         tasksCount: tasks.length,
-        milestonesCount: milestones.length
+        milestonesCount: milestones.length,
       },
       tasks: tasks.map(t => ({
         ...t,
@@ -902,7 +944,7 @@ export class ProjectManagerAgent {
         endDate: this.calculateEndDate(t, tasks),
         isCritical: criticalPath.includes(t.id),
         status: 'NON_INIZIATO',
-        progress: 0
+        progress: 0,
       })),
       milestones,
       criticalPath,
@@ -910,14 +952,14 @@ export class ProjectManagerAgent {
         'Iniziare permessi in parallelo alla progettazione definitiva',
         'Pre-ordinare materiali per evitare ritardi',
         'Schedulare riunioni settimanali di coordinamento',
-        'Implementare dashboard real-time per tracking avanzamento'
+        'Implementare dashboard real-time per tracking avanzamento',
       ],
       riskMitigation: {
         weatherRisk: 'Schedulare lavori esterni nei mesi favorevoli',
         supplierRisk: 'Identificare fornitori backup per materiali critici',
         permitRisk: 'Buffer temporale 15% su permessi critici',
-        resourceRisk: 'Piano contingenza per risorse chiave'
-      }
+        resourceRisk: 'Piano contingenza per risorse chiave',
+      },
     };
   }
 
@@ -930,11 +972,11 @@ export class ProjectManagerAgent {
   private calculateStartDate(task: any, allTasks: any[]): Date {
     // Logica semplificata per calcolare data inizio task
     const baseDate = new Date();
-    
+
     if (task.dependencies.length === 0) {
       return baseDate;
     }
-    
+
     // Trova la data di fine più tardiva delle dipendenze
     let latestEndDate = baseDate;
     task.dependencies.forEach((depId: string) => {
@@ -946,7 +988,7 @@ export class ProjectManagerAgent {
         }
       }
     });
-    
+
     return this.addDaysToDate(latestEndDate, 1);
   }
 
@@ -959,31 +1001,34 @@ export class ProjectManagerAgent {
     // Algoritmo semplificato per percorso critico
     // In un'implementazione reale useremmo CPM (Critical Path Method)
     const criticalTasks = tasks
-      .filter(t => t.category === 'PROGETTAZIONE' || t.category === 'PERMESSI' || t.priority === 'CRITICA')
+      .filter(
+        t => t.category === 'PROGETTAZIONE' || t.category === 'PERMESSI' || t.priority === 'CRITICA'
+      )
       .map(t => t.id);
-    
+
     return criticalTasks;
   }
 
   async optimizeResourceAllocation(tasks: any[]): Promise<any> {
     // Simula ottimizzazione allocazione risorse
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     const resources = Array.from(new Set(tasks.flatMap(t => t.resources)));
     const resourceUtilization = resources.map(resource => {
       const resourceTasks = tasks.filter(t => t.resources.includes(resource));
       const totalDuration = resourceTasks.reduce((sum, t) => sum + t.duration, 0);
       const utilization = Math.min((totalDuration / 365) * 100, 100);
-      
+
       return {
         resource,
         utilization: Math.round(utilization),
         tasksAssigned: resourceTasks.length,
-        suggestions: utilization > 80 
-          ? ['Considerare risorse aggiuntive', 'Rivedere timeline task non critici']
-          : utilization < 40
-          ? ['Risorsa sottoutilizzata', 'Possibile ridistribuzione carichi']
-          : ['Utilizzo ottimale']
+        suggestions:
+          utilization > 80
+            ? ['Considerare risorse aggiuntive', 'Rivedere timeline task non critici']
+            : utilization < 40
+              ? ['Risorsa sottoutilizzata', 'Possibile ridistribuzione carichi']
+              : ['Utilizzo ottimale'],
       };
     });
 
@@ -994,11 +1039,11 @@ export class ProjectManagerAgent {
       recommendations: [
         'Implementare resource leveling per distribuire carichi',
         'Considerare outsourcing per picchi di lavoro',
-        'Pianificare formazione cross-funzionale team'
-      ]
+        'Pianificare formazione cross-funzionale team',
+      ],
     };
   }
 }
 
 // Export default per facile utilizzo
-export default AIAgentFactory; 
+export default AIAgentFactory;

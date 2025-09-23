@@ -1,6 +1,15 @@
 // Tipi per il sistema di Advanced Blockchain & Web3 Integration
 
-export type BlockchainNetwork = 'ethereum' | 'polygon' | 'binance_smart_chain' | 'avalanche' | 'arbitrum' | 'optimism' | 'solana' | 'cardano' | 'polkadot';
+export type BlockchainNetwork =
+  | 'ethereum'
+  | 'polygon'
+  | 'binance_smart_chain'
+  | 'avalanche'
+  | 'arbitrum'
+  | 'optimism'
+  | 'solana'
+  | 'cardano'
+  | 'polkadot';
 
 export type TokenStandard = 'ERC20' | 'ERC721' | 'ERC1155' | 'BEP20' | 'SPL' | 'ADA' | 'DOT';
 
@@ -8,11 +17,34 @@ export type TransactionStatus = 'pending' | 'confirmed' | 'failed' | 'cancelled'
 
 export type ContractStatus = 'deployed' | 'verified' | 'paused' | 'deprecated' | 'upgrading';
 
-export type WalletType = 'metamask' | 'wallet_connect' | 'coinbase_wallet' | 'trust_wallet' | 'ledger' | 'trezor' | 'phantom' | 'solflare';
+export type WalletType =
+  | 'metamask'
+  | 'wallet_connect'
+  | 'coinbase_wallet'
+  | 'trust_wallet'
+  | 'ledger'
+  | 'trezor'
+  | 'phantom'
+  | 'solflare';
 
-export type NFTCategory = 'real_estate' | 'property_deed' | 'rental_agreement' | 'investment_certificate' | 'membership' | 'utility' | 'collectible';
+export type NFTCategory =
+  | 'real_estate'
+  | 'property_deed'
+  | 'rental_agreement'
+  | 'investment_certificate'
+  | 'membership'
+  | 'utility'
+  | 'collectible';
 
-export type DeFiProtocol = 'uniswap' | 'sushiswap' | 'compound' | 'aave' | 'curve' | 'yearn' | 'maker_dao' | 'pancakeswap';
+export type DeFiProtocol =
+  | 'uniswap'
+  | 'sushiswap'
+  | 'compound'
+  | 'aave'
+  | 'curve'
+  | 'yearn'
+  | 'maker_dao'
+  | 'pancakeswap';
 
 export type StakingStatus = 'active' | 'pending' | 'unstaking' | 'completed' | 'slashed';
 
@@ -31,34 +63,34 @@ export interface Wallet {
   address: string;
   type: WalletType;
   network: BlockchainNetwork;
-  
+
   // Balance info
   nativeBalance: string; // in wei/lamports
   formattedBalance: string; // formatted with decimals
   usdValue: number;
-  
+
   // Token balances
   tokenBalances: TokenBalance[];
-  
+
   // NFT holdings
   nfts: NFTHolding[];
-  
+
   // Connection status
   isConnected: boolean;
   isActive: boolean;
-  
+
   // Metadata
   ensName?: string;
   avatar?: string;
-  
+
   // Security
   isMultisig: boolean;
   signers?: string[];
-  
+
   // Timeline
   connectedAt: Date;
   lastActivityAt: Date;
-  
+
   // Preferences
   preferences: {
     defaultNetwork: BlockchainNetwork;
@@ -77,21 +109,21 @@ export interface TokenBalance {
   formattedBalance: string;
   usdValue: number;
   logoUri?: string;
-  
+
   // Token metadata
   standard: TokenStandard;
   network: BlockchainNetwork;
-  
+
   // Price info
   pricePerToken: number;
   priceChange24h: number;
   marketCap?: number;
-  
+
   // DeFi info
   isStaked: boolean;
   stakedAmount?: string;
   rewards?: string;
-  
+
   // Permissions
   allowances: Array<{
     spender: string;
@@ -108,37 +140,37 @@ export interface NFTHolding {
   image?: string;
   animationUrl?: string;
   externalUrl?: string;
-  
+
   // Metadata
   attributes: Array<{
     traitType: string;
     value: string | number;
     displayType?: string;
   }>;
-  
+
   // Collection info
   collectionName: string;
   collectionSlug: string;
-  
+
   // Ownership
   owner: string;
   tokenStandard: TokenStandard;
   network: BlockchainNetwork;
-  
+
   // Market data
   floorPrice?: number;
   lastSalePrice?: number;
   estimatedValue?: number;
-  
+
   // Real estate specific
   category: NFTCategory;
   realEstateData?: RealEstateNFTData;
-  
+
   // Utility
   isStaked: boolean;
   stakingRewards?: string;
   unlockDate?: Date;
-  
+
   // Timeline
   mintedAt: Date;
   acquiredAt: Date;
@@ -154,36 +186,36 @@ export interface RealEstateNFTData {
     latitude: number;
     longitude: number;
   };
-  
+
   // Physical attributes
   size: number; // square meters
   bedrooms?: number;
   bathrooms?: number;
   floors?: number;
   yearBuilt?: number;
-  
+
   // Valuation
   currentValuation: number;
   lastAppraisal: Date;
   appreciationRate: number; // annual percentage
-  
+
   // Ownership
   ownershipPercentage: number; // for fractional ownership
   totalShares: number;
-  
+
   // Legal
   deedHash: string;
   legalDescription: string;
   zoning: string;
   taxId: string;
-  
+
   // Income
   rentalIncome?: {
     monthlyRent: number;
     occupancyRate: number;
     leaseEndDate?: Date;
   };
-  
+
   // Documents
   documents: Array<{
     type: 'deed' | 'survey' | 'inspection' | 'insurance' | 'tax_record';
@@ -198,33 +230,33 @@ export interface SmartContract {
   name: string;
   description: string;
   network: BlockchainNetwork;
-  
+
   // Contract info
   abi: any[];
   bytecode?: string;
   sourceCode?: string;
-  
+
   // Deployment
   deployedAt: Date;
   deployedBy: string;
   deploymentTxHash: string;
   blockNumber: number;
-  
+
   // Status
   status: ContractStatus;
   isVerified: boolean;
   isProxy: boolean;
   implementationAddress?: string;
-  
+
   // Functionality
   functions: ContractFunction[];
   events: ContractEvent[];
-  
+
   // Usage stats
   totalTransactions: number;
   uniqueUsers: number;
   totalValueLocked?: number;
-  
+
   // Security
   auditReports: Array<{
     auditor: string;
@@ -237,15 +269,15 @@ export interface SmartContract {
       status: 'open' | 'acknowledged' | 'fixed';
     }>;
   }>;
-  
+
   // Governance
   isGovernanceEnabled: boolean;
   governanceToken?: string;
-  
+
   // Metadata
   tags: string[];
   category: string;
-  
+
   // Timeline
   createdAt: Date;
   updatedAt: Date;
@@ -265,11 +297,11 @@ export interface ContractFunction {
     type: string;
     description?: string;
   }>;
-  
+
   // Properties
   stateMutability: 'pure' | 'view' | 'nonpayable' | 'payable';
   visibility: 'public' | 'external' | 'internal' | 'private';
-  
+
   // Usage
   callCount: number;
   gasUsage: {
@@ -277,7 +309,7 @@ export interface ContractFunction {
     max: number;
     average: number;
   };
-  
+
   // Documentation
   description?: string;
   examples?: string[];
@@ -291,11 +323,11 @@ export interface ContractEvent {
     type: string;
     indexed: boolean;
   }>;
-  
+
   // Usage
   emissionCount: number;
   lastEmittedAt?: Date;
-  
+
   // Documentation
   description?: string;
 }
@@ -304,7 +336,7 @@ export interface Transaction {
   id: string;
   hash: string;
   network: BlockchainNetwork;
-  
+
   // Basic info
   from: string;
   to: string;
@@ -314,40 +346,47 @@ export interface Transaction {
   gasPrice: string; // in wei
   maxFeePerGas?: string;
   maxPriorityFeePerGas?: string;
-  
+
   // Status
   status: TransactionStatus;
   blockNumber?: number;
   blockHash?: string;
   transactionIndex?: number;
   confirmations: number;
-  
+
   // Data
   input?: string;
   logs?: TransactionLog[];
-  
+
   // Metadata
-  type: 'transfer' | 'contract_interaction' | 'contract_deployment' | 'nft_mint' | 'nft_transfer' | 'defi_swap' | 'staking';
+  type:
+    | 'transfer'
+    | 'contract_interaction'
+    | 'contract_deployment'
+    | 'nft_mint'
+    | 'nft_transfer'
+    | 'defi_swap'
+    | 'staking';
   description: string;
-  
+
   // Decoded data
   decodedInput?: {
     methodName: string;
     parameters: Record<string, any>;
   };
-  
+
   // Value tracking
   usdValueAtTime: number;
   currentUsdValue: number;
-  
+
   // Timeline
   submittedAt: Date;
   confirmedAt?: Date;
-  
+
   // Error handling
   error?: string;
   revertReason?: string;
-  
+
   // MEV protection
   isMevProtected: boolean;
   flashbotBundle?: string;
@@ -357,11 +396,11 @@ export interface TransactionLog {
   address: string;
   topics: string[];
   data: string;
-  
+
   // Decoded
   eventName?: string;
   decodedData?: Record<string, any>;
-  
+
   // Context
   logIndex: number;
   blockNumber: number;
@@ -373,12 +412,12 @@ export interface DeFiPosition {
   protocol: DeFiProtocol;
   network: BlockchainNetwork;
   type: 'lending' | 'borrowing' | 'liquidity_providing' | 'yield_farming' | 'staking';
-  
+
   // Position details
   asset: string;
   amount: string;
   usdValue: number;
-  
+
   // Rewards
   rewards: Array<{
     token: string;
@@ -386,27 +425,27 @@ export interface DeFiPosition {
     usdValue: number;
     apr: number;
   }>;
-  
+
   // Risk metrics
   healthFactor?: number;
   liquidationPrice?: number;
   collateralizationRatio?: number;
-  
+
   // Performance
   totalEarned: number;
   totalEarnedUsd: number;
   apy: number;
   impermanentLoss?: number;
-  
+
   // Timeline
   enteredAt: Date;
   lastUpdateAt: Date;
-  
+
   // Actions available
   canWithdraw: boolean;
   canClaim: boolean;
   canCompound: boolean;
-  
+
   // Position specific data
   liquidityPoolData?: LiquidityPoolPosition;
   stakingData?: StakingPosition;
@@ -420,12 +459,12 @@ export interface LiquidityPoolPosition {
   token0Amount: string;
   token1Amount: string;
   lpTokens: string;
-  
+
   // Pool info
   poolFee: number;
   totalLiquidity: number;
   volume24h: number;
-  
+
   // Position performance
   feesEarned: {
     token0: string;
@@ -438,12 +477,12 @@ export interface StakingPosition {
   validatorAddress?: string;
   delegatedAmount: string;
   rewards: string;
-  
+
   // Staking details
   stakingPeriod?: number; // in days
   lockEndDate?: Date;
   slashingRisk: number; // percentage
-  
+
   // Validator info
   validatorInfo?: {
     name: string;
@@ -459,13 +498,13 @@ export interface LendingPosition {
     amount: string;
     apy: number;
   }>;
-  
+
   borrowedAssets: Array<{
     asset: string;
     amount: string;
     apy: number;
   }>;
-  
+
   // Risk metrics
   borrowLimit: number;
   borrowLimitUsed: number;
@@ -477,24 +516,24 @@ export interface GovernanceProposal {
   title: string;
   description: string;
   proposer: string;
-  
+
   // Voting
   votingPower: string;
   votesFor: string;
   votesAgainst: string;
   votesAbstain: string;
   quorum: string;
-  
+
   // Status
   status: GovernanceStatus;
-  
+
   // Timeline
   createdAt: Date;
   votingStartsAt: Date;
   votingEndsAt: Date;
   executionEta?: Date;
   executedAt?: Date;
-  
+
   // Execution
   actions: Array<{
     target: string;
@@ -502,7 +541,7 @@ export interface GovernanceProposal {
     calldata: string;
     value: string;
   }>;
-  
+
   // User interaction
   userVote?: {
     choice: 'for' | 'against' | 'abstain';
@@ -510,12 +549,12 @@ export interface GovernanceProposal {
     reason?: string;
     votedAt: Date;
   };
-  
+
   // Metadata
   category: string;
   tags: string[];
   discussionUrl?: string;
-  
+
   // Impact assessment
   estimatedImpact: {
     financial: number;
@@ -529,19 +568,19 @@ export interface NFTMarketplace {
   name: string;
   network: BlockchainNetwork;
   contractAddress: string;
-  
+
   // Marketplace info
   totalVolume: number;
   totalSales: number;
   activeListings: number;
-  
+
   // Fees
   marketplaceFee: number; // percentage
   royaltyFee: number; // percentage
-  
+
   // Supported standards
   supportedStandards: TokenStandard[];
-  
+
   // Features
   features: {
     auctions: boolean;
@@ -550,7 +589,7 @@ export interface NFTMarketplace {
     fractionalOwnership: boolean;
     crossChain: boolean;
   };
-  
+
   // Statistics
   stats: {
     volume24h: number;
@@ -567,22 +606,22 @@ export interface NFTListing {
   tokenId: string;
   contractAddress: string;
   marketplace: string;
-  
+
   // Listing details
   seller: string;
   price: string;
   currency: string;
-  
+
   // Auction details
   isAuction: boolean;
   auctionEndTime?: Date;
   currentBid?: string;
   bidder?: string;
   reservePrice?: string;
-  
+
   // Status
   status: AuctionStatus;
-  
+
   // Offers
   offers: Array<{
     bidder: string;
@@ -591,12 +630,12 @@ export interface NFTListing {
     expiresAt: Date;
     status: 'active' | 'accepted' | 'rejected' | 'expired';
   }>;
-  
+
   // Timeline
   listedAt: Date;
   expiresAt?: Date;
   soldAt?: Date;
-  
+
   // Metadata
   nftMetadata: NFTHolding;
 }
@@ -606,13 +645,13 @@ export interface CrossChainBridge {
   name: string;
   sourceNetwork: BlockchainNetwork;
   destinationNetwork: BlockchainNetwork;
-  
+
   // Bridge info
   contractAddresses: {
     source: string;
     destination: string;
   };
-  
+
   // Supported assets
   supportedAssets: Array<{
     sourceToken: string;
@@ -621,16 +660,16 @@ export interface CrossChainBridge {
     maxAmount: string;
     fee: number; // percentage
   }>;
-  
+
   // Security
   securityModel: 'validator_set' | 'optimistic' | 'zero_knowledge' | 'federated';
   validators: string[];
-  
+
   // Performance
   averageBridgeTime: number; // in minutes
   successRate: number; // percentage
   totalVolume: number;
-  
+
   // Status
   isActive: boolean;
   maintenanceMode: boolean;
@@ -639,42 +678,42 @@ export interface CrossChainBridge {
 export interface CrossChainTransaction {
   id: string;
   bridgeId: string;
-  
+
   // Transaction details
   sourceNetwork: BlockchainNetwork;
   destinationNetwork: BlockchainNetwork;
   asset: string;
   amount: string;
-  
+
   // Addresses
   sender: string;
   recipient: string;
-  
+
   // Transaction hashes
   sourceTxHash: string;
   destinationTxHash?: string;
-  
+
   // Status
   status: CrossChainStatus;
-  
+
   // Timeline
   initiatedAt: Date;
   completedAt?: Date;
   estimatedCompletionTime: Date;
-  
+
   // Fees
   bridgeFee: string;
   gasFees: {
     source: string;
     destination?: string;
   };
-  
+
   // Progress tracking
   confirmations: {
     required: number;
     current: number;
   };
-  
+
   // Error handling
   error?: string;
   refundTxHash?: string;
@@ -685,7 +724,7 @@ export interface PriceOracle {
   name: string;
   network: BlockchainNetwork;
   contractAddress: string;
-  
+
   // Oracle info
   assetPairs: Array<{
     base: string;
@@ -694,23 +733,23 @@ export interface PriceOracle {
     lastUpdated: Date;
     confidence: number;
   }>;
-  
+
   // Status
   status: OracleStatus;
-  
+
   // Performance
   updateFrequency: number; // in seconds
   deviation: number; // percentage from market price
   uptime: number; // percentage
-  
+
   // Data sources
   dataSources: string[];
   aggregationMethod: 'median' | 'mean' | 'weighted_average';
-  
+
   // Security
   isDecentralized: boolean;
   nodeCount?: number;
-  
+
   // Usage
   totalQueries: number;
   subscribedContracts: string[];
@@ -721,18 +760,18 @@ export interface YieldFarmingPool {
   name: string;
   protocol: DeFiProtocol;
   network: BlockchainNetwork;
-  
+
   // Pool details
   stakingToken: string;
   rewardTokens: string[];
   totalStaked: string;
   totalRewards: string;
-  
+
   // APY calculation
   apy: number;
   baseApy: number;
   bonusApy: number;
-  
+
   // Pool mechanics
   lockPeriod?: number; // in days
   vestingPeriod?: number; // in days
@@ -740,14 +779,14 @@ export interface YieldFarmingPool {
     duration: number; // in days
     multiplier: number;
   }>;
-  
+
   // Status
   status: LiquidityPoolStatus;
-  
+
   // Timeline
   startDate: Date;
   endDate?: Date;
-  
+
   // User position
   userPosition?: {
     stakedAmount: string;
@@ -763,7 +802,7 @@ export interface Web3Analytics {
     totalValue: number;
     totalValueChange24h: number;
     totalValueChangePercentage: number;
-    
+
     // Asset breakdown
     assetAllocation: Array<{
       asset: string;
@@ -771,7 +810,7 @@ export interface Web3Analytics {
       percentage: number;
       change24h: number;
     }>;
-    
+
     // Network breakdown
     networkAllocation: Array<{
       network: BlockchainNetwork;
@@ -779,7 +818,7 @@ export interface Web3Analytics {
       percentage: number;
     }>;
   };
-  
+
   // DeFi metrics
   defi: {
     totalDeposited: number;
@@ -787,7 +826,7 @@ export interface Web3Analytics {
     netWorth: number;
     totalYieldEarned: number;
     averageApy: number;
-    
+
     // Protocol breakdown
     protocolBreakdown: Array<{
       protocol: DeFiProtocol;
@@ -795,18 +834,18 @@ export interface Web3Analytics {
       apy: number;
       risk: 'low' | 'medium' | 'high';
     }>;
-    
+
     // Position health
     healthFactor: number;
     liquidationRisk: 'low' | 'medium' | 'high';
   };
-  
+
   // NFT metrics
   nft: {
     totalValue: number;
     totalCount: number;
     floorValueSum: number;
-    
+
     // Collection breakdown
     collectionBreakdown: Array<{
       collection: string;
@@ -814,7 +853,7 @@ export interface Web3Analytics {
       floorPrice: number;
       totalValue: number;
     }>;
-    
+
     // Category breakdown
     categoryBreakdown: Array<{
       category: NFTCategory;
@@ -822,20 +861,20 @@ export interface Web3Analytics {
       value: number;
     }>;
   };
-  
+
   // Transaction metrics
   transactions: {
     totalCount: number;
     totalGasSpent: number;
     totalVolume: number;
-    
+
     // Activity breakdown
     activityBreakdown: Array<{
       type: string;
       count: number;
       volume: number;
     }>;
-    
+
     // Network usage
     networkUsage: Array<{
       network: BlockchainNetwork;
@@ -843,14 +882,14 @@ export interface Web3Analytics {
       gasSpent: number;
     }>;
   };
-  
+
   // Performance metrics
   performance: {
     totalReturn: number;
     totalReturnPercentage: number;
     bestPerformingAsset: string;
     worstPerformingAsset: string;
-    
+
     // Time-based returns
     returns: {
       '24h': number;
@@ -858,17 +897,17 @@ export interface Web3Analytics {
       '30d': number;
       '90d': number;
       '1y': number;
-      'all_time': number;
+      all_time: number;
     };
   };
-  
+
   // Risk metrics
   risk: {
     portfolioRisk: 'low' | 'medium' | 'high';
     concentrationRisk: number;
     liquidityRisk: number;
     smartContractRisk: number;
-    
+
     // Risk factors
     riskFactors: Array<{
       factor: string;
@@ -876,7 +915,7 @@ export interface Web3Analytics {
       description: string;
     }>;
   };
-  
+
   // Timeline
   generatedAt: Date;
   dataAsOf: Date;
@@ -888,7 +927,7 @@ export interface Web3Security {
     isHardwareWallet: boolean;
     hasMultisig: boolean;
     signerCount?: number;
-    
+
     // Permission analysis
     tokenApprovals: Array<{
       spender: string;
@@ -898,12 +937,12 @@ export interface Web3Security {
       risk: 'low' | 'medium' | 'high';
       lastUsed?: Date;
     }>;
-    
+
     // Security score
     securityScore: number; // 0-100
     recommendations: string[];
   };
-  
+
   // Contract interactions
   contractSecurity: {
     interactedContracts: Array<{
@@ -914,12 +953,12 @@ export interface Web3Security {
       riskScore: number;
       lastInteraction: Date;
     }>;
-    
+
     // Risk assessment
     highRiskContracts: string[];
     unverifiedContracts: string[];
   };
-  
+
   // Transaction security
   transactionSecurity: {
     suspiciousTransactions: Array<{
@@ -928,13 +967,13 @@ export interface Web3Security {
       reason: string;
       timestamp: Date;
     }>;
-    
+
     // MEV analysis
     mevExposure: number; // percentage of transactions
     frontRunningInstances: number;
     sandwichAttacks: number;
   };
-  
+
   // Alerts
   securityAlerts: Array<{
     id: string;
@@ -961,12 +1000,12 @@ export interface Web3Config {
     };
     isTestnet: boolean;
   }>;
-  
+
   // Default settings
   defaultNetwork: BlockchainNetwork;
   defaultSlippage: number;
   defaultGasLimit: number;
-  
+
   // Feature flags
   features: {
     enableDeFi: boolean;
@@ -976,7 +1015,7 @@ export interface Web3Config {
     enableAnalytics: boolean;
     enableSecurity: boolean;
   };
-  
+
   // API keys
   apiKeys: {
     alchemy?: string;
@@ -985,7 +1024,7 @@ export interface Web3Config {
     covalent?: string;
     thegraph?: string;
   };
-  
+
   // Security settings
   security: {
     requireConfirmation: boolean;
@@ -993,7 +1032,7 @@ export interface Web3Config {
     enableMevProtection: boolean;
     autoRevokeApprovals: boolean;
   };
-  
+
   // UI preferences
   ui: {
     theme: 'light' | 'dark' | 'auto';
@@ -1010,68 +1049,74 @@ export interface Web3Stats {
     totalWallets: number;
     activeWallets: number;
     networksUsed: number;
-    
+
     // Wallet breakdown
     walletBreakdown: Record<WalletType, number>;
-    
+
     // Network breakdown
     networkBreakdown: Record<BlockchainNetwork, number>;
   };
-  
+
   // Transaction stats
   transactions: {
     total: number;
     successful: number;
     failed: number;
     pending: number;
-    
+
     // Volume
     totalVolume: number;
     averageValue: number;
-    
+
     // Gas usage
     totalGasUsed: number;
     totalGasCost: number;
     averageGasPrice: number;
   };
-  
+
   // DeFi stats
   defi: {
     totalValueLocked: number;
     activePositions: number;
     totalYieldEarned: number;
     averageApy: number;
-    
+
     // Protocol usage
-    protocolUsage: Record<DeFiProtocol, {
-      users: number;
-      tvl: number;
-      volume: number;
-    }>;
+    protocolUsage: Record<
+      DeFiProtocol,
+      {
+        users: number;
+        tvl: number;
+        volume: number;
+      }
+    >;
   };
-  
+
   // NFT stats
   nft: {
     totalMinted: number;
     totalTraded: number;
     totalVolume: number;
     averagePrice: number;
-    
+
     // Category breakdown
-    categoryStats: Record<NFTCategory, {
-      count: number;
-      volume: number;
-      averagePrice: number;
-    }>;
+    categoryStats: Record<
+      NFTCategory,
+      {
+        count: number;
+        volume: number;
+        averagePrice: number;
+      }
+    >;
   };
-  
+
   // Security stats
   security: {
     securityScore: number;
     activeApprovals: number;
     revokedApprovals: number;
     securityAlerts: number;
-    
+
     // Risk breakdown
     riskBreakdown: {
       low: number;
@@ -1080,21 +1125,24 @@ export interface Web3Stats {
       critical: number;
     };
   };
-  
+
   // Performance
   performance: {
     averageResponseTime: number;
     successRate: number;
     uptime: number;
-    
+
     // API performance
-    apiPerformance: Record<string, {
-      calls: number;
-      averageLatency: number;
-      errorRate: number;
-    }>;
+    apiPerformance: Record<
+      string,
+      {
+        calls: number;
+        averageLatency: number;
+        errorRate: number;
+      }
+    >;
   };
-  
+
   // Timeline
   generatedAt: Date;
   period: string;

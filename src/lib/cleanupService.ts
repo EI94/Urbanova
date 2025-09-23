@@ -1,11 +1,13 @@
 // Servizio di Pulizia Database - Urbanova AI
+import {getDocs, deleteDoc, doc } from 'firebase/firestore';
+
 import { db } from './firebase';
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { safeCollection } from './firebaseUtils';
 
 export class CleanupService {
   private readonly COLLECTIONS_TO_CLEAN = [
     'projects',
-    'users', 
+    'users',
     'documents',
     'meetings',
     'tasks',
@@ -13,7 +15,7 @@ export class CleanupService {
     'feasibilityComparisons',
     'emailConfigs',
     'emailLogs',
-    'landSearchResults'
+    'landSearchResults',
   ];
 
   async cleanAllCollections(): Promise<{
@@ -22,28 +24,29 @@ export class CleanupService {
     details: { [collection: string]: { total: number; deleted: number; errors: number } };
   }> {
     console.log('🧹 Iniziando pulizia database Firebase...');
-    
-    const results: { [collection: string]: { total: number; deleted: number; errors: number } } = {};
-    
+
+    const results: { [collection: string]: { total: number; deleted: number; errors: number } } =
+      {};
+
     try {
       for (const collectionName of this.COLLECTIONS_TO_CLEAN) {
         console.log(`📁 Pulendo collezione: ${collectionName}`);
-        
-        const collectionRef = collection(db, collectionName);
+
+        const collectionRef = safeCollection(collectionName);
         const snapshot = await getDocs(collectionRef);
-        
+
         if (snapshot.empty) {
           console.log(`✅ Collezione ${collectionName} già vuota`);
           results[collectionName] = { total: 0, deleted: 0, errors: 0 };
           continue;
         }
-        
+
         console.log(`📊 Trovati ${snapshot.size} documenti da eliminare`);
-        
+
         let deletedCount = 0;
         let errorCount = 0;
-        
-        const deletePromises = snapshot.docs.map(async (docSnapshot) => {
+
+        const deletePromises = snapshot.docs.map(async docSnapshot => {
           try {
             await deleteDoc(doc(db, collectionName, docSnapshot.id));
             console.log(`🗑️ Eliminato documento: ${docSnapshot.id}`);
@@ -55,35 +58,34 @@ export class CleanupService {
             return false;
           }
         });
-        
+
         await Promise.all(deletePromises);
-        
+
         results[collectionName] = {
           total: snapshot.size,
           deleted: deletedCount,
-          errors: errorCount
+          errors: errorCount,
         };
-        
+
         console.log(`✅ Eliminati ${deletedCount}/${snapshot.size} documenti da ${collectionName}`);
       }
-      
+
       const totalDeleted = Object.values(results).reduce((sum, r) => sum + r.deleted, 0);
       const totalErrors = Object.values(results).reduce((sum, r) => sum + r.errors, 0);
-      
+
       console.log('🎉 Pulizia database completata!');
-      
+
       return {
         success: true,
         message: `Pulizia completata! Eliminati ${totalDeleted} documenti${totalErrors > 0 ? `, ${totalErrors} errori` : ''}`,
-        details: results
+        details: results,
       };
-      
     } catch (error) {
       console.error('❌ Errore durante la pulizia:', error);
       return {
         success: false,
         message: `Errore durante la pulizia: ${error}`,
-        details: results
+        details: results,
       };
     }
   }
@@ -95,24 +97,24 @@ export class CleanupService {
     errors: number;
   }> {
     console.log(`🧹 Pulendo collezione specifica: ${collectionName}`);
-    
+
     try {
-      const collectionRef = collection(db, collectionName);
+      const collectionRef = safeCollection(collectionName);
       const snapshot = await getDocs(collectionRef);
-      
+
       if (snapshot.empty) {
         return {
           success: true,
           message: `Collezione ${collectionName} già vuota`,
           deleted: 0,
-          errors: 0
+          errors: 0,
         };
       }
-      
+
       let deletedCount = 0;
       let errorCount = 0;
-      
-      const deletePromises = snapshot.docs.map(async (docSnapshot) => {
+
+      const deletePromises = snapshot.docs.map(async docSnapshot => {
         try {
           await deleteDoc(doc(db, collectionName, docSnapshot.id));
           deletedCount++;
@@ -123,23 +125,22 @@ export class CleanupService {
           return false;
         }
       });
-      
+
       await Promise.all(deletePromises);
-      
+
       return {
         success: true,
         message: `Eliminati ${deletedCount}/${snapshot.size} documenti da ${collectionName}`,
         deleted: deletedCount,
-        errors: errorCount
+        errors: errorCount,
       };
-      
     } catch (error) {
       console.error('❌ Errore durante la pulizia:', error);
       return {
         success: false,
         message: `Errore durante la pulizia: ${error}`,
         deleted: 0,
-        errors: 0
+        errors: 0,
       };
     }
   }
@@ -148,38 +149,42 @@ export class CleanupService {
     return [...this.COLLECTIONS_TO_CLEAN];
   }
 
-  async cleanupDatabase(collections?: string[], dryRun: boolean = false): Promise<{
+  async cleanupDatabase(
+    collections?: string[],
+    dryRun: boolean = false
+  ): Promise<{
     success: boolean;
     deletedCount: number;
     details: { [collection: string]: { total: number; deleted: number; errors: number } };
     message: string;
   }> {
     console.log(`🧹 Avvio pulizia database${dryRun ? ' (SIMULAZIONE)' : ''}`);
-    
+
     const collectionsToClean = collections || this.COLLECTIONS_TO_CLEAN;
-    const results: { [collection: string]: { total: number; deleted: number; errors: number } } = {};
+    const results: { [collection: string]: { total: number; deleted: number; errors: number } } =
+      {};
     let totalDeleted = 0;
-    
+
     try {
       for (const collectionName of collectionsToClean) {
         console.log(`📁 Pulendo collezione: ${collectionName}`);
-        
-        const collectionRef = collection(db, collectionName);
+
+        const collectionRef = safeCollection(collectionName);
         const snapshot = await getDocs(collectionRef);
-        
+
         if (snapshot.empty) {
           console.log(`✅ Collezione ${collectionName} già vuota`);
           results[collectionName] = { total: 0, deleted: 0, errors: 0 };
           continue;
         }
-        
+
         console.log(`📊 Trovati ${snapshot.size} documenti da eliminare`);
-        
+
         let deletedCount = 0;
         let errorCount = 0;
-        
+
         if (!dryRun) {
-          const deletePromises = snapshot.docs.map(async (docSnapshot) => {
+          const deletePromises = snapshot.docs.map(async docSnapshot => {
             try {
               await deleteDoc(doc(db, collectionName, docSnapshot.id));
               deletedCount++;
@@ -190,41 +195,42 @@ export class CleanupService {
               return false;
             }
           });
-          
+
           await Promise.all(deletePromises);
         } else {
           // Simulazione - conta solo i documenti
           deletedCount = snapshot.size;
         }
-        
+
         results[collectionName] = {
           total: snapshot.size,
           deleted: deletedCount,
-          errors: errorCount
+          errors: errorCount,
         };
-        
+
         totalDeleted += deletedCount;
-        console.log(`✅ ${dryRun ? 'Simulazione' : 'Eliminati'} ${deletedCount}/${snapshot.size} documenti da ${collectionName}`);
+        console.log(
+          `✅ ${dryRun ? 'Simulazione' : 'Eliminati'} ${deletedCount}/${snapshot.size} documenti da ${collectionName}`
+        );
       }
-      
-      const message = dryRun 
+
+      const message = dryRun
         ? `Simulazione completata! Verrebbero eliminati ${totalDeleted} documenti`
         : `Pulizia completata! Eliminati ${totalDeleted} documenti`;
-      
+
       return {
         success: true,
         deletedCount: totalDeleted,
         details: results,
-        message
+        message,
       };
-      
     } catch (error) {
       console.error('❌ Errore durante la pulizia:', error);
       return {
         success: false,
         deletedCount: 0,
         details: results,
-        message: `Errore durante la pulizia: ${error}`
+        message: `Errore durante la pulizia: ${error}`,
       };
     }
   }
@@ -235,42 +241,42 @@ export class CleanupService {
     totalDocuments: number;
   }> {
     console.log('📊 Recuperando statistiche database...');
-    
+
     const stats: { [name: string]: { count: number; size: string } } = {};
     let totalDocuments = 0;
-    
+
     try {
       for (const collectionName of this.COLLECTIONS_TO_CLEAN) {
-        const collectionRef = collection(db, collectionName);
+        const collectionRef = safeCollection(collectionName);
         const snapshot = await getDocs(collectionRef);
-        
+
         const count = snapshot.size;
         totalDocuments += count;
-        
+
         // Stima della dimensione (approssimativa)
         const estimatedSize = count * 1024; // 1KB per documento
-        const sizeString = estimatedSize > 1024 * 1024 
-          ? `${(estimatedSize / (1024 * 1024)).toFixed(2)} MB`
-          : `${(estimatedSize / 1024).toFixed(2)} KB`;
-        
+        const sizeString =
+          estimatedSize > 1024 * 1024
+            ? `${(estimatedSize / (1024 * 1024)).toFixed(2)} MB`
+            : `${(estimatedSize / 1024).toFixed(2)} KB`;
+
         stats[collectionName] = {
           count,
-          size: sizeString
+          size: sizeString,
         };
       }
-      
+
       return {
         totalCollections: this.COLLECTIONS_TO_CLEAN.length,
         collections: stats,
-        totalDocuments
+        totalDocuments,
       };
-      
     } catch (error) {
       console.error('❌ Errore nel recupero statistiche:', error);
       return {
         totalCollections: 0,
         collections: {},
-        totalDocuments: 0
+        totalDocuments: 0,
       };
     }
   }

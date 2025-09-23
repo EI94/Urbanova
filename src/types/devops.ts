@@ -1,38 +1,147 @@
 // Tipi per il sistema di Advanced DevOps & CI/CD Pipeline
 
-export type PipelineStatus = 'pending' | 'running' | 'success' | 'failed' | 'cancelled' | 'skipped' | 'waiting' | 'manual';
+export type PipelineStatus =
+  | 'pending'
+  | 'running'
+  | 'success'
+  | 'failed'
+  | 'cancelled'
+  | 'skipped'
+  | 'waiting'
+  | 'manual';
 
-export type DeploymentEnvironment = 'development' | 'staging' | 'production' | 'testing' | 'preview' | 'canary' | 'blue' | 'green';
+export type DeploymentEnvironment =
+  | 'development'
+  | 'staging'
+  | 'production'
+  | 'testing'
+  | 'preview'
+  | 'canary'
+  | 'blue'
+  | 'green';
 
-export type BuildTrigger = 'push' | 'pull_request' | 'schedule' | 'manual' | 'webhook' | 'tag' | 'release' | 'api';
+export type BuildTrigger =
+  | 'push'
+  | 'pull_request'
+  | 'schedule'
+  | 'manual'
+  | 'webhook'
+  | 'tag'
+  | 'release'
+  | 'api';
 
-export type ArtifactType = 'docker' | 'npm' | 'jar' | 'zip' | 'tar' | 'binary' | 'helm' | 'terraform' | 'static';
+export type ArtifactType =
+  | 'docker'
+  | 'npm'
+  | 'jar'
+  | 'zip'
+  | 'tar'
+  | 'binary'
+  | 'helm'
+  | 'terraform'
+  | 'static';
 
-export type TestType = 'unit' | 'integration' | 'e2e' | 'performance' | 'security' | 'smoke' | 'regression' | 'acceptance';
+export type TestType =
+  | 'unit'
+  | 'integration'
+  | 'e2e'
+  | 'performance'
+  | 'security'
+  | 'smoke'
+  | 'regression'
+  | 'acceptance';
 
-export type SecurityScanType = 'sast' | 'dast' | 'dependency' | 'container' | 'infrastructure' | 'secrets' | 'compliance';
+export type SecurityScanType =
+  | 'sast'
+  | 'dast'
+  | 'dependency'
+  | 'container'
+  | 'infrastructure'
+  | 'secrets'
+  | 'compliance';
 
-export type InfrastructureProvider = 'aws' | 'azure' | 'gcp' | 'kubernetes' | 'docker' | 'terraform' | 'ansible' | 'helm';
+export type InfrastructureProvider =
+  | 'aws'
+  | 'azure'
+  | 'gcp'
+  | 'kubernetes'
+  | 'docker'
+  | 'terraform'
+  | 'ansible'
+  | 'helm';
 
-export type MonitoringTool = 'prometheus' | 'grafana' | 'datadog' | 'newrelic' | 'elastic' | 'splunk' | 'jaeger' | 'zipkin';
+export type MonitoringTool =
+  | 'prometheus'
+  | 'grafana'
+  | 'datadog'
+  | 'newrelic'
+  | 'elastic'
+  | 'splunk'
+  | 'jaeger'
+  | 'zipkin';
 
-export type NotificationChannel = 'slack' | 'email' | 'teams' | 'discord' | 'webhook' | 'sms' | 'pagerduty' | 'jira';
+export type NotificationChannel =
+  | 'slack'
+  | 'email'
+  | 'teams'
+  | 'discord'
+  | 'webhook'
+  | 'sms'
+  | 'pagerduty'
+  | 'jira';
 
-export type GitProvider = 'github' | 'gitlab' | 'bitbucket' | 'azure_devops' | 'codecommit' | 'gitea' | 'custom';
+export type GitProvider =
+  | 'github'
+  | 'gitlab'
+  | 'bitbucket'
+  | 'azure_devops'
+  | 'codecommit'
+  | 'gitea'
+  | 'custom';
 
-export type QualityGate = 'coverage' | 'security' | 'performance' | 'complexity' | 'duplication' | 'maintainability' | 'reliability';
+export type QualityGate =
+  | 'coverage'
+  | 'security'
+  | 'performance'
+  | 'complexity'
+  | 'duplication'
+  | 'maintainability'
+  | 'reliability';
 
-export type ReleaseStrategy = 'blue_green' | 'canary' | 'rolling' | 'recreate' | 'a_b_test' | 'feature_flag' | 'shadow';
+export type ReleaseStrategy =
+  | 'blue_green'
+  | 'canary'
+  | 'rolling'
+  | 'recreate'
+  | 'a_b_test'
+  | 'feature_flag'
+  | 'shadow';
 
-export type ResourceType = 'cpu' | 'memory' | 'storage' | 'network' | 'gpu' | 'database' | 'cache' | 'queue';
+export type ResourceType =
+  | 'cpu'
+  | 'memory'
+  | 'storage'
+  | 'network'
+  | 'gpu'
+  | 'database'
+  | 'cache'
+  | 'queue';
 
-export type ComplianceFramework = 'soc2' | 'iso27001' | 'gdpr' | 'hipaa' | 'pci_dss' | 'fedramp' | 'nist' | 'cis';
+export type ComplianceFramework =
+  | 'soc2'
+  | 'iso27001'
+  | 'gdpr'
+  | 'hipaa'
+  | 'pci_dss'
+  | 'fedramp'
+  | 'nist'
+  | 'cis';
 
 export interface Pipeline {
   id: string;
   name: string;
   description: string;
-  
+
   // Configuration
   repository: {
     provider: GitProvider;
@@ -41,7 +150,7 @@ export interface Pipeline {
     path?: string;
     credentials?: string;
   };
-  
+
   // Trigger configuration
   triggers: Array<{
     type: BuildTrigger;
@@ -51,15 +160,18 @@ export interface Pipeline {
     paths?: string[];
     schedule?: string; // cron expression
   }>;
-  
+
   // Variables and secrets
-  variables: Record<string, {
-    value: string;
-    encrypted: boolean;
-    environment?: DeploymentEnvironment[];
-    description?: string;
-  }>;
-  
+  variables: Record<
+    string,
+    {
+      value: string;
+      encrypted: boolean;
+      environment?: DeploymentEnvironment[];
+      description?: string;
+    }
+  >;
+
   // Stages definition
   stages: Array<{
     id: string;
@@ -70,7 +182,7 @@ export interface Pipeline {
     timeout?: number; // in minutes
     retryCount?: number;
     environment?: DeploymentEnvironment;
-    
+
     // Jobs in this stage
     jobs: Array<{
       id: string;
@@ -78,7 +190,7 @@ export interface Pipeline {
       order: number;
       dependsOn?: string[];
       condition?: string;
-      
+
       // Execution environment
       runner: {
         type: 'docker' | 'kubernetes' | 'vm' | 'self_hosted';
@@ -90,14 +202,14 @@ export interface Pipeline {
           storage?: string;
         };
       };
-      
+
       // Steps in this job
       steps: Array<{
         id: string;
         name: string;
         order: number;
         type: 'script' | 'action' | 'plugin' | 'service';
-        
+
         // Step configuration
         config: {
           command?: string;
@@ -111,7 +223,7 @@ export interface Pipeline {
           timeout?: number;
           continueOnError?: boolean;
         };
-        
+
         // Artifacts
         artifacts?: Array<{
           type: ArtifactType;
@@ -120,7 +232,7 @@ export interface Pipeline {
           retention?: number; // days
           public?: boolean;
         }>;
-        
+
         // Cache configuration
         cache?: Array<{
           key: string;
@@ -130,7 +242,7 @@ export interface Pipeline {
       }>;
     }>;
   }>;
-  
+
   // Quality gates
   qualityGates: Array<{
     type: QualityGate;
@@ -139,7 +251,7 @@ export interface Pipeline {
     blocking: boolean;
     stage?: string;
   }>;
-  
+
   // Notifications
   notifications: Array<{
     channel: NotificationChannel;
@@ -147,18 +259,18 @@ export interface Pipeline {
     events: PipelineStatus[];
     enabled: boolean;
   }>;
-  
+
   // Status and metadata
   status: PipelineStatus;
   enabled: boolean;
   version: string;
-  
+
   // Timeline
   createdAt: Date;
   updatedAt: Date;
   createdBy: string;
   updatedBy: string;
-  
+
   // Statistics
   stats: {
     totalRuns: number;
@@ -176,11 +288,11 @@ export interface PipelineRun {
   id: string;
   pipelineId: string;
   pipelineName: string;
-  
+
   // Run details
   number: number;
   status: PipelineStatus;
-  
+
   // Trigger information
   trigger: {
     type: BuildTrigger;
@@ -205,17 +317,17 @@ export interface PipelineRun {
       parameters?: Record<string, any>;
     };
   };
-  
+
   // Environment and configuration
   environment: DeploymentEnvironment;
   branch: string;
   variables: Record<string, string>;
-  
+
   // Execution details
   startedAt?: Date;
   completedAt?: Date;
   duration?: number; // in seconds
-  
+
   // Stage executions
   stages: Array<{
     id: string;
@@ -224,7 +336,7 @@ export interface PipelineRun {
     startedAt?: Date;
     completedAt?: Date;
     duration?: number;
-    
+
     // Job executions
     jobs: Array<{
       id: string;
@@ -234,7 +346,7 @@ export interface PipelineRun {
       completedAt?: Date;
       duration?: number;
       runner?: string;
-      
+
       // Step executions
       steps: Array<{
         id: string;
@@ -244,7 +356,7 @@ export interface PipelineRun {
         completedAt?: Date;
         duration?: number;
         exitCode?: number;
-        
+
         // Logs and artifacts
         logs?: Array<{
           timestamp: Date;
@@ -252,7 +364,7 @@ export interface PipelineRun {
           message: string;
           source?: string;
         }>;
-        
+
         artifacts?: Array<{
           name: string;
           type: ArtifactType;
@@ -260,7 +372,7 @@ export interface PipelineRun {
           url: string;
           checksum?: string;
         }>;
-        
+
         // Test results
         testResults?: Array<{
           type: TestType;
@@ -272,7 +384,7 @@ export interface PipelineRun {
           coverage?: number;
           reportUrl?: string;
         }>;
-        
+
         // Security scan results
         securityResults?: Array<{
           type: SecurityScanType;
@@ -288,7 +400,7 @@ export interface PipelineRun {
       }>;
     }>;
   }>;
-  
+
   // Overall results
   testResults?: {
     total: number;
@@ -297,14 +409,14 @@ export interface PipelineRun {
     skipped: number;
     coverage: number;
   };
-  
+
   securityResults?: {
     totalVulnerabilities: number;
     criticalVulnerabilities: number;
     highVulnerabilities: number;
     passed: boolean;
   };
-  
+
   qualityResults?: {
     gates: Array<{
       type: QualityGate;
@@ -314,7 +426,7 @@ export interface PipelineRun {
     }>;
     overallPassed: boolean;
   };
-  
+
   // Artifacts produced
   artifacts: Array<{
     name: string;
@@ -325,7 +437,7 @@ export interface PipelineRun {
     checksum: string;
     createdAt: Date;
   }>;
-  
+
   // Deployment information
   deployments?: Array<{
     environment: DeploymentEnvironment;
@@ -343,7 +455,7 @@ export interface Environment {
   name: string;
   type: DeploymentEnvironment;
   description: string;
-  
+
   // Configuration
   config: {
     url?: string;
@@ -352,7 +464,7 @@ export interface Environment {
     region?: string;
     provider: InfrastructureProvider;
   };
-  
+
   // Access control
   protection: {
     requireApproval: boolean;
@@ -365,14 +477,17 @@ export interface Environment {
       timezone: string;
     };
   };
-  
+
   // Variables and secrets
-  variables: Record<string, {
-    value: string;
-    encrypted: boolean;
-    description?: string;
-  }>;
-  
+  variables: Record<
+    string,
+    {
+      value: string;
+      encrypted: boolean;
+      description?: string;
+    }
+  >;
+
   // Resource limits
   resources: {
     limits: Record<ResourceType, string>;
@@ -385,7 +500,7 @@ export interface Environment {
       targetMemory?: number;
     };
   };
-  
+
   // Monitoring and observability
   monitoring: {
     enabled: boolean;
@@ -395,11 +510,11 @@ export interface Environment {
     healthCheckUrl?: string;
     metricsEndpoint?: string;
   };
-  
+
   // Status
   status: 'active' | 'inactive' | 'maintenance' | 'deprecated';
   health: 'healthy' | 'degraded' | 'unhealthy' | 'unknown';
-  
+
   // Current deployment
   currentDeployment?: {
     version: string;
@@ -408,12 +523,12 @@ export interface Environment {
     pipelineRunId: string;
     commit: string;
   };
-  
+
   // Timeline
   createdAt: Date;
   updatedAt: Date;
   createdBy: string;
-  
+
   // Statistics
   stats: {
     totalDeployments: number;
@@ -429,12 +544,12 @@ export interface Infrastructure {
   id: string;
   name: string;
   description: string;
-  
+
   // Provider configuration
   provider: InfrastructureProvider;
   region?: string;
   zone?: string;
-  
+
   // Resource definition
   resources: Array<{
     id: string;
@@ -442,29 +557,29 @@ export interface Infrastructure {
     name: string;
     config: Record<string, any>;
     dependencies?: string[];
-    
+
     // State
     status: 'creating' | 'active' | 'updating' | 'deleting' | 'deleted' | 'error';
     lastModified: Date;
-    
+
     // Cost information
     cost?: {
       hourly: number;
       monthly: number;
       currency: string;
     };
-    
+
     // Tags
     tags: Record<string, string>;
   }>;
-  
+
   // Infrastructure as Code
   iac: {
     tool: 'terraform' | 'cloudformation' | 'pulumi' | 'cdk' | 'helm';
     repository: string;
     path: string;
     version: string;
-    
+
     // State management
     state: {
       backend: string;
@@ -473,7 +588,7 @@ export interface Infrastructure {
       lastUpdate: Date;
     };
   };
-  
+
   // Security and compliance
   security: {
     compliance: ComplianceFramework[];
@@ -487,7 +602,7 @@ export interface Infrastructure {
         resource: string;
       }>;
     };
-    
+
     // Network security
     networkPolicies?: string[];
     firewallRules?: string[];
@@ -497,7 +612,7 @@ export interface Infrastructure {
       keyManagement: string;
     };
   };
-  
+
   // Monitoring
   monitoring: {
     enabled: boolean;
@@ -515,7 +630,7 @@ export interface Infrastructure {
       enabled: boolean;
     }>;
   };
-  
+
   // Cost tracking
   costs: {
     current: {
@@ -535,11 +650,11 @@ export interface Infrastructure {
       period: 'monthly' | 'quarterly' | 'yearly';
     };
   };
-  
+
   // Status
   status: 'active' | 'inactive' | 'provisioning' | 'updating' | 'destroying' | 'error';
   health: 'healthy' | 'degraded' | 'unhealthy' | 'unknown';
-  
+
   // Timeline
   createdAt: Date;
   updatedAt: Date;
@@ -552,10 +667,10 @@ export interface Release {
   name: string;
   version: string;
   description?: string;
-  
+
   // Release configuration
   strategy: ReleaseStrategy;
-  
+
   // Source information
   source: {
     pipelineRunId: string;
@@ -563,13 +678,13 @@ export interface Release {
     branch: string;
     artifacts: string[];
   };
-  
+
   // Target environments
   environments: Array<{
     environmentId: string;
     environmentName: string;
     order: number;
-    
+
     // Deployment configuration
     config: {
       replicas?: number;
@@ -581,7 +696,7 @@ export interface Release {
         retries: number;
       };
     };
-    
+
     // Approval workflow
     approval?: {
       required: boolean;
@@ -590,13 +705,20 @@ export interface Release {
       approvedAt?: Date;
       reason?: string;
     };
-    
+
     // Deployment status
-    status: 'pending' | 'approved' | 'deploying' | 'deployed' | 'failed' | 'rolled_back' | 'cancelled';
+    status:
+      | 'pending'
+      | 'approved'
+      | 'deploying'
+      | 'deployed'
+      | 'failed'
+      | 'rolled_back'
+      | 'cancelled';
     startedAt?: Date;
     completedAt?: Date;
     duration?: number;
-    
+
     // Rollback information
     rollback?: {
       available: boolean;
@@ -605,7 +727,7 @@ export interface Release {
       triggeredBy?: string;
       triggeredAt?: Date;
     };
-    
+
     // Health and monitoring
     health: {
       status: 'healthy' | 'degraded' | 'unhealthy' | 'unknown';
@@ -616,7 +738,7 @@ export interface Release {
         lastCheck: Date;
       }>;
     };
-    
+
     // Traffic management (for canary/blue-green)
     traffic?: {
       percentage: number;
@@ -627,7 +749,7 @@ export interface Release {
       }>;
     };
   }>;
-  
+
   // Feature flags
   featureFlags?: Array<{
     name: string;
@@ -638,7 +760,7 @@ export interface Release {
       value: boolean;
     }>;
   }>;
-  
+
   // Quality gates
   qualityGates: Array<{
     type: QualityGate;
@@ -646,10 +768,10 @@ export interface Release {
     value: number;
     threshold: number;
   }>;
-  
+
   // Status
   status: 'draft' | 'pending' | 'in_progress' | 'deployed' | 'failed' | 'cancelled' | 'rolled_back';
-  
+
   // Timeline
   createdAt: Date;
   updatedAt: Date;
@@ -657,7 +779,7 @@ export interface Release {
   scheduledAt?: Date;
   startedAt?: Date;
   completedAt?: Date;
-  
+
   // Release notes
   notes?: {
     features: string[];
@@ -666,7 +788,7 @@ export interface Release {
     knownIssues: string[];
     rollbackPlan?: string;
   };
-  
+
   // Metrics and KPIs
   metrics?: {
     deploymentTime: number;
@@ -686,7 +808,7 @@ export interface DevOpsMetrics {
       trend: 'up' | 'down' | 'stable';
       target?: number;
     };
-    
+
     leadTime: {
       value: number; // in hours
       p50: number;
@@ -694,7 +816,7 @@ export interface DevOpsMetrics {
       trend: 'up' | 'down' | 'stable';
       target?: number;
     };
-    
+
     meanTimeToRecovery: {
       value: number; // in hours
       p50: number;
@@ -702,14 +824,14 @@ export interface DevOpsMetrics {
       trend: 'up' | 'down' | 'stable';
       target?: number;
     };
-    
+
     changeFailureRate: {
       value: number; // percentage
       trend: 'up' | 'down' | 'stable';
       target?: number;
     };
   };
-  
+
   // Pipeline metrics
   pipelines: {
     totalRuns: number;
@@ -720,7 +842,7 @@ export interface DevOpsMetrics {
       count: number;
       percentage: number;
     }>;
-    
+
     // Performance over time
     trends: Array<{
       date: Date;
@@ -729,7 +851,7 @@ export interface DevOpsMetrics {
       averageDuration: number;
     }>;
   };
-  
+
   // Environment metrics
   environments: Array<{
     name: string;
@@ -737,7 +859,7 @@ export interface DevOpsMetrics {
     deployments: number;
     averageDeploymentTime: number;
     rollbacks: number;
-    
+
     // Resource utilization
     resources: {
       cpu: { usage: number; limit: number };
@@ -745,14 +867,14 @@ export interface DevOpsMetrics {
       storage: { usage: number; limit: number };
     };
   }>;
-  
+
   // Quality metrics
   quality: {
     testCoverage: number;
     codeQuality: number;
     securityScore: number;
     performanceScore: number;
-    
+
     // Trends
     trends: Array<{
       date: Date;
@@ -762,7 +884,7 @@ export interface DevOpsMetrics {
       performance: number;
     }>;
   };
-  
+
   // Cost metrics
   costs: {
     infrastructure: {
@@ -771,14 +893,14 @@ export interface DevOpsMetrics {
       budget: number;
       currency: string;
     };
-    
+
     ci_cd: {
       current: number;
       forecast: number;
       budget: number;
       currency: string;
     };
-    
+
     // Cost per deployment
     costPerDeployment: number;
     costPerEnvironment: Array<{
@@ -786,20 +908,20 @@ export interface DevOpsMetrics {
       cost: number;
     }>;
   };
-  
+
   // Team productivity
   productivity: {
     commitsPerDay: number;
     pullRequestsPerDay: number;
     reviewTime: number; // in hours
     mergeTime: number; // in hours
-    
+
     // Developer experience
     buildWaitTime: number;
     testWaitTime: number;
     deploymentWaitTime: number;
   };
-  
+
   // Generated at
   generatedAt: Date;
   period: {
@@ -813,15 +935,15 @@ export interface Incident {
   id: string;
   title: string;
   description: string;
-  
+
   // Classification
   severity: 'low' | 'medium' | 'high' | 'critical';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   category: 'deployment' | 'infrastructure' | 'security' | 'performance' | 'data' | 'external';
-  
+
   // Status
   status: 'open' | 'investigating' | 'identified' | 'monitoring' | 'resolved' | 'closed';
-  
+
   // Impact
   impact: {
     environments: DeploymentEnvironment[];
@@ -830,24 +952,24 @@ export interface Incident {
     revenue?: number;
     sla: boolean;
   };
-  
+
   // Timeline
   detectedAt: Date;
   acknowledgedAt?: Date;
   resolvedAt?: Date;
   closedAt?: Date;
-  
+
   // Response team
   assignee?: string;
   team: string[];
-  
+
   // Root cause analysis
   rootCause?: {
     category: 'human_error' | 'system_failure' | 'process_failure' | 'external' | 'unknown';
     description: string;
     evidence: string[];
   };
-  
+
   // Resolution
   resolution?: {
     description: string;
@@ -855,7 +977,7 @@ export interface Incident {
     preventionMeasures: string[];
     followUpTasks: string[];
   };
-  
+
   // Communication
   communications: Array<{
     timestamp: Date;
@@ -864,7 +986,7 @@ export interface Incident {
     author: string;
     channels: NotificationChannel[];
   }>;
-  
+
   // Metrics
   metrics: {
     detectionTime: number; // minutes from occurrence to detection
@@ -872,7 +994,7 @@ export interface Incident {
     resolutionTime?: number; // minutes from detection to resolution
     recoveryTime?: number; // minutes from resolution to full recovery
   };
-  
+
   // Related items
   related: {
     pipelines: string[];
@@ -880,7 +1002,7 @@ export interface Incident {
     releases: string[];
     alerts: string[];
   };
-  
+
   // Post-incident review
   postIncidentReview?: {
     scheduled: boolean;
@@ -894,7 +1016,7 @@ export interface Incident {
       status: 'open' | 'in_progress' | 'completed';
     }>;
   };
-  
+
   // Timeline
   createdAt: Date;
   updatedAt: Date;
@@ -913,7 +1035,7 @@ export interface DevOpsConfiguration {
       days: string[];
     };
   };
-  
+
   // Git integration
   git: {
     defaultProvider: GitProvider;
@@ -923,7 +1045,7 @@ export interface DevOpsConfiguration {
       enabled: boolean;
     }>;
   };
-  
+
   // CI/CD settings
   cicd: {
     defaultRunner: string;
@@ -933,7 +1055,7 @@ export interface DevOpsConfiguration {
       config: Record<string, any>;
       enabled: boolean;
     }>;
-    
+
     // Default pipeline settings
     defaults: {
       timeout: number; // minutes
@@ -943,7 +1065,7 @@ export interface DevOpsConfiguration {
       logRetention: number; // days
     };
   };
-  
+
   // Infrastructure settings
   infrastructure: {
     defaultProvider: InfrastructureProvider;
@@ -952,7 +1074,7 @@ export interface DevOpsConfiguration {
       config: Record<string, any>;
       enabled: boolean;
     }>;
-    
+
     // Cost management
     costTracking: {
       enabled: boolean;
@@ -965,7 +1087,7 @@ export interface DevOpsConfiguration {
       }>;
     };
   };
-  
+
   // Security settings
   security: {
     scanners: Array<{
@@ -974,7 +1096,7 @@ export interface DevOpsConfiguration {
       config: Record<string, any>;
       enabled: boolean;
     }>;
-    
+
     // Compliance
     compliance: {
       frameworks: ComplianceFramework[];
@@ -984,7 +1106,7 @@ export interface DevOpsConfiguration {
         exportFormat: 'json' | 'csv' | 'pdf';
       };
     };
-    
+
     // Secret management
     secrets: {
       provider: 'vault' | 'aws_secrets' | 'azure_keyvault' | 'gcp_secrets' | 'kubernetes';
@@ -995,7 +1117,7 @@ export interface DevOpsConfiguration {
       };
     };
   };
-  
+
   // Monitoring settings
   monitoring: {
     tools: Array<{
@@ -1003,7 +1125,7 @@ export interface DevOpsConfiguration {
       config: Record<string, any>;
       enabled: boolean;
     }>;
-    
+
     // Alerting
     alerting: {
       channels: Array<{
@@ -1011,7 +1133,7 @@ export interface DevOpsConfiguration {
         config: Record<string, any>;
         enabled: boolean;
       }>;
-      
+
       // Default alert rules
       rules: Array<{
         name: string;
@@ -1021,7 +1143,7 @@ export interface DevOpsConfiguration {
       }>;
     };
   };
-  
+
   // Quality gates
   qualityGates: {
     defaults: Array<{
@@ -1030,16 +1152,19 @@ export interface DevOpsConfiguration {
       operator: 'gt' | 'gte' | 'lt' | 'lte' | 'eq';
       blocking: boolean;
     }>;
-    
+
     // Override per environment
-    overrides: Record<DeploymentEnvironment, Array<{
-      type: QualityGate;
-      threshold: number;
-      operator: 'gt' | 'gte' | 'lt' | 'lte' | 'eq';
-      blocking: boolean;
-    }>>;
+    overrides: Record<
+      DeploymentEnvironment,
+      Array<{
+        type: QualityGate;
+        threshold: number;
+        operator: 'gt' | 'gte' | 'lt' | 'lte' | 'eq';
+        blocking: boolean;
+      }>
+    >;
   };
-  
+
   // Approval workflows
   approvals: {
     production: {
@@ -1047,13 +1172,13 @@ export interface DevOpsConfiguration {
       approvers: string[];
       timeout: number; // hours
     };
-    
+
     staging: {
       required: boolean;
       approvers: string[];
       timeout: number; // hours
     };
-    
+
     // Emergency deployments
     emergency: {
       enabled: boolean;
@@ -1061,7 +1186,7 @@ export interface DevOpsConfiguration {
       postApprovalRequired: boolean;
     };
   };
-  
+
   // Retention policies
   retention: {
     pipelineRuns: number; // days
@@ -1070,7 +1195,7 @@ export interface DevOpsConfiguration {
     metrics: number; // days
     incidents: number; // days
   };
-  
+
   // Feature flags
   features: {
     enableAdvancedSecurity: boolean;
@@ -1089,25 +1214,25 @@ export interface DevOpsStats {
     totalEnvironments: number;
     totalReleases: number;
     totalIncidents: number;
-    
+
     // Current status
     runningPipelines: number;
     pendingDeployments: number;
     openIncidents: number;
-    
+
     // Health indicators
     systemHealth: 'healthy' | 'degraded' | 'unhealthy';
     infrastructureHealth: 'healthy' | 'degraded' | 'unhealthy';
     securityHealth: 'healthy' | 'degraded' | 'unhealthy';
   };
-  
+
   // Performance metrics
   performance: {
     pipelineSuccessRate: number;
     averageBuildTime: number;
     averageDeploymentTime: number;
     deploymentFrequency: number;
-    
+
     // Trends (last 30 days)
     trends: {
       successRate: Array<{ date: Date; value: number }>;
@@ -1116,7 +1241,7 @@ export interface DevOpsStats {
       frequency: Array<{ date: Date; value: number }>;
     };
   };
-  
+
   // Resource utilization
   resources: {
     compute: {
@@ -1124,12 +1249,12 @@ export interface DevOpsStats {
       memory: { used: number; total: number; percentage: number };
       storage: { used: number; total: number; percentage: number };
     };
-    
+
     network: {
       bandwidth: { used: number; total: number; percentage: number };
       connections: { active: number; total: number };
     };
-    
+
     costs: {
       current: number;
       forecast: number;
@@ -1137,14 +1262,14 @@ export interface DevOpsStats {
       currency: string;
     };
   };
-  
+
   // Quality metrics
   quality: {
     overallScore: number;
     testCoverage: number;
     codeQuality: number;
     securityScore: number;
-    
+
     // Quality trends
     trends: {
       coverage: Array<{ date: Date; value: number }>;
@@ -1152,7 +1277,7 @@ export interface DevOpsStats {
       security: Array<{ date: Date; value: number }>;
     };
   };
-  
+
   // Top performers/issues
   top: {
     pipelines: Array<{
@@ -1162,7 +1287,7 @@ export interface DevOpsStats {
       averageDuration: number;
       totalRuns: number;
     }>;
-    
+
     environments: Array<{
       id: string;
       name: string;
@@ -1170,7 +1295,7 @@ export interface DevOpsStats {
       deployments: number;
       issues: number;
     }>;
-    
+
     failures: Array<{
       pipeline: string;
       stage: string;
@@ -1179,7 +1304,7 @@ export interface DevOpsStats {
       percentage: number;
     }>;
   };
-  
+
   // Generated at
   generatedAt: Date;
   period: string;

@@ -1,7 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { UsersIcon, MessageCircleIcon, StarIcon, XIcon, PlusIcon } from '@/components/icons';
+
+import { UsersIcon, MessageCircleIcon, XIcon, PlusIcon } from '@/components/icons';
+
+// Mock StarIcon
+const StarIcon = XIcon;
+
 import { Badge } from './Badge';
 import Button from './Button';
 
@@ -38,9 +43,11 @@ export default function TeamCollaborationPanel({
   currentSearchId,
   onAddComment,
   onVote,
-  onAddToSharedFavorites
+  onAddToSharedFavorites,
 }: TeamCollaborationPanelProps) {
-  const [activeTab, setActiveTab] = useState<'team' | 'comments' | 'favorites' | 'activity'>('team');
+  const [activeTab, setActiveTab] = useState<'team' | 'comments' | 'favorites' | 'activity'>(
+    'team'
+  );
   const [newComment, setNewComment] = useState('');
   const [selectedLandId, setSelectedLandId] = useState<string>('');
 
@@ -51,22 +58,22 @@ export default function TeamCollaborationPanel({
       name: 'Marco Rossi',
       avatar: '👨‍💼',
       isOnline: true,
-      currentActivity: 'Analizzando terreni a Roma'
+      currentActivity: 'Analizzando terreni a Roma',
     },
     {
       id: '2',
       name: 'Laura Bianchi',
       avatar: '👩‍💼',
       isOnline: true,
-      currentActivity: 'Valutando ROI progetti'
+      currentActivity: 'Valutando ROI progetti',
     },
     {
       id: '3',
       name: 'Giuseppe Verdi',
       avatar: '👨‍💼',
       isOnline: false,
-      currentActivity: 'Ultima attività: Ricerca Milano'
-    }
+      currentActivity: 'Ultima attività: Ricerca Milano',
+    },
   ];
 
   // Mock data per commenti team
@@ -78,7 +85,7 @@ export default function TeamCollaborationPanel({
       landId: 'land-1',
       comment: 'Ottima posizione, prezzo interessante per la zona!',
       timestamp: new Date(Date.now() - 5 * 60 * 1000),
-      type: 'comment'
+      type: 'comment',
     },
     {
       id: '2',
@@ -87,8 +94,8 @@ export default function TeamCollaborationPanel({
       landId: 'land-1',
       comment: 'Concordo, ROI stimato del 18%',
       timestamp: new Date(Date.now() - 3 * 60 * 1000),
-      type: 'comment'
-    }
+      type: 'comment',
+    },
   ];
 
   const sharedFavorites = ['land-1', 'land-3', 'land-5'];
@@ -128,8 +135,8 @@ export default function TeamCollaborationPanel({
             { id: 'team', name: 'Team', icon: '👥', count: teamMembers.length },
             { id: 'comments', name: 'Commenti', icon: '💬', count: teamComments.length },
             { id: 'favorites', name: 'Preferiti', icon: '⭐', count: sharedFavorites.length },
-            { id: 'activity', name: 'Attività', icon: '📊' }
-          ].map((tab) => (
+            { id: 'activity', name: 'Attività', icon: '📊' },
+          ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
@@ -143,7 +150,9 @@ export default function TeamCollaborationPanel({
                 <span>{tab.icon}</span>
                 <span>{tab.name}</span>
                 {tab.count !== undefined && (
-                  <Badge variant="secondary" className="ml-1">{tab.count}</Badge>
+                  <Badge variant="secondary" className="ml-1">
+                    {tab.count}
+                  </Badge>
                 )}
               </span>
             </button>
@@ -157,13 +166,18 @@ export default function TeamCollaborationPanel({
         {activeTab === 'team' && (
           <div className="space-y-4">
             <h4 className="font-semibold text-gray-900 mb-3">Membri Team Attivi</h4>
-            {teamMembers.map((member) => (
-              <div key={member.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+            {teamMembers.map(member => (
+              <div
+                key={member.id}
+                className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
+              >
                 <div className="text-2xl">{member.avatar}</div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-gray-900">{member.name}</span>
-                    <div className={`w-2 h-2 rounded-full ${member.isOnline ? 'bg-green-500' : 'bg-gray-400'}`} />
+                    <div
+                      className={`w-2 h-2 rounded-full ${member.isOnline ? 'bg-green-500' : 'bg-gray-400'}`}
+                    />
                   </div>
                   <p className="text-sm text-gray-600">{member.currentActivity}</p>
                 </div>
@@ -193,7 +207,7 @@ export default function TeamCollaborationPanel({
                     placeholder="Inserisci ID terreno"
                     className="flex-1 px-2 py-1 text-sm border border-blue-300 rounded"
                     value={selectedLandId === 'land-new' ? '' : selectedLandId}
-                    onChange={(e) => setSelectedLandId(e.target.value)}
+                    onChange={e => setSelectedLandId(e.target.value)}
                   />
                 </div>
                 <textarea
@@ -201,7 +215,7 @@ export default function TeamCollaborationPanel({
                   className="w-full px-3 py-2 text-sm border border-blue-300 rounded resize-none"
                   rows={3}
                   value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
+                  onChange={e => setNewComment(e.target.value)}
                 />
                 <div className="flex gap-2 mt-2">
                   <Button
@@ -228,7 +242,7 @@ export default function TeamCollaborationPanel({
 
             {/* Comments List */}
             <div className="space-y-3">
-              {teamComments.map((comment) => (
+              {teamComments.map(comment => (
                 <div key={comment.id} className="bg-gray-50 p-3 rounded-lg">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
@@ -256,8 +270,11 @@ export default function TeamCollaborationPanel({
           <div className="space-y-4">
             <h4 className="font-semibold text-gray-900 mb-3">Preferiti Condivisi</h4>
             <div className="space-y-2">
-              {sharedFavorites.map((landId) => (
-                <div key={landId} className="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              {sharedFavorites.map(landId => (
+                <div
+                  key={landId}
+                  className="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-lg"
+                >
                   <div className="flex items-center gap-2">
                     <StarIcon className="h-5 w-5 text-yellow-500" />
                     <span className="font-medium text-gray-900">Terreno {landId}</span>
@@ -282,10 +299,30 @@ export default function TeamCollaborationPanel({
             <h4 className="font-semibold text-gray-900 mb-3">Attività Recenti</h4>
             <div className="space-y-3">
               {[
-                { action: 'Nuova ricerca avviata', member: 'Marco Rossi', time: '2 min fa', icon: '🔍' },
-                { action: 'Terreno aggiunto ai preferiti', member: 'Laura Bianchi', time: '5 min fa', icon: '⭐' },
-                { action: 'Commento aggiunto', member: 'Marco Rossi', time: '8 min fa', icon: '💬' },
-                { action: 'Voto positivo registrato', member: 'Giuseppe Verdi', time: '15 min fa', icon: '👍' }
+                {
+                  action: 'Nuova ricerca avviata',
+                  member: 'Marco Rossi',
+                  time: '2 min fa',
+                  icon: '🔍',
+                },
+                {
+                  action: 'Terreno aggiunto ai preferiti',
+                  member: 'Laura Bianchi',
+                  time: '5 min fa',
+                  icon: '⭐',
+                },
+                {
+                  action: 'Commento aggiunto',
+                  member: 'Marco Rossi',
+                  time: '8 min fa',
+                  icon: '💬',
+                },
+                {
+                  action: 'Voto positivo registrato',
+                  member: 'Giuseppe Verdi',
+                  time: '15 min fa',
+                  icon: '👍',
+                },
               ].map((activity, idx) => (
                 <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                   <span className="text-xl">{activity.icon}</span>

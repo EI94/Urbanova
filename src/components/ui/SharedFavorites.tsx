@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  StarIcon, 
-  UsersIcon, 
+
+import {
+  ShareIcon as StarIcon,
+  UsersIcon,
   FilterIcon,
   SortAscIcon,
   SortDescIcon,
@@ -11,8 +12,9 @@ import {
   MessageCircleIcon,
   ShareIcon,
   TrashIcon,
-  PlusIcon
+  PlusIcon,
 } from '@/components/icons';
+
 import { Badge } from './Badge';
 import Button from './Button';
 
@@ -43,7 +45,10 @@ interface SharedFavoritesProps {
   onAddComment: (landId: string, comment: string) => void;
   onVote: (landId: string, vote: 'like' | 'dislike' | 'neutral') => void;
   onUpdatePriority: (landId: string, priority: 'high' | 'medium' | 'low') => void;
-  onUpdateStatus: (landId: string, status: 'active' | 'analyzing' | 'rejected' | 'approved') => void;
+  onUpdateStatus: (
+    landId: string,
+    status: 'active' | 'analyzing' | 'rejected' | 'approved'
+  ) => void;
   onRemove: (landId: string) => void;
 }
 
@@ -55,7 +60,7 @@ export default function SharedFavorites({
   onVote,
   onUpdatePriority,
   onUpdateStatus,
-  onRemove
+  onRemove,
 }: SharedFavoritesProps) {
   const [activeTab, setActiveTab] = useState<'all' | 'high' | 'medium' | 'low'>('all');
   const [sortBy, setSortBy] = useState<'date' | 'price' | 'area' | 'votes'>('date');
@@ -77,11 +82,11 @@ export default function SharedFavorites({
       teamVotes: [
         { memberId: '1', memberName: 'Marco Rossi', vote: 'like', comment: 'Ottima posizione!' },
         { memberId: '2', memberName: 'Laura Bianchi', vote: 'like', comment: 'ROI interessante' },
-        { memberId: '3', memberName: 'Giuseppe Verdi', vote: 'neutral' }
+        { memberId: '3', memberName: 'Giuseppe Verdi', vote: 'neutral' },
       ],
       tags: ['Centro Storico', 'Alto Potenziale', 'ROI'],
       priority: 'high',
-      status: 'analyzing'
+      status: 'analyzing',
     },
     {
       id: '2',
@@ -95,11 +100,16 @@ export default function SharedFavorites({
       teamVotes: [
         { memberId: '1', memberName: 'Marco Rossi', vote: 'like' },
         { memberId: '2', memberName: 'Laura Bianchi', vote: 'like', comment: 'Zona in sviluppo' },
-        { memberId: '3', memberName: 'Giuseppe Verdi', vote: 'dislike', comment: 'Prezzo troppo alto' }
+        {
+          memberId: '3',
+          memberName: 'Giuseppe Verdi',
+          vote: 'dislike',
+          comment: 'Prezzo troppo alto',
+        },
       ],
       tags: ['Riconversione', 'Zona Sviluppo', 'Milano'],
       priority: 'medium',
-      status: 'active'
+      status: 'active',
     },
     {
       id: '3',
@@ -112,74 +122,102 @@ export default function SharedFavorites({
       addedAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
       teamVotes: [
         { memberId: '1', memberName: 'Marco Rossi', vote: 'neutral' },
-        { memberId: '2', memberName: 'Laura Bianchi', vote: 'like', comment: 'Buon rapporto qualità-prezzo' },
-        { memberId: '3', memberName: 'Giuseppe Verdi', vote: 'like' }
+        {
+          memberId: '2',
+          memberName: 'Laura Bianchi',
+          vote: 'like',
+          comment: 'Buon rapporto qualità-prezzo',
+        },
+        { memberId: '3', memberName: 'Giuseppe Verdi', vote: 'like' },
       ],
       tags: ['Residenziale', 'Vomero', 'Buon Prezzo'],
       priority: 'low',
-      status: 'active'
-    }
+      status: 'active',
+    },
   ]);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'error';
-      case 'medium': return 'warning';
-      case 'low': return 'success';
-      default: return 'outline';
+      case 'high':
+        return 'error';
+      case 'medium':
+        return 'warning';
+      case 'low':
+        return 'success';
+      default:
+        return 'outline';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'success';
-      case 'analyzing': return 'warning';
-      case 'rejected': return 'error';
-      case 'approved': return 'info';
-      default: return 'outline';
+      case 'active':
+        return 'success';
+      case 'analyzing':
+        return 'warning';
+      case 'rejected':
+        return 'error';
+      case 'approved':
+        return 'info';
+      default:
+        return 'outline';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'active': return '🟢';
-      case 'analyzing': return '🟡';
-      case 'rejected': return '🔴';
-      case 'approved': return '🔵';
-      default: return '⚪';
+      case 'active':
+        return '🟢';
+      case 'analyzing':
+        return '🟡';
+      case 'rejected':
+        return '🔴';
+      case 'approved':
+        return '🔵';
+      default:
+        return '⚪';
     }
   };
 
   const getVoteIcon = (vote: string) => {
     switch (vote) {
-      case 'like': return '👍';
-      case 'dislike': return '👎';
-      case 'neutral': return '🤔';
-      default: return '⚪';
+      case 'like':
+        return '👍';
+      case 'dislike':
+        return '👎';
+      case 'neutral':
+        return '🤔';
+      default:
+        return '⚪';
     }
   };
 
   const getVoteColor = (vote: string) => {
     switch (vote) {
-      case 'like': return 'success';
-      case 'dislike': return 'error';
-      case 'neutral': return 'warning';
-      default: return 'outline';
+      case 'like':
+        return 'success';
+      case 'dislike':
+        return 'error';
+      case 'neutral':
+        return 'warning';
+      default:
+        return 'outline';
     }
   };
 
   const filteredFavorites = favorites.filter(favorite => {
     const matchesTab = activeTab === 'all' || favorite.priority === activeTab;
     const matchesStatus = filterStatus === 'all' || favorite.status === filterStatus;
-    const matchesSearch = favorite.landTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         favorite.landLocation.toLowerCase().includes(searchTerm.toLowerCase());
-    
+    const matchesSearch =
+      favorite.landTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      favorite.landLocation.toLowerCase().includes(searchTerm.toLowerCase());
+
     return matchesTab && matchesStatus && matchesSearch;
   });
 
   const sortedFavorites = [...filteredFavorites].sort((a, b) => {
     let aValue: any, bValue: any;
-    
+
     switch (sortBy) {
       case 'date':
         aValue = a.addedAt.getTime();
@@ -201,7 +239,7 @@ export default function SharedFavorites({
         aValue = a.addedAt.getTime();
         bValue = b.addedAt.getTime();
     }
-    
+
     if (sortOrder === 'asc') {
       return aValue - bValue;
     } else {
@@ -210,11 +248,11 @@ export default function SharedFavorites({
   });
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('it-IT', { 
-      style: 'currency', 
+    return new Intl.NumberFormat('it-IT', {
+      style: 'currency',
       currency: 'EUR',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(value);
   };
 
@@ -252,10 +290,22 @@ export default function SharedFavorites({
             <div className="flex space-x-1">
               {[
                 { id: 'all', name: 'Tutti', count: favorites.length },
-                { id: 'high', name: 'Alta Priorità', count: favorites.filter(f => f.priority === 'high').length },
-                { id: 'medium', name: 'Media Priorità', count: favorites.filter(f => f.priority === 'medium').length },
-                { id: 'low', name: 'Bassa Priorità', count: favorites.filter(f => f.priority === 'low').length }
-              ].map((tab) => (
+                {
+                  id: 'high',
+                  name: 'Alta Priorità',
+                  count: favorites.filter(f => f.priority === 'high').length,
+                },
+                {
+                  id: 'medium',
+                  name: 'Media Priorità',
+                  count: favorites.filter(f => f.priority === 'medium').length,
+                },
+                {
+                  id: 'low',
+                  name: 'Bassa Priorità',
+                  count: favorites.filter(f => f.priority === 'low').length,
+                },
+              ].map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
@@ -267,7 +317,9 @@ export default function SharedFavorites({
                 >
                   <span className="flex items-center gap-2">
                     <span>{tab.name}</span>
-                    <Badge variant="secondary" className="text-xs">{tab.count}</Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      {tab.count}
+                    </Badge>
                   </span>
                 </button>
               ))}
@@ -280,12 +332,12 @@ export default function SharedFavorites({
                 placeholder="Cerca per titolo o location..."
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
               />
-              
+
               <select
                 value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
+                onChange={e => setFilterStatus(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
               >
                 <option value="all">Tutti gli stati</option>
@@ -298,7 +350,7 @@ export default function SharedFavorites({
               <div className="flex items-center gap-2">
                 <select
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
+                  onChange={e => setSortBy(e.target.value as any)}
                   className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                 >
                   <option value="date">Data</option>
@@ -306,12 +358,16 @@ export default function SharedFavorites({
                   <option value="area">Area</option>
                   <option value="votes">Voti</option>
                 </select>
-                
+
                 <button
                   onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
                   className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
-                  {sortOrder === 'asc' ? <SortAscIcon className="h-4 w-4" /> : <SortDescIcon className="h-4 w-4" />}
+                  {sortOrder === 'asc' ? (
+                    <SortAscIcon className="h-4 w-4" />
+                  ) : (
+                    <SortDescIcon className="h-4 w-4" />
+                  )}
                 </button>
               </div>
             </div>
@@ -321,21 +377,24 @@ export default function SharedFavorites({
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
           <div className="grid gap-6">
-            {sortedFavorites.map((favorite) => (
-              <div key={favorite.id} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+            {sortedFavorites.map(favorite => (
+              <div
+                key={favorite.id}
+                className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
+              >
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-lg font-semibold text-gray-900">{favorite.landTitle}</h3>
-                      <Badge variant={getPriorityColor(favorite.priority)}>
+                      <Badge variant={getPriorityColor(favorite.priority) as any}>
                         Priorità {favorite.priority}
                       </Badge>
-                      <Badge variant={getStatusColor(favorite.status)}>
+                      <Badge variant={getStatusColor(favorite.status) as any}>
                         {getStatusIcon(favorite.status)} {favorite.status}
                       </Badge>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
                       <div>
                         <p className="text-sm text-gray-500">Location</p>
@@ -343,7 +402,9 @@ export default function SharedFavorites({
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Prezzo</p>
-                        <p className="font-medium text-gray-900">{formatCurrency(favorite.landPrice)}</p>
+                        <p className="font-medium text-gray-900">
+                          {formatCurrency(favorite.landPrice)}
+                        </p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Area</p>
@@ -357,7 +418,7 @@ export default function SharedFavorites({
 
                     {/* Tags */}
                     <div className="flex flex-wrap gap-2 mb-3">
-                      {favorite.tags.map((tag) => (
+                      {favorite.tags.map(tag => (
                         <Badge key={tag} variant="outline" className="text-xs">
                           {tag}
                         </Badge>
@@ -372,14 +433,15 @@ export default function SharedFavorites({
                     <UsersIcon className="h-4 w-4" />
                     Voti del Team ({favorite.teamVotes.length} membri)
                   </h4>
-                  
+
                   <div className="grid gap-3">
                     {favorite.teamVotes.map((vote, idx) => (
-                      <div key={idx} className="flex items-center justify-between bg-white p-3 rounded border">
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between bg-white p-3 rounded border"
+                      >
                         <div className="flex items-center gap-3">
-                          <Badge variant={getVoteColor(vote.vote)}>
-                            {getVoteIcon(vote.vote)}
-                          </Badge>
+                          <Badge variant={getVoteColor(vote.vote) as any}>{getVoteIcon(vote.vote)}</Badge>
                           <span className="font-medium text-gray-900">{vote.memberName}</span>
                           {vote.comment && (
                             <span className="text-sm text-gray-600">"{vote.comment}"</span>
@@ -392,15 +454,11 @@ export default function SharedFavorites({
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-3">
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => onViewLand(favorite.landId)}
-                  >
+                  <Button variant="primary" size="sm" onClick={() => onViewLand(favorite.landId)}>
                     <EyeIcon className="h-4 w-4 mr-1" />
                     Visualizza Terreno
                   </Button>
-                  
+
                   <Button
                     variant="outline"
                     size="sm"
@@ -408,7 +466,7 @@ export default function SharedFavorites({
                   >
                     👍 Vota Positivo
                   </Button>
-                  
+
                   <Button
                     variant="outline"
                     size="sm"
@@ -419,7 +477,7 @@ export default function SharedFavorites({
 
                   <select
                     value={favorite.priority}
-                    onChange={(e) => onUpdatePriority(favorite.landId, e.target.value as any)}
+                    onChange={e => onUpdatePriority(favorite.landId, e.target.value as any)}
                     className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                   >
                     <option value="low">Bassa Priorità</option>
@@ -429,7 +487,7 @@ export default function SharedFavorites({
 
                   <select
                     value={favorite.status}
-                    onChange={(e) => onUpdateStatus(favorite.landId, e.target.value as any)}
+                    onChange={e => onUpdateStatus(favorite.landId, e.target.value as any)}
                     className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                   >
                     <option value="active">Attivo</option>
@@ -459,8 +517,7 @@ export default function SharedFavorites({
               <p className="text-gray-500">
                 {searchTerm || filterStatus !== 'all' || activeTab !== 'all'
                   ? 'Prova a modificare i filtri di ricerca'
-                  : 'Inizia ad aggiungere terreni ai preferiti condivisi del team'
-                }
+                  : 'Inizia ad aggiungere terreni ai preferiti condivisi del team'}
               </p>
             </div>
           )}

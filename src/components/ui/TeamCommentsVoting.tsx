@@ -1,16 +1,21 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  MessageCircleIcon, 
-  ThumbsUpIcon, 
+
+import {
+  MessageCircleIcon,
+  ThumbsUpIcon,
   ThumbsDownIcon,
-  StarIcon,
+  // StarIcon,
   UserIcon,
   ClockIcon,
   ReplyIcon,
-  FlagIcon
+  FlagIcon,
 } from '@/components/icons';
+
+// Mock StarIcon
+const StarIcon = ThumbsUpIcon;
+
 import { Badge } from './Badge';
 import Button from './Button';
 
@@ -35,7 +40,9 @@ interface TeamCommentsVotingProps {
   landTitle: string;
   isOpen: boolean;
   onClose: () => void;
-  onAddComment: (comment: Omit<TeamComment, 'id' | 'timestamp' | 'likes' | 'dislikes' | 'replies' | 'isEdited'>) => void;
+  onAddComment: (
+    comment: Omit<TeamComment, 'id' | 'timestamp' | 'likes' | 'dislikes' | 'replies' | 'isEdited'>
+  ) => void;
   onVote: (commentId: string, vote: 'like' | 'dislike') => void;
   onReply: (commentId: string, reply: string) => void;
   onAddToFavorites: (landId: string) => void;
@@ -49,10 +56,12 @@ export default function TeamCommentsVoting({
   onAddComment,
   onVote,
   onReply,
-  onAddToFavorites
+  onAddToFavorites,
 }: TeamCommentsVotingProps) {
   const [newComment, setNewComment] = useState('');
-  const [commentType, setCommentType] = useState<'comment' | 'vote' | 'favorite' | 'analysis'>('comment');
+  const [commentType, setCommentType] = useState<'comment' | 'vote' | 'favorite' | 'analysis'>(
+    'comment'
+  );
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -72,7 +81,7 @@ export default function TeamCommentsVoting({
       dislikes: 0,
       replies: [],
       isEdited: false,
-      tags: ['ROI', 'Posizione', 'Prezzo']
+      tags: ['ROI', 'Posizione', 'Prezzo'],
     },
     {
       id: '2',
@@ -99,11 +108,11 @@ export default function TeamCommentsVoting({
           dislikes: 0,
           replies: [],
           isEdited: false,
-          tags: ['Urbanistica']
-        }
+          tags: ['Urbanistica'],
+        },
       ],
       isEdited: false,
-      tags: ['Sviluppo']
+      tags: ['Sviluppo'],
     },
     {
       id: '3',
@@ -118,14 +127,27 @@ export default function TeamCommentsVoting({
       dislikes: 1,
       replies: [],
       isEdited: false,
-      tags: ['Voto']
-    }
+      tags: ['Voto'],
+    },
   ]);
 
   const availableTags = [
-    'ROI', 'Posizione', 'Prezzo', 'Sviluppo', 'Urbanistica', 'Accessibilità', 
-    'Servizi', 'Trasporti', 'Scuole', 'Ospedali', 'Centri Commerciali',
-    'Parcheggi', 'Giardini', 'Sicurezza', 'Rumore', 'Inquinamento'
+    'ROI',
+    'Posizione',
+    'Prezzo',
+    'Sviluppo',
+    'Urbanistica',
+    'Accessibilità',
+    'Servizi',
+    'Trasporti',
+    'Scuole',
+    'Ospedali',
+    'Centri Commerciali',
+    'Parcheggi',
+    'Giardini',
+    'Sicurezza',
+    'Rumore',
+    'Inquinamento',
   ];
 
   const handleAddComment = () => {
@@ -137,7 +159,7 @@ export default function TeamCommentsVoting({
         landId,
         comment: newComment,
         type: commentType,
-        tags: selectedTags
+        tags: selectedTags,
       });
       setNewComment('');
       setSelectedTags([]);
@@ -154,30 +176,36 @@ export default function TeamCommentsVoting({
   };
 
   const handleTagToggle = (tag: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) 
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
-    );
+    setSelectedTags(prev => (prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]));
   };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'comment': return '💬';
-      case 'vote': return '👍';
-      case 'favorite': return '⭐';
-      case 'analysis': return '📊';
-      default: return '💬';
+      case 'comment':
+        return '💬';
+      case 'vote':
+        return '👍';
+      case 'favorite':
+        return '⭐';
+      case 'analysis':
+        return '📊';
+      default:
+        return '💬';
     }
   };
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'comment': return 'blue';
-      case 'vote': return 'green';
-      case 'favorite': return 'yellow';
-      case 'analysis': return 'purple';
-      default: return 'blue';
+      case 'comment':
+        return 'blue';
+      case 'vote':
+        return 'green';
+      case 'favorite':
+        return 'yellow';
+      case 'analysis':
+        return 'purple';
+      default:
+        return 'blue';
     }
   };
 
@@ -198,10 +226,7 @@ export default function TeamCommentsVoting({
                 {landTitle} - Collabora con il team per valutare questa opportunità
               </p>
             </div>
-            <button
-              onClick={onClose}
-              className="text-white hover:text-blue-200 transition-colors"
-            >
+            <button onClick={onClose} className="text-white hover:text-blue-200 transition-colors">
               <span className="sr-only">Chiudi</span>
               <div className="w-8 h-8 flex items-center justify-center text-2xl">×</div>
             </button>
@@ -212,19 +237,23 @@ export default function TeamCommentsVoting({
         <div className="flex-1 overflow-y-auto p-6">
           {/* Add Comment Section */}
           <div className="bg-gray-50 p-6 rounded-lg border mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Aggiungi Commento o Analisi</h3>
-            
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Aggiungi Commento o Analisi
+            </h3>
+
             <div className="space-y-4">
               {/* Comment Type Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Tipo di Contributo</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tipo di Contributo
+                </label>
                 <div className="flex gap-2">
                   {[
                     { id: 'comment', label: 'Commento', icon: '💬' },
                     { id: 'analysis', label: 'Analisi', icon: '📊' },
                     { id: 'vote', label: 'Voto', icon: '👍' },
-                    { id: 'favorite', label: 'Preferito', icon: '⭐' }
-                  ].map((type) => (
+                    { id: 'favorite', label: 'Preferito', icon: '⭐' },
+                  ].map(type => (
                     <button
                       key={type.id}
                       onClick={() => setCommentType(type.id as any)}
@@ -246,29 +275,38 @@ export default function TeamCommentsVoting({
               {/* Comment Input */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {commentType === 'comment' ? 'Commento' : 
-                   commentType === 'analysis' ? 'Analisi' : 
-                   commentType === 'vote' ? 'Voto' : 'Preferito'}
+                  {commentType === 'comment'
+                    ? 'Commento'
+                    : commentType === 'analysis'
+                      ? 'Analisi'
+                      : commentType === 'vote'
+                        ? 'Voto'
+                        : 'Preferito'}
                 </label>
                 <textarea
                   placeholder={
-                    commentType === 'comment' ? 'Scrivi un commento...' :
-                    commentType === 'analysis' ? 'Fornisci un\'analisi dettagliata...' :
-                    commentType === 'vote' ? 'Spiega il motivo del tuo voto...' :
-                    'Spiega perché questo terreno ti piace...'
+                    commentType === 'comment'
+                      ? 'Scrivi un commento...'
+                      : commentType === 'analysis'
+                        ? "Fornisci un'analisi dettagliata..."
+                        : commentType === 'vote'
+                          ? 'Spiega il motivo del tuo voto...'
+                          : 'Spiega perché questo terreno ti piace...'
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
                   rows={4}
                   value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
+                  onChange={e => setNewComment(e.target.value)}
                 />
               </div>
 
               {/* Tags Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Tag Rilevanti</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tag Rilevanti
+                </label>
                 <div className="flex flex-wrap gap-2">
-                  {availableTags.map((tag) => (
+                  {availableTags.map(tag => (
                     <button
                       key={tag}
                       onClick={() => handleTagToggle(tag)}
@@ -293,11 +331,16 @@ export default function TeamCommentsVoting({
                   className="flex-1"
                 >
                   <MessageCircleIcon className="h-4 w-4 mr-2" />
-                  Aggiungi {commentType === 'comment' ? 'Commento' : 
-                           commentType === 'analysis' ? 'Analisi' : 
-                           commentType === 'vote' ? 'Voto' : 'Preferito'}
+                  Aggiungi{' '}
+                  {commentType === 'comment'
+                    ? 'Commento'
+                    : commentType === 'analysis'
+                      ? 'Analisi'
+                      : commentType === 'vote'
+                        ? 'Voto'
+                        : 'Preferito'}
                 </Button>
-                
+
                 {commentType === 'favorite' && (
                   <Button
                     variant="outline"
@@ -315,9 +358,12 @@ export default function TeamCommentsVoting({
           {/* Comments List */}
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-900">Commenti e Analisi del Team</h3>
-            
-            {comments.map((comment) => (
-              <div key={comment.id} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+
+            {comments.map(comment => (
+              <div
+                key={comment.id}
+                className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
+              >
                 {/* Comment Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -329,7 +375,9 @@ export default function TeamCommentsVoting({
                           {getTypeIcon(comment.type)} {comment.type}
                         </Badge>
                         {comment.isEdited && (
-                          <Badge variant="outline" className="text-xs">Modificato</Badge>
+                          <Badge variant="outline" className="text-xs">
+                            Modificato
+                          </Badge>
                         )}
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -338,7 +386,7 @@ export default function TeamCommentsVoting({
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
@@ -364,11 +412,11 @@ export default function TeamCommentsVoting({
                 {/* Comment Content */}
                 <div className="mb-4">
                   <p className="text-gray-700 mb-3">{comment.comment}</p>
-                  
+
                   {/* Tags */}
                   {comment.tags.length > 0 && (
                     <div className="flex flex-wrap gap-2">
-                      {comment.tags.map((tag) => (
+                      {comment.tags.map(tag => (
                         <Badge key={tag} variant="outline" className="text-xs">
                           {tag}
                         </Badge>
@@ -379,11 +427,7 @@ export default function TeamCommentsVoting({
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-3 mb-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setReplyingTo(comment.id)}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => setReplyingTo(comment.id)}>
                     <ReplyIcon className="h-4 w-4 mr-1" />
                     Rispondi
                   </Button>
@@ -398,14 +442,16 @@ export default function TeamCommentsVoting({
                   <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                     <div className="flex items-center gap-2 mb-2">
                       <ReplyIcon className="h-4 w-4 text-blue-600" />
-                      <span className="text-sm font-medium text-blue-900">Rispondi a {comment.memberName}</span>
+                      <span className="text-sm font-medium text-blue-900">
+                        Rispondi a {comment.memberName}
+                      </span>
                     </div>
                     <textarea
                       placeholder="Scrivi una risposta..."
                       className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
                       rows={3}
                       value={replyText}
-                      onChange={(e) => setReplyText(e.target.value)}
+                      onChange={e => setReplyText(e.target.value)}
                     />
                     <div className="flex gap-2 mt-2">
                       <Button
@@ -433,8 +479,11 @@ export default function TeamCommentsVoting({
                 {/* Replies */}
                 {comment.replies.length > 0 && (
                   <div className="ml-8 mt-4 space-y-3">
-                    {comment.replies.map((reply) => (
-                      <div key={reply.id} className="bg-gray-50 p-4 rounded-lg border-l-4 border-blue-300">
+                    {comment.replies.map(reply => (
+                      <div
+                        key={reply.id}
+                        className="bg-gray-50 p-4 rounded-lg border-l-4 border-blue-300"
+                      >
                         <div className="flex items-center gap-2 mb-2">
                           <div className="text-lg">{reply.memberAvatar}</div>
                           <span className="font-medium text-gray-900">{reply.memberName}</span>
@@ -445,7 +494,7 @@ export default function TeamCommentsVoting({
                         <p className="text-gray-700 mb-2">{reply.comment}</p>
                         {reply.tags.length > 0 && (
                           <div className="flex flex-wrap gap-2">
-                            {reply.tags.map((tag) => (
+                            {reply.tags.map(tag => (
                               <Badge key={tag} variant="outline" className="text-xs">
                                 {tag}
                               </Badge>

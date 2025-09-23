@@ -1,11 +1,11 @@
 // Service per la gestione della Real-time Collaboration
-import { 
-  CollaborationSession, 
-  CollaborationParticipant, 
-  RealtimeMessage, 
-  CursorPosition, 
-  DocumentChange, 
-  LiveComment, 
+import {
+  CollaborationSession,
+  CollaborationParticipant,
+  RealtimeMessage,
+  CursorPosition,
+  DocumentChange,
+  LiveComment,
   UserPresence,
   CollaborationMetrics,
   RealtimeConnection,
@@ -13,7 +13,7 @@ import {
   RealtimeNotification,
   CollaborationFilter,
   RealtimeConfig,
-  CollaborationType
+  CollaborationType,
 } from '@/types/realtime';
 import { TeamRole } from '@/types/team';
 
@@ -35,9 +35,9 @@ export class RealtimeService {
       enablePresence: true,
       enableCursors: true,
       enableLiveComments: true,
-      enableDocumentSync: true
+      enableDocumentSync: true,
     };
-    
+
     this.initializeDefaultTemplates();
     this.startHeartbeat();
   }
@@ -56,7 +56,7 @@ export class RealtimeService {
       isActive: true,
       createdBy: 'system',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     // Template per collaborazione su analisi
@@ -71,7 +71,7 @@ export class RealtimeService {
       isActive: true,
       createdBy: 'system',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     // Template per presentazioni collaborative
@@ -82,11 +82,16 @@ export class RealtimeService {
       type: 'presentation',
       defaultPermissions: ['VIEW_ANALYTICS', 'ADD_COMMENTS'],
       defaultMaxParticipants: 20,
-      features: ['live_presentation', 'audience_interaction', 'real_time_polls', 'collaborative_notes'],
+      features: [
+        'live_presentation',
+        'audience_interaction',
+        'real_time_polls',
+        'collaborative_notes',
+      ],
       isActive: true,
       createdBy: 'system',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.templates.set(landSearchTemplate.id, landSearchTemplate);
@@ -128,19 +133,25 @@ export class RealtimeService {
         canEdit: [creator.userId],
         canComment: template.defaultPermissions.includes('ADD_COMMENTS') ? [creator.userId] : [],
         canInvite: [creator.userId],
-        canManage: [creator.userId]
+        canManage: [creator.userId],
       },
       tags: [],
       attachments: [],
-      notes: ''
+      notes: '',
     };
 
     this.sessions.set(sessionId, session);
     this.messages.set(sessionId, []);
-    
+
     // Crea notifica di creazione sessione
-    this.createNotification(sessionId, creator.userId, 'session_created', 'Sessione creata', `La sessione "${name}" è stata creata`);
-    
+    this.createNotification(
+      sessionId,
+      creator.userId,
+      'session_created',
+      'Sessione creata',
+      `La sessione "${name}" è stata creata`
+    );
+
     return session;
   }
 
@@ -175,13 +186,13 @@ export class RealtimeService {
         contributions: {
           changesCount: 0,
           commentsCount: 0,
-          timeSpent: 0
-        }
+          timeSpent: 0,
+        },
       });
     }
 
     session.lastActivity = new Date();
-    
+
     // Crea messaggio di join
     this.createMessage(sessionId, {
       type: 'user_joined',
@@ -189,14 +200,20 @@ export class RealtimeService {
       userName: participant.userName,
       userAvatar: participant.userAvatar,
       userRole: participant.userRole,
-      data: { participant }
+      data: { participant },
     });
 
     // Crea notifica per altri partecipanti
     session.participants
       .filter(p => p.userId !== participant.userId)
       .forEach(p => {
-        this.createNotification(sessionId, p.userId, 'user_joined', 'Nuovo partecipante', `${participant.userName} si è unito alla sessione`);
+        this.createNotification(
+          sessionId,
+          p.userId,
+          'user_joined',
+          'Nuovo partecipante',
+          `${participant.userName} si è unito alla sessione`
+        );
       });
 
     return session;
@@ -214,9 +231,11 @@ export class RealtimeService {
       participant.isActive = false;
       participant.presence = 'offline';
       participant.lastSeen = new Date();
-      
+
       // Calcola tempo speso
-      const timeSpent = Math.round((participant.lastSeen.getTime() - participant.joinedAt.getTime()) / (1000 * 60));
+      const timeSpent = Math.round(
+        (participant.lastSeen.getTime() - participant.joinedAt.getTime()) / (1000 * 60)
+      );
       participant.contributions.timeSpent += timeSpent;
     }
 
@@ -227,14 +246,20 @@ export class RealtimeService {
       userName: participant?.userName || 'Unknown',
       userAvatar: participant?.userAvatar || '👤',
       userRole: participant?.userRole || 'TEAM_MEMBER',
-      data: { participant }
+      data: { participant },
     });
 
     // Crea notifica per altri partecipanti
     session.participants
       .filter(p => p.userId !== userId && p.isActive)
       .forEach(p => {
-        this.createNotification(sessionId, p.userId, 'user_left', 'Partecipante uscito', `${participant?.userName || 'Un utente'} ha lasciato la sessione`);
+        this.createNotification(
+          sessionId,
+          p.userId,
+          'user_left',
+          'Partecipante uscito',
+          `${participant?.userName || 'Un utente'} ha lasciato la sessione`
+        );
       });
 
     return session;
@@ -259,7 +284,7 @@ export class RealtimeService {
       userName: participant.userName,
       userAvatar: participant.userAvatar,
       userRole: participant.userRole,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     participant.cursorPosition = cursorPosition;
@@ -272,7 +297,7 @@ export class RealtimeService {
       userName: participant.userName,
       userAvatar: participant.userAvatar,
       userRole: participant.userRole,
-      data: { cursorPosition }
+      data: { cursorPosition },
     });
 
     return cursorPosition;
@@ -295,19 +320,24 @@ export class RealtimeService {
       throw new Error('Utente non presente nella sessione');
     }
 
-    const comment: LiveComment = {
+    const commentData: Partial<LiveComment> = {
       id: `comment-${Date.now()}`,
       userId,
       userName: participant.userName,
       userAvatar: participant.userAvatar,
       userRole: participant.userRole,
       content,
-      position,
       timestamp: new Date(),
       replies: [],
       isResolved: false,
-      reactions: {}
+      reactions: {},
     };
+
+    if (position) {
+      commentData.position = position;
+    }
+
+    const comment: LiveComment = commentData as LiveComment;
 
     // Aggiorna contatori partecipante
     participant.contributions.commentsCount++;
@@ -320,14 +350,20 @@ export class RealtimeService {
       userName: participant.userName,
       userAvatar: participant.userAvatar,
       userRole: participant.userRole,
-      data: { comment }
+      data: { comment },
     });
 
     // Crea notifica per altri partecipanti
     session.participants
       .filter(p => p.userId !== userId && p.isActive)
       .forEach(p => {
-        this.createNotification(sessionId, p.userId, 'comment_added', 'Nuovo commento', `${participant.userName} ha aggiunto un commento`);
+        this.createNotification(
+          sessionId,
+          p.userId,
+          'comment_added',
+          'Nuovo commento',
+          `${participant.userName} ha aggiunto un commento`
+        );
       });
 
     return comment;
@@ -351,7 +387,7 @@ export class RealtimeService {
         userName: participant.userName,
         userAvatar: participant.userAvatar,
         userRole: participant.userRole,
-        data: { presence }
+        data: { presence },
       });
     }
   }
@@ -371,8 +407,8 @@ export class RealtimeService {
       metadata: {
         priority: 'low',
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 ore
-        retryCount: 0
-      }
+        retryCount: 0,
+      },
     };
 
     const sessionMessages = this.messages.get(sessionId) || [];
@@ -401,7 +437,7 @@ export class RealtimeService {
       isRead: false,
       createdAt: new Date(),
       actionUrl: `/dashboard/collaboration/${sessionId}`,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 giorni
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 giorni
     };
 
     this.notifications.set(notification.id, notification);
@@ -418,7 +454,7 @@ export class RealtimeService {
 
   // Ottieni sessioni per utente
   getUserSessions(userId: string, filter?: CollaborationFilter): CollaborationSession[] {
-    let sessions = Array.from(this.sessions.values()).filter(s => 
+    let sessions = Array.from(this.sessions.values()).filter(s =>
       s.participants.some(p => p.userId === userId)
     );
 
@@ -460,11 +496,11 @@ export class RealtimeService {
 
     const messages = this.messages.get(sessionId) || [];
     const activeParticipants = session.participants.filter(p => p.isActive).length;
-    
+
     // Calcola tempo di risposta medio
     const responseTimes: number[] = [];
     const userMessages = new Map<string, RealtimeMessage[]>();
-    
+
     messages.forEach(msg => {
       if (!userMessages.has(msg.userId)) {
         userMessages.set(msg.userId, []);
@@ -475,21 +511,31 @@ export class RealtimeService {
     userMessages.forEach((userMsgs, userId) => {
       if (userMsgs.length > 1) {
         for (let i = 1; i < userMsgs.length; i++) {
-          const responseTime = userMsgs[i].timestamp.getTime() - userMsgs[i-1].timestamp.getTime();
-          responseTimes.push(responseTime);
+          const currentMsg = userMsgs[i];
+          const previousMsg = userMsgs[i - 1];
+          if (currentMsg && previousMsg) {
+            const responseTime =
+              currentMsg.timestamp.getTime() - previousMsg.timestamp.getTime();
+            responseTimes.push(responseTime);
+          }
         }
       }
     });
 
-    const averageResponseTime = responseTimes.length > 0 
-      ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length 
-      : 0;
+    const averageResponseTime =
+      responseTimes.length > 0
+        ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length
+        : 0;
 
     // Calcola score collaborazione (0-100)
-    const totalContributions = session.participants.reduce((total, p) => 
-      total + p.contributions.changesCount + p.contributions.commentsCount, 0
+    const totalContributions = session.participants.reduce(
+      (total, p) => total + p.contributions.changesCount + p.contributions.commentsCount,
+      0
     );
-    const collaborationScore = Math.min(100, Math.round((totalContributions / session.participants.length) * 10));
+    const collaborationScore = Math.min(
+      100,
+      Math.round((totalContributions / session.participants.length) * 10)
+    );
 
     // Top contributors
     const topContributors = session.participants
@@ -497,7 +543,7 @@ export class RealtimeService {
         userId: p.userId,
         userName: p.userName,
         contributions: p.contributions.changesCount + p.contributions.commentsCount,
-        responseTime: averageResponseTime
+        responseTime: averageResponseTime,
       }))
       .sort((a, b) => b.contributions - a.contributions)
       .slice(0, 5);
@@ -506,13 +552,19 @@ export class RealtimeService {
       sessionId,
       totalParticipants: session.participants.length,
       activeParticipants,
-      totalChanges: session.participants.reduce((total, p) => total + p.contributions.changesCount, 0),
-      totalComments: session.participants.reduce((total, p) => total + p.contributions.commentsCount, 0),
+      totalChanges: session.participants.reduce(
+        (total, p) => total + p.contributions.changesCount,
+        0
+      ),
+      totalComments: session.participants.reduce(
+        (total, p) => total + p.contributions.commentsCount,
+        0
+      ),
       averageResponseTime,
       collaborationScore,
       topContributors,
       bottlenecks: this.identifyBottlenecks(sessionId),
-      peakActivityTime: this.findPeakActivityTime(sessionId)
+      peakActivityTime: this.findPeakActivityTime(sessionId),
     };
   }
 
@@ -522,7 +574,7 @@ export class RealtimeService {
     if (!session) return [];
 
     const bottlenecks: string[] = [];
-    
+
     // Verifica partecipanti inattivi
     const inactiveParticipants = session.participants.filter(p => !p.isActive).length;
     if (inactiveParticipants > session.participants.length * 0.3) {
@@ -530,8 +582,8 @@ export class RealtimeService {
     }
 
     // Verifica partecipanti con poche contribuzioni
-    const lowContributors = session.participants.filter(p => 
-      p.contributions.changesCount + p.contributions.commentsCount < 2
+    const lowContributors = session.participants.filter(
+      p => p.contributions.changesCount + p.contributions.commentsCount < 2
     ).length;
     if (lowContributors > session.participants.length * 0.5) {
       bottlenecks.push('Bassa partecipazione del team');
@@ -563,12 +615,12 @@ export class RealtimeService {
   private startHeartbeat() {
     setInterval(() => {
       const now = new Date();
-      
+
       // Verifica connessioni scadute
       this.connections.forEach((connection, connectionId) => {
         if (now.getTime() - connection.lastHeartbeat.getTime() > this.config.connectionTimeout) {
           connection.isActive = false;
-          
+
           // Aggiorna presenza utente
           if (connection.sessionId) {
             this.updatePresence(connection.sessionId, connection.userId, 'offline');
@@ -579,10 +631,12 @@ export class RealtimeService {
       // Verifica sessioni inattive
       this.sessions.forEach((session, sessionId) => {
         const timeSinceLastActivity = now.getTime() - session.lastActivity.getTime();
-        if (timeSinceLastActivity > 30 * 60 * 1000) { // 30 minuti
+        if (timeSinceLastActivity > 30 * 60 * 1000) {
+          // 30 minuti
           // Aggiorna partecipanti inattivi
           session.participants.forEach(p => {
-            if (p.isActive && timeSinceLastActivity > 15 * 60 * 1000) { // 15 minuti
+            if (p.isActive && timeSinceLastActivity > 15 * 60 * 1000) {
+              // 15 minuti
               p.presence = 'away';
             }
           });

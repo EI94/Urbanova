@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { feasibilityService } from '@/lib/feasibilityService';
+import { useEffect } from 'react';
 import { toast } from 'react-hot-toast';
+
+import { feasibilityService } from '@/lib/feasibilityService';
 
 export default function EditFeasibilityProjectPage() {
   const params = useParams();
@@ -12,34 +13,33 @@ export default function EditFeasibilityProjectPage() {
   useEffect(() => {
     const loadAndRedirect = async () => {
       try {
-        if (!params.id) {
-          toast.error('❌ ID progetto non valido');
+        if (!params?.id) {
+          toast('❌ ID progetto non valido', { icon: '❌' });
           router.push('/dashboard/feasibility-analysis');
           return;
         }
 
         // Carica il progetto per verificare che esista
-        const project = await feasibilityService.getProjectById(params.id as string);
-        
+        const project = await feasibilityService.getProjectById(params?.id as string);
+
         if (!project) {
-          toast.error('❌ Progetto non trovato');
+          toast('❌ Progetto non trovato', { icon: '❌' });
           router.push('/dashboard/feasibility-analysis');
           return;
         }
 
         // Reindirizza alla pagina di creazione con i dati del progetto
         // I dati verranno caricati automaticamente nella pagina di creazione
-        router.push(`/dashboard/feasibility-analysis/new?edit=${params.id}`);
-        
+        router.push(`/dashboard/feasibility-analysis/new?edit=${params?.id}`);
       } catch (error) {
         console.error('❌ Errore caricamento progetto per edit:', error);
-        toast.error('❌ Errore nel caricamento del progetto');
+        toast('❌ Errore nel caricamento del progetto', { icon: '❌' });
         router.push('/dashboard/feasibility-analysis');
       }
     };
 
     loadAndRedirect();
-  }, [params.id, router]);
+  }, [params?.id, router]);
 
   // Mostra un loader mentre reindirizza
   return (

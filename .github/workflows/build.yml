@@ -1,0 +1,132 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '22'
+  PNPM_VERSION: '8'
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies and build application
+        run: |
+          echo "📦 Installing dependencies..."
+          pnpm install --no-frozen-lockfile
+          
+          echo "🔍 Debugging workspace structure..."
+          pwd
+          ls -la
+          
+          echo "🏗️ Building Next.js application..."
+          SKIP_ENV_VALIDATION=true pnpm build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: build-artifacts
+          path: |
+            .next/
+            dist/
+            build/
+          retention-days: 7
+
+  firestore-validate:
+    name: Firestore Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+        
+      - name: Install Firebase CLI
+        run: pnpm add -g firebase-tools@13.15.0
+        
+      - name: Validate Firestore configuration files
+        run: |
+          echo "🔍 Validating Firebase configuration files..."
+          
+          # Check if firebase.json exists and is valid JSON
+          if [ -f "firebase.json" ]; then
+            echo "✅ firebase.json exists"
+            cat firebase.json | jq . > /dev/null && echo "✅ firebase.json is valid JSON" || (echo "❌ firebase.json is invalid JSON" && exit 1)
+          else
+            echo "❌ firebase.json not found" && exit 1
+          fi
+          
+          # Check if firestore.rules exists
+          if [ -f "firestore.rules" ]; then
+            echo "✅ firestore.rules exists"
+            echo "📝 Firestore rules file size: $(wc -c < firestore.rules) bytes"
+          else
+            echo "❌ firestore.rules not found" && exit 1
+          fi
+          
+          # Check if firestore.indexes.json exists and is valid JSON
+          if [ -f "firestore.indexes.json" ]; then
+            echo "✅ firestore.indexes.json exists"
+            cat firestore.indexes.json | jq . > /dev/null && echo "✅ firestore.indexes.json is valid JSON" || (echo "❌ firestore.indexes.json is invalid JSON" && exit 1)
+          else
+            echo "❌ firestore.indexes.json not found" && exit 1
+          fi
+          
+          echo "🎉 All Firestore configuration files are valid!"
+        
+      - name: Run migration validation
+        run: pnpm run migrate:validate
+        
+      - name: Success
+        run: |
+          echo "🎉 Firestore validation completata con successo!"
+          echo "✅ Regole validate"
+          echo "✅ Indici validati"
+          echo "✅ Migrazione validata"

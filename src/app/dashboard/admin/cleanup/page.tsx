@@ -1,16 +1,19 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'react-hot-toast';
+
+import {
+  TrashIcon,
+  CheckCircleIcon,
+  AlertIcon,
+  RefreshIcon,
+} from '@/components/icons';
+// Mock DatabaseIcon
+const DatabaseIcon = RefreshIcon;
+
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { cleanupService } from '@/lib/cleanupService';
-import { 
-  TrashIcon, 
-  CheckCircleIcon, 
-  AlertIcon,
-  DatabaseIcon,
-  RefreshIcon
-} from '@/components/icons';
-import toast from 'react-hot-toast';
 
 export default function CleanupPage() {
   const [loading, setLoading] = useState(false);
@@ -18,7 +21,11 @@ export default function CleanupPage() {
   const [selectedCollection, setSelectedCollection] = useState('');
 
   const handleCleanAll = async () => {
-    if (!confirm('⚠️ ATTENZIONE: Questa operazione eliminerà TUTTI i dati dal database. Sei sicuro di voler continuare?')) {
+    if (
+      !confirm(
+        '⚠️ ATTENZIONE: Questa operazione eliminerà TUTTI i dati dal database. Sei sicuro di voler continuare?'
+      )
+    ) {
       return;
     }
 
@@ -26,15 +33,15 @@ export default function CleanupPage() {
     try {
       const result = await cleanupService.cleanAllCollections();
       setResults(result);
-      
+
       if (result.success) {
-        toast.success('✅ ' + result.message);
+        toast('✅ ' + result.message, { icon: '✅' });
       } else {
-        toast.error('❌ ' + result.message);
+        toast('❌ ' + result.message, { icon: '❌' });
       }
     } catch (error) {
       console.error('Errore pulizia:', error);
-      toast.error('❌ Errore durante la pulizia del database');
+      toast('❌ Errore durante la pulizia del database', { icon: '❌' });
     } finally {
       setLoading(false);
     }
@@ -42,20 +49,24 @@ export default function CleanupPage() {
 
   const handleCleanSpecific = async () => {
     if (!selectedCollection) {
-      toast.error('Seleziona una collezione da pulire');
+      toast('Seleziona una collezione da pulire', { icon: '❌' });
       return;
     }
 
-    if (!confirm(`⚠️ ATTENZIONE: Eliminerai tutti i dati dalla collezione "${selectedCollection}". Sei sicuro?`)) {
+    if (
+      !confirm(
+        `⚠️ ATTENZIONE: Eliminerai tutti i dati dalla collezione "${selectedCollection}". Sei sicuro?`
+      )
+    ) {
       return;
     }
 
     setLoading(true);
     try {
       const result = await cleanupService.cleanSpecificCollection(selectedCollection);
-      
+
       if (result.success) {
-        toast.success('✅ ' + result.message);
+        toast('✅ ' + result.message, { icon: '✅' });
         setResults({
           success: true,
           message: result.message,
@@ -63,16 +74,16 @@ export default function CleanupPage() {
             [selectedCollection]: {
               total: result.deleted + result.errors,
               deleted: result.deleted,
-              errors: result.errors
-            }
-          }
+              errors: result.errors,
+            },
+          },
         });
       } else {
-        toast.error('❌ ' + result.message);
+        toast('❌ ' + result.message, { icon: '❌' });
       }
     } catch (error) {
       console.error('Errore pulizia:', error);
-      toast.error('❌ Errore durante la pulizia della collezione');
+      toast('❌ Errore durante la pulizia della collezione', { icon: '❌' });
     } finally {
       setLoading(false);
     }
@@ -86,9 +97,7 @@ export default function CleanupPage() {
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-gray-900">🧹 Pulizia Database</h1>
-          <p className="text-gray-600 mt-1">
-            Gestisci e pulisci i dati del database Firebase
-          </p>
+          <p className="text-gray-600 mt-1">Gestisci e pulisci i dati del database Firebase</p>
         </div>
 
         {/* Warning */}
@@ -97,8 +106,8 @@ export default function CleanupPage() {
           <div>
             <h3 className="font-bold">Attenzione!</h3>
             <div className="text-sm">
-              Queste operazioni eliminano permanentemente i dati dal database. 
-              Assicurati di avere un backup prima di procedere.
+              Queste operazioni eliminano permanentemente i dati dal database. Assicurati di avere
+              un backup prima di procedere.
             </div>
           </div>
         </div>
@@ -111,16 +120,12 @@ export default function CleanupPage() {
               <TrashIcon className="h-5 w-5 mr-2 text-red-600" />
               Pulizia Completa Database
             </h2>
-            
+
             <p className="text-gray-600 mb-4">
               Elimina tutti i dati da tutte le collezioni del database.
             </p>
-            
-            <button 
-              onClick={handleCleanAll}
-              disabled={loading}
-              className="btn btn-error w-full"
-            >
+
+            <button onClick={handleCleanAll} disabled={loading} className="btn btn-error w-full">
               {loading ? (
                 <>
                   <div className="loading loading-spinner loading-sm mr-2"></div>
@@ -141,27 +146,27 @@ export default function CleanupPage() {
               <DatabaseIcon className="h-5 w-5 mr-2 text-blue-600" />
               Pulizia Collezione Specifica
             </h2>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="label">
                   <span className="label-text">Seleziona Collezione</span>
                 </label>
-                <select 
+                <select
                   className="select select-bordered w-full"
                   value={selectedCollection}
-                  onChange={(e) => setSelectedCollection(e.target.value)}
+                  onChange={e => setSelectedCollection(e.target.value)}
                 >
                   <option value="">Scegli una collezione...</option>
-                  {collections.map((collection) => (
+                  {collections.map(collection => (
                     <option key={collection} value={collection}>
                       {collection}
                     </option>
                   ))}
                 </select>
               </div>
-              
-              <button 
+
+              <button
                 onClick={handleCleanSpecific}
                 disabled={loading || !selectedCollection}
                 className="btn btn-outline btn-warning w-full"
@@ -189,12 +194,12 @@ export default function CleanupPage() {
               <CheckCircleIcon className="h-5 w-5 mr-2 text-green-600" />
               Risultati Pulizia
             </h2>
-            
+
             <div className={`alert ${results.success ? 'alert-success' : 'alert-error'} mb-4`}>
               <CheckCircleIcon className="h-5 w-5" />
               <span>{results.message}</span>
             </div>
-            
+
             {results.details && (
               <div className="overflow-x-auto">
                 <table className="table table-zebra w-full">
@@ -237,9 +242,9 @@ export default function CleanupPage() {
         {/* Collections Info */}
         <div className="bg-white shadow-sm rounded-lg p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">📊 Collezioni Database</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {collections.map((collection) => (
+            {collections.map(collection => (
               <div key={collection} className="p-3 bg-gray-50 rounded-lg">
                 <div className="font-medium text-gray-900">{collection}</div>
                 <div className="text-sm text-gray-500">

@@ -2,56 +2,206 @@
 
 export type SecurityThreatLevel = 'info' | 'low' | 'medium' | 'high' | 'critical' | 'emergency';
 
-export type VulnerabilityType = 'injection' | 'broken_auth' | 'sensitive_data' | 'xxe' | 'broken_access' | 
-  'security_misconfig' | 'xss' | 'insecure_deserialization' | 'components' | 'logging_monitoring' |
-  'buffer_overflow' | 'race_condition' | 'privilege_escalation' | 'denial_service' | 'code_injection';
+// Alias per compatibilità
+export type SecurityThreat = ThreatIntelligence;
+export type SecurityLevel = SecurityThreatLevel;
+export type ThreatType = ThreatCategory;
+export type ComplianceStandard = ComplianceFramework;
+export type IncidentSeverity = SecurityThreatLevel;
 
-export type ComplianceFramework = 'soc2' | 'gdpr' | 'hipaa' | 'pci_dss' | 'iso27001' | 'nist' | 
-  'fedramp' | 'cis' | 'cobit' | 'fisma' | 'sox' | 'glba';
+// Tipi aggiuntivi per SecurityCompliance
+export interface VulnerabilityAssessment {
+  id: string;
+  name: string;
+  description: string;
+  vulnerabilities: SecurityVulnerability[];
+  assessmentDate: Date;
+  assessor: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'reviewed';
+  score: number;
+  recommendations: string[];
+}
 
-export type AccessControlType = 'rbac' | 'abac' | 'dac' | 'mac' | 'zero_trust' | 'just_in_time' | 
-  'privileged_access' | 'conditional_access';
+export interface SecurityTraining {
+  id: string;
+  title: string;
+  description: string;
+  type: 'awareness' | 'technical' | 'compliance' | 'incident_response';
+  duration: number; // minutes
+  required: boolean;
+  targetAudience: string[];
+  completionRate: number;
+  lastUpdated: Date;
+  isMandatory: boolean;
+  validityPeriod: number; // days
+  passingScore: number; // percentage
+  hasAssessment: boolean;
+  maxAttempts: number;
+  modules: Array<{
+    id: string;
+    name: string;
+    title: string;
+    content: string;
+    duration: number;
+    completed: boolean;
+  }>;
+}
 
-export type EncryptionMethod = 'aes256' | 'rsa4096' | 'ecdsa' | 'chacha20' | 'twofish' | 'blowfish' |
-  'post_quantum' | 'homomorphic' | 'format_preserving';
+export type VulnerabilityType =
+  | 'injection'
+  | 'broken_auth'
+  | 'sensitive_data'
+  | 'xxe'
+  | 'broken_access'
+  | 'security_misconfig'
+  | 'xss'
+  | 'insecure_deserialization'
+  | 'components'
+  | 'logging_monitoring'
+  | 'buffer_overflow'
+  | 'race_condition'
+  | 'privilege_escalation'
+  | 'denial_service'
+  | 'code_injection';
 
-export type AuthenticationMethod = 'password' | 'mfa' | 'biometric' | 'certificate' | 'token' | 
-  'saml' | 'oauth2' | 'oidc' | 'kerberos' | 'ldap' | 'smart_card' | 'hardware_key';
+export type ComplianceFramework =
+  | 'soc2'
+  | 'gdpr'
+  | 'hipaa'
+  | 'pci_dss'
+  | 'iso27001'
+  | 'nist'
+  | 'fedramp'
+  | 'cis'
+  | 'cobit'
+  | 'fisma'
+  | 'sox'
+  | 'glba';
 
-export type SecurityScanType = 'sast' | 'dast' | 'iast' | 'rasp' | 'dependency' | 'container' | 
-  'infrastructure' | 'network' | 'web_app' | 'mobile' | 'api' | 'database' | 'cloud_config';
+export type AccessControlType =
+  | 'rbac'
+  | 'abac'
+  | 'dac'
+  | 'mac'
+  | 'zero_trust'
+  | 'just_in_time'
+  | 'privileged_access'
+  | 'conditional_access';
 
-export type ThreatCategory = 'malware' | 'phishing' | 'ransomware' | 'apt' | 'insider_threat' | 
-  'ddos' | 'data_breach' | 'supply_chain' | 'social_engineering' | 'zero_day' | 'botnet' | 'cryptojacking';
+export type EncryptionMethod =
+  | 'aes256'
+  | 'rsa4096'
+  | 'ecdsa'
+  | 'chacha20'
+  | 'twofish'
+  | 'blowfish'
+  | 'post_quantum'
+  | 'homomorphic'
+  | 'format_preserving';
 
-export type SecurityEventType = 'login_attempt' | 'access_denied' | 'privilege_escalation' | 
-  'data_access' | 'configuration_change' | 'policy_violation' | 'anomaly_detected' | 'threat_detected';
+export type AuthenticationMethod =
+  | 'password'
+  | 'mfa'
+  | 'biometric'
+  | 'certificate'
+  | 'token'
+  | 'saml'
+  | 'oauth2'
+  | 'oidc'
+  | 'kerberos'
+  | 'ldap'
+  | 'smart_card'
+  | 'hardware_key';
+
+export type SecurityScanType =
+  | 'sast'
+  | 'dast'
+  | 'iast'
+  | 'rasp'
+  | 'dependency'
+  | 'container'
+  | 'infrastructure'
+  | 'network'
+  | 'web_app'
+  | 'mobile'
+  | 'api'
+  | 'database'
+  | 'cloud_config';
+
+export type ThreatCategory =
+  | 'malware'
+  | 'phishing'
+  | 'ransomware'
+  | 'apt'
+  | 'insider_threat'
+  | 'ddos'
+  | 'data_breach'
+  | 'supply_chain'
+  | 'social_engineering'
+  | 'zero_day'
+  | 'botnet'
+  | 'cryptojacking'
+  | 'unauthorized_access'
+  | 'compliance_violation';
+
+export type SecurityEventType =
+  | 'login_attempt'
+  | 'access_denied'
+  | 'privilege_escalation'
+  | 'data_access'
+  | 'configuration_change'
+  | 'policy_violation'
+  | 'anomaly_detected'
+  | 'threat_detected';
 
 export type RiskLevel = 'negligible' | 'low' | 'medium' | 'high' | 'critical' | 'catastrophic';
 
-export type SecurityStatus = 'secure' | 'at_risk' | 'compromised' | 'under_attack' | 'investigating' | 
-  'remediating' | 'monitoring' | 'unknown';
+export type SecurityStatus =
+  | 'secure'
+  | 'at_risk'
+  | 'compromised'
+  | 'under_attack'
+  | 'investigating'
+  | 'remediating'
+  | 'monitoring'
+  | 'unknown';
 
 export type AlertSeverity = 'info' | 'warning' | 'critical' | 'emergency';
 
-export type IncidentStatus = 'new' | 'assigned' | 'investigating' | 'analyzing' | 'containing' | 
-  'eradicating' | 'recovering' | 'resolved' | 'closed';
+export type IncidentStatus =
+  | 'new'
+  | 'assigned'
+  | 'investigating'
+  | 'analyzing'
+  | 'containing'
+  | 'eradicating'
+  | 'recovering'
+  | 'resolved'
+  | 'closed';
 
 export type AuditResult = 'pass' | 'fail' | 'warning' | 'not_applicable' | 'manual_review';
 
-export type IdentityProvider = 'active_directory' | 'azure_ad' | 'okta' | 'auth0' | 'ping_identity' | 
-  'onelogin' | 'google_workspace' | 'aws_iam' | 'custom';
+export type IdentityProvider =
+  | 'active_directory'
+  | 'azure_ad'
+  | 'okta'
+  | 'auth0'
+  | 'ping_identity'
+  | 'onelogin'
+  | 'google_workspace'
+  | 'aws_iam'
+  | 'custom';
 
 export interface ThreatIntelligence {
   id: string;
   name: string;
   description: string;
-  
+
   // Threat Classification
   category: ThreatCategory;
   severity: SecurityThreatLevel;
   confidence: number; // 0-100
-  
+
   // Threat Details
   indicators: Array<{
     type: 'ip' | 'domain' | 'url' | 'hash' | 'email' | 'file_path' | 'registry_key' | 'user_agent';
@@ -59,7 +209,7 @@ export interface ThreatIntelligence {
     confidence: number;
     context?: string;
   }>;
-  
+
   // Attack Information
   attackVectors: string[];
   techniques: Array<{
@@ -68,12 +218,12 @@ export interface ThreatIntelligence {
     tactic: string;
     description: string;
   }>;
-  
+
   // Target Information
   targetedSectors: string[];
   targetedCountries: string[];
   targetedTechnologies: string[];
-  
+
   // Attribution
   attribution: {
     actor?: string;
@@ -82,11 +232,11 @@ export interface ThreatIntelligence {
     motivation?: string;
     confidence: number;
   };
-  
+
   // Timeline
   firstSeen: Date;
   lastSeen: Date;
-  
+
   // Sources
   sources: Array<{
     name: string;
@@ -94,17 +244,17 @@ export interface ThreatIntelligence {
     reliability: 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
     credibility: number;
   }>;
-  
+
   // Mitigation
   mitigations: Array<{
     technique: string;
     description: string;
     effectiveness: number;
   }>;
-  
+
   // Status
   status: 'active' | 'inactive' | 'monitoring' | 'historical';
-  
+
   // Metadata
   tags: string[];
   createdAt: Date;
@@ -116,18 +266,18 @@ export interface SecurityVulnerability {
   id: string;
   title: string;
   description: string;
-  
+
   // Classification
   type: VulnerabilityType;
   severity: SecurityThreatLevel;
   cvssScore: number;
   cvssVector: string;
-  
+
   // Identification
   cve?: string;
   cwe?: string;
   owasp?: string;
-  
+
   // Asset Information
   asset: {
     id: string;
@@ -137,7 +287,7 @@ export interface SecurityVulnerability {
     owner: string;
     criticality: 'low' | 'medium' | 'high' | 'critical';
   };
-  
+
   // Technical Details
   location: {
     file?: string;
@@ -147,20 +297,20 @@ export interface SecurityVulnerability {
     parameter?: string;
     component?: string;
   };
-  
+
   // Evidence
   evidence: Array<{
     type: 'screenshot' | 'log' | 'code' | 'request' | 'response' | 'report';
     data: string;
     description?: string;
   }>;
-  
+
   // Risk Assessment
   exploitability: number; // 0-10
   impact: number; // 0-10
   likelihood: number; // 0-10
   riskScore: number; // 0-10
-  
+
   // Remediation
   remediation: {
     effort: 'low' | 'medium' | 'high';
@@ -169,7 +319,7 @@ export interface SecurityVulnerability {
     estimatedTime: number; // hours
     resources: string[];
   };
-  
+
   // Patch Information
   patch: {
     available: boolean;
@@ -178,24 +328,24 @@ export interface SecurityVulnerability {
     releaseDate?: Date;
     tested: boolean;
   };
-  
+
   // Status Tracking
   status: 'open' | 'confirmed' | 'in_progress' | 'resolved' | 'accepted_risk' | 'false_positive';
   assignedTo?: string;
-  
+
   // Compliance Impact
   complianceImpact: Array<{
     framework: ComplianceFramework;
     control: string;
     impact: 'low' | 'medium' | 'high';
   }>;
-  
+
   // Timeline
   discoveredAt: Date;
   reportedAt: Date;
   acknowledgedAt?: Date;
   resolvedAt?: Date;
-  
+
   // Scanning Information
   scanner: {
     name: string;
@@ -204,14 +354,14 @@ export interface SecurityVulnerability {
     scanDate: Date;
     confidence: number;
   };
-  
+
   // References
   references: Array<{
     type: 'vendor' | 'exploit' | 'advisory' | 'article' | 'cve' | 'documentation';
     url: string;
     title?: string;
   }>;
-  
+
   // Metadata
   tags: string[];
   createdAt: Date;
@@ -222,21 +372,21 @@ export interface SecurityIncident {
   id: string;
   title: string;
   description: string;
-  
+
   // Classification
   category: ThreatCategory;
   severity: SecurityThreatLevel;
   priority: 'low' | 'medium' | 'high' | 'critical';
-  
+
   // Status
   status: IncidentStatus;
-  
+
   // Impact Assessment
   impact: {
     confidentiality: 'none' | 'low' | 'medium' | 'high';
     integrity: 'none' | 'low' | 'medium' | 'high';
     availability: 'none' | 'low' | 'medium' | 'high';
-    
+
     // Business Impact
     affectedSystems: string[];
     affectedUsers: number;
@@ -244,13 +394,13 @@ export interface SecurityIncident {
     serviceDisruption: boolean;
     financialImpact?: number;
     reputationalImpact: 'none' | 'low' | 'medium' | 'high';
-    
+
     // Compliance Impact
     complianceViolation: boolean;
     regulatoryNotificationRequired: boolean;
     affectedRegulations: ComplianceFramework[];
   };
-  
+
   // Timeline
   detectedAt: Date;
   reportedAt: Date;
@@ -259,7 +409,7 @@ export interface SecurityIncident {
   eradicatedAt?: Date;
   recoveredAt?: Date;
   resolvedAt?: Date;
-  
+
   // Response Team
   assignedTo?: string;
   responseTeam: Array<{
@@ -268,7 +418,7 @@ export interface SecurityIncident {
     role: 'lead' | 'analyst' | 'technical' | 'legal' | 'communications' | 'management';
     contactInfo: string;
   }>;
-  
+
   // Investigation
   investigation: {
     rootCause?: string;
@@ -278,7 +428,7 @@ export interface SecurityIncident {
       event: string;
       evidence?: string;
     }>;
-    
+
     // Attribution
     attribution?: {
       actor?: string;
@@ -286,7 +436,7 @@ export interface SecurityIncident {
       motivation?: string;
       confidence: number;
     };
-    
+
     // Indicators of Compromise
     iocs: Array<{
       type: 'ip' | 'domain' | 'hash' | 'email' | 'file' | 'registry' | 'process';
@@ -295,7 +445,7 @@ export interface SecurityIncident {
       context?: string;
     }>;
   };
-  
+
   // Response Actions
   actions: Array<{
     id: string;
@@ -308,7 +458,7 @@ export interface SecurityIncident {
     completedAt?: Date;
     notes?: string;
   }>;
-  
+
   // Communication
   communications: Array<{
     timestamp: Date;
@@ -318,7 +468,7 @@ export interface SecurityIncident {
     channel: 'email' | 'phone' | 'meeting' | 'portal' | 'press_release';
     sentBy: string;
   }>;
-  
+
   // Evidence
   evidence: Array<{
     id: string;
@@ -336,7 +486,7 @@ export interface SecurityIncident {
       notes?: string;
     }>;
   }>;
-  
+
   // Lessons Learned
   lessonsLearned?: {
     whatWorked: string[];
@@ -345,7 +495,7 @@ export interface SecurityIncident {
     preventionMeasures: string[];
     trainingNeeds: string[];
   };
-  
+
   // Metrics
   metrics: {
     detectionTime: number; // minutes
@@ -354,7 +504,7 @@ export interface SecurityIncident {
     recoveryTime?: number; // minutes
     totalCost?: number;
   };
-  
+
   // Related Items
   related: {
     vulnerabilities: string[];
@@ -362,7 +512,7 @@ export interface SecurityIncident {
     incidents: string[];
     alerts: string[];
   };
-  
+
   // Metadata
   tags: string[];
   createdAt: Date;
@@ -374,13 +524,20 @@ export interface SecurityPolicy {
   id: string;
   name: string;
   description: string;
-  
+
   // Policy Details
-  type: 'access_control' | 'data_protection' | 'network_security' | 'endpoint_security' | 
-        'application_security' | 'incident_response' | 'business_continuity' | 'risk_management';
-  
+  type:
+    | 'access_control'
+    | 'data_protection'
+    | 'network_security'
+    | 'endpoint_security'
+    | 'application_security'
+    | 'incident_response'
+    | 'business_continuity'
+    | 'risk_management';
+
   category: 'technical' | 'administrative' | 'physical';
-  
+
   // Scope
   scope: {
     environments: Array<'development' | 'staging' | 'production' | 'all'>;
@@ -388,7 +545,7 @@ export interface SecurityPolicy {
     users: string[];
     applications: string[];
   };
-  
+
   // Policy Rules
   rules: Array<{
     id: string;
@@ -399,7 +556,7 @@ export interface SecurityPolicy {
     parameters: Record<string, any>;
     enabled: boolean;
   }>;
-  
+
   // Enforcement
   enforcement: {
     mode: 'monitor' | 'enforce' | 'disabled';
@@ -411,7 +568,7 @@ export interface SecurityPolicy {
       conditions: string[];
     }>;
   };
-  
+
   // Compliance Mapping
   complianceMapping: Array<{
     framework: ComplianceFramework;
@@ -419,12 +576,12 @@ export interface SecurityPolicy {
     requirement: string;
     mappingType: 'full' | 'partial' | 'supporting';
   }>;
-  
+
   // Risk Assessment
   riskReduction: number; // 0-100
   implementationComplexity: 'low' | 'medium' | 'high';
   businessImpact: 'low' | 'medium' | 'high';
-  
+
   // Lifecycle
   status: 'draft' | 'review' | 'approved' | 'active' | 'deprecated' | 'retired';
   version: string;
@@ -433,7 +590,7 @@ export interface SecurityPolicy {
   effectiveDate?: Date;
   reviewDate?: Date;
   nextReviewDate?: Date;
-  
+
   // Documentation
   documentation: {
     procedures: string[];
@@ -441,7 +598,7 @@ export interface SecurityPolicy {
     templates: string[];
     training: string[];
   };
-  
+
   // Monitoring
   monitoring: {
     enabled: boolean;
@@ -449,7 +606,7 @@ export interface SecurityPolicy {
     alerts: string[];
     reportingFrequency: 'daily' | 'weekly' | 'monthly' | 'quarterly';
   };
-  
+
   // Metadata
   tags: string[];
   createdAt: Date;
@@ -462,11 +619,17 @@ export interface SecurityAudit {
   id: string;
   name: string;
   description: string;
-  
+
   // Audit Details
-  type: 'internal' | 'external' | 'regulatory' | 'compliance' | 'penetration_test' | 'vulnerability_assessment';
+  type:
+    | 'internal'
+    | 'external'
+    | 'regulatory'
+    | 'compliance'
+    | 'penetration_test'
+    | 'vulnerability_assessment';
   framework: ComplianceFramework;
-  
+
   // Scope
   scope: {
     systems: string[];
@@ -478,7 +641,7 @@ export interface SecurityAudit {
       end: Date;
     };
   };
-  
+
   // Auditor Information
   auditor: {
     name: string;
@@ -486,7 +649,7 @@ export interface SecurityAudit {
     credentials: string[];
     contactInfo: string;
   };
-  
+
   // Audit Plan
   plan: {
     objectives: string[];
@@ -499,7 +662,7 @@ export interface SecurityAudit {
     }>;
     resources: string[];
   };
-  
+
   // Findings
   findings: Array<{
     id: string;
@@ -507,7 +670,7 @@ export interface SecurityAudit {
     description: string;
     severity: SecurityThreatLevel;
     category: string;
-    
+
     // Control Information
     control: {
       id: string;
@@ -515,18 +678,18 @@ export interface SecurityAudit {
       requirement: string;
       framework: ComplianceFramework;
     };
-    
+
     // Assessment
     result: AuditResult;
     evidence: string[];
-    
+
     // Risk
     risk: {
       likelihood: 'low' | 'medium' | 'high';
       impact: 'low' | 'medium' | 'high';
       rating: RiskLevel;
     };
-    
+
     // Remediation
     recommendation: string;
     managementResponse?: string;
@@ -538,7 +701,7 @@ export interface SecurityAudit {
       actualDate?: Date;
     };
   }>;
-  
+
   // Overall Results
   results: {
     totalControls: number;
@@ -548,17 +711,17 @@ export interface SecurityAudit {
     overallRating: 'excellent' | 'good' | 'satisfactory' | 'needs_improvement' | 'inadequate';
     compliancePercentage: number;
   };
-  
+
   // Status
   status: 'planned' | 'in_progress' | 'fieldwork_complete' | 'reporting' | 'final' | 'closed';
-  
+
   // Timeline
   plannedStartDate: Date;
   actualStartDate?: Date;
   plannedEndDate: Date;
   actualEndDate?: Date;
   reportDate?: Date;
-  
+
   // Documentation
   documents: Array<{
     name: string;
@@ -567,7 +730,7 @@ export interface SecurityAudit {
     uploadedAt: Date;
     uploadedBy: string;
   }>;
-  
+
   // Follow-up
   followUp: {
     required: boolean;
@@ -575,7 +738,7 @@ export interface SecurityAudit {
     completedDate?: Date;
     findings: string[];
   };
-  
+
   // Metadata
   tags: string[];
   createdAt: Date;
@@ -587,12 +750,12 @@ export interface SecurityAlert {
   id: string;
   title: string;
   description: string;
-  
+
   // Classification
   type: SecurityEventType;
   severity: AlertSeverity;
   category: ThreatCategory;
-  
+
   // Source Information
   source: {
     system: string;
@@ -600,7 +763,7 @@ export interface SecurityAlert {
     rule: string;
     confidence: number;
   };
-  
+
   // Event Details
   event: {
     timestamp: Date;
@@ -616,7 +779,7 @@ export interface SecurityAlert {
     url?: string;
     userAgent?: string;
   };
-  
+
   // Context
   context: {
     asset: {
@@ -625,9 +788,9 @@ export interface SecurityAlert {
       type: string;
       criticality: 'low' | 'medium' | 'high' | 'critical';
     };
-    
+
     environment: 'development' | 'staging' | 'production';
-    
+
     // Threat Intelligence Context
     threatIntelligence?: {
       matchedIndicators: Array<{
@@ -639,7 +802,7 @@ export interface SecurityAlert {
       attribution?: string;
     };
   };
-  
+
   // Risk Assessment
   risk: {
     score: number; // 0-100
@@ -650,14 +813,14 @@ export interface SecurityAlert {
       value: number;
     }>;
   };
-  
+
   // Response
   response: {
     status: 'new' | 'acknowledged' | 'investigating' | 'resolved' | 'false_positive' | 'suppressed';
     assignedTo?: string;
     acknowledgedAt?: Date;
     resolvedAt?: Date;
-    
+
     actions: Array<{
       type: 'block_ip' | 'quarantine_file' | 'disable_user' | 'isolate_system' | 'collect_evidence';
       description: string;
@@ -667,7 +830,7 @@ export interface SecurityAlert {
       result?: string;
     }>;
   };
-  
+
   // Correlation
   correlation: {
     relatedAlerts: string[];
@@ -676,14 +839,14 @@ export interface SecurityAlert {
     count: number;
     timeWindow: number; // minutes
   };
-  
+
   // Evidence
   evidence: Array<{
     type: 'log' | 'packet_capture' | 'file_hash' | 'screenshot' | 'memory_dump';
     data: string;
     metadata?: Record<string, any>;
   }>;
-  
+
   // Suppression
   suppression: {
     suppressed: boolean;
@@ -692,7 +855,7 @@ export interface SecurityAlert {
     suppressedAt?: Date;
     expiresAt?: Date;
   };
-  
+
   // Metadata
   tags: string[];
   createdAt: Date;
@@ -701,7 +864,7 @@ export interface SecurityAlert {
 
 export interface IdentityAccess {
   id: string;
-  
+
   // Identity Information
   identity: {
     type: 'user' | 'service_account' | 'device' | 'application';
@@ -712,7 +875,7 @@ export interface IdentityAccess {
     manager?: string;
     location?: string;
   };
-  
+
   // Authentication
   authentication: {
     methods: AuthenticationMethod[];
@@ -732,7 +895,7 @@ export interface IdentityAccess {
       verified: boolean;
     }>;
   };
-  
+
   // Authorization
   authorization: {
     roles: Array<{
@@ -744,7 +907,7 @@ export interface IdentityAccess {
       assignedBy: string;
       expiresAt?: Date;
     }>;
-    
+
     permissions: Array<{
       resource: string;
       action: string;
@@ -754,7 +917,7 @@ export interface IdentityAccess {
       grantedBy: string;
       expiresAt?: Date;
     }>;
-    
+
     groups: Array<{
       id: string;
       name: string;
@@ -762,7 +925,7 @@ export interface IdentityAccess {
       joinedAt: Date;
     }>;
   };
-  
+
   // Access Patterns
   accessPatterns: {
     usualLocations: string[];
@@ -774,7 +937,7 @@ export interface IdentityAccess {
     }>;
     riskScore: number; // 0-100
   };
-  
+
   // Privileged Access
   privilegedAccess: {
     hasPrivilegedAccess: boolean;
@@ -790,7 +953,7 @@ export interface IdentityAccess {
       approver?: string;
     }>;
   };
-  
+
   // Compliance
   compliance: {
     backgroundCheckCompleted: boolean;
@@ -800,7 +963,7 @@ export interface IdentityAccess {
       acceptedAt: Date;
       version: string;
     }>;
-    
+
     accessReviews: Array<{
       reviewDate: Date;
       reviewer: string;
@@ -809,7 +972,7 @@ export interface IdentityAccess {
       nextReviewDate: Date;
     }>;
   };
-  
+
   // Risk Assessment
   risk: {
     riskScore: number; // 0-100
@@ -822,17 +985,17 @@ export interface IdentityAccess {
     }>;
     lastAssessment: Date;
   };
-  
+
   // Status
   status: 'active' | 'inactive' | 'suspended' | 'terminated' | 'pending_activation';
-  
+
   // Lifecycle
   createdAt: Date;
   activatedAt?: Date;
   lastModified: Date;
   deactivatedAt?: Date;
   terminatedAt?: Date;
-  
+
   // Provider Information
   provider: {
     type: IdentityProvider;
@@ -840,7 +1003,7 @@ export interface IdentityAccess {
     syncedAt?: Date;
     attributes: Record<string, any>;
   };
-  
+
   // Metadata
   tags: string[];
   notes: string[];
@@ -853,20 +1016,20 @@ export interface SecurityMetrics {
     end: Date;
     granularity: 'hour' | 'day' | 'week' | 'month';
   };
-  
+
   // Threat Metrics
   threats: {
     totalThreats: number;
     newThreats: number;
     activeThreats: number;
     blockedThreats: number;
-    
+
     // By Severity
     bySeverity: Record<SecurityThreatLevel, number>;
-    
+
     // By Category
     byCategory: Record<ThreatCategory, number>;
-    
+
     // Top Threats
     topThreats: Array<{
       name: string;
@@ -874,69 +1037,72 @@ export interface SecurityMetrics {
       count: number;
       trend: 'up' | 'down' | 'stable';
     }>;
-    
+
     // Mean Time to Detection/Response
     mttd: number; // minutes
     mttr: number; // minutes
   };
-  
+
   // Vulnerability Metrics
   vulnerabilities: {
     totalVulnerabilities: number;
     newVulnerabilities: number;
     resolvedVulnerabilities: number;
     openVulnerabilities: number;
-    
+
     // By Severity
     bySeverity: Record<SecurityThreatLevel, number>;
-    
+
     // By Type
     byType: Record<VulnerabilityType, number>;
-    
+
     // By Asset Type
     byAssetType: Record<string, number>;
-    
+
     // Mean Time to Remediation
     mttr: number; // days
-    
+
     // SLA Compliance
     slaCompliance: number; // percentage
   };
-  
+
   // Incident Metrics
   incidents: {
     totalIncidents: number;
     newIncidents: number;
     resolvedIncidents: number;
     openIncidents: number;
-    
+
     // By Severity
     bySeverity: Record<SecurityThreatLevel, number>;
-    
+
     // By Category
     byCategory: Record<ThreatCategory, number>;
-    
+
     // Response Times
     averageResponseTime: number; // minutes
     averageResolutionTime: number; // hours
-    
+
     // Cost Impact
     totalCost: number;
     averageCost: number;
   };
-  
+
   // Compliance Metrics
   compliance: {
     overallScore: number; // percentage
-    
-    byFramework: Record<ComplianceFramework, {
-      score: number;
-      totalControls: number;
-      passedControls: number;
-      failedControls: number;
-      lastAssessment: Date;
-    }>;
-    
+
+    byFramework: Record<
+      ComplianceFramework,
+      {
+        score: number;
+        totalControls: number;
+        passedControls: number;
+        failedControls: number;
+        lastAssessment: Date;
+      }
+    >;
+
     // Audit Results
     audits: {
       total: number;
@@ -945,14 +1111,14 @@ export interface SecurityMetrics {
       pending: number;
     };
   };
-  
+
   // Access Metrics
   access: {
     totalIdentities: number;
     activeIdentities: number;
     privilegedIdentities: number;
     suspendedIdentities: number;
-    
+
     // Authentication
     authentication: {
       totalLogins: number;
@@ -961,7 +1127,7 @@ export interface SecurityMetrics {
       mfaAdoption: number; // percentage
       ssoAdoption: number; // percentage
     };
-    
+
     // Access Reviews
     accessReviews: {
       total: number;
@@ -970,11 +1136,11 @@ export interface SecurityMetrics {
       overdue: number;
     };
   };
-  
+
   // Security Posture
   posture: {
     overallScore: number; // 0-100
-    
+
     components: {
       threatProtection: number;
       vulnerabilityManagement: number;
@@ -983,26 +1149,29 @@ export interface SecurityMetrics {
       dataProtection: number;
       compliance: number;
     };
-    
+
     trends: Array<{
       date: Date;
       score: number;
       components: Record<string, number>;
     }>;
   };
-  
+
   // Risk Metrics
   risk: {
     overallRisk: RiskLevel;
     riskScore: number; // 0-100
-    
+
     // Risk by Category
-    byCategory: Record<string, {
-      level: RiskLevel;
-      score: number;
-      count: number;
-    }>;
-    
+    byCategory: Record<
+      string,
+      {
+        level: RiskLevel;
+        score: number;
+        count: number;
+      }
+    >;
+
     // Risk Trends
     trends: Array<{
       date: Date;
@@ -1010,7 +1179,7 @@ export interface SecurityMetrics {
       level: RiskLevel;
     }>;
   };
-  
+
   // Performance Metrics
   performance: {
     // Security Tool Performance
@@ -1022,7 +1191,7 @@ export interface SecurityMetrics {
       accuracy: number; // percentage
       falsePositives: number;
     }>;
-    
+
     // Team Performance
     team: {
       alertsProcessed: number;
@@ -1031,16 +1200,16 @@ export interface SecurityMetrics {
       workload: number; // alerts per analyst
     };
   };
-  
+
   // Cost Metrics
   costs: {
     totalSecuritySpend: number;
     costPerIncident: number;
     costPerEmployee: number;
-    
+
     // By Category
     byCategory: Record<string, number>;
-    
+
     // ROI Metrics
     roi: {
       preventedLosses: number;
@@ -1048,7 +1217,7 @@ export interface SecurityMetrics {
       roiPercentage: number;
     };
   };
-  
+
   // Generated At
   generatedAt: Date;
   generatedBy: string;
@@ -1064,7 +1233,7 @@ export interface SecurityConfiguration {
     riskTolerance: 'low' | 'medium' | 'high';
     complianceRequirements: ComplianceFramework[];
   };
-  
+
   // Security Policies
   policies: {
     passwordPolicy: {
@@ -1078,14 +1247,14 @@ export interface SecurityConfiguration {
       lockoutThreshold: number;
       lockoutDuration: number; // minutes
     };
-    
+
     sessionPolicy: {
       maxIdleTime: number; // minutes
       maxSessionTime: number; // hours
       concurrentSessions: number;
       requireReauth: boolean;
     };
-    
+
     accessPolicy: {
       defaultDeny: boolean;
       requireApproval: boolean;
@@ -1094,7 +1263,7 @@ export interface SecurityConfiguration {
       privilegedAccessTimeout: number; // minutes
     };
   };
-  
+
   // Threat Intelligence
   threatIntelligence: {
     enabled: boolean;
@@ -1106,14 +1275,14 @@ export interface SecurityConfiguration {
       updateFrequency: number; // hours
       enabled: boolean;
     }>;
-    
+
     confidence: {
       minimumConfidence: number; // 0-100
       autoBlock: boolean;
       autoBlockThreshold: number; // 0-100
     };
   };
-  
+
   // Vulnerability Management
   vulnerabilityManagement: {
     scanFrequency: {
@@ -1122,14 +1291,14 @@ export interface SecurityConfiguration {
       medium: number;
       low: number;
     };
-    
+
     sla: {
       critical: number; // days
       high: number;
       medium: number;
       low: number;
     };
-    
+
     riskAcceptance: {
       requireApproval: boolean;
       maxRiskScore: number;
@@ -1137,7 +1306,7 @@ export interface SecurityConfiguration {
       reviewFrequency: number; // days
     };
   };
-  
+
   // Incident Response
   incidentResponse: {
     escalation: {
@@ -1145,7 +1314,7 @@ export interface SecurityConfiguration {
       escalationTime: number; // minutes
       escalationSeverity: SecurityThreatLevel;
     };
-    
+
     notification: {
       channels: Array<{
         type: 'email' | 'sms' | 'slack' | 'teams' | 'webhook';
@@ -1153,7 +1322,7 @@ export interface SecurityConfiguration {
         severities: SecurityThreatLevel[];
         enabled: boolean;
       }>;
-      
+
       external: {
         regulatoryNotification: boolean;
         customerNotification: boolean;
@@ -1161,24 +1330,24 @@ export interface SecurityConfiguration {
         lawEnforcement: boolean;
       };
     };
-    
+
     retention: {
       incidents: number; // days
       evidence: number; // days
       logs: number; // days
     };
   };
-  
+
   // Monitoring & Alerting
   monitoring: {
     realTimeMonitoring: boolean;
-    
+
     alerting: {
       enabled: boolean;
       deduplicate: boolean;
       deduplicationWindow: number; // minutes
       rateLimit: number; // alerts per minute
-      
+
       rules: Array<{
         name: string;
         condition: string;
@@ -1186,7 +1355,7 @@ export interface SecurityConfiguration {
         enabled: boolean;
       }>;
     };
-    
+
     logging: {
       centralizedLogging: boolean;
       logRetention: number; // days
@@ -1194,7 +1363,7 @@ export interface SecurityConfiguration {
       logIntegrityChecking: boolean;
     };
   };
-  
+
   // Compliance
   compliance: {
     frameworks: Array<{
@@ -1203,7 +1372,7 @@ export interface SecurityConfiguration {
       assessmentFrequency: number; // days
       autoRemediation: boolean;
     }>;
-    
+
     reporting: {
       frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly';
       recipients: string[];
@@ -1211,7 +1380,7 @@ export interface SecurityConfiguration {
       includeEvidence: boolean;
     };
   };
-  
+
   // Integration
   integrations: {
     siem: {
@@ -1221,7 +1390,7 @@ export interface SecurityConfiguration {
       apiKey?: string;
       format: 'cef' | 'leef' | 'json' | 'syslog';
     };
-    
+
     soar: {
       enabled: boolean;
       vendor: string;
@@ -1229,7 +1398,7 @@ export interface SecurityConfiguration {
       apiKey?: string;
       autoResponse: boolean;
     };
-    
+
     ticketing: {
       enabled: boolean;
       system: string;
@@ -1238,11 +1407,11 @@ export interface SecurityConfiguration {
       autoCreate: boolean;
     };
   };
-  
+
   // Automation
   automation: {
     enabled: boolean;
-    
+
     rules: Array<{
       name: string;
       trigger: string;
@@ -1253,7 +1422,7 @@ export interface SecurityConfiguration {
       }>;
       enabled: boolean;
     }>;
-    
+
     orchestration: {
       enabled: boolean;
       workflows: Array<{
@@ -1269,7 +1438,7 @@ export interface SecurityConfiguration {
       }>;
     };
   };
-  
+
   // Data Protection
   dataProtection: {
     encryption: {
@@ -1278,14 +1447,14 @@ export interface SecurityConfiguration {
         algorithm: EncryptionMethod;
         keyRotation: number; // days
       };
-      
+
       inTransit: {
         enabled: boolean;
         minTlsVersion: string;
         cipherSuites: string[];
       };
     };
-    
+
     dlp: {
       enabled: boolean;
       policies: Array<{
@@ -1295,7 +1464,7 @@ export interface SecurityConfiguration {
         enabled: boolean;
       }>;
     };
-    
+
     backup: {
       enabled: boolean;
       frequency: number; // hours
@@ -1304,7 +1473,7 @@ export interface SecurityConfiguration {
       offsite: boolean;
     };
   };
-  
+
   // Metadata
   version: string;
   lastUpdated: Date;

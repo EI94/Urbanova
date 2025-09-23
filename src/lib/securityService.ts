@@ -8,7 +8,7 @@ import {
   SecurityAlert,
   IdentityAccess,
   SecurityMetrics,
-  SecurityConfiguration
+  SecurityConfiguration,
 } from '@/types/security';
 
 export class SecurityService {
@@ -19,7 +19,7 @@ export class SecurityService {
   private audits: Map<string, SecurityAudit> = new Map();
   private alerts: Map<string, SecurityAlert> = new Map();
   private identities: Map<string, IdentityAccess> = new Map();
-  private configuration: SecurityConfiguration;
+  private configuration!: SecurityConfiguration;
 
   constructor() {
     this.initializeConfiguration();
@@ -35,7 +35,7 @@ export class SecurityService {
         industry: 'Real Estate Technology',
         size: 'enterprise',
         riskTolerance: 'low',
-        complianceRequirements: ['soc2', 'gdpr', 'iso27001']
+        complianceRequirements: ['soc2', 'gdpr', 'iso27001'],
       },
       policies: {
         passwordPolicy: {
@@ -47,21 +47,21 @@ export class SecurityService {
           maxAge: 90,
           historyCount: 12,
           lockoutThreshold: 5,
-          lockoutDuration: 30
+          lockoutDuration: 30,
         },
         sessionPolicy: {
           maxIdleTime: 30,
           maxSessionTime: 8,
           concurrentSessions: 3,
-          requireReauth: true
+          requireReauth: true,
         },
         accessPolicy: {
           defaultDeny: true,
           requireApproval: true,
           approvalTimeout: 24,
           emergencyAccess: true,
-          privilegedAccessTimeout: 60
-        }
+          privilegedAccessTimeout: 60,
+        },
       },
       threatIntelligence: {
         enabled: true,
@@ -71,40 +71,40 @@ export class SecurityService {
             type: 'open_source',
             url: 'https://attack.mitre.org/api',
             updateFrequency: 24,
-            enabled: true
-          }
+            enabled: true,
+          },
         ],
         confidence: {
           minimumConfidence: 70,
           autoBlock: true,
-          autoBlockThreshold: 90
-        }
+          autoBlockThreshold: 90,
+        },
       },
       vulnerabilityManagement: {
         scanFrequency: {
           critical: 1,
           high: 3,
           medium: 7,
-          low: 30
+          low: 30,
         },
         sla: {
           critical: 1,
           high: 7,
           medium: 30,
-          low: 90
+          low: 90,
         },
         riskAcceptance: {
           requireApproval: true,
           maxRiskScore: 7.0,
           approvers: ['ciso@urbanova.com'],
-          reviewFrequency: 90
-        }
+          reviewFrequency: 90,
+        },
       },
       incidentResponse: {
         escalation: {
           autoEscalate: true,
           escalationTime: 60,
-          escalationSeverity: 'high'
+          escalationSeverity: 'high',
         },
         notification: {
           channels: [
@@ -112,21 +112,21 @@ export class SecurityService {
               type: 'email',
               config: { recipients: ['security@urbanova.com'] },
               severities: ['critical', 'high'],
-              enabled: true
-            }
+              enabled: true,
+            },
           ],
           external: {
             regulatoryNotification: true,
             customerNotification: false,
             mediaResponse: false,
-            lawEnforcement: false
-          }
+            lawEnforcement: false,
+          },
         },
         retention: {
           incidents: 2555,
           evidence: 2555,
-          logs: 365
-        }
+          logs: 365,
+        },
       },
       monitoring: {
         realTimeMonitoring: true,
@@ -140,16 +140,16 @@ export class SecurityService {
               name: 'Multiple Failed Logins',
               condition: 'failed_logins > 5 in 10 minutes',
               severity: 'warning',
-              enabled: true
-            }
-          ]
+              enabled: true,
+            },
+          ],
         },
         logging: {
           centralizedLogging: true,
           logRetention: 365,
           logEncryption: true,
-          logIntegrityChecking: true
-        }
+          logIntegrityChecking: true,
+        },
       },
       compliance: {
         frameworks: [
@@ -157,35 +157,35 @@ export class SecurityService {
             framework: 'soc2',
             enabled: true,
             assessmentFrequency: 365,
-            autoRemediation: true
-          }
+            autoRemediation: true,
+          },
         ],
         reporting: {
           frequency: 'monthly',
           recipients: ['compliance@urbanova.com'],
           format: 'pdf',
-          includeEvidence: true
-        }
+          includeEvidence: true,
+        },
       },
       integrations: {
         siem: {
           enabled: true,
           vendor: 'Splunk',
           endpoint: 'https://siem.urbanova.com:8088',
-          format: 'json'
+          format: 'json',
         },
         soar: {
           enabled: true,
           vendor: 'Phantom',
           endpoint: 'https://soar.urbanova.com/api',
-          autoResponse: true
+          autoResponse: true,
         },
         ticketing: {
           enabled: true,
           system: 'ServiceNow',
           endpoint: 'https://urbanova.service-now.com/api',
-          autoCreate: true
-        }
+          autoCreate: true,
+        },
       },
       automation: {
         enabled: true,
@@ -195,8 +195,8 @@ export class SecurityService {
             trigger: 'threat_detected',
             condition: 'confidence > 90 AND severity = critical',
             actions: [{ type: 'block_ip', parameters: { duration: 3600 } }],
-            enabled: true
-          }
+            enabled: true,
+          },
         ],
         orchestration: {
           enabled: true,
@@ -208,26 +208,26 @@ export class SecurityService {
                 {
                   name: 'Create Ticket',
                   type: 'create_ticket',
-                  parameters: { system: 'servicenow' }
-                }
+                  parameters: { system: 'servicenow' },
+                },
               ],
-              enabled: true
-            }
-          ]
-        }
+              enabled: true,
+            },
+          ],
+        },
       },
       dataProtection: {
         encryption: {
           atRest: {
             enabled: true,
             algorithm: 'aes256',
-            keyRotation: 90
+            keyRotation: 90,
           },
           inTransit: {
             enabled: true,
             minTlsVersion: '1.3',
-            cipherSuites: ['TLS_AES_256_GCM_SHA384']
-          }
+            cipherSuites: ['TLS_AES_256_GCM_SHA384'],
+          },
         },
         dlp: {
           enabled: true,
@@ -236,21 +236,21 @@ export class SecurityService {
               name: 'PII Protection',
               dataTypes: ['ssn', 'credit_card'],
               actions: ['alert', 'block'],
-              enabled: true
-            }
-          ]
+              enabled: true,
+            },
+          ],
         },
         backup: {
           enabled: true,
           frequency: 6,
           retention: 90,
           encryption: true,
-          offsite: true
-        }
+          offsite: true,
+        },
       },
       version: '1.0.0',
       lastUpdated: new Date(),
-      updatedBy: 'security-admin'
+      updatedBy: 'security-admin',
     };
   }
 
@@ -277,8 +277,8 @@ export class SecurityService {
           type: 'domain',
           value: 'cozybearsupply.com',
           confidence: 90,
-          context: 'Command and control domain'
-        }
+          context: 'Command and control domain',
+        },
       ],
       attackVectors: ['spear_phishing'],
       techniques: [
@@ -286,15 +286,15 @@ export class SecurityService {
           id: 'T1566.001',
           name: 'Spearphishing Attachment',
           tactic: 'Initial Access',
-          description: 'Adversaries may send spearphishing emails'
-        }
+          description: 'Adversaries may send spearphishing emails',
+        },
       ],
       targetedSectors: ['government', 'technology'],
       targetedCountries: ['US', 'EU'],
       targetedTechnologies: ['Windows', 'Office365'],
       attribution: {
         actor: 'APT29',
-        confidence: 90
+        confidence: 90,
       },
       firstSeen: new Date('2023-01-15'),
       lastSeen: new Date(),
@@ -302,21 +302,21 @@ export class SecurityService {
         {
           name: 'MITRE ATT&CK',
           reliability: 'A',
-          credibility: 95
-        }
+          credibility: 95,
+        },
       ],
       mitigations: [
         {
           technique: 'Email Security',
           description: 'Implement advanced email filtering',
-          effectiveness: 85
-        }
+          effectiveness: 85,
+        },
       ],
       status: 'active',
       tags: ['apt', 'russia'],
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date(),
-      createdBy: 'threat-intel-team'
+      createdBy: 'threat-intel-team',
     };
     this.threats.set(threat.id, threat);
   }
@@ -336,11 +336,11 @@ export class SecurityService {
         type: 'application',
         environment: 'production',
         owner: 'dev-team@urbanova.com',
-        criticality: 'critical'
+        criticality: 'critical',
       },
       location: {
         file: '/src/auth/login.php',
-        line: 45
+        line: 45,
       },
       evidence: [],
       exploitability: 9.5,
@@ -352,11 +352,11 @@ export class SecurityService {
         priority: 'critical',
         steps: ['Replace with parameterized queries'],
         estimatedTime: 8,
-        resources: ['Senior Developer']
+        resources: ['Senior Developer'],
       },
       patch: {
         available: true,
-        tested: true
+        tested: true,
       },
       status: 'confirmed',
       complianceImpact: [],
@@ -367,12 +367,12 @@ export class SecurityService {
         version: '2.14.0',
         scanType: 'dast',
         scanDate: new Date('2024-01-18'),
-        confidence: 95
+        confidence: 95,
       },
       references: [],
       tags: ['sql-injection'],
       createdAt: new Date('2024-01-18'),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
     this.vulnerabilities.set(vuln.id, vuln);
   }
@@ -397,7 +397,7 @@ export class SecurityService {
         reputationalImpact: 'high',
         complianceViolation: true,
         regulatoryNotificationRequired: true,
-        affectedRegulations: ['gdpr']
+        affectedRegulations: ['gdpr'],
       },
       detectedAt: new Date(Date.now() - 4 * 60 * 60 * 1000),
       reportedAt: new Date(Date.now() - 3 * 60 * 60 * 1000),
@@ -406,30 +406,30 @@ export class SecurityService {
           userId: 'ciso-001',
           name: 'CISO',
           role: 'lead',
-          contactInfo: 'ciso@urbanova.com'
-        }
+          contactInfo: 'ciso@urbanova.com',
+        },
       ],
       investigation: {
         attackTimeline: [],
-        iocs: []
+        iocs: [],
       },
       actions: [],
       communications: [],
       evidence: [],
       metrics: {
         detectionTime: 120,
-        responseTime: 60
+        responseTime: 60,
       },
       related: {
         vulnerabilities: [],
         threats: [],
         incidents: [],
-        alerts: []
+        alerts: [],
       },
       tags: ['data-breach'],
       createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000),
       updatedAt: new Date(),
-      createdBy: 'security-monitoring'
+      createdBy: 'security-monitoring',
     };
     this.incidents.set(incident.id, incident);
   }
@@ -447,42 +447,42 @@ export class SecurityService {
           system: 'Security Monitoring',
           sensor: 'SIEM',
           rule: `Rule-${i}`,
-          confidence: 85
+          confidence: 85,
         },
         event: {
           timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
-          sourceIp: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`
+          sourceIp: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
         },
         context: {
           asset: {
             id: `asset-${i}`,
             name: `System ${i}`,
             type: 'server',
-            criticality: 'medium'
+            criticality: 'medium',
           },
-          environment: 'production'
+          environment: 'production',
         },
         risk: {
           score: Math.floor(Math.random() * 100),
           level: 'medium',
-          factors: []
+          factors: [],
         },
         response: {
           status: 'new',
-          actions: []
+          actions: [],
         },
         correlation: {
           relatedAlerts: [],
           count: 1,
-          timeWindow: 15
+          timeWindow: 15,
         },
         evidence: [],
         suppression: {
-          suppressed: false
+          suppressed: false,
         },
         tags: ['automated'],
         createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
       this.alerts.set(alert.id, alert);
     }
@@ -504,7 +504,7 @@ export class SecurityService {
           type: 'application',
           environment: 'development',
           owner: 'dev-team@urbanova.com',
-          criticality: 'medium'
+          criticality: 'medium',
         },
         location: {},
         evidence: [],
@@ -517,11 +517,11 @@ export class SecurityService {
           priority: 'medium',
           steps: ['Apply patch'],
           estimatedTime: 16,
-          resources: ['Developer']
+          resources: ['Developer'],
         },
         patch: {
           available: true,
-          tested: false
+          tested: false,
         },
         status: 'open',
         complianceImpact: [],
@@ -532,12 +532,12 @@ export class SecurityService {
           version: '1.0.0',
           scanType: 'sast',
           scanDate: new Date(),
-          confidence: 80
+          confidence: 80,
         },
         references: [],
         tags: ['automated'],
         createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
       this.vulnerabilities.set(vuln.id, vuln);
     }
@@ -564,32 +564,32 @@ export class SecurityService {
           reputationalImpact: 'none',
           complianceViolation: false,
           regulatoryNotificationRequired: false,
-          affectedRegulations: []
+          affectedRegulations: [],
         },
         detectedAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
         reportedAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
         responseTeam: [],
         investigation: {
           attackTimeline: [],
-          iocs: []
+          iocs: [],
         },
         actions: [],
         communications: [],
         evidence: [],
         metrics: {
           detectionTime: 60,
-          responseTime: 30
+          responseTime: 30,
         },
         related: {
           vulnerabilities: [],
           threats: [],
           incidents: [],
-          alerts: []
+          alerts: [],
         },
         tags: ['automated'],
         createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
         updatedAt: new Date(),
-        createdBy: 'security-monitoring'
+        createdBy: 'security-monitoring',
       };
       this.incidents.set(incident.id, incident);
     }
@@ -602,29 +602,35 @@ export class SecurityService {
   }
 
   // Public API methods
-  createThreat(threat: Omit<ThreatIntelligence, 'id' | 'createdAt' | 'updatedAt'>): ThreatIntelligence {
+  createThreat(
+    threat: Omit<ThreatIntelligence, 'id' | 'createdAt' | 'updatedAt'>
+  ): ThreatIntelligence {
     const newThreat: ThreatIntelligence = {
       ...threat,
       id: `threat-${Date.now()}`,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
     this.threats.set(newThreat.id, newThreat);
     return newThreat;
   }
 
-  createVulnerability(vulnerability: Omit<SecurityVulnerability, 'id' | 'createdAt' | 'updatedAt'>): SecurityVulnerability {
+  createVulnerability(
+    vulnerability: Omit<SecurityVulnerability, 'id' | 'createdAt' | 'updatedAt'>
+  ): SecurityVulnerability {
     const newVulnerability: SecurityVulnerability = {
       ...vulnerability,
       id: `vuln-${Date.now()}`,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
     this.vulnerabilities.set(newVulnerability.id, newVulnerability);
     return newVulnerability;
   }
 
-  createIncident(incident: Omit<SecurityIncident, 'id' | 'createdAt' | 'updatedAt' | 'metrics'>): SecurityIncident {
+  createIncident(
+    incident: Omit<SecurityIncident, 'id' | 'createdAt' | 'updatedAt' | 'metrics'>
+  ): SecurityIncident {
     const newIncident: SecurityIncident = {
       ...incident,
       id: `inc-${Date.now()}`,
@@ -632,8 +638,8 @@ export class SecurityService {
       updatedAt: new Date(),
       metrics: {
         detectionTime: 0,
-        responseTime: 0
-      }
+        responseTime: 0,
+      },
     };
     this.incidents.set(newIncident.id, newIncident);
     return newIncident;
@@ -656,7 +662,7 @@ export class SecurityService {
       period: {
         start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
         end: new Date(),
-        granularity: 'day'
+        granularity: 'day',
       },
       threats: {
         totalThreats: this.threats.size,
@@ -669,7 +675,7 @@ export class SecurityService {
           medium: 0,
           high: 0,
           critical: 1,
-          emergency: 0
+          emergency: 0,
         },
         byCategory: {
           malware: 0,
@@ -683,13 +689,13 @@ export class SecurityService {
           social_engineering: 0,
           zero_day: 0,
           botnet: 0,
-          cryptojacking: 0
-        },
-        topThreats: [
-          { name: 'APT29', category: 'apt', count: 1, trend: 'stable' }
-        ],
+          cryptojacking: 0,
+          unauthorized_access: 0,
+          compliance_violation: 0,
+        } as any,
+        topThreats: [{ name: 'APT29', category: 'apt', count: 1, trend: 'stable' }],
         mttd: 45,
-        mttr: 120
+        mttr: 120,
       },
       vulnerabilities: {
         totalVulnerabilities: vulnerabilities.length,
@@ -702,7 +708,7 @@ export class SecurityService {
           medium: vulnerabilities.filter(v => v.severity === 'medium').length,
           high: 0,
           critical: vulnerabilities.filter(v => v.severity === 'critical').length,
-          emergency: 0
+          emergency: 0,
         },
         byType: {
           injection: vulnerabilities.filter(v => v.type === 'injection').length,
@@ -719,13 +725,13 @@ export class SecurityService {
           race_condition: 0,
           privilege_escalation: 0,
           denial_service: 0,
-          code_injection: 0
+          code_injection: 0,
         },
         byAssetType: {
-          application: vulnerabilities.length
+          application: vulnerabilities.length,
         },
         mttr: 7.5,
-        slaCompliance: 92.5
+        slaCompliance: 92.5,
       },
       incidents: {
         totalIncidents: incidents.length,
@@ -738,7 +744,7 @@ export class SecurityService {
           medium: incidents.filter(i => i.severity === 'medium').length,
           high: incidents.filter(i => i.severity === 'high').length,
           critical: 0,
-          emergency: 0
+          emergency: 0,
         },
         byCategory: {
           malware: incidents.filter(i => i.category === 'malware').length,
@@ -752,12 +758,14 @@ export class SecurityService {
           social_engineering: 0,
           zero_day: 0,
           botnet: 0,
-          cryptojacking: 0
-        },
+          cryptojacking: 0,
+          unauthorized_access: 0,
+          compliance_violation: 0,
+        } as any,
         averageResponseTime: 45,
         averageResolutionTime: 240,
         totalCost: 50000,
-        averageCost: 25000
+        averageCost: 25000,
       },
       compliance: {
         overallScore: 87.5,
@@ -767,26 +775,92 @@ export class SecurityService {
             totalControls: 25,
             passedControls: 23,
             failedControls: 2,
-            lastAssessment: new Date('2024-01-15')
+            lastAssessment: new Date('2024-01-15'),
           },
-          gdpr: { score: 0, totalControls: 0, passedControls: 0, failedControls: 0, lastAssessment: new Date('2024-01-01') },
-          hipaa: { score: 0, totalControls: 0, passedControls: 0, failedControls: 0, lastAssessment: new Date('2024-01-01') },
-          pci_dss: { score: 0, totalControls: 0, passedControls: 0, failedControls: 0, lastAssessment: new Date('2024-01-01') },
-          iso27001: { score: 0, totalControls: 0, passedControls: 0, failedControls: 0, lastAssessment: new Date('2024-01-01') },
-          nist: { score: 0, totalControls: 0, passedControls: 0, failedControls: 0, lastAssessment: new Date('2024-01-01') },
-          fedramp: { score: 0, totalControls: 0, passedControls: 0, failedControls: 0, lastAssessment: new Date('2024-01-01') },
-          cis: { score: 0, totalControls: 0, passedControls: 0, failedControls: 0, lastAssessment: new Date('2024-01-01') },
-          cobit: { score: 0, totalControls: 0, passedControls: 0, failedControls: 0, lastAssessment: new Date('2024-01-01') },
-          fisma: { score: 0, totalControls: 0, passedControls: 0, failedControls: 0, lastAssessment: new Date('2024-01-01') },
-          sox: { score: 0, totalControls: 0, passedControls: 0, failedControls: 0, lastAssessment: new Date('2024-01-01') },
-          glba: { score: 0, totalControls: 0, passedControls: 0, failedControls: 0, lastAssessment: new Date('2024-01-01') }
+          gdpr: {
+            score: 0,
+            totalControls: 0,
+            passedControls: 0,
+            failedControls: 0,
+            lastAssessment: new Date('2024-01-01'),
+          },
+          hipaa: {
+            score: 0,
+            totalControls: 0,
+            passedControls: 0,
+            failedControls: 0,
+            lastAssessment: new Date('2024-01-01'),
+          },
+          pci_dss: {
+            score: 0,
+            totalControls: 0,
+            passedControls: 0,
+            failedControls: 0,
+            lastAssessment: new Date('2024-01-01'),
+          },
+          iso27001: {
+            score: 0,
+            totalControls: 0,
+            passedControls: 0,
+            failedControls: 0,
+            lastAssessment: new Date('2024-01-01'),
+          },
+          nist: {
+            score: 0,
+            totalControls: 0,
+            passedControls: 0,
+            failedControls: 0,
+            lastAssessment: new Date('2024-01-01'),
+          },
+          fedramp: {
+            score: 0,
+            totalControls: 0,
+            passedControls: 0,
+            failedControls: 0,
+            lastAssessment: new Date('2024-01-01'),
+          },
+          cis: {
+            score: 0,
+            totalControls: 0,
+            passedControls: 0,
+            failedControls: 0,
+            lastAssessment: new Date('2024-01-01'),
+          },
+          cobit: {
+            score: 0,
+            totalControls: 0,
+            passedControls: 0,
+            failedControls: 0,
+            lastAssessment: new Date('2024-01-01'),
+          },
+          fisma: {
+            score: 0,
+            totalControls: 0,
+            passedControls: 0,
+            failedControls: 0,
+            lastAssessment: new Date('2024-01-01'),
+          },
+          sox: {
+            score: 0,
+            totalControls: 0,
+            passedControls: 0,
+            failedControls: 0,
+            lastAssessment: new Date('2024-01-01'),
+          },
+          glba: {
+            score: 0,
+            totalControls: 0,
+            passedControls: 0,
+            failedControls: 0,
+            lastAssessment: new Date('2024-01-01'),
+          },
         },
         audits: {
           total: 1,
           passed: 1,
           failed: 0,
-          pending: 0
-        }
+          pending: 0,
+        },
       },
       access: {
         totalIdentities: 1,
@@ -798,14 +872,14 @@ export class SecurityService {
           successfulLogins: 1247,
           failedLogins: 0,
           mfaAdoption: 100,
-          ssoAdoption: 75
+          ssoAdoption: 75,
         },
         accessReviews: {
           total: 1,
           completed: 1,
           pending: 0,
-          overdue: 0
-        }
+          overdue: 0,
+        },
       },
       posture: {
         overallScore: 82,
@@ -815,21 +889,21 @@ export class SecurityService {
           incidentResponse: 88,
           accessControl: 90,
           dataProtection: 80,
-          compliance: 75
+          compliance: 75,
         },
-        trends: []
+        trends: [],
       },
       risk: {
         overallRisk: 'medium',
         riskScore: 65,
         byCategory: {
-          'Technical': {
+          Technical: {
             level: 'medium',
             score: 60,
-            count: vulnerabilities.length
-          }
+            count: vulnerabilities.length,
+          },
         },
-        trends: []
+        trends: [],
       },
       performance: {
         tools: [
@@ -839,32 +913,32 @@ export class SecurityService {
             availability: 99.5,
             responseTime: 250,
             accuracy: 92,
-            falsePositives: 8
-          }
+            falsePositives: 8,
+          },
         ],
         team: {
           alertsProcessed: alerts.length,
           incidentsHandled: incidents.length,
           averageResponseTime: 45,
-          workload: alerts.length
-        }
+          workload: alerts.length,
+        },
       },
       costs: {
         totalSecuritySpend: 500000,
         costPerIncident: 25000,
         costPerEmployee: 1250,
         byCategory: {
-          'Tools': 200000,
-          'Personnel': 250000
+          Tools: 200000,
+          Personnel: 250000,
         },
         roi: {
           preventedLosses: 2000000,
           securityInvestment: 500000,
-          roiPercentage: 300
-        }
+          roiPercentage: 300,
+        },
       },
       generatedAt: new Date(),
-      generatedBy: 'security-service'
+      generatedBy: 'security-service',
     };
   }
 
@@ -899,6 +973,149 @@ export class SecurityService {
 
   getConfiguration(): SecurityConfiguration {
     return this.configuration;
+  }
+
+  // Metodi richiesti da SecurityCompliance
+  generateSecurityStats(): SecurityMetrics {
+    return this.generateSecurityMetrics();
+  }
+
+  getSecurityAlerts(): SecurityAlert[] {
+    return Array.from(this.alerts.values());
+  }
+
+  getSecurityIncidents(): SecurityIncident[] {
+    return Array.from(this.incidents.values());
+  }
+
+  getSecurityPolicies(): SecurityPolicy[] {
+    return Array.from(this.policies.values());
+  }
+
+  getComplianceFrameworks(): Array<{id: string, name: string, compliancePercentage: number, implementedControls: number, totalControls: number, standard: string, certificationStatus: string, description: string, isActive: boolean, version: string, nextAuditDate: Date, domains: Array<{name: string, status: string}>}> {
+    return this.configuration.organization.complianceRequirements.map(framework => ({
+      id: framework,
+      name: framework.toUpperCase(),
+      compliancePercentage: Math.floor(Math.random() * 20) + 80, // 80-100%
+      implementedControls: Math.floor(Math.random() * 20) + 80,
+      totalControls: 100,
+      standard: framework.toUpperCase(),
+      certificationStatus: Math.random() > 0.5 ? 'certified' : 'in_progress',
+      description: `Framework di compliance ${framework.toUpperCase()}`,
+      isActive: true,
+      version: '1.0',
+      nextAuditDate: new Date(Date.now() + Math.random() * 365 * 24 * 60 * 60 * 1000),
+      domains: [
+        { name: 'Access Control', status: 'compliant' },
+        { name: 'Data Protection', status: 'compliant' },
+        { name: 'Incident Response', status: 'in_progress' }
+      ]
+    }));
+  }
+
+  getSecurityTrainings(): any[] {
+    // Mock data per SecurityTraining
+    return [
+      {
+        id: '1',
+        title: 'Security Awareness Training',
+        description: 'Basic security awareness training',
+        type: 'awareness',
+        duration: 60,
+        required: true,
+        targetAudience: ['all'],
+        completionRate: 85,
+        lastUpdated: new Date(),
+        isMandatory: true,
+        validityPeriod: 365,
+        passingScore: 80,
+        hasAssessment: true,
+        maxAttempts: 3,
+        modules: [
+          {
+            id: '1',
+            name: 'module1',
+            title: 'Introduction to Security',
+            content: 'Basic security concepts',
+            duration: 30,
+            completed: false
+          }
+        ]
+      }
+    ];
+  }
+
+  getSecurityThreats(): ThreatIntelligence[] {
+    return Array.from(this.threats.values());
+  }
+
+  createSecurityIncident(incident: Partial<SecurityIncident>): SecurityIncident {
+    const newIncident: SecurityIncident = {
+      id: `incident-${Date.now()}`,
+      title: incident.title || 'New Security Incident',
+      description: incident.description || '',
+      category: incident.category || 'malware',
+      severity: incident.severity || 'medium',
+      priority: incident.priority || 'medium',
+      status: 'new',
+      impact: {
+        confidentiality: 'none',
+        integrity: 'none',
+        availability: 'none',
+        affectedSystems: [],
+        affectedUsers: 0,
+        dataCompromised: false,
+        serviceDisruption: false,
+        reputationalImpact: 'none',
+        complianceViolation: false,
+        regulatoryNotificationRequired: false,
+        affectedRegulations: []
+      },
+      detectedAt: new Date(),
+      reportedAt: new Date(),
+      responseTeam: [],
+      investigation: {
+        attackTimeline: [],
+        iocs: []
+      },
+      actions: [],
+      communications: [],
+      evidence: [],
+      metrics: {
+        detectionTime: 0,
+        responseTime: 0
+      },
+      related: {
+        vulnerabilities: [],
+        threats: [],
+        incidents: [],
+        alerts: []
+      },
+      tags: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      createdBy: 'system',
+      ...incident
+    };
+    
+    this.incidents.set(newIncident.id, newIncident);
+    return newIncident;
+  }
+
+  updateAlertStatus(alertId: string, status: string): void {
+    const alert = this.alerts.get(alertId);
+    if (alert) {
+      alert.response.status = status as any;
+      this.alerts.set(alertId, alert);
+    }
+  }
+
+  updateIncidentStatus(incidentId: string, status: string): void {
+    const incident = this.incidents.get(incidentId);
+    if (incident) {
+      incident.status = status as any;
+      this.incidents.set(incidentId, incident);
+    }
   }
 }
 

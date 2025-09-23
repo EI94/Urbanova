@@ -40,19 +40,19 @@ console.log('\n3️⃣ TEST AUTENTICAZIONE...');
 fetch('https://www.urbanova.life/api/feasibility-recalculate', {
   method: 'POST',
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   },
-  body: JSON.stringify({ test: 'auth' })
+  body: JSON.stringify({ test: 'auth' }),
 })
-.then(response => {
-  console.log('✅ API Auth OK - Status:', response.status);
-  return response.text();
-})
-.then(data => {
-  console.log('📄 Risposta API:', data.substring(0, 200));
-})
-.catch(error => {
-  console.log('❌ API Auth KO:', error.message);
-});
+  .then(response => {
+    console.log('✅ API Auth OK - Status:', response.status);
+    return response.text();
+  })
+  .then(data => {
+    console.log('📄 Risposta API:', data.substring(0, 200));
+  })
+  .catch(error => {
+    console.log('❌ API Auth KO:', error.message);
+  });
 
 console.log('\n🏁 TEST COMPLETATI - Controlla i risultati sopra');

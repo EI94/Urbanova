@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import { BrainIcon, SearchIcon, FilterIcon, CheckCircleIcon } from '@/components/icons';
 
 interface ProgressBarProps {
@@ -18,7 +19,7 @@ export default function ProgressBar({
   message,
   currentSource = '',
   sourcesCompleted = [],
-  sourcesTotal = []
+  sourcesTotal = [],
 }: ProgressBarProps) {
   if (phase === 'idle') return null;
 
@@ -67,42 +68,40 @@ export default function ProgressBar({
         {getPhaseIcon()}
         <div className="flex-1">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">
-              {message}
-            </span>
-            <span className="text-sm text-gray-500">
-              {progress.toFixed(0)}%
-            </span>
+            <span className="text-sm font-medium text-gray-700">{message}</span>
+            <span className="text-sm text-gray-500">{progress.toFixed(0)}%</span>
           </div>
         </div>
       </div>
-      
+
       {/* Progress Bar */}
       <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
-        <div 
+        <div
           className={`h-2 rounded-full transition-all duration-500 ease-out ${getPhaseColor()}`}
           style={{ width: `${progress}%` }}
         ></div>
       </div>
-      
+
       {/* Sources Status */}
       {sourcesTotal.length > 0 && (
         <div className="flex items-center gap-4">
           {sourcesTotal.map(source => (
             <div key={source} className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                sourcesCompleted.includes(source) 
-                  ? 'bg-green-500' 
-                  : source === currentSource 
-                    ? 'bg-yellow-500 animate-pulse'
-                    : 'bg-gray-300'
-              }`}></div>
+              <div
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  sourcesCompleted.includes(source)
+                    ? 'bg-green-500'
+                    : source === currentSource
+                      ? 'bg-yellow-500 animate-pulse'
+                      : 'bg-gray-300'
+                }`}
+              ></div>
               <span className="text-xs text-gray-600">{source}</span>
             </div>
           ))}
         </div>
       )}
-      
+
       {/* Current Source Indicator */}
       {currentSource && !sourcesCompleted.includes(currentSource) && (
         <div className="mt-2 text-xs text-yellow-700 bg-yellow-100 px-2 py-1 rounded">
@@ -111,4 +110,4 @@ export default function ProgressBar({
       )}
     </div>
   );
-} 
+}

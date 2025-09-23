@@ -1,18 +1,19 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { getSupportedLanguages } from '@/lib/languageConfig';
-import { SupportedLanguage } from '@/types/language';
-import { 
-  CheckIcon, 
-  XIcon, 
+
+import {
+  CheckIcon,
+  XIcon,
   PlayIcon,
   StopIcon,
   ClockIcon,
   ZapIcon,
-  EyeIcon
+  EyeIcon,
 } from '@/components/icons';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { getSupportedLanguages } from '@/lib/languageConfig';
+import { SupportedLanguage } from '@/types/language';
 
 interface SmoothnessTestProps {
   onComplete?: (results: any) => void;
@@ -35,7 +36,7 @@ export default function SmoothnessTest({ onComplete }: SmoothnessTestProps) {
   const [progress, setProgress] = useState(0);
   const [isObserving, setIsObserving] = useState(false);
   const [visualGlitches, setVisualGlitches] = useState(0);
-  
+
   const observerRef = useRef<MutationObserver | null>(null);
   const supportedLanguages = getSupportedLanguages();
 
@@ -43,32 +44,32 @@ export default function SmoothnessTest({ onComplete }: SmoothnessTestProps) {
   const startVisualObservation = () => {
     setIsObserving(true);
     setVisualGlitches(0);
-    
-    observerRef.current = new MutationObserver((mutations) => {
+
+    observerRef.current = new MutationObserver(mutations => {
       let glitchCount = 0;
-      
-      mutations.forEach((mutation) => {
+
+      mutations.forEach(mutation => {
         // Conta cambiamenti rapidi che potrebbero essere glitch
         if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
           glitchCount++;
         }
-        
+
         // Conta cambiamenti di attributi rapidi
         if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
           glitchCount++;
         }
       });
-      
+
       if (glitchCount > 0) {
         setVisualGlitches(prev => prev + glitchCount);
       }
     });
-    
+
     observerRef.current.observe(document.body, {
       childList: true,
       subtree: true,
       attributes: true,
-      attributeFilter: ['class', 'style']
+      attributeFilter: ['class', 'style'],
     });
   };
 
@@ -83,11 +84,11 @@ export default function SmoothnessTest({ onComplete }: SmoothnessTestProps) {
   // Calcola score di performance
   const calculatePerformanceScore = (duration: number, glitches: number): number => {
     // Score basato su durata (più veloce = migliore)
-    const durationScore = Math.max(0, 100 - (duration / 10));
-    
+    const durationScore = Math.max(0, 100 - duration / 10);
+
     // Penalità per glitch visivi
     const glitchPenalty = glitches * 5;
-    
+
     return Math.max(0, Math.min(100, durationScore - glitchPenalty));
   };
 
@@ -102,49 +103,50 @@ export default function SmoothnessTest({ onComplete }: SmoothnessTestProps) {
   // Test smoothness per una lingua
   const testLanguageSmoothness = async (language: SupportedLanguage): Promise<SmoothnessResult> => {
     setCurrentTest(`Testando smoothness: ${language}`);
-    
+
     // Inizia osservazione visiva
     startVisualObservation();
-    
+
     // Attendi un momento per stabilizzare
     await new Promise(resolve => setTimeout(resolve, 100));
-    
+
     // Reset contatore glitch
     setVisualGlitches(0);
-    
+
     // Misura tempo di cambio lingua
     const startTime = performance.now();
-    
+
     try {
       await changeLanguage(language);
-      
+
       // Attendi per completare il rendering
       await new Promise(resolve => setTimeout(resolve, 200));
-      
+
       const endTime = performance.now();
       const duration = endTime - startTime;
-      
+
       // Ferma osservazione
       stopVisualObservation();
-      
+
       // Calcola metriche
       const finalGlitches = visualGlitches;
       const performanceScore = calculatePerformanceScore(duration, finalGlitches);
       const smoothness = getSmoothnessLevel(performanceScore);
-      
+
       const result: SmoothnessResult = {
         language,
         duration,
         smoothness,
         visualGlitches: finalGlitches,
         performanceScore,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-      
-      console.log(`🎯 [SmoothnessTest] ${language}: ${duration.toFixed(1)}ms, ${finalGlitches} glitch, score: ${performanceScore.toFixed(1)}`);
-      
+
+      console.log(
+        `🎯 [SmoothnessTest] ${language}: ${duration.toFixed(1)}ms, ${finalGlitches} glitch, score: ${performanceScore.toFixed(1)}`
+      );
+
       return result;
-      
     } catch (error) {
       stopVisualObservation();
       throw error;
@@ -156,51 +158,52 @@ export default function SmoothnessTest({ onComplete }: SmoothnessTestProps) {
     setIsRunning(true);
     setResults([]);
     setProgress(0);
-    
+
     console.log(`🎯 [SmoothnessTest] Avvio test smoothness`);
-    
+
     const smoothnessResults: SmoothnessResult[] = [];
-    
+
     try {
       for (let i = 0; i < supportedLanguages.length; i++) {
         const language = supportedLanguages[i];
         setProgress((i / supportedLanguages.length) * 100);
-        
+
         try {
-          const result = await testLanguageSmoothness(language.code);
+          const result = await testLanguageSmoothness((language?.code || 'unknown') as any);
           smoothnessResults.push(result);
           setResults([...smoothnessResults]);
-          
+
           // Pausa tra i test
           await new Promise(resolve => setTimeout(resolve, 300));
-          
         } catch (error) {
-          console.error(`❌ [SmoothnessTest] Errore test ${language.code}:`, error);
-          
+          console.error(`❌ [SmoothnessTest] Errore test ${language?.code || 'unknown'}:`, error);
+
           // Aggiungi risultato di errore
           const errorResult: SmoothnessResult = {
-            language: language.code,
+            language: (language?.code || 'unknown') as any,
             duration: 0,
             smoothness: 'poor',
             visualGlitches: 0,
             performanceScore: 0,
-            timestamp: new Date()
+            timestamp: new Date(),
           };
-          
+
           smoothnessResults.push(errorResult);
           setResults([...smoothnessResults]);
         }
       }
-      
+
       setProgress(100);
-      
+
       // Calcola statistiche
       const totalTests = smoothnessResults.length;
       const successfulTests = smoothnessResults.filter(r => r.performanceScore > 0).length;
-      const averageDuration = smoothnessResults.reduce((sum, r) => sum + r.duration, 0) / totalTests;
-      const averageScore = smoothnessResults.reduce((sum, r) => sum + r.performanceScore, 0) / totalTests;
+      const averageDuration =
+        smoothnessResults.reduce((sum, r) => sum + r.duration, 0) / totalTests;
+      const averageScore =
+        smoothnessResults.reduce((sum, r) => sum + r.performanceScore, 0) / totalTests;
       const totalGlitches = smoothnessResults.reduce((sum, r) => sum + r.visualGlitches, 0);
-      
+
       const stats = {
         totalTests,
         successfulTests,
@@ -211,20 +214,19 @@ export default function SmoothnessTest({ onComplete }: SmoothnessTestProps) {
           excellent: smoothnessResults.filter(r => r.smoothness === 'excellent').length,
           good: smoothnessResults.filter(r => r.smoothness === 'good').length,
           acceptable: smoothnessResults.filter(r => r.smoothness === 'acceptable').length,
-          poor: smoothnessResults.filter(r => r.smoothness === 'poor').length
-        }
+          poor: smoothnessResults.filter(r => r.smoothness === 'poor').length,
+        },
       };
-      
+
       console.log(`🎯 [SmoothnessTest] Test completati:`, stats);
-      
+
       // Callback di completamento
       if (onComplete) {
         onComplete({
           results: smoothnessResults,
-          stats
+          stats,
         });
       }
-      
     } catch (error) {
       console.error('❌ [SmoothnessTest] Errore generale:', error);
     } finally {
@@ -253,9 +255,13 @@ export default function SmoothnessTest({ onComplete }: SmoothnessTestProps) {
     good: results.filter(r => r.smoothness === 'good').length,
     acceptable: results.filter(r => r.smoothness === 'acceptable').length,
     poor: results.filter(r => r.smoothness === 'poor').length,
-    averageDuration: results.length > 0 ? results.reduce((sum, r) => sum + r.duration, 0) / results.length : 0,
-    averageScore: results.length > 0 ? results.reduce((sum, r) => sum + r.performanceScore, 0) / results.length : 0,
-    totalGlitches: results.reduce((sum, r) => sum + r.visualGlitches, 0)
+    averageDuration:
+      results.length > 0 ? results.reduce((sum, r) => sum + r.duration, 0) / results.length : 0,
+    averageScore:
+      results.length > 0
+        ? results.reduce((sum, r) => sum + r.performanceScore, 0) / results.length
+        : 0,
+    totalGlitches: results.reduce((sum, r) => sum + r.visualGlitches, 0),
   };
 
   // Cleanup observer
@@ -277,7 +283,7 @@ export default function SmoothnessTest({ onComplete }: SmoothnessTestProps) {
             Verifica la fluidità e performance del cambio lingua
           </p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           {stats.total > 0 && (
             <div className="text-right">
@@ -289,16 +295,15 @@ export default function SmoothnessTest({ onComplete }: SmoothnessTestProps) {
               </div>
             </div>
           )}
-          
+
           <div className="flex gap-2">
             <button
               onClick={runSmoothnessTest}
               disabled={isRunning}
               className={`
                 flex items-center gap-2 px-3 py-2 rounded-md transition-colors text-sm
-                ${isRunning 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-purple-600 hover:bg-purple-700'
+                ${
+                  isRunning ? 'bg-gray-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
                 }
                 text-white
               `}
@@ -306,7 +311,7 @@ export default function SmoothnessTest({ onComplete }: SmoothnessTestProps) {
               <PlayIcon className="h-4 w-4" />
               {isRunning ? 'Test in corso...' : 'Test Smoothness'}
             </button>
-            
+
             {isObserving && (
               <div className="flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">
                 <EyeIcon className="h-3 w-3" />
@@ -325,16 +330,12 @@ export default function SmoothnessTest({ onComplete }: SmoothnessTestProps) {
             <span className="text-sm text-gray-500">{progress.toFixed(1)}%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
+            <div
               className="bg-purple-600 h-2 rounded-full transition-all duration-300"
               style={{ width: `${progress}%` }}
             ></div>
           </div>
-          {currentTest && (
-            <p className="text-sm text-gray-600 mt-2">
-              {currentTest}
-            </p>
-          )}
+          {currentTest && <p className="text-sm text-gray-600 mt-2">{currentTest}</p>}
         </div>
       )}
 
@@ -342,11 +343,15 @@ export default function SmoothnessTest({ onComplete }: SmoothnessTestProps) {
       {stats.total > 0 && (
         <div className="grid grid-cols-4 gap-4 mb-6">
           <div className="text-center p-3 bg-purple-50 rounded-lg">
-            <div className="text-2xl font-bold text-purple-600">{stats.averageScore.toFixed(1)}</div>
+            <div className="text-2xl font-bold text-purple-600">
+              {stats.averageScore.toFixed(1)}
+            </div>
             <div className="text-sm text-purple-700">Score Medio</div>
           </div>
           <div className="text-center p-3 bg-blue-50 rounded-lg">
-            <div className="text-2xl font-bold text-blue-600">{stats.averageDuration.toFixed(1)}ms</div>
+            <div className="text-2xl font-bold text-blue-600">
+              {stats.averageDuration.toFixed(1)}ms
+            </div>
             <div className="text-sm text-blue-700">Durata Media</div>
           </div>
           <div className="text-center p-3 bg-green-50 rounded-lg">
@@ -389,35 +394,46 @@ export default function SmoothnessTest({ onComplete }: SmoothnessTestProps) {
       {results.length > 0 && (
         <div className="space-y-3 max-h-64 overflow-y-auto">
           <h4 className="font-medium mb-3">Risultati Dettagliati</h4>
-          
+
           {results.map((result, index) => (
             <div
               key={index}
               className={`
                 p-3 rounded-lg border-l-4 flex items-center justify-between
-                ${result.smoothness === 'excellent' ? 'border-green-500 bg-green-50' :
-                  result.smoothness === 'good' ? 'border-blue-500 bg-blue-50' :
-                  result.smoothness === 'acceptable' ? 'border-yellow-500 bg-yellow-50' :
-                  'border-red-500 bg-red-50'
+                ${
+                  result.smoothness === 'excellent'
+                    ? 'border-green-500 bg-green-50'
+                    : result.smoothness === 'good'
+                      ? 'border-blue-500 bg-blue-50'
+                      : result.smoothness === 'acceptable'
+                        ? 'border-yellow-500 bg-yellow-50'
+                        : 'border-red-500 bg-red-50'
                 }
               `}
             >
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-medium text-sm">{result.language.toUpperCase()}</span>
-                  <span className={`
+                  <span
+                    className={`
                     px-2 py-1 rounded-full text-xs font-medium
-                    ${result.smoothness === 'excellent' ? 'bg-green-100 text-green-800' :
-                      result.smoothness === 'good' ? 'bg-blue-100 text-blue-800' :
-                      result.smoothness === 'acceptable' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
+                    ${
+                      result.smoothness === 'excellent'
+                        ? 'bg-green-100 text-green-800'
+                        : result.smoothness === 'good'
+                          ? 'bg-blue-100 text-blue-800'
+                          : result.smoothness === 'acceptable'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
                     }
-                  `}>
+                  `}
+                  >
                     {result.smoothness.toUpperCase()}
                   </span>
                 </div>
                 <p className="text-sm text-gray-600">
-                  {result.duration.toFixed(1)}ms • {result.visualGlitches} glitch • Score: {result.performanceScore.toFixed(1)}
+                  {result.duration.toFixed(1)}ms • {result.visualGlitches} glitch • Score:{' '}
+                  {result.performanceScore.toFixed(1)}
                 </p>
               </div>
               <div className="text-xs text-gray-500 ml-4">
@@ -432,16 +448,17 @@ export default function SmoothnessTest({ onComplete }: SmoothnessTestProps) {
       <div className="mt-6">
         <h4 className="font-medium mb-3">Test Rapido</h4>
         <div className="flex flex-wrap gap-2">
-          {supportedLanguages.slice(0, 3).map((lang) => (
+          {supportedLanguages.slice(0, 3).map(lang => (
             <button
               key={lang.code}
               onClick={() => testSingleLanguageSmoothness(lang.code)}
               disabled={isRunning}
               className={`
                 px-3 py-1 rounded-md text-sm transition-colors
-                ${isRunning 
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                ${
+                  isRunning
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                 }
               `}
             >
@@ -461,4 +478,4 @@ export default function SmoothnessTest({ onComplete }: SmoothnessTestProps) {
       )}
     </div>
   );
-} 
+}

@@ -1,0 +1,1 @@
+🧪 Test commit per attivare workflow Firebase CI

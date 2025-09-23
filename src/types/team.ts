@@ -1,37 +1,42 @@
 // Tipi per il sistema di ruoli e permessi team
 
-export type TeamRole = 'PROJECT_MANAGER' | 'FINANCIAL_ANALYST' | 'ARCHITECT' | 'DEVELOPER' | 'TEAM_MEMBER';
+export type TeamRole =
+  | 'PROJECT_MANAGER'
+  | 'FINANCIAL_ANALYST'
+  | 'ARCHITECT'
+  | 'DEVELOPER'
+  | 'TEAM_MEMBER';
 
-export type Permission = 
+export type Permission =
   // Gestione Sessioni
   | 'CREATE_SESSIONS'
   | 'JOIN_SESSIONS'
   | 'MANAGE_SESSIONS'
   | 'DELETE_SESSIONS'
-  
+
   // Gestione Commenti
   | 'ADD_COMMENTS'
   | 'EDIT_COMMENTS'
   | 'DELETE_COMMENTS'
   | 'MODERATE_COMMENTS'
-  
+
   // Gestione Preferiti
   | 'ADD_TO_FAVORITES'
   | 'REMOVE_FROM_FAVORITES'
   | 'UPDATE_PRIORITY'
   | 'UPDATE_STATUS'
-  
+
   // Gestione Team
   | 'INVITE_MEMBERS'
   | 'REMOVE_MEMBERS'
   | 'ASSIGN_ROLES'
   | 'MANAGE_PERMISSIONS'
-  
+
   // Analytics e Reporting
   | 'VIEW_ANALYTICS'
   | 'EXPORT_REPORTS'
   | 'VIEW_TEAM_PERFORMANCE'
-  
+
   // Approvazioni
   | 'APPROVE_DECISIONS'
   | 'REJECT_DECISIONS'

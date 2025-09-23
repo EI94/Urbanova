@@ -1,8 +1,19 @@
 // Tipi per il sistema di Workflow Management & Approvals
 
-export type WorkflowStatus = 'draft' | 'pending_approval' | 'approved' | 'rejected' | 'completed' | 'cancelled';
+export type WorkflowStatus =
+  | 'draft'
+  | 'pending_approval'
+  | 'approved'
+  | 'rejected'
+  | 'completed'
+  | 'cancelled';
 
-export type WorkflowType = 'land_approval' | 'financial_decision' | 'technical_review' | 'team_decision' | 'project_approval';
+export type WorkflowType =
+  | 'land_approval'
+  | 'financial_decision'
+  | 'technical_review'
+  | 'team_decision'
+  | 'project_approval';
 
 export type ApprovalAction = 'approve' | 'reject' | 'request_changes' | 'delegate';
 
@@ -67,7 +78,7 @@ export interface WorkflowInstance {
   currentStepId: string;
   progress: number; // 0-100
   priority: 'low' | 'medium' | 'high' | 'critical';
-  
+
   // Dati specifici del workflow
   context: {
     landId?: string;
@@ -76,27 +87,27 @@ export interface WorkflowInstance {
     amount?: number;
     technicalDetails?: any;
   };
-  
+
   // Partecipanti e responsabili
   initiator: string;
   participants: string[];
   assignees: Record<string, string>; // stepId -> userId
-  
+
   // Timeline
   createdAt: Date;
   startedAt?: Date;
   completedAt?: Date;
   deadline?: Date;
-  
+
   // Steps e approvazioni
   steps: WorkflowStep[];
   approvals: WorkflowApproval[];
-  
+
   // Metadata
   tags: string[];
   attachments: string[];
   notes: string;
-  
+
   // Notifiche
   lastNotificationSent?: Date;
   nextReminderDate?: Date;
@@ -106,7 +117,12 @@ export interface WorkflowNotification {
   id: string;
   workflowId: string;
   userId: string;
-  type: 'approval_required' | 'workflow_started' | 'workflow_completed' | 'deadline_approaching' | 'reminder';
+  type:
+    | 'approval_required'
+    | 'workflow_started'
+    | 'workflow_completed'
+    | 'deadline_approaching'
+    | 'reminder';
   title: string;
   message: string;
   priority: 'low' | 'medium' | 'high' | 'critical';

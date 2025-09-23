@@ -1,0 +1,68 @@
+# Engineering Workflow - Urbanova
+
+## 4-Step Development Process
+1. **Plan**: ADR/PRD creation and review
+2. **Types**: Define TypeScript types and Zod schemas
+3. **Tests**: Write unit and integration tests
+4. **Build**: Implement feature with tests passing
+
+## Branching Strategy
+- **Main**: `main` - production-ready code only
+- **Feature**: `feature/{scope}` - e.g., `feature/chatops-integration`
+- **Hotfix**: `hotfix/{issue}` - critical production fixes
+- **Release**: `release/{version}` - version preparation
+
+## Pull Request Checklist
+- [ ] ADR/PRD referenced and linked
+- [ ] Types added to packages/types
+- [ ] Zod validation implemented
+- [ ] Tests unit + integration passing
+- [ ] Documentation updated
+- [ ] No TODOs or FIXMEs left
+- [ ] Code review completed
+- [ ] All CI checks passing
+
+## Code Review Standards
+- **Fail on missing types/tests**: No code without proper typing and test coverage
+- **No TODOs left**: All implementation details must be complete
+- **Type safety**: Strict TypeScript compliance
+- **Performance**: Consider impact on existing functionality
+- **Security**: Validate all inputs, sanitize outputs
+
+## Commit Style
+Use conventional commits:
+- `feat:` - new feature
+- `fix:` - bug fix
+- `chore:` - maintenance tasks
+- `refactor:` - code refactoring
+- `test:` - adding or updating tests
+- `docs:` - documentation changes
+- `style:` - formatting, missing semicolons, etc.
+- `perf:` - performance improvements
+
+## Definition of Done
+A feature is complete when:
+- [ ] Feature is demoable
+- [ ] All tests are passing
+- [ ] Dashboards are updated
+- [ ] Logs and audit trail are present
+- [ ] Documentation is complete
+- [ ] Code review is approved
+- [ ] No linting errors
+- [ ] TypeScript compilation successful
+
+## Quality Gates
+- **Pre-commit**: TypeScript check, linting, unit tests
+- **Pre-merge**: Integration tests, security scan
+- **Pre-deploy**: E2E tests, performance tests
+- **Post-deploy**: Monitoring, error tracking
+
+## Testing Strategy
+- **Unit Tests (70%)**: Individual functions and components
+- **Integration Tests (20%)**: API endpoints and service interactions
+- **E2E Tests (10%)**: Critical user journeys
+- **Coverage Target**: Minimum 80% code coverage
+description:
+globs:
+alwaysApply: true
+---

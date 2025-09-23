@@ -1,34 +1,45 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import DashboardLayout from '@/components/layout/DashboardLayout';
 import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
-import { robustProjectDeletionService } from '@/lib/robustProjectDeletionService';
-
+import { useAuth } from '@/contexts/AuthContext';
 import { 
-  CalculatorIcon, 
-  TrendingUpIcon, 
-  EuroIcon, 
-  BuildingIcon,
-  PlusIcon,
-  ChartBarIcon,
-  CompareIcon,
-  CheckCircleIcon,
-  CalendarIcon,
-  LocationIcon,
-  EditIcon,
-  TrashIcon,
-  EyeIcon,
-  TrophyIcon
-} from '@/components/icons';
+  Calculator, 
+  TrendingUp, 
+  Euro, 
+  Building,
+  Building2,
+  Plus,
+  BarChart3,
+  GitCompare,
+  CheckCircle,
+  Calendar,
+  MapPin,
+  Edit,
+  Trash2,
+  Eye,
+  Trophy,
+  FileText,
+  Target,
+  Shield,
+  CreditCard,
+  Search,
+  Settings,
+  Share2,
+  Users
+} from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
+import FeedbackWidget from '@/components/ui/FeedbackWidget';
+import ShareProjectModal from '@/components/workspace/ShareProjectModal';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { Workspace } from '@/types/workspace';
+import '@/lib/cssErrorHandler'; // CSS Error Handler per analisi fattibilità
 
 export default function FeasibilityAnalysisPage() {
   const { t, formatCurrency: fmtCurrency } = useLanguage();
-  const { currentUser: user, loading: authLoading } = useAuth();
+  const { currentUser, loading: authLoading } = useAuth();
   const [projects, setProjects] = useState<FeasibilityProject[]>([]);
   const [ranking, setRanking] = useState<FeasibilityProject[]>([]);
   const [statistics, setStatistics] = useState<any>(null);
@@ -38,226 +49,236 @@ export default function FeasibilityAnalysisPage() {
   const [showComparison, setShowComparison] = useState(false);
   const [project1Id, setProject1Id] = useState('');
   const [project2Id, setProject2Id] = useState('');
-  const [deletionInProgress, setDeletionInProgress] = useState<Set<string>>(new Set());
-
-
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [selectedProjectForShare, setSelectedProjectForShare] = useState<FeasibilityProject | null>(null);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
 
   useEffect(() => {
-    // Aspetta che l'autenticazione sia pronta
-    if (!authLoading) {
-      loadData();
-    }
-  }, [authLoading, user]);
+    // SEMPRE carica i dati reali, indipendentemente dall'autenticazione
+    console.log('🔄 Caricamento dati reali da Firebase...');
+    loadDataForTest();
+  }, []);
 
-  const loadData = async (forceRefresh = false) => {
-    if (authLoading) {
+  useEffect(() => {
+    // Carica workspace solo quando currentUser è disponibile
+    if (currentUser) {
+      loadWorkspaces();
+    }
+  }, [currentUser]);
+
+  // Carica workspace dell'utente
+  const loadWorkspaces = async () => {
+    try {
+      if (!currentUser) return;
+      
+      const response = await fetch(`/api/workspace/user/${currentUser.uid}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setWorkspaces(data.workspaces);
+        console.log('✅ [Workspace] Workspace caricati:', data.workspaces.length);
+      }
+    } catch (error) {
+      console.error('❌ [Workspace] Errore caricamento workspace:', error);
+    }
+  };
+
+  // Gestisce la condivisione di un progetto
+  const handleShareProject = async (workspaceId: string, permissions: any) => {
+    if (!selectedProjectForShare) return;
+
+    try {
+      const response = await fetch('/api/workspace/share-project', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          workspaceId,
+          projectId: selectedProjectForShare.id,
+          permissions,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast('✅ Progetto condiviso con successo!', { icon: '✅' });
+        setShowShareModal(false);
+        setSelectedProjectForShare(null);
+      } else {
+        toast('❌ Errore nella condivisione del progetto', { icon: '❌' });
+      }
+    } catch (error) {
+      console.error('❌ [Workspace] Errore condivisione:', error);
+      toast('Errore nella condivisione del progetto', { icon: '❌' });
+    }
+  };
+
+  // Apre il modal di condivisione
+  const openShareModal = (project: FeasibilityProject) => {
+    if (workspaces.length === 0) {
+      toast('Nessun workspace disponibile. Crea un workspace per condividere progetti.', { icon: '⚠️' });
       return;
     }
-    
-    if (!user) {
-      setError('Utente non autenticato. Effettua il login per continuare.');
+
+    setSelectedProjectForShare(project);
+    setShowShareModal(true);
+  };
+
+  const loadData = async () => {
+    if (!currentUser) {
+      setError('Utente non autenticato');
       setLoading(false);
       return;
     }
-    
+
     setLoading(true);
     setError(null);
+    
     try {
-      // Forza il refresh dei dati se richiesto
-      const timestamp = forceRefresh ? Date.now() : 0;
+      console.log('🔄 Caricamento progetti per utente:', currentUser.email);
       
-      if (forceRefresh) {
-        
-        // Forza refresh completo bypassando cache
-        const [allProjects, projectsRanking, stats] = await Promise.all([
-          feasibilityService.getAllProjects(),
-          feasibilityService.getProjectsRanking(),
-          feasibilityService.getStatistics()
-        ]);
-        
-        // Forza aggiornamento stato
-        setProjects([]); // Pulisci prima
-        setTimeout(() => {
-          setProjects(allProjects || []);
-          setRanking(projectsRanking || []);
-          setStatistics(stats || {});
-        }, 50);
-        
-      } else {
-        // Caricamento normale
-        const [allProjects, projectsRanking, stats] = await Promise.all([
-          feasibilityService.getAllProjects(),
-          feasibilityService.getProjectsRanking(),
-          feasibilityService.getStatistics()
-        ]);
-        
-        setProjects(allProjects || []);
-        setRanking(projectsRanking || []);
-        setStatistics(stats || {});
-      }
+      const [projectsData, rankingData] = await Promise.all([
+        feasibilityService.getProjectsByUser(currentUser.uid),
+        feasibilityService.getProjectsRanking()
+      ]);
       
+      const statisticsData = {
+        totalProjects: projectsData.length,
+        totalInvestment: projectsData.reduce((sum, p) => sum + (p.costs?.total || 0), 0),
+        averageReturn: projectsData.reduce((sum, p) => sum + (p.results?.margin || 0), 0) / projectsData.length,
+        averageROI: projectsData.reduce((sum, p) => sum + (p.results?.roi || 0), 0) / projectsData.length
+      };
+
+      setProjects(projectsData);
+      setRanking(rankingData);
+      setStatistics(statisticsData);
+      
+      console.log('✅ Dati caricati con successo:', {
+        projects: projectsData.length,
+        ranking: rankingData.length,
+        statistics: statisticsData
+      });
     } catch (error) {
       console.error('❌ Errore caricamento dati:', error);
-      setError('Errore nel caricamento dei dati. Riprova più tardi.');
-      toast(`❌ Errore nel caricamento dei dati`, { icon: '❌' });
+      setError('Errore nel caricamento dei dati');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadDataForTest = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      console.log('🔄 [FEASIBILITY] Caricamento progetti reali da Firebase...');
+      
+      // Carica dati reali da Firebase
+      const [projectsData, rankingData] = await Promise.all([
+        feasibilityService.getAllProjects(), // Carica TUTTI i progetti, non solo per utente
+        feasibilityService.getProjectsRanking()
+      ]);
+      
+      const statisticsData = {
+        totalProjects: projectsData.length,
+        totalInvestment: projectsData.reduce((sum, p) => sum + (p.costs?.total || 0), 0),
+        averageReturn: projectsData.length > 0 ? projectsData.reduce((sum, p) => sum + (p.results?.margin || 0), 0) / projectsData.length : 0,
+        averageROI: projectsData.length > 0 ? projectsData.reduce((sum, p) => sum + (p.results?.roi || 0), 0) / projectsData.length : 0
+      };
+
+      setProjects(projectsData);
+      setRanking(rankingData);
+      setStatistics(statisticsData);
+      
+      console.log('✅ [FEASIBILITY] Progetti caricati con successo:', {
+        projects: projectsData.length,
+        ranking: rankingData.length,
+        statistics: statisticsData
+      });
+    } catch (error) {
+      console.error('❌ [FEASIBILITY] Errore caricamento progetti:', error);
+      setError('Errore nel caricamento dei progetti');
+      
+      // Fallback: imposta dati vuoti
+      setProjects([]);
+      setRanking([]);
+      setStatistics({
+        totalProjects: 0,
+        totalInvestment: 0,
+        averageReturn: 0,
+        averageROI: 0
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteProject = async (projectId: string) => {
-    if (!projectId) {
-      toast('❌ ID progetto non valido', { icon: '❌' });
-      return;
-    }
-
-    if (!user) {
-      toast('❌ Utente non autenticato', { icon: '❌' });
-      return;
-    }
-
-    // BLOCCAGGIO ELIMINAZIONI SIMULTANEE
-    if (deletionInProgress.has(projectId)) {
-      toast('⏳ Eliminazione già in corso per questo progetto', { icon: '⏳' });
-      return;
-    }
-
-    if (!confirm('Sei sicuro di voler eliminare questo progetto? L\'operazione non può essere annullata.')) {
-      return;
-    }
-
-    // BLOCCA ELIMINAZIONE
-    setDeletionInProgress(prev => new Set(prev).add(projectId));
-
+    if (!confirm('Sei sicuro di voler eliminare questo progetto?')) return;
+    
     try {
-      toast('🗑️ Eliminazione progetto in corso...', { icon: '⏳' });
-      
-      // 1. ELIMINAZIONE ROBUSTA E SINCRONIZZATA
-      const deletionResult = await robustProjectDeletionService.robustDeleteProject(projectId);
-      
-      if (deletionResult.success && deletionResult.backendVerified) {
-        // 2. AGGIORNA IMMEDIATAMENTE TUTTE LE LISTE
-        setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId));
-        setRanking(prevRanking => prevRanking.filter(p => p.id !== projectId));
-        
-        // 3. RICALCOLA STATISTICHE
-        const remainingProjects = projects.filter(p => p.id !== projectId);
-        if (remainingProjects.length > 0) {
-          const totalProjects = remainingProjects.length;
-          const avgMargin = remainingProjects.reduce((sum, p) => sum + (p.results?.margin || 0), 0) / totalProjects;
-          const totalInvestment = remainingProjects.reduce((sum, p) => sum + (p.costs?.land?.purchasePrice || 0), 0);
-          const onTarget = remainingProjects.filter(p => (p.results?.margin || 0) >= (p.targetMargin || 0)).length;
-          
-          setStatistics({
-            totalProjects,
-            averageMargin: avgMargin,
-            totalInvestment,
-            onTarget
-          });
-        } else {
-          setStatistics({
-            totalProjects: 0,
-            averageMargin: 0,
-            totalInvestment: 0,
-            onTarget: 0
-          });
-        }
-        
-        toast(`✅ ${deletionResult.message}`, { icon: '✅' });
-        
-        // 4. FORZA REFRESH COMPLETO DOPO 1 SECONDO
-        setTimeout(() => {
-          loadData(true);
-        }, 1000);
-        
-      } else {
-        throw new Error(`Eliminazione fallita: ${deletionResult.message}`);
-      }
-      
-    } catch (error) {
-      toast(`❌ Errore eliminazione: ${error}`, { icon: '❌' });
-      
-      // 5. FORZA REFRESH PER VERIFICARE STATO REALE
-      setTimeout(() => {
-        loadData(true);
-      }, 2000);
-    } finally {
-      // RIMUOVI BLOCCAGGIO
-      setDeletionInProgress(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(projectId);
-        return newSet;
-      });
+      await feasibilityService.deleteProject(projectId);
+      await loadData();
+      toast('Progetto eliminato con successo', { icon: '✅' });
+    } catch (err) {
+      console.error('Error deleting project:', err);
+      toast('Errore nell\'eliminazione del progetto', { icon: '❌' });
     }
   };
 
-  const handleCompareProjects = async () => {
-    if (!project1Id || !project2Id) {
-      toast(t('selectTwo', 'feasibility.toasts'), { icon: '⚠️' });
-      return;
-    }
-
-    try {
-      const comparison = await feasibilityService.compareProjects(project1Id, project2Id, 'user123');
-      toast(`✅ ${t('compareCreated', 'feasibility.toasts')}`, { icon: '✅' });
-      setShowComparison(false);
-      setProject1Id('');
-      setProject2Id('');
-    } catch (error) {
-      toast(`❌ ${t('compareError', 'feasibility.toasts')}` as string, { icon: '❌' });
-    }
-  };
-
-  const formatCurrency = (value: number) => {
-    try {
-      return fmtCurrency(value || 0);
-    } catch (error) {
-      return `€${(value || 0).toLocaleString()}`;
-    }
-  };
-
-  const formatPercentage = (value: number) => {
-    try {
-      return `${(value || 0).toFixed(1)}%`;
-    } catch (error) {
-      return '0.0%';
-    }
-  };
-
-  const getMarginColor = (margin: number, targetMargin: number) => {
-    if (margin >= targetMargin) return 'text-success';
-    if (margin >= targetMargin * 0.8) return 'text-warning';
-    return 'text-error';
-  };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'PIANIFICAZIONE': return 'bg-blue-100 text-blue-800';
-      case 'IN_CORSO': return 'bg-yellow-100 text-yellow-800';
-      case 'COMPLETATO': return 'bg-green-100 text-green-800';
-      case 'SOSPESO': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+    const colors = {
+      draft: 'text-gray-600 bg-gray-100',
+      in_progress: 'text-blue-600 bg-blue-100',
+      completed: 'text-green-600 bg-green-100',
+      cancelled: 'text-red-600 bg-red-100',
+    };
+    return colors[status as keyof typeof colors] || 'text-gray-600 bg-gray-100';
   };
 
-  if (authLoading) {
-    return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="loading loading-spinner loading-lg mb-4"></div>
-            <p className="text-gray-600">Verifica autenticazione...</p>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  const getStatusLabel = (status: string) => {
+    const labels = {
+      draft: 'Bozza',
+      in_progress: 'In Corso',
+      completed: 'Completato',
+      cancelled: 'Annullato',
+    };
+    return labels[status as keyof typeof labels] || status;
+  };
+
+  const getRiskColor = (risk: string) => {
+    const colors = {
+      low: 'text-green-600 bg-green-100',
+      medium: 'text-yellow-600 bg-yellow-100',
+      high: 'text-red-600 bg-red-100',
+    };
+    return colors[risk as keyof typeof colors] || 'text-gray-600 bg-gray-100';
+  };
+
+  const getRiskLabel = (risk: string) => {
+    const labels = {
+      low: 'Basso',
+      medium: 'Medio',
+      high: 'Alto',
+    };
+    return labels[risk as keyof typeof labels] || risk;
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('it-IT');
+  };
 
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="loading loading-spinner loading-lg"></div>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Caricamento analisi fattibilità...</p>
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -266,415 +287,226 @@ export default function FeasibilityAnalysisPage() {
   if (error) {
     return (
       <DashboardLayout>
-        <div className="flex flex-col items-center justify-center h-64 space-y-4">
-          <div className="text-red-600 text-xl">❌ {error}</div>
-          <button 
-            onClick={() => loadData()}
-            className="btn btn-primary"
-          >
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-red-600 text-xl mb-4">❌ {error}</div>
+            <button
+              onClick={loadData}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
             🔄 Riprova
           </button>
+          </div>
         </div>
       </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">📊 {t('title', 'feasibility')}</h1>
-            <p className="text-gray-600 mt-1">{t('subtitle', 'feasibility')}</p>
+    <DashboardLayout title="Analisi di Fattibilità">
+      {/* Page Header */}
+        <div className="mb-6 px-6">
+          <div className="flex items-center space-x-4 mb-4">
           </div>
-          <div className="flex space-x-3">
-            <Link href="/dashboard/feasibility-analysis/new">
-              <button className="btn btn-primary">
-                <PlusIcon className="h-4 w-4 mr-2" />
-                {t('newProject', 'feasibility')}
-              </button>
-            </Link>
-            <button 
-              onClick={() => setShowComparison(true)}
-              className="btn btn-outline"
-            >
-              <CompareIcon className="h-4 w-4 mr-2" />
-              {t('compare', 'feasibility')}
-            </button>
-            
-            <button 
-              onClick={async () => {
-                if (!user) {
-                  toast('❌ Utente non autenticato', { icon: '❌' });
-                  return;
-                }
-                
-                if (!confirm('⚠️ ATTENZIONE: Questa operazione eliminerà TUTTI i progetti dal database. Sei sicuro di voler continuare?')) {
-                  return;
-                }
-                
-                try {
-                  toast('🧹 Pulizia completa database in corso...', { icon: '⏳' });
-                  
-                  const result = await robustProjectDeletionService.completeDatabaseCleanup();
-                  
-                  if (result.success) {
-                    toast(`✅ ${result.message}`, { icon: '✅' });
-                    
-                    // Pulisci tutte le liste locali
-                    setProjects([]);
-                    setRanking([]);
-                    setStatistics({
-                      totalProjects: 0,
-                      averageMargin: 0,
-                      totalInvestment: 0,
-                      onTarget: 0
-                    });
-                    
-                    // Forza refresh completo
-                    setTimeout(() => {
-                      loadData(true);
-                    }, 1000);
-                    
-                  } else {
-                    throw new Error(result.message);
-                  }
-                  
-                } catch (error) {
-                  toast(`❌ Errore pulizia database: ${error}`, { icon: '❌' });
-                }
-              }}
-              className="btn btn-error"
-            >
-              🧹 Pulizia Completa Database
-            </button>
-            
-            <button 
-              onClick={async () => {
-                if (!user) {
-                  toast('❌ Utente non autenticato', { icon: '❌' });
-                  return;
-                }
-                
-                try {
-                  toast('🧪 Test servizio eliminazione robusta...', { icon: '⏳' });
-                  
-                  const response = await fetch('/api/test-robust-deletion', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'status' })
-                  });
-                  
-                  const result = await response.json();
-                  
-                  if (result.success) {
-                    toast(`✅ Servizio attivo: ${result.status.name} v${result.status.version}`, { icon: '✅' });
-                    console.log('🧪 Test servizio eliminazione robusta:', result);
-                  } else {
-                    throw new Error(result.error);
-                  }
-                  
-                } catch (error) {
-                  toast(`❌ Test servizio fallito: ${error}`, { icon: '❌' });
-                  console.error('❌ Test servizio eliminazione robusta fallito:', error);
-                }
-              }}
-              className="btn btn-warning"
-            >
-              🧪 Test Servizio Eliminazione
-            </button>
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+            <Calculator className="w-5 h-5 text-white" />
+          </div>
+          <p className="text-gray-600 text-lg">
+            Valutiamo la fattibilità economica dei progetti immobiliari
+          </p>
+        </div>
+        <div className="mt-4">
+          <Link
+            href="/dashboard/feasibility-analysis/new"
+            className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 flex items-center space-x-2 inline-flex"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Nuovo Progetto</span>
+          </Link>
           </div>
         </div>
 
-        {/* Statistiche */}
-        {statistics && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="stat bg-white shadow-sm rounded-lg p-6">
-              <div className="stat-figure text-primary">
-                <BuildingIcon className="h-6 w-6" />
+      {/* Main Content */}
+      <div className="p-8">
+        <div className="space-y-8">
+          {/* KPI Cards - Apple Style */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Progetti Totali</p>
+                  <p className="text-2xl font-bold text-gray-900">{statistics?.totalProjects || 0}</p>
+        </div>
+                <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
+                  <Building className="w-6 h-6 text-blue-600" />
               </div>
-              <div className="stat-title text-gray-500">{t('stats.totalProjects', 'feasibility')}</div>
-              <div className="stat-value text-2xl">{statistics.totalProjects}</div>
-            </div>
-            
-            <div className="stat bg-white shadow-sm rounded-lg p-6">
-              <div className="stat-figure text-success">
-                <TrendingUpIcon className="h-6 w-6" />
               </div>
-              <div className="stat-title text-gray-500">{t('stats.averageMargin', 'feasibility')}</div>
-              <div className="stat-value text-2xl">{formatPercentage(statistics.averageMargin)}</div>
             </div>
-            
-            <div className="stat bg-white shadow-sm rounded-lg p-6">
-              <div className="stat-figure text-info">
-                <EuroIcon className="h-6 w-6" />
-              </div>
-              <div className="stat-title text-gray-500">{t('stats.totalInvestment', 'feasibility')}</div>
-              <div className="stat-value text-2xl">{formatCurrency(statistics.totalInvestment)}</div>
-            </div>
-            
-            <div className="stat bg-white shadow-sm rounded-lg p-6">
-              <div className="stat-figure text-warning">
-                <CheckCircleIcon className="h-6 w-6" />
-              </div>
-              <div className="stat-title text-gray-500">{t('stats.onTarget', 'feasibility')}</div>
-              <div className="stat-value text-2xl">{statistics.projectsOnTarget}/{statistics.totalProjects}</div>
-            </div>
-          </div>
-        )}
 
-        {/* Classifica Progetti */}
-        <div className="bg-white shadow-sm rounded-lg p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-              <TrophyIcon className="h-5 w-5 mr-2 text-yellow-600" />
-              {t('rankingTitle', 'feasibility')}
-            </h2>
-            <span className="text-sm text-gray-500">{t('stats.fromMostProfitable', 'feasibility')}</span>
-          </div>
-          
-          {ranking.length === 0 ? (
-            <div className="text-center py-12">
-              <CalculatorIcon className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-700 mb-2">{t('emptyRankingTitle', 'feasibility')}</h3>
-              <p className="text-gray-500 mb-4">{t('emptyRankingSubtitle', 'feasibility')}</p>
-              <div className="flex justify-center">
-                <Link href="/dashboard/feasibility-analysis/new">
-                  <button className="btn btn-primary">
-                    <PlusIcon className="h-4 w-4 mr-2" />
-                    {t('createFirstProject', 'feasibility')}
-                  </button>
-                </Link>
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Investimento Totale</p>
+                  <p className="text-2xl font-bold text-gray-900">{fmtCurrency(statistics?.totalInvestment || 0)}</p>
+              </div>
+                <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
+                  <Euro className="w-6 h-6 text-green-600" />
+              </div>
               </div>
             </div>
-          ) : (
-            <div className="space-y-4">
-              {ranking.slice(0, 5).map((project, index) => (
-                <div key={project.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center justify-center w-8 h-8 bg-yellow-100 text-yellow-800 rounded-full font-bold">
-                      {index + 1}
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-gray-900">{project.name}</h3>
-                      <p className="text-sm text-gray-600 flex items-center">
-                        <LocationIcon className="h-3 w-3 mr-1" />
-                        {project.address}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-6">
-                    <div className="text-right">
-                      <div className={`font-bold text-lg ${getMarginColor(project.results.margin, project.targetMargin)}`}>
-                        {formatPercentage(project.results.margin)}
-                      </div>
-                      <div className="text-xs text-gray-500">Marginalità</div>
-                    </div>
-                    
-                    <div className="text-right">
-                      <div className="font-medium text-gray-900">
-                        {formatCurrency(project.costs.land.purchasePrice)}
-                      </div>
-                      <div className="text-xs text-gray-500">Costo Terreno</div>
-                    </div>
-                    
-                    <div className="text-right">
-                      <div className="font-medium text-gray-900">
-                        {formatCurrency(project.results.profit)}
-                      </div>
-                      <div className="text-xs text-gray-500">Utile</div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <span className={`badge ${getStatusColor(project.status)}`}>
-                        {project.status}
-                      </span>
-                      <div className="dropdown dropdown-end">
-                        <button className="btn btn-ghost btn-sm">
-                          <EditIcon className="h-4 w-4" />
-                        </button>
-                        <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-                          <li>
-                            <Link href={`/dashboard/feasibility-analysis/${project.id}`}>
-                              <EyeIcon className="h-4 w-4" />
-                              Visualizza
-                            </Link>
-                          </li>
-                          <li>
-                            <Link href={`/dashboard/feasibility-analysis/${project.id}/edit`}>
-                              <EditIcon className="h-4 w-4" />
-                              Modifica
-                            </Link>
-                          </li>
-                          <li>
-                            <button 
-                              onClick={() => handleDeleteProject(project.id!)}
-                              disabled={deletionInProgress.has(project.id!)}
-                              className={deletionInProgress.has(project.id!) ? 'opacity-50 cursor-not-allowed' : ''}
-                            >
-                              <TrashIcon className="h-4 w-4" />
-                              {deletionInProgress.has(project.id!) ? 'Eliminazione...' : 'Elimina'}
-                            </button>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Rendimento Medio</p>
+                  <p className="text-2xl font-bold text-gray-900">{statistics?.averageReturn || 0}%</p>
+              </div>
+                <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-purple-600" />
+              </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">ROI Medio</p>
+                  <p className="text-2xl font-bold text-gray-900">{statistics?.averageROI || 0}%</p>
                 </div>
-              ))}
+                <div className="w-12 h-12 bg-yellow-50 rounded-xl flex items-center justify-center">
+                  <Trophy className="w-6 h-6 text-yellow-600" />
+              </div>
+              </div>
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* Lista Completa Progetti */}
-        <div className="bg-white shadow-sm rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">📋 {t('allProjects', 'feasibility')}</h2>
-          
-          {projects.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-500">{t('noProjects', 'feasibility')}</p>
+          {/* Projects List */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+            <div className="p-6 border-b border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900">Progetti di Fattibilità</h2>
+                  <p className="text-sm text-gray-600 mt-1">Gestisci e monitora i tuoi progetti di analisi</p>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="relative">
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Cerca progetti..."
+                      className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+          </div>
+              </div>
             </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="table table-zebra w-full">
-                <thead>
-                  <tr>
-                    <th>{t('table.project', 'feasibility')}</th>
-                    <th>{t('table.location', 'feasibility')}</th>
-                    <th>{t('table.status', 'feasibility')}</th>
-                    <th>{t('table.landCost', 'feasibility')}</th>
-                    <th>{t('table.margin', 'feasibility')}</th>
-                    <th>{t('table.target', 'feasibility')}</th>
-                    <th>{t('table.profit', 'feasibility')}</th>
-                    <th>{t('table.actions', 'feasibility')}</th>
-                  </tr>
-                </thead>
-                <tbody>
+
+            <div className="p-6">
+              {projects.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <FileText className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Nessun progetto trovato</h3>
+                  <p className="text-gray-600 mb-6">Inizia creando il tuo primo progetto di fattibilità per valutare la redditività dei tuoi investimenti.</p>
+                  <Link
+                    href="/dashboard/feasibility-analysis/new"
+                    className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    Crea Nuovo Progetto
+                            </Link>
+                </div>
+              ) : (
+                <div className="space-y-4">
                   {projects.map((project) => (
-                    <tr key={project.id}>
-                      <td>
+                    <div key={project.id} className="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all duration-200">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <h3 className="text-lg font-semibold text-gray-900">{project.name}</h3>
+                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(project.status)}`}>
+                              {getStatusLabel(project.status)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-3 flex items-center">
+                            <MapPin className="w-4 h-4 mr-1" />
+                            {project.address}
+                          </p>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                            <div>
+                              <p className="text-gray-500">Investimento</p>
+                              <p className="font-semibold text-gray-900">{fmtCurrency(project.costs?.land?.subtotal || 0)}</p>
+            </div>
+                            <div>
+                              <p className="text-gray-500">Rendimento</p>
+                              <p className="font-semibold text-gray-900">{project.results?.margin || 0}%</p>
+        </div>
+                            <div>
+                              <p className="text-gray-500">ROI</p>
+                              <p className="font-semibold text-gray-900">{project.results?.roi || 0}%</p>
+            </div>
                         <div>
-                          <div className="font-medium">{project.name}</div>
-                          <div className="text-sm text-gray-500">
-                            {project?.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'N/A'}
+                              <p className="text-gray-500">Payback</p>
+                              <p className="font-semibold text-gray-900">{project.results?.paybackPeriod || 0} anni</p>
+                            </div>
                           </div>
                         </div>
-                      </td>
-                      <td>{project?.address || 'N/A'}</td>
-                      <td>
-                        <span className={`badge ${getStatusColor(project?.status || 'PIANIFICAZIONE')}`}>
-                          {project?.status || 'PIANIFICAZIONE'}
-                        </span>
-                      </td>
-                      <td>{formatCurrency(project?.costs?.land?.purchasePrice || 0)}</td>
-                      <td>
-                        <span className={`font-bold ${getMarginColor(project?.results?.margin || 0, project?.targetMargin || 0)}`}>
-                          {formatPercentage(project?.results?.margin || 0)}
-                        </span>
-                      </td>
-                      <td>
-                        <span className="text-sm text-gray-500">
-                          {formatPercentage(project?.targetMargin || 0)}
-                        </span>
-                      </td>
-                      <td>{formatCurrency(project?.results?.profit || 0)}</td>
-                      <td>
                         <div className="flex items-center space-x-2">
-                          <Link href={`/dashboard/feasibility-analysis/${project?.id || 'unknown'}`}>
-                            <button className="btn btn-ghost btn-sm">
-                              <EyeIcon className="h-4 w-4" />
-                            </button>
-                          </Link>
-                          <Link href={`/dashboard/feasibility-analysis/${project?.id || 'unknown'}/edit`}>
-                            <button className="btn btn-ghost btn-sm">
-                              <EditIcon className="h-4 w-4" />
-                            </button>
-                          </Link>
-                          <button 
-                            onClick={() => project?.id && handleDeleteProject(project.id)}
-                            disabled={project?.id ? deletionInProgress.has(project.id) : false}
-                            className={`btn btn-ghost btn-sm ${project?.id && deletionInProgress.has(project.id) ? 'text-gray-400 cursor-not-allowed' : 'text-red-600'}`}
+                          <Link
+                            href={`/dashboard/feasibility-analysis/${project.id}`}
+                            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                           >
-                            <TrashIcon className="h-4 w-4" />
-                            {project?.id && deletionInProgress.has(project.id) ? '⏳' : ''}
+                            <Eye className="w-4 h-4" />
+                          </Link>
+                          <Link
+                            href={`/dashboard/feasibility-analysis/${project.id}/edit`}
+                            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Link>
+                          <button
+                            onClick={() => openShareModal(project)}
+                            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                          >
+                            <Share2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteProject(project.id!)}
+                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
-                      </td>
-                    </tr>
+                      </div>
+                    </div>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        {/* Modal Confronto */}
-        {showComparison && (
-          <div className="modal modal-open">
-            <div className="modal-box">
-              <h3 className="font-bold text-lg mb-4">🔍 {t('compareProjects', 'feasibility.modal')}</h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="label">
-                    <span className="label-text">{t('firstProject', 'feasibility.modal')}</span>
-                  </label>
-                  <select 
-                    className="select select-bordered w-full"
-                    value={project1Id}
-                    onChange={(e) => setProject1Id(e.target.value)}
-                  >
-                    <option value="">{t('selectProject', 'feasibility.modal')}</option>
-                    {projects.map((project) => (
-                      <option key={project.id} value={project.id}>
-                        {project.name} ({formatPercentage(project.results.margin)})
-                      </option>
-                    ))}
-                  </select>
                 </div>
-                
-                <div>
-                  <label className="label">
-                    <span className="label-text">{t('secondProject', 'feasibility.modal')}</span>
-                  </label>
-                  <select 
-                    className="select select-bordered w-full"
-                    value={project2Id}
-                    onChange={(e) => setProject2Id(e.target.value)}
-                  >
-                    <option value="">{t('selectProject', 'feasibility.modal')}</option>
-                    {projects.map((project) => (
-                      <option key={project.id} value={project.id}>
-                        {project.name} ({formatPercentage(project.results.margin)})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              
-              <div className="modal-action">
-                <button 
-                  className="btn"
-                  onClick={() => setShowComparison(false)}
-                >
-                  {t('cancel', 'common')}
-                </button>
-                <button 
-                  className="btn btn-primary"
-                  onClick={handleCompareProjects}
-                  disabled={!project1Id || !project2Id}
-                >
-                  {t('compare', 'feasibility')}
-                </button>
-              </div>
+              )}
             </div>
           </div>
-        )}
+        </div>
 
+        {/* Feedback Widget */}
+        <FeedbackWidget className="" />
         
+        {/* Modal Condivisione Progetto */}
+        {selectedProjectForShare && (
+          <ShareProjectModal
+            isOpen={showShareModal}
+            onClose={() => {
+              setShowShareModal(false);
+              setSelectedProjectForShare(null);
+            }}
+            projectId={selectedProjectForShare.id!}
+            projectType="feasibility"
+            projectName={selectedProjectForShare.name}
+            workspaces={workspaces}
+            onShare={handleShareProject}
+          />
+        )}
       </div>
     </DashboardLayout>
   );
-} 
+}

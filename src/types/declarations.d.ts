@@ -81,6 +81,7 @@ declare module '@/components/layout/DashboardLayout' {
   import { ReactNode } from 'react';
   interface DashboardLayoutProps {
     children: ReactNode;
+    title?: string;
   }
   export default function DashboardLayout(props: DashboardLayoutProps): JSX.Element;
 }
@@ -98,7 +99,7 @@ declare module '@/components/icons' {
   interface IconProps {
     className?: string;
   }
-  
+
   export function DashboardIcon(props?: IconProps): JSX.Element;
   export function ProjectsIcon(props?: IconProps): JSX.Element;
   export function SettingsIcon(props?: IconProps): JSX.Element;
@@ -140,6 +141,53 @@ declare module '@/components/icons' {
   export function GlobeIcon(props?: IconProps): JSX.Element;
   export function ChevronDownIcon(props?: IconProps): JSX.Element;
   export function TargetIcon(props?: IconProps): JSX.Element;
+  export function HeartIcon(props?: IconProps): JSX.Element;
+  export function MapPinIcon(props?: IconProps): JSX.Element;
+  export function RulerIcon(props?: IconProps): JSX.Element;
+  export function ShareIcon(props?: IconProps): JSX.Element;
+  export function DownloadIcon(props?: IconProps): JSX.Element;
+  export function AlertIcon(props?: IconProps): JSX.Element;
+  export function InfoIcon(props?: IconProps): JSX.Element;
+  export function BrainIcon(props?: IconProps): JSX.Element;
+  export function ZapIcon(props?: IconProps): JSX.Element;
+  export function LightbulbIcon(props?: IconProps): JSX.Element;
+  export function SparklesIcon(props?: IconProps): JSX.Element;
+  export function LanguageIcon(props?: IconProps): JSX.Element;
+  export function CogIcon(props?: IconProps): JSX.Element;
+  export function ChartIcon(props?: IconProps): JSX.Element;
+  export function CodeIcon(props?: IconProps): JSX.Element;
+  export function KeyIcon(props?: IconProps): JSX.Element;
+  export function CloudIcon(props?: IconProps): JSX.Element;
+  export function SecurityIcon(props?: IconProps): JSX.Element;
+  export function CalendarDaysIcon(props?: IconProps): JSX.Element;
+  export function XCircleIcon(props?: IconProps): JSX.Element;
+  export function UnlockIcon(props?: IconProps): JSX.Element;
+  export function PauseIcon(props?: IconProps): JSX.Element;
+  export function MessageCircleIcon(props?: IconProps): JSX.Element;
+  export function SortAscIcon(props?: IconProps): JSX.Element;
+  export function SortDescIcon(props?: IconProps): JSX.Element;
+  export function ThumbsUpIcon(props?: IconProps): JSX.Element;
+  export function ThumbsDownIcon(props?: IconProps): JSX.Element;
+  export function ReplyIcon(props?: IconProps): JSX.Element;
+  export function FlagIcon(props?: IconProps): JSX.Element;
+  export function BellIcon(props?: IconProps): JSX.Element;
+  export function UserIcon(props?: IconProps): JSX.Element;
+  export function ProjectIcon(props?: IconProps): JSX.Element;
+  export function RocketIcon(props?: IconProps): JSX.Element;
+  export function XIcon(props?: IconProps): JSX.Element;
+  export function UploadIcon(props?: IconProps): JSX.Element;
+  export function ShieldIcon(props?: IconProps): JSX.Element;
+  export function FolderIcon(props?: IconProps): JSX.Element;
+  export function VideoIcon(props?: IconProps): JSX.Element;
+  export function CheckIcon(props?: IconProps): JSX.Element;
+  export function RefreshIcon(props?: IconProps): JSX.Element;
+  export function ChevronUpIcon(props?: IconProps): JSX.Element;
+  export function ChevronDownIcon(props?: IconProps): JSX.Element;
+  export function TagIcon(props?: IconProps): JSX.Element;
+  export function CrownIcon(props?: IconProps): JSX.Element;
+  export function PlayIcon(props?: IconProps): JSX.Element;
+  export function StopIcon(props?: IconProps): JSX.Element;
+  export function LockIcon(props?: IconProps): JSX.Element;
 }
 
 // Dichiarazioni per servizi
@@ -159,7 +207,7 @@ declare module '@/lib/firebase' {
 
 declare module '@/contexts/AuthContext' {
   export function useAuth(): {
-    user: any;
+    currentUser: any;
     login: (email: string, password: string) => Promise<void>;
     signup: (email: string, password: string, userData: any) => Promise<void>;
     logout: () => Promise<void>;
@@ -173,6 +221,15 @@ declare module '@/contexts/AuthContext' {
 declare module 'react-hot-toast' {
   export function toast(message: string, options?: any): void;
   export function Toaster(props?: any): JSX.Element;
+  
+  // Extend toast with success, error, etc.
+  export const toast: {
+    (message: string, options?: any): void;
+    success: (message: string, options?: any) => void;
+    error: (message: string, options?: any) => void;
+    loading: (message: string, options?: any) => void;
+    dismiss: (toastId?: string) => void;
+  };
 }
 
 // Dichiarazioni per chart.js
@@ -212,4 +269,4 @@ declare module 'clsx' {
 
 declare module 'tailwind-merge' {
   export function twMerge(...inputs: any[]): string;
-} 
+}

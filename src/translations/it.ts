@@ -31,7 +31,7 @@ export const it = {
     user: 'Utente',
     lastUpdate: 'Ultimo aggiornamento',
     selectLanguage: 'Seleziona la lingua',
-    languageSettings: 'Impostazioni lingua'
+    languageSettings: 'Impostazioni lingua',
   },
   navigation: {
     dashboard: 'Dashboard',
@@ -57,7 +57,7 @@ export const it = {
     permits: 'Permessi',
     clients: 'Clienti',
     notifications: 'Notifiche',
-    settings: 'Impostazioni'
+    settings: 'Impostazioni',
   },
   navigationSections: {
     dashboard: 'Dashboard',
@@ -68,7 +68,7 @@ export const it = {
     marketing: 'Marketing e Vendite',
     epc: 'Costruzione (EPC)',
     businessPlan: 'Business Plan',
-    other: 'Altro'
+    other: 'Altro',
   },
   dashboard: {
     title: 'Dashboard',
@@ -93,7 +93,7 @@ export const it = {
     onHold: 'In Attesa',
     completed: 'Completato',
     errorLoadingStats: 'Errore nel caricamento delle statistiche',
-    loadingStats: 'Caricamento statistiche...'
+    loadingStats: 'Caricamento statistiche...',
   },
   feasibility: {
     title: 'Analisi di Fattibilità',
@@ -106,7 +106,7 @@ export const it = {
       averageMargin: 'Marginalità Media',
       totalInvestment: 'Investimento Totale',
       onTarget: 'Su Target',
-      fromMostProfitable: 'Dal più profittevole'
+      fromMostProfitable: 'Dal più profittevole',
     },
     emptyRankingTitle: 'Nessun progetto di fattibilità',
     emptyRankingSubtitle: 'Crea il tuo primo progetto di fattibilità per iniziare',
@@ -124,13 +124,13 @@ export const it = {
       actions: 'Azioni',
       view: 'Visualizza',
       edit: 'Modifica',
-      delete: 'Elimina'
+      delete: 'Elimina',
     },
     modal: {
       compareProjects: 'Confronta Progetti',
       firstProject: 'Primo Progetto',
       secondProject: 'Secondo Progetto',
-      selectProject: 'Seleziona progetto...'
+      selectProject: 'Seleziona progetto...',
     },
     toasts: {
       loadError: 'Errore nel caricamento dei dati',
@@ -138,9 +138,9 @@ export const it = {
       deleteError: "Errore nell'eliminazione del progetto",
       selectTwo: 'Seleziona due progetti da confrontare',
       compareCreated: 'Confronto creato con successo',
-      compareError: 'Errore nella creazione del confronto'
+      compareError: 'Errore nella creazione del confronto',
     },
-    confirmDelete: 'Sei sicuro di voler eliminare questo progetto?'
+    confirmDelete: 'Sei sicuro di voler eliminare questo progetto?',
   },
   landScraping: {
     title: 'AI Land Scraping',
@@ -162,11 +162,11 @@ export const it = {
     analysis: 'Analisi',
     favorites: 'Preferiti',
     scheduledSearches: 'Ricerche Programmate',
-    searchHistory: 'Ricerche Recenti'
+    searchHistory: 'Ricerche Recenti',
   },
   marketIntelligence: {
     title: 'Market Intelligence',
-    subtitle: 'Opportunità di mercato scoperte dall\'AI',
+    subtitle: "Opportunità di mercato scoperte dall'AI",
     totalOpportunities: 'Opportunità Totali',
     averageValue: 'Valore Medio',
     coveredZones: 'Zone Coperte',
@@ -179,7 +179,7 @@ export const it = {
     newAISearch: 'Nuova Ricerca AI',
     noOpportunitiesFound: 'Nessuna opportunità trovata',
     startNewSearch: 'Inizia una nuova ricerca AI per scoprire opportunità di mercato',
-    startFirstSearch: 'Avvia Prima Ricerca'
+    startFirstSearch: 'Avvia Prima Ricerca',
   },
   aiLandScraping: {
     title: 'AI Land Scraping',
@@ -214,7 +214,7 @@ export const it = {
     resultsCount: 'risultati',
     online: 'Online',
     scraping: 'Scraping',
-    ai: 'AI'
+    ai: 'AI',
   },
   newProject: {
     title: 'Nuovo Progetto',
@@ -236,25 +236,25 @@ export const it = {
       datePlaceholder: 'gg/mm/aaaa',
       validation: {
         requiredFields: 'Compila tutti i campi obbligatori',
-        saveError: 'Si è verificato un errore durante il salvataggio del progetto'
-      }
+        saveError: 'Si è verificato un errore durante il salvataggio del progetto',
+      },
     },
     statuses: {
       planning: 'Pianificazione',
       inProgress: 'In Corso',
       onHold: 'In Attesa',
-      completed: 'Completato'
+      completed: 'Completato',
     },
     types: {
       residential: 'Residenziale',
       commercial: 'Commerciale',
       mixed: 'Misto',
-      industrial: 'Industriale'
+      industrial: 'Industriale',
     },
     buttons: {
       cancel: 'Annulla',
-      saveProject: 'Salva Progetto'
-    }
+      saveProject: 'Salva Progetto',
+    },
   },
   permitsCompliance: {
     title: 'Sistema Permessi Intelligente',
@@ -263,7 +263,7 @@ export const it = {
       overview: 'Overview',
       permits: 'Permessi',
       timeline: 'Timeline',
-      alerts: 'Alert'
+      alerts: 'Alert',
     },
     stats: {
       totalPermits: 'Totale Permessi',
@@ -271,19 +271,19 @@ export const it = {
       inProgress: 'In Corso',
       critical: 'Critici',
       totalCost: 'Costo Totale',
-      averageProgress: 'Progresso Medio'
+      averageProgress: 'Progresso Medio',
     },
     quickActions: {
       newPermit: 'Nuovo Permesso',
       generateReport: 'Genera Report Compliance',
       scheduleInspection: 'Programma Sopralluogo',
-      updateTimeline: 'Aggiorna Timeline Progetto'
+      updateTimeline: 'Aggiorna Timeline Progetto',
     },
     categories: {
       urban: 'URBANISTICO',
       environmental: 'AMBIENTALE',
       safety: 'SICUREZZA',
-      energy: 'ENERGETICO'
+      energy: 'ENERGETICO',
     },
     criticalAlerts: {
       title: 'Alert Critici',
@@ -291,8 +291,8 @@ export const it = {
       buildingPermitMessage: 'Presentare richiesta proroga entro 10 giorni',
       viaDelay: 'Ritardo VIA',
       viaMessage: 'Accelerare raccolta documentazione mancante',
-      seeAllAlerts: 'Vedi tutti gli alert →'
-    }
+      seeAllAlerts: 'Vedi tutti gli alert →',
+    },
   },
   projectTimeline: {
     title: 'Project Timeline AI',
@@ -306,14 +306,14 @@ export const it = {
       ganttChart: 'Gantt Chart',
       kanbanBoard: 'Kanban Board',
       milestoneTimeline: 'Milestone Timeline',
-      resources: 'Risorse'
+      resources: 'Risorse',
     },
     filters: {
       all: 'Tutte',
       design: 'PROGETTAZIONE',
       permits: 'PERMESSI',
       construction: 'COSTRUZIONE',
-      marketing: 'MARKETING'
+      marketing: 'MARKETING',
     },
     months: {
       jan: 'gen',
@@ -327,13 +327,13 @@ export const it = {
       sep: 'set',
       oct: 'ott',
       nov: 'nov',
-      dec: 'dic'
+      dec: 'dic',
     },
     timelineViews: {
       threeMonths: '3M',
       sixMonths: '6M',
-      oneYear: '1Y'
-    }
+      oneYear: '1Y',
+    },
   },
   notifications: {
     title: 'Notifiche',
@@ -354,19 +354,19 @@ export const it = {
       permit: 'Permesso',
       task: 'Task',
       system: 'Sistema',
-      marketing: 'Marketing'
+      marketing: 'Marketing',
     },
     priorities: {
       low: 'Bassa',
       medium: 'Media',
       high: 'Alta',
-      critical: 'Critica'
+      critical: 'Critica',
     },
     actions: {
       view: 'Visualizza',
       dismiss: 'Ignora',
-      snooze: 'Rimanda'
-    }
+      snooze: 'Rimanda',
+    },
   },
   userProfile: {
     title: 'Profilo Utente',
@@ -379,7 +379,7 @@ export const it = {
     changeAvatar: 'Cambia Immagine',
     removeAvatar: 'Rimuovi Immagine',
     uploadImage: 'Carica Immagine',
-    dragAndDrop: 'Trascina un\'immagine qui o clicca per selezionare',
+    dragAndDrop: "Trascina un'immagine qui o clicca per selezionare",
     supportedFormats: 'Formati supportati: JPG, PNG, GIF (max 5MB)',
     firstName: 'Nome',
     lastName: 'Cognome',
@@ -405,7 +405,7 @@ export const it = {
     enable2FA: 'Abilita 2FA',
     disable2FA: 'Disabilita 2FA',
     backupCodes: 'Codici di Backup',
-    generateBackupCodes: 'Genera Nuovi Codici'
+    generateBackupCodes: 'Genera Nuovi Codici',
   },
   projects: {
     title: 'Progetti',
@@ -423,7 +423,7 @@ export const it = {
     progress: 'Progresso',
     budget: 'Budget',
     units: 'unità',
-    details: 'Dettagli'
+    details: 'Dettagli',
   },
   settings: {
     title: 'Impostazioni',
@@ -433,22 +433,22 @@ export const it = {
       subtitle: 'Gestisci dati personali e preferenze',
       personalData: 'Dati personali',
       languagePreferences: 'Preferenze lingua',
-      timezone: 'Fuso orario'
+      timezone: 'Fuso orario',
     },
     security: {
       title: 'Sicurezza',
       subtitle: 'Configura sicurezza e privacy',
       password: 'Password',
       twoFactorAuth: 'Autenticazione 2FA',
-      privacy: 'Privacy'
+      privacy: 'Privacy',
     },
     system: {
       title: 'Sistema',
       subtitle: 'Configurazione sistema e API',
       apiKeys: 'API Keys',
       integrations: 'Integrazioni',
-      backup: 'Backup'
-    }
+      backup: 'Backup',
+    },
   },
   // ========================================
   // NOTIFICHE PUSH
@@ -469,21 +469,22 @@ export const it = {
     sendTest: 'Invia Notifica di Test',
     testSent: 'Notifica di test inviata con successo!',
     testFailed: 'Impossibile inviare la notifica di test',
-    testError: 'Errore durante l\'invio della notifica di test',
+    testError: "Errore durante l'invio della notifica di test",
     notSupported: 'Notifiche Push Non Supportate',
     browserNotSupported: 'Il tuo browser non supporta le notifiche push',
     permissionDenied: 'Permesso Negato',
-    permissionDeniedDescription: 'Hai negato i permessi per le notifiche. Per abilitarle, vai nelle impostazioni del browser.',
+    permissionDeniedDescription:
+      'Hai negato i permessi per le notifiche. Per abilitarle, vai nelle impostazioni del browser.',
     retryPermission: 'Riprova a richiedere i permessi',
     permissionStatus: 'Stato Permessi',
     permission: {
       granted: 'Concesso',
       denied: 'Negato',
-      default: 'Non richiesto'
+      default: 'Non richiesto',
     },
     status: {
       subscribed: 'Abilitato',
-      notSubscribed: 'Non Abilitato'
+      notSubscribed: 'Non Abilitato',
     },
     advancedSettings: 'Impostazioni Avanzate',
     updateServiceWorker: 'Aggiorna Service Worker',
@@ -494,12 +495,13 @@ export const it = {
     cacheClearFailed: 'Impossibile pulire la cache',
     serviceWorkerStatus: 'Stato Service Worker',
     serviceWorker: {
-      active: 'Attivo'
+      active: 'Attivo',
     },
     help: {
       title: 'Come funzionano le notifiche push?',
-      description: 'Le notifiche push ti permettono di ricevere aggiornamenti in tempo reale anche quando l\'app è chiusa. Vengono gestite dal Service Worker del browser.'
-    }
+      description:
+        "Le notifiche push ti permettono di ricevere aggiornamenti in tempo reale anche quando l'app è chiusa. Vengono gestite dal Service Worker del browser.",
+    },
   },
 
   // ========================================
@@ -513,9 +515,9 @@ export const it = {
     realTimeSync: 'Sincronizzazione in Tempo Reale',
     realTimeSyncDescription: 'I tuoi dati si sincronizzano automaticamente',
     backgroundSync: 'Sincronizzazione in Background',
-    backgroundSyncDescription: 'Sincronizza i dati anche quando l\'app è chiusa',
+    backgroundSyncDescription: "Sincronizza i dati anche quando l'app è chiusa",
     pushNotifications: 'Notifiche Push',
-    pushNotificationsDescription: 'Ricevi notifiche anche quando l\'app è chiusa',
+    pushNotificationsDescription: "Ricevi notifiche anche quando l'app è chiusa",
     serviceWorker: 'Service Worker',
     serviceWorkerDescription: 'Gestisce la cache e le funzionalità offline',
     progressiveWebApp: 'App Progressiva Web',
@@ -530,17 +532,17 @@ export const it = {
     updateCompleted: 'Aggiornamento completato!',
     updateFailed: 'Aggiornamento fallito',
     cacheManagement: 'Gestione Cache',
-    cacheManagementDescription: 'Gestisci la cache dell\'applicazione',
+    cacheManagementDescription: "Gestisci la cache dell'applicazione",
     clearAllCache: 'Pulisci Tutta la Cache',
     clearCacheConfirm: 'Sei sicuro di voler pulire tutta la cache?',
     cacheCleared: 'Cache pulita con successo!',
     storageUsage: 'Utilizzo Spazio',
-    storageUsageDescription: 'Monitora l\'utilizzo dello spazio di archiviazione',
+    storageUsageDescription: "Monitora l'utilizzo dello spazio di archiviazione",
     storageUsed: 'Spazio utilizzato',
     storageAvailable: 'Spazio disponibile',
     storageTotal: 'Spazio totale',
     performance: 'Prestazioni',
-    performanceDescription: 'Monitora le prestazioni dell\'applicazione',
+    performanceDescription: "Monitora le prestazioni dell'applicazione",
     loadTime: 'Tempo di caricamento',
     memoryUsage: 'Utilizzo memoria',
     networkStatus: 'Stato rete',
@@ -566,8 +568,8 @@ export const it = {
       threeHours: '3 ore',
       sixHours: '6 ore',
       twelveHours: '12 ore',
-      daily: 'Giornaliera'
-    }
+      daily: 'Giornaliera',
+    },
   },
 
   // ========================================
@@ -585,17 +587,20 @@ export const it = {
     twoFactorSetup: 'Configurazione 2FA',
     twoFactorSetupDescription: 'Scansiona il codice QR con la tua app di autenticazione',
     backupCodes: 'Codici di Backup',
-    backupCodesDescription: 'Salva questi codici in un posto sicuro per accedere al tuo account se perdi il dispositivo',
+    backupCodesDescription:
+      'Salva questi codici in un posto sicuro per accedere al tuo account se perdi il dispositivo',
     generateBackupCodes: 'Genera Nuovi Codici',
     regenerateBackupCodes: 'Rigenera Codici di Backup',
-    backupCodesWarning: 'Attenzione: Rigenerare i codici di backup invaliderà tutti i codici precedenti',
+    backupCodesWarning:
+      'Attenzione: Rigenerare i codici di backup invaliderà tutti i codici precedenti',
     passwordChange: 'Cambio Password',
     passwordChangeDescription: 'Cambia la password del tuo account',
     currentPassword: 'Password Attuale',
     newPassword: 'Nuova Password',
     confirmNewPassword: 'Conferma Nuova Password',
     passwordRequirements: 'Requisiti Password',
-    passwordRequirementsDescription: 'La password deve contenere almeno 8 caratteri, una lettera maiuscola, una minuscola, un numero e un carattere speciale',
+    passwordRequirementsDescription:
+      'La password deve contenere almeno 8 caratteri, una lettera maiuscola, una minuscola, un numero e un carattere speciale',
     passwordChanged: 'Password cambiata con successo!',
     passwordChangeFailed: 'Impossibile cambiare la password',
     passwordMismatch: 'Le password non coincidono',
@@ -634,11 +639,11 @@ export const it = {
     dataCollection: 'Raccolta Dati',
     dataCollectionDescription: 'Controlla quali dati vengono raccolti e utilizzati',
     analytics: 'Analytics',
-    analyticsDescription: 'Consenti l\'utilizzo di analytics per migliorare l\'esperienza',
+    analyticsDescription: "Consenti l'utilizzo di analytics per migliorare l'esperienza",
     marketing: 'Marketing',
-    marketingDescription: 'Consenti l\'invio di comunicazioni marketing',
+    marketingDescription: "Consenti l'invio di comunicazioni marketing",
     thirdParty: 'Servizi di Terze Parti',
-    thirdPartyDescription: 'Consenti l\'utilizzo di servizi di terze parti',
+    thirdPartyDescription: "Consenti l'utilizzo di servizi di terze parti",
     dataExport: 'Esportazione Dati',
     dataExportDescription: 'Esporta tutti i tuoi dati personali',
     exportData: 'Esporta Dati',
@@ -650,10 +655,12 @@ export const it = {
     dataDeletionDescription: 'Elimina permanentemente tutti i tuoi dati',
     deleteAccount: 'Elimina Account',
     deleteAccountDescription: 'Elimina permanentemente il tuo account e tutti i dati associati',
-    deleteAccountWarning: 'Attenzione: Questa azione è irreversibile e eliminerà permanentemente tutti i tuoi dati',
-    deleteAccountConfirm: 'Sei sicuro di voler eliminare il tuo account? Questa azione non può essere annullata.',
+    deleteAccountWarning:
+      'Attenzione: Questa azione è irreversibile e eliminerà permanentemente tutti i tuoi dati',
+    deleteAccountConfirm:
+      'Sei sicuro di voler eliminare il tuo account? Questa azione non può essere annullata.',
     accountDeleted: 'Account eliminato con successo!',
-    accountDeletionFailed: 'Impossibile eliminare l\'account'
+    accountDeletionFailed: "Impossibile eliminare l'account",
   },
 
   // ========================================
@@ -661,7 +668,7 @@ export const it = {
   // ========================================
   advancedSettings: {
     title: 'Impostazioni Avanzate',
-    description: 'Configura le impostazioni avanzate dell\'applicazione',
+    description: "Configura le impostazioni avanzate dell'applicazione",
     developerMode: 'Modalità Sviluppatore',
     developerModeDescription: 'Abilita funzionalità avanzate per sviluppatori',
     enableDeveloperMode: 'Abilita Modalità Sviluppatore',
@@ -673,7 +680,7 @@ export const it = {
     debugModeEnabled: 'Modalità debug abilitata',
     debugModeDisabled: 'Modalità debug disabilitata',
     performanceMode: 'Modalità Prestazioni',
-    performanceModeDescription: 'Ottimizza le prestazioni dell\'applicazione',
+    performanceModeDescription: "Ottimizza le prestazioni dell'applicazione",
     enablePerformanceMode: 'Abilita Modalità Prestazioni',
     performanceModeEnabled: 'Modalità prestazioni abilitata',
     performanceModeDisabled: 'Modalità prestazioni disabilitata',
@@ -690,9 +697,9 @@ export const it = {
     apiSettings: 'Impostazioni API',
     apiSettingsDescription: 'Configura le impostazioni delle API',
     apiEndpoint: 'Endpoint API',
-    apiEndpointDescription: 'L\'endpoint delle API per le richieste',
+    apiEndpointDescription: "L'endpoint delle API per le richieste",
     apiKey: 'Chiave API',
-    apiKeyDescription: 'La tua chiave API per l\'accesso ai servizi',
+    apiKeyDescription: "La tua chiave API per l'accesso ai servizi",
     apiVersion: 'Versione API',
     apiVersionDescription: 'La versione delle API da utilizzare',
     apiTimeout: 'Timeout API',
@@ -700,9 +707,9 @@ export const it = {
     webhookSettings: 'Impostazioni Webhook',
     webhookSettingsDescription: 'Configura i webhook per le notifiche',
     webhookUrl: 'URL Webhook',
-    webhookUrlDescription: 'L\'URL per ricevere le notifiche webhook',
+    webhookUrlDescription: "L'URL per ricevere le notifiche webhook",
     webhookSecret: 'Segreto Webhook',
-    webhookSecretDescription: 'Il segreto per verificare l\'autenticità dei webhook',
+    webhookSecretDescription: "Il segreto per verificare l'autenticità dei webhook",
     webhookEvents: 'Eventi Webhook',
     webhookEventsDescription: 'Seleziona gli eventi per cui ricevere notifiche webhook',
     webhookTest: 'Test Webhook',
@@ -718,7 +725,7 @@ export const it = {
     slackIntegrationEnabled: 'Integrazione Slack abilitata',
     slackIntegrationDisabled: 'Integrazione Slack disabilitata',
     slackWebhookUrl: 'URL Webhook Slack',
-    slackWebhookUrlDescription: 'L\'URL del webhook Slack per le notifiche',
+    slackWebhookUrlDescription: "L'URL del webhook Slack per le notifiche",
     slackChannel: 'Canale Slack',
     slackChannelDescription: 'Il canale Slack per le notifiche',
     teamsIntegration: 'Integrazione Microsoft Teams',
@@ -727,14 +734,14 @@ export const it = {
     teamsIntegrationEnabled: 'Integrazione Teams abilitata',
     teamsIntegrationDisabled: 'Integrazione Teams disabilitata',
     teamsWebhookUrl: 'URL Webhook Teams',
-    teamsWebhookUrlDescription: 'L\'URL del webhook Teams per le notifiche',
+    teamsWebhookUrlDescription: "L'URL del webhook Teams per le notifiche",
     emailIntegration: 'Integrazione Email',
-    emailIntegrationDescription: 'Configura l\'invio di email automatiche',
+    emailIntegrationDescription: "Configura l'invio di email automatiche",
     enableEmailIntegration: 'Abilita Integrazione Email',
     emailIntegrationEnabled: 'Integrazione email abilitata',
     emailIntegrationDisabled: 'Integrazione email disabilitata',
     smtpSettings: 'Impostazioni SMTP',
-    smtpSettingsDescription: 'Configura il server SMTP per l\'invio di email',
+    smtpSettingsDescription: "Configura il server SMTP per l'invio di email",
     smtpHost: 'Host SMTP',
     smtpPort: 'Porta SMTP',
     smtpUsername: 'Username SMTP',
@@ -743,12 +750,12 @@ export const it = {
     smtpSecurityOptions: {
       none: 'Nessuna',
       tls: 'TLS',
-      ssl: 'SSL'
+      ssl: 'SSL',
     },
     testEmail: 'Test Email',
-    testEmailDescription: 'Invia un\'email di test per verificare la configurazione',
+    testEmailDescription: "Invia un'email di test per verificare la configurazione",
     sendTestEmail: 'Invia Email di Test',
     testEmailSent: 'Email di test inviata con successo!',
-    testEmailFailed: 'Impossibile inviare l\'email di test'
-  }
-}; 
+    testEmailFailed: "Impossibile inviare l'email di test",
+  },
+};

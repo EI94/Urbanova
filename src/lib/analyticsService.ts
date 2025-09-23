@@ -1,5 +1,5 @@
 // Service per la gestione delle Advanced Analytics & Reporting
-import { 
+import {
   AnalyticsFilter,
   PerformanceMetrics,
   TeamAnalytics,
@@ -18,7 +18,7 @@ import {
   AnalyticsPeriod,
   AnalyticsMetric,
   ChartType,
-  ReportFormat
+  ReportFormat,
 } from '@/types/analytics';
 import { TeamRole } from '@/types/team';
 
@@ -42,7 +42,7 @@ export class AnalyticsService {
     const executiveDashboard: AnalyticsDashboard = {
       id: 'executive-dashboard-v1',
       name: 'Dashboard Executive',
-      description: 'Vista d\'insieme per decisioni strategiche',
+      description: "Vista d'insieme per decisioni strategiche",
       type: 'executive',
       layout: {
         columns: 4,
@@ -57,10 +57,10 @@ export class AnalyticsService {
               dataSource: 'performance_metrics',
               refreshInterval: 300,
               size: 'medium',
-              position: { x: 0, y: 0, width: 2, height: 1 }
+              position: { x: 0, y: 0, width: 2, height: 1 },
             },
             data: { value: 85, trend: 5, unit: '%' },
-            lastUpdated: new Date()
+            lastUpdated: new Date(),
           },
           {
             id: 'team-productivity',
@@ -72,27 +72,27 @@ export class AnalyticsService {
               dataSource: 'productivity_metrics',
               refreshInterval: 600,
               size: 'large',
-              position: { x: 2, y: 0, width: 2, height: 2 }
+              position: { x: 2, y: 0, width: 2, height: 2 },
             },
             data: {
               labels: ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu'],
-              datasets: [{ data: [75, 78, 82, 79, 85, 88] }]
+              datasets: [{ data: [75, 78, 82, 79, 85, 88] }],
             },
-            lastUpdated: new Date()
-          }
-        ]
+            lastUpdated: new Date(),
+          },
+        ],
       },
       filters: { period: 'month' },
       permissions: {
         canView: ['PROJECT_MANAGER', 'FINANCIAL_ANALYST'],
         canEdit: ['PROJECT_MANAGER'],
         canShare: ['PROJECT_MANAGER'],
-        canExport: ['PROJECT_MANAGER', 'FINANCIAL_ANALYST']
+        canExport: ['PROJECT_MANAGER', 'FINANCIAL_ANALYST'],
       },
       createdAt: new Date(),
       updatedAt: new Date(),
       lastViewed: new Date(),
-      viewCount: 0
+      viewCount: 0,
     };
 
     // Dashboard Team
@@ -114,10 +114,10 @@ export class AnalyticsService {
               dataSource: 'team_analytics',
               refreshInterval: 300,
               size: 'medium',
-              position: { x: 0, y: 0, width: 1, height: 1 }
+              position: { x: 0, y: 0, width: 1, height: 1 },
             },
             data: { value: 82, unit: '%' },
-            lastUpdated: new Date()
+            lastUpdated: new Date(),
           },
           {
             id: 'collaboration-score',
@@ -128,24 +128,24 @@ export class AnalyticsService {
               dataSource: 'collaboration_analytics',
               refreshInterval: 300,
               size: 'small',
-              position: { x: 1, y: 0, width: 1, height: 1 }
+              position: { x: 1, y: 0, width: 1, height: 1 },
             },
             data: { value: 78, max: 100, unit: '%' },
-            lastUpdated: new Date()
-          }
-        ]
+            lastUpdated: new Date(),
+          },
+        ],
       },
       filters: { period: 'week' },
       permissions: {
         canView: ['PROJECT_MANAGER', 'TEAM_MEMBER'],
         canEdit: ['PROJECT_MANAGER'],
         canShare: ['PROJECT_MANAGER'],
-        canExport: ['PROJECT_MANAGER']
+        canExport: ['PROJECT_MANAGER'],
       },
       createdAt: new Date(),
       updatedAt: new Date(),
       lastViewed: new Date(),
-      viewCount: 0
+      viewCount: 0,
     };
 
     this.dashboards.set(executiveDashboard.id, executiveDashboard);
@@ -167,23 +167,23 @@ export class AnalyticsService {
         format: 'pdf',
         includeCharts: true,
         includeTables: true,
-        includeInsights: true
+        includeInsights: true,
       },
       content: {
         summary: 'Performance generale del team in linea con gli obiettivi settimanali',
         keyFindings: [
           'Team performance: +5% rispetto alla settimana precedente',
           'Produttività media: 82% (target: 80%)',
-          'Collaborazione: score elevato (78/100)'
+          'Collaborazione: score elevato (78/100)',
         ],
         recommendations: [
           'Mantenere il focus sulla qualità del lavoro',
           'Incentivare la condivisione di conoscenze',
-          'Monitorare i trend di performance'
+          'Monitorare i trend di performance',
         ],
         charts: [],
         tables: [],
-        insights: []
+        insights: [],
       },
       status: 'completed',
       generatedAt: new Date(),
@@ -191,7 +191,7 @@ export class AnalyticsService {
       fileSize: 1024,
       downloadUrl: '/reports/weekly-performance.pdf',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     // Report Collaborazione Mensile
@@ -207,23 +207,23 @@ export class AnalyticsService {
         format: 'pdf',
         includeCharts: true,
         includeTables: true,
-        includeInsights: true
+        includeInsights: true,
       },
       content: {
         summary: 'Collaborazione del team in crescita costante',
         keyFindings: [
           'Sessioni collaborative: +15% rispetto al mese precedente',
           'Engagement medio: 76% (target: 75%)',
-          'Knowledge sharing: trend positivo'
+          'Knowledge sharing: trend positivo',
         ],
         recommendations: [
           'Promuovere sessioni collaborative cross-team',
           'Implementare sistemi di riconoscimento',
-          'Migliorare la comunicazione asincrona'
+          'Migliorare la comunicazione asincrona',
         ],
         charts: [],
         tables: [],
-        insights: []
+        insights: [],
       },
       status: 'completed',
       generatedAt: new Date(),
@@ -231,7 +231,7 @@ export class AnalyticsService {
       fileSize: 2048,
       downloadUrl: '/reports/monthly-collaboration.pdf',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.reports.set(weeklyPerformanceReport.id, weeklyPerformanceReport);
@@ -252,7 +252,7 @@ export class AnalyticsService {
         threshold: 80,
         direction: 'increasing',
         confidence: 92,
-        impact: 'high'
+        impact: 'high',
       },
       actions: [
         {
@@ -260,19 +260,19 @@ export class AnalyticsService {
           description: 'Le strategie implementate stanno funzionando bene',
           priority: 'medium',
           effort: 'low',
-          expectedOutcome: 'Stabilizzazione del trend positivo'
+          expectedOutcome: 'Stabilizzazione del trend positivo',
         },
         {
           title: 'Identificare best practices',
           description: 'Analizzare cosa sta funzionando meglio',
           priority: 'high',
           effort: 'medium',
-          expectedOutcome: 'Replicazione delle best practices'
-        }
+          expectedOutcome: 'Replicazione delle best practices',
+        },
       ],
       detectedAt: new Date(),
       lastUpdated: new Date(),
-      isAcknowledged: false
+      isAcknowledged: false,
     };
 
     // Insight Collaborazione
@@ -287,7 +287,7 @@ export class AnalyticsService {
         threshold: 85,
         direction: 'stable',
         confidence: 87,
-        impact: 'medium'
+        impact: 'medium',
       },
       actions: [
         {
@@ -295,19 +295,19 @@ export class AnalyticsService {
           description: 'Creare più opportunità di collaborazione strutturata',
           priority: 'high',
           effort: 'medium',
-          expectedOutcome: 'Aumento score collaborazione del 10%'
+          expectedOutcome: 'Aumento score collaborazione del 10%',
         },
         {
           title: 'Migliorare strumenti di comunicazione',
           description: 'Valutare e implementare strumenti più efficaci',
           priority: 'medium',
           effort: 'high',
-          expectedOutcome: 'Migliore efficienza comunicativa'
-        }
+          expectedOutcome: 'Migliore efficienza comunicativa',
+        },
       ],
       detectedAt: new Date(),
       lastUpdated: new Date(),
-      isAcknowledged: false
+      isAcknowledged: false,
     };
 
     this.insights.set(performanceTrendInsight.id, performanceTrendInsight);
@@ -328,16 +328,19 @@ export class AnalyticsService {
     const tasksCompleted = Math.floor(Math.random() * 20) + 10;
     const tasksTotal = tasksCompleted + Math.floor(Math.random() * 5);
     const completionRate = Math.round((tasksCompleted / tasksTotal) * 100);
-    
+
     const averageTaskDuration = Math.random() * 8 + 2; // 2-10 ore
     const totalTimeSpent = tasksCompleted * averageTaskDuration;
     const efficiencyScore = Math.min(100, Math.round(completionRate * 0.8 + Math.random() * 20));
-    
+
     const qualityScore = Math.min(100, Math.round(efficiencyScore * 0.9 + Math.random() * 10));
     const errorRate = Math.max(0, Math.round((100 - qualityScore) * 0.5));
     const reviewScore = Math.min(100, Math.round(qualityScore * 0.95 + Math.random() * 5));
-    
-    const collaborationScore = Math.min(100, Math.round(efficiencyScore * 0.85 + Math.random() * 15));
+
+    const collaborationScore = Math.min(
+      100,
+      Math.round(efficiencyScore * 0.85 + Math.random() * 15)
+    );
     const teamInteractions = Math.floor(Math.random() * 50) + 20;
     const knowledgeShared = Math.floor(Math.random() * 10) + 5;
 
@@ -361,7 +364,7 @@ export class AnalyticsService {
       period,
       startDate,
       endDate,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
   }
 
@@ -392,7 +395,7 @@ export class AnalyticsService {
       return {
         date,
         averageScore: Math.floor(Math.random() * 15) + averagePerformance - 7,
-        memberCount: totalMembers
+        memberCount: totalMembers,
       };
     });
 
@@ -401,7 +404,7 @@ export class AnalyticsService {
       userId: `user-${i + 1}`,
       userName: `Top Performer ${i + 1}`,
       performanceScore: Math.floor(Math.random() * 10) + 90,
-      improvement: Math.floor(Math.random() * 20) + 5
+      improvement: Math.floor(Math.random() * 20) + 5,
     }));
 
     // Aree di miglioramento
@@ -411,15 +414,15 @@ export class AnalyticsService {
         currentScore: averageCollaboration,
         targetScore: averageCollaboration + 10,
         gap: 10,
-        priority: 'high' as const
+        priority: 'high' as const,
       },
       {
         metric: 'Knowledge Sharing',
         currentScore: Math.floor(Math.random() * 20) + 70,
         targetScore: 85,
         gap: 15,
-        priority: 'medium' as const
-      }
+        priority: 'medium' as const,
+      },
     ];
 
     return {
@@ -434,7 +437,7 @@ export class AnalyticsService {
         good,
         average,
         belowAverage,
-        poor
+        poor,
       },
       performanceTrend,
       topPerformers,
@@ -442,7 +445,7 @@ export class AnalyticsService {
       period,
       startDate,
       endDate,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
   }
 
@@ -459,7 +462,9 @@ export class AnalyticsService {
     const completionRate = Math.round((completedTasks / totalTasks) * 100);
     const onTimeDelivery = completionRate > 90;
 
-    const plannedDuration = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    const plannedDuration = Math.floor(
+      (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
     const actualDuration = Math.floor(plannedDuration * (0.9 + Math.random() * 0.2));
     const timeVariance = Math.round(((actualDuration - plannedDuration) / plannedDuration) * 100);
 
@@ -481,18 +486,18 @@ export class AnalyticsService {
         name: 'Planning Completato',
         plannedDate: new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000),
         actualDate: new Date(startDate.getTime() + 6 * 24 * 60 * 60 * 1000),
-        status: 'completed' as const
+        status: 'completed' as const,
       },
       {
         name: 'Development 50%',
         plannedDate: new Date(startDate.getTime() + 21 * 24 * 60 * 60 * 1000),
-        status: 'pending' as const
+        status: 'pending' as const,
       },
       {
         name: 'Testing Iniziato',
         plannedDate: new Date(startDate.getTime() + 35 * 24 * 60 * 60 * 1000),
-        status: 'pending' as const
-      }
+        status: 'pending' as const,
+      },
     ];
 
     return {
@@ -518,7 +523,7 @@ export class AnalyticsService {
       startDate,
       endDate,
       milestones,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
   }
 
@@ -536,7 +541,7 @@ export class AnalyticsService {
       synchronous: Math.floor(Math.random() * 40) + 30,
       asynchronous: Math.floor(Math.random() * 40) + 30,
       crossTeam: Math.floor(Math.random() * 20) + 10,
-      external: Math.floor(Math.random() * 10) + 5
+      external: Math.floor(Math.random() * 10) + 5,
     };
 
     const averageResponseTime = Math.floor(Math.random() * 60) + 15;
@@ -549,7 +554,7 @@ export class AnalyticsService {
       userName: `User ${i + 1}`,
       connections: Math.floor(Math.random() * 10) + 5,
       influence: Math.floor(Math.random() * 30) + 60,
-      centrality: Math.floor(Math.random() * 30) + 60
+      centrality: Math.floor(Math.random() * 30) + 60,
     }));
 
     // Trend temporali
@@ -560,7 +565,7 @@ export class AnalyticsService {
         date,
         activeSessions: Math.floor(Math.random() * 10) + 5,
         averageScore: Math.floor(Math.random() * 15) + averageCollaborationScore - 7,
-        participantCount: Math.floor(Math.random() * 20) + 10
+        participantCount: Math.floor(Math.random() * 20) + 10,
       };
     });
 
@@ -577,7 +582,7 @@ export class AnalyticsService {
       period,
       startDate,
       endDate,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
   }
 
@@ -595,28 +600,28 @@ export class AnalyticsService {
       design: Math.floor(Math.random() * 20) + 75,
       analysis: Math.floor(Math.random() * 20) + 75,
       management: Math.floor(Math.random() * 20) + 75,
-      testing: Math.floor(Math.random() * 20) + 75
+      testing: Math.floor(Math.random() * 20) + 75,
     };
 
     const efficiencyMetrics = {
       timeToComplete: Math.random() * 8 + 2,
       resourceUtilization: Math.floor(Math.random() * 20) + 75,
       wasteReduction: Math.floor(Math.random() * 15) + 5,
-      processOptimization: Math.floor(Math.random() * 20) + 70
+      processOptimization: Math.floor(Math.random() * 20) + 70,
     };
 
     const keyPerformanceIndicators = {
       throughput: Math.floor(Math.random() * 5) + 8,
       cycleTime: Math.random() * 4 + 2,
       leadTime: Math.random() * 8 + 4,
-      valueStreamMapping: Math.floor(Math.random() * 20) + 70
+      valueStreamMapping: Math.floor(Math.random() * 20) + 70,
     };
 
     const benchmarking = {
       industryAverage: Math.floor(Math.random() * 20) + 70,
       competitorScore: Math.floor(Math.random() * 20) + 75,
       internalTarget: 85,
-      gap: 85 - overallProductivity
+      gap: 85 - overallProductivity,
     };
 
     return {
@@ -629,7 +634,7 @@ export class AnalyticsService {
       period,
       startDate,
       endDate,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
   }
 
@@ -647,28 +652,28 @@ export class AnalyticsService {
       growth: Math.floor(Math.random() * 20) + 70,
       purpose: Math.floor(Math.random() * 20) + 75,
       relationships: Math.floor(Math.random() * 20) + 70,
-      autonomy: Math.floor(Math.random() * 20) + 70
+      autonomy: Math.floor(Math.random() * 20) + 70,
     };
 
     const participationMetrics = {
       meetingAttendance: Math.floor(Math.random() * 20) + 75,
       contributionRate: Math.floor(Math.random() * 20) + 70,
       initiativeTaking: Math.floor(Math.random() * 20) + 65,
-      feedbackProvision: Math.floor(Math.random() * 20) + 70
+      feedbackProvision: Math.floor(Math.random() * 20) + 70,
     };
 
     const sentimentAnalysis = {
       positive: Math.floor(Math.random() * 30) + 50,
       neutral: Math.floor(Math.random() * 20) + 20,
       negative: Math.floor(Math.random() * 15) + 5,
-      overallSentiment: Math.floor(Math.random() * 60) + 20
+      overallSentiment: Math.floor(Math.random() * 60) + 20,
     };
 
     const satisfactionMetrics = {
       jobSatisfaction: Math.floor(Math.random() * 20) + 75,
       teamSatisfaction: Math.floor(Math.random() * 20) + 75,
       companySatisfaction: Math.floor(Math.random() * 20) + 70,
-      retentionLikelihood: Math.floor(Math.random() * 20) + 75
+      retentionLikelihood: Math.floor(Math.random() * 20) + 75,
     };
 
     return {
@@ -681,7 +686,7 @@ export class AnalyticsService {
       period,
       startDate,
       endDate,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
   }
 
@@ -698,28 +703,28 @@ export class AnalyticsService {
       totalErrors: Math.floor(Math.random() * 20) + 5,
       criticalErrors: Math.floor(Math.random() * 5) + 1,
       errorRate: Math.max(0, Math.round((100 - overallQuality) * 0.4)),
-      errorResolutionTime: Math.random() * 8 + 2
+      errorResolutionTime: Math.random() * 8 + 2,
     };
 
     const reviewMetrics = {
       reviewCoverage: Math.floor(Math.random() * 20) + 80,
       reviewEfficiency: Math.floor(Math.random() * 20) + 75,
       feedbackQuality: Math.floor(Math.random() * 20) + 75,
-      iterationCount: Math.random() * 3 + 1
+      iterationCount: Math.random() * 3 + 1,
     };
 
     const complianceMetrics = {
       standardsCompliance: Math.floor(Math.random() * 20) + 80,
       regulatoryCompliance: Math.floor(Math.random() * 20) + 85,
       auditScore: Math.floor(Math.random() * 20) + 80,
-      riskLevel: overallQuality > 85 ? 'low' : overallQuality > 75 ? 'medium' : 'high'
-    };
+      riskLevel: overallQuality > 85 ? 'low' : overallQuality > 75 ? 'medium' : 'high',
+    } as any;
 
     const customerMetrics = {
       satisfactionScore: Math.floor(Math.random() * 20) + 75,
       complaintRate: Math.max(0, Math.round((100 - overallQuality) * 0.3)),
       recommendationScore: Math.floor(Math.random() * 20) + 70,
-      retentionRate: Math.floor(Math.random() * 20) + 80
+      retentionRate: Math.floor(Math.random() * 20) + 80,
     };
 
     return {
@@ -732,7 +737,7 @@ export class AnalyticsService {
       period,
       startDate,
       endDate,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
   }
 
@@ -756,14 +761,14 @@ export class AnalyticsService {
       type,
       layout: {
         ...layout,
-        widgets: []
+        widgets: [],
       },
       filters: { period: 'month' },
       permissions,
       createdAt: new Date(),
       updatedAt: new Date(),
       lastViewed: new Date(),
-      viewCount: 0
+      viewCount: 0,
     };
 
     this.dashboards.set(dashboard.id, dashboard);
@@ -783,12 +788,12 @@ export class AnalyticsService {
     const newWidget: AnalyticsWidget = {
       ...widget,
       id: `widget-${Date.now()}`,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
 
     dashboard.layout.widgets.push(newWidget);
     dashboard.updatedAt = new Date();
-    
+
     return newWidget;
   }
 
@@ -796,7 +801,13 @@ export class AnalyticsService {
   generateReport(
     name: string,
     description: string,
-    type: 'performance' | 'collaboration' | 'productivity' | 'engagement' | 'quality' | 'comprehensive',
+    type:
+      | 'performance'
+      | 'collaboration'
+      | 'productivity'
+      | 'engagement'
+      | 'quality'
+      | 'comprehensive',
     config: {
       metrics: AnalyticsMetric[];
       period: AnalyticsPeriod;
@@ -819,15 +830,15 @@ export class AnalyticsService {
         recommendations: [],
         charts: [],
         tables: [],
-        insights: []
+        insights: [],
       },
       status: 'generating',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.reports.set(report.id, report);
-    
+
     // Simula generazione asincrona del report
     setTimeout(() => {
       this.completeReportGeneration(report.id);
@@ -847,16 +858,16 @@ export class AnalyticsService {
       keyFindings: [
         'Performance generale in linea con gli obiettivi',
         'Trend positivo per la collaborazione',
-        'Aree di miglioramento identificate'
+        'Aree di miglioramento identificate',
       ],
       recommendations: [
         'Mantenere le strategie attuali',
         'Implementare miglioramenti nelle aree critiche',
-        'Monitorare i trend identificati'
+        'Monitorare i trend identificati',
       ],
       charts: [],
       tables: [],
-      insights: []
+      insights: [],
     };
 
     report.status = 'completed';
@@ -876,16 +887,12 @@ export class AnalyticsService {
 
   // Ottieni report per utente
   getUserReports(userId: string): AnalyticsReport[] {
-    return Array.from(this.reports.values()).filter(report =>
-      report.status === 'completed'
-    );
+    return Array.from(this.reports.values()).filter(report => report.status === 'completed');
   }
 
   // Ottieni insights attivi
   getActiveInsights(): AnalyticsInsight[] {
-    return Array.from(this.insights.values()).filter(insight =>
-      !insight.isAcknowledged
-    );
+    return Array.from(this.insights.values()).filter(insight => !insight.isAcknowledged);
   }
 
   // Marca insight come riconosciuto
@@ -927,7 +934,7 @@ export class AnalyticsService {
       triggerCount: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
-      createdBy: 'system'
+      createdBy: 'system',
     };
 
     this.alerts.set(alert.id, alert);
@@ -972,7 +979,7 @@ export class AnalyticsService {
       nextRun: new Date(schedule.startDate.getTime() + 24 * 60 * 60 * 1000),
       createdAt: new Date(),
       updatedAt: new Date(),
-      createdBy: 'system'
+      createdBy: 'system',
     };
 
     this.schedules.set(reportSchedule.id, reportSchedule);
@@ -1005,7 +1012,7 @@ export class AnalyticsService {
       progress: 0,
       requestedAt: new Date(),
       startedAt: new Date(),
-      requestedBy: 'system'
+      requestedBy: 'system',
     };
 
     this.exports.set(export_.id, export_);
@@ -1040,47 +1047,47 @@ export class AnalyticsService {
   ): Record<string, any> {
     const startDate = new Date();
     const endDate = new Date();
-    
+
     // Simula calcolo metriche aggregate
     const aggregated: Record<string, any> = {};
-    
+
     if (metrics.includes('performance')) {
       aggregated.performance = {
         average: 82,
         trend: 5,
-        distribution: { excellent: 30, good: 45, average: 20, belowAverage: 4, poor: 1 }
+        distribution: { excellent: 30, good: 45, average: 20, belowAverage: 4, poor: 1 },
       };
     }
-    
+
     if (metrics.includes('collaboration')) {
       aggregated.collaboration = {
         average: 78,
         trend: 8,
-        patterns: { synchronous: 40, asynchronous: 35, crossTeam: 15, external: 10 }
+        patterns: { synchronous: 40, asynchronous: 35, crossTeam: 15, external: 10 },
       };
     }
-    
+
     if (metrics.includes('productivity')) {
       aggregated.productivity = {
         average: 85,
         trend: 3,
-        areas: { development: 87, design: 83, analysis: 86, management: 82, testing: 88 }
+        areas: { development: 87, design: 83, analysis: 86, management: 82, testing: 88 },
       };
     }
-    
+
     if (metrics.includes('engagement')) {
       aggregated.engagement = {
         average: 76,
         trend: 6,
-        factors: { recognition: 78, growth: 75, purpose: 80, relationships: 73, autonomy: 77 }
+        factors: { recognition: 78, growth: 75, purpose: 80, relationships: 73, autonomy: 77 },
       };
     }
-    
+
     if (metrics.includes('quality')) {
       aggregated.quality = {
         average: 88,
         trend: 2,
-        metrics: { errorRate: 3, reviewCoverage: 92, compliance: 95, satisfaction: 84 }
+        metrics: { errorRate: 3, reviewCoverage: 92, compliance: 95, satisfaction: 84 },
       };
     }
 

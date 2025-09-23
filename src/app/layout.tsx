@@ -1,15 +1,23 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+
+import Toaster from '@/components/ui/Toaster';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
-import Toaster from '@/components/ui/Toaster';
+import { DarkModeProvider } from '@/contexts/DarkModeContext';
+import '@/lib/globalErrorInterceptor'; // GLOBAL ERROR INTERCEPTOR - DEVE ESSERE PRIMO
+import '@/lib/cssErrorHandler'; // CSS Error Handler
+import '@/lib/osProtection'; // OS Protection
+import CommandPaletteWrapper from '@/components/CommandPaletteWrapper';
+import { EnvironmentBanner } from '@/components/ui/EnvironmentBanner';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Urbanova - Piattaforma Smart City',
-  description: 'Urbanova - La piattaforma integrata per la gestione delle smart city e sviluppo immobiliare intelligente',
+  description:
+    'Urbanova - La piattaforma integrata per la gestione delle smart city e sviluppo immobiliare intelligente',
   keywords: 'smart city, sviluppo immobiliare, urbanistica, AI, analisi fattibilità, land scraping',
   authors: [{ name: 'Urbanova Team' }],
   creator: 'Urbanova',
@@ -25,7 +33,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Urbanova - Piattaforma Smart City',
-    description: 'La piattaforma integrata per la gestione delle smart city e sviluppo immobiliare intelligente',
+    description:
+      'La piattaforma integrata per la gestione delle smart city e sviluppo immobiliare intelligente',
     url: 'https://urbanova.vercel.app',
     siteName: 'Urbanova',
     images: [
@@ -42,24 +51,18 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Urbanova - Piattaforma Smart City',
-    description: 'La piattaforma integrata per la gestione delle smart city e sviluppo immobiliare intelligente',
+    description:
+      'La piattaforma integrata per la gestione delle smart city e sviluppo immobiliare intelligente',
     images: ['/og-image.png'],
   },
   icons: {
-    icon: [
-      { url: '/favicon.ico' },
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-    ],
+    icon: [{ url: '/favicon.ico' }, { url: '/favicon.svg', type: 'image/svg+xml' }],
     apple: '/apple-touch-icon.png',
   },
   manifest: '/site.webmanifest',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="it" data-theme="urbanova">
       <head>
@@ -71,8 +74,11 @@ export default function RootLayout({
       <body className={inter.className}>
         <LanguageProvider>
           <AuthProvider>
-            {children}
-            <Toaster />
+            <DarkModeProvider>
+              <EnvironmentBanner />
+              <CommandPaletteWrapper>{children}</CommandPaletteWrapper>
+              <Toaster />
+            </DarkModeProvider>
           </AuthProvider>
         </LanguageProvider>
       </body>

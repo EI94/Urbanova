@@ -1,14 +1,11 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "es6"
-    ],
+    "target": "es2018",
+    "lib": ["dom", "es2018"],
+    "downlevelIteration": true,
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": false,
+    "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -24,19 +21,24 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"],
+      "@urbanova/types": ["./packages/types/dist"],
+      "@urbanova/infra": ["./packages/infra/dist"],
+      "@urbanova/toolos": ["./packages/toolos/dist"],
+      "@urbanova/data": ["./packages/data/dist"],
+      "@urbanova/os": ["./packages/os/dist"],
+      "@urbanova/pdf": ["./packages/pdf/dist"],
+      "@urbanova/agents": ["./packages/agents/dist"],
+      "@urbanova/tools": ["./packages/tools/dist"]
     },
-    "strictNullChecks": true
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "next-env.d.ts",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["**/*.ts", "**/*.tsx", "next-env.d.ts", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }

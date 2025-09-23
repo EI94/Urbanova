@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import { urbanovaPDFService } from '@/lib/urbanovaPDFService';
+
 import { feasibilityService } from '@/lib/feasibilityService';
+import { urbanovaPDFService } from '@/lib/urbanovaPDFService';
 
 // Inizializza OpenAI solo se la chiave è disponibile
 let openai: OpenAI | null = null;
@@ -29,10 +30,10 @@ export async function POST(request: NextRequest) {
       // Fallback con dati di esempio se il progetto non esiste
       project = {
         id: analysisId,
-        name: "Progetto di Esempio",
-        address: "Indirizzo non specificato",
-        status: "PIANIFICAZIONE",
-        propertyType: "Immobile residenziale",
+        name: 'Progetto di Esempio',
+        address: 'Indirizzo non specificato',
+        status: 'PIANIFICAZIONE',
+        propertyType: 'Immobile residenziale',
         totalArea: 0,
         startDate: new Date(),
         constructionStartDate: new Date(),
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
           bankCharges: 0,
           exchange: 0,
           insurance: 0,
-          total: 0
+          total: 0,
         },
         revenues: {
           units: 0,
@@ -56,32 +57,36 @@ export async function POST(request: NextRequest) {
           revenuePerUnit: 0,
           totalSales: 0,
           otherRevenues: 0,
-          total: 0
+          total: 0,
         },
         results: {
           profit: 0,
           margin: 0,
           roi: 0,
-          paybackPeriod: 0
+          paybackPeriod: 0,
         },
         isTargetAchieved: false,
         notes: notes || '',
         createdAt: new Date(),
-        updatedAt: new Date()
-      };
+        updatedAt: new Date(),
+      } as any;
     }
 
     // Calcola tutti i valori del progetto
     const calculatedCosts = feasibilityService.calculateCosts(project);
     const calculatedRevenues = feasibilityService.calculateRevenues(project);
-    const calculatedResults = feasibilityService.calculateResults(project, calculatedCosts, calculatedRevenues);
+    const calculatedResults = feasibilityService.calculateResults(
+      project,
+      calculatedCosts,
+      calculatedRevenues as any
+    );
 
     console.log('✅ Dati progetto calcolati:', {
       costs: calculatedCosts.total,
       revenues: calculatedRevenues.total,
       profit: calculatedResults.profit,
       margin: calculatedResults.margin,
-      roi: calculatedResults.roi
+      roi: calculatedResults.roi,
     });
 
     // Genera PDF in stile Urbanova
@@ -89,7 +94,7 @@ export async function POST(request: NextRequest) {
       project,
       calculatedCosts,
       calculatedRevenues,
-      calculatedResults
+      calculatedResults,
     });
 
     // Restituisci il PDF
@@ -99,13 +104,9 @@ export async function POST(request: NextRequest) {
         'Content-Disposition': `attachment; filename="Studio-Fattibilita-${project.name?.replace(/\s+/g, '-') || 'Progetto'}.pdf"`,
       },
     });
-
   } catch (error) {
     console.error('Errore generazione report:', error);
-    return NextResponse.json(
-      { error: 'Errore nella generazione del report' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Errore nella generazione del report' }, { status: 500 });
   }
 }
 
@@ -118,22 +119,23 @@ async function generateAIAnalysis(analysis: any, notes?: string) {
           `ROI attraente del ${analysis.expectedROI.toFixed(1)}%`,
           `Posizione strategica a ${analysis.location}`,
           `Tipo immobile richiesto: ${analysis.propertyType}`,
-          `Periodo di recupero ragionevole: ${analysis.paybackPeriod.toFixed(1)} anni`
+          `Periodo di recupero ragionevole: ${analysis.paybackPeriod.toFixed(1)} anni`,
         ],
         cons: [
-          "Rischi di mercato immobiliare",
-          "Tempistiche di vendita variabili",
-          "Costi di gestione e manutenzione"
+          'Rischi di mercato immobiliare',
+          'Tempistiche di vendita variabili',
+          'Costi di gestione e manutenzione',
         ],
-        recommendation: notes && notes.trim() 
-          ? `L'investimento mostra potenziale con un ROI attraente, ma richiede attenta valutazione dei rischi di mercato. Considerazioni aggiuntive: ${notes}`
-          : "L'investimento mostra potenziale con un ROI attraente, ma richiede attenta valutazione dei rischi di mercato.",
+        recommendation:
+          notes && notes.trim()
+            ? `L'investimento mostra potenziale con un ROI attraente, ma richiede attenta valutazione dei rischi di mercato. Considerazioni aggiuntive: ${notes}`
+            : "L'investimento mostra potenziale con un ROI attraente, ma richiede attenta valutazione dei rischi di mercato.",
         strategies: [
-          "Monitorare le tendenze del mercato immobiliare locale",
-          "Ottimizzare i tempi di vendita in base alla domanda",
-          "Considerare la diversificazione del portafoglio",
-          "Valutare opzioni di affitto temporaneo"
-        ]
+          'Monitorare le tendenze del mercato immobiliare locale',
+          'Ottimizzare i tempi di vendita in base alla domanda',
+          'Considerare la diversificazione del portafoglio',
+          'Valutare opzioni di affitto temporaneo',
+        ],
       };
     }
 
@@ -156,49 +158,47 @@ async function generateAIAnalysis(analysis: any, notes?: string) {
     ${notes && notes.trim() ? `\nNote e considerazioni aggiuntive: ${notes}` : ''}
     
     Rispondi in italiano, in modo professionale ma comprensibile.
-    ${notes && notes.trim() ? 'Utilizza le note fornite per personalizzare l\'analisi e fornire raccomandazioni più specifiche e contestuali.' : ''}
+    ${notes && notes.trim() ? "Utilizza le note fornite per personalizzare l'analisi e fornire raccomandazioni più specifiche e contestuali." : ''}
     `;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: 'gpt-4',
       messages: [
         {
-          role: "system",
-          content: "Sei un esperto analista immobiliare italiano. Fornisci analisi professionali e raccomandazioni concrete."
+          role: 'system',
+          content:
+            'Sei un esperto analista immobiliare italiano. Fornisci analisi professionali e raccomandazioni concrete.',
         },
         {
-          role: "user",
-          content: prompt
-        }
+          role: 'user',
+          content: prompt,
+        },
       ],
       max_tokens: 800,
       temperature: 0.7,
     });
 
-    const content = completion.choices[0]?.message?.content || "Analisi AI non disponibile";
-    
+    const content = completion.choices[0]?.message?.content || 'Analisi AI non disponibile';
+
     // Parsing dell'analisi AI per estrarre PRO, CONTRO, raccomandazione e strategie
     return parseAIAnalysis(content);
-
   } catch (error) {
     console.error('Errore OpenAI:', error);
     return {
       pros: [
         `ROI attraente del ${analysis.expectedROI.toFixed(1)}%`,
         `Posizione strategica a ${analysis.location}`,
-        `Tipo immobile richiesto: ${analysis.propertyType}`
+        `Tipo immobile richiesto: ${analysis.propertyType}`,
       ],
-      cons: [
-        "Rischi di mercato immobiliare",
-        "Tempistiche di vendita variabili"
-      ],
-      recommendation: notes && notes.trim() 
-        ? `L'investimento mostra potenziale ma richiede attenta valutazione. Considerazioni aggiuntive: ${notes}`
-        : "L'investimento mostra potenziale ma richiede attenta valutazione",
+      cons: ['Rischi di mercato immobiliare', 'Tempistiche di vendita variabili'],
+      recommendation:
+        notes && notes.trim()
+          ? `L'investimento mostra potenziale ma richiede attenta valutazione. Considerazioni aggiuntive: ${notes}`
+          : "L'investimento mostra potenziale ma richiede attenta valutazione",
       strategies: [
-        "Monitorare il mercato e ottimizzare i tempi",
-        "Considerare la diversificazione del portafoglio"
-      ]
+        'Monitorare il mercato e ottimizzare i tempi',
+        'Considerare la diversificazione del portafoglio',
+      ],
     };
   }
 }
@@ -206,14 +206,14 @@ async function generateAIAnalysis(analysis: any, notes?: string) {
 function parseAIAnalysis(content: string) {
   // Parsing semplice dell'analisi AI
   const lines = content.split('\n').filter(line => line.trim());
-  
+
   const pros: string[] = [];
   const cons: string[] = [];
   const strategies: string[] = [];
-  let recommendation = "Analisi in corso...";
-  
+  let recommendation = 'Analisi in corso...';
+
   let currentSection = '';
-  
+
   for (const line of lines) {
     if (line.includes('PRO') || line.includes('pro') || line.includes('Vantaggi')) {
       currentSection = 'pros';
@@ -232,14 +232,14 @@ function parseAIAnalysis(content: string) {
       recommendation = line.trim();
     }
   }
-  
+
   // Fallback se non è stato possibile estrarre dati strutturati
-  if (pros.length === 0) pros.push("ROI attraente e posizione strategica");
-  if (cons.length === 0) cons.push("Rischi di mercato e tempistiche di vendita");
-  if (strategies.length === 0) strategies.push("Monitorare il mercato e ottimizzare i tempi");
-  if (recommendation === "Analisi in corso...") {
+  if (pros.length === 0) pros.push('ROI attraente e posizione strategica');
+  if (cons.length === 0) cons.push('Rischi di mercato e tempistiche di vendita');
+  if (strategies.length === 0) strategies.push('Monitorare il mercato e ottimizzare i tempi');
+  if (recommendation === 'Analisi in corso...') {
     recommendation = "L'investimento mostra potenziale ma richiede attenta valutazione";
   }
-  
+
   return { pros, cons, recommendation, strategies };
 }

@@ -1,14 +1,39 @@
 // Tipi per il sistema di Advanced API Gateway & Microservices Architecture
 
-export type ServiceStatus = 'healthy' | 'degraded' | 'unhealthy' | 'maintenance' | 'offline' | 'starting' | 'stopping';
+export type ServiceStatus =
+  | 'healthy'
+  | 'degraded'
+  | 'unhealthy'
+  | 'maintenance'
+  | 'offline'
+  | 'starting'
+  | 'stopping';
 
 export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
 
-export type AuthenticationType = 'none' | 'api_key' | 'bearer_token' | 'oauth2' | 'basic_auth' | 'jwt' | 'custom';
+export type AuthenticationType =
+  | 'none'
+  | 'api_key'
+  | 'bearer_token'
+  | 'oauth2'
+  | 'basic_auth'
+  | 'jwt'
+  | 'custom';
 
-export type RateLimitType = 'requests_per_minute' | 'requests_per_hour' | 'requests_per_day' | 'concurrent_requests' | 'bandwidth';
+export type RateLimitType =
+  | 'requests_per_minute'
+  | 'requests_per_hour'
+  | 'requests_per_day'
+  | 'concurrent_requests'
+  | 'bandwidth';
 
-export type LoadBalancingStrategy = 'round_robin' | 'least_connections' | 'weighted' | 'ip_hash' | 'random' | 'health_based';
+export type LoadBalancingStrategy =
+  | 'round_robin'
+  | 'least_connections'
+  | 'weighted'
+  | 'ip_hash'
+  | 'random'
+  | 'health_based';
 
 export type CacheStrategy = 'none' | 'memory' | 'redis' | 'cdn' | 'database' | 'hybrid';
 
@@ -18,15 +43,35 @@ export type AlertSeverity = 'low' | 'medium' | 'high' | 'critical';
 
 export type DeploymentStrategy = 'blue_green' | 'canary' | 'rolling' | 'recreate' | 'a_b_test';
 
-export type ServiceType = 'api' | 'web' | 'worker' | 'database' | 'cache' | 'message_queue' | 'storage' | 'auth' | 'gateway';
+export type ServiceType =
+  | 'api'
+  | 'web'
+  | 'worker'
+  | 'database'
+  | 'cache'
+  | 'message_queue'
+  | 'storage'
+  | 'auth'
+  | 'gateway';
 
 export type HealthCheckType = 'http' | 'tcp' | 'grpc' | 'custom' | 'database' | 'dependency';
 
 export type CircuitBreakerState = 'closed' | 'open' | 'half_open';
 
-export type RetryStrategy = 'exponential_backoff' | 'linear_backoff' | 'fixed_delay' | 'immediate' | 'custom';
+export type RetryStrategy =
+  | 'exponential_backoff'
+  | 'linear_backoff'
+  | 'fixed_delay'
+  | 'immediate'
+  | 'custom';
 
-export type ServiceDiscoveryType = 'consul' | 'etcd' | 'zookeeper' | 'kubernetes' | 'dns' | 'static';
+export type ServiceDiscoveryType =
+  | 'consul'
+  | 'etcd'
+  | 'zookeeper'
+  | 'kubernetes'
+  | 'dns'
+  | 'static';
 
 export interface APIEndpoint {
   id: string;
@@ -34,12 +79,12 @@ export interface APIEndpoint {
   method: RequestMethod;
   name: string;
   description: string;
-  
+
   // Service routing
   serviceId: string;
   serviceName: string;
   targetUrl: string;
-  
+
   // Authentication & Authorization
   authentication: {
     type: AuthenticationType;
@@ -48,7 +93,7 @@ export interface APIEndpoint {
     roles?: string[];
     customHeaders?: Record<string, string>;
   };
-  
+
   // Rate limiting
   rateLimiting: {
     enabled: boolean;
@@ -59,7 +104,7 @@ export interface APIEndpoint {
     skipSuccessfulRequests?: boolean;
     keyGenerator?: 'ip' | 'user' | 'api_key' | 'custom';
   };
-  
+
   // Caching
   caching: {
     enabled: boolean;
@@ -68,7 +113,7 @@ export interface APIEndpoint {
     varyBy?: string[];
     conditions?: string[];
   };
-  
+
   // Request/Response transformation
   transformation: {
     requestHeaders?: Record<string, string>;
@@ -76,7 +121,7 @@ export interface APIEndpoint {
     requestBody?: string; // transformation script
     responseBody?: string; // transformation script
   };
-  
+
   // Validation
   validation: {
     requestSchema?: any; // JSON Schema
@@ -84,7 +129,7 @@ export interface APIEndpoint {
     validateRequest: boolean;
     validateResponse: boolean;
   };
-  
+
   // Monitoring & Analytics
   monitoring: {
     enabled: boolean;
@@ -93,7 +138,7 @@ export interface APIEndpoint {
     trackMetrics: boolean;
     customMetrics?: string[];
   };
-  
+
   // Circuit breaker
   circuitBreaker: {
     enabled: boolean;
@@ -101,7 +146,7 @@ export interface APIEndpoint {
     recoveryTimeout: number; // in seconds
     state: CircuitBreakerState;
   };
-  
+
   // Retry policy
   retryPolicy: {
     enabled: boolean;
@@ -111,7 +156,7 @@ export interface APIEndpoint {
     maxDelay?: number; // in seconds
     retryableStatusCodes?: number[];
   };
-  
+
   // Documentation
   documentation: {
     summary: string;
@@ -123,16 +168,16 @@ export interface APIEndpoint {
       response: any;
     }>;
   };
-  
+
   // Status & Metrics
   isActive: boolean;
   version: string;
-  
+
   // Timeline
   createdAt: Date;
   updatedAt: Date;
   lastAccessedAt?: Date;
-  
+
   // Performance metrics
   metrics: {
     totalRequests: number;
@@ -151,18 +196,18 @@ export interface Microservice {
   name: string;
   description: string;
   type: ServiceType;
-  
+
   // Deployment info
   version: string;
   environment: 'development' | 'staging' | 'production';
   namespace: string;
-  
+
   // Network configuration
   host: string;
   port: number;
   protocol: 'http' | 'https' | 'grpc' | 'tcp' | 'udp';
   basePath?: string;
-  
+
   // Health & Status
   status: ServiceStatus;
   healthCheck: {
@@ -174,7 +219,7 @@ export interface Microservice {
     successThreshold: number;
     failureThreshold: number;
   };
-  
+
   // Scaling configuration
   scaling: {
     minInstances: number;
@@ -185,7 +230,7 @@ export interface Microservice {
     scaleUpCooldown: number; // in seconds
     scaleDownCooldown: number; // in seconds
   };
-  
+
   // Resource limits
   resources: {
     cpu: {
@@ -201,7 +246,7 @@ export interface Microservice {
       limits: string;
     };
   };
-  
+
   // Dependencies
   dependencies: Array<{
     serviceId: string;
@@ -209,14 +254,17 @@ export interface Microservice {
     type: 'required' | 'optional';
     healthImpact: 'critical' | 'degraded' | 'none';
   }>;
-  
+
   // Environment variables
-  environmentVariables: Record<string, {
-    value: string;
-    encrypted: boolean;
-    source?: 'config' | 'secret' | 'computed';
-  }>;
-  
+  environmentVariables: Record<
+    string,
+    {
+      value: string;
+      encrypted: boolean;
+      source?: 'config' | 'secret' | 'computed';
+    }
+  >;
+
   // Load balancing
   loadBalancing: {
     strategy: LoadBalancingStrategy;
@@ -224,7 +272,7 @@ export interface Microservice {
     stickySession: boolean;
     weights?: Record<string, number>;
   };
-  
+
   // Security
   security: {
     networkPolicies: string[];
@@ -235,7 +283,7 @@ export interface Microservice {
       fsGroup?: number;
     };
   };
-  
+
   // Monitoring & Observability
   observability: {
     metricsEnabled: boolean;
@@ -244,10 +292,10 @@ export interface Microservice {
     customDashboards: string[];
     alertRules: string[];
   };
-  
+
   // API endpoints exposed by this service
   endpoints: string[]; // APIEndpoint IDs
-  
+
   // Deployment history
   deployments: Array<{
     version: string;
@@ -257,7 +305,7 @@ export interface Microservice {
     status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'rolled_back';
     rollbackVersion?: string;
   }>;
-  
+
   // Performance metrics
   metrics: {
     uptime: number; // percentage
@@ -277,7 +325,7 @@ export interface Microservice {
       outbound: number; // bytes per second
     };
   };
-  
+
   // Timeline
   createdAt: Date;
   updatedAt: Date;
@@ -289,13 +337,13 @@ export interface APIGateway {
   id: string;
   name: string;
   description: string;
-  
+
   // Network configuration
   host: string;
   port: number;
   protocol: 'http' | 'https';
   domain?: string;
-  
+
   // SSL/TLS configuration
   ssl: {
     enabled: boolean;
@@ -304,7 +352,7 @@ export interface APIGateway {
     cipherSuites: string[];
     hsts: boolean;
   };
-  
+
   // Global authentication
   globalAuth: {
     enabled: boolean;
@@ -312,7 +360,7 @@ export interface APIGateway {
     config: Record<string, any>;
     excludedPaths?: string[];
   };
-  
+
   // Global rate limiting
   globalRateLimit: {
     enabled: boolean;
@@ -320,7 +368,7 @@ export interface APIGateway {
     burstLimit: number;
     keyGenerator: 'ip' | 'user' | 'api_key';
   };
-  
+
   // CORS configuration
   cors: {
     enabled: boolean;
@@ -331,7 +379,7 @@ export interface APIGateway {
     credentials: boolean;
     maxAge: number; // in seconds
   };
-  
+
   // Request/Response middleware
   middleware: Array<{
     id: string;
@@ -341,7 +389,7 @@ export interface APIGateway {
     config: Record<string, any>;
     enabled: boolean;
   }>;
-  
+
   // Service discovery
   serviceDiscovery: {
     type: ServiceDiscoveryType;
@@ -349,14 +397,14 @@ export interface APIGateway {
     healthCheckInterval: number;
     unhealthyThreshold: number;
   };
-  
+
   // Load balancing
   loadBalancing: {
     strategy: LoadBalancingStrategy;
     healthCheckEnabled: boolean;
     sessionAffinity: boolean;
   };
-  
+
   // Caching
   caching: {
     enabled: boolean;
@@ -364,7 +412,7 @@ export interface APIGateway {
     maxCacheSize: string; // e.g., "1GB"
     compressionEnabled: boolean;
   };
-  
+
   // Logging & Monitoring
   logging: {
     level: LogLevel;
@@ -374,7 +422,7 @@ export interface APIGateway {
       config: Record<string, any>;
     }>;
   };
-  
+
   // Metrics collection
   metrics: {
     enabled: boolean;
@@ -384,7 +432,7 @@ export interface APIGateway {
       config: Record<string, any>;
     }>;
   };
-  
+
   // Security
   security: {
     ipWhitelist?: string[];
@@ -393,16 +441,16 @@ export interface APIGateway {
     requestSizeLimit: string; // e.g., "10MB"
     headerSizeLimit: string; // e.g., "8KB"
   };
-  
+
   // Status
   status: ServiceStatus;
   version: string;
-  
+
   // Timeline
   createdAt: Date;
   updatedAt: Date;
   lastRestartedAt?: Date;
-  
+
   // Performance metrics
   performanceMetrics: {
     totalRequests: number;
@@ -412,7 +460,7 @@ export interface APIGateway {
     throughput: number;
     errorRate: number;
     uptime: number;
-    
+
     // Resource usage
     cpuUsage: number;
     memoryUsage: number;
@@ -420,7 +468,7 @@ export interface APIGateway {
       inbound: number;
       outbound: number;
     };
-    
+
     // Cache metrics
     cacheHitRate?: number;
     cacheMissRate?: number;
@@ -432,10 +480,10 @@ export interface ServiceMesh {
   id: string;
   name: string;
   description: string;
-  
+
   // Mesh configuration
   services: string[]; // Microservice IDs
-  
+
   // Traffic management
   trafficPolicies: Array<{
     id: string;
@@ -459,7 +507,7 @@ export interface ServiceMesh {
       };
     }>;
   }>;
-  
+
   // Security policies
   securityPolicies: Array<{
     id: string;
@@ -472,7 +520,7 @@ export interface ServiceMesh {
       conditions?: Record<string, any>;
     }>;
   }>;
-  
+
   // Observability
   observability: {
     distributedTracing: {
@@ -492,7 +540,7 @@ export interface ServiceMesh {
       accessLogs: boolean;
     };
   };
-  
+
   // mTLS configuration
   mtls: {
     enabled: boolean;
@@ -500,7 +548,7 @@ export interface ServiceMesh {
     certificateAuthority: string;
     certificateLifetime: number; // in hours
   };
-  
+
   // Circuit breaker configuration
   circuitBreaker: {
     enabled: boolean;
@@ -512,11 +560,11 @@ export interface ServiceMesh {
       recoveryTime: number;
     }>;
   };
-  
+
   // Status
   status: ServiceStatus;
   version: string;
-  
+
   // Timeline
   createdAt: Date;
   updatedAt: Date;
@@ -524,49 +572,49 @@ export interface ServiceMesh {
 
 export interface APIRequest {
   id: string;
-  
+
   // Request details
   method: RequestMethod;
   path: string;
   fullUrl: string;
-  
+
   // Headers
   headers: Record<string, string>;
   queryParams: Record<string, string>;
   body?: any;
-  
+
   // Client information
   clientIP: string;
   userAgent: string;
   userId?: string;
   apiKey?: string;
-  
+
   // Routing
   endpointId: string;
   serviceId: string;
   gatewayId: string;
-  
+
   // Timing
   timestamp: Date;
   responseTime: number; // in milliseconds
-  
+
   // Response details
   statusCode: number;
   responseSize: number; // in bytes
   responseHeaders: Record<string, string>;
-  
+
   // Error information
   error?: {
     message: string;
     code: string;
     stack?: string;
   };
-  
+
   // Tracing
   traceId?: string;
   spanId?: string;
   parentSpanId?: string;
-  
+
   // Security
   authentication: {
     type: AuthenticationType;
@@ -574,7 +622,7 @@ export interface APIRequest {
     userId?: string;
     scopes?: string[];
   };
-  
+
   // Rate limiting
   rateLimitInfo?: {
     limit: number;
@@ -582,21 +630,21 @@ export interface APIRequest {
     resetTime: Date;
     exceeded: boolean;
   };
-  
+
   // Cache information
   cacheInfo?: {
     hit: boolean;
     key: string;
     ttl?: number;
   };
-  
+
   // Retry information
   retryInfo?: {
     attempt: number;
     maxAttempts: number;
     nextRetryAt?: Date;
   };
-  
+
   // Circuit breaker
   circuitBreakerInfo?: {
     state: CircuitBreakerState;
@@ -609,11 +657,11 @@ export interface ServiceAlert {
   id: string;
   name: string;
   description: string;
-  
+
   // Alert configuration
   type: 'metric' | 'log' | 'health_check' | 'custom';
   severity: AlertSeverity;
-  
+
   // Conditions
   conditions: Array<{
     metric: string;
@@ -621,28 +669,28 @@ export interface ServiceAlert {
     threshold: number;
     duration: number; // in seconds
   }>;
-  
+
   // Targets
   services: string[]; // Microservice IDs
   endpoints?: string[]; // APIEndpoint IDs
-  
+
   // Notification
   notifications: Array<{
     type: 'email' | 'slack' | 'webhook' | 'sms' | 'pagerduty';
     config: Record<string, any>;
     enabled: boolean;
   }>;
-  
+
   // State
   state: 'ok' | 'warning' | 'critical' | 'unknown';
   lastTriggeredAt?: Date;
   acknowledgedAt?: Date;
   acknowledgedBy?: string;
-  
+
   // Timeline
   createdAt: Date;
   updatedAt: Date;
-  
+
   // History
   history: Array<{
     timestamp: Date;
@@ -656,27 +704,27 @@ export interface ServiceDeployment {
   id: string;
   serviceId: string;
   serviceName: string;
-  
+
   // Deployment details
   version: string;
   strategy: DeploymentStrategy;
-  
+
   // Configuration
   replicas: number;
   image: string;
   tag: string;
-  
+
   // Environment
   environment: 'development' | 'staging' | 'production';
   namespace: string;
-  
+
   // Resources
   resources: {
     cpu: string;
     memory: string;
     storage?: string;
   };
-  
+
   // Health checks
   healthChecks: Array<{
     type: HealthCheckType;
@@ -687,10 +735,10 @@ export interface ServiceDeployment {
     successThreshold: number;
     failureThreshold: number;
   }>;
-  
+
   // Status
   status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'rolling_back' | 'rolled_back';
-  
+
   // Progress tracking
   progress: {
     total: number;
@@ -698,17 +746,17 @@ export interface ServiceDeployment {
     failed: number;
     percentage: number;
   };
-  
+
   // Timeline
   startedAt: Date;
   completedAt?: Date;
   deployedBy: string;
-  
+
   // Rollback information
   canRollback: boolean;
   rollbackVersion?: string;
   rollbackReason?: string;
-  
+
   // Logs and events
   logs: Array<{
     timestamp: Date;
@@ -716,7 +764,7 @@ export interface ServiceDeployment {
     message: string;
     source: string;
   }>;
-  
+
   // Metrics during deployment
   deploymentMetrics: {
     duration: number; // in seconds
@@ -733,7 +781,7 @@ export interface APIAnalytics {
     end: Date;
     granularity: 'minute' | 'hour' | 'day' | 'week' | 'month';
   };
-  
+
   // Overall metrics
   overview: {
     totalRequests: number;
@@ -746,7 +794,7 @@ export interface APIAnalytics {
     errorRate: number;
     uniqueClients: number;
   };
-  
+
   // Traffic patterns
   traffic: {
     requestsOverTime: Array<{
@@ -754,7 +802,7 @@ export interface APIAnalytics {
       requests: number;
       errors: number;
     }>;
-    
+
     topEndpoints: Array<{
       endpointId: string;
       path: string;
@@ -762,7 +810,7 @@ export interface APIAnalytics {
       averageResponseTime: number;
       errorRate: number;
     }>;
-    
+
     topClients: Array<{
       clientIP: string;
       userAgent: string;
@@ -770,7 +818,7 @@ export interface APIAnalytics {
       errorRate: number;
     }>;
   };
-  
+
   // Performance metrics
   performance: {
     responseTimeDistribution: Array<{
@@ -778,7 +826,7 @@ export interface APIAnalytics {
       count: number;
       percentage: number;
     }>;
-    
+
     slowestEndpoints: Array<{
       endpointId: string;
       path: string;
@@ -786,7 +834,7 @@ export interface APIAnalytics {
       p95ResponseTime: number;
       requests: number;
     }>;
-    
+
     servicePerformance: Array<{
       serviceId: string;
       serviceName: string;
@@ -795,7 +843,7 @@ export interface APIAnalytics {
       errorRate: number;
     }>;
   };
-  
+
   // Error analysis
   errors: {
     errorsByStatusCode: Array<{
@@ -803,14 +851,14 @@ export interface APIAnalytics {
       count: number;
       percentage: number;
     }>;
-    
+
     errorsByService: Array<{
       serviceId: string;
       serviceName: string;
       errorCount: number;
       errorRate: number;
     }>;
-    
+
     topErrors: Array<{
       message: string;
       count: number;
@@ -819,14 +867,14 @@ export interface APIAnalytics {
       affectedEndpoints: string[];
     }>;
   };
-  
+
   // Security insights
   security: {
     authenticationFailures: number;
     rateLimitExceeded: number;
     suspiciousIPs: string[];
     blockedRequests: number;
-    
+
     attackPatterns: Array<{
       type: string;
       count: number;
@@ -834,7 +882,7 @@ export interface APIAnalytics {
       description: string;
     }>;
   };
-  
+
   // Cache performance
   cache: {
     hitRate: number;
@@ -842,7 +890,7 @@ export interface APIAnalytics {
     totalHits: number;
     totalMisses: number;
     evictions: number;
-    
+
     topCachedEndpoints: Array<{
       endpointId: string;
       path: string;
@@ -851,7 +899,7 @@ export interface APIAnalytics {
       misses: number;
     }>;
   };
-  
+
   // Geographic distribution
   geography?: {
     requestsByCountry: Array<{
@@ -859,14 +907,14 @@ export interface APIAnalytics {
       requests: number;
       percentage: number;
     }>;
-    
+
     responseTimeByRegion: Array<{
       region: string;
       averageResponseTime: number;
       requests: number;
     }>;
   };
-  
+
   // Generated at
   generatedAt: Date;
 }
@@ -889,7 +937,7 @@ export interface ServiceTopology {
       memory: number;
     };
   }>;
-  
+
   // Connections between services
   connections: Array<{
     id: string;
@@ -897,20 +945,20 @@ export interface ServiceTopology {
     target: string; // service ID
     type: 'http' | 'grpc' | 'message_queue' | 'database' | 'cache';
     protocol: string;
-    
+
     // Traffic metrics
     requestsPerSecond: number;
     averageLatency: number;
     errorRate: number;
-    
+
     // Connection health
     health: 'healthy' | 'degraded' | 'unhealthy';
-    
+
     // Security
     encrypted: boolean;
     authenticated: boolean;
   }>;
-  
+
   // External dependencies
   externalDependencies: Array<{
     id: string;
@@ -920,10 +968,10 @@ export interface ServiceTopology {
     status: ServiceStatus;
     connectedServices: string[];
   }>;
-  
+
   // Generated at
   generatedAt: Date;
-  
+
   // Metadata
   metadata: {
     totalServices: number;
@@ -940,25 +988,25 @@ export interface APIGatewayConfig {
     name: string;
     version: string;
     environment: 'development' | 'staging' | 'production';
-    
+
     // Network
     host: string;
     port: number;
     protocol: 'http' | 'https';
-    
+
     // Performance
     maxConnections: number;
     connectionTimeout: number;
     requestTimeout: number;
     keepAliveTimeout: number;
-    
+
     // Security
     enableCORS: boolean;
     enableCSRF: boolean;
     enableRateLimit: boolean;
     enableAuthentication: boolean;
   };
-  
+
   // Default policies
   defaultPolicies: {
     authentication: AuthenticationType;
@@ -975,38 +1023,38 @@ export interface APIGatewayConfig {
       response: number;
     };
   };
-  
+
   // Monitoring
   monitoring: {
     metricsEnabled: boolean;
     loggingEnabled: boolean;
     tracingEnabled: boolean;
-    
+
     // Retention policies
     logsRetentionDays: number;
     metricsRetentionDays: number;
     tracesRetentionDays: number;
   };
-  
+
   // Integration settings
   integrations: {
     serviceDiscovery: {
       type: ServiceDiscoveryType;
       config: Record<string, any>;
     };
-    
+
     messageQueue: {
       enabled: boolean;
       type: 'rabbitmq' | 'kafka' | 'redis' | 'aws_sqs';
       config: Record<string, any>;
     };
-    
+
     database: {
       type: 'postgresql' | 'mysql' | 'mongodb' | 'redis';
       config: Record<string, any>;
     };
   };
-  
+
   // Feature flags
   features: {
     enableCircuitBreaker: boolean;
@@ -1032,7 +1080,7 @@ export interface APIGatewayStats {
     errorRate: number;
     uptime: number;
   };
-  
+
   // Performance metrics
   performance: {
     throughput: {
@@ -1040,21 +1088,21 @@ export interface APIGatewayStats {
       peak: number;
       average: number;
     };
-    
+
     latency: {
       p50: number;
       p95: number;
       p99: number;
       max: number;
     };
-    
+
     errors: {
       total: number;
       rate: number;
       byStatusCode: Record<number, number>;
     };
   };
-  
+
   // Resource usage
   resources: {
     cpu: {
@@ -1062,19 +1110,19 @@ export interface APIGatewayStats {
       average: number;
       peak: number;
     };
-    
+
     memory: {
       current: number;
       average: number;
       peak: number;
     };
-    
+
     network: {
       inbound: number;
       outbound: number;
     };
   };
-  
+
   // Service health
   serviceHealth: Array<{
     serviceId: string;
@@ -1084,7 +1132,7 @@ export interface APIGatewayStats {
     errorRate: number;
     uptime: number;
   }>;
-  
+
   // Rate limiting
   rateLimiting: {
     totalRequests: number;
@@ -1095,7 +1143,7 @@ export interface APIGatewayStats {
       blockedRequests: number;
     }>;
   };
-  
+
   // Caching
   caching: {
     hitRate: number;
@@ -1105,7 +1153,7 @@ export interface APIGatewayStats {
     cacheSize: number;
     evictions: number;
   };
-  
+
   // Security
   security: {
     authenticationFailures: number;
@@ -1113,7 +1161,7 @@ export interface APIGatewayStats {
     suspiciousActivities: number;
     blockedIPs: number;
   };
-  
+
   // Generated at
   generatedAt: Date;
   period: string;

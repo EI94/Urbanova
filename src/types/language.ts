@@ -40,4 +40,4 @@ export interface LanguageSettings {
   autoDetect: boolean;
   fallbackLanguage: SupportedLanguage;
   persistLanguage: boolean;
-} 
+}

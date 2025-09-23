@@ -1,22 +1,18 @@
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signOut, 
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
   sendPasswordResetEmail,
   onAuthStateChanged,
   User as FirebaseUser,
-  updateProfile
+  updateProfile,
 } from 'firebase/auth';
-import { auth } from './firebase';
-import { db } from './firebase';
-import { 
-  doc, 
-  setDoc, 
-  getDoc, 
-  collection, 
-  addDoc, 
-  serverTimestamp 
-} from 'firebase/firestore';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+
+// 🛡️ OS PROTECTION - Importa protezione CSS per firebase auth service
+import '@/lib/osProtection';
+
+import { auth, db } from './firebase';
 
 // Interfaccia per l'utente
 export interface User {
@@ -52,8 +48,18 @@ class FirebaseAuthService {
   // REGISTRAZIONE UTENTE
   // ========================================
 
-  async signup(email: string, password: string, displayName: string, firstName?: string, lastName?: string): Promise<AuthResult> {
+  async signup(
+    email: string,
+    password: string,
+    displayName: string,
+    firstName?: string,
+    lastName?: string
+  ): Promise<AuthResult> {
     try {
+      if (!auth) {
+        throw new Error('Firebase auth non disponibile');
+      }
+      
       // Crea utente con Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
@@ -61,7 +67,7 @@ class FirebaseAuthService {
       // Aggiorna il displayName
       if (user) {
         await updateProfile(user, {
-          displayName: displayName
+          displayName: displayName,
         });
 
         // Crea profilo utente in Firestore
@@ -72,7 +78,7 @@ class FirebaseAuthService {
           lastName: lastName || '',
           role: 'USER',
           company: '',
-          createdAt: new Date()
+          createdAt: new Date(),
         });
 
         return {
@@ -82,16 +88,16 @@ class FirebaseAuthService {
             displayName: displayName,
             firstName: firstName,
             lastName: lastName,
-            role: 'USER'
-          },
-          success: true
+            role: 'USER',
+          } as any,
+          success: true,
         };
       }
 
-      throw new Error('Errore durante la creazione dell\'utente');
+      throw new Error("Errore durante la creazione dell'utente");
     } catch (error: any) {
       console.error('Errore durante la registrazione:', error);
-      
+
       let errorMessage = 'Errore durante la registrazione';
       if (error.code === 'auth/email-already-in-use') {
         errorMessage = 'Email già in uso';
@@ -104,7 +110,7 @@ class FirebaseAuthService {
       return {
         user: {} as User,
         success: false,
-        error: errorMessage
+        error: errorMessage,
       };
     }
   }
@@ -115,6 +121,10 @@ class FirebaseAuthService {
 
   async login(email: string, password: string): Promise<AuthResult> {
     try {
+      if (!auth) {
+        throw new Error('Firebase auth non disponibile');
+      }
+      
       // Login con Firebase Auth
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
@@ -133,13 +143,13 @@ class FirebaseAuthService {
           firstName: userProfile?.firstName,
           lastName: userProfile?.lastName,
           role: userProfile?.role || 'USER',
-          company: userProfile?.company
+          company: userProfile?.company,
         },
-        success: true
+        success: true,
       };
     } catch (error: any) {
       console.error('Errore durante il login:', error);
-      
+
       let errorMessage = 'Errore durante il login';
       if (error.code === 'auth/user-not-found') {
         errorMessage = 'Utente non trovato';
@@ -154,7 +164,7 @@ class FirebaseAuthService {
       return {
         user: {} as User,
         success: false,
-        error: errorMessage
+        error: errorMessage,
       };
     }
   }
@@ -165,6 +175,10 @@ class FirebaseAuthService {
 
   async logout(): Promise<boolean> {
     try {
+      if (!auth) {
+        throw new Error('Firebase auth non disponibile');
+      }
+      
       await signOut(auth);
       return true;
     } catch (error) {
@@ -179,16 +193,20 @@ class FirebaseAuthService {
 
   async resetPassword(email: string): Promise<boolean> {
     try {
+      if (!auth) {
+        throw new Error('Firebase auth non disponibile');
+      }
+      
       await sendPasswordResetEmail(auth, email);
       return true;
     } catch (error: any) {
       console.error('Errore durante il reset password:', error);
-      
+
       if (error.code === 'auth/user-not-found') {
         throw new Error('Email non trovata');
       }
-      
-      throw new Error('Errore durante l\'invio dell\'email di reset');
+
+      throw new Error("Errore durante l'invio dell'email di reset");
     }
   }
 
@@ -197,22 +215,52 @@ class FirebaseAuthService {
   // ========================================
 
   onAuthStateChanged(callback: (user: User | null) => void) {
+    if (!auth) {
+      console.error('❌ [Firebase Auth] auth non disponibile, callback con null');
+      callback(null);
+      return () => {}; // unsubscribe function vuota
+    }
+    
     return onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
-        // Ottieni profilo completo da Firestore
-        const userProfile = await this.getUserProfile(firebaseUser.uid);
-        
-        const user: User = {
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-          displayName: firebaseUser.displayName || userProfile?.displayName || '',
-          firstName: userProfile?.firstName,
-          lastName: userProfile?.lastName,
-          role: userProfile?.role || 'USER',
-          company: userProfile?.company
-        };
-        
-        callback(user);
+        try {
+          // CHIRURGICO: Protezione ultra-sicura per getUserProfile
+          let userProfile = null;
+          try {
+            userProfile = await this.getUserProfile(firebaseUser.uid);
+          } catch (error) {
+            console.warn("⚠️ [Firebase Auth] Errore caricamento profilo:", error);
+            userProfile = null;
+          }
+
+          // CHIRURGICO: Protezione ultra-sicura per userProfile destructuring
+          const safeUserProfile = (userProfile && typeof userProfile === 'object') ? userProfile : {};
+
+          const user: User = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName || safeUserProfile.displayName || '',
+            firstName: safeUserProfile.firstName || null,
+            lastName: safeUserProfile.lastName || null,
+            role: safeUserProfile.role || 'USER',
+            company: safeUserProfile.company || null,
+          };
+
+          callback(user);
+        } catch (error) {
+          console.error("❌ [Firebase Auth] Errore critico in onAuthStateChanged:", error);
+          // Fallback sicuro
+          const user: User = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName || '',
+            firstName: null,
+            lastName: null,
+            role: 'USER',
+            company: null,
+          };
+          callback(user);
+        }
       } else {
         callback(null);
       }
@@ -224,12 +272,17 @@ class FirebaseAuthService {
   // ========================================
 
   getCurrentUser(): User | null {
+    if (!auth) {
+      console.error('❌ [Firebase Auth] auth non disponibile in getCurrentUser');
+      return null;
+    }
+    
     const firebaseUser = auth.currentUser;
     if (firebaseUser) {
       return {
         uid: firebaseUser.uid,
         email: firebaseUser.email,
-        displayName: firebaseUser.displayName
+        displayName: firebaseUser.displayName,
       };
     }
     return null;
@@ -245,7 +298,7 @@ class FirebaseAuthService {
       await setDoc(userRef, {
         ...profileData,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
     } catch (error) {
       console.error('Errore durante la creazione del profilo utente:', error);
@@ -256,7 +309,7 @@ class FirebaseAuthService {
     try {
       const userRef = doc(db, 'users', uid);
       const userSnap = await getDoc(userRef);
-      
+
       if (userSnap.exists()) {
         return userSnap.data();
       }
@@ -270,11 +323,15 @@ class FirebaseAuthService {
   private async updateLastLogin(uid: string): Promise<void> {
     try {
       const userRef = doc(db, 'users', uid);
-      await setDoc(userRef, {
-        lastLoginAt: serverTimestamp()
-      }, { merge: true });
+      await setDoc(
+        userRef,
+        {
+          lastLoginAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
     } catch (error) {
-      console.error('Errore durante l\'aggiornamento dell\'ultimo login:', error);
+      console.error("Errore durante l'aggiornamento dell'ultimo login:", error);
     }
   }
 
@@ -285,13 +342,17 @@ class FirebaseAuthService {
   async updateUserProfile(uid: string, updates: any): Promise<boolean> {
     try {
       const userRef = doc(db, 'users', uid);
-      await setDoc(userRef, {
-        ...updates,
-        updatedAt: serverTimestamp()
-      }, { merge: true });
+      await setDoc(
+        userRef,
+        {
+          ...updates,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
       return true;
     } catch (error) {
-      console.error('Errore durante l\'aggiornamento del profilo:', error);
+      console.error("Errore durante l'aggiornamento del profilo:", error);
       return false;
     }
   }

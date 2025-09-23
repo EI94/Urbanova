@@ -1,13 +1,20 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
 import { firebaseAuthService, User } from '@/lib/firebaseAuthService';
 
 // Interfaccia per il contesto di autenticazione
 interface AuthContextType {
   currentUser: User | null;
   loading: boolean;
-  signup: (email: string, password: string, displayName: string, firstName?: string, lastName?: string) => Promise<void>;
+  signup: (
+    email: string,
+    password: string,
+    displayName: string,
+    firstName?: string,
+    lastName?: string
+  ) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
@@ -15,14 +22,76 @@ interface AuthContextType {
 
 // Creazione del contesto con valori predefiniti
 const AuthContext = createContext<AuthContextType | null>(null);
+AuthContext.displayName = 'AuthContext';
 
-// Hook personalizzato per utilizzare il contesto
+// Hook personalizzato per utilizzare il contesto - VERSIONE ULTRA-ROBUSTA CON PROTEZIONE AGGIUNTIVA
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth deve essere utilizzato all\'interno di un AuthProvider');
+  console.log('🔍 [useAuth] Hook chiamato...');
+  
+  try {
+    // CHIRURGICO: Verifica che React sia disponibile
+    if (typeof useContext !== 'function') {
+      console.error('❌ [useAuth] useContext non disponibile');
+      return createFallbackAuth();
+    }
+    
+    // CHIRURGICO: Verifica che AuthContext sia definito
+    if (!AuthContext) {
+      console.error('❌ [useAuth] AuthContext non definito');
+      return createFallbackAuth();
+    }
+    
+    console.log('🔍 [useAuth] Chiamando useContext...');
+    
+    // Controllo diretto del contesto
+    const context = useContext(AuthContext);
+    
+    console.log('🔍 [useAuth] Context ricevuto:', context ? 'Definito' : 'Undefined');
+    
+    // Se il contesto è null o undefined, restituisci un oggetto di fallback
+    if (!context) {
+      console.warn("⚠️ [useAuth] Contesto non disponibile, usando fallback sicuro");
+      return createFallbackAuth();
+    }
+    
+    // CHIRURGICO: Verifica che il context sia un oggetto valido
+    if (typeof context !== 'object') {
+      console.error('❌ [useAuth] Context non è un oggetto:', typeof context);
+      return createFallbackAuth();
+    }
+    
+    console.log('🔍 [useAuth] Context valido, creando return object...');
+    
+    // Assicurati che tutte le proprietà siano definite
+    const authObject = {
+      currentUser: context.currentUser || null,
+      loading: context.loading || false,
+      login: context.login || (async () => { throw new Error("Login function not available"); }),
+      signup: context.signup || (async () => { throw new Error("Signup function not available"); }),
+      logout: context.logout || (async () => { throw new Error("Logout function not available"); }),
+      resetPassword: context.resetPassword || (async () => { throw new Error("Reset password function not available"); })
+    };
+    
+    console.log('✅ [useAuth] Auth object creato con successo');
+    return authObject;
+  } catch (error) {
+    console.error("❌ [useAuth] Errore critico nel hook:", error);
+    // Restituisci sempre un oggetto valido, mai undefined
+    return createFallbackAuth();
   }
-  return context;
+}
+
+// CHIRURGICO: Funzione helper per creare oggetto auth di fallback
+function createFallbackAuth() {
+  console.log('🆘 [useAuth] Creando auth di fallback...');
+  return {
+    currentUser: null,
+    loading: false,
+    login: async () => { throw new Error("Auth context error"); },
+    signup: async () => { throw new Error("Auth context error"); },
+    logout: async () => { throw new Error("Auth context error"); },
+    resetPassword: async () => { throw new Error("Auth context error"); }
+  };
 }
 
 // Props per il provider
@@ -35,11 +104,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // CHIRURGICO: Protezione ultra-sicura per inizializzazione provider
+  console.log('🔥 [AuthProvider] Inizializzazione provider...');
+
   // Funzione per registrazione
-  async function signup(email: string, password: string, displayName: string, firstName?: string, lastName?: string) {
+  async function signup(
+    email: string,
+    password: string,
+    displayName: string,
+    firstName?: string,
+    lastName?: string
+  ) {
     try {
-      const result = await firebaseAuthService.signup(email, password, displayName, firstName, lastName);
-      
+      const result = await firebaseAuthService.signup(
+        email,
+        password,
+        displayName,
+        firstName,
+        lastName
+      );
+
       if (result.success) {
         setCurrentUser(result.user);
       } else {
@@ -55,7 +139,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   async function login(email: string, password: string) {
     try {
       const result = await firebaseAuthService.login(email, password);
-      
+
       if (result.success) {
         setCurrentUser(result.user);
       } else {
@@ -90,26 +174,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Effetto per controllare lo stato dell'autenticazione
   useEffect(() => {
-    const unsubscribe = firebaseAuthService.onAuthStateChanged((user: User | null) => {
-      setCurrentUser(user);
-      setLoading(false);
-    });
+    console.log('🔥 [AuthProvider] useEffect onAuthStateChanged...');
+    
+    try {
+      const unsubscribe = firebaseAuthService.onAuthStateChanged((user: User | null) => {
+        console.log('🔥 [AuthProvider] onAuthStateChanged callback:', user ? 'User logged in' : 'User logged out');
+        setCurrentUser(user);
+        setLoading(false);
+      });
 
-    return unsubscribe;
+      return unsubscribe;
+    } catch (error) {
+      console.error('❌ [AuthProvider] Errore in onAuthStateChanged:', error);
+      setLoading(false);
+      return () => {}; // unsubscribe function vuota
+    }
   }, []);
 
   const value = {
-    currentUser,
-    loading,
-    signup,
-    login,
-    logout,
-    resetPassword
+    currentUser: currentUser || null,
+    loading: loading || false,
+    signup: signup || (async () => { throw new Error("Signup not available"); }),
+    login: login || (async () => { throw new Error("Login not available"); }),
+    logout: logout || (async () => { throw new Error("Logout not available"); }),
+    resetPassword: resetPassword || (async () => { throw new Error("Reset password not available"); }),
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-} 
+  console.log('🔥 [AuthProvider] Rendering provider con value:', { 
+    currentUser: value.currentUser ? 'User present' : 'No user', 
+    loading: value.loading 
+  });
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}

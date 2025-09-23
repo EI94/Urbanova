@@ -1,220 +1,321 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { BuildingIcon, LocationIcon, PlusIcon } from '@/components/icons';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getProjects, RealEstateProject } from '@/lib/firestoreService';
-import { useLanguage } from '@/contexts/LanguageContext';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import {
+  Building,
+  Plus,
+  Search,
+  Filter,
+  Eye,
+  Edit,
+  Trash2,
+  Download,
+  Share,
+  Calendar,
+  Users,
+  DollarSign,
+  BarChart3,
+  TrendingUp,
+  FileText,
+  CreditCard,
+  Shield,
+  Target,
+  Bot,
+  Sparkles,
+} from 'lucide-react';
 
-// Componente Card Progetto
-interface ProjectCardProps {
-  project: RealEstateProject;
-}
+// Mock data per i progetti
+const mockProjects = [
+  {
+    id: '1',
+    name: 'Residenza Marina',
+    location: 'Roma, EUR',
+    status: 'in_progress',
+    priority: 'high',
+    budget: 2500000,
+    progress: 65,
+    createdAt: new Date('2024-01-15'),
+    category: 'Residenziale',
+  },
+  {
+    id: '2',
+    name: 'Centro Commerciale Nord',
+    location: 'Milano, Porta Nuova',
+    status: 'planning',
+    priority: 'medium',
+    budget: 8200000,
+    progress: 25,
+    createdAt: new Date('2024-02-20'),
+    category: 'Commerciale',
+  },
+];
 
-const ProjectCard = ({ project }: ProjectCardProps) => {
-  const { t, formatCurrency: fmtCurrency } = useLanguage();
-  
-  const getStatusColor = () => {
-    switch (project.status) {
-      case 'COMPLETATO':
-        return 'bg-success text-white';
-      case 'IN_CORSO':
-        return 'bg-info text-white';
-      case 'PIANIFICAZIONE':
-        return 'bg-warning text-white';
-      case 'IN_ATTESA':
-        return 'bg-neutral text-white';
+export default function ProgettiPage() {
+  const [projects, setProjects] = useState(mockProjects);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [filteredProjects, setFilteredProjects] = useState(projects);
+
+  useEffect(() => {
+    setProjects(mockProjects);
+  }, []);
+
+  useEffect(() => {
+    let filtered = projects.filter(project => {
+      const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          project.location.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = selectedStatus === 'all' || project.status === selectedStatus;
+      return matchesSearch && matchesStatus;
+    });
+    setFilteredProjects(filtered);
+  }, [projects, searchTerm, selectedStatus]);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'in_progress':
+        return 'bg-blue-100 text-blue-800';
+      case 'planning':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'on_hold':
+        return 'bg-gray-100 text-gray-800';
       default:
-        return 'bg-base-300 text-neutral-800';
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
-  // Calcolo del progresso per la barra
-  const getProgress = () => {
-    if (project.status === 'COMPLETATO') return 100;
-    if (project.status === 'PIANIFICAZIONE') return 10;
-    if (project.status === 'IN_ATTESA') return 30;
-    if (project.status === 'IN_CORSO') return 65;
-    return 0;
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'Completato';
+      case 'in_progress':
+        return 'In Corso';
+      case 'planning':
+        return 'Pianificazione';
+      case 'on_hold':
+        return 'In Pausa';
+      default:
+        return status;
+    }
   };
 
-  const formatBudget = (budget?: number) => {
-    if (!budget) return 'N/D';
-    return fmtCurrency(budget);
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high':
+        return 'bg-red-100 text-red-800';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'low':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
 
-  const progress = getProgress();
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case 'high':
+        return 'Alta';
+      case 'medium':
+        return 'Media';
+      case 'low':
+        return 'Bassa';
+      default:
+        return priority;
+    }
+  };
 
-  return (
-    <div className="card bg-base-100 shadow-smooth-md hover:shadow-smooth-lg transition-shadow duration-300">
-      <div className="card-body p-5">
-        <div className="flex justify-between items-start">
-          <h3 className="card-title text-lg font-semibold text-neutral-900">{project.name}</h3>
-          <div className={`badge ${getStatusColor()} py-1 px-2`}>
-            {project.status.replace('_', ' ')}
-          </div>
-        </div>
-        <p className="mt-2 text-neutral-600 line-clamp-2">{project.description}</p>
-        
-        {project.propertyType && (
-          <div className="mt-3 flex items-center">
-            <BuildingIcon className="h-4 w-4 text-blue-500 mr-1" />
-            <span className="text-sm text-neutral-700">{project.propertyType}</span>
-            {project.units && (
-              <span className="ml-2 text-sm text-neutral-500">{project.units} {t('units', 'projects')}</span>
-            )}
-          </div>
-        )}
-        
-        {progress > 0 && (
-          <div className="mt-4">
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-xs font-medium text-neutral-700">{t('progress', 'projects')}</span>
-              <span className="text-xs font-medium text-neutral-700">{progress}%</span>
-            </div>
-            <div className="w-full bg-base-200 rounded-full h-2">
-              <div 
-                className="bg-primary h-2 rounded-full" 
-                style={{ width: `${progress}%` }}
-              ></div>
-            </div>
-          </div>
-        )}
-        
-        <div className="flex items-center mt-4 text-sm text-neutral-500">
-          <LocationIcon className="h-4 w-4 mr-1" />
-          <span>{project.location}</span>
-        </div>
-        
-        {project.budget && (
-          <div className="mt-1 text-sm text-neutral-700">
-            <span className="font-medium">{t('budget', 'projects')}: </span>
-            <span>{formatBudget(project.budget)}</span>
-          </div>
-        )}
-        
-        <div className="card-actions justify-end mt-4">
-          <Link href={`/dashboard/progetti/${project.id}`} className="btn btn-sm btn-outline">
-            {t('details', 'projects')}
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-};
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('it-IT', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
 
-export default function ProgettiPage() {
-  const { t } = useLanguage();
-  const [projects, setProjects] = useState<RealEstateProject[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const loadProjects = async () => {
-      try {
-        const projectsData = await getProjects();
-        setProjects(projectsData);
-      } catch (err) {
-        console.error('Errore nel caricamento dei progetti:', err);
-        setError(t('errorLoadingProjects', 'projects'));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProjects();
-  }, [t]);
-
-  if (loading) {
+  if (projects.length === 0) {
     return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="loading loading-spinner loading-lg"></div>
-          <span className="ml-4 text-lg">{t('loadingProjects', 'projects')}</span>
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  if (error) {
-    return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="text-red-500 text-6xl mb-4">⚠️</div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('errorTitle', 'projects')}</h2>
-            <p className="text-gray-600">{error}</p>
-          </div>
+      <DashboardLayout title="Progetti">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
+    <DashboardLayout title="Progetti">
+      <div className="flex-1 p-6">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">🏗️ {t('title', 'projects')}</h1>
-            <p className="text-gray-600 mt-1">{t('subtitle', 'projects')}</p>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <Building className="w-8 h-8 text-purple-600" />
+              Progetti
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Gestisci e monitora tutti i tuoi progetti immobiliari
+            </p>
           </div>
-          <Link href="/dashboard/progetti/nuovo">
-            <button className="btn btn-primary">
-              <PlusIcon className="h-4 w-4 mr-2" />
-              {t('newProject', 'projects')}
-            </button>
+          <Link
+            href="/dashboard/progetti/nuovo"
+            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Nuovo Progetto
           </Link>
         </div>
 
-        {/* Statistiche */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="text-2xl font-bold text-blue-600">{projects.length}</div>
-            <div className="text-sm text-gray-600">{t('totalProjects', 'projects')}</div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="text-2xl font-bold text-green-600">
-              {projects.filter(p => p.status === 'COMPLETATO').length}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Cerca progetti..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
             </div>
-            <div className="text-sm text-gray-600">{t('completedProjects', 'projects')}</div>
+            
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">Tutti gli Stati</option>
+              <option value="planning">Pianificazione</option>
+              <option value="in_progress">In Corso</option>
+              <option value="completed">Completato</option>
+              <option value="on_hold">In Pausa</option>
+            </select>
           </div>
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="text-2xl font-bold text-yellow-600">
-              {projects.filter(p => p.status === 'IN_CORSO').length}
-            </div>
-            <div className="text-sm text-gray-600">{t('inProgressProjects', 'projects')}</div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="text-2xl font-bold text-purple-600">
-              {projects.filter(p => p.status === 'PIANIFICAZIONE').length}
-            </div>
-            <div className="text-sm text-gray-600">{t('planningProjects', 'projects')}</div>
+
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded-lg transition-colors ${
+                viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <Building className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-lg transition-colors ${
+                viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <BarChart3 className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
-        {/* Lista Progetti */}
-        {projects.length === 0 ? (
-          <div className="text-center py-12">
-            <BuildingIcon className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-700 mb-2">{t('noProjects', 'projects')}</h3>
-            <p className="text-gray-500 mb-4">{t('createFirstProject', 'projects')}</p>
-            <Link href="/dashboard/progetti/nuovo">
-              <button className="btn btn-primary">
-                <PlusIcon className="h-4 w-4 mr-2" />
-                {t('newProject', 'projects')}
-              </button>
-            </Link>
-          </div>
-        ) : (
+        {viewMode === 'grid' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
+            {filteredProjects.map(project => (
+              <div key={project.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                <div className="aspect-video bg-gray-100 relative">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Building className="w-12 h-12 text-gray-400" />
+                  </div>
+                  <div className="absolute top-2 right-2 flex space-x-1">
+                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(project.status)}`}>
+                      {getStatusLabel(project.status)}
+                    </span>
+                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(project.priority)}`}>
+                      {getPriorityLabel(project.priority)}
+                    </span>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{project.name}</h3>
+                  <p className="text-sm text-gray-600 mb-2">{project.location}</p>
+                  <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
+                    <span>Budget: {formatCurrency(project.budget)}</span>
+                    <span>{project.progress}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${project.progress}%` }}
+                    ></div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <button className="p-1 text-gray-400 hover:text-blue-600 transition-colors">
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button className="p-1 text-gray-400 hover:text-green-600 transition-colors">
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button className="p-1 text-gray-400 hover:text-orange-600 transition-colors">
+                        <Share className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <button className="p-1 text-gray-400 hover:text-red-600 transition-colors">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         )}
+
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Progetti Totali</p>
+                <p className="text-2xl font-bold text-gray-900">{projects.length}</p>
+              </div>
+              <Building className="w-8 h-8 text-blue-600" />
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">In Corso</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {projects.filter(p => p.status === 'in_progress').length}
+                </p>
+              </div>
+              <Calendar className="w-8 h-8 text-green-600" />
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Completati</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {projects.filter(p => p.status === 'completed').length}
+                </p>
+              </div>
+              <TrendingUp className="w-8 h-8 text-green-600" />
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Budget Totale</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {formatCurrency(projects.reduce((sum, p) => sum + p.budget, 0))}
+                </p>
+              </div>
+              <DollarSign className="w-8 h-8 text-purple-600" />
+            </div>
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   );
-} 
+}

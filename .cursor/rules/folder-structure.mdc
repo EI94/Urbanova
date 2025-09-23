@@ -1,0 +1,119 @@
+# Folder Structure - Urbanova
+
+## Current Structure (as-is)
+```
+src/
+  app/                    # Next.js App Router
+    api/                  # API routes
+    dashboard/            # Dashboard pages
+    auth/                 # Authentication pages
+  components/             # React components
+    ui/                   # UI components
+    layout/               # Layout components
+  contexts/               # React contexts
+  hooks/                  # Custom hooks
+  lib/                    # Services and utilities
+  types/                  # TypeScript type definitions
+  translations/           # i18n files
+```
+
+## Target Structure (to-be)
+```
+apps/
+  web/                    # Next.js app (UI + API routes)
+    src/
+      app/                # App Router
+      components/         # React components
+      contexts/           # React contexts
+      hooks/              # Custom hooks
+      lib/                # Web-specific services
+      types/              # Web-specific types
+      translations/       # i18n files
+
+packages/
+  types/                  # Domain & DTO types + zod schemas
+    src/
+      domain/             # Core domain types
+      dto/                # Data transfer objects
+      db/                 # Database shapes
+      index.ts            # Main exports
+      factories.ts        # Test factories
+      
+  agents/                 # Agent actions (pure TS)
+    src/
+      landScout/          # Land discovery agent
+      feasibility/        # Feasibility analysis agent
+      dealMemo/           # Deal memo generation agent
+      chatOps/            # Chat operations agent
+      index.ts            # Main exports
+      
+  data/                   # Firestore adapters (CRUD)
+    src/
+      firestore/          # Firestore operations
+      validation/         # Zod validation schemas
+      migrations/         # Database migrations
+      index.ts            # Main exports
+      
+  scrapers/               # Land/Aste scrapers
+    src/
+      land/               # Land scraping
+      aste/               # Auction scraping
+      common/             # Shared scraping utilities
+      index.ts            # Main exports
+      
+  pdf/                    # PDF generators
+    src/
+      templates/          # PDF templates
+      generators/         # PDF generation logic
+      index.ts            # Main exports
+      
+  testing/                # Test utilities
+    src/
+      factories/          # Test data factories
+      mocks/              # Mock implementations
+      utils/              # Testing utilities
+      index.ts            # Main exports
+
+infra/
+  tasks/                  # Cloud Tasks job definitions
+  firebase/               # Firebase configuration
+  vercel/                 # Vercel configuration
+
+docs/                     # Documentation
+  adr/                    # Architecture Decision Records
+  prd/                    # Product Requirements Documents
+  api/                    # API documentation
+```
+
+## Migration Path
+1. **Phase 1**: Create packages structure alongside existing src/
+2. **Phase 2**: Move types to packages/types
+3. **Phase 3**: Move services to appropriate packages
+4. **Phase 4**: Update imports and remove old structure
+5. **Phase 5**: Clean up and optimize
+
+## Code Location Rules
+- **Domain Logic**: packages/agents
+- **Data Access**: packages/data
+- **External Integrations**: packages/scrapers
+- **UI Components**: apps/web/src/components
+- **API Routes**: apps/web/src/app/api
+- **Types**: packages/types (shared), apps/web/src/types (web-specific)
+- **Tests**: Co-located with source code
+- **Configuration**: Root level or infra/ folder
+
+## Import Patterns
+```typescript
+// From packages
+import { Project, Deal } from '@urbanova/types';
+import { landScoutAgent } from '@urbanova/agents';
+import { projectService } from '@urbanova/data';
+
+// From web app
+import { DashboardLayout } from '@/components/layout';
+import { useAuth } from '@/contexts/AuthContext';
+```
+description:
+globs:
+alwaysApply: true
+---

@@ -1,17 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+
+import { CheckIcon, XIcon, RefreshIcon, SaveIcon, UploadIcon as LoadIcon, ClockIcon } from '@/components/icons';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getSupportedLanguages } from '@/lib/languageConfig';
 import { SupportedLanguage } from '@/types/language';
-import { 
-  CheckIcon, 
-  XIcon, 
-  RefreshIcon,
-  SaveIcon,
-  LoadIcon,
-  ClockIcon
-} from '@/components/icons';
 
 interface PersistenceTestProps {
   onComplete?: (results: any) => void;
@@ -20,13 +14,15 @@ interface PersistenceTestProps {
 export default function PersistenceTest({ onComplete }: PersistenceTestProps) {
   const { currentLanguage, changeLanguage } = useLanguage();
   const [isRunning, setIsRunning] = useState(false);
-  const [results, setResults] = useState<Array<{
-    test: string;
-    status: 'pass' | 'fail' | 'warning';
-    message: string;
-    timestamp: Date;
-  }>>([]);
-  
+  const [results, setResults] = useState<
+    Array<{
+      test: string;
+      status: 'pass' | 'fail' | 'warning';
+      message: string;
+      timestamp: Date;
+    }>
+  >([]);
+
   const [originalLanguage, setOriginalLanguage] = useState<SupportedLanguage | null>(null);
   const supportedLanguages = getSupportedLanguages();
 
@@ -43,128 +39,129 @@ export default function PersistenceTest({ onComplete }: PersistenceTestProps) {
     try {
       // Test 1: Salvataggio lingua
       const testLanguage = supportedLanguages.find(l => l.code !== currentLanguage)?.code || 'en';
-      
+
       console.log(`💾 [PersistenceTest] Cambio lingua da ${currentLanguage} a ${testLanguage}`);
-      
+
       await changeLanguage(testLanguage);
-      
+
       testResults.push({
         test: 'Cambio lingua',
         status: 'pass',
         message: `Lingua cambiata da ${currentLanguage} a ${testLanguage}`,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       // Test 2: Verifica localStorage
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       const savedLanguage = localStorage.getItem('urbanova-language');
       const savedTimestamp = localStorage.getItem('urbanova-language-timestamp');
-      
+
       if (savedLanguage === testLanguage && savedTimestamp) {
         testResults.push({
           test: 'Salvataggio localStorage',
           status: 'pass',
           message: `Lingua salvata: ${savedLanguage}, Timestamp: ${new Date(parseInt(savedTimestamp)).toLocaleString()}`,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       } else {
         testResults.push({
           test: 'Salvataggio localStorage',
           status: 'fail',
           message: `Lingua non salvata correttamente. Atteso: ${testLanguage}, Trovato: ${savedLanguage}`,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       }
 
       // Test 3: Simulazione reload pagina
       console.log(`💾 [PersistenceTest] Simulazione reload pagina`);
-      
+
       // Salva stato corrente
       const currentState = {
         language: testLanguage,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
-      
+
       // Simula reload (non ricarica realmente la pagina)
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       // Verifica che la lingua sia ancora quella impostata
       const reloadedLanguage = localStorage.getItem('urbanova-language');
-      
+
       if (reloadedLanguage === testLanguage) {
         testResults.push({
           test: 'Persistenza dopo reload',
           status: 'pass',
           message: `Lingua persistita dopo reload: ${reloadedLanguage}`,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       } else {
         testResults.push({
           test: 'Persistenza dopo reload',
           status: 'fail',
           message: `Lingua non persistita. Atteso: ${testLanguage}, Trovato: ${reloadedLanguage}`,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       }
 
       // Test 4: Test cambio multiplo
       console.log(`💾 [PersistenceTest] Test cambio multiplo`);
-      
+
       const testLanguages = ['it', 'en', 'es'];
       const changeResults = [];
-      
+
       for (const lang of testLanguages) {
         const startTime = Date.now();
-        await changeLanguage(lang);
+        await changeLanguage(lang as any);
         const changeTime = Date.now() - startTime;
-        
+
         const saved = localStorage.getItem('urbanova-language');
         changeResults.push({
           language: lang,
           saved: saved,
           success: saved === lang,
-          duration: changeTime
+          duration: changeTime,
         });
-        
+
         await new Promise(resolve => setTimeout(resolve, 100));
       }
-      
+
       const successfulChanges = changeResults.filter(r => r.success).length;
-      
+
       if (successfulChanges === testLanguages.length) {
         testResults.push({
           test: 'Cambio multiplo',
           status: 'pass',
           message: `Tutti i ${testLanguages.length} cambi lingua riusciti`,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       } else {
         testResults.push({
           test: 'Cambio multiplo',
           status: 'fail',
           message: `${successfulChanges}/${testLanguages.length} cambi lingua riusciti`,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       }
 
       // Test 5: Test timestamp
       const finalTimestamp = localStorage.getItem('urbanova-language-timestamp');
       const timestampAge = finalTimestamp ? Date.now() - parseInt(finalTimestamp) : 0;
-      
-      if (timestampAge < 60000) { // Meno di 1 minuto
+
+      if (timestampAge < 60000) {
+        // Meno di 1 minuto
         testResults.push({
           test: 'Timestamp aggiornato',
           status: 'pass',
           message: `Timestamp aggiornato ${Math.round(timestampAge / 1000)}s fa`,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       } else {
         testResults.push({
           test: 'Timestamp aggiornato',
           status: 'warning',
           message: `Timestamp vecchio: ${Math.round(timestampAge / 1000)}s fa`,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       }
 
@@ -172,27 +169,31 @@ export default function PersistenceTest({ onComplete }: PersistenceTestProps) {
       const allData = {
         language: localStorage.getItem('urbanova-language'),
         timestamp: localStorage.getItem('urbanova-language-timestamp'),
-        hasValidLanguage: supportedLanguages.some(l => l.code === localStorage.getItem('urbanova-language')),
-        hasValidTimestamp: !isNaN(parseInt(localStorage.getItem('urbanova-language-timestamp') || '0'))
+        hasValidLanguage: supportedLanguages.some(
+          l => l.code === localStorage.getItem('urbanova-language')
+        ),
+        hasValidTimestamp: !isNaN(
+          parseInt(localStorage.getItem('urbanova-language-timestamp') || '0')
+        ),
       };
-      
+
       if (allData.hasValidLanguage && allData.hasValidTimestamp) {
         testResults.push({
           test: 'Integrità dati',
           status: 'pass',
           message: `Dati validi: lingua=${allData.language}, timestamp=${allData.timestamp}`,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       } else {
         testResults.push({
           test: 'Integrità dati',
           status: 'fail',
           message: `Dati corrotti: lingua=${allData.language}, timestamp=${allData.timestamp}`,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       }
 
-      setResults(testResults);
+      setResults(testResults as any);
 
       // Calcola statistiche
       const totalTests = testResults.length;
@@ -206,7 +207,7 @@ export default function PersistenceTest({ onComplete }: PersistenceTestProps) {
         passed: passedTests,
         failed: failedTests,
         warnings: warningTests,
-        successRate: `${successRate.toFixed(1)}%`
+        successRate: `${successRate.toFixed(1)}%`,
       });
 
       // Callback di completamento
@@ -218,24 +219,23 @@ export default function PersistenceTest({ onComplete }: PersistenceTestProps) {
             passed: passedTests,
             failed: failedTests,
             warning: warningTests,
-            successRate
+            successRate,
           },
           currentLanguage: localStorage.getItem('urbanova-language'),
-          originalLanguage
+          originalLanguage,
         });
       }
-
     } catch (error) {
       console.error('❌ [PersistenceTest] Errore durante test:', error);
-      
+
       testResults.push({
         test: 'Errore generale',
         status: 'fail',
         message: error instanceof Error ? error.message : 'Errore sconosciuto',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
-      
-      setResults(testResults);
+
+      setResults(testResults as any);
     } finally {
       setIsRunning(false);
     }
@@ -255,7 +255,10 @@ export default function PersistenceTest({ onComplete }: PersistenceTestProps) {
     passed: results.filter(r => r.status === 'pass').length,
     failed: results.filter(r => r.status === 'fail').length,
     warning: results.filter(r => r.status === 'warning').length,
-    successRate: results.length > 0 ? (results.filter(r => r.status === 'pass').length / results.length) * 100 : 0
+    successRate:
+      results.length > 0
+        ? (results.filter(r => r.status === 'pass').length / results.length) * 100
+        : 0,
   };
 
   return (
@@ -270,36 +273,31 @@ export default function PersistenceTest({ onComplete }: PersistenceTestProps) {
             Verifica che le impostazioni lingua persistano correttamente
           </p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           {stats.total > 0 && (
             <div className="text-right">
               <div className="text-sm font-medium">
                 {stats.passed}/{stats.total} test passati
               </div>
-              <div className="text-xs text-gray-500">
-                {stats.successRate.toFixed(1)}% successo
-              </div>
+              <div className="text-xs text-gray-500">{stats.successRate.toFixed(1)}% successo</div>
             </div>
           )}
-          
+
           <div className="flex gap-2">
             <button
               onClick={runPersistenceTest}
               disabled={isRunning}
               className={`
                 flex items-center gap-2 px-3 py-2 rounded-md transition-colors text-sm
-                ${isRunning 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-blue-600 hover:bg-blue-700'
-                }
+                ${isRunning ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}
                 text-white
               `}
             >
               <SaveIcon className="h-4 w-4" />
               {isRunning ? 'Test in corso...' : 'Test Persistenza'}
             </button>
-            
+
             {originalLanguage && originalLanguage !== currentLanguage && (
               <button
                 onClick={restoreOriginalLanguage}
@@ -322,7 +320,7 @@ export default function PersistenceTest({ onComplete }: PersistenceTestProps) {
           </div>
           <p className="text-lg font-semibold">{currentLanguage.toUpperCase()}</p>
         </div>
-        
+
         <div className="p-3 bg-gray-50 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
             <SaveIcon className="h-4 w-4 text-gray-600" />
@@ -332,7 +330,7 @@ export default function PersistenceTest({ onComplete }: PersistenceTestProps) {
             {localStorage.getItem('urbanova-language')?.toUpperCase() || 'Nessuna'}
           </p>
         </div>
-        
+
         <div className="p-3 bg-gray-50 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
             <LoadIcon className="h-4 w-4 text-gray-600" />
@@ -360,7 +358,9 @@ export default function PersistenceTest({ onComplete }: PersistenceTestProps) {
             <div className="text-sm text-red-700">Falliti</div>
           </div>
           <div className="text-center p-3 bg-yellow-50 rounded-lg">
-            <div className="text-2xl font-bold text-yellow-600">{stats.successRate.toFixed(1)}%</div>
+            <div className="text-2xl font-bold text-yellow-600">
+              {stats.successRate.toFixed(1)}%
+            </div>
             <div className="text-sm text-yellow-700">Successo</div>
           </div>
         </div>
@@ -370,15 +370,18 @@ export default function PersistenceTest({ onComplete }: PersistenceTestProps) {
       {results.length > 0 && (
         <div className="space-y-3 max-h-64 overflow-y-auto">
           <h4 className="font-medium mb-3">Risultati Test Persistenza</h4>
-          
+
           {results.map((result, index) => (
             <div
               key={index}
               className={`
                 p-3 rounded-lg border-l-4 flex items-center justify-between
-                ${result.status === 'pass' ? 'border-green-500 bg-green-50' :
-                  result.status === 'fail' ? 'border-red-500 bg-red-50' :
-                  'border-yellow-500 bg-yellow-50'
+                ${
+                  result.status === 'pass'
+                    ? 'border-green-500 bg-green-50'
+                    : result.status === 'fail'
+                      ? 'border-red-500 bg-red-50'
+                      : 'border-yellow-500 bg-yellow-50'
                 }
               `}
             >
@@ -413,4 +416,4 @@ export default function PersistenceTest({ onComplete }: PersistenceTestProps) {
       )}
     </div>
   );
-} 
+}

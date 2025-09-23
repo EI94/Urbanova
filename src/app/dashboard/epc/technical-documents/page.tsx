@@ -1,7 +1,12 @@
 'use client';
 
+import { DocumentIcon } from '@/components/icons';
+// import { EngineeringIcon, CertificateIcon } from '@/components/icons';
+
+// Mock missing icons
+const EngineeringIcon = DocumentIcon;
+const CertificateIcon = DocumentIcon;
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { DocumentIcon, EngineeringIcon, CertificateIcon } from '@/components/icons';
 
 export default function EPCTechnicalDocumentsPage() {
   return (
@@ -11,7 +16,7 @@ export default function EPCTechnicalDocumentsPage() {
           <h1 className="text-3xl font-bold text-gray-900">📋 Documenti Tecnici EPC</h1>
           <p className="text-gray-600 mt-1">Gestisci documentazione tecnica e certificazioni</p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Progetti Esecutivi */}
           <div className="bg-white rounded-lg shadow-sm p-6">

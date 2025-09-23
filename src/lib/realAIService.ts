@@ -1,6 +1,7 @@
 // Servizio AI Reale per Analisi Terreni - Urbanova AI
 import OpenAI from 'openai';
-import { ScrapedLand, LandAnalysis } from '@/types/land';
+
+import { ScrapedLand, LandAnalysis } from '../../src/types/land';
 
 export class RealAIService {
   private openai: OpenAI | null = null;
@@ -10,7 +11,7 @@ export class RealAIService {
     // Inizializza OpenAI solo se l'API key è configurata
     const apiKey = process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY;
     console.log('🔧 [RealAIService] Verifica configurazione OpenAI...');
-    
+
     if (apiKey && apiKey !== 'undefined' && apiKey !== '') {
       try {
         this.openai = new OpenAI({
@@ -38,30 +39,29 @@ export class RealAIService {
       }
 
       const prompt = this.buildAnalysisPrompt(land, marketContext);
-      
+
       const completion = await this.openai.chat.completions.create({
-        model: "gpt-4",
+        model: 'gpt-4',
         messages: [
           {
-            role: "system",
+            role: 'system',
             content: `Sei un esperto analista immobiliare specializzato in valutazione di terreni edificabili. 
             Analizza ogni terreno considerando: prezzo, localizzazione, potenziale di sviluppo, rischi, 
-            opportunità di investimento e trend di mercato. Fornisci analisi dettagliate e raccomandazioni concrete.`
+            opportunità di investimento e trend di mercato. Fornisci analisi dettagliate e raccomandazioni concrete.`,
           },
           {
-            role: "user",
-            content: prompt
-          }
+            role: 'user',
+            content: prompt,
+          },
         ],
         temperature: 0.3,
-        max_tokens: 1000
+        max_tokens: 1000,
       });
 
-      const analysis = this.parseAIResponse(completion.choices[0].message.content || '');
-      
+      const analysis = this.parseAIResponse(completion.choices[0]?.message?.content || '');
+
       console.log(`✅ [RealAIService] Analisi completata per ${land.title}`);
       return analysis;
-
     } catch (error) {
       console.error('❌ Errore analisi AI:', error);
       // Fallback a analisi locale se AI non disponibile
@@ -81,23 +81,23 @@ export class RealAIService {
       progetti futuri e potenziale di crescita. Fornisci un'analisi sintetica ma completa.`;
 
       const completion = await this.openai.chat.completions.create({
-        model: "gpt-4",
+        model: 'gpt-4',
         messages: [
           {
-            role: "system",
-            content: "Sei un esperto di mercato immobiliare italiano. Fornisci analisi accurate e aggiornate."
+            role: 'system',
+            content:
+              'Sei un esperto di mercato immobiliare italiano. Fornisci analisi accurate e aggiornate.',
           },
           {
-            role: "user",
-            content: prompt
-          }
+            role: 'user',
+            content: prompt,
+          },
         ],
         temperature: 0.3,
-        max_tokens: 500
+        max_tokens: 500,
       });
 
-      return completion.choices[0].message.content || 'Analisi trend non disponibile';
-
+      return completion.choices[0]?.message?.content || 'Analisi trend non disponibile';
     } catch (error) {
       console.error('❌ Errore analisi trend:', error);
       return `Analisi trend di mercato per ${location}: Dati non disponibili al momento.`;
@@ -112,7 +112,7 @@ export class RealAIService {
           'Considera terreni con buona accessibilità',
           'Valuta potenziale di sviluppo futuro',
           'Verifica servizi disponibili nella zona',
-          'Analizza trend di crescita del quartiere'
+          'Analizza trend di crescita del quartiere',
         ];
       }
 
@@ -121,23 +121,23 @@ export class RealAIService {
       Fornisci 5-7 raccomandazioni concrete e actionable.`;
 
       const completion = await this.openai.chat.completions.create({
-        model: "gpt-4",
+        model: 'gpt-4',
         messages: [
           {
-            role: "system",
-            content: "Sei un consulente immobiliare esperto. Fornisci raccomandazioni pratiche e concrete."
+            role: 'system',
+            content:
+              'Sei un consulente immobiliare esperto. Fornisci raccomandazioni pratiche e concrete.',
           },
           {
-            role: "user",
-            content: prompt
-          }
+            role: 'user',
+            content: prompt,
+          },
         ],
         temperature: 0.3,
-        max_tokens: 800
+        max_tokens: 800,
       });
 
-      return this.parseRecommendations(completion.choices[0].message.content || '');
-
+      return this.parseRecommendations(completion.choices[0]?.message?.content || '');
     } catch (error) {
       console.error('❌ Errore generazione raccomandazioni:', error);
       return ['Analisi raccomandazioni non disponibile al momento.'];
@@ -160,24 +160,23 @@ export class RealAIService {
       Considera: rapporto qualità/prezzo, potenziale di sviluppo, rischi, opportunità di mercato.`;
 
       const completion = await this.openai.chat.completions.create({
-        model: "gpt-4",
+        model: 'gpt-4',
         messages: [
           {
-            role: "system",
-            content: "Sei un valutatore immobiliare esperto. Fornisci solo un numero da 0 a 100."
+            role: 'system',
+            content: 'Sei un valutatore immobiliare esperto. Fornisci solo un numero da 0 a 100.',
           },
           {
-            role: "user",
-            content: prompt
-          }
+            role: 'user',
+            content: prompt,
+          },
         ],
         temperature: 0.1,
-        max_tokens: 10
+        max_tokens: 10,
       });
 
-      const score = parseInt(completion.choices[0].message.content || '70');
+      const score = parseInt(completion.choices[0]?.message?.content || '70');
       return Math.max(0, Math.min(100, score));
-
     } catch (error) {
       console.error('❌ Errore calcolo AI Score:', error);
       return this.calculateBasicAIScore(land);
@@ -195,7 +194,7 @@ export class RealAIService {
     PREZZO/m²: €${land.pricePerSqm}
     ZONA: ${land.zoning}
     PERMESSI EDIFICABILITÀ: ${land.buildingRights}
-    INFRASTRUTTURE: ${land.infrastructure.join(', ')}
+    INFRASTRUTTURE: ${land.infrastructure?.join(', ') || 'Non specificate'}
     DESCRIZIONE: ${land.description}
     FONTE: ${land.source}
 
@@ -241,7 +240,7 @@ export class RealAIService {
       warnings: [],
       estimatedROI: 8,
       timeToMarket: '12-18 mesi',
-      competitiveAdvantage: 'Prezzo competitivo'
+      competitiveAdvantage: 'Prezzo competitivo',
     };
 
     // Estrai informazioni dalla risposta testuale
@@ -260,7 +259,7 @@ export class RealAIService {
 
   private parseRecommendations(response: string): string[] {
     const recommendations: string[] = [];
-    
+
     // Estrai raccomandazioni dalla risposta
     const lines = response.split('\n');
     for (const line of lines) {
@@ -276,16 +275,16 @@ export class RealAIService {
     let score = 70;
 
     // Bonus per prezzo competitivo
-    if (land.pricePerSqm < 100) score += 15;
-    else if (land.pricePerSqm < 150) score += 10;
-    else if (land.pricePerSqm < 200) score += 5;
+    if (land.pricePerSqm && land.pricePerSqm < 100) score += 15;
+    else if (land.pricePerSqm && land.pricePerSqm < 150) score += 10;
+    else if (land.pricePerSqm && land.pricePerSqm < 200) score += 5;
 
     // Bonus per area ottimale
     if (land.area >= 1000 && land.area <= 3000) score += 10;
     else if (land.area >= 500 && land.area <= 5000) score += 5;
 
     // Bonus per infrastrutture
-    score += land.infrastructure.length * 3;
+    score += (land.infrastructure?.length || 0) * 3;
 
     // Bonus per building rights
     if (land.buildingRights === 'Sì') score += 15;
@@ -302,19 +301,13 @@ export class RealAIService {
       recommendations: [
         'Verifica i permessi edificabilità',
         'Analizza la domanda di mercato locale',
-        'Considera i costi di urbanizzazione'
+        'Considera i costi di urbanizzazione',
       ],
-      opportunities: [
-        'Potenziale di rivalutazione',
-        'Possibilità di sviluppo residenziale'
-      ],
-      warnings: [
-        'Verificare conformità urbanistica',
-        'Controllare vincoli ambientali'
-      ],
+      opportunities: ['Potenziale di rivalutazione', 'Possibilità di sviluppo residenziale'],
+      warnings: ['Verificare conformità urbanistica', 'Controllare vincoli ambientali'],
       estimatedROI: 8,
       timeToMarket: '12-18 mesi',
-      competitiveAdvantage: 'Prezzo competitivo'
+      competitiveAdvantage: 'Prezzo competitivo',
     };
   }
 
@@ -330,14 +323,14 @@ export class RealAIService {
       // Test rapido della connessione OpenAI
       try {
         const completion = await this.openai.chat.completions.create({
-          model: "gpt-4",
+          model: 'gpt-4',
           messages: [
             {
-              role: "user",
-              content: "Test"
-            }
+              role: 'user',
+              content: 'Test',
+            },
           ],
-          max_tokens: 5
+          max_tokens: 5,
         });
 
         console.log('✅ [RealAIService] Configurazione AI verificata - OpenAI attivo');
@@ -359,4 +352,4 @@ export class RealAIService {
 }
 
 // Istanza singleton
-export const realAIService = new RealAIService(); 
+export const realAIService = new RealAIService();

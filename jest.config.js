@@ -1,0 +1,58 @@
+const nextJest = require('next/jest');
+
+const createJestConfig = nextJest({
+  // Provide the path to your Next.js app to load next.config.js and .env files
+  dir: './',
+});
+
+// Add any custom config to be passed to Jest
+const customJestConfig = {
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  testEnvironment: 'jsdom',
+  testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '^@urbanova/types$': '<rootDir>/packages/types/src',
+    '^@urbanova/agents$': '<rootDir>/packages/agents/src',
+    '^@urbanova/data$': '<rootDir>/packages/data/src',
+    '^@urbanova/scrapers$': '<rootDir>/packages/scrapers/src',
+    '^@urbanova/pdf$': '<rootDir>/packages/pdf/src',
+    '^@urbanova/testing$': '<rootDir>/packages/testing/src',
+    '^@urbanova/infra$': '<rootDir>/packages/infra/src',
+  },
+  collectCoverageFrom: [
+    'src/**/*.{js,jsx,ts,tsx}',
+    'packages/**/src/**/*.{js,jsx,ts,tsx}',
+    '!src/**/*.d.ts',
+    '!packages/**/src/**/*.d.ts',
+    '!**/node_modules/**',
+    '!**/.next/**',
+  ],
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+  },
+  testMatch: [
+    '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
+    '<rootDir>/src/**/*.{test,spec}.{js,jsx,ts,tsx}',
+    '<rootDir>/packages/**/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
+    '<rootDir>/packages/**/src/**/*.{test,spec}.{js,jsx,ts,tsx}',
+  ],
+  transform: {
+    '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }],
+  },
+  transformIgnorePatterns: [
+    'node_modules/(?!(uuid|@google-cloud|firebase-admin)/)',
+    '^.+\\.module\\.(css|sass|scss)$',
+  ],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  testTimeout: 10000,
+  verbose: true,
+};
+
+// createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
+module.exports = createJestConfig(customJestConfig);

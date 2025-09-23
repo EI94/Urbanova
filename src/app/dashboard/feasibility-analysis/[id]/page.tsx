@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
-import { 
-  CalculatorIcon, 
-  BuildingIcon, 
-  EuroIcon, 
+import { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
+
+import {
+  CalculatorIcon,
+  BuildingIcon,
+  EuroIcon,
   CalendarIcon,
   LocationIcon,
   EditIcon,
@@ -17,11 +18,11 @@ import {
   ChartBarIcon,
   ClockIcon,
   CheckCircleIcon,
-  AlertIcon
+  AlertIcon,
 } from '@/components/icons';
-import toast from 'react-hot-toast';
-import Link from 'next/link';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import FeasibilityReportGenerator from '@/components/ui/FeasibilityReportGenerator';
+import { feasibilityService, FeasibilityProject } from '@/lib/feasibilityService';
 
 export default function FeasibilityProjectDetailPage() {
   const params = useParams();
@@ -30,10 +31,10 @@ export default function FeasibilityProjectDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (params.id) {
+    if (params?.id) {
       loadProject(params.id as string);
     }
-  }, [params.id]);
+  }, [params?.id]);
 
   const loadProject = async (projectId: string) => {
     setLoading(true);
@@ -42,12 +43,12 @@ export default function FeasibilityProjectDetailPage() {
       if (projectData) {
         setProject(projectData);
       } else {
-        toast.error('❌ Progetto non trovato');
+        toast('❌ Progetto non trovato', { icon: '❌' });
         router.push('/dashboard/feasibility-analysis');
       }
     } catch (error) {
       console.error('Errore caricamento progetto:', error);
-      toast.error('❌ Errore nel caricamento del progetto');
+      toast('❌ Errore nel caricamento del progetto', { icon: '❌' });
       router.push('/dashboard/feasibility-analysis');
     } finally {
       setLoading(false);
@@ -55,11 +56,11 @@ export default function FeasibilityProjectDetailPage() {
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('it-IT', { 
-      style: 'currency', 
+    return new Intl.NumberFormat('it-IT', {
+      style: 'currency',
       currency: 'EUR',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(value);
   };
 
@@ -71,7 +72,7 @@ export default function FeasibilityProjectDetailPage() {
     try {
       // Gestisce diversi tipi di input per le date
       let dateObj: Date;
-      
+
       if (date instanceof Date) {
         dateObj = date;
       } else if (typeof date === 'string') {
@@ -86,16 +87,16 @@ export default function FeasibilityProjectDetailPage() {
         // Fallback per date invalide
         return 'Data non disponibile';
       }
-      
+
       // Verifica se la data è valida
       if (isNaN(dateObj.getTime())) {
         return 'Data non valida';
       }
-      
+
       return new Intl.DateTimeFormat('it-IT', {
         day: '2-digit',
         month: '2-digit',
-        year: 'numeric'
+        year: 'numeric',
       }).format(dateObj);
     } catch (error) {
       console.error('Errore formattazione data:', error, 'Input:', date);
@@ -111,21 +112,31 @@ export default function FeasibilityProjectDetailPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PIANIFICAZIONE': return 'bg-blue-100 text-blue-800';
-      case 'IN_CORSO': return 'bg-yellow-100 text-yellow-800';
-      case 'COMPLETATO': return 'bg-green-100 text-green-800';
-      case 'SOSPESO': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'PIANIFICAZIONE':
+        return 'bg-blue-100 text-blue-800';
+      case 'IN_CORSO':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'COMPLETATO':
+        return 'bg-green-100 text-green-800';
+      case 'SOSPESO':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'PIANIFICAZIONE': return <CalendarIcon className="h-4 w-4" />;
-      case 'IN_CORSO': return <ClockIcon className="h-4 w-4" />;
-      case 'COMPLETATO': return <CheckCircleIcon className="h-4 w-4" />;
-      case 'SOSPESO': return <AlertIcon className="h-4 w-4" />;
-      default: return <CalendarIcon className="h-4 w-4" />;
+      case 'PIANIFICAZIONE':
+        return <CalendarIcon className="h-4 w-4" />;
+      case 'IN_CORSO':
+        return <ClockIcon className="h-4 w-4" />;
+      case 'COMPLETATO':
+        return <CheckCircleIcon className="h-4 w-4" />;
+      case 'SOSPESO':
+        return <AlertIcon className="h-4 w-4" />;
+      default:
+        return <CalendarIcon className="h-4 w-4" />;
     }
   };
 
@@ -196,14 +207,16 @@ export default function FeasibilityProjectDetailPage() {
               <CalculatorIcon className="h-6 w-6" />
             </div>
             <div className="stat-title text-gray-500">Marginalità</div>
-            <div className={`stat-value text-2xl ${getMarginColor(project.results.margin, project.targetMargin)}`}>
+            <div
+              className={`stat-value text-2xl ${getMarginColor(project.results.margin, project.targetMargin)}`}
+            >
               {formatPercentage(project.results.margin)}
             </div>
             <div className="stat-desc text-xs">
               Target: {formatPercentage(project.targetMargin)}
             </div>
           </div>
-          
+
           <div className="stat bg-white shadow-sm rounded-lg p-6">
             <div className="stat-figure text-success">
               <EuroIcon className="h-6 w-6" />
@@ -212,11 +225,9 @@ export default function FeasibilityProjectDetailPage() {
             <div className="stat-value text-2xl text-success">
               {formatCurrency(project.results.profit)}
             </div>
-            <div className="stat-desc text-xs">
-              ROI: {formatPercentage(project.results.roi)}
-            </div>
+            <div className="stat-desc text-xs">ROI: {formatPercentage(project.results.roi)}</div>
           </div>
-          
+
           <div className="stat bg-white shadow-sm rounded-lg p-6">
             <div className="stat-figure text-info">
               <BuildingIcon className="h-6 w-6" />
@@ -229,7 +240,7 @@ export default function FeasibilityProjectDetailPage() {
               Totale: {formatCurrency(project.costs.land.subtotal)}
             </div>
           </div>
-          
+
           <div className="stat bg-white shadow-sm rounded-lg p-6">
             <div className="stat-figure text-warning">
               <ClockIcon className="h-6 w-6" />
@@ -238,9 +249,7 @@ export default function FeasibilityProjectDetailPage() {
             <div className="stat-value text-2xl">
               {project.results.paybackPeriod.toFixed(1)} mesi
             </div>
-            <div className="stat-desc text-xs">
-              Durata: {project.duration} mesi
-            </div>
+            <div className="stat-desc text-xs">Durata: {project.duration} mesi</div>
           </div>
         </div>
 
@@ -251,7 +260,7 @@ export default function FeasibilityProjectDetailPage() {
               <BuildingIcon className="h-5 w-5 mr-2 text-blue-600" />
               Dettagli Progetto
             </h2>
-            
+
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -281,7 +290,7 @@ export default function FeasibilityProjectDetailPage() {
                   <p className="text-gray-900">{formatDate(project.constructionStartDate)}</p>
                 </div>
               </div>
-              
+
               {project.notes && (
                 <div>
                   <label className="text-sm font-medium text-gray-500">Note</label>
@@ -297,7 +306,7 @@ export default function FeasibilityProjectDetailPage() {
               <ChartBarIcon className="h-5 w-5 mr-2 text-purple-600" />
               Analisi Finanziaria
             </h2>
-            
+
             <div className="space-y-4">
               <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                 <span className="font-medium">Marginalità Target</span>
@@ -305,36 +314,42 @@ export default function FeasibilityProjectDetailPage() {
                   {formatPercentage(project.targetMargin)}
                 </span>
               </div>
-              
+
               <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                 <span className="font-medium">Marginalità Effettiva</span>
-                <span className={`text-lg font-bold ${getMarginColor(project.results.margin, project.targetMargin)}`}>
+                <span
+                  className={`text-lg font-bold ${getMarginColor(project.results.margin, project.targetMargin)}`}
+                >
                   {formatPercentage(project.results.margin)}
                 </span>
               </div>
-              
+
               <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                 <span className="font-medium">ROI</span>
                 <span className="text-lg font-bold text-green-600">
                   {formatPercentage(project.results.roi)}
                 </span>
               </div>
-              
+
               <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                 <span className="font-medium">Payback Period</span>
                 <span className="text-lg font-bold text-orange-600">
                   {project.results.paybackPeriod.toFixed(1)} mesi
                 </span>
               </div>
-              
-              <div className={`p-3 rounded-lg ${project.isTargetAchieved ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+
+              <div
+                className={`p-3 rounded-lg ${project.isTargetAchieved ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}
+              >
                 <div className="flex items-center">
                   {project.isTargetAchieved ? (
                     <CheckCircleIcon className="h-5 w-5 text-green-600 mr-2" />
                   ) : (
                     <AlertIcon className="h-5 w-5 text-red-600 mr-2" />
                   )}
-                  <span className={`font-medium ${project.isTargetAchieved ? 'text-green-800' : 'text-red-800'}`}>
+                  <span
+                    className={`font-medium ${project.isTargetAchieved ? 'text-green-800' : 'text-red-800'}`}
+                  >
                     {project.isTargetAchieved ? 'Target Raggiunto' : 'Target Non Raggiunto'}
                   </span>
                 </div>
@@ -349,7 +364,7 @@ export default function FeasibilityProjectDetailPage() {
             <EuroIcon className="h-5 w-5 mr-2 text-red-600" />
             Dettagli Costi
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Costi Terreno */}
             <div>
@@ -357,20 +372,28 @@ export default function FeasibilityProjectDetailPage() {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Prezzo Acquisto:</span>
-                  <span className="font-medium">{formatCurrency(project.costs.land.purchasePrice)}</span>
+                  <span className="font-medium">
+                    {formatCurrency(project.costs.land.purchasePrice)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Imposte (9%):</span>
-                  <span className="font-medium">{formatCurrency(project.costs.land.purchaseTaxes)}</span>
+                  <span className="font-medium">
+                    {formatCurrency(project.costs.land.purchaseTaxes)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Commissioni (3%):</span>
-                  <span className="font-medium">{formatCurrency(project.costs.land.intermediationFees)}</span>
+                  <span className="font-medium">
+                    {formatCurrency(project.costs.land.intermediationFees)}
+                  </span>
                 </div>
                 <hr className="my-2" />
                 <div className="flex justify-between font-bold">
                   <span>Subtotale Terreno:</span>
-                  <span className="text-red-600">{formatCurrency(project.costs.land.subtotal)}</span>
+                  <span className="text-red-600">
+                    {formatCurrency(project.costs.land.subtotal)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -381,24 +404,34 @@ export default function FeasibilityProjectDetailPage() {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Scavi e Fondazioni:</span>
-                  <span className="font-medium">{formatCurrency(project.costs.construction.excavation)}</span>
+                  <span className="font-medium">
+                    {formatCurrency(project.costs.construction.excavation)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Strutture:</span>
-                  <span className="font-medium">{formatCurrency(project.costs.construction.structures)}</span>
+                  <span className="font-medium">
+                    {formatCurrency(project.costs.construction.structures)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Impianti:</span>
-                  <span className="font-medium">{formatCurrency(project.costs.construction.systems)}</span>
+                  <span className="font-medium">
+                    {formatCurrency(project.costs.construction.systems)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Finiture:</span>
-                  <span className="font-medium">{formatCurrency(project.costs.construction.finishes)}</span>
+                  <span className="font-medium">
+                    {formatCurrency(project.costs.construction.finishes)}
+                  </span>
                 </div>
                 <hr className="my-2" />
                 <div className="flex justify-between font-bold">
                   <span>Subtotale Costruzione:</span>
-                  <span className="text-red-600">{formatCurrency(project.costs.construction.subtotal)}</span>
+                  <span className="text-red-600">
+                    {formatCurrency(project.costs.construction.subtotal)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -433,11 +466,13 @@ export default function FeasibilityProjectDetailPage() {
                 <span className="font-medium">{formatCurrency(project.costs.insurance)}</span>
               </div>
             </div>
-            
+
             <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
               <div className="flex justify-between items-center">
                 <span className="text-lg font-bold text-red-800">TOTALE COSTI</span>
-                <span className="text-2xl font-bold text-red-600">{formatCurrency(project.costs.total)}</span>
+                <span className="text-2xl font-bold text-red-600">
+                  {formatCurrency(project.costs.total)}
+                </span>
               </div>
             </div>
           </div>
@@ -449,7 +484,7 @@ export default function FeasibilityProjectDetailPage() {
             <TrendingUpIcon className="h-5 w-5 mr-2 text-green-600" />
             Dettagli Ricavi
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <h3 className="font-medium text-gray-900 mb-3">Vendite</h3>
@@ -464,26 +499,34 @@ export default function FeasibilityProjectDetailPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Prezzo Vendita:</span>
-                  <span className="font-medium">{formatCurrency(project.revenues.pricePerSqm)}/m²</span>
+                  <span className="font-medium">
+                    {formatCurrency(project.revenues.pricePerSqm)}/m²
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Ricavo per Unità:</span>
-                  <span className="font-medium">{formatCurrency(project.revenues.revenuePerUnit)}</span>
+                  <span className="font-medium">
+                    {formatCurrency(project.revenues.revenuePerUnit)}
+                  </span>
                 </div>
                 <hr className="my-2" />
                 <div className="flex justify-between font-bold">
                   <span>Totale Vendite:</span>
-                  <span className="text-green-600">{formatCurrency(project.revenues.totalSales)}</span>
+                  <span className="text-green-600">
+                    {formatCurrency(project.revenues.totalSales)}
+                  </span>
                 </div>
               </div>
             </div>
-            
+
             <div>
               <h3 className="font-medium text-gray-900 mb-3">Altri Ricavi</h3>
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Altri Ricavi:</span>
-                  <span className="font-medium">{formatCurrency(project.revenues.otherRevenues)}</span>
+                  <span className="font-medium">
+                    {formatCurrency(project.revenues.otherRevenues)}
+                  </span>
                 </div>
                 <hr className="my-2" />
                 <div className="flex justify-between font-bold">
@@ -498,7 +541,7 @@ export default function FeasibilityProjectDetailPage() {
         {/* Metadati */}
         <div className="bg-white shadow-sm rounded-lg p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Informazioni Progetto</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div>
               <span className="text-gray-500">Creato da:</span>
@@ -506,45 +549,56 @@ export default function FeasibilityProjectDetailPage() {
             </div>
             <div>
               <span className="text-gray-500">Data creazione:</span>
-              <p className="font-medium">{project.createdAt ? formatDate(project.createdAt) : 'Non disponibile'}</p>
+              <p className="font-medium">
+                {project.createdAt ? formatDate(project.createdAt) : 'Non disponibile'}
+              </p>
             </div>
             <div>
               <span className="text-gray-500">Ultimo aggiornamento:</span>
-              <p className="font-medium">{project.updatedAt ? formatDate(project.updatedAt) : 'Non disponibile'}</p>
+              <p className="font-medium">
+                {project.updatedAt ? formatDate(project.updatedAt) : 'Non disponibile'}
+              </p>
             </div>
           </div>
         </div>
 
         {/* Generatore Report PDF */}
         <div className="mt-8">
-          <FeasibilityReportGenerator 
+          <FeasibilityReportGenerator
             analysis={{
-              id: project.id,
-              title: project.title || project.name || 'Progetto senza titolo',
-              location: project.location || project.address || 'Località non specificata',
-              propertyType: project.propertyType || 'Non specificato',
+              id: project.id || '',
+              title: project.name || 'Progetto senza titolo',
+              location: project.address || 'Località non specificata',
+              propertyType: 'Non specificato',
               totalInvestment: project.costs.total,
-              expectedROI: ((project.revenues.total - project.costs.total) / project.costs.total) * 100,
+              expectedROI:
+                ((project.revenues.total - project.costs.total) / project.costs.total) * 100,
               paybackPeriod: project.costs.total / (project.revenues.total - project.costs.total),
               netPresentValue: project.revenues.total - project.costs.total,
               internalRateOfReturn: 15.8, // Calcolato dal sistema
-              riskLevel: project.costs.total > 1000000 ? 'HIGH' : project.costs.total > 500000 ? 'MEDIUM' : 'LOW',
+              riskLevel:
+                project.costs.total > 1000000
+                  ? 'HIGH'
+                  : project.costs.total > 500000
+                    ? 'MEDIUM'
+                    : 'LOW',
               marketTrend: 'POSITIVE' as const,
               recommendations: [
-                `ROI atteso: ${((project.revenues.total - project.costs.total) / project.costs.total * 100).toFixed(1)}%`,
+                `ROI atteso: ${(((project.revenues.total - project.costs.total) / project.costs.total) * 100).toFixed(1)}%`,
                 `Margine di profitto: ${formatCurrency(project.revenues.total - project.costs.total)}`,
-                `Località strategica: ${project.location}`,
-                `Tipo immobile: ${project.propertyType}`
+                `Località strategica: ${project.address}`,
+                `Tipo immobile: Non specificato`,
               ],
-              createdAt: project.createdAt ? 
-                (typeof project.createdAt === 'string' ? project.createdAt : 
-                 project.createdAt instanceof Date ? project.createdAt.toISOString() : 
-                 project.createdAt.toDate ? project.createdAt.toDate().toISOString() : 
-                 new Date().toISOString()) : 
-                new Date().toISOString()
+              createdAt: project.createdAt
+                ? typeof project.createdAt === 'string'
+                  ? project.createdAt
+                  : project.createdAt instanceof Date
+                    ? project.createdAt.toISOString()
+                    : new Date().toISOString()
+                : new Date().toISOString(),
             }}
             onGenerateReport={() => {
-              toast.success('Report generato con successo! 📊');
+              toast('Report generato con successo! 📊', { icon: '📊' });
             }}
           />
         </div>

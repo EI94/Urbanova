@@ -1,26 +1,70 @@
+// Import polyfills per File API
+require('./src/polyfills.js');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // 🛡️ GLOBAL ERROR INTERCEPTOR - DEVE ESSERE PRIMO
+  webpack: (config, { isServer }) => {
+    // Importa protezione globale
+    if (!isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        '@/lib/globalErrorInterceptor': require.resolve('./src/lib/globalErrorInterceptor.ts'),
+        '@/lib/osProtection': require.resolve('./src/lib/osProtection.ts')
+      };
+    }
+    return config;
+  },
   reactStrictMode: false,
   experimental: {
     // Next.js 13.4 e superiori hanno App Router abilitato di default
   },
   images: {
-    domains: [
-      'firebasestorage.googleapis.com',
-      'via.placeholder.com'
-    ],
+    domains: ['firebasestorage.googleapis.com', 'via.placeholder.com'],
   },
   // Escludiamo le directory che non devono essere compilate
   distDir: '.next',
   eslint: {
-    ignoreDuringBuilds: true
+    ignoreDuringBuilds: true,
   },
   typescript: {
-    ignoreBuildErrors: true
+    ignoreBuildErrors: true,
   },
   // Configurazione per gestire Puppeteer e dipendenze problematiche
   webpack: (config, { isServer }) => {
+    if (isServer) {
+      // ULTRA NUCLEAR APPROACH: Inietta polyfill direttamente nel bundle
+      const webpack = require('webpack');
+      config.plugins = config.plugins || [];
+      
+      // Definisce File come funzione globale che funziona veramente
+      config.plugins.push(
+        new webpack.BannerPlugin({
+          banner: `
+if (typeof global !== 'undefined' && typeof global.File === 'undefined') {
+  global.File = class File {
+    constructor(name, size, type) {
+      this.name = name || '';
+      this.size = size || 0;
+      this.type = type || '';
+      this.lastModified = Date.now();
+    }
+  };
+}
+if (typeof globalThis !== 'undefined' && typeof globalThis.File === 'undefined') {
+  globalThis.File = global.File;
+}
+          `,
+          raw: true,
+          entryOnly: false
+        })
+      );
+    }
+    
     if (!isServer) {
+      // APPROCCIO SEMPLICE: Nessuna intercettazione webpack, solo safeCollection() nei file sorgente
+      console.log('🔥 [SIMPLE APPROACH] Usando solo safeCollection() senza intercettazione webpack');
+      
       // Lato client - escludi moduli Node.js
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -38,16 +82,23 @@ const nextConfig = {
         path: false,
         child_process: false,
         'puppeteer-core': false,
-        puppeteer: false
+        puppeteer: false,
       };
     }
-    
+
     // Escludi Puppeteer dal bundle client
     config.externals = config.externals || [];
     if (!isServer) {
       config.externals.push('puppeteer', 'puppeteer-core');
     }
-    
+
+    // Ignora file TypeScript nei node_modules
+    config.module.rules.push({
+      test: /\.ts$/,
+      include: /node_modules/,
+      use: 'ignore-loader'
+    });
+
     return config;
   },
   // Configurazione per Vercel
@@ -68,7 +119,7 @@ const nextConfig = {
   // Disabilita completamente TypeScript per il build
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
-  }
+  },
 };
 
-module.exports = nextConfig; 
+module.exports = nextConfig;

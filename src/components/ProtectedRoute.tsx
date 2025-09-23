@@ -1,15 +1,26 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+
 import { useAuth } from '../contexts/AuthContext';
+import '@/lib/osProtection'; // OS Protection per protected route
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { currentUser, loading } = useAuth();
+  // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    console.error('❌ [ProtectedRoute] Errore useAuth:', error);
+    authContext = { currentUser: null, loading: false };
+  }
+  const currentUser = (authContext && typeof authContext === 'object' && 'currentUser' in authContext) ? authContext.currentUser : null;
+  const loading = (authContext && typeof authContext === 'object' && 'loading' in authContext) ? authContext.loading : false;
   const router = useRouter();
 
   useEffect(() => {
@@ -30,4 +41,4 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   // Se l'utente è autenticato, mostra il contenuto della pagina
   return currentUser ? <>{children}</> : null;
-} 
+}

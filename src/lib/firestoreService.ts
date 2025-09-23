@@ -1,20 +1,21 @@
-import { db } from './firebase';
-import { 
-  collection, 
-  getDocs, 
-  getDoc, 
-  doc, 
-  query, 
-  where, 
-  addDoc, 
-  updateDoc, 
+import {
+  getDocs,
+  getDoc,
+  doc,
+  query,
+  where,
+  addDoc,
+  updateDoc,
   deleteDoc,
   orderBy,
   serverTimestamp,
   DocumentData,
   writeBatch,
-  runTransaction
+  runTransaction,
 } from 'firebase/firestore';
+
+import { db } from './firebase';
+import { safeCollection } from './firebaseUtils';
 
 // Collezioni Firestore
 export const COLLECTIONS = {
@@ -37,6 +38,7 @@ export interface RealEstateProject {
   startDate?: Date;
   endDate?: Date;
   budget?: number;
+  expectedROI?: number;
   surface?: number;
   units?: number;
   energyClass?: string;
@@ -51,18 +53,18 @@ export type NewProjectData = Omit<RealEstateProject, 'id' | 'createdAt' | 'updat
 
 // Funzione per ottenere tutti i progetti
 export async function getProjects(): Promise<RealEstateProject[]> {
-  console.log("🔄 Caricamento progetti da Firestore...");
-  
+  console.log('🔄 Caricamento progetti da Firestore...');
+
   try {
-    const projectsRef = collection(db, COLLECTIONS.PROJECTS);
+    const projectsRef = safeCollection(COLLECTIONS.PROJECTS);
     const q = query(projectsRef, orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
-    
+
     const projects = snapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data()
+      ...doc.data(),
     })) as RealEstateProject[];
-    
+
     console.log(`✅ Progetti caricati: ${projects.length}`);
     return projects;
   } catch (error) {
@@ -74,17 +76,17 @@ export async function getProjects(): Promise<RealEstateProject[]> {
 // Funzione per ottenere un singolo progetto
 export async function getProjectById(id: string): Promise<RealEstateProject | null> {
   console.log(`🔄 Caricamento progetto con ID: ${id}`);
-  
+
   try {
     const docRef = doc(db, COLLECTIONS.PROJECTS, id);
     const docSnap = await getDoc(docRef);
-    
+
     if (docSnap.exists()) {
       const project = {
         id: docSnap.id,
-        ...docSnap.data()
+        ...docSnap.data(),
       } as RealEstateProject;
-      
+
       console.log(`✅ Progetto caricato: ${project.name}`);
       return project;
     } else {
@@ -101,61 +103,72 @@ export async function getProjectById(id: string): Promise<RealEstateProject | nu
 export const addProject = async (projectData: NewProjectData): Promise<string> => {
   try {
     console.log('🔄 Aggiunta nuovo progetto:', projectData);
-    
+
     // Verifica che i dati siano validi
     if (!projectData.name || !projectData.description) {
       throw new Error('Nome e descrizione sono obbligatori');
     }
-    
-    const projectRef = await addDoc(collection(db, COLLECTIONS.PROJECTS), {
+
+    const projectRef = await addDoc(safeCollection(COLLECTIONS.PROJECTS), {
       ...projectData,
       createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     });
-    
+
     console.log(`✅ Progetto creato con ID: ${projectRef.id}`);
     return projectRef.id;
   } catch (error) {
     console.error('❌ Errore nella creazione del progetto:', error);
-    throw new Error(`Impossibile creare il progetto: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`);
+    throw new Error(
+      `Impossibile creare il progetto: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`
+    );
   }
 };
 
 // Funzione per aggiornare un progetto esistente
-export const updateProject = async (id: string, updates: Partial<NewProjectData>): Promise<void> => {
+export const updateProject = async (
+  id: string,
+  updates: Partial<NewProjectData>
+): Promise<void> => {
   try {
     console.log(`🔄 Aggiornamento progetto ${id}:`, updates);
-    
+
     const projectRef = doc(db, COLLECTIONS.PROJECTS, id);
     await updateDoc(projectRef, {
       ...updates,
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     });
-    
+
     console.log(`✅ Progetto ${id} aggiornato con successo`);
   } catch (error) {
     console.error(`❌ Errore nell'aggiornamento del progetto ${id}:`, error);
-    throw new Error(`Impossibile aggiornare il progetto: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`);
+    throw new Error(
+      `Impossibile aggiornare il progetto: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`
+    );
   }
 };
 
 // Funzione per eliminare un progetto (DEPRECATO - usa robustProjectDeletionService)
 export const deleteProject = async (id: string): Promise<void> => {
   try {
-    console.log(`⚠️ DEPRECATO: deleteProject chiamato direttamente - usa robustProjectDeletionService`);
-    
+    console.log(
+      `⚠️ DEPRECATO: deleteProject chiamato direttamente - usa robustProjectDeletionService`
+    );
+
     // Reindirizza al servizio robusto
     const { robustProjectDeletionService } = await import('./robustProjectDeletionService');
     const result = await robustProjectDeletionService.robustDeleteProject(id);
-    
+
     if (!result.success || !result.backendVerified) {
       throw new Error(`Eliminazione fallita: ${result.message}`);
     }
-    
+
     console.log(`✅ Progetto ${id} eliminato tramite servizio robusto`);
   } catch (error) {
     console.error(`❌ Errore nell'eliminazione del progetto ${id}:`, error);
-    throw new Error(`Impossibile eliminare il progetto: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`);
+    throw new Error(
+      `Impossibile eliminare il progetto: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`
+    );
   }
 };
 
@@ -163,20 +176,16 @@ export const deleteProject = async (id: string): Promise<void> => {
 export const getProjectsByUser = async (userId: string): Promise<RealEstateProject[]> => {
   try {
     console.log(`🔄 Caricamento progetti per utente: ${userId}`);
-    
-    const projectsRef = collection(db, COLLECTIONS.PROJECTS);
-    const q = query(
-      projectsRef, 
-      where('createdBy', '==', userId),
-      orderBy('createdAt', 'desc')
-    );
-    
+
+    const projectsRef = safeCollection(COLLECTIONS.PROJECTS);
+    const q = query(projectsRef, where('createdBy', '==', userId), orderBy('createdAt', 'desc'));
+
     const snapshot = await getDocs(q);
     const projects = snapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data()
+      ...doc.data(),
     })) as RealEstateProject[];
-    
+
     console.log(`✅ Progetti utente caricati: ${projects.length}`);
     return projects;
   } catch (error) {
@@ -186,23 +195,21 @@ export const getProjectsByUser = async (userId: string): Promise<RealEstateProje
 };
 
 // Funzione per ottenere progetti per status
-export const getProjectsByStatus = async (status: RealEstateProject['status']): Promise<RealEstateProject[]> => {
+export const getProjectsByStatus = async (
+  status: RealEstateProject['status']
+): Promise<RealEstateProject[]> => {
   try {
     console.log(`🔄 Caricamento progetti per status: ${status}`);
-    
-    const projectsRef = collection(db, COLLECTIONS.PROJECTS);
-    const q = query(
-      projectsRef, 
-      where('status', '==', status),
-      orderBy('createdAt', 'desc')
-    );
-    
+
+    const projectsRef = safeCollection(COLLECTIONS.PROJECTS);
+    const q = query(projectsRef, where('status', '==', status), orderBy('createdAt', 'desc'));
+
     const snapshot = await getDocs(q);
     const projects = snapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data()
+      ...doc.data(),
     })) as RealEstateProject[];
-    
+
     console.log(`✅ Progetti status ${status} caricati: ${projects.length}`);
     return projects;
   } catch (error) {
@@ -215,23 +222,24 @@ export const getProjectsByStatus = async (status: RealEstateProject['status']): 
 export const searchProjects = async (searchTerm: string): Promise<RealEstateProject[]> => {
   try {
     console.log(`🔄 Ricerca progetti: ${searchTerm}`);
-    
-    const projectsRef = collection(db, COLLECTIONS.PROJECTS);
+
+    const projectsRef = safeCollection(COLLECTIONS.PROJECTS);
     const q = query(projectsRef, orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
-    
+
     const projects = snapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data()
+      ...doc.data(),
     })) as RealEstateProject[];
-    
+
     // Filtra i risultati localmente
-    const filteredProjects = projects.filter(project => 
-      project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.location.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredProjects = projects.filter(
+      project =>
+        project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.location.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    
+
     console.log(`✅ Ricerca completata: ${filteredProjects.length} risultati`);
     return filteredProjects;
   } catch (error) {
@@ -241,31 +249,35 @@ export const searchProjects = async (searchTerm: string): Promise<RealEstateProj
 };
 
 // Funzione per creare progetto con transazione
-export const createProjectWithTransaction = async (projectData: NewProjectData): Promise<string> => {
+export const createProjectWithTransaction = async (
+  projectData: NewProjectData
+): Promise<string> => {
   try {
     console.log('🔄 Creazione progetto con transazione:', projectData);
-    
-    return await runTransaction(db, async (transaction) => {
+
+    return await runTransaction(db, async transaction => {
       // Verifica che i dati siano validi
       if (!projectData.name || !projectData.description) {
         throw new Error('Nome e descrizione sono obbligatori');
       }
-      
+
       // Crea il documento
-      const projectRef = doc(collection(db, COLLECTIONS.PROJECTS));
-      
+      const projectRef = doc(safeCollection(COLLECTIONS.PROJECTS));
+
       transaction.set(projectRef, {
         ...projectData,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
-      
+
       console.log(`✅ Progetto creato con transazione: ${projectRef.id}`);
       return projectRef.id;
     });
   } catch (error) {
     console.error('❌ Errore nella creazione progetto con transazione:', error);
-    throw new Error(`Impossibile creare il progetto: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`);
+    throw new Error(
+      `Impossibile creare il progetto: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`
+    );
   }
 };
 
@@ -273,31 +285,33 @@ export const createProjectWithTransaction = async (projectData: NewProjectData):
 export const createProjectWithBatch = async (projectData: NewProjectData): Promise<string> => {
   try {
     console.log('🔄 Creazione progetto con batch:', projectData);
-    
+
     const batch = writeBatch(db);
-    
+
     // Verifica che i dati siano validi
     if (!projectData.name || !projectData.description) {
       throw new Error('Nome e descrizione sono obbligatori');
     }
-    
+
     // Crea il documento
-    const projectRef = doc(collection(db, COLLECTIONS.PROJECTS));
-    
+    const projectRef = doc(safeCollection(COLLECTIONS.PROJECTS));
+
     batch.set(projectRef, {
       ...projectData,
       createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     });
-    
+
     // Commit del batch
     await batch.commit();
-    
+
     console.log(`✅ Progetto creato con batch: ${projectRef.id}`);
     return projectRef.id;
   } catch (error) {
     console.error('❌ Errore nella creazione progetto con batch:', error);
-    throw new Error(`Impossibile creare il progetto: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`);
+    throw new Error(
+      `Impossibile creare il progetto: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`
+    );
   }
 };
 
@@ -305,11 +319,11 @@ export const createProjectWithBatch = async (projectData: NewProjectData): Promi
 export const testFirestoreConnection = async (): Promise<boolean> => {
   try {
     console.log('🔄 Test connessione Firestore...');
-    
+
     // Prova a leggere un documento di test
     const testRef = doc(db, 'test', 'connection');
     await getDoc(testRef);
-    
+
     console.log('✅ Connessione Firestore OK');
     return true;
   } catch (error) {
@@ -340,12 +354,12 @@ export const getProjectStats = async (): Promise<{
 }> => {
   try {
     console.log('🔄 Caricamento statistiche progetti...');
-    
-    const projectsRef = collection(db, COLLECTIONS.PROJECTS);
+
+    const projectsRef = safeCollection(COLLECTIONS.PROJECTS);
     const snapshot = await getDocs(projectsRef);
-    
+
     const projects = snapshot.docs.map(doc => doc.data()) as RealEstateProject[];
-    
+
     // Inizializza le statistiche con valori di default sicuri
     const stats = {
       totalProjects: projects.length,
@@ -357,16 +371,16 @@ export const getProjectStats = async (): Promise<{
         RESIDENZIALE: 0,
         COMMERCIALE: 0,
         MISTO: 0,
-        INDUSTRIALE: 0
+        INDUSTRIALE: 0,
       },
       projectsByStatus: {
         PIANIFICAZIONE: 0,
         IN_CORSO: 0,
         IN_ATTESA: 0,
-        COMPLETATO: 0
-      }
+        COMPLETATO: 0,
+      },
     };
-    
+
     projects.forEach(project => {
       // Conta per status
       if (project.status) {
@@ -375,7 +389,7 @@ export const getProjectStats = async (): Promise<{
           stats.projectsByStatus[status]++;
         }
       }
-      
+
       // Conta per tipo
       if (project.propertyType) {
         const type = project.propertyType.toUpperCase() as keyof typeof stats.projectsByType;
@@ -383,12 +397,12 @@ export const getProjectStats = async (): Promise<{
           stats.projectsByType[type]++;
         }
       }
-      
+
       // Calcola budget totale
       if (project.budget) {
         stats.totalBudget += project.budget;
       }
-      
+
       // Conta progetti attivi e completati
       if (project.status === 'IN_CORSO') {
         stats.activeProjects++;
@@ -396,13 +410,14 @@ export const getProjectStats = async (): Promise<{
         stats.completedProjects++;
       }
     });
-    
+
     // Calcola ROI medio se ci sono progetti con ROI
     const projectsWithROI = projects.filter(p => p.expectedROI);
     if (projectsWithROI.length > 0) {
-      stats.averageROI = projectsWithROI.reduce((sum, p) => sum + (p.expectedROI || 0), 0) / projectsWithROI.length;
+      stats.averageROI =
+        projectsWithROI.reduce((sum, p) => sum + (p.expectedROI || 0), 0) / projectsWithROI.length;
     }
-    
+
     console.log('✅ Statistiche progetti caricate:', stats);
     return stats;
   } catch (error) {
@@ -418,14 +433,14 @@ export const getProjectStats = async (): Promise<{
         RESIDENZIALE: 0,
         COMMERCIALE: 0,
         MISTO: 0,
-        INDUSTRIALE: 0
+        INDUSTRIALE: 0,
       },
       projectsByStatus: {
         PIANIFICAZIONE: 0,
         IN_CORSO: 0,
         IN_ATTESA: 0,
-        COMPLETATO: 0
-      }
+        COMPLETATO: 0,
+      },
     };
   }
-}; 
+};

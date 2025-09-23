@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "urbanova-b623e"
+    "default": "urbanova-dev",
+    "staging": "urbanova-staging",
+    "production": "urbanova-production"
   }
 }

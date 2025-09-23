@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
 import { X, Mail, Send, User, Users, Clock, Star } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
+
+import { Badge } from './Badge';
 import Button from './Button';
 import { Card, CardContent, CardHeader, CardTitle } from './Card';
-import { Badge } from './Badge';
 
 interface EmailContact {
   email: string;
@@ -27,7 +28,7 @@ export default function EmailSharingModal({
   onClose,
   reportTitle,
   reportUrl,
-  onShareSuccess
+  onShareSuccess,
 }: EmailSharingModalProps) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
@@ -53,9 +54,7 @@ export default function EmailSharingModal({
       if (contacts) {
         const parsedContacts: EmailContact[] = JSON.parse(contacts);
         // Ordina per frequenza di utilizzo e data recente
-        const sorted = parsedContacts
-          .sort((a, b) => b.usageCount - a.usageCount)
-          .slice(0, 5);
+        const sorted = parsedContacts.sort((a, b) => b.usageCount - a.usageCount).slice(0, 5);
         setSuggestedContacts(sorted);
       }
     } catch (error) {
@@ -99,24 +98,27 @@ Il tuo team Urbanova`;
   const saveContact = (email: string, name?: string) => {
     try {
       const contacts = localStorage.getItem('urbanova_email_contacts');
-      let parsedContacts: EmailContact[] = contacts ? JSON.parse(contacts) : [];
-      
+      const parsedContacts: EmailContact[] = contacts ? JSON.parse(contacts) : [];
+
       const existingIndex = parsedContacts.findIndex(c => c.email === email);
       if (existingIndex >= 0) {
         // Aggiorna contatto esistente
-        parsedContacts[existingIndex].usageCount++;
-        parsedContacts[existingIndex].lastUsed = new Date();
-        if (name) parsedContacts[existingIndex].name = name;
+        const existingContact = parsedContacts[existingIndex];
+        if (existingContact) {
+          existingContact.usageCount++;
+          existingContact.lastUsed = new Date();
+          if (name) existingContact.name = name;
+        }
       } else {
         // Aggiungi nuovo contatto
         parsedContacts.push({
           email,
-          name,
+          name: name || undefined,
           lastUsed: new Date(),
-          usageCount: 1
-        });
+          usageCount: 1,
+        } as EmailContact);
       }
-      
+
       localStorage.setItem('urbanova_email_contacts', JSON.stringify(parsedContacts));
     } catch (error) {
       console.error('Errore salvataggio contatto:', error);
@@ -126,23 +128,23 @@ Il tuo team Urbanova`;
   const handleContactSuggestion = (contact: EmailContact) => {
     setEmail(contact.email);
     if (contact.name) setName(contact.name);
-    toast.success(`Contatto ${contact.email} selezionato! ✨`);
+    toast(`Contatto ${contact.email} selezionato! ✨`, { icon: '✅' });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email.trim()) {
-      toast.error('Inserisci un indirizzo email valido');
+      toast('Inserisci un indirizzo email valido', { icon: '❌' });
       return;
     }
 
     setIsLoading(true);
-    
+
     try {
       // Salva il contatto
       saveContact(email, name);
-      
+
       // Invia email (qui chiameremo l'API)
       const response = await fetch('/api/share-report-email', {
         method: 'POST',
@@ -155,25 +157,25 @@ Il tuo team Urbanova`;
           subject,
           message,
           reportTitle,
-          reportUrl
+          reportUrl,
         }),
       });
 
       if (response.ok) {
-        toast.success('Report condiviso con successo! 📧✨');
+        toast('Report condiviso con successo! 📧✨', { icon: '✅' });
         onShareSuccess?.();
         onClose();
-        
+
         // Ricarica i contatti suggeriti
         loadSuggestedContacts();
         loadRecentContacts();
       } else {
         const error = await response.json();
-        toast.error(`Errore invio email: ${error.message}`);
+        toast(`Errore invio email: ${error.message}`, { icon: '❌' });
       }
     } catch (error) {
       console.error('Errore invio email:', error);
-      toast.error('Errore nell\'invio dell\'email');
+      toast("Errore nell'invio dell'email", { icon: '❌' });
     } finally {
       setIsLoading(false);
     }
@@ -192,13 +194,12 @@ Il tuo team Urbanova`;
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">Condividi Report via Email</h2>
-              <p className="text-sm text-gray-600">Invia lo studio di fattibilità ai tuoi contatti</p>
+              <p className="text-sm text-gray-600">
+                Invia lo studio di fattibilità ai tuoi contatti
+              </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <X className="h-5 w-5 text-gray-500" />
           </button>
         </div>
@@ -268,7 +269,7 @@ Il tuo team Urbanova`;
                 <input
                   type="text"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={e => setName(e.target.value)}
                   placeholder="Nome del destinatario"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
@@ -280,7 +281,7 @@ Il tuo team Urbanova`;
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   placeholder="email@esempio.com"
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -289,24 +290,20 @@ Il tuo team Urbanova`;
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Oggetto
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Oggetto</label>
               <input
                 type="text"
                 value={subject}
-                onChange={(e) => setSubject(e.target.value)}
+                onChange={e => setSubject(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Messaggio
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Messaggio</label>
               <textarea
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={e => setMessage(e.target.value)}
                 rows={6}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               />
@@ -316,19 +313,18 @@ Il tuo team Urbanova`;
             <div className="bg-gray-50 rounded-lg p-4">
               <h4 className="text-sm font-medium text-gray-700 mb-2">Anteprima Report</h4>
               <div className="text-sm text-gray-600">
-                <p><strong>Titolo:</strong> {reportTitle}</p>
-                <p><strong>Link:</strong> {reportUrl}</p>
+                <p>
+                  <strong>Titolo:</strong> {reportTitle}
+                </p>
+                <p>
+                  <strong>Link:</strong> {reportUrl}
+                </p>
               </div>
             </div>
 
             {/* Azioni */}
             <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                disabled={isLoading}
-              >
+              <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
                 Annulla
               </Button>
               <Button

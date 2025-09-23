@@ -24,7 +24,7 @@ import {
   HealthCheckType,
   CircuitBreakerState,
   RetryStrategy,
-  ServiceDiscoveryType
+  ServiceDiscoveryType,
 } from '@/types/apigateway';
 import { TeamRole } from '@/types/team';
 
@@ -36,7 +36,7 @@ export class APIGatewayService {
   private requests: Map<string, APIRequest> = new Map();
   private alerts: Map<string, ServiceAlert> = new Map();
   private deployments: Map<string, ServiceDeployment> = new Map();
-  private config: APIGatewayConfig;
+  private config!: APIGatewayConfig;
 
   constructor() {
     this.initializeConfig();
@@ -66,22 +66,22 @@ export class APIGatewayService {
         enableCORS: true,
         enableCSRF: true,
         enableRateLimit: true,
-        enableAuthentication: true
+        enableAuthentication: true,
       },
       defaultPolicies: {
         authentication: 'bearer_token',
         rateLimit: {
           requestsPerMinute: 1000,
-          burstLimit: 2000
+          burstLimit: 2000,
         },
         caching: {
           defaultTtl: 300,
-          enabled: true
+          enabled: true,
         },
         timeout: {
           request: 30000,
-          response: 60000
-        }
+          response: 60000,
+        },
       },
       monitoring: {
         metricsEnabled: true,
@@ -89,15 +89,15 @@ export class APIGatewayService {
         tracingEnabled: true,
         logsRetentionDays: 30,
         metricsRetentionDays: 90,
-        tracesRetentionDays: 7
+        tracesRetentionDays: 7,
       },
       integrations: {
         serviceDiscovery: {
           type: 'kubernetes',
           config: {
             namespace: 'urbanova',
-            labelSelector: 'app.urbanova.io/managed-by=gateway'
-          }
+            labelSelector: 'app.urbanova.io/managed-by=gateway',
+          },
         },
         messageQueue: {
           enabled: true,
@@ -105,17 +105,17 @@ export class APIGatewayService {
           config: {
             host: 'rabbitmq.urbanova.svc.cluster.local',
             port: 5672,
-            vhost: '/urbanova'
-          }
+            vhost: '/urbanova',
+          },
         },
         database: {
           type: 'postgresql',
           config: {
             host: 'postgres.urbanova.svc.cluster.local',
             port: 5432,
-            database: 'urbanova_gateway'
-          }
-        }
+            database: 'urbanova_gateway',
+          },
+        },
       },
       features: {
         enableCircuitBreaker: true,
@@ -124,8 +124,8 @@ export class APIGatewayService {
         enableHealthChecks: true,
         enableMetrics: true,
         enableTracing: true,
-        enableCaching: true
-      }
+        enableCaching: true,
+      },
     };
   }
 
@@ -145,22 +145,22 @@ export class APIGatewayService {
           certificateId: 'urbanova-ssl-cert',
           tlsVersion: 'TLSv1.3',
           cipherSuites: ['TLS_AES_256_GCM_SHA384', 'TLS_CHACHA20_POLY1305_SHA256'],
-          hsts: true
+          hsts: true,
         },
         globalAuth: {
           enabled: true,
           type: 'bearer_token',
           config: {
             issuer: 'https://auth.urbanova.com',
-            audience: 'urbanova-api'
+            audience: 'urbanova-api',
           },
-          excludedPaths: ['/health', '/metrics', '/docs']
+          excludedPaths: ['/health', '/metrics', '/docs'],
         },
         globalRateLimit: {
           enabled: true,
           requestsPerMinute: 10000,
           burstLimit: 20000,
-          keyGenerator: 'ip'
+          keyGenerator: 'ip',
         },
         cors: {
           enabled: true,
@@ -169,7 +169,7 @@ export class APIGatewayService {
           allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
           exposedHeaders: ['X-RateLimit-Remaining', 'X-Response-Time'],
           credentials: true,
-          maxAge: 86400
+          maxAge: 86400,
         },
         middleware: [
           {
@@ -178,7 +178,7 @@ export class APIGatewayService {
             type: 'request',
             order: 1,
             config: { headerName: 'X-Request-ID' },
-            enabled: true
+            enabled: true,
           },
           {
             id: 'auth',
@@ -186,7 +186,7 @@ export class APIGatewayService {
             type: 'request',
             order: 2,
             config: { skipPaths: ['/health', '/metrics'] },
-            enabled: true
+            enabled: true,
           },
           {
             id: 'rate-limit',
@@ -194,7 +194,7 @@ export class APIGatewayService {
             type: 'request',
             order: 3,
             config: { redis: 'redis://redis:6379' },
-            enabled: true
+            enabled: true,
           },
           {
             id: 'response-time',
@@ -202,28 +202,28 @@ export class APIGatewayService {
             type: 'response',
             order: 1,
             config: { headerName: 'X-Response-Time' },
-            enabled: true
-          }
+            enabled: true,
+          },
         ],
         serviceDiscovery: {
           type: 'kubernetes',
           config: {
             namespace: 'urbanova',
-            resyncPeriod: 30
+            resyncPeriod: 30,
           },
           healthCheckInterval: 10,
-          unhealthyThreshold: 3
+          unhealthyThreshold: 3,
         },
         loadBalancing: {
           strategy: 'round_robin',
           healthCheckEnabled: true,
-          sessionAffinity: false
+          sessionAffinity: false,
         },
         caching: {
           enabled: true,
           defaultTtl: 300,
           maxCacheSize: '1GB',
-          compressionEnabled: true
+          compressionEnabled: true,
         },
         logging: {
           level: 'info',
@@ -233,10 +233,10 @@ export class APIGatewayService {
               type: 'elasticsearch',
               config: {
                 host: 'elasticsearch.logging.svc.cluster.local',
-                index: 'urbanova-gateway-logs'
-              }
-            }
-          ]
+                index: 'urbanova-gateway-logs',
+              },
+            },
+          ],
         },
         metrics: {
           enabled: true,
@@ -246,15 +246,15 @@ export class APIGatewayService {
               type: 'prometheus',
               config: {
                 endpoint: '/metrics',
-                port: 9090
-              }
-            }
-          ]
+                port: 9090,
+              },
+            },
+          ],
         },
         security: {
           ddosProtection: true,
           requestSizeLimit: '10MB',
-          headerSizeLimit: '8KB'
+          headerSizeLimit: '8KB',
         },
         status: 'healthy',
         version: '1.2.3',
@@ -272,13 +272,13 @@ export class APIGatewayService {
           memoryUsage: 62,
           networkIO: {
             inbound: 125000000,
-            outbound: 890000000
+            outbound: 890000000,
           },
           cacheHitRate: 78.5,
           cacheMissRate: 21.5,
-          cacheEvictions: 1250
-        }
-      }
+          cacheEvictions: 1250,
+        },
+      },
     ];
 
     gateways.forEach(gateway => {
@@ -309,7 +309,7 @@ export class APIGatewayService {
           timeout: 5,
           retries: 3,
           successThreshold: 1,
-          failureThreshold: 3
+          failureThreshold: 3,
         },
         scaling: {
           minInstances: 2,
@@ -318,64 +318,64 @@ export class APIGatewayService {
           targetCPU: 70,
           targetMemory: 80,
           scaleUpCooldown: 300,
-          scaleDownCooldown: 600
+          scaleDownCooldown: 600,
         },
         resources: {
           cpu: {
             requests: '200m',
-            limits: '1000m'
+            limits: '1000m',
           },
           memory: {
             requests: '256Mi',
-            limits: '1Gi'
-          }
+            limits: '1Gi',
+          },
         },
         dependencies: [
           {
             serviceId: 'database-service',
             serviceName: 'PostgreSQL Database',
             type: 'required',
-            healthImpact: 'critical'
+            healthImpact: 'critical',
           },
           {
             serviceId: 'redis-cache',
             serviceName: 'Redis Cache',
             type: 'optional',
-            healthImpact: 'degraded'
-          }
+            healthImpact: 'degraded',
+          },
         ],
         environmentVariables: {
-          'DATABASE_URL': {
+          DATABASE_URL: {
             value: 'postgresql://user:pass@postgres:5432/urbanova',
             encrypted: true,
-            source: 'secret'
+            source: 'secret',
           },
-          'REDIS_URL': {
+          REDIS_URL: {
             value: 'redis://redis:6379',
             encrypted: false,
-            source: 'config'
+            source: 'config',
           },
-          'LOG_LEVEL': {
+          LOG_LEVEL: {
             value: 'info',
             encrypted: false,
-            source: 'config'
-          }
+            source: 'config',
+          },
         },
         loadBalancing: {
           strategy: 'round_robin',
           healthCheckPath: '/health',
-          stickySession: false
+          stickySession: false,
         },
         security: {
           networkPolicies: ['allow-ingress-gateway', 'allow-database'],
-          serviceAccount: 'land-scraping-sa'
+          serviceAccount: 'land-scraping-sa',
         },
         observability: {
           metricsEnabled: true,
           tracingEnabled: true,
           loggingEnabled: true,
           customDashboards: ['land-scraping-performance', 'data-quality'],
-          alertRules: ['high-error-rate', 'low-success-rate']
+          alertRules: ['high-error-rate', 'low-success-rate'],
         },
         endpoints: ['search-properties', 'get-property-details', 'scrape-listings'],
         deployments: [
@@ -384,8 +384,8 @@ export class APIGatewayService {
             strategy: 'rolling',
             deployedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
             deployedBy: 'ci-cd-system',
-            status: 'completed'
-          }
+            status: 'completed',
+          },
         ],
         metrics: {
           uptime: 99.8,
@@ -393,7 +393,7 @@ export class APIGatewayService {
             average: 125,
             p50: 95,
             p95: 280,
-            p99: 450
+            p99: 450,
           },
           throughput: 450,
           errorRate: 1.2,
@@ -401,13 +401,13 @@ export class APIGatewayService {
           cpuUsage: 42,
           networkIO: {
             inbound: 25000000,
-            outbound: 45000000
-          }
+            outbound: 45000000,
+          },
         },
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
         lastDeployedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-        lastHealthCheckAt: new Date(Date.now() - 30 * 1000)
+        lastHealthCheckAt: new Date(Date.now() - 30 * 1000),
       },
       {
         id: 'user-management-service',
@@ -429,7 +429,7 @@ export class APIGatewayService {
           timeout: 5,
           retries: 3,
           successThreshold: 1,
-          failureThreshold: 3
+          failureThreshold: 3,
         },
         scaling: {
           minInstances: 3,
@@ -438,59 +438,59 @@ export class APIGatewayService {
           targetCPU: 60,
           targetMemory: 70,
           scaleUpCooldown: 180,
-          scaleDownCooldown: 300
+          scaleDownCooldown: 300,
         },
         resources: {
           cpu: {
             requests: '150m',
-            limits: '800m'
+            limits: '800m',
           },
           memory: {
             requests: '128Mi',
-            limits: '512Mi'
-          }
+            limits: '512Mi',
+          },
         },
         dependencies: [
           {
             serviceId: 'database-service',
             serviceName: 'PostgreSQL Database',
             type: 'required',
-            healthImpact: 'critical'
+            healthImpact: 'critical',
           },
           {
             serviceId: 'auth-service',
             serviceName: 'Authentication Service',
             type: 'required',
-            healthImpact: 'critical'
-          }
+            healthImpact: 'critical',
+          },
         ],
         environmentVariables: {
-          'JWT_SECRET': {
+          JWT_SECRET: {
             value: 'super-secret-jwt-key',
             encrypted: true,
-            source: 'secret'
+            source: 'secret',
           },
-          'SESSION_TIMEOUT': {
+          SESSION_TIMEOUT: {
             value: '3600',
             encrypted: false,
-            source: 'config'
-          }
+            source: 'config',
+          },
         },
         loadBalancing: {
           strategy: 'least_connections',
           healthCheckPath: '/health',
-          stickySession: true
+          stickySession: true,
         },
         security: {
           networkPolicies: ['allow-ingress-gateway', 'allow-auth-service'],
-          serviceAccount: 'user-mgmt-sa'
+          serviceAccount: 'user-mgmt-sa',
         },
         observability: {
           metricsEnabled: true,
           tracingEnabled: true,
           loggingEnabled: true,
           customDashboards: ['user-activity', 'auth-metrics'],
-          alertRules: ['auth-failures', 'session-anomalies']
+          alertRules: ['auth-failures', 'session-anomalies'],
         },
         endpoints: ['user-login', 'user-register', 'user-profile', 'user-permissions'],
         deployments: [
@@ -499,8 +499,8 @@ export class APIGatewayService {
             strategy: 'blue_green',
             deployedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
             deployedBy: 'devops-team',
-            status: 'completed'
-          }
+            status: 'completed',
+          },
         ],
         metrics: {
           uptime: 99.95,
@@ -508,7 +508,7 @@ export class APIGatewayService {
             average: 78,
             p50: 65,
             p95: 180,
-            p99: 320
+            p99: 320,
           },
           throughput: 890,
           errorRate: 0.8,
@@ -516,13 +516,13 @@ export class APIGatewayService {
           cpuUsage: 35,
           networkIO: {
             inbound: 18000000,
-            outbound: 25000000
-          }
+            outbound: 25000000,
+          },
         },
         createdAt: new Date('2023-12-01'),
         updatedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
         lastDeployedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-        lastHealthCheckAt: new Date(Date.now() - 25 * 1000)
+        lastHealthCheckAt: new Date(Date.now() - 25 * 1000),
       },
       {
         id: 'notification-service',
@@ -543,7 +543,7 @@ export class APIGatewayService {
           timeout: 10,
           retries: 2,
           successThreshold: 1,
-          failureThreshold: 2
+          failureThreshold: 2,
         },
         scaling: {
           minInstances: 2,
@@ -552,59 +552,59 @@ export class APIGatewayService {
           targetCPU: 50,
           targetMemory: 60,
           scaleUpCooldown: 240,
-          scaleDownCooldown: 480
+          scaleDownCooldown: 480,
         },
         resources: {
           cpu: {
             requests: '100m',
-            limits: '500m'
+            limits: '500m',
           },
           memory: {
             requests: '64Mi',
-            limits: '256Mi'
-          }
+            limits: '256Mi',
+          },
         },
         dependencies: [
           {
             serviceId: 'message-queue',
             serviceName: 'RabbitMQ',
             type: 'required',
-            healthImpact: 'critical'
+            healthImpact: 'critical',
           },
           {
             serviceId: 'email-service',
             serviceName: 'SMTP Service',
             type: 'required',
-            healthImpact: 'degraded'
-          }
+            healthImpact: 'degraded',
+          },
         ],
         environmentVariables: {
-          'SMTP_HOST': {
+          SMTP_HOST: {
             value: 'smtp.urbanova.com',
             encrypted: false,
-            source: 'config'
+            source: 'config',
           },
-          'SMTP_PASSWORD': {
+          SMTP_PASSWORD: {
             value: 'encrypted-smtp-password',
             encrypted: true,
-            source: 'secret'
-          }
+            source: 'secret',
+          },
         },
         loadBalancing: {
           strategy: 'random',
           healthCheckPath: '/health',
-          stickySession: false
+          stickySession: false,
         },
         security: {
           networkPolicies: ['allow-message-queue'],
-          serviceAccount: 'notification-sa'
+          serviceAccount: 'notification-sa',
         },
         observability: {
           metricsEnabled: true,
           tracingEnabled: false,
           loggingEnabled: true,
           customDashboards: ['notification-delivery'],
-          alertRules: ['delivery-failures']
+          alertRules: ['delivery-failures'],
         },
         endpoints: ['send-email', 'send-sms', 'send-push'],
         deployments: [
@@ -613,8 +613,8 @@ export class APIGatewayService {
             strategy: 'rolling',
             deployedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
             deployedBy: 'automated-deployment',
-            status: 'completed'
-          }
+            status: 'completed',
+          },
         ],
         metrics: {
           uptime: 99.7,
@@ -622,7 +622,7 @@ export class APIGatewayService {
             average: 45,
             p50: 32,
             p95: 120,
-            p99: 250
+            p99: 250,
           },
           throughput: 234,
           errorRate: 2.1,
@@ -630,14 +630,14 @@ export class APIGatewayService {
           cpuUsage: 28,
           networkIO: {
             inbound: 5000000,
-            outbound: 12000000
-          }
+            outbound: 12000000,
+          },
         },
         createdAt: new Date('2023-11-15'),
         updatedAt: new Date(Date.now() - 18 * 60 * 60 * 1000),
         lastDeployedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-        lastHealthCheckAt: new Date(Date.now() - 40 * 1000)
-      }
+        lastHealthCheckAt: new Date(Date.now() - 40 * 1000),
+      },
     ];
 
     microservices.forEach(service => {
@@ -661,7 +661,7 @@ export class APIGatewayService {
           type: 'bearer_token',
           required: true,
           scopes: ['read:properties'],
-          roles: ['user', 'admin']
+          roles: ['user', 'admin'],
         },
         rateLimiting: {
           enabled: true,
@@ -669,38 +669,38 @@ export class APIGatewayService {
           limit: 100,
           windowSize: 60,
           burstLimit: 150,
-          keyGenerator: 'user'
+          keyGenerator: 'user',
         },
         caching: {
           enabled: true,
           strategy: 'redis',
           ttl: 300,
-          varyBy: ['query', 'location', 'filters']
+          varyBy: ['query', 'location', 'filters'],
         },
         transformation: {
           requestHeaders: {
-            'X-Service': 'land-scraping'
+            'X-Service': 'land-scraping',
           },
           responseHeaders: {
-            'X-Cache-Status': 'HIT'
-          }
+            'X-Cache-Status': 'HIT',
+          },
         },
         validation: {
           validateRequest: true,
-          validateResponse: true
+          validateResponse: true,
         },
         monitoring: {
           enabled: true,
           logRequests: true,
           logResponses: false,
           trackMetrics: true,
-          customMetrics: ['search_queries', 'result_count']
+          customMetrics: ['search_queries', 'result_count'],
         },
         circuitBreaker: {
           enabled: true,
           failureThreshold: 10,
           recoveryTimeout: 60,
-          state: 'closed'
+          state: 'closed',
         },
         retryPolicy: {
           enabled: true,
@@ -708,11 +708,12 @@ export class APIGatewayService {
           strategy: 'exponential_backoff',
           backoffMultiplier: 2,
           maxDelay: 30,
-          retryableStatusCodes: [500, 502, 503, 504]
+          retryableStatusCodes: [500, 502, 503, 504],
         },
         documentation: {
           summary: 'Search for real estate properties',
-          description: 'Allows searching for properties with various filters like location, price range, property type, etc.',
+          description:
+            'Allows searching for properties with various filters like location, price range, property type, etc.',
           tags: ['properties', 'search'],
           examples: [
             {
@@ -720,15 +721,15 @@ export class APIGatewayService {
               request: {
                 location: 'Milan',
                 minPrice: 200000,
-                maxPrice: 500000
+                maxPrice: 500000,
               },
               response: {
                 results: [],
                 totalCount: 0,
-                page: 1
-              }
-            }
-          ]
+                page: 1,
+              },
+            },
+          ],
         },
         isActive: true,
         version: '2.1.0',
@@ -743,8 +744,8 @@ export class APIGatewayService {
           p95ResponseTime: 320,
           p99ResponseTime: 580,
           errorRate: 5.0,
-          throughput: 125
-        }
+          throughput: 125,
+        },
       },
       {
         id: 'user-login',
@@ -757,7 +758,7 @@ export class APIGatewayService {
         targetUrl: 'http://user-mgmt.urbanova.svc.cluster.local:8080/api/v1/auth/login',
         authentication: {
           type: 'none',
-          required: false
+          required: false,
         },
         rateLimiting: {
           enabled: true,
@@ -765,60 +766,61 @@ export class APIGatewayService {
           limit: 20,
           windowSize: 60,
           burstLimit: 30,
-          keyGenerator: 'ip'
+          keyGenerator: 'ip',
         },
         caching: {
           enabled: false,
           strategy: 'none',
-          ttl: 0
+          ttl: 0,
         },
         transformation: {
           requestHeaders: {
-            'X-Login-Attempt': 'true'
-          }
+            'X-Login-Attempt': 'true',
+          },
         },
         validation: {
           validateRequest: true,
-          validateResponse: true
+          validateResponse: true,
         },
         monitoring: {
           enabled: true,
           logRequests: true,
           logResponses: false,
           trackMetrics: true,
-          customMetrics: ['login_attempts', 'failed_logins']
+          customMetrics: ['login_attempts', 'failed_logins'],
         },
         circuitBreaker: {
           enabled: true,
           failureThreshold: 20,
           recoveryTimeout: 120,
-          state: 'closed'
+          state: 'closed',
         },
         retryPolicy: {
           enabled: false,
           maxAttempts: 1,
-          strategy: 'immediate'
+          strategy: 'immediate',
         },
         documentation: {
           summary: 'User authentication endpoint',
-          description: 'Authenticates user credentials and returns a JWT token for subsequent API calls',
+          description:
+            'Authenticates user credentials and returns a JWT token for subsequent API calls',
           tags: ['auth', 'login'],
           examples: [
             {
               name: 'Successful login',
               request: {
                 email: 'user@example.com',
-                password: 'password123'
+                password: 'password123',
               },
               response: {
                 token: 'jwt-token-here',
                 user: {
                   id: '123',
-                  email: 'user@example.com'
-                }
-              }
-            }
-          ]
+                  email: 'user@example.com',
+                },
+              },
+            },
+          ],
         },
         isActive: true,
         version: '1.8.2',
@@ -833,8 +835,8 @@ export class APIGatewayService {
           p95ResponseTime: 220,
           p99ResponseTime: 380,
           errorRate: 10.6,
-          throughput: 89
-        }
+          throughput: 89,
+        },
       },
       {
         id: 'send-notification',
@@ -848,7 +850,7 @@ export class APIGatewayService {
         authentication: {
           type: 'api_key',
           required: true,
-          scopes: ['write:notifications']
+          scopes: ['write:notifications'],
         },
         rateLimiting: {
           enabled: true,
@@ -856,30 +858,30 @@ export class APIGatewayService {
           limit: 1000,
           windowSize: 60,
           burstLimit: 1500,
-          keyGenerator: 'api_key'
+          keyGenerator: 'api_key',
         },
         caching: {
           enabled: false,
           strategy: 'none',
-          ttl: 0
+          ttl: 0,
         },
         transformation: {},
         validation: {
           validateRequest: true,
-          validateResponse: false
+          validateResponse: false,
         },
         monitoring: {
           enabled: true,
           logRequests: true,
           logResponses: true,
           trackMetrics: true,
-          customMetrics: ['notifications_sent', 'delivery_rate']
+          customMetrics: ['notifications_sent', 'delivery_rate'],
         },
         circuitBreaker: {
           enabled: true,
           failureThreshold: 15,
           recoveryTimeout: 90,
-          state: 'closed'
+          state: 'closed',
         },
         retryPolicy: {
           enabled: true,
@@ -887,11 +889,12 @@ export class APIGatewayService {
           strategy: 'exponential_backoff',
           backoffMultiplier: 1.5,
           maxDelay: 60,
-          retryableStatusCodes: [500, 502, 503]
+          retryableStatusCodes: [500, 502, 503],
         },
         documentation: {
           summary: 'Send notifications to users',
-          description: 'Sends various types of notifications including email, SMS and push notifications',
+          description:
+            'Sends various types of notifications including email, SMS and push notifications',
           tags: ['notifications', 'messaging'],
           examples: [
             {
@@ -900,14 +903,14 @@ export class APIGatewayService {
                 type: 'email',
                 recipient: 'user@example.com',
                 subject: 'Welcome to Urbanova',
-                body: 'Welcome message here'
+                body: 'Welcome message here',
               },
               response: {
                 id: 'notification-123',
-                status: 'sent'
-              }
-            }
-          ]
+                status: 'sent',
+              },
+            },
+          ],
         },
         isActive: true,
         version: '1.3.1',
@@ -922,9 +925,9 @@ export class APIGatewayService {
           p95ResponseTime: 150,
           p99ResponseTime: 280,
           errorRate: 2.0,
-          throughput: 45
-        }
-      }
+          throughput: 45,
+        },
+      },
     ];
 
     endpoints.forEach(endpoint => {
@@ -948,24 +951,24 @@ export class APIGatewayService {
           rules: [
             {
               match: {
-                headers: { 'x-canary': 'true' }
+                headers: { 'x-canary': 'true' },
               },
               route: {
                 destination: 'land-scraping-service-canary',
                 weight: 10,
-                timeout: 30000
-              }
+                timeout: 30000,
+              },
             },
             {
               match: {},
               route: {
                 destination: 'land-scraping-service',
                 weight: 90,
-                timeout: 30000
-              }
-            }
-          ]
-        }
+                timeout: 30000,
+              },
+            },
+          ],
+        },
       ],
       securityPolicies: [
         {
@@ -975,38 +978,38 @@ export class APIGatewayService {
           rules: [
             {
               action: 'deny',
-              conditions: { 'source.namespace': 'external' }
+              conditions: { 'source.namespace': 'external' },
             },
             {
               action: 'allow',
               source: 'urbanova/*',
-              destination: 'urbanova/*'
-            }
-          ]
-        }
+              destination: 'urbanova/*',
+            },
+          ],
+        },
       ],
       observability: {
         distributedTracing: {
           enabled: true,
           samplingRate: 10,
-          jaegerEndpoint: 'http://jaeger-collector:14268/api/traces'
+          jaegerEndpoint: 'http://jaeger-collector:14268/api/traces',
         },
         metricsCollection: {
           enabled: true,
           prometheusEndpoint: 'http://prometheus:9090',
-          customMetrics: ['request_duration', 'request_size', 'response_size']
+          customMetrics: ['request_duration', 'request_size', 'response_size'],
         },
         logging: {
           enabled: true,
           level: 'info',
-          accessLogs: true
-        }
+          accessLogs: true,
+        },
       },
       mtls: {
         enabled: true,
         mode: 'strict',
         certificateAuthority: 'urbanova-ca',
-        certificateLifetime: 24
+        certificateLifetime: 24,
       },
       circuitBreaker: {
         enabled: true,
@@ -1016,14 +1019,14 @@ export class APIGatewayService {
           {
             service: 'user-management-service',
             failureThreshold: 5,
-            recoveryTime: 60
-          }
-        ]
+            recoveryTime: 60,
+          },
+        ],
       },
       status: 'healthy',
       version: '1.0.0',
       createdAt: new Date('2024-01-01'),
-      updatedAt: new Date(Date.now() - 6 * 60 * 60 * 1000)
+      updatedAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
     };
 
     this.serviceMeshes.set(serviceMesh.id, serviceMesh);
@@ -1043,31 +1046,31 @@ export class APIGatewayService {
             metric: 'error_rate',
             operator: 'gt',
             threshold: 5.0,
-            duration: 300
-          }
+            duration: 300,
+          },
         ],
         services: ['land-scraping-service', 'user-management-service'],
         notifications: [
           {
             type: 'email',
             config: {
-              recipients: ['devops@urbanova.com', 'alerts@urbanova.com']
+              recipients: ['devops@urbanova.com', 'alerts@urbanova.com'],
             },
-            enabled: true
+            enabled: true,
           },
           {
             type: 'slack',
             config: {
               channel: '#alerts',
-              webhook: 'https://hooks.slack.com/services/...'
+              webhook: 'https://hooks.slack.com/services/...',
             },
-            enabled: true
-          }
+            enabled: true,
+          },
         ],
         state: 'ok',
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-        history: []
+        history: [],
       },
       {
         id: 'service-down',
@@ -1080,24 +1083,24 @@ export class APIGatewayService {
             metric: 'health_status',
             operator: 'eq',
             threshold: 0,
-            duration: 60
-          }
+            duration: 60,
+          },
         ],
         services: ['land-scraping-service', 'user-management-service', 'notification-service'],
         notifications: [
           {
             type: 'pagerduty',
             config: {
-              serviceKey: 'urbanova-service-key'
+              serviceKey: 'urbanova-service-key',
             },
-            enabled: true
-          }
+            enabled: true,
+          },
         ],
         state: 'ok',
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
-        history: []
-      }
+        history: [],
+      },
     ];
 
     alerts.forEach(alert => {
@@ -1109,7 +1112,7 @@ export class APIGatewayService {
   private simulateAPIData() {
     // Simula richieste API
     this.generateRequests(100);
-    
+
     // Simula deployment
     const deployment: ServiceDeployment = {
       id: 'deploy-001',
@@ -1124,7 +1127,7 @@ export class APIGatewayService {
       namespace: 'urbanova',
       resources: {
         cpu: '500m',
-        memory: '1Gi'
+        memory: '1Gi',
       },
       healthChecks: [
         {
@@ -1134,15 +1137,15 @@ export class APIGatewayService {
           interval: 30,
           timeout: 5,
           successThreshold: 1,
-          failureThreshold: 3
-        }
+          failureThreshold: 3,
+        },
       ],
       status: 'in_progress',
       progress: {
         total: 4,
         completed: 2,
         failed: 0,
-        percentage: 50
+        percentage: 50,
       },
       startedAt: new Date(Date.now() - 5 * 60 * 1000),
       deployedBy: 'ci-cd-pipeline',
@@ -1153,27 +1156,27 @@ export class APIGatewayService {
           timestamp: new Date(Date.now() - 4 * 60 * 1000),
           level: 'info',
           message: 'Starting deployment of version 2.1.1',
-          source: 'deployment-controller'
+          source: 'deployment-controller',
         },
         {
           timestamp: new Date(Date.now() - 3 * 60 * 1000),
           level: 'info',
           message: 'Scaling up new pods',
-          source: 'deployment-controller'
+          source: 'deployment-controller',
         },
         {
           timestamp: new Date(Date.now() - 2 * 60 * 1000),
           level: 'info',
           message: '2/4 pods ready',
-          source: 'deployment-controller'
-        }
+          source: 'deployment-controller',
+        },
       ],
       deploymentMetrics: {
         duration: 300,
         successRate: 98.5,
         errorCount: 2,
-        rollbackCount: 0
-      }
+        rollbackCount: 0,
+      },
     };
 
     this.deployments.set(deployment.id, deployment);
@@ -1184,11 +1187,13 @@ export class APIGatewayService {
     const endpoints = Array.from(this.endpoints.values());
     const methods: RequestMethod[] = ['GET', 'POST', 'PUT', 'DELETE'];
     const statusCodes = [200, 201, 400, 401, 403, 404, 500, 502, 503];
-    
+
     for (let i = 0; i < count; i++) {
       const endpoint = endpoints[Math.floor(Math.random() * endpoints.length)];
-      const isError = Math.random() < 0.1; // 10% error rate
+      if (!endpoint) continue;
       
+      const isError = Math.random() < 0.1; // 10% error rate
+
       const request: APIRequest = {
         id: `req-${Date.now()}-${i}`,
         method: endpoint.method,
@@ -1196,12 +1201,12 @@ export class APIGatewayService {
         fullUrl: `https://api.urbanova.com${endpoint.path}?query=example`,
         headers: {
           'User-Agent': 'Urbanova-Client/1.0',
-          'Authorization': 'Bearer jwt-token-here',
-          'Content-Type': 'application/json'
+          Authorization: 'Bearer jwt-token-here',
+          'Content-Type': 'application/json',
         },
         queryParams: {
           query: 'example',
-          limit: '10'
+          limit: '10',
         },
         clientIP: `192.168.1.${Math.floor(Math.random() * 255)}`,
         userAgent: 'Urbanova-Client/1.0',
@@ -1211,41 +1216,45 @@ export class APIGatewayService {
         gatewayId: 'main-gateway',
         timestamp: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000),
         responseTime: Math.floor(Math.random() * 500) + 50,
-        statusCode: isError ? statusCodes[Math.floor(Math.random() * 3) + 6] : statusCodes[Math.floor(Math.random() * 2)],
+        statusCode: isError
+          ? statusCodes[Math.floor(Math.random() * 3) + 6] || 500
+          : statusCodes[Math.floor(Math.random() * 2)] || 200,
         responseSize: Math.floor(Math.random() * 10000) + 1000,
         responseHeaders: {
           'Content-Type': 'application/json',
-          'X-Response-Time': `${Math.floor(Math.random() * 500) + 50}ms`
+          'X-Response-Time': `${Math.floor(Math.random() * 500) + 50}ms`,
         },
         authentication: {
           type: endpoint.authentication.type,
           successful: !isError || Math.random() > 0.5,
           userId: `user-${Math.floor(Math.random() * 1000)}`,
-          scopes: endpoint.authentication.scopes
-        },
+          scopes: endpoint.authentication.scopes || undefined,
+        } as any,
         rateLimitInfo: {
           limit: endpoint.rateLimiting.limit,
           remaining: Math.floor(Math.random() * endpoint.rateLimiting.limit),
           resetTime: new Date(Date.now() + 60 * 1000),
-          exceeded: Math.random() < 0.02
+          exceeded: Math.random() < 0.02,
         },
         cacheInfo: {
           hit: Math.random() < 0.7,
           key: `cache-${endpoint.id}-${Math.random().toString(36).substr(2, 9)}`,
-          ttl: endpoint.caching.ttl
+          ttl: endpoint.caching.ttl,
         },
         circuitBreakerInfo: {
           state: endpoint.circuitBreaker.state,
           failureCount: Math.floor(Math.random() * 5),
-          lastFailureAt: isError ? new Date(Date.now() - Math.random() * 60 * 60 * 1000) : undefined
-        }
+          lastFailureAt: isError
+            ? new Date(Date.now() - Math.random() * 60 * 60 * 1000)
+            : undefined,
+        } as any,
       };
 
       if (isError) {
         request.error = {
           message: 'Internal Server Error',
           code: 'INTERNAL_ERROR',
-          stack: 'Error stack trace here...'
+          stack: 'Error stack trace here...',
         };
       }
 
@@ -1278,16 +1287,16 @@ export class APIGatewayService {
       // Simula variazioni nelle metriche
       service.metrics.cpuUsage += (Math.random() - 0.5) * 10;
       service.metrics.cpuUsage = Math.max(0, Math.min(100, service.metrics.cpuUsage));
-      
+
       service.metrics.memoryUsage += (Math.random() - 0.5) * 5;
       service.metrics.memoryUsage = Math.max(0, Math.min(100, service.metrics.memoryUsage));
-      
+
       service.metrics.responseTime.average += (Math.random() - 0.5) * 20;
       service.metrics.responseTime.average = Math.max(10, service.metrics.responseTime.average);
-      
+
       service.metrics.errorRate += (Math.random() - 0.5) * 2;
       service.metrics.errorRate = Math.max(0, Math.min(50, service.metrics.errorRate));
-      
+
       service.lastHealthCheckAt = new Date();
     });
   }
@@ -1296,9 +1305,10 @@ export class APIGatewayService {
   private updateServiceHealth() {
     this.microservices.forEach(service => {
       // Simula cambio stato occasionale
-      if (Math.random() < 0.05) { // 5% chance
+      if (Math.random() < 0.05) {
+        // 5% chance
         const statuses: ServiceStatus[] = ['healthy', 'degraded', 'unhealthy'];
-        service.status = statuses[Math.floor(Math.random() * statuses.length)];
+        service.status = statuses[Math.floor(Math.random() * statuses.length)] || 'healthy';
       }
     });
   }
@@ -1306,14 +1316,19 @@ export class APIGatewayService {
   // Simula deployment
   private simulateDeployment() {
     const services = Array.from(this.microservices.values());
-    const service = services[Math.floor(Math.random() * services.length)];
+    if (services.length === 0) return;
     
+    const service = services[Math.floor(Math.random() * services.length)];
+    if (!service) return;
+
     const deployment: ServiceDeployment = {
       id: `deploy-${Date.now()}`,
       serviceId: service.id,
       serviceName: service.name,
       version: `${service.version}.${Math.floor(Math.random() * 10)}`,
-      strategy: ['rolling', 'blue_green', 'canary'][Math.floor(Math.random() * 3)] as DeploymentStrategy,
+      strategy: ['rolling', 'blue_green', 'canary'][
+        Math.floor(Math.random() * 3)
+      ] as DeploymentStrategy,
       replicas: service.scaling.currentInstances,
       image: `urbanova/${service.name.toLowerCase().replace(/\s+/g, '-')}`,
       tag: `v${service.version}`,
@@ -1321,7 +1336,7 @@ export class APIGatewayService {
       namespace: service.namespace,
       resources: {
         cpu: service.resources.cpu.limits,
-        memory: service.resources.memory.limits
+        memory: service.resources.memory.limits,
       },
       healthChecks: [service.healthCheck],
       status: 'pending',
@@ -1329,7 +1344,7 @@ export class APIGatewayService {
         total: service.scaling.currentInstances,
         completed: 0,
         failed: 0,
-        percentage: 0
+        percentage: 0,
       },
       startedAt: new Date(),
       deployedBy: 'automated-system',
@@ -1340,15 +1355,15 @@ export class APIGatewayService {
           timestamp: new Date(),
           level: 'info',
           message: `Starting deployment of ${service.name} version ${service.version}`,
-          source: 'deployment-controller'
-        }
+          source: 'deployment-controller',
+        },
       ],
       deploymentMetrics: {
         duration: 0,
         successRate: 100,
         errorCount: 0,
-        rollbackCount: 0
-      }
+        rollbackCount: 0,
+      },
     };
 
     this.deployments.set(deployment.id, deployment);
@@ -1357,7 +1372,9 @@ export class APIGatewayService {
   // API pubbliche del service
 
   // Crea endpoint
-  createEndpoint(endpoint: Omit<APIEndpoint, 'id' | 'createdAt' | 'updatedAt' | 'metrics'>): APIEndpoint {
+  createEndpoint(
+    endpoint: Omit<APIEndpoint, 'id' | 'createdAt' | 'updatedAt' | 'metrics'>
+  ): APIEndpoint {
     const newEndpoint: APIEndpoint = {
       ...endpoint,
       id: `endpoint-${Date.now()}`,
@@ -1371,8 +1388,8 @@ export class APIGatewayService {
         p95ResponseTime: 0,
         p99ResponseTime: 0,
         errorRate: 0,
-        throughput: 0
-      }
+        throughput: 0,
+      },
     };
 
     this.endpoints.set(newEndpoint.id, newEndpoint);
@@ -1387,7 +1404,7 @@ export class APIGatewayService {
     const updatedEndpoint = {
       ...endpoint,
       ...updates,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.endpoints.set(id, updatedEndpoint);
@@ -1400,7 +1417,9 @@ export class APIGatewayService {
   }
 
   // Crea microservizio
-  createMicroservice(service: Omit<Microservice, 'id' | 'createdAt' | 'updatedAt' | 'metrics' | 'deployments'>): Microservice {
+  createMicroservice(
+    service: Omit<Microservice, 'id' | 'createdAt' | 'updatedAt' | 'metrics' | 'deployments'>
+  ): Microservice {
     const newService: Microservice = {
       ...service,
       id: `service-${Date.now()}`,
@@ -1414,7 +1433,7 @@ export class APIGatewayService {
           average: 100,
           p50: 80,
           p95: 200,
-          p99: 400
+          p99: 400,
         },
         throughput: 0,
         errorRate: 0,
@@ -1422,10 +1441,10 @@ export class APIGatewayService {
         cpuUsage: 0,
         networkIO: {
           inbound: 0,
-          outbound: 0
-        }
+          outbound: 0,
+        },
       },
-      deployments: []
+      deployments: [],
     };
 
     this.microservices.set(newService.id, newService);
@@ -1440,7 +1459,7 @@ export class APIGatewayService {
     const updatedService = {
       ...service,
       ...updates,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.microservices.set(id, updatedService);
@@ -1469,7 +1488,7 @@ export class APIGatewayService {
       namespace: service.namespace,
       resources: {
         cpu: service.resources.cpu.limits,
-        memory: service.resources.memory.limits
+        memory: service.resources.memory.limits,
       },
       healthChecks: [service.healthCheck],
       status: 'pending',
@@ -1477,7 +1496,7 @@ export class APIGatewayService {
         total: service.scaling.currentInstances,
         completed: 0,
         failed: 0,
-        percentage: 0
+        percentage: 0,
       },
       startedAt: new Date(),
       deployedBy: 'manual-deployment',
@@ -1488,15 +1507,15 @@ export class APIGatewayService {
           timestamp: new Date(),
           level: 'info',
           message: `Starting deployment of ${service.name} version ${version}`,
-          source: 'deployment-controller'
-        }
+          source: 'deployment-controller',
+        },
       ],
       deploymentMetrics: {
         duration: 0,
         successRate: 100,
         errorCount: 0,
-        rollbackCount: 0
-      }
+        rollbackCount: 0,
+      },
     };
 
     this.deployments.set(deployment.id, deployment);
@@ -1513,7 +1532,7 @@ export class APIGatewayService {
       deployment.progress.percentage = 100;
       deployment.progress.completed = deployment.progress.total;
       deployment.completedAt = new Date();
-      
+
       // Aggiorna versione servizio
       service.version = version;
       service.lastDeployedAt = new Date();
@@ -1537,13 +1556,15 @@ export class APIGatewayService {
   }
 
   // Crea alert
-  createAlert(alert: Omit<ServiceAlert, 'id' | 'createdAt' | 'updatedAt' | 'history'>): ServiceAlert {
+  createAlert(
+    alert: Omit<ServiceAlert, 'id' | 'createdAt' | 'updatedAt' | 'history'>
+  ): ServiceAlert {
     const newAlert: ServiceAlert = {
       ...alert,
       id: `alert-${Date.now()}`,
       createdAt: new Date(),
       updatedAt: new Date(),
-      history: []
+      history: [],
     };
 
     this.alerts.set(newAlert.id, newAlert);
@@ -1557,7 +1578,7 @@ export class APIGatewayService {
 
     alert.state = state;
     alert.updatedAt = new Date();
-    
+
     if (state !== 'ok') {
       alert.lastTriggeredAt = new Date();
     }
@@ -1565,7 +1586,7 @@ export class APIGatewayService {
     alert.history.push({
       timestamp: new Date(),
       state: state === 'ok' ? 'resolved' : 'triggered',
-      message: `Alert state changed to ${state}`
+      message: `Alert state changed to ${state}`,
     });
 
     return true;
@@ -1574,70 +1595,79 @@ export class APIGatewayService {
   // Genera analytics
   generateAPIAnalytics(timeRange?: { start: Date; end: Date }): APIAnalytics {
     const requests = Array.from(this.requests.values());
-    const filteredRequests = timeRange 
+    const filteredRequests = timeRange
       ? requests.filter(r => r.timestamp >= timeRange.start && r.timestamp <= timeRange.end)
       : requests;
 
     const totalRequests = filteredRequests.length;
     const successfulRequests = filteredRequests.filter(r => r.statusCode < 400).length;
     const failedRequests = totalRequests - successfulRequests;
-    const averageResponseTime = filteredRequests.reduce((sum, r) => sum + r.responseTime, 0) / totalRequests || 0;
+    const averageResponseTime =
+      filteredRequests.reduce((sum, r) => sum + r.responseTime, 0) / totalRequests || 0;
 
     return {
-      timeRange: timeRange || {
+      timeRange: timeRange || ({
         start: new Date(Date.now() - 24 * 60 * 60 * 1000),
         end: new Date(),
-        granularity: 'hour'
-      },
+        granularity: 'hour' as const,
+      } as any),
       overview: {
         totalRequests,
         successfulRequests,
         failedRequests,
         averageResponseTime,
-        p95ResponseTime: this.calculatePercentile(filteredRequests.map(r => r.responseTime), 95),
-        p99ResponseTime: this.calculatePercentile(filteredRequests.map(r => r.responseTime), 99),
+        p95ResponseTime: this.calculatePercentile(
+          filteredRequests.map(r => r.responseTime),
+          95
+        ),
+        p99ResponseTime: this.calculatePercentile(
+          filteredRequests.map(r => r.responseTime),
+          99
+        ),
         throughput: totalRequests / (24 * 60 * 60), // requests per second over 24h
         errorRate: (failedRequests / totalRequests) * 100 || 0,
-        uniqueClients: new Set(filteredRequests.map(r => r.clientIP)).size
+        uniqueClients: new Set(filteredRequests.map(r => r.clientIP)).size,
       },
       traffic: {
         requestsOverTime: this.groupRequestsByTime(filteredRequests),
         topEndpoints: this.getTopEndpoints(filteredRequests),
-        topClients: this.getTopClients(filteredRequests)
+        topClients: this.getTopClients(filteredRequests),
       },
       performance: {
         responseTimeDistribution: this.getResponseTimeDistribution(filteredRequests),
         slowestEndpoints: this.getSlowestEndpoints(filteredRequests),
-        servicePerformance: this.getServicePerformance(filteredRequests)
+        servicePerformance: this.getServicePerformance(filteredRequests),
       },
       errors: {
         errorsByStatusCode: this.getErrorsByStatusCode(filteredRequests),
         errorsByService: this.getErrorsByService(filteredRequests),
-        topErrors: this.getTopErrors(filteredRequests)
+        topErrors: this.getTopErrors(filteredRequests),
       },
       security: {
         authenticationFailures: filteredRequests.filter(r => !r.authentication.successful).length,
         rateLimitExceeded: filteredRequests.filter(r => r.rateLimitInfo?.exceeded).length,
         suspiciousIPs: this.getSuspiciousIPs(filteredRequests),
         blockedRequests: filteredRequests.filter(r => r.statusCode === 429).length,
-        attackPatterns: []
+        attackPatterns: [],
       },
       cache: {
         hitRate: (filteredRequests.filter(r => r.cacheInfo?.hit).length / totalRequests) * 100 || 0,
-        missRate: (filteredRequests.filter(r => r.cacheInfo && !r.cacheInfo.hit).length / totalRequests) * 100 || 0,
+        missRate:
+          (filteredRequests.filter(r => r.cacheInfo && !r.cacheInfo.hit).length / totalRequests) *
+            100 || 0,
         totalHits: filteredRequests.filter(r => r.cacheInfo?.hit).length,
         totalMisses: filteredRequests.filter(r => r.cacheInfo && !r.cacheInfo.hit).length,
         evictions: Math.floor(Math.random() * 100),
-        topCachedEndpoints: this.getTopCachedEndpoints(filteredRequests)
+        topCachedEndpoints: this.getTopCachedEndpoints(filteredRequests),
       },
-      generatedAt: new Date()
+      generatedAt: new Date(),
     };
   }
 
   // Genera topologia servizi
   generateServiceTopology(): ServiceTopology {
     const services = Array.from(this.microservices.values());
-    
+
     return {
       services: services.map((service, index) => ({
         id: service.id,
@@ -1646,14 +1676,14 @@ export class APIGatewayService {
         status: service.status,
         position: {
           x: (index % 3) * 200 + 100,
-          y: Math.floor(index / 3) * 150 + 100
+          y: Math.floor(index / 3) * 150 + 100,
         },
         metadata: {
           version: service.version,
           replicas: service.scaling.currentInstances,
           cpu: service.metrics.cpuUsage,
-          memory: service.metrics.memoryUsage
-        }
+          memory: service.metrics.memoryUsage,
+        },
       })),
       connections: this.generateServiceConnections(),
       externalDependencies: [
@@ -1663,7 +1693,7 @@ export class APIGatewayService {
           type: 'database',
           url: 'postgres://postgres:5432/urbanova',
           status: 'healthy',
-          connectedServices: ['land-scraping-service', 'user-management-service']
+          connectedServices: ['land-scraping-service', 'user-management-service'],
         },
         {
           id: 'redis-cache',
@@ -1671,8 +1701,8 @@ export class APIGatewayService {
           type: 'cache',
           url: 'redis://redis:6379',
           status: 'healthy',
-          connectedServices: ['land-scraping-service']
-        }
+          connectedServices: ['land-scraping-service'],
+        },
       ],
       generatedAt: new Date(),
       metadata: {
@@ -1680,8 +1710,8 @@ export class APIGatewayService {
         healthyServices: services.filter(s => s.status === 'healthy').length,
         unhealthyServices: services.filter(s => s.status === 'unhealthy').length,
         totalConnections: services.length * 2, // Simplified
-        criticalPath: ['main-gateway', 'land-scraping-service', 'postgres-db']
-      }
+        criticalPath: ['main-gateway', 'land-scraping-service', 'postgres-db'],
+      },
     };
   }
 
@@ -1699,46 +1729,50 @@ export class APIGatewayService {
         healthyServices: services.filter(s => s.status === 'healthy').length,
         totalRequests: requests.length,
         requestsPerSecond: requests.length / (24 * 60 * 60),
-        averageResponseTime: requests.reduce((sum, r) => sum + r.responseTime, 0) / requests.length || 0,
+        averageResponseTime:
+          requests.reduce((sum, r) => sum + r.responseTime, 0) / requests.length || 0,
         errorRate: (requests.filter(r => r.statusCode >= 400).length / requests.length) * 100 || 0,
-        uptime: 99.9
+        uptime: 99.9,
       },
       performance: {
         throughput: {
           current: 1250,
           peak: 2500,
-          average: 1100
+          average: 1100,
         },
         latency: {
           p50: 85,
           p95: 250,
           p99: 450,
-          max: 2000
+          max: 2000,
         },
         errors: {
           total: requests.filter(r => r.statusCode >= 400).length,
           rate: (requests.filter(r => r.statusCode >= 400).length / requests.length) * 100 || 0,
-          byStatusCode: this.getErrorsByStatusCode(requests).reduce((acc, item) => {
-            acc[item.statusCode] = item.count;
-            return acc;
-          }, {} as Record<number, number>)
-        }
+          byStatusCode: this.getErrorsByStatusCode(requests).reduce(
+            (acc, item) => {
+              acc[item.statusCode] = item.count;
+              return acc;
+            },
+            {} as Record<number, number>
+          ),
+        },
       },
       resources: {
         cpu: {
           current: 45,
           average: 42,
-          peak: 78
+          peak: 78,
         },
         memory: {
           current: 62,
           average: 58,
-          peak: 85
+          peak: 85,
         },
         network: {
           inbound: 125000000,
-          outbound: 890000000
-        }
+          outbound: 890000000,
+        },
       },
       serviceHealth: services.map(service => ({
         serviceId: service.id,
@@ -1746,30 +1780,32 @@ export class APIGatewayService {
         status: service.status,
         responseTime: service.metrics.responseTime.average,
         errorRate: service.metrics.errorRate,
-        uptime: service.metrics.uptime
+        uptime: service.metrics.uptime,
       })),
       rateLimiting: {
         totalRequests: requests.length,
         blockedRequests: requests.filter(r => r.statusCode === 429).length,
         blockRate: (requests.filter(r => r.statusCode === 429).length / requests.length) * 100 || 0,
-        topBlockedIPs: this.getTopBlockedIPs(requests)
+        topBlockedIPs: this.getTopBlockedIPs(requests),
       },
       caching: {
         hitRate: (requests.filter(r => r.cacheInfo?.hit).length / requests.length) * 100 || 0,
-        missRate: (requests.filter(r => r.cacheInfo && !r.cacheInfo.hit).length / requests.length) * 100 || 0,
+        missRate:
+          (requests.filter(r => r.cacheInfo && !r.cacheInfo.hit).length / requests.length) * 100 ||
+          0,
         totalHits: requests.filter(r => r.cacheInfo?.hit).length,
         totalMisses: requests.filter(r => r.cacheInfo && !r.cacheInfo.hit).length,
         cacheSize: 1024 * 1024 * 512, // 512MB
-        evictions: Math.floor(Math.random() * 1000)
+        evictions: Math.floor(Math.random() * 1000),
       },
       security: {
         authenticationFailures: requests.filter(r => !r.authentication.successful).length,
         authorizationFailures: requests.filter(r => r.statusCode === 403).length,
         suspiciousActivities: Math.floor(Math.random() * 50),
-        blockedIPs: Math.floor(Math.random() * 25)
+        blockedIPs: Math.floor(Math.random() * 25),
       },
       generatedAt: new Date(),
-      period: '24h'
+      period: '24h',
     };
   }
 
@@ -1778,13 +1814,13 @@ export class APIGatewayService {
     if (values.length === 0) return 0;
     const sorted = values.sort((a, b) => a - b);
     const index = Math.ceil((percentile / 100) * sorted.length) - 1;
-    return sorted[Math.max(0, index)];
+    return sorted[Math.max(0, index)] || 0;
   }
 
   private groupRequestsByTime(requests: APIRequest[]) {
     // Simplified grouping by hour
     const groups: Record<string, { requests: number; errors: number }> = {};
-    
+
     requests.forEach(request => {
       const hour = new Date(request.timestamp).toISOString().slice(0, 13);
       if (!groups[hour]) {
@@ -1799,21 +1835,25 @@ export class APIGatewayService {
     return Object.entries(groups).map(([hour, data]) => ({
       timestamp: new Date(hour),
       requests: data.requests,
-      errors: data.errors
+      errors: data.errors,
     }));
   }
 
   private getTopEndpoints(requests: APIRequest[]) {
-    const endpointStats: Record<string, { requests: number; totalTime: number; errors: number }> = {};
-    
+    const endpointStats: Record<string, { requests: number; totalTime: number; errors: number }> =
+      {};
+
     requests.forEach(request => {
       if (!endpointStats[request.endpointId]) {
         endpointStats[request.endpointId] = { requests: 0, totalTime: 0, errors: 0 };
       }
-      endpointStats[request.endpointId].requests++;
-      endpointStats[request.endpointId].totalTime += request.responseTime;
-      if (request.statusCode >= 400) {
-        endpointStats[request.endpointId].errors++;
+      const stats = endpointStats[request.endpointId];
+      if (stats) {
+        stats.requests++;
+        stats.totalTime += request.responseTime;
+        if (request.statusCode >= 400) {
+          stats.errors++;
+        }
       }
     });
 
@@ -1823,7 +1863,7 @@ export class APIGatewayService {
         path: this.endpoints.get(endpointId)?.path || 'Unknown',
         requests: stats.requests,
         averageResponseTime: stats.totalTime / stats.requests,
-        errorRate: (stats.errors / stats.requests) * 100
+        errorRate: (stats.errors / stats.requests) * 100,
       }))
       .sort((a, b) => b.requests - a.requests)
       .slice(0, 10);
@@ -1831,14 +1871,17 @@ export class APIGatewayService {
 
   private getTopClients(requests: APIRequest[]) {
     const clientStats: Record<string, { requests: number; errors: number; userAgent: string }> = {};
-    
+
     requests.forEach(request => {
       if (!clientStats[request.clientIP]) {
         clientStats[request.clientIP] = { requests: 0, errors: 0, userAgent: request.userAgent };
       }
-      clientStats[request.clientIP].requests++;
-      if (request.statusCode >= 400) {
-        clientStats[request.clientIP].errors++;
+      const stats = clientStats[request.clientIP];
+      if (stats) {
+        stats.requests++;
+        if (request.statusCode >= 400) {
+          stats.errors++;
+        }
       }
     });
 
@@ -1847,7 +1890,7 @@ export class APIGatewayService {
         clientIP,
         userAgent: stats.userAgent,
         requests: stats.requests,
-        errorRate: (stats.errors / stats.requests) * 100
+        errorRate: (stats.errors / stats.requests) * 100,
       }))
       .sort((a, b) => b.requests - a.requests)
       .slice(0, 10);
@@ -1859,29 +1902,35 @@ export class APIGatewayService {
       { range: '50-100ms', min: 50, max: 100 },
       { range: '100-200ms', min: 100, max: 200 },
       { range: '200-500ms', min: 200, max: 500 },
-      { range: '500ms+', min: 500, max: Infinity }
+      { range: '500ms+', min: 500, max: Infinity },
     ];
 
     return ranges.map(range => {
-      const count = requests.filter(r => r.responseTime >= range.min && r.responseTime < range.max).length;
+      const count = requests.filter(
+        r => r.responseTime >= range.min && r.responseTime < range.max
+      ).length;
       return {
         range: range.range,
         count,
-        percentage: (count / requests.length) * 100 || 0
+        percentage: (count / requests.length) * 100 || 0,
       };
     });
   }
 
   private getSlowestEndpoints(requests: APIRequest[]) {
-    const endpointStats: Record<string, { totalTime: number; requests: number; times: number[] }> = {};
-    
+    const endpointStats: Record<string, { totalTime: number; requests: number; times: number[] }> =
+      {};
+
     requests.forEach(request => {
       if (!endpointStats[request.endpointId]) {
         endpointStats[request.endpointId] = { totalTime: 0, requests: 0, times: [] };
       }
-      endpointStats[request.endpointId].totalTime += request.responseTime;
-      endpointStats[request.endpointId].requests++;
-      endpointStats[request.endpointId].times.push(request.responseTime);
+      const stats = endpointStats[request.endpointId];
+      if (stats) {
+        stats.totalTime += request.responseTime;
+        stats.requests++;
+        stats.times.push(request.responseTime);
+      }
     });
 
     return Object.entries(endpointStats)
@@ -1890,42 +1939,47 @@ export class APIGatewayService {
         path: this.endpoints.get(endpointId)?.path || 'Unknown',
         averageResponseTime: stats.totalTime / stats.requests,
         p95ResponseTime: this.calculatePercentile(stats.times, 95),
-        requests: stats.requests
+        requests: stats.requests,
       }))
       .sort((a, b) => b.averageResponseTime - a.averageResponseTime)
       .slice(0, 10);
   }
 
   private getServicePerformance(requests: APIRequest[]) {
-    const serviceStats: Record<string, { totalTime: number; requests: number; errors: number }> = {};
-    
+    const serviceStats: Record<string, { totalTime: number; requests: number; errors: number }> =
+      {};
+
     requests.forEach(request => {
       if (!serviceStats[request.serviceId]) {
         serviceStats[request.serviceId] = { totalTime: 0, requests: 0, errors: 0 };
       }
-      serviceStats[request.serviceId].totalTime += request.responseTime;
-      serviceStats[request.serviceId].requests++;
-      if (request.statusCode >= 400) {
-        serviceStats[request.serviceId].errors++;
+      const stats = serviceStats[request.serviceId];
+      if (stats) {
+        stats.totalTime += request.responseTime;
+        stats.requests++;
+        if (request.statusCode >= 400) {
+          stats.errors++;
+        }
       }
     });
 
-    return Object.entries(serviceStats)
-      .map(([serviceId, stats]) => ({
-        serviceId,
-        serviceName: this.microservices.get(serviceId)?.name || 'Unknown',
-        averageResponseTime: stats.totalTime / stats.requests,
-        throughput: stats.requests / (24 * 60 * 60), // per second over 24h
-        errorRate: (stats.errors / stats.requests) * 100
-      }));
+    return Object.entries(serviceStats).map(([serviceId, stats]) => ({
+      serviceId,
+      serviceName: this.microservices.get(serviceId)?.name || 'Unknown',
+      averageResponseTime: stats.totalTime / stats.requests,
+      throughput: stats.requests / (24 * 60 * 60), // per second over 24h
+      errorRate: (stats.errors / stats.requests) * 100,
+    }));
   }
 
   private getErrorsByStatusCode(requests: APIRequest[]) {
     const statusCodes: Record<number, number> = {};
-    
-    requests.filter(r => r.statusCode >= 400).forEach(request => {
-      statusCodes[request.statusCode] = (statusCodes[request.statusCode] || 0) + 1;
-    });
+
+    requests
+      .filter(r => r.statusCode >= 400)
+      .forEach(request => {
+        statusCodes[request.statusCode] = (statusCodes[request.statusCode] || 0) + 1;
+      });
 
     const total = Object.values(statusCodes).reduce((sum, count) => sum + count, 0);
 
@@ -1933,21 +1987,24 @@ export class APIGatewayService {
       .map(([statusCode, count]) => ({
         statusCode: parseInt(statusCode),
         count,
-        percentage: (count / total) * 100
+        percentage: (count / total) * 100,
       }))
       .sort((a, b) => b.count - a.count);
   }
 
   private getErrorsByService(requests: APIRequest[]) {
     const serviceStats: Record<string, { total: number; errors: number }> = {};
-    
+
     requests.forEach(request => {
       if (!serviceStats[request.serviceId]) {
         serviceStats[request.serviceId] = { total: 0, errors: 0 };
       }
-      serviceStats[request.serviceId].total++;
-      if (request.statusCode >= 400) {
-        serviceStats[request.serviceId].errors++;
+      const stats = serviceStats[request.serviceId];
+      if (stats) {
+        stats.total++;
+        if (request.statusCode >= 400) {
+          stats.errors++;
+        }
       }
     });
 
@@ -1956,33 +2013,38 @@ export class APIGatewayService {
         serviceId,
         serviceName: this.microservices.get(serviceId)?.name || 'Unknown',
         errorCount: stats.errors,
-        errorRate: (stats.errors / stats.total) * 100
+        errorRate: (stats.errors / stats.total) * 100,
       }))
       .sort((a, b) => b.errorRate - a.errorRate);
   }
 
   private getTopErrors(requests: APIRequest[]) {
-    const errorMessages: Record<string, { count: number; first: Date; last: Date; endpoints: Set<string> }> = {};
-    
-    requests.filter(r => r.error).forEach(request => {
-      const message = request.error!.message;
-      if (!errorMessages[message]) {
-        errorMessages[message] = {
-          count: 0,
-          first: request.timestamp,
-          last: request.timestamp,
-          endpoints: new Set()
-        };
-      }
-      errorMessages[message].count++;
-      errorMessages[message].endpoints.add(request.endpointId);
-      if (request.timestamp < errorMessages[message].first) {
-        errorMessages[message].first = request.timestamp;
-      }
-      if (request.timestamp > errorMessages[message].last) {
-        errorMessages[message].last = request.timestamp;
-      }
-    });
+    const errorMessages: Record<
+      string,
+      { count: number; first: Date; last: Date; endpoints: Set<string> }
+    > = {};
+
+    requests
+      .filter(r => r.error)
+      .forEach(request => {
+        const message = request.error!.message;
+        if (!errorMessages[message]) {
+          errorMessages[message] = {
+            count: 0,
+            first: request.timestamp,
+            last: request.timestamp,
+            endpoints: new Set(),
+          };
+        }
+        errorMessages[message].count++;
+        errorMessages[message].endpoints.add(request.endpointId);
+        if (request.timestamp < errorMessages[message].first) {
+          errorMessages[message].first = request.timestamp;
+        }
+        if (request.timestamp > errorMessages[message].last) {
+          errorMessages[message].last = request.timestamp;
+        }
+      });
 
     return Object.entries(errorMessages)
       .map(([message, stats]) => ({
@@ -1990,7 +2052,7 @@ export class APIGatewayService {
         count: stats.count,
         firstOccurrence: stats.first,
         lastOccurrence: stats.last,
-        affectedEndpoints: Array.from(stats.endpoints)
+        affectedEndpoints: Array.from(stats.endpoints),
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
@@ -1998,25 +2060,29 @@ export class APIGatewayService {
 
   private getSuspiciousIPs(requests: APIRequest[]): string[] {
     const ipStats: Record<string, { requests: number; errors: number; rateLimitHits: number }> = {};
-    
+
     requests.forEach(request => {
       if (!ipStats[request.clientIP]) {
         ipStats[request.clientIP] = { requests: 0, errors: 0, rateLimitHits: 0 };
       }
-      ipStats[request.clientIP].requests++;
-      if (request.statusCode >= 400) {
-        ipStats[request.clientIP].errors++;
-      }
-      if (request.rateLimitInfo?.exceeded) {
-        ipStats[request.clientIP].rateLimitHits++;
+      const stats = ipStats[request.clientIP];
+      if (stats) {
+        stats.requests++;
+        if (request.statusCode >= 400) {
+          stats.errors++;
+        }
+        if (request.rateLimitInfo?.exceeded) {
+          stats.rateLimitHits++;
+        }
       }
     });
 
     return Object.entries(ipStats)
-      .filter(([ip, stats]) => 
-        stats.errors > 50 || // High error count
-        stats.rateLimitHits > 10 || // Frequent rate limiting
-        (stats.errors / stats.requests) > 0.5 // High error rate
+      .filter(
+        ([ip, stats]) =>
+          stats.errors > 50 || // High error count
+          stats.rateLimitHits > 10 || // Frequent rate limiting
+          stats.errors / stats.requests > 0.5 // High error rate
       )
       .map(([ip]) => ip)
       .slice(0, 10);
@@ -2024,17 +2090,22 @@ export class APIGatewayService {
 
   private getTopCachedEndpoints(requests: APIRequest[]) {
     const endpointStats: Record<string, { hits: number; misses: number }> = {};
-    
-    requests.filter(r => r.cacheInfo).forEach(request => {
-      if (!endpointStats[request.endpointId]) {
-        endpointStats[request.endpointId] = { hits: 0, misses: 0 };
-      }
-      if (request.cacheInfo!.hit) {
-        endpointStats[request.endpointId].hits++;
-      } else {
-        endpointStats[request.endpointId].misses++;
-      }
-    });
+
+    requests
+      .filter(r => r.cacheInfo)
+      .forEach(request => {
+        if (!endpointStats[request.endpointId]) {
+          endpointStats[request.endpointId] = { hits: 0, misses: 0 };
+        }
+        const stats = endpointStats[request.endpointId];
+        if (stats && request.cacheInfo) {
+          if (request.cacheInfo.hit) {
+            stats.hits++;
+          } else {
+            stats.misses++;
+          }
+        }
+      });
 
     return Object.entries(endpointStats)
       .map(([endpointId, stats]) => ({
@@ -2042,7 +2113,7 @@ export class APIGatewayService {
         path: this.endpoints.get(endpointId)?.path || 'Unknown',
         hitRate: (stats.hits / (stats.hits + stats.misses)) * 100,
         hits: stats.hits,
-        misses: stats.misses
+        misses: stats.misses,
       }))
       .sort((a, b) => b.hitRate - a.hitRate)
       .slice(0, 10);
@@ -2050,10 +2121,12 @@ export class APIGatewayService {
 
   private getTopBlockedIPs(requests: APIRequest[]) {
     const ipStats: Record<string, number> = {};
-    
-    requests.filter(r => r.statusCode === 429).forEach(request => {
-      ipStats[request.clientIP] = (ipStats[request.clientIP] || 0) + 1;
-    });
+
+    requests
+      .filter(r => r.statusCode === 429)
+      .forEach(request => {
+        ipStats[request.clientIP] = (ipStats[request.clientIP] || 0) + 1;
+      });
 
     return Object.entries(ipStats)
       .map(([ip, blockedRequests]) => ({ ip, blockedRequests }))
@@ -2075,7 +2148,7 @@ export class APIGatewayService {
         errorRate: 1.2,
         health: 'healthy' as const,
         encrypted: true,
-        authenticated: true
+        authenticated: true,
       },
       {
         id: 'gateway-to-user-mgmt',
@@ -2088,7 +2161,7 @@ export class APIGatewayService {
         errorRate: 0.8,
         health: 'healthy' as const,
         encrypted: true,
-        authenticated: true
+        authenticated: true,
       },
       {
         id: 'user-mgmt-to-notifications',
@@ -2101,8 +2174,8 @@ export class APIGatewayService {
         errorRate: 2.1,
         health: 'healthy' as const,
         encrypted: false,
-        authenticated: true
-      }
+        authenticated: true,
+      },
     ];
   }
 
@@ -2140,8 +2213,8 @@ export class APIGatewayService {
   }
 
   getRequests(): APIRequest[] {
-    return Array.from(this.requests.values()).sort((a, b) => 
-      b.timestamp.getTime() - a.timestamp.getTime()
+    return Array.from(this.requests.values()).sort(
+      (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
     );
   }
 
@@ -2154,8 +2227,8 @@ export class APIGatewayService {
   }
 
   getDeployments(): ServiceDeployment[] {
-    return Array.from(this.deployments.values()).sort((a, b) => 
-      b.startedAt.getTime() - a.startedAt.getTime()
+    return Array.from(this.deployments.values()).sort(
+      (a, b) => b.startedAt.getTime() - a.startedAt.getTime()
     );
   }
 
@@ -2172,25 +2245,29 @@ export class APIGatewayService {
   }
 
   // Ricerca requests
-  searchRequests(query: string, filters?: {
-    method?: RequestMethod;
-    statusCode?: number;
-    serviceId?: string;
-    endpointId?: string;
-    clientIP?: string;
-    dateFrom?: Date;
-    dateTo?: Date;
-  }): APIRequest[] {
+  searchRequests(
+    query: string,
+    filters?: {
+      method?: RequestMethod;
+      statusCode?: number;
+      serviceId?: string;
+      endpointId?: string;
+      clientIP?: string;
+      dateFrom?: Date;
+      dateTo?: Date;
+    }
+  ): APIRequest[] {
     let results = Array.from(this.requests.values());
 
     // Filtro per query testuale
     if (query.trim()) {
       const searchTerm = query.toLowerCase();
-      results = results.filter(req => 
-        req.path.toLowerCase().includes(searchTerm) ||
-        req.clientIP.includes(searchTerm) ||
-        req.userAgent.toLowerCase().includes(searchTerm) ||
-        req.userId?.includes(searchTerm)
+      results = results.filter(
+        req =>
+          req.path.toLowerCase().includes(searchTerm) ||
+          req.clientIP.includes(searchTerm) ||
+          req.userAgent.toLowerCase().includes(searchTerm) ||
+          req.userId?.includes(searchTerm)
       );
     }
 

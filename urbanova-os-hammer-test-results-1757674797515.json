@@ -1,0 +1,6466 @@
+{
+  "summary": {
+    "totalTests": 100,
+    "successfulTests": 100,
+    "failedTests": 0,
+    "successRate": "100.00",
+    "urbanovaOSActivations": 100,
+    "urbanovaOSActivationRate": "100.00",
+    "avgResponseTime": 9106
+  },
+  "categoryStats": {
+    "FATTIBILITÀ": {
+      "total": 20,
+      "success": 20,
+      "failures": 0,
+      "urbanovaOS": 20,
+      "avgResponseTime": 10425.75
+    },
+    "RICERCA_MERCATO": {
+      "total": 15,
+      "success": 15,
+      "failures": 0,
+      "urbanovaOS": 15,
+      "avgResponseTime": 9819.2
+    },
+    "GESTIONE_PROGETTI": {
+      "total": 15,
+      "success": 15,
+      "failures": 0,
+      "urbanovaOS": 15,
+      "avgResponseTime": 9777.6
+    },
+    "COMPLIANCE_PERMESSI": {
+      "total": 10,
+      "success": 10,
+      "failures": 0,
+      "urbanovaOS": 10,
+      "avgResponseTime": 10076.6
+    },
+    "CONVERSAZIONI_GENERALI": {
+      "total": 20,
+      "success": 20,
+      "failures": 0,
+      "urbanovaOS": 20,
+      "avgResponseTime": 6954.45
+    },
+    "DOMANDE_TECNICHE": {
+      "total": 10,
+      "success": 10,
+      "failures": 0,
+      "urbanovaOS": 10,
+      "avgResponseTime": 8024.9
+    },
+    "EDGE_CASES": {
+      "total": 10,
+      "success": 10,
+      "failures": 0,
+      "urbanovaOS": 10,
+      "avgResponseTime": 8804
+    }
+  },
+  "results": [
+    {
+      "testId": 1,
+      "category": "FATTIBILITÀ",
+      "input": "Ciao Urbanova, devo fare uno studio di fattibilità per un terreno di 5000mq a Milano. Puoi aiutarmi?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 7821,
+      "success": true,
+      "timestamp": "2025-09-12T10:43:14.560Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [
+              {
+                "name": "number",
+                "value": "5000mq",
+                "confidence": 0.8,
+                "type": "number"
+              },
+              {
+                "name": "location",
+                "value": "milano",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:43:06.766Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 2,
+      "category": "FATTIBILITÀ",
+      "input": "Ho un terreno agricolo di 3 ettari in Toscana, voglio trasformarlo in residenziale. Fai l'analisi completa.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 10081,
+      "success": true,
+      "timestamp": "2025-09-12T10:43:25.644Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:43:15.581Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 3,
+      "category": "FATTIBILITÀ",
+      "input": "Studio di fattibilità urgente: terreno 2000mq zona EUR Roma, destinazione commerciale.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 10666,
+      "success": true,
+      "timestamp": "2025-09-12T10:43:37.311Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [
+              {
+                "name": "number",
+                "value": "2000mq",
+                "confidence": 0.8,
+                "type": "number"
+              },
+              {
+                "name": "location",
+                "value": "roma",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:43:26.666Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 4,
+      "category": "FATTIBILITÀ",
+      "input": "Analizza la fattibilità di un progetto residenziale su terreno di 8000mq a Bologna.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 11532,
+      "success": true,
+      "timestamp": "2025-09-12T10:43:49.844Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [
+              {
+                "name": "number",
+                "value": "8000mq",
+                "confidence": 0.8,
+                "type": "number"
+              },
+              {
+                "name": "location",
+                "value": "bologna",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:43:38.327Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 5,
+      "category": "FATTIBILITÀ",
+      "input": "Devo valutare un investimento immobiliare: terreno industriale 15000mq a Torino. Procedi con l'analisi.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 7922,
+      "success": true,
+      "timestamp": "2025-09-12T10:43:58.768Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [
+              {
+                "name": "number",
+                "value": "15000mq",
+                "confidence": 0.8,
+                "type": "number"
+              },
+              {
+                "name": "location",
+                "value": "torino",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:43:50.875Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 6,
+      "category": "FATTIBILITÀ",
+      "input": "Fai uno studio di fattibilità per un complesso residenziale di 50 unità a Firenze.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 11166,
+      "success": true,
+      "timestamp": "2025-09-12T10:44:10.935Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [
+              {
+                "name": "location",
+                "value": "firenze",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:43:59.799Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 7,
+      "category": "FATTIBILITÀ",
+      "input": "Terreno misto 6000mq a Napoli, destinazione mista residenziale-commerciale. Analizza tutto.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 9431,
+      "success": true,
+      "timestamp": "2025-09-12T10:44:21.368Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [
+              {
+                "name": "number",
+                "value": "6000mq",
+                "confidence": 0.8,
+                "type": "number"
+              },
+              {
+                "name": "location",
+                "value": "napoli",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:44:11.951Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 8,
+      "category": "FATTIBILITÀ",
+      "input": "Studio completo per terreno edificabile 4000mq zona Porta Nuova Milano.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 9390,
+      "success": true,
+      "timestamp": "2025-09-12T10:44:31.758Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [
+              {
+                "name": "number",
+                "value": "4000mq",
+                "confidence": 0.8,
+                "type": "number"
+              },
+              {
+                "name": "location",
+                "value": "milano",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:44:22.383Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 9,
+      "category": "FATTIBILITÀ",
+      "input": "Analisi fattibilità: terreno agricolo 10 ettari in Umbria per agriturismo.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 8145,
+      "success": true,
+      "timestamp": "2025-09-12T10:44:40.904Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:44:32.775Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 10,
+      "category": "FATTIBILITÀ",
+      "input": "Progetto residenziale di lusso su terreno 12000mq a Como. Fai l'analisi dettagliata.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 9512,
+      "success": true,
+      "timestamp": "2025-09-12T10:44:51.417Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [
+              {
+                "name": "number",
+                "value": "12000mq",
+                "confidence": 0.8,
+                "type": "number"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:44:41.919Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 11,
+      "category": "FATTIBILITÀ",
+      "input": "Studio di fattibilità per complesso commerciale 30000mq a Roma Est.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 10571,
+      "success": true,
+      "timestamp": "2025-09-12T10:45:02.989Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [
+              {
+                "name": "number",
+                "value": "30000mq",
+                "confidence": 0.8,
+                "type": "number"
+              },
+              {
+                "name": "location",
+                "value": "roma",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:44:52.433Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 12,
+      "category": "FATTIBILITÀ",
+      "input": "Terreno industriale dismesso 20000mq a Genova. Valuta riconversione residenziale.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 9878,
+      "success": true,
+      "timestamp": "2025-09-12T10:45:13.869Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [
+              {
+                "name": "number",
+                "value": "20000mq",
+                "confidence": 0.8,
+                "type": "number"
+              },
+              {
+                "name": "location",
+                "value": "genova",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:45:04.011Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 13,
+      "category": "FATTIBILITÀ",
+      "input": "Analizza fattibilità progetto residenziale sociale 100 unità a Palermo.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 10669,
+      "success": true,
+      "timestamp": "2025-09-12T10:45:25.539Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [
+              {
+                "name": "location",
+                "value": "palermo",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:45:14.894Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 14,
+      "category": "FATTIBILITÀ",
+      "input": "Studio completo terreno 7000mq zona Navigli Milano per residenziale.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 8731,
+      "success": true,
+      "timestamp": "2025-09-12T10:45:35.271Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [
+              {
+                "name": "number",
+                "value": "7000mq",
+                "confidence": 0.8,
+                "type": "number"
+              },
+              {
+                "name": "location",
+                "value": "milano",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:45:26.559Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 15,
+      "category": "FATTIBILITÀ",
+      "input": "Fai analisi fattibilità terreno agricolo 5 ettari in Puglia per residenziale.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 9428,
+      "success": true,
+      "timestamp": "2025-09-12T10:45:45.700Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:45:36.287Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 16,
+      "category": "FATTIBILITÀ",
+      "input": "Progetto misto residenziale-commerciale 15000mq a Verona. Analizza tutto.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 9982,
+      "success": true,
+      "timestamp": "2025-09-12T10:45:56.683Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [
+              {
+                "name": "number",
+                "value": "15000mq",
+                "confidence": 0.8,
+                "type": "number"
+              },
+              {
+                "name": "location",
+                "value": "verona",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:45:46.726Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 17,
+      "category": "FATTIBILITÀ",
+      "input": "Studio fattibilità terreno edificabile 9000mq zona Prati Roma.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 9544,
+      "success": true,
+      "timestamp": "2025-09-12T10:46:07.227Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [
+              {
+                "name": "number",
+                "value": "9000mq",
+                "confidence": 0.8,
+                "type": "number"
+              },
+              {
+                "name": "location",
+                "value": "roma",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:45:57.705Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 18,
+      "category": "FATTIBILITÀ",
+      "input": "Analisi completa terreno industriale 25000mq a Bari per riconversione.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 12254,
+      "success": true,
+      "timestamp": "2025-09-12T10:46:20.482Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [
+              {
+                "name": "number",
+                "value": "25000mq",
+                "confidence": 0.8,
+                "type": "number"
+              },
+              {
+                "name": "location",
+                "value": "bari",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:46:08.258Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 19,
+      "category": "FATTIBILITÀ",
+      "input": "Studio per complesso residenziale 80 unità a Bergamo. Procedi.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 9903,
+      "success": true,
+      "timestamp": "2025-09-12T10:46:31.386Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [
+              {
+                "name": "location",
+                "value": "bergamo",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:46:21.509Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 20,
+      "category": "FATTIBILITÀ",
+      "input": "Terreno misto 11000mq a Padova. Fai studio fattibilità completo.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 21889,
+      "success": true,
+      "timestamp": "2025-09-12T10:46:54.277Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [
+              {
+                "name": "number",
+                "value": "11000mq",
+                "confidence": 0.8,
+                "type": "number"
+              },
+              {
+                "name": "location",
+                "value": "padova",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:46:32.411Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 21,
+      "category": "RICERCA_MERCATO",
+      "input": "Analizza il mercato immobiliare di Milano per appartamenti di lusso.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 13819,
+      "success": true,
+      "timestamp": "2025-09-12T10:47:09.097Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "market_research",
+            "entities": [
+              {
+                "name": "location",
+                "value": "milano",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:46:55.302Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 22,
+      "category": "RICERCA_MERCATO",
+      "input": "Fai una ricerca di mercato sui prezzi degli uffici a Roma centro.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 9611,
+      "success": true,
+      "timestamp": "2025-09-12T10:47:19.708Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "market_research",
+            "entities": [
+              {
+                "name": "location",
+                "value": "roma",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:47:10.119Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 23,
+      "category": "RICERCA_MERCATO",
+      "input": "Studio del mercato residenziale a Firenze: trend e previsioni.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 15146,
+      "success": true,
+      "timestamp": "2025-09-12T10:47:35.856Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [
+              {
+                "name": "location",
+                "value": "firenze",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:47:20.730Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 24,
+      "category": "RICERCA_MERCATO",
+      "input": "Analisi mercato immobiliare commerciale a Torino. Dammi tutti i dati.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 10479,
+      "success": true,
+      "timestamp": "2025-09-12T10:47:47.336Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [
+              {
+                "name": "location",
+                "value": "torino",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:47:36.877Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 25,
+      "category": "RICERCA_MERCATO",
+      "input": "Ricerca prezzi terreni edificabili nella zona di Bologna.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 7435,
+      "success": true,
+      "timestamp": "2025-09-12T10:47:55.773Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "market_research",
+            "entities": [
+              {
+                "name": "location",
+                "value": "bologna",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:47:48.360Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 26,
+      "category": "RICERCA_MERCATO",
+      "input": "Studio mercato immobiliare turistico in Toscana.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 13927,
+      "success": true,
+      "timestamp": "2025-09-12T10:48:10.701Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:47:56.799Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 27,
+      "category": "RICERCA_MERCATO",
+      "input": "Analizza il mercato degli immobili industriali a Napoli.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 10176,
+      "success": true,
+      "timestamp": "2025-09-12T10:48:21.878Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "market_research",
+            "entities": [
+              {
+                "name": "location",
+                "value": "napoli",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:48:11.728Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 28,
+      "category": "RICERCA_MERCATO",
+      "input": "Ricerca mercato residenziale sociale a Palermo.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 8815,
+      "success": true,
+      "timestamp": "2025-09-12T10:48:31.695Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "market_research",
+            "entities": [
+              {
+                "name": "location",
+                "value": "palermo",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:48:22.903Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 29,
+      "category": "RICERCA_MERCATO",
+      "input": "Studio mercato immobiliare di lusso a Como e dintorni.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 8738,
+      "success": true,
+      "timestamp": "2025-09-12T10:48:41.435Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:48:32.719Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 30,
+      "category": "RICERCA_MERCATO",
+      "input": "Analisi mercato commerciale a Verona centro storico.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 8288,
+      "success": true,
+      "timestamp": "2025-09-12T10:48:50.723Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [
+              {
+                "name": "location",
+                "value": "verona",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:48:42.456Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 31,
+      "category": "RICERCA_MERCATO",
+      "input": "Ricerca prezzi immobili residenziali a Bergamo.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 8684,
+      "success": true,
+      "timestamp": "2025-09-12T10:49:00.407Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "market_research",
+            "entities": [
+              {
+                "name": "location",
+                "value": "bergamo",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:48:51.745Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 32,
+      "category": "RICERCA_MERCATO",
+      "input": "Studio mercato immobiliare studentesco a Padova.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 6889,
+      "success": true,
+      "timestamp": "2025-09-12T10:49:08.297Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [
+              {
+                "name": "location",
+                "value": "padova",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:49:01.430Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 33,
+      "category": "RICERCA_MERCATO",
+      "input": "Analisi mercato residenziale a Genova zona porto.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 6639,
+      "success": true,
+      "timestamp": "2025-09-12T10:49:15.937Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [
+              {
+                "name": "location",
+                "value": "genova",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:49:09.318Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 34,
+      "category": "RICERCA_MERCATO",
+      "input": "Ricerca mercato immobiliare turistico in Sicilia.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 10987,
+      "success": true,
+      "timestamp": "2025-09-12T10:49:27.925Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "market_research",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:49:16.955Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 35,
+      "category": "RICERCA_MERCATO",
+      "input": "Studio mercato immobiliare residenziale a Bari.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 7655,
+      "success": true,
+      "timestamp": "2025-09-12T10:49:36.581Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "feasibility_analysis",
+            "entities": [
+              {
+                "name": "location",
+                "value": "bari",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:49:28.948Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 36,
+      "category": "GESTIONE_PROGETTI",
+      "input": "Crea un piano di progetto per un complesso residenziale di 100 unità.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 9186,
+      "success": true,
+      "timestamp": "2025-09-12T10:49:46.767Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:49:37.603Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 37,
+      "category": "GESTIONE_PROGETTI",
+      "input": "Gestisci la timeline di un progetto immobiliare di 18 mesi.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 9215,
+      "success": true,
+      "timestamp": "2025-09-12T10:49:56.984Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:49:47.787Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 38,
+      "category": "GESTIONE_PROGETTI",
+      "input": "Organizza le fasi di un progetto residenziale da zero.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 8781,
+      "success": true,
+      "timestamp": "2025-09-12T10:50:06.767Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:49:58.008Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 39,
+      "category": "GESTIONE_PROGETTI",
+      "input": "Crea cronoprogramma per ristrutturazione edificio storico.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 10067,
+      "success": true,
+      "timestamp": "2025-09-12T10:50:17.834Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:50:07.790Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 40,
+      "category": "GESTIONE_PROGETTI",
+      "input": "Gestisci progetto residenziale con 5 fasi di sviluppo.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 9866,
+      "success": true,
+      "timestamp": "2025-09-12T10:50:28.702Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:50:18.857Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 41,
+      "category": "GESTIONE_PROGETTI",
+      "input": "Organizza timeline progetto commerciale 24 mesi.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 9646,
+      "success": true,
+      "timestamp": "2025-09-12T10:50:39.349Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:50:29.725Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 42,
+      "category": "GESTIONE_PROGETTI",
+      "input": "Crea piano progetto residenziale sociale con permessi.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 10929,
+      "success": true,
+      "timestamp": "2025-09-12T10:50:51.280Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:50:40.375Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 43,
+      "category": "GESTIONE_PROGETTI",
+      "input": "Gestisci progetto misto residenziale-commerciale.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 9258,
+      "success": true,
+      "timestamp": "2025-09-12T10:51:01.540Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:50:52.307Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 44,
+      "category": "GESTIONE_PROGETTI",
+      "input": "Organizza fasi progetto residenziale di lusso.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 10801,
+      "success": true,
+      "timestamp": "2025-09-12T10:51:13.343Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:51:02.570Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 45,
+      "category": "GESTIONE_PROGETTI",
+      "input": "Crea cronoprogramma progetto residenziale con cantieri multipli.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 9077,
+      "success": true,
+      "timestamp": "2025-09-12T10:51:23.423Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:51:14.370Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 46,
+      "category": "GESTIONE_PROGETTI",
+      "input": "Gestisci progetto residenziale con finanziamenti pubblici.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 8839,
+      "success": true,
+      "timestamp": "2025-09-12T10:51:33.264Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:51:24.443Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 47,
+      "category": "GESTIONE_PROGETTI",
+      "input": "Organizza timeline progetto residenziale sostenibile.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 11513,
+      "success": true,
+      "timestamp": "2025-09-12T10:51:45.779Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:51:34.286Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 48,
+      "category": "GESTIONE_PROGETTI",
+      "input": "Crea piano progetto residenziale con tecnologie smart.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 9535,
+      "success": true,
+      "timestamp": "2025-09-12T10:51:56.315Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:51:46.808Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 49,
+      "category": "GESTIONE_PROGETTI",
+      "input": "Gestisci progetto residenziale con certificazioni energetiche.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 11072,
+      "success": true,
+      "timestamp": "2025-09-12T10:52:08.388Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:51:57.338Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 50,
+      "category": "GESTIONE_PROGETTI",
+      "input": "Organizza fasi progetto residenziale con spazi comuni.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 8879,
+      "success": true,
+      "timestamp": "2025-09-12T10:52:18.269Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:52:09.413Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 51,
+      "category": "COMPLIANCE_PERMESSI",
+      "input": "Verifica tutti i permessi necessari per un progetto residenziale a Milano.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 13794,
+      "success": true,
+      "timestamp": "2025-09-12T10:52:33.067Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [
+              {
+                "name": "location",
+                "value": "milano",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:52:19.298Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 52,
+      "category": "COMPLIANCE_PERMESSI",
+      "input": "Controlla compliance normativa per terreno agricolo da trasformare.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 8415,
+      "success": true,
+      "timestamp": "2025-09-12T10:52:42.484Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "compliance_check",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:52:34.095Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 53,
+      "category": "COMPLIANCE_PERMESSI",
+      "input": "Analizza permessi per complesso commerciale a Roma.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 12044,
+      "success": true,
+      "timestamp": "2025-09-12T10:52:55.530Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "compliance_check",
+            "entities": [
+              {
+                "name": "location",
+                "value": "roma",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:52:43.507Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 54,
+      "category": "COMPLIANCE_PERMESSI",
+      "input": "Verifica normative per progetto residenziale sostenibile.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 8010,
+      "success": true,
+      "timestamp": "2025-09-12T10:53:04.542Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:52:56.559Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 55,
+      "category": "COMPLIANCE_PERMESSI",
+      "input": "Controlla compliance per ristrutturazione edificio storico.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 8827,
+      "success": true,
+      "timestamp": "2025-09-12T10:53:14.371Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "compliance_check",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:53:05.568Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 56,
+      "category": "COMPLIANCE_PERMESSI",
+      "input": "Analizza permessi per progetto residenziale sociale.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 10695,
+      "success": true,
+      "timestamp": "2025-09-12T10:53:26.068Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:53:15.391Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 57,
+      "category": "COMPLIANCE_PERMESSI",
+      "input": "Verifica normative per complesso residenziale di lusso.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 8365,
+      "success": true,
+      "timestamp": "2025-09-12T10:53:35.435Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "compliance_check",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:53:27.092Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 58,
+      "category": "COMPLIANCE_PERMESSI",
+      "input": "Controlla compliance per progetto misto residenziale-commerciale.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 8145,
+      "success": true,
+      "timestamp": "2025-09-12T10:53:44.583Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:53:36.461Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 59,
+      "category": "COMPLIANCE_PERMESSI",
+      "input": "Analizza permessi per progetto residenziale con spazi verdi.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 12314,
+      "success": true,
+      "timestamp": "2025-09-12T10:53:57.899Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:53:45.610Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 60,
+      "category": "COMPLIANCE_PERMESSI",
+      "input": "Verifica normative per progetto residenziale con parcheggi.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 10157,
+      "success": true,
+      "timestamp": "2025-09-12T10:54:09.058Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:53:58.923Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 61,
+      "category": "CONVERSAZIONI_GENERALI",
+      "input": "Ciao Urbanova, come stai oggi?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 1351,
+      "success": true,
+      "timestamp": "2025-09-12T10:54:11.411Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:54:10.084Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 62,
+      "category": "CONVERSAZIONI_GENERALI",
+      "input": "Qual è il tempo a Milano?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 7097,
+      "success": true,
+      "timestamp": "2025-09-12T10:54:19.510Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [
+              {
+                "name": "location",
+                "value": "milano",
+                "confidence": 0.9,
+                "type": "location"
+              }
+            ],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:54:12.434Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 63,
+      "category": "CONVERSAZIONI_GENERALI",
+      "input": "Raccontami una barzelletta.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 1717,
+      "success": true,
+      "timestamp": "2025-09-12T10:54:22.230Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:54:20.534Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 64,
+      "category": "CONVERSAZIONI_GENERALI",
+      "input": "Che ore sono?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 2214,
+      "success": true,
+      "timestamp": "2025-09-12T10:54:25.446Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:54:23.252Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 65,
+      "category": "CONVERSAZIONI_GENERALI",
+      "input": "Come si calcola il ROI di un investimento immobiliare?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 5444,
+      "success": true,
+      "timestamp": "2025-09-12T10:54:31.891Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:54:26.461Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 66,
+      "category": "CONVERSAZIONI_GENERALI",
+      "input": "Qual è la differenza tra rendita catastale e valore di mercato?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 5801,
+      "success": true,
+      "timestamp": "2025-09-12T10:54:38.695Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "market_research",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:54:32.916Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 67,
+      "category": "CONVERSAZIONI_GENERALI",
+      "input": "Spiegami cos'è un mutuo a tasso fisso.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 4238,
+      "success": true,
+      "timestamp": "2025-09-12T10:54:43.936Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:54:39.718Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 68,
+      "category": "CONVERSAZIONI_GENERALI",
+      "input": "Come funziona l'IVA sugli immobili?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 9613,
+      "success": true,
+      "timestamp": "2025-09-12T10:54:54.552Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:54:44.961Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 69,
+      "category": "CONVERSAZIONI_GENERALI",
+      "input": "Quali sono i vantaggi del Superbonus 110%?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 7753,
+      "success": true,
+      "timestamp": "2025-09-12T10:55:03.307Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:54:55.576Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 70,
+      "category": "CONVERSAZIONI_GENERALI",
+      "input": "Come si calcola l'IMU?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 10897,
+      "success": true,
+      "timestamp": "2025-09-12T10:55:15.206Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:55:04.329Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 71,
+      "category": "CONVERSAZIONI_GENERALI",
+      "input": "Spiegami la differenza tra prima e seconda casa.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 7952,
+      "success": true,
+      "timestamp": "2025-09-12T10:55:24.160Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:55:16.229Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 72,
+      "category": "CONVERSAZIONI_GENERALI",
+      "input": "Come funziona la compravendita immobiliare?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 10889,
+      "success": true,
+      "timestamp": "2025-09-12T10:55:36.051Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:55:25.177Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 73,
+      "category": "CONVERSAZIONI_GENERALI",
+      "input": "Quali documenti servono per un mutuo?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 9711,
+      "success": true,
+      "timestamp": "2025-09-12T10:55:46.764Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:55:37.072Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 74,
+      "category": "CONVERSAZIONI_GENERALI",
+      "input": "Come si calcola il valore di un immobile?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 9014,
+      "success": true,
+      "timestamp": "2025-09-12T10:55:56.780Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:55:47.786Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 75,
+      "category": "CONVERSAZIONI_GENERALI",
+      "input": "Spiegami cos'è il catasto.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 5761,
+      "success": true,
+      "timestamp": "2025-09-12T10:56:03.542Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:55:57.804Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 76,
+      "category": "CONVERSAZIONI_GENERALI",
+      "input": "Come funziona la successione immobiliare?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 7715,
+      "success": true,
+      "timestamp": "2025-09-12T10:56:12.259Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:56:04.563Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 77,
+      "category": "CONVERSAZIONI_GENERALI",
+      "input": "Quali sono i costi di un'agenzia immobiliare?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 6518,
+      "success": true,
+      "timestamp": "2025-09-12T10:56:19.779Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:56:13.280Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 78,
+      "category": "CONVERSAZIONI_GENERALI",
+      "input": "Come si fa una perizia immobiliare?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 7714,
+      "success": true,
+      "timestamp": "2025-09-12T10:56:28.495Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:56:20.795Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 79,
+      "category": "CONVERSAZIONI_GENERALI",
+      "input": "Spiegami cos'è il diritto di superficie.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 5098,
+      "success": true,
+      "timestamp": "2025-09-12T10:56:34.595Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:56:29.512Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 80,
+      "category": "CONVERSAZIONI_GENERALI",
+      "input": "Come funziona l'affitto a canone concordato?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 12592,
+      "success": true,
+      "timestamp": "2025-09-12T10:56:48.188Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:56:35.609Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 81,
+      "category": "DOMANDE_TECNICHE",
+      "input": "Calcola il VAN di un progetto residenziale con investimento iniziale di 5M€ e flussi di 500k€ annui per 15 anni.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 3815,
+      "success": true,
+      "timestamp": "2025-09-12T10:56:53.004Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:56:49.206Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 82,
+      "category": "DOMANDE_TECNICHE",
+      "input": "Analizza la sostenibilità energetica di un complesso residenziale di 200 unità.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 10560,
+      "success": true,
+      "timestamp": "2025-09-12T10:57:04.566Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:56:54.021Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 83,
+      "category": "DOMANDE_TECNICHE",
+      "input": "Calcola il LTV (Loan-to-Value) per un mutuo di 300k€ su immobile del valore di 400k€.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 4048,
+      "success": true,
+      "timestamp": "2025-09-12T10:57:09.615Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:57:05.584Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 84,
+      "category": "DOMANDE_TECNICHE",
+      "input": "Analizza l'impatto ambientale di un progetto residenziale su terreno di 10 ettari.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 8848,
+      "success": true,
+      "timestamp": "2025-09-12T10:57:19.463Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:57:10.630Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 85,
+      "category": "DOMANDE_TECNICHE",
+      "input": "Calcola il DSCR (Debt Service Coverage Ratio) per un progetto commerciale.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 5868,
+      "success": true,
+      "timestamp": "2025-09-12T10:57:26.331Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:57:20.480Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 86,
+      "category": "DOMANDE_TECNICHE",
+      "input": "Analizza la fattibilità finanziaria di un progetto residenziale con finanziamento misto pubblico-privato.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 11134,
+      "success": true,
+      "timestamp": "2025-09-12T10:57:38.467Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:57:27.347Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 87,
+      "category": "DOMANDE_TECNICHE",
+      "input": "Calcola il payback period di un investimento immobiliare con cash flow negativi iniziali.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 9167,
+      "success": true,
+      "timestamp": "2025-09-12T10:57:48.636Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:57:39.491Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 88,
+      "category": "DOMANDE_TECNICHE",
+      "input": "Analizza la sensibilità del progetto ai cambiamenti dei tassi di interesse.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 9618,
+      "success": true,
+      "timestamp": "2025-09-12T10:57:59.256Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:57:49.659Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 89,
+      "category": "DOMANDE_TECNICHE",
+      "input": "Calcola il valore attuale netto di un progetto residenziale con scenari multipli.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 8377,
+      "success": true,
+      "timestamp": "2025-09-12T10:58:08.635Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:58:00.276Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 90,
+      "category": "DOMANDE_TECNICHE",
+      "input": "Analizza la sostenibilità economica di un progetto residenziale sociale.",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 8814,
+      "success": true,
+      "timestamp": "2025-09-12T10:58:18.451Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "project_management",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:58:09.666Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 91,
+      "category": "EDGE_CASES",
+      "input": "Cosa succede se costruisco una casa su Marte?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 8725,
+      "success": true,
+      "timestamp": "2025-09-12T10:58:28.179Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:58:19.499Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 92,
+      "category": "EDGE_CASES",
+      "input": "Posso comprare la Torre Eiffel?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 3332,
+      "success": true,
+      "timestamp": "2025-09-12T10:58:32.513Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:58:29.201Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 93,
+      "category": "EDGE_CASES",
+      "input": "Come faccio a diventare milionario vendendo case di cartone?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 15407,
+      "success": true,
+      "timestamp": "2025-09-12T10:58:48.921Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:58:33.535Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 94,
+      "category": "EDGE_CASES",
+      "input": "È legale costruire una casa sull'albero di 10 piani?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 7496,
+      "success": true,
+      "timestamp": "2025-09-12T10:58:57.419Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:58:49.944Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 95,
+      "category": "EDGE_CASES",
+      "input": "Posso affittare il mio garage come ufficio?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 8072,
+      "success": true,
+      "timestamp": "2025-09-12T10:59:06.492Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:58:58.442Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 96,
+      "category": "EDGE_CASES",
+      "input": "Come faccio a vendere una casa che non esiste?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 10540,
+      "success": true,
+      "timestamp": "2025-09-12T10:59:18.033Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:59:07.514Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 97,
+      "category": "EDGE_CASES",
+      "input": "È possibile costruire una casa sott'acqua?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 12178,
+      "success": true,
+      "timestamp": "2025-09-12T10:59:31.212Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:59:19.054Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 98,
+      "category": "EDGE_CASES",
+      "input": "Posso comprare un castello per 1€?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 6645,
+      "success": true,
+      "timestamp": "2025-09-12T10:59:38.859Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:59:32.233Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 99,
+      "category": "EDGE_CASES",
+      "input": "Come faccio a diventare proprietario di tutto il mondo?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 8227,
+      "success": true,
+      "timestamp": "2025-09-12T10:59:48.089Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:59:39.882Z"
+        }
+      },
+      "urbanovaOS": true
+    },
+    {
+      "testId": 100,
+      "category": "EDGE_CASES",
+      "input": "È legale vivere in una casa mobile permanente?",
+      "output": "\nHo attivato i seguenti workflow:\n- Workflow completato\n",
+      "responseTime": 7418,
+      "success": true,
+      "timestamp": "2025-09-12T10:59:56.510Z",
+      "metadata": {
+        "urbanovaOS": true,
+        "confidence": 0.95,
+        "systemsUsed": [
+          "classification",
+          "vector",
+          "workflow"
+        ],
+        "pluginsExecuted": [],
+        "workflowsTriggered": [
+          "user_message"
+        ],
+        "classifications": [
+          {
+            "category": "real_estate",
+            "confidence": 0.75,
+            "intent": "general_query",
+            "entities": [],
+            "sentiment": "neutral",
+            "urgency": "medium",
+            "complexity": "moderate",
+            "userExpertise": "intermediate",
+            "projectPhase": "planning",
+            "actions": []
+          }
+        ],
+        "vectorMatches": [],
+        "executionTime": 0,
+        "memoryUsage": 0,
+        "cpuUsage": 0,
+        "suggestedActions": [],
+        "nextSteps": [],
+        "systemStatus": {
+          "overall": "healthy",
+          "components": {
+            "ml": "healthy",
+            "vector": "healthy",
+            "workflow": "healthy",
+            "plugins": "healthy"
+          },
+          "performance": {
+            "avgResponseTime": 0,
+            "successRate": 0,
+            "errorRate": 0,
+            "activeConnections": 0,
+            "memoryUsage": 0,
+            "cpuUsage": 0
+          },
+          "lastHealthCheck": "2025-09-12T10:59:49.113Z"
+        }
+      },
+      "urbanovaOS": true
+    }
+  ]
+}

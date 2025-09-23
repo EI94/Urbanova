@@ -1,0 +1,161 @@
+# Architecture Decision Records - Urbanova
+
+## ADR-0001: Architecture Style
+- **Decision**: Modular Next.js app + "packages/*" for domain, agents, data, scrapers.
+- **Context**: We already use Next 15 + Firebase + Vercel; we add isolated packages to avoid "god" files.
+- **Consequences**: Clear boundaries; testable; enables workers/microjobs later.
+
+## ADR-0002: Data Store & Schema
+- **Decision**: Firestore for OLTP; BigQuery (later) for analytics snapshots; GCS for files.
+- **Collections**: projects, deals, documents, vendors, rdOs, sal, listings, auditEvents, users, roles.
+- **Validation**: Zod schemas mirror TS types; all writes pass validate().
+
+## ADR-0003: AI & Orchestration
+- **Decision**: LLM with function-calling; agents are pure TS modules exposing actions.
+- **Transport**: Next API routes for sync; Cloud Tasks for async jobs.
+- **Audit**: Every agent call emits auditEvent.
+
+## ADR-0004: ChatOps Interface
+- **Decision**: Twilio WhatsApp webhook → /api/wa/inbound → Orchestrator → Agents.
+- **Commands**: natural language + slash commands. Confirm on irreversible ops.
+
+## ADR-0005: Testing Pyramid
+- **Decision**: Jest unit (70%), integration (20%), e2e light (10% with Next API).
+- **Rule**: types & Zod first; tests green before merging; no feature without tests.
+
+## ADR-0006: Security & GDPR
+- **Decision**: RBAC; per-project ACL; redact PII in logs; signed URLs for files; data retention policies.
+
+## ADR-0007: Type Safety & Validation
+- **Decision**: TypeScript strict mode + Zod for runtime validation at API boundaries.
+- **Context**: Prevent runtime errors and ensure data integrity across the system.
+- **Consequences**: Better developer experience, fewer bugs, self-documenting APIs.
+
+## ADR-0008: Package Structure
+- **Decision**: Monorepo with packages/* for shared logic, apps/web for Next.js frontend.
+- **Context**: Enable code sharing between different parts of the system while maintaining clear boundaries.
+- **Consequences**: Reusable modules, better testing, easier maintenance.
+
+## ADR-0007: Messaging & Webhook Security
+- **Decision**: Verify Twilio signatures using X-Twilio-Signature header; reject invalid requests; sanitize inbound text.
+- **Context**: WhatsApp Business API requires signature verification for security; prevents webhook spoofing.
+- **Consequences**: Enhanced security; requires proper Twilio auth token; dev bypass available for testing.
+
+## ADR-0008: Storage & Signed URLs
+- **Decision**: PDFs stored in GCS bucket; generate signed URLs with 15min TTL; metadata includes {projectId, dealId, hash}.
+- **Context**: Need secure, scalable file storage; signed URLs provide access control without authentication complexity.
+- **Consequences**: GCS dependency; URL expiration management; metadata tracking for audit.
+
+## ADR-0009: Rate Limiting & Abuse Prevention
+- **Decision**: Token bucket per waSenderId using Firestore counter; capacity=10, refill=1 token/20s.
+- **Context**: Prevent abuse from individual WhatsApp users; maintain service quality.
+- **Consequences**: Firestore read/write overhead; user experience impact on heavy users.
+
+## ADR-0013: Capability Registry
+- **Decision**: Each capability declares: name, description, zod args, requiredRole, confirm?:boolean, dryRun?:boolean, handler(ctx, args).
+- **Context**: Need a unified way to register and execute typed capabilities across the system.
+- **Consequences**: Capabilities live in packages/os/src/capabilities/* and are registered in a single registry.
+
+## ADR-0014: Planner/Router
+- **Decision**: Classify inbound text → {mode:'QNA'|'ACTION', intent?, args?}.
+- **Context**: Need to distinguish between questions (QNA) and actions (capability execution).
+- **Consequences**: ACTION: choose capability by intent; QNA: use RAG over project semantic store + docstore, respond with citations.
+
+## ADR-0015: Project Semantic Store
+- **Decision**: Snapshot key metrics in Firestore subcollection `projects/{id}/semantic/kpi` and keep doc index in `projects/{id}/semantic/index`.
+- **Context**: Need semantic search capabilities for project-related questions.
+- **Consequences**: RAG uses vector store (placeholder in dev), sources must be cited.
+
+## ADR-0016: Core Capabilities v1
+- **Decision**: Implement `project.get_summary` and `feasibility.run_sensitivity` as core Urbanova OS capabilities.
+- **Context**: Need real business value capabilities for project management and financial analysis.
+- **Consequences**: 
+  - `project.get_summary` returns KPI progetto (ROI, payback, docs completeness, next milestones) in <3s.
+  - `feasibility.run_sensitivity` computes scenarios ± deltas on costs/prices and produces PDF URL in <12s.
+  - Both require owner|pm permissions and integrate with existing FeasibilityService and document systems.
+
+## ADR-0010: Document Flow & Lifecycle
+- **Decision**: Document lifecycle: REQUESTED → UPLOADED → EXTRACTED → VALIDATED → EXPIRED; files stored in GCS under `projects/{id}/docs/{docId}`.
+- **Context**: Need automated document collection and validation workflow for construction projects.
+- **Consequences**: GCS storage structure; document state management; audit trail for compliance.
+
+## ADR-0011: OCR & Document Processing
+- **Decision**: Google Document AI for production; Tesseract fallback for development; store extracted fields as JSON in Firestore.
+- **Context**: Need to extract structured data from uploaded documents (CDU, DURC, planimetrie).
+- **Consequences**: GCP Document AI dependency; fallback strategy for development; extracted data validation.
+
+## ADR-0012: External Document Sharing
+- **Decision**: For v1, no direct vendor emails; generate secure JWT links (48h expiry) + templated messages for WhatsApp/email forwarding.
+- **Context**: Need secure document upload links without complex vendor authentication.
+- **Consequences**: JWT management; link expiration; manual forwarding required initially.
+
+## ADR-0020: Tool SDK
+- **Decision**: A Tool has: manifest, actions[], optional uiExtensions.
+- **Context**: Need extensible tool system for third-party integrations and custom workflows.
+- **Consequences**: 
+  - An Action has: name, description, zArgs, requiredRole, confirm?, longRunning?, handler(ctx,args).
+  - Tools live in packages/tools/* and register at boot.
+  - Enables plugin architecture and marketplace for Urbanova ecosystem.
+
+## ADR-0021: Tool Installation
+- **Decision**: Enable/disable per workspace and per project. Store config+secrets in workspaces/{id}/tools/{toolId}.
+- **Context**: Need granular control over tool availability and configuration across different workspaces and projects.
+- **Consequences**: 
+  - Per-workspace tool management with isolated configurations.
+  - Secure storage of tool secrets and configuration.
+  - Enables multi-tenant tool deployment.
+
+## ADR-0022: Tool Runner
+- **Decision**: Every run persisted in toolRuns; support status, progress, logs, cancellation. Long tasks run async via Cloud Tasks (later) or background job mock now.
+- **Context**: Need reliable execution tracking and async processing for long-running tool operations.
+- **Consequences**: 
+  - Full audit trail of tool executions.
+  - Support for both sync and async tool operations.
+  - Progress tracking and cancellation support.
+  - Foundation for distributed task processing.
+
+## ADR-0030: Interactive Planner
+- **Decision**: Two-stage protocol: PLAN (draft with assumptions, missing, risks) → CONFIRM → RUN.
+- **Context**: Need to provide users with visibility into what actions will be taken before execution, especially for complex multi-step operations.
+- **Consequences**: 
+  - Plans composed of Tool Actions; validation via each action's zod schema.
+  - Persist conversational state in `sessions` to support multi-turn completion.
+  - Users can review and modify plans before execution.
+  - Enables complex workflow orchestration with user oversight.
+
+## ADR-0031: Confirmation Gate
+- **Decision**: Any action marked `confirm:true` or having side-effects requires explicit user confirmation.
+- **Context**: Need to prevent unintended side effects and give users control over system actions.
+- **Consequences**: 
+  - Support `dryRun` to simulate without side effects and show predicted outputs.
+  - Users must explicitly approve actions that modify data or trigger external services.
+  - Enables safe exploration of system capabilities without risk.
+  - Foundation for audit trails and compliance.
+
+## ADR-0032: UX Contracts
+- **Decision**: Chat renders a "Plan Preview" message (steps, assumptions, missing fields), with CTA buttons.
+- **Context**: Need consistent user experience for plan review and confirmation across all interaction modes.
+- **Consequences**: 
+  - Standardized CTA buttons: [Confirm & Run] [Edit Parameters] [Dry-run] [Cancel].
+  - Consistent plan presentation format across all tools and capabilities.
+  - Users can interact with plans through familiar chat interface patterns.
+  - Enables accessibility and mobile-friendly interactions.
+
+## ADR-0041: Dedupe & Trust
+- **Date**: 2024-01-25
+- **Status**: Accepted
+- **Context**: Need to handle duplicate deals from multiple sources and establish trust scoring
+- **Decision**: Implement fingerprint-based deduplication and multi-source trust scoring (0..1)
+- **Consequences**: Better data quality, reduced noise, informed decision making
+
+## ADR-0042: Watchlists & Alerts
+- **Date**: 2024-01-25
+- **Status**: Accepted
+- **Context**: Need to enable users to monitor specific market conditions and receive notifications
+- **Decision**: Implement user-configurable watchlists with automated alerting via chat
+- **Consequences**: Proactive deal discovery, improved user engagement, automated market monitoring
+
+description:
+globs:
+alwaysApply: true
+---

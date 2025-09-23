@@ -1,247 +1,382 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import {
+  Building,
+  Plus,
+  Search,
+  Filter,
+  Grid,
+  List,
+  Eye,
+  Edit,
+  Trash2,
+  Download,
+  Share,
+  Star,
+  Clock,
+  Users,
+  MapPin,
+  BarChart3,
+  TrendingUp,
+  FileText,
+  CreditCard,
+  Shield,
+  Calendar,
+  Target,
+  Bot,
+  Sparkles,
+  Settings,
+  CheckCircle,
+} from 'lucide-react';
+import FeedbackWidget from '@/components/ui/FeedbackWidget';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { BuildingIcon } from '@/components/icons';
-import Button from '@/components/ui/Button';
 
-interface DesignTemplate {
+// ============================================================================
+// TYPES
+// ============================================================================
+
+interface Template {
   id: string;
   name: string;
   category: string;
+  thumbnail: string;
   description: string;
-  style: string;
-  efficiency: number;
-  sustainability: number;
-  thumbnailUrl?: string;
-  features: string[];
-  typicalUse: string;
-  sqmRange: [number, number];
-  estimatedCostPerSqm: number;
+  tags: string[];
+  rating: number;
+  downloads: number;
+  createdAt: string;
+  isPremium: boolean;
 }
 
-interface AIDesignSuggestion {
+interface Project {
   id: string;
-  title: string;
-  reasoning: string;
-  benefits: string[];
-  implementation: string;
-  priority: 'HIGH' | 'MEDIUM' | 'LOW';
-  category: 'LAYOUT' | 'SUSTAINABILITY' | 'EFFICIENCY' | 'AESTHETICS' | 'FUNCTIONALITY';
+  name: string;
+  template: string;
+  status: 'draft' | 'in_progress' | 'completed' | 'archived';
+  progress: number;
+  lastModified: string;
+  thumbnail: string;
+  location?: string;
+  budget?: number;
 }
 
-interface DesignParameters {
-  projectType: 'RESIDENZIALE' | 'COMMERCIALE' | 'MISTO' | 'INDUSTRIALE';
-  totalArea: number;
-  floors: number;
-  budget: number;
-  style: 'MODERNO' | 'CLASSICO' | 'INDUSTRIALE' | 'MINIMALISTA' | 'SOSTENIBILE';
-  priorities: string[];
-  location: string;
-  targetUsers: string;
-}
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
 
 export default function DesignCenterPage() {
-  const [activeTab, setActiveTab] = useState<'templates' | 'ai-designer' | 'suggestions'>('templates');
-  const [designParams, setDesignParams] = useState<DesignParameters>({
-    projectType: 'RESIDENZIALE',
-    totalArea: 1000,
-    floors: 3,
-    budget: 1500000,
-    style: 'MODERNO',
-    priorities: [],
-    location: '',
-    targetUsers: ''
-  });
-  
-  const [designTemplates, setDesignTemplates] = useState<DesignTemplate[]>([]);
-  const [aiSuggestions, setAiSuggestions] = useState<AIDesignSuggestion[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [templatesLoading, setTemplatesLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'templates' | 'projects' | 'analytics'>('templates');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Carica template da Firestore (da implementare)
-    const loadTemplates = async () => {
-      try {
-        // TODO: Implementare caricamento da Firestore
-        // const data = await getDesignTemplates();
-        // setDesignTemplates(data);
-        
-        // Per ora, array vuoto
-        setDesignTemplates([]);
-      } catch (error) {
-        console.error('Errore nel caricamento dei template:', error);
-        setDesignTemplates([]);
-      } finally {
-        setTemplatesLoading(false);
-      }
-    };
-    
-    loadTemplates();
+    loadData();
   }, []);
 
-  const generateAISuggestions = async () => {
-    setLoading(true);
-    
+  const loadData = async () => {
     try {
-      // TODO: Implementare generazione AI reale
-      // const suggestions = await generateDesignSuggestions(designParams);
-      // setAiSuggestions(suggestions);
-      
-      // Per ora, array vuoto
-      setAiSuggestions([]);
+      // Mock data for templates
+      const mockTemplates: Template[] = [
+        {
+          id: '1',
+          name: 'Villa Moderna',
+          category: 'residential',
+          thumbnail: '/templates/villa-moderna.jpg',
+          description: 'Design elegante per villa moderna con spazi aperti',
+          tags: ['moderna', 'villa', 'lusso'],
+          rating: 4.8,
+          downloads: 1250,
+          createdAt: '2024-01-15',
+          isPremium: false,
+        },
+        {
+          id: '2',
+          name: 'Condominio Sostenibile',
+          category: 'residential',
+          thumbnail: '/templates/condominio-eco.jpg',
+          description: 'Progetto eco-sostenibile per complesso residenziale',
+          tags: ['sostenibile', 'condominio', 'eco'],
+          rating: 4.9,
+          downloads: 890,
+          createdAt: '2024-01-10',
+          isPremium: true,
+        },
+        {
+          id: '3',
+          name: 'Centro Commerciale',
+          category: 'commercial',
+          thumbnail: '/templates/centro-commerciale.jpg',
+          description: 'Layout ottimizzato per centro commerciale moderno',
+          tags: ['commerciale', 'retail', 'moderno'],
+          rating: 4.6,
+          downloads: 650,
+          createdAt: '2024-01-05',
+          isPremium: true,
+        },
+      ];
+
+      // Mock data for projects
+      const mockProjects: Project[] = [
+        {
+          id: '1',
+          name: 'Villa Moderna Roma',
+          template: 'Villa Moderna',
+          status: 'in_progress',
+          progress: 75,
+          lastModified: '2024-01-20',
+          thumbnail: '/projects/villa-roma.jpg',
+          location: 'Roma, Italia',
+          budget: 450000,
+        },
+        {
+          id: '2',
+          name: 'Condominio Eco Milano',
+          template: 'Condominio Sostenibile',
+          status: 'completed',
+          progress: 100,
+          lastModified: '2024-01-18',
+          thumbnail: '/projects/condominio-milano.jpg',
+          location: 'Milano, Italia',
+          budget: 1200000,
+        },
+        {
+          id: '3',
+          name: 'Centro Commerciale Napoli',
+          template: 'Centro Commerciale',
+          status: 'draft',
+          progress: 25,
+          lastModified: '2024-01-15',
+          thumbnail: '/projects/centro-napoli.jpg',
+          location: 'Napoli, Italia',
+          budget: 2500000,
+        },
+      ];
+
+      setTemplates(mockTemplates);
+      setProjects(mockProjects);
     } catch (error) {
-      console.error('Errore nella generazione dei suggerimenti AI:', error);
-      setAiSuggestions([]);
+      console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setDesignParams(prev => ({
-      ...prev,
-      [name]: e.target.type === 'number' ? Number(value) : value
-    }));
-  };
+  const filteredTemplates = templates.filter(template => {
+    const matchesSearch = searchTerm === '' || 
+                         template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         template.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         template.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
-  const handlePriorityChange = (priority: string) => {
-    setDesignParams(prev => ({
-      ...prev,
-      priorities: prev.priorities.includes(priority)
-        ? prev.priorities.filter(p => p !== priority)
-        : [...prev.priorities, priority]
-    }));
-  };
+  const filteredProjects = projects.filter(project => 
+    project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    project.template.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('it-IT', { 
-      style: 'currency', 
-      currency: 'EUR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(value);
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'HIGH': return 'text-error';
-      case 'MEDIUM': return 'text-warning';
-      case 'LOW': return 'text-success';
-      default: return 'text-neutral';
-    }
-  };
-
-  const getCategoryIcon = (category: string) => {
-    return <BuildingIcon className="h-4 w-4" />;
-  };
+  if (loading) {
+    return (
+      <DashboardLayout title="Design Center">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-900">Design Center</h1>
-          <p className="text-neutral-600 mt-1">
-            Template architettonici e suggerimenti AI per i tuoi progetti
+    <DashboardLayout title="Design Center">
+      {/* Page Header */}
+        <div className="mb-6 px-6">
+          <div className="flex items-center space-x-4 mb-4">
+          </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+            <Building className="w-5 h-5 text-white" />
+          </div>
+          <p className="text-gray-600 text-lg">
+            Crea e personalizza i tuoi progetti con i template professionali
           </p>
         </div>
+      </div>
 
+      <div className="max-w-7xl mx-auto">
         {/* Tabs */}
-        <div className="tabs tabs-boxed">
-          <button 
-            className={`tab ${activeTab === 'templates' ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab('templates')}
-          >
-            Template
-          </button>
-          <button 
-            className={`tab ${activeTab === 'ai-designer' ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab('ai-designer')}
-          >
-            AI Designer
-          </button>
-          <button 
-            className={`tab ${activeTab === 'suggestions' ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab('suggestions')}
-          >
-            Suggerimenti
-          </button>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setActiveTab('templates')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'templates'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Template Gallery
+            </button>
+            <button
+              onClick={() => setActiveTab('projects')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'projects'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              I Miei Progetti
+            </button>
+            <button
+              onClick={() => setActiveTab('analytics')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'analytics'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Analytics
+            </button>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded-md transition-colors ${
+                viewMode === 'grid' ? 'bg-gray-200 text-gray-900' : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              <Grid className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-md transition-colors ${
+                viewMode === 'list' ? 'bg-gray-200 text-gray-900' : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
-        {/* Templates Tab */}
+        {/* Search and Filter */}
+        <div className="flex items-center space-x-4 mb-6">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Cerca template o progetti..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="all">Tutti</option>
+            <option value="residential">Residenziale</option>
+            <option value="commercial">Commerciale</option>
+            <option value="industrial">Industriale</option>
+            <option value="public">Pubblico</option>
+          </select>
+        </div>
+
+        {/* Content */}
         {activeTab === 'templates' && (
           <div className="space-y-6">
-            {templatesLoading ? (
-              <div className="flex items-center justify-center h-64">
-                <div className="loading loading-spinner loading-lg"></div>
-              </div>
-            ) : designTemplates.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-neutral-400 mb-4">
-                  <BuildingIcon className="h-16 w-16 mx-auto" />
-                </div>
-                <h3 className="text-lg font-medium text-neutral-700 mb-2">
-                  Nessun template disponibile
-                </h3>
-                <p className="text-neutral-500">
-                  I template architettonici saranno disponibili presto
-                </p>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">Template Disponibili</h2>
+              <span className="text-sm text-gray-500">{filteredTemplates.length} template</span>
+            </div>
+
+            {viewMode === 'grid' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredTemplates.map((template) => (
+                  <div key={template.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                    <div className="aspect-w-16 aspect-h-9 bg-gray-200 flex items-center justify-center">
+                      <Building className="w-12 h-12 text-gray-400" />
+                    </div>
+                    <div className="p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-semibold text-gray-900">{template.name}</h3>
+                        {template.isPremium && (
+                          <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                            Premium
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">{template.description}</p>
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {template.tags.map((tag) => (
+                          <span key={tag} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center space-x-1">
+                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                          <span className="text-sm text-gray-600">{template.rating}</span>
+                        </div>
+                        <span className="text-sm text-gray-500">{template.downloads} download</span>
+                      </div>
+                      <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                        Usa Template
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {designTemplates.map((template) => (
-                  <div key={template.id} className="card bg-white shadow-sm hover:shadow-md transition-shadow">
-                    <div className="card-body p-5">
-                      <h3 className="card-title text-lg font-semibold text-neutral-900">
-                        {template.name}
-                      </h3>
-                      <p className="text-neutral-600 text-sm mb-3">{template.description}</p>
-                      
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="badge badge-outline">{template.category}</span>
-                        <span className="badge badge-outline">{template.style}</span>
+              <div className="space-y-4">
+                {filteredTemplates.map((template) => (
+                  <div key={template.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Building className="w-8 h-8 text-gray-400" />
                       </div>
-                      
-                      <div className="space-y-2 mb-4">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-neutral-500">Efficienza:</span>
-                          <span className="font-medium">{template.efficiency}%</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-neutral-500">Sostenibilità:</span>
-                          <span className="font-medium">{template.sustainability}%</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-neutral-500">Costo/m²:</span>
-                          <span className="font-medium">{formatCurrency(template.estimatedCostPerSqm)}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2 mb-4">
-                        <h4 className="font-medium text-neutral-900 text-sm">Caratteristiche:</h4>
-                        <div className="flex flex-wrap gap-1">
-                          {template.features.slice(0, 3).map((feature, index) => (
-                            <span key={index} className="badge badge-sm badge-outline">
-                              {feature}
-                            </span>
-                          ))}
-                          {template.features.length > 3 && (
-                            <span className="badge badge-sm badge-outline">
-                              +{template.features.length - 3}
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-semibold text-gray-900">{template.name}</h3>
+                          {template.isPremium && (
+                            <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                              Premium
                             </span>
                           )}
                         </div>
+                        <p className="text-sm text-gray-600 mb-2">{template.description}</p>
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {template.tags.map((tag) => (
+                            <span key={tag} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <div className="flex items-center space-x-1">
+                            <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                            <span className="text-sm text-gray-600">{template.rating}</span>
+                          </div>
+                          <span className="text-sm text-gray-500">{template.downloads} download</span>
+                          <span className="text-sm text-gray-500">{template.createdAt}</span>
+                        </div>
                       </div>
-                      
-                      <div className="card-actions justify-end">
-                        <Button variant="outline" size="sm">
-                          Dettagli
-                        </Button>
-                        <Button variant="primary" size="sm">
-                          Seleziona
-                        </Button>
+                      <div className="flex items-center space-x-2">
+                        <button className="p-2 text-gray-400 hover:text-gray-600">
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button className="p-2 text-gray-400 hover:text-gray-600">
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                          Usa Template
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -251,225 +386,187 @@ export default function DesignCenterPage() {
           </div>
         )}
 
-        {/* AI Designer Tab */}
-        {activeTab === 'ai-designer' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Parameters Form */}
-            <div className="bg-white shadow-sm rounded-lg p-6">
-              <h2 className="text-lg font-semibold text-neutral-900 mb-4">Parametri Progetto</h2>
-              
-              <div className="space-y-4">
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">Tipo Progetto</span>
-                  </label>
-                  <select
-                    name="projectType"
-                    value={designParams.projectType}
-                    onChange={handleInputChange}
-                    className="select select-bordered w-full"
-                  >
-                    <option value="RESIDENZIALE">Residenziale</option>
-                    <option value="COMMERCIALE">Commerciale</option>
-                    <option value="MISTO">Misto</option>
-                    <option value="INDUSTRIALE">Industriale</option>
-                  </select>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text font-medium">Superficie (m²)</span>
-                    </label>
-                    <input
-                      type="number"
-                      name="totalArea"
-                      value={designParams.totalArea}
-                      onChange={handleInputChange}
-                      className="input input-bordered w-full"
-                      placeholder="1000"
-                    />
-                  </div>
-                  
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text font-medium">Piani</span>
-                    </label>
-                    <input
-                      type="number"
-                      name="floors"
-                      value={designParams.floors}
-                      onChange={handleInputChange}
-                      className="input input-bordered w-full"
-                      placeholder="3"
-                    />
-                  </div>
-                </div>
-                
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">Budget (€)</span>
-                  </label>
-                  <input
-                    type="number"
-                    name="budget"
-                    value={designParams.budget}
-                    onChange={handleInputChange}
-                    className="input input-bordered w-full"
-                    placeholder="1500000"
-                  />
-                </div>
-                
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">Stile</span>
-                  </label>
-                  <select
-                    name="style"
-                    value={designParams.style}
-                    onChange={handleInputChange}
-                    className="select select-bordered w-full"
-                  >
-                    <option value="MODERNO">Moderno</option>
-                    <option value="CLASSICO">Classico</option>
-                    <option value="INDUSTRIALE">Industriale</option>
-                    <option value="MINIMALISTA">Minimalista</option>
-                    <option value="SOSTENIBILE">Sostenibile</option>
-                  </select>
-                </div>
-                
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">Priorità</span>
-                  </label>
-                  <div className="space-y-2">
-                    {['Efficienza Energetica', 'Sostenibilità', 'Funzionalità', 'Estetica', 'Costi'].map((priority) => (
-                      <label key={priority} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="checkbox checkbox-sm"
-                          checked={designParams.priorities.includes(priority)}
-                          onChange={() => handlePriorityChange(priority)}
-                        />
-                        <span className="text-sm">{priority}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">Località</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="location"
-                    value={designParams.location}
-                    onChange={handleInputChange}
-                    className="input input-bordered w-full"
-                    placeholder="Milano, Lombardia"
-                  />
-                </div>
-                
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">Utenti Target</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="targetUsers"
-                    value={designParams.targetUsers}
-                    onChange={handleInputChange}
-                    className="input input-bordered w-full"
-                    placeholder="Famiglie, giovani professionisti..."
-                  />
-                </div>
-                
-                <Button
-                  variant="primary"
-                  fullWidth
-                  isLoading={loading}
-                  onClick={generateAISuggestions}
-                  disabled={!designParams.location || !designParams.targetUsers}
-                >
-                  {loading ? 'Generando...' : 'Genera Suggerimenti AI'}
-                </Button>
-              </div>
+        {activeTab === 'projects' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">I Miei Progetti</h2>
+              <button className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
+                <Plus className="w-4 h-4" />
+                <span>Nuovo Progetto</span>
+              </button>
             </div>
 
-            {/* AI Suggestions */}
-            <div className="bg-white shadow-sm rounded-lg p-6">
-              <h2 className="text-lg font-semibold text-neutral-900 mb-4">Suggerimenti AI</h2>
-              
-              {loading ? (
-                <div className="flex items-center justify-center h-64">
-                  <div className="loading loading-spinner loading-lg"></div>
-                </div>
-              ) : aiSuggestions.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-neutral-400 mb-4">
-                    <BuildingIcon className="h-16 w-16 mx-auto" />
-                  </div>
-                  <h3 className="text-lg font-medium text-neutral-700 mb-2">
-                    Nessun suggerimento generato
-                  </h3>
-                  <p className="text-neutral-500">
-                    Compila i parametri e genera suggerimenti AI personalizzati
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {aiSuggestions.map((suggestion) => (
-                    <div key={suggestion.id} className="card bg-base-100 shadow-sm">
-                      <div className="card-body p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="card-title text-base font-semibold text-neutral-900">
-                            {suggestion.title}
-                          </h3>
-                          <span className={`badge ${getPriorityColor(suggestion.priority)}`}>
-                            {suggestion.priority}
-                          </span>
+            {viewMode === 'grid' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredProjects.map((project) => (
+                  <div key={project.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                    <div className="aspect-w-16 aspect-h-9 bg-gray-200 flex items-center justify-center">
+                      <Building className="w-12 h-12 text-gray-400" />
+                    </div>
+                    <div className="p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-semibold text-gray-900">{project.name}</h3>
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          project.status === 'completed' ? 'bg-green-100 text-green-800' :
+                          project.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                          project.status === 'draft' ? 'bg-gray-100 text-gray-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {project.status === 'completed' ? 'Completato' :
+                           project.status === 'in_progress' ? 'In Corso' :
+                           project.status === 'draft' ? 'Bozza' : 'Archiviato'}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">Template: {project.template}</p>
+                      <div className="mb-3">
+                        <div className="flex items-center justify-between text-sm text-gray-600 mb-1">
+                          <span>Progresso</span>
+                          <span>{project.progress}%</span>
                         </div>
-                        
-                        <p className="text-sm text-neutral-600 mb-3">{suggestion.reasoning}</p>
-                        
-                        <div className="space-y-2 mb-3">
-                          <h4 className="font-medium text-neutral-900 text-sm">Benefici:</h4>
-                          <ul className="list-disc list-inside text-sm text-neutral-600 space-y-1">
-                            {suggestion.benefits.map((benefit, index) => (
-                              <li key={index}>{benefit}</li>
-                            ))}
-                          </ul>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <h4 className="font-medium text-neutral-900 text-sm">Implementazione:</h4>
-                          <p className="text-sm text-neutral-600">{suggestion.implementation}</p>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${project.progress}%` }}
+                          ></div>
                         </div>
                       </div>
+                      <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
+                        <span>Ultima modifica: {project.lastModified}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <button className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors">
+                          Modifica
+                        </button>
+                        <button className="p-2 text-gray-400 hover:text-gray-600">
+                          <Share className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredProjects.map((project) => (
+                  <div key={project.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Building className="w-8 h-8 text-gray-400" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-semibold text-gray-900">{project.name}</h3>
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                            project.status === 'completed' ? 'bg-green-100 text-green-800' :
+                            project.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                            project.status === 'draft' ? 'bg-gray-100 text-gray-800' :
+                            'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {project.status === 'completed' ? 'Completato' :
+                             project.status === 'in_progress' ? 'In Corso' :
+                             project.status === 'draft' ? 'Bozza' : 'Archiviato'}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">Template: {project.template}</p>
+                        <div className="mb-2">
+                          <div className="flex items-center justify-between text-sm text-gray-600 mb-1">
+                            <span>Progresso</span>
+                            <span>{project.progress}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                              style={{ width: `${project.progress}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                          <span>Ultima modifica: {project.lastModified}</span>
+                          {project.location && <span>📍 {project.location}</span>}
+                          {project.budget && <span>💰 €{project.budget.toLocaleString()}</span>}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <button className="p-2 text-gray-400 hover:text-gray-600">
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button className="p-2 text-gray-400 hover:text-gray-600">
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button className="p-2 text-gray-400 hover:text-gray-600">
+                          <Share className="w-4 h-4" />
+                        </button>
+                        <button className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                          Modifica
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
-        {/* Suggestions Tab */}
-        {activeTab === 'suggestions' && (
-          <div className="text-center py-12">
-            <div className="text-neutral-400 mb-4">
-              <BuildingIcon className="h-16 w-16 mx-auto" />
+        {activeTab === 'analytics' && (
+          <div className="space-y-6">
+            <h2 className="text-lg font-semibold text-gray-900">Analytics</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Template Utilizzati</p>
+                    <p className="text-2xl font-semibold text-gray-900">{projects.length}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <Building className="w-6 h-6 text-blue-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Progetti Completati</p>
+                    <p className="text-2xl font-semibold text-gray-900">
+                      {projects.filter(p => p.status === 'completed').length}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <CheckCircle className="w-6 h-6 text-green-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Progetti in Corso</p>
+                    <p className="text-2xl font-semibold text-gray-900">
+                      {projects.filter(p => p.status === 'in_progress').length}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                    <Clock className="w-6 h-6 text-yellow-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Tempo Medio</p>
+                    <p className="text-2xl font-semibold text-gray-900">15 giorni</p>
+                  </div>
+                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <TrendingUp className="w-6 h-6 text-purple-600" />
+                  </div>
+                </div>
+              </div>
             </div>
-            <h3 className="text-lg font-medium text-neutral-700 mb-2">
-              Suggerimenti salvati
-            </h3>
-            <p className="text-neutral-500">
-              I tuoi suggerimenti AI salvati appariranno qui
-            </p>
           </div>
         )}
       </div>
+      
+      {/* Feedback Widget */}
+      <FeedbackWidget />
     </DashboardLayout>
   );
-} 
+}

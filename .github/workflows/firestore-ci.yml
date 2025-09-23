@@ -1,0 +1,67 @@
+name: Validate Firestore Rules
+
+on:
+  push:
+    branches: [main, staging, production]
+    paths:
+      - 'firestore.rules'
+      - 'firestore.indexes.json'
+  pull_request:
+    branches: [main, staging, production]
+    paths:
+      - 'firestore.rules'
+      - 'firestore.indexes.json'
+
+jobs:
+  validate-firestore:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Verify pnpm installation
+        run: pnpm --version
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Setup Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Authenticate to Firebase
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Check Firestore Configuration Files
+        run: |
+          echo "🔍 Checking Firestore configuration files..."
+          ls -la firestore.rules firestore.indexes.json firebase.json
+          echo "✅ Firestore configuration files found"
+
+      - name: Validate Firestore Rules
+        run: |
+          echo "🔍 Validating Firestore rules..."
+          firebase deploy --only firestore:rules --project=urbanova-b623e --dry-run
+          echo "✅ Firestore rules validation completed"
+
+      - name: Validate Firestore Indexes
+        run: |
+          echo "🔍 Validating Firestore indexes..."
+          firebase deploy --only firestore:indexes --project=urbanova-b623e --dry-run
+          echo "✅ Firestore indexes validation completed"
