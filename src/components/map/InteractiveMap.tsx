@@ -496,10 +496,11 @@ export function InteractiveMap({
         
         <MarkerClusterGroup
           chunkedLoading
-          maxClusterRadius={50}
-          spiderfyOnMaxZoom={true}
+          maxClusterRadius={0}
+          spiderfyOnMaxZoom={false}
           showCoverageOnHover={false}
-          zoomToBoundsOnClick={true}
+          zoomToBoundsOnClick={false}
+          disableClusteringAtZoom={1}
         >
           {filteredMarkers.map((marker) => (
             <Marker

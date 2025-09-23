@@ -95,13 +95,55 @@ export default function MarketIntelligenceMapModal({
         </div>
 
         {/* Contenuto */}
-        <div className="p-6">
+        <div className="p-6 max-h-[80vh] overflow-y-auto">
+          {/* Barra di ricerca */}
+          <div className="mb-6">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Cerca comuni italiani (es. Roma, Milano, Gallarate...)"
+                className="w-full px-4 py-3 pl-10 pr-4 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                onChange={(e) => {
+                  const query = e.target.value;
+                  if (query.trim()) {
+                    // Ricerca immediata
+                    fetch(`/api/geographic/search?q=${encodeURIComponent(query)}&type=comune&limit=5`)
+                      .then(res => res.json())
+                      .then(data => {
+                        if (data.success && data.data.results.length > 0) {
+                          const result = data.data.results[0];
+                          const location: GeographicSearchResult = {
+                            id: result.id,
+                            nome: result.nome,
+                            provincia: result.provincia,
+                            regione: result.regione,
+                            tipo: result.tipo,
+                            popolazione: result.popolazione,
+                            superficie: result.superficie,
+                            latitudine: result.latitudine,
+                            longitudine: result.longitudine
+                          };
+                          setSelectedLocation(location);
+                        }
+                      })
+                      .catch(err => console.error('Errore ricerca:', err));
+                  }
+                }}
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              💡 Digita il nome di un comune per selezionarlo automaticamente
+            </p>
+          </div>
+
           {/* Istruzioni per l'utente */}
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 mb-6">
             <h3 className="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-2">
               💡 Come utilizzare la mappa
             </h3>
             <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+              <li>• <strong>Cerca nella barra sopra</strong> per trovare rapidamente un comune</li>
               <li>• <strong>Clicca su un marker arancione</strong> sulla mappa per selezionare un comune</li>
               <li>• <strong>Zoomma e naviga</strong> sulla mappa per esplorare diverse zone</li>
               <li>• <strong>Conferma la selezione</strong> per utilizzare la localizzazione nella ricerca terreni</li>
@@ -109,7 +151,7 @@ export default function MarketIntelligenceMapModal({
             {!selectedLocation && (
               <div className="mt-3 p-3 bg-blue-100 dark:bg-blue-800/30 rounded-lg border border-blue-300 dark:border-blue-700">
                 <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
-                  ⚠️ Clicca su un marker arancione sulla mappa per selezionare un comune
+                  ⚠️ Cerca un comune nella barra sopra o clicca su un marker arancione sulla mappa
                 </p>
               </div>
             )}
