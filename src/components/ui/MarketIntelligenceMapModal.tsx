@@ -34,9 +34,17 @@ export default function MarketIntelligenceMapModal({
     stats: mapStats
   } = useMapData();
 
+  // DEBUG: Log dei marker caricati
+  console.log('🔍 [MarketIntelligenceMapModal] Marker caricati:', geographicMarkers?.length || 0);
+  if (geographicMarkers && geographicMarkers.length > 0) {
+    console.log('🔍 [MarketIntelligenceMapModal] Primi 3 marker:', geographicMarkers.slice(0, 3));
+  }
+
   if (!isOpen) return null;
 
   const handleMarkerClick = (marker: MapMarker) => {
+    console.log('🔍 [MarketIntelligenceMapModal] Marker cliccato:', marker);
+    
     const location: GeographicSearchResult = {
       id: marker.id,
       nome: marker.nome,
@@ -49,6 +57,7 @@ export default function MarketIntelligenceMapModal({
       longitudine: marker.lng
     };
     
+    console.log('🔍 [MarketIntelligenceMapModal] Location creata:', location);
     setSelectedLocation(location);
   };
 
@@ -130,7 +139,7 @@ export default function MarketIntelligenceMapModal({
                 showControls={true}
                 onMarkerClick={handleMarkerClick}
                 onMapClick={(lat, lng) => {
-                  console.log('Mappa cliccata:', { lat, lng });
+                  console.log('🔍 [MarketIntelligenceMapModal] Mappa cliccata:', { lat, lng });
                 }}
               />
             )}

@@ -1248,20 +1248,25 @@ export default function LandScrapingPage() {
                 📍 Localizzazione
               </label>
               <div className="space-y-2">
-                <AdvancedLocationSelector
-                  value={searchCriteria.location}
-                  onChange={location => setSearchCriteria(prev => ({ ...prev, location }))}
-                  placeholder="Cerca localizzazioni (es. Garbatella, Pomezia, Roma...)"
-                  className="w-full"
-                  showMultiple={true}
-                />
-                <button
-                  onClick={() => setShowMapModal(true)}
-                  className="w-full px-3 py-2 text-sm bg-gray-100 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
-                >
-                  <MapIcon className="w-4 h-4" />
-                  Cerca su Mappa ISTAT
-                </button>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={searchCriteria.location}
+                    onChange={e => setSearchCriteria(prev => ({ ...prev, location: e.target.value }))}
+                    placeholder="Cerca localizzazioni (es. Garbatella, Pomezia, Roma...)"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <button
+                    onClick={() => setShowMapModal(true)}
+                    className="px-4 py-2 text-sm bg-blue-600 text-white border border-blue-600 rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <MapIcon className="w-4 h-4" />
+                    Mappa ISTAT
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500">
+                  💡 Usa il pulsante "Mappa ISTAT" per una ricerca geografica avanzata con tutti i comuni italiani
+                </p>
               </div>
             </div>
 
