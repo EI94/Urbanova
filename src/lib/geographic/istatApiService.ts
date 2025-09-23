@@ -350,122 +350,30 @@ class IstatApiService {
       const query = (params.query || params.q).toLowerCase().trim();
       console.log(`🔍 [IstatAPI] Ricerca per: "${query}"`);
       
-      // Algoritmo di ricerca intelligente con priorità per città principali
+      // Algoritmo di ricerca SEMPLICE e FUNZIONALE
       const exactNameMatches = comuni.filter(comune => 
         comune.nome.toLowerCase() === query
       );
       
-      // PRIORITÀ SPECIALE: Se l'utente cerca "Roma", "Milano", "Napoli", "Palermo", "Torino"
-      const priorityCities = ['roma', 'milano', 'napoli', 'palermo', 'torino'];
-      const priorityMatches = comuni.filter(comune => 
-        priorityCities.includes(query) && 
-        comune.nome.toLowerCase() === query &&
-        (comune.provincia.toLowerCase() === query || 
-         comune.regione.toLowerCase() === 'lazio' && query === 'roma' ||
-         comune.regione.toLowerCase() === 'lombardia' && query === 'milano' ||
-         comune.regione.toLowerCase() === 'campania' && query === 'napoli' ||
-         comune.regione.toLowerCase() === 'sicilia' && query === 'palermo' ||
-         comune.regione.toLowerCase() === 'piemonte' && query === 'torino')
-      );
-      
-      const exactLocationMatches = comuni.filter(comune => 
-        !exactNameMatches.includes(comune) && 
-        !priorityMatches.includes(comune) && (
-          comune.provincia.toLowerCase() === query ||
-          comune.regione.toLowerCase() === query
-        )
-      );
-      
       const startsWithMatches = comuni.filter(comune => 
         !exactNameMatches.includes(comune) && 
-        !priorityMatches.includes(comune) &&
-        !exactLocationMatches.includes(comune) && (
-          comune.nome.toLowerCase().startsWith(query) ||
-          comune.provincia.toLowerCase().startsWith(query) ||
-          comune.regione.toLowerCase().startsWith(query)
-        )
+        comune.nome.toLowerCase().startsWith(query)
       );
       
       const containsMatches = comuni.filter(comune => 
         !exactNameMatches.includes(comune) && 
-        !priorityMatches.includes(comune) &&
-        !exactLocationMatches.includes(comune) && 
-        !startsWithMatches.includes(comune) && (
-          comune.nome.toLowerCase().includes(query) ||
-          comune.provincia.toLowerCase().includes(query) ||
-          comune.regione.toLowerCase().includes(query)
-        )
+        !startsWithMatches.includes(comune) && 
+        comune.nome.toLowerCase().includes(query)
       );
       
       // DEBUG: Log dei risultati per capire cosa succede
       console.log(`🔍 [IstatAPI] DEBUG Ricerca "${query}":`);
       console.log(`  - Esatti: ${exactNameMatches.length}`);
-      console.log(`  - Priorità: ${priorityMatches.length}`);
-      console.log(`  - Province/Regioni: ${exactLocationMatches.length}`);
       console.log(`  - Iniziano: ${startsWithMatches.length}`);
       console.log(`  - Contengono: ${containsMatches.length}`);
-      if (priorityMatches.length > 0) {
-        console.log(`  - Primi priorità:`, priorityMatches.slice(0, 3).map(c => c.nome));
-      }
       
-      // FALLBACK HARDCODED per Roma e Milano se non trovati correttamente
-      if (query === 'roma') {
-        console.log('🔍 [IstatAPI] Forzando Roma con fallback hardcoded');
-        const romaFallback: IstatComuneData = {
-          nome: 'Roma',
-          provincia: 'Roma',
-          regione: 'Lazio',
-          codiceIstat: '058091',
-          popolazione: 2873000,
-          superficie: 1285.31,
-          latitudine: 41.9028,
-          longitudine: 12.4964,
-          altitudine: 21,
-          zonaClimatica: 'D',
-          cap: '00100',
-          prefisso: '06'
-        };
-        filteredComuni = [romaFallback, ...exactNameMatches, ...exactLocationMatches, ...startsWithMatches, ...containsMatches];
-      } else if (query === 'milano') {
-        console.log('🔍 [IstatAPI] Forzando Milano con fallback hardcoded');
-        const milanoFallback: IstatComuneData = {
-          nome: 'Milano',
-          provincia: 'Milano',
-          regione: 'Lombardia',
-          codiceIstat: '015146',
-          popolazione: 1396000,
-          superficie: 181.76,
-          latitudine: 45.4642,
-          longitudine: 9.1900,
-          altitudine: 122,
-          zonaClimatica: 'E',
-          cap: '20100',
-          prefisso: '02'
-        };
-        filteredComuni = [milanoFallback, ...exactNameMatches, ...exactLocationMatches, ...startsWithMatches, ...containsMatches];
-      } else if (query === 'gallarate' || query === 'Gallarate') {
-        console.log('🔍 [IstatAPI] Forzando Gallarate con fallback hardcoded');
-        const gallarateFallback: IstatComuneData = {
-          nome: 'Gallarate',
-          provincia: 'Varese',
-          regione: 'Lombardia',
-          codiceIstat: '012064',
-          popolazione: 54000,
-          superficie: 20.98,
-          latitudine: 45.6595,
-          longitudine: 8.7942,
-          altitudine: 238,
-          zonaClimatica: 'E',
-          cap: '21013',
-          prefisso: '0331'
-        };
-        filteredComuni = [gallarateFallback, ...exactNameMatches, ...exactLocationMatches, ...startsWithMatches, ...containsMatches];
-      } else {
-        // ORDINE PRIORITARIO: Prima le città principali, poi gli altri
-        filteredComuni = [...priorityMatches, ...exactNameMatches, ...exactLocationMatches, ...startsWithMatches, ...containsMatches];
-      }
-      
-      console.log(`🔍 [IstatAPI] Risultati: ${priorityMatches.length} priorità, ${exactNameMatches.length} esatti, ${exactLocationMatches.length} province/regioni, ${startsWithMatches.length} iniziano, ${containsMatches.length} contengono`);
+      // ORDINE PRIORITARIO: Prima gli esatti, poi gli altri
+      filteredComuni = [...exactNameMatches, ...startsWithMatches, ...containsMatches];
     }
 
     if (params.regione) {
