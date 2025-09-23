@@ -177,7 +177,7 @@ class IstatApiService {
       
       // Parsing dati (salta header) - TUTTI I COMUNI ITALIANI
       const maxLines = lines.length; // TUTTI i comuni, nessun limite
-      for (let i = 4; i < maxLines; i++) { // Salta le prime 4 righe (header multi-linea complesso)
+      for (let i = 3; i < maxLines; i++) { // Salta le prime 3 righe (header multi-linea complesso)
         try {
           const line = lines[i]?.trim();
           if (!line) continue;
