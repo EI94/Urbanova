@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { X, MapPin, Search, Filter } from 'lucide-react';
 import { InteractiveMap, MapMarker } from '@/components/map/InteractiveMap';
 import { useMapData } from '@/hooks/useMapData';
-import { GeographicSearchResult, GeographicSearch } from '@/components/ui/GeographicSearch';
+import { GeographicSearchResult } from '@/components/ui/GeographicSearch';
 
 interface MarketIntelligenceMapModalProps {
   isOpen: boolean;
@@ -61,9 +61,6 @@ export default function MarketIntelligenceMapModal({
     setSelectedLocation(location);
   };
 
-  const handleSearchResultClick = (result: GeographicSearchResult) => {
-    setSelectedLocation(result);
-  };
 
   const handleConfirmSelection = () => {
     if (selectedLocation) {
@@ -99,14 +96,23 @@ export default function MarketIntelligenceMapModal({
 
         {/* Contenuto */}
         <div className="p-6">
-          {/* Barra di ricerca */}
-          <div className="mb-6">
-            <GeographicSearch
-              onResultSelect={handleSearchResultClick}
-              placeholder="Cerca comuni italiani (es. Gallarate, Roma, Milano...)"
-              showFilters={true}
-              maxResults={10}
-            />
+          {/* Istruzioni per l'utente */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 mb-6">
+            <h3 className="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-2">
+              💡 Come utilizzare la mappa
+            </h3>
+            <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+              <li>• <strong>Clicca su un marker arancione</strong> sulla mappa per selezionare un comune</li>
+              <li>• <strong>Zoomma e naviga</strong> sulla mappa per esplorare diverse zone</li>
+              <li>• <strong>Conferma la selezione</strong> per utilizzare la localizzazione nella ricerca terreni</li>
+            </ul>
+            {!selectedLocation && (
+              <div className="mt-3 p-3 bg-blue-100 dark:bg-blue-800/30 rounded-lg border border-blue-300 dark:border-blue-700">
+                <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
+                  ⚠️ Clicca su un marker arancione sulla mappa per selezionare un comune
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Mappa */}
@@ -196,26 +202,6 @@ export default function MarketIntelligenceMapModal({
             </div>
           )}
 
-          {/* Istruzioni */}
-          <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              💡 Come utilizzare la mappa
-            </h3>
-            <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-              <li>• <strong>Clicca su un marker</strong> per selezionare un comune o una zona</li>
-              <li>• <strong>Usa la barra di ricerca</strong> per trovare rapidamente una località</li>
-              <li>• <strong>Applica i filtri</strong> per restringere la ricerca per regione, provincia o tipo</li>
-              <li>• <strong>Zoomma e naviga</strong> sulla mappa per esplorare diverse zone</li>
-              <li>• <strong>Conferma la selezione</strong> per utilizzare la localizzazione nella ricerca terreni</li>
-            </ul>
-            {!selectedLocation && (
-              <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <p className="text-sm text-blue-700 dark:text-blue-300 font-medium">
-                  ⚠️ Clicca su un marker arancione sulla mappa per selezionare un comune
-                </p>
-              </div>
-            )}
-          </div>
 
           {/* Azioni */}
           <div className="flex justify-end space-x-3">
@@ -228,9 +214,9 @@ export default function MarketIntelligenceMapModal({
             <button
               onClick={handleConfirmSelection}
               disabled={!selectedLocation}
-              className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+              className="px-6 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
             >
-              {selectedLocation ? 'Conferma Selezione' : 'Seleziona un Comune'}
+              {selectedLocation ? '✅ Seleziona Luogo e Continua' : '⚠️ Seleziona un Comune dalla Mappa'}
             </button>
           </div>
         </div>
