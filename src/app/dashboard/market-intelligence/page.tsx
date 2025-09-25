@@ -121,7 +121,7 @@ export default function LandScrapingPage() {
     areaRange: [0, 0], // 0 = nessun limite
     propertyTypes: ['residenziale'],
     hasPermits: false,
-    minAIScore: 70,
+    minAIScore: 0, // CORREZIONE: Ridotto da 70 a 0 per mostrare tutti i risultati
     riskLevel: 'all',
     maxDistance: 50,
   });
@@ -480,13 +480,14 @@ export default function LandScrapingPage() {
       land => land.price >= filters.priceRange[0] && land.price <= filters.priceRange[1]
     );
 
-    // Filtro area
-    filtered = filtered.filter(
-      land => land.area >= filters.areaRange[0] && land.area <= filters.areaRange[1]
-    );
+    // Filtro area - CORREZIONE: Gestisce area = 0 (non specificata)
+    filtered = filtered.filter(land => {
+      if (land.area === 0) return true; // Se area non specificata, include sempre
+      return land.area >= filters.areaRange[0] && land.area <= filters.areaRange[1];
+    });
 
-    // Filtro tipologia
-    if (filters.propertyTypes.length > 0) {
+    // Filtro tipologia - CORREZIONE: Più flessibile
+    if (filters.propertyTypes.length > 0 && !filters.propertyTypes.includes('tutti')) {
       filtered = filtered.filter(land =>
         filters.propertyTypes.some(type =>
           land.features.some(feature => feature.toLowerCase().includes(type.toLowerCase()))
@@ -1820,6 +1821,8 @@ export default function LandScrapingPage() {
                     onClick={() => {
                       setSearchCriteria(entry.criteria);
                       setEmail(entry.email);
+                      // CORREZIONE: Esegue automaticamente la ricerca
+                      handleSearch(entry.criteria, entry.email);
                     }}
                     className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 border border-blue-600 rounded hover:bg-blue-50 transition-colors"
                   >
