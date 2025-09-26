@@ -61,6 +61,10 @@ export default function NewFeasibilityProjectPage() {
     perSqm: 0,
   });
 
+  // Nuovo stato per gestire le modalità dei ricavi
+  const [revenueMode, setRevenueMode] = useState<'lumpSum' | 'perSqm'>('perSqm');
+  const [lumpSumRevenue, setLumpSumRevenue] = useState(0); // Prezzo a corpo per unità
+
   const [autoSaving, setAutoSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
@@ -392,7 +396,46 @@ export default function NewFeasibilityProjectPage() {
     safeSetTimeout(() => recalculateAll(), 100);
   };
 
-  const handleConstructionCostPerSqmChange = (field: string, value: number) => {
+  // Funzioni per gestire le modalità dei ricavi
+  const handleRevenueModeChange = (mode: 'lumpSum' | 'perSqm') => {
+    setRevenueMode(mode);
+
+    // Se si passa da modalità per mq a a corpo, calcola il prezzo a corpo
+    if (mode === 'lumpSum' && project.revenues?.pricePerSqm && project.revenues?.averageArea) {
+      const lumpSum = project.revenues.pricePerSqm * project.revenues.averageArea;
+      setLumpSumRevenue(lumpSum);
+    } else if (mode === 'perSqm' && lumpSumRevenue && project.revenues?.averageArea) {
+      // Se si passa da a corpo a per mq, calcola il prezzo per mq
+      const pricePerSqm = lumpSumRevenue / project.revenues.averageArea;
+      setProject(prev => ({
+        ...prev,
+        revenues: {
+          ...prev.revenues,
+          pricePerSqm: pricePerSqm,
+        },
+      } as Partial<FeasibilityProject>));
+    }
+
+    // Ricalcola automaticamente
+    safeSetTimeout(() => recalculateAll(), 100);
+  };
+
+  const handleLumpSumRevenueChange = (value: string) => {
+    const numValue = parseFloat(value) || 0;
+    setLumpSumRevenue(numValue);
+
+    // Aggiorna i ricavi nel progetto
+    setProject(prev => ({
+      ...prev,
+      revenues: {
+        ...prev.revenues,
+        pricePerSqm: project.revenues?.averageArea ? numValue / project.revenues.averageArea : 0,
+      },
+    } as Partial<FeasibilityProject>));
+
+    // Ricalcola automaticamente
+    safeSetTimeout(() => recalculateAll(), 100);
+  };
     setConstructionCostsPerSqm(prev => ({
       ...prev,
       [field]: value,
@@ -434,6 +477,14 @@ export default function NewFeasibilityProjectPage() {
       costs.insurance = insuranceCost;
 
       const revenues = feasibilityService.calculateRevenues(project);
+      
+      // Aggiorna i ricavi in base alla modalità selezionata
+      if (revenueMode === 'lumpSum' && lumpSumRevenue > 0 && project.revenues?.units) {
+        revenues.total = lumpSumRevenue * project.revenues.units;
+        revenues.pricePerSqm = project.revenues?.averageArea ? lumpSumRevenue / project.revenues.averageArea : 0;
+      } else if (revenueMode === 'perSqm' && project.revenues?.pricePerSqm && project.revenues?.averageArea && project.revenues?.units) {
+        revenues.total = project.revenues.pricePerSqm * project.revenues.averageArea * project.revenues.units;
+      }
       const results = feasibilityService.calculateResults(
         costs,
         revenues,
@@ -1681,6 +1732,46 @@ export default function NewFeasibilityProjectPage() {
                 Ricavi
               </h2>
 
+              {/* Toggle per modalità ricavi */}
+              <div className="flex items-center space-x-2 mb-6">
+                <span className="text-sm text-gray-600">Modalità:</span>
+                <div className="relative group">
+                  <InfoIcon className="h-4 w-4 text-gray-400 hover:text-blue-500 cursor-help" />
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                    <div className="text-center">
+                      <div className="font-semibold mb-1">Modalità Ricavi</div>
+                      <div className="text-left space-y-1">
+                        <div><strong>A corpo:</strong> Prezzo fisso per unità</div>
+                        <div><strong>€/m²:</strong> Prezzo per metro quadrato</div>
+                      </div>
+                    </div>
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                  </div>
+                </div>
+                <div className="flex bg-gray-100 rounded-lg p-1">
+                  <button
+                    onClick={() => handleRevenueModeChange('lumpSum')}
+                    className={`px-3 py-1 text-sm rounded-md transition-all ${
+                      revenueMode === 'lumpSum'
+                        ? 'bg-green-500 text-white shadow-sm'
+                        : 'text-gray-600 hover:text-gray-800'
+                    }`}
+                  >
+                    A corpo
+                  </button>
+                  <button
+                    onClick={() => handleRevenueModeChange('perSqm')}
+                    className={`px-3 py-1 text-sm rounded-md transition-all ${
+                      revenueMode === 'perSqm'
+                        ? 'bg-green-500 text-white shadow-sm'
+                        : 'text-gray-600 hover:text-gray-800'
+                    }`}
+                  >
+                    €/m²
+                  </button>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="label">
@@ -1710,20 +1801,55 @@ export default function NewFeasibilityProjectPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="label">
-                    <span className="label-text">Prezzo Vendita (€/m²)</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={project.revenues?.pricePerSqm || ''}
-                    onChange={e =>
-                      handleInputChange('revenues', 'pricePerSqm', handleNumberInput(e))
-                    }
-                    className="input input-bordered w-full"
-                    placeholder="Inserisci prezzo"
-                  />
-                </div>
+                {/* Campo per modalità a corpo */}
+                {revenueMode === 'lumpSum' && (
+                  <div className="md:col-span-2">
+                    <div className="mb-4 p-4 bg-green-50 rounded-lg">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium text-green-900">Prezzo a Corpo per Unità</h4>
+                        <div className="text-sm text-green-500">
+                          Prezzo fisso per ogni unità
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <div className="flex-1">
+                          <input
+                            type="text"
+                            value={lumpSumRevenue || ''}
+                            onChange={e => handleLumpSumRevenueChange(handleNumberInput(e))}
+                            className="input input-bordered w-full text-lg font-medium"
+                            placeholder="Es. 300000"
+                          />
+                        </div>
+                        <div className="text-sm text-green-600">€ per unità</div>
+                      </div>
+                      {project.revenues?.units && project.revenues?.averageArea && (
+                        <div className="mt-2 text-sm text-green-600">
+                          Totale: {formatCurrency(lumpSumRevenue * (project.revenues.units || 0))} | 
+                          Equivale a: {formatCurrency(lumpSumRevenue / (project.revenues.averageArea || 1))}/mq
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Campo per modalità €/m² */}
+                {revenueMode === 'perSqm' && (
+                  <div>
+                    <label className="label">
+                      <span className="label-text">Prezzo Vendita (€/m²)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={project.revenues?.pricePerSqm || ''}
+                      onChange={e =>
+                        handleInputChange('revenues', 'pricePerSqm', handleNumberInput(e))
+                      }
+                      className="input input-bordered w-full"
+                      placeholder="Inserisci prezzo"
+                    />
+                  </div>
+                )}
 
                 <div>
                   <label className="label">
