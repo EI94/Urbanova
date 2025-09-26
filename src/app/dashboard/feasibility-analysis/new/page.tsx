@@ -17,6 +17,13 @@ import {
   AlertTriangleIcon,
   InfoIcon,
 } from '@/components/icons';
+
+// Import QuestionMarkIcon separatamente per evitare conflitti
+const QuestionMarkIcon = ({ className = 'h-5 w-5' }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import FeasibilityReportGenerator from '@/components/ui/FeasibilityReportGenerator';
 import ProjectReminderModal from '@/components/ui/ProjectReminderModal';
@@ -45,6 +52,9 @@ export default function NewFeasibilityProjectPage() {
     interestRate: 3.5,
     loanTermYears: 15,
   });
+
+  // Stato per la percentuale di acconto per il calcolo Assicurazione sul Finanziamento (Legge 210)
+  const [downPaymentPercentage, setDownPaymentPercentage] = useState(20); // Default 20%
 
   // Nuovo stato per gestire i costi di costruzione
   const [constructionCostMode, setConstructionCostMode] = useState<'lumpSumTotal' | 'lumpSumPerSqm' | 'detailed'>('detailed');
@@ -417,7 +427,9 @@ export default function NewFeasibilityProjectPage() {
 
   const recalculateAll = () => {
     try {
-      const costs = feasibilityService.calculateCosts(project, constructionCostMode);
+      // Mappa constructionCostMode ai valori accettati da calculateCosts
+      const costMode = constructionCostMode === 'lumpSumPerSqm' ? 'perSqm' : 'total';
+      const costs = feasibilityService.calculateCosts(project, costMode);
 
       // Calcola assicurazioni se i flag sono attivi
       let insuranceCost = 0;
@@ -425,7 +437,11 @@ export default function NewFeasibilityProjectPage() {
         insuranceCost += costs.construction.subtotal * 0.015; // 1.5% del costo costruzione
       }
       if (insuranceFlags.financingInsurance) {
-        insuranceCost += financingData.loanAmount * 0.01; // 1% dell'importo finanziato
+        // Legge 210: 1% sugli acconti ricevuti dai clienti
+        // Calcoliamo l'1% della percentuale di acconto sui ricavi totali
+        const revenues = feasibilityService.calculateRevenues(project);
+        const downPaymentAmount = (revenues.total * downPaymentPercentage) / 100;
+        insuranceCost += downPaymentAmount * 0.01; // 1% degli acconti stimati
       }
       costs.insurance = insuranceCost;
 
@@ -1193,7 +1209,7 @@ export default function NewFeasibilityProjectPage() {
                             value={constructionCostMode === 'lumpSumTotal' ? lumpSumCosts.total || '' : lumpSumCosts.perSqm || ''}
                             onChange={e => handleLumpSumCostChange(
                               constructionCostMode === 'lumpSumTotal' ? 'total' : 'perSqm',
-                              handleNumberInput(e)
+                              handleNumberInput(e).toString()
                             )}
                             className="input input-bordered w-full text-lg font-medium"
                             placeholder={constructionCostMode === 'lumpSumTotal' ? 'Es. 180000' : 'Es. 1800'}
@@ -1337,33 +1353,93 @@ export default function NewFeasibilityProjectPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <input
-                          type="checkbox"
-                          checked={insuranceFlags.financingInsurance}
-                          onChange={e => {
-                            setInsuranceFlags(prev => ({
-                              ...prev,
-                              financingInsurance: e.target.checked,
-                            }));
-                            safeSetTimeout(() => recalculateAll(), 100);
-                          }}
-                          className="checkbox checkbox-primary"
-                        />
-                        <div>
-                          <div className="font-medium">Assicurazione sul Finanziamento</div>
-                          <div className="text-sm text-gray-600">
-                            1% sull'importo finanziato (Legge 210)
+                    <div className="p-4 bg-gray-50 rounded-lg space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <input
+                            type="checkbox"
+                            checked={insuranceFlags.financingInsurance}
+                            onChange={e => {
+                              setInsuranceFlags(prev => ({
+                                ...prev,
+                                financingInsurance: e.target.checked,
+                              }));
+                              safeSetTimeout(() => recalculateAll(), 100);
+                            }}
+                            className="checkbox checkbox-primary"
+                          />
+                          <div>
+                            <div className="font-medium flex items-center">
+                              Assicurazione sul Finanziamento
+                              <div className="relative group ml-2">
+                                <QuestionMarkIcon className="h-4 w-4 text-gray-400 hover:text-blue-500 cursor-help" />
+                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                                  <div className="text-center">
+                                    <div className="font-semibold mb-1">Legge 210/2004</div>
+                                    <div className="text-left space-y-1">
+                                      <div><strong>Protezione acquirenti:</strong> Immobili in costruzione</div>
+                                      <div><strong>Calcolo:</strong> 1% sugli acconti ricevuti</div>
+                                      <div><strong>Scopo:</strong> Garanzia per i clienti</div>
+                                    </div>
+                                  </div>
+                                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              1% sugli acconti ricevuti dai clienti (Legge 210)
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-bold">
-                          {formatCurrency(financingData.loanAmount * 0.01)}
+                        <div className="text-right">
+                          <div className="font-bold">
+                            {insuranceFlags.financingInsurance ? formatCurrency(calculatedCosts.insurance - (insuranceFlags.constructionInsurance ? calculatedCosts.construction?.subtotal * 0.015 : 0)) : formatCurrency(0)}
+                          </div>
+                          <div className="text-xs text-gray-500">Calcolato automaticamente</div>
                         </div>
-                        <div className="text-xs text-gray-500">Calcolato automaticamente</div>
                       </div>
+                      
+                      {insuranceFlags.financingInsurance && (
+                        <div className="ml-8 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <label className="text-sm font-medium text-blue-900">
+                              Percentuale Acconto Stimata
+                            </label>
+                            <div className="text-xs text-blue-600">
+                              Stima per il calcolo Legge 210
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <input
+                              type="range"
+                              min="5"
+                              max="50"
+                              value={downPaymentPercentage}
+                              onChange={e => {
+                                setDownPaymentPercentage(parseInt(e.target.value));
+                                safeSetTimeout(() => recalculateAll(), 100);
+                              }}
+                              className="flex-1 range range-primary range-sm"
+                            />
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="text"
+                                value={downPaymentPercentage}
+                                onChange={e => {
+                                  const value = parseInt(e.target.value) || 20;
+                                  setDownPaymentPercentage(Math.min(50, Math.max(5, value)));
+                                  safeSetTimeout(() => recalculateAll(), 100);
+                                }}
+                                className="w-16 input input-bordered input-sm text-center"
+                              />
+                              <span className="text-sm text-gray-600">%</span>
+                            </div>
+                          </div>
+                          <div className="mt-2 text-xs text-blue-700">
+                            💡 Urbanova calcola l'1% di questa percentuale sui ricavi totali
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
