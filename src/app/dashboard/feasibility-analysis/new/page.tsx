@@ -16,6 +16,7 @@ import {
   SearchIcon,
   AlertTriangleIcon,
   InfoIcon,
+  QuestionMarkIcon,
 } from '@/components/icons';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import FeasibilityReportGenerator from '@/components/ui/FeasibilityReportGenerator';
@@ -40,6 +41,7 @@ export default function NewFeasibilityProjectPage() {
     constructionInsurance: false,
     financingInsurance: false,
   });
+  const [downPaymentPercentage, setDownPaymentPercentage] = useState(20); // Percentuale acconto stimata (default 20%)
   const [financingData, setFinancingData] = useState({
     loanAmount: 0,
     interestRate: 3.5,
@@ -425,7 +427,9 @@ export default function NewFeasibilityProjectPage() {
         insuranceCost += costs.construction.subtotal * 0.015; // 1.5% del costo costruzione
       }
       if (insuranceFlags.financingInsurance) {
-        insuranceCost += financingData.loanAmount * 0.01; // 1% dell'importo finanziato
+        // Legge 210: 1% sugli acconti ricevuti dai clienti
+        const estimatedDownPayment = (revenues.total * downPaymentPercentage) / 100;
+        insuranceCost += estimatedDownPayment * 0.01; // 1% degli acconti stimati
       }
       costs.insurance = insuranceCost;
 
@@ -1490,18 +1494,71 @@ export default function NewFeasibilityProjectPage() {
                           }}
                           className="checkbox checkbox-primary"
                         />
-                        <div>
-                          <div className="font-medium">Assicurazione sul Finanziamento</div>
-                          <div className="text-sm text-gray-600">
-                            1% sull'importo finanziato (Legge 210)
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2">
+                            <div className="font-medium">Assicurazione sul Finanziamento</div>
+                            <div className="relative group">
+                              <QuestionMarkIcon className="h-4 w-4 text-gray-400 hover:text-blue-500 cursor-help" />
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 max-w-xs">
+                                <div className="text-center">
+                                  <div className="font-semibold mb-1">Legge 210/2004</div>
+                                  <div className="text-left space-y-1">
+                                    <div><strong>Obbligo:</strong> Assicurazione fideiussoria per tutela acquirenti</div>
+                                    <div><strong>Calcolo:</strong> 1% sugli acconti ricevuti dai clienti</div>
+                                    <div><strong>Finalità:</strong> Garanzia restituzione somme versate</div>
+                                    <div><strong>Copertura:</strong> Situazioni di crisi del costruttore</div>
+                                  </div>
+                                </div>
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                              </div>
+                            </div>
                           </div>
+                          <div className="text-sm text-gray-600 mt-1">
+                            1% sugli acconti ricevuti dai clienti (Legge 210/2004)
+                          </div>
+                          
+                          {/* Campo per percentuale acconto stimata */}
+                          {insuranceFlags.financingInsurance && (
+                            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                              <div className="flex items-center space-x-3">
+                                <div className="flex-1">
+                                  <label className="text-sm font-medium text-blue-800">
+                                    Percentuale acconto stimata:
+                                  </label>
+                                  <div className="flex items-center space-x-2 mt-1">
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      max="100"
+                                      value={downPaymentPercentage}
+                                      onChange={e => {
+                                        const value = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
+                                        setDownPaymentPercentage(value);
+                                        safeSetTimeout(() => recalculateAll(), 100);
+                                      }}
+                                      className="input input-bordered input-sm w-20"
+                                    />
+                                    <span className="text-sm text-blue-600">%</span>
+                                  </div>
+                                </div>
+                                <div className="text-sm text-blue-600">
+                                  Acconto stimato: {formatCurrency((calculatedRevenues.total * downPaymentPercentage) / 100)}
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="font-bold">
-                          {formatCurrency(financingData.loanAmount * 0.01)}
+                          {insuranceFlags.financingInsurance ? 
+                            formatCurrency(((calculatedRevenues.total * downPaymentPercentage) / 100) * 0.01) : 
+                            '0 €'
+                          }
                         </div>
-                        <div className="text-xs text-gray-500">Calcolato automaticamente</div>
+                        <div className="text-xs text-gray-500">
+                          {insuranceFlags.financingInsurance ? 'Calcolato automaticamente' : 'Non attiva'}
+                        </div>
                       </div>
                     </div>
                   </div>
