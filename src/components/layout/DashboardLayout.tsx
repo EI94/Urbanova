@@ -70,7 +70,8 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
   // CHIRURGICO: Protezione usePathname per evitare race condition con useAuth
   let pathname = '/dashboard';
   try {
-    pathname = usePathname();
+    const pathnameResult = usePathname();
+    pathname = pathnameResult || '/dashboard'; // CORREZIONE: Gestisce null
   } catch (error) {
     console.warn("⚠️ [DashboardLayout] Errore usePathname:", error);
   }
@@ -106,7 +107,14 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
           } catch (notificationError) {
             console.error('❌ [DashboardLayout] Errore caricamento notifiche:', notificationError);
             // Non bloccare il caricamento se le notifiche falliscono
-            setNotifications({ unread: 0, total: 0 });
+            setNotifications({ 
+              unread: 0, 
+              total: 0, 
+              read: 0, 
+              dismissed: 0, 
+              byType: {}, 
+              byPriority: {} 
+            });
           }
           
           // Carica profilo utente con gestione errori
@@ -150,7 +158,12 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
 
   const handleLogout = async () => {
     try {
-      await auth.logout();
+      // CORREZIONE: Controlla se logout esiste prima di chiamarlo
+      if (auth && typeof auth === 'object' && 'logout' in auth && typeof auth.logout === 'function') {
+        await auth.logout();
+      } else {
+        console.warn('⚠️ [DashboardLayout] Logout non disponibile');
+      }
     } catch (error) {
       console.error('Error during logout:', error);
     }
