@@ -244,7 +244,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   }`}
                   onClick={(e) => {
                     // 🔧 FIX: Forza navigazione anche se si è in una sottopagina
-                    if (pathname?.includes('/feasibility-analysis/new')) {
+                    if (pathname?.includes('/feasibility-analysis/')) {
                       e.preventDefault();
                       window.location.href = '/dashboard/feasibility-analysis';
                     }
