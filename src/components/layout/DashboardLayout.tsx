@@ -174,6 +174,10 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
     if (href === '/dashboard') {
       return pathname === '/dashboard' || pathname === '/dashboard/unified';
     }
+    // 🔧 FIX: Gestione migliorata per sottopagine
+    if (href === '/dashboard/feasibility-analysis') {
+      return pathname.startsWith('/dashboard/feasibility-analysis');
+    }
     return pathname.startsWith(href);
   };
 
@@ -238,6 +242,13 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                       ? 'bg-blue-50 text-blue-700 shadow-sm'
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                   }`}
+                  onClick={(e) => {
+                    // 🔧 FIX: Forza navigazione anche se si è in una sottopagina
+                    if (pathname?.includes('/feasibility-analysis/new')) {
+                      e.preventDefault();
+                      window.location.href = '/dashboard/feasibility-analysis';
+                    }
+                  }}
                 >
                   <CalculatorIcon className="w-4 h-4 mr-3" />
                   Analisi Fattibilità
