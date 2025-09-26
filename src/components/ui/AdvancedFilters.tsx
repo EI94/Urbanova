@@ -35,7 +35,7 @@ export default function AdvancedFilters({
     let count = 0;
     if (filters.priceRange?.[0] > 0 || filters.priceRange?.[1] < 1000000) count++;
     if (filters.areaRange?.[0] > 500 || filters.areaRange?.[1] < 10000) count++;
-    if (filters.propertyTypes?.length !== 1 || filters.propertyTypes?.[0] !== 'residenziale')
+    if (filters.propertyTypes?.length !== 1 || filters.propertyTypes?.[0] !== 'tutti')
       count++;
     if (filters.hasPermits) count++;
     if (filters.minAIScore > 70) count++;
@@ -48,6 +48,7 @@ export default function AdvancedFilters({
   };
 
   const propertyTypeOptions = [
+    { value: 'tutti', label: 'Tutte le destinazioni' },
     { value: 'residenziale', label: 'Residenziale' },
     { value: 'commerciale', label: 'Commerciale' },
     { value: 'industriale', label: 'Industriale' },
@@ -174,18 +175,29 @@ export default function AdvancedFilters({
                   <label key={option.value} className="flex items-center">
                     <input
                       type="checkbox"
-                      checked={filters.propertyTypes?.includes(option.value) || false}
+                      checked={
+                        option.value === 'tutti' 
+                          ? filters.propertyTypes?.includes('tutti') || false
+                          : filters.propertyTypes?.includes(option.value) || false
+                      }
                       onChange={e => {
-                        if (e.target.checked) {
-                          updateFilter('propertyTypes', [
-                            ...(filters.propertyTypes || []),
-                            option.value,
-                          ]);
+                        if (option.value === 'tutti') {
+                          // Se selezioni "Tutte", deseleziona tutto il resto
+                          if (e.target.checked) {
+                            updateFilter('propertyTypes', ['tutti']);
+                          } else {
+                            updateFilter('propertyTypes', []);
+                          }
                         } else {
-                          updateFilter(
-                            'propertyTypes',
-                            (filters.propertyTypes || []).filter(t => t !== option.value)
-                          );
+                          // Se selezioni una destinazione specifica, rimuovi "tutti"
+                          const currentTypes = filters.propertyTypes || [];
+                          const filteredTypes = currentTypes.filter(t => t !== 'tutti');
+                          
+                          if (e.target.checked) {
+                            updateFilter('propertyTypes', [...filteredTypes, option.value]);
+                          } else {
+                            updateFilter('propertyTypes', filteredTypes.filter(t => t !== option.value));
+                          }
                         }
                       }}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
@@ -214,8 +226,23 @@ export default function AdvancedFilters({
 
             {/* AI Score */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
                 AI Score Minimo: {filters.minAIScore}
+                <div className="relative group">
+                  <button
+                    type="button"
+                    className="w-4 h-4 bg-gray-400 text-white rounded-full text-xs flex items-center justify-center hover:bg-gray-500 transition-colors"
+                    title="Clicca per informazioni"
+                  >
+                    ?
+                  </button>
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-3 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                    <div className="text-center">
+                      <strong>AI Score:</strong> Valutazione automatica della qualità del terreno basata su fattori come ubicazione, servizi, potenziale di sviluppo e rischio. Score più alto = terreno più promettente.
+                    </div>
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                  </div>
+                </div>
               </label>
               <input
                 type="range"

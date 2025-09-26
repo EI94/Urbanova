@@ -119,7 +119,7 @@ export default function LandScrapingPage() {
   const [filters, setFilters] = useState<FilterState>({
     priceRange: [0, 0], // 0 = nessun limite
     areaRange: [0, 0], // 0 = nessun limite
-    propertyTypes: ['residenziale'],
+    propertyTypes: ['tutti'], // CORREZIONE: Default a "tutte le destinazioni" per esperienza inclusiva
     hasPermits: false,
     minAIScore: 0, // CORREZIONE: Ridotto da 70 a 0 per mostrare tutti i risultati
     riskLevel: 'all',
@@ -486,7 +486,7 @@ export default function LandScrapingPage() {
       return land.area >= filters.areaRange[0] && land.area <= filters.areaRange[1];
     });
 
-    // Filtro tipologia - CORREZIONE: Più flessibile
+    // Filtro tipologia - CORREZIONE: Gestisce "tutti" come default inclusivo
     if (filters.propertyTypes.length > 0 && !filters.propertyTypes.includes('tutti')) {
       filtered = filtered.filter(land =>
         filters.propertyTypes.some(type =>
@@ -494,6 +494,7 @@ export default function LandScrapingPage() {
         )
       );
     }
+    // Se "tutti" è selezionato, non filtra per tipologia (include tutto)
 
     // Filtro permessi
     if (filters.hasPermits) {
