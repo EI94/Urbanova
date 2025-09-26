@@ -154,7 +154,7 @@ export default function LandScrapingPage() {
   const [servicesStatus, setServicesStatus] = useState<{
     email: boolean;
     webScraping: boolean;
-    ai: boolean;
+    // ai: boolean; // Rimosso - non necessario per l'utente
   } | null>(null);
 
   const [emailError, setEmailError] = useState<string | null>(null);
@@ -261,7 +261,7 @@ export default function LandScrapingPage() {
             setServicesStatus({
               email: data.services?.email === 'configured' || false,
               webScraping: data.services?.webScraping === 'operational' || false,
-              ai: data.services?.ai === 'configured' || false,
+              // ai: data.services?.ai === 'configured' || false, // Rimosso
             });
             return; // Successo, esci dal loop
           } else {
@@ -297,7 +297,7 @@ export default function LandScrapingPage() {
       setServicesStatus({
         email: false,
         webScraping: false,
-        ai: false,
+        // ai: false, // Rimosso
       });
 
       // Mostra errore all'utente
@@ -309,7 +309,7 @@ export default function LandScrapingPage() {
       setServicesStatus({
         email: false,
         webScraping: false,
-        ai: false,
+        // ai: false, // Rimosso
       });
     }
   };
@@ -1173,10 +1173,7 @@ export default function LandScrapingPage() {
                   className={`w-2 h-2 rounded-full ${servicesStatus.webScraping ? 'bg-green-500' : 'bg-red-500'}`}
                 ></div>
                 <span className="text-gray-600">{t('scraping', 'aiLandScraping')}</span>
-                <div
-                  className={`w-2 h-2 rounded-full ${servicesStatus.ai ? 'bg-green-500' : 'bg-red-500'}`}
-                ></div>
-                <span className="text-gray-600">{t('ai', 'aiLandScraping')}</span>
+                {/* AI Analysis rimosso - non necessario per l'utente */}
               </div>
             ) : null}
           </div>
@@ -1256,7 +1253,7 @@ export default function LandScrapingPage() {
                     setSearchCriteria(prev => ({ ...prev, location: locationString }));
                   }}
                   placeholder="Cerca comuni italiani (es. Roma, Milano, Gallarate...)"
-                  className="w-full"
+                className="w-full"
                   showFilters={true}
                   maxResults={20}
                 />

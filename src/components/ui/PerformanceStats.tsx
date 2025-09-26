@@ -19,7 +19,7 @@ interface PerformanceStatsProps {
   servicesStatus?: {
     email: boolean;
     webScraping: boolean;
-    ai: boolean;
+    // ai: boolean; // Rimosso - non necessario per l'utente
   };
 }
 
@@ -143,12 +143,7 @@ export default function PerformanceStats({
               ></div>
               <span className="text-xs text-gray-600">Web Scraping</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div
-                className={`w-2 h-2 rounded-full ${servicesStatus.ai ? 'bg-green-500' : 'bg-red-500'}`}
-              ></div>
-              <span className="text-xs text-gray-600">AI Analysis</span>
-            </div>
+            {/* AI Analysis rimosso - non necessario per l'utente */}
           </div>
         </div>
       )}
