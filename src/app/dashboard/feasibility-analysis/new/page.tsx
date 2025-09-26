@@ -15,6 +15,7 @@ import {
   TrendingUpIcon,
   SearchIcon,
   AlertTriangleIcon,
+  InfoIcon,
 } from '@/components/icons';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import FeasibilityReportGenerator from '@/components/ui/FeasibilityReportGenerator';
@@ -46,12 +47,16 @@ export default function NewFeasibilityProjectPage() {
   });
 
   // Nuovo stato per gestire i costi di costruzione
-  const [constructionCostMode, setConstructionCostMode] = useState<'perSqm' | 'total'>('total');
+  const [constructionCostMode, setConstructionCostMode] = useState<'lumpSumTotal' | 'lumpSumPerSqm' | 'detailed'>('detailed');
   const [constructionCostsPerSqm, setConstructionCostsPerSqm] = useState({
     excavation: 0,
     structures: 0,
     systems: 0,
     finishes: 0,
+  });
+  const [lumpSumCosts, setLumpSumCosts] = useState({
+    total: 0,
+    perSqm: 0,
   });
 
   const [autoSaving, setAutoSaving] = useState(false);
@@ -315,42 +320,73 @@ export default function NewFeasibilityProjectPage() {
   };
 
   // Nuove funzioni per gestire i costi di costruzione
-  const handleConstructionCostModeChange = (mode: 'perSqm' | 'total') => {
+  const handleConstructionCostModeChange = (mode: 'lumpSumTotal' | 'lumpSumPerSqm' | 'detailed') => {
     setConstructionCostMode(mode);
 
-    // Se si passa da perSqm a total, calcola i totali
-    if (mode === 'total' && project.totalArea && project.totalArea > 0) {
+    // Se si passa da modalità dettagliata a a corpo, calcola i totali
+    if (mode === 'lumpSumTotal' && project.totalArea && project.totalArea > 0) {
       const totalCosts = {
-        excavation: constructionCostsPerSqm.excavation * project.totalArea,
-        structures: constructionCostsPerSqm.structures * project.totalArea,
-        systems: constructionCostsPerSqm.systems * project.totalArea,
-        finishes: constructionCostsPerSqm.finishes * project.totalArea,
+        excavation: project.costs?.construction?.excavation || 0,
+        structures: project.costs?.construction?.structures || 0,
+        systems: project.costs?.construction?.systems || 0,
+        finishes: project.costs?.construction?.finishes || 0,
       };
+      const total = totalCosts.excavation + totalCosts.structures + totalCosts.systems + totalCosts.finishes;
+      setLumpSumCosts(prev => ({ ...prev, total }));
+    } else if (mode === 'lumpSumPerSqm' && project.totalArea && project.totalArea > 0) {
+      const totalCosts = {
+        excavation: project.costs?.construction?.excavation || 0,
+        structures: project.costs?.construction?.structures || 0,
+        systems: project.costs?.construction?.systems || 0,
+        finishes: project.costs?.construction?.finishes || 0,
+      };
+      const total = totalCosts.excavation + totalCosts.structures + totalCosts.systems + totalCosts.finishes;
+      const perSqm = total / project.totalArea;
+      setLumpSumCosts(prev => ({ ...prev, perSqm }));
+    }
 
+    // Ricalcola automaticamente
+    safeSetTimeout(() => recalculateAll(), 100);
+  };
+
+  // Funzioni per gestire i costi a corpo
+  const handleLumpSumCostChange = (type: 'total' | 'perSqm', value: string) => {
+    const numValue = parseFloat(value) || 0;
+    setLumpSumCosts(prev => ({ ...prev, [type]: numValue }));
+
+    // Aggiorna i costi di costruzione nel progetto
+    if (type === 'total') {
       setProject(prev => ({
         ...prev,
         costs: {
           ...prev.costs,
           construction: {
             ...prev.costs?.construction,
-            ...totalCosts,
+            excavation: numValue * 0.1, // 10% per scavi
+            structures: numValue * 0.5,  // 50% per strutture
+            systems: numValue * 0.25,    // 25% per impianti
+            finishes: numValue * 0.15,   // 15% per finiture
+          },
+        },
+      } as Partial<FeasibilityProject>));
+    } else if (type === 'perSqm' && project.totalArea && project.totalArea > 0) {
+      const total = numValue * project.totalArea;
+      setProject(prev => ({
+        ...prev,
+        costs: {
+          ...prev.costs,
+          construction: {
+            ...prev.costs?.construction,
+            excavation: total * 0.1, // 10% per scavi
+            structures: total * 0.5,  // 50% per strutture
+            systems: total * 0.25,    // 25% per impianti
+            finishes: total * 0.15,   // 15% per finiture
           },
         },
       } as Partial<FeasibilityProject>));
     }
 
-    // Se si passa da total a perSqm, calcola i costi per mq
-    if (mode === 'perSqm' && project.totalArea && project.totalArea > 0) {
-      const costsPerSqm = {
-        excavation: (project.costs?.construction?.excavation || 0) / project.totalArea,
-        structures: (project.costs?.construction?.structures || 0) / project.totalArea,
-        systems: (project.costs?.construction?.systems || 0) / project.totalArea,
-        finishes: (project.costs?.construction?.finishes || 0) / project.totalArea,
-      };
-
-      setConstructionCostsPerSqm(costsPerSqm);
-    }
-
+    // Ricalcola automaticamente
     safeSetTimeout(() => recalculateAll(), 100);
   };
 
@@ -1040,33 +1076,57 @@ export default function NewFeasibilityProjectPage() {
                     {/* Toggle per modalità costi */}
                     <div className="flex items-center space-x-2">
                       <span className="text-sm text-gray-600">Modalità:</span>
+                      <div className="relative group">
+                        <InfoIcon className="h-4 w-4 text-gray-400 hover:text-blue-500 cursor-help" />
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                          <div className="text-center">
+                            <div className="font-semibold mb-1">Modalità Costi Costruzione</div>
+                            <div className="text-left space-y-1">
+                              <div><strong>A corpo totale:</strong> Prezzo fisso totale</div>
+                              <div><strong>A corpo per mq:</strong> Prezzo fisso per mq</div>
+                              <div><strong>In dettaglio:</strong> Costi specifici per categoria</div>
+                            </div>
+                          </div>
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                        </div>
+                      </div>
                       <div className="flex bg-gray-100 rounded-lg p-1">
                         <button
-                          onClick={() => handleConstructionCostModeChange('perSqm')}
+                          onClick={() => handleConstructionCostModeChange('lumpSumTotal')}
                           className={`px-3 py-1 text-sm rounded-md transition-all ${
-                            constructionCostMode === 'perSqm'
+                            constructionCostMode === 'lumpSumTotal'
                               ? 'bg-blue-500 text-white shadow-sm'
                               : 'text-gray-600 hover:text-gray-800'
                           }`}
                         >
-                          €/mq
+                          A corpo totale
                         </button>
                         <button
-                          onClick={() => handleConstructionCostModeChange('total')}
+                          onClick={() => handleConstructionCostModeChange('lumpSumPerSqm')}
                           className={`px-3 py-1 text-sm rounded-md transition-all ${
-                            constructionCostMode === 'total'
+                            constructionCostMode === 'lumpSumPerSqm'
                               ? 'bg-blue-500 text-white shadow-sm'
                               : 'text-gray-600 hover:text-gray-800'
                           }`}
                         >
-                          Totale
+                          A corpo per mq
+                        </button>
+                        <button
+                          onClick={() => handleConstructionCostModeChange('detailed')}
+                          className={`px-3 py-1 text-sm rounded-md transition-all ${
+                            constructionCostMode === 'detailed'
+                              ? 'bg-blue-500 text-white shadow-sm'
+                              : 'text-gray-600 hover:text-gray-800'
+                          }`}
+                        >
+                          In dettaglio
                         </button>
                       </div>
                     </div>
                   </div>
 
-                  {/* Avviso se mancano i mq */}
-                  {constructionCostMode === 'perSqm' &&
+                  {/* Avviso se mancano i mq per modalità per mq */}
+                  {constructionCostMode === 'lumpSumPerSqm' &&
                     (!project.totalArea || project.totalArea <= 0) && (
                       <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                         <div className="flex items-center">
@@ -1079,8 +1139,8 @@ export default function NewFeasibilityProjectPage() {
                       </div>
                     )}
 
-                  {/* Informazioni calcolo */}
-                  {constructionCostMode === 'perSqm' &&
+                  {/* Informazioni calcolo per modalità per mq */}
+                  {constructionCostMode === 'lumpSumPerSqm' &&
                     project.totalArea &&
                     project.totalArea > 0 && (
                       <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -1088,7 +1148,7 @@ export default function NewFeasibilityProjectPage() {
                           <div className="flex items-center">
                             <span className="h-4 w-4 text-blue-600 mr-2">✅</span>
                             <span className="text-sm text-blue-800">
-                              Calcolo automatico: {project.totalArea} mq × costo per mq = totale
+                              Calcolo automatico: {project.totalArea} mq × {formatCurrency(lumpSumCosts.perSqm)}/mq = {formatCurrency(lumpSumCosts.perSqm * project.totalArea)}
                             </span>
                           </div>
                           <div className="text-sm text-blue-600 font-medium">
@@ -1098,27 +1158,75 @@ export default function NewFeasibilityProjectPage() {
                       </div>
                     )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                      <label className="label">
-                        <span className="label-text">
-                          Scavi e Fondazioni
-                          {constructionCostMode === 'perSqm' && (
-                            <span className="text-xs text-gray-500 ml-1">(€/mq)</span>
-                          )}
-                        </span>
-                      </label>
-                      {constructionCostMode === 'perSqm' ? (
-                        <input
-                          type="text"
-                          value={constructionCostsPerSqm.excavation || ''}
-                          onChange={e =>
-                            handleConstructionCostPerSqmChange('excavation', handleNumberInput(e))
-                          }
-                          className="input input-bordered w-full"
-                          placeholder="Es. 25"
-                        />
-                      ) : (
+                  {/* Informazioni per modalità a corpo totale */}
+                  {constructionCostMode === 'lumpSumTotal' && lumpSumCosts.total > 0 && (
+                    <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <span className="h-4 w-4 text-green-600 mr-2">💰</span>
+                          <span className="text-sm text-green-800">
+                            Costo fisso totale: {formatCurrency(lumpSumCosts.total)}
+                          </span>
+                        </div>
+                        <div className="text-sm text-green-600 font-medium">
+                          Distribuzione automatica per categoria
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Campi per modalità a corpo */}
+                  {(constructionCostMode === 'lumpSumTotal' || constructionCostMode === 'lumpSumPerSqm') && (
+                    <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium text-gray-900">
+                          {constructionCostMode === 'lumpSumTotal' ? 'Costo Totale a Corpo' : 'Costo per mq a Corpo'}
+                        </h4>
+                        <div className="text-sm text-gray-500">
+                          {constructionCostMode === 'lumpSumTotal' ? 'Importo fisso totale' : 'Importo fisso per mq'}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <div className="flex-1">
+                          <input
+                            type="text"
+                            value={constructionCostMode === 'lumpSumTotal' ? lumpSumCosts.total || '' : lumpSumCosts.perSqm || ''}
+                            onChange={e => handleLumpSumCostChange(
+                              constructionCostMode === 'lumpSumTotal' ? 'total' : 'perSqm',
+                              handleNumberInput(e)
+                            )}
+                            className="input input-bordered w-full text-lg font-medium"
+                            placeholder={constructionCostMode === 'lumpSumTotal' ? 'Es. 180000' : 'Es. 1800'}
+                          />
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {constructionCostMode === 'lumpSumTotal' ? '€' : '€/mq'}
+                        </div>
+                      </div>
+                      {constructionCostMode === 'lumpSumPerSqm' && project.totalArea && project.totalArea > 0 && (
+                        <div className="mt-2 text-sm text-blue-600">
+                          Totale: {formatCurrency(lumpSumCosts.perSqm * project.totalArea)}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Campi dettagliati per modalità in dettaglio */}
+                  {constructionCostMode === 'detailed' && (
+                    <div className="mb-4">
+                      <div className="text-sm text-gray-600 mb-3">
+                        💡 Inserisci i costi specifici per ogni categoria di costruzione
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Campi dettagliati - mostrati solo in modalità detailed */}
+                  {constructionCostMode === 'detailed' && (
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div>
+                        <label className="label">
+                          <span className="label-text">Scavi e Fondazioni</span>
+                        </label>
                         <input
                           type="text"
                           value={project.costs?.construction?.excavation || ''}
@@ -1132,37 +1240,12 @@ export default function NewFeasibilityProjectPage() {
                           className="input input-bordered w-full"
                           placeholder="Inserisci importo"
                         />
-                      )}
-                      {constructionCostMode === 'perSqm' &&
-                        project.totalArea &&
-                        project.totalArea > 0 && (
-                          <div className="text-xs text-gray-500 mt-1">
-                            Totale:{' '}
-                            {formatCurrency(constructionCostsPerSqm.excavation * project.totalArea)}
-                          </div>
-                        )}
-                    </div>
+                      </div>
 
-                    <div>
-                      <label className="label">
-                        <span className="label-text">
-                          Strutture
-                          {constructionCostMode === 'perSqm' && (
-                            <span className="text-xs text-gray-500 ml-1">(€/mq)</span>
-                          )}
-                        </span>
-                      </label>
-                      {constructionCostMode === 'perSqm' ? (
-                        <input
-                          type="text"
-                          value={constructionCostsPerSqm.structures || ''}
-                          onChange={e =>
-                            handleConstructionCostPerSqmChange('structures', handleNumberInput(e))
-                          }
-                          className="input input-bordered w-full"
-                          placeholder="Es. 180"
-                        />
-                      ) : (
+                      <div>
+                        <label className="label">
+                          <span className="label-text">Strutture</span>
+                        </label>
                         <input
                           type="text"
                           value={project.costs?.construction?.structures || ''}
@@ -1176,18 +1259,54 @@ export default function NewFeasibilityProjectPage() {
                           className="input input-bordered w-full"
                           placeholder="Inserisci importo"
                         />
-                      )}
-                      {constructionCostMode === 'perSqm' &&
-                        project.totalArea &&
-                        project.totalArea > 0 && (
-                          <div className="text-xs text-gray-500 mt-1">
-                            Totale:{' '}
-                            {formatCurrency(constructionCostsPerSqm.structures * project.totalArea)}
-                          </div>
-                        )}
-                    </div>
+                      </div>
 
-                    <div>
+                      <div>
+                        <label className="label">
+                          <span className="label-text">Impianti</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={project.costs?.construction?.systems || ''}
+                          onChange={e =>
+                            handleInputChange(
+                              'costs',
+                              'construction.systems',
+                              handleNumberInput(e)
+                            )
+                          }
+                          className="input input-bordered w-full"
+                          placeholder="Inserisci importo"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="label">
+                          <span className="label-text">Finiture</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={project.costs?.construction?.finishes || ''}
+                          onChange={e =>
+                            handleInputChange(
+                              'costs',
+                              'construction.finishes',
+                              handleNumberInput(e)
+                            )
+                          }
+                          className="input input-bordered w-full"
+                          placeholder="Inserisci importo"
+                        />
+                      </div>
+                    </div>
+                  {/* Subtotale costi costruzione */}
+                  <div className="mt-4 text-right">
+                    <span className="text-sm text-gray-500">Subtotale: </span>
+                    <span className="font-medium">
+                      {formatCurrency(calculatedCosts.construction.subtotal)}
+                    </span>
+                  </div>
+                </div>
                       <label className="label">
                         <span className="label-text">
                           Impianti
