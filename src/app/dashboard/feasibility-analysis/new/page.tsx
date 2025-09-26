@@ -1633,10 +1633,12 @@ export default function NewFeasibilityProjectPage() {
                 <div>
                   <label className="label">
                     <span className="label-text font-medium">Note Progetto</span>
-                    <span className="label-text-alt text-gray-500">
+                  </label>
+                  <div className="mb-3">
+                    <span className="text-sm text-gray-500">
                       Queste note verranno elaborate dall'AI per migliorare l'analisi
                     </span>
-                  </label>
+                  </div>
                   <textarea
                     value={project.notes || ''}
                     onChange={e => handleInputChange('basic', 'notes', e.target.value)}
