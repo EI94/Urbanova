@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     // INVIA EMAIL SEMPLICE
     const { data, error } = await resend.emails.send({
-      from: 'Urbanova <noreply@urbanova.com>',
+      from: 'Urbanova <noreply@resend.dev>', // CORREZIONE: Usa dominio verificato Resend
       to: [to],
       subject: subject,
       html: `
