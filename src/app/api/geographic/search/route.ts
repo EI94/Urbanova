@@ -33,7 +33,7 @@ function getClientIP(request: NextRequest): string {
   
   if (cfConnectingIP) return cfConnectingIP;
   if (realIP) return realIP;
-  if (forwarded) return forwarded.split(',')[0].trim();
+  if (forwarded) return forwarded.split(',')[0]?.trim() || 'unknown';
   
   return 'unknown';
 }
@@ -239,7 +239,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         latitudine: comune.latitudine,
         longitudine: comune.longitudine,
         score: 250 - index, // Score decrescente
-      metadata: params.includeMetadata ? {
+        metadata: params.includeMetadata ? {
           codiceIstat: comune.codiceIstat,
           altitudine: comune.altitudine,
           zonaClimatica: comune.zonaClimatica,
