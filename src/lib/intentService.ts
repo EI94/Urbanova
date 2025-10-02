@@ -1016,6 +1016,19 @@ class IntentService {
         
         console.log('✅ [Intent Service] Business Plan creato con ID:', businessPlanId);
         
+        // Crea notifica di business plan pronto
+        try {
+          const { firebaseNotificationService } = await import('./firebaseNotificationService');
+          await firebaseNotificationService.createBusinessPlanReadyNotification(
+            userId,
+            intent.collectedData.projectName || `Business Plan ${intent.collectedData.location}`,
+            businessPlanId
+          );
+          console.log('✅ [Intent Service] Notifica business plan creata per:', userId);
+        } catch (notificationError) {
+          console.warn('⚠️ [Intent Service] Errore creazione notifica business plan (non critico):', notificationError);
+        }
+        
         return {
           id: businessPlanId,
           name: intent.collectedData.projectName || `Business Plan ${intent.collectedData.location}`,

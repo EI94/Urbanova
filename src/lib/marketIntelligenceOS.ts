@@ -251,6 +251,21 @@ export class MarketIntelligenceOS {
   ): Promise<any> {
     const opportunities = await this.getUserOpportunities(userProfile.userId);
     
+    // Crea notifica per nuove opportunità trovate
+    if (opportunities.length > 0) {
+      try {
+        const { firebaseNotificationService } = await import('./firebaseNotificationService');
+        await firebaseNotificationService.createMarketIntelligenceUpdateNotification(
+          userProfile.userId,
+          query.location || 'Zona selezionata',
+          opportunities.length
+        );
+        console.log('✅ [MarketIntelligenceOS] Notifica opportunità creata per:', userProfile.userId);
+      } catch (notificationError) {
+        console.warn('⚠️ [MarketIntelligenceOS] Errore creazione notifica (non critico):', notificationError);
+      }
+    }
+    
     return {
       success: true,
       data: {

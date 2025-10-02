@@ -81,13 +81,22 @@ class FirebaseAuthService {
           createdAt: new Date(),
         });
 
+        // Crea notifica di benvenuto
+        try {
+          const { firebaseNotificationService } = await import('./firebaseNotificationService');
+          await firebaseNotificationService.createWelcomeNotification(user.uid);
+          console.log('✅ [FirebaseAuth] Notifica di benvenuto creata per:', user.uid);
+        } catch (notificationError) {
+          console.warn('⚠️ [FirebaseAuth] Errore creazione notifica benvenuto (non critico):', notificationError);
+        }
+
         return {
           user: {
             uid: user.uid,
-            email: user.email,
+            email: user.email || '',
             displayName: displayName,
-            firstName: firstName,
-            lastName: lastName,
+            firstName: firstName || '',
+            lastName: lastName || '',
             role: 'USER',
           } as any,
           success: true,

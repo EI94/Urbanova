@@ -15,7 +15,6 @@ import {
   TrendingUpIcon,
   SearchIcon,
   AlertTriangleIcon,
-  InfoIcon,
 } from '@/components/icons';
 
 // Import QuestionMarkIcon separatamente per evitare conflitti
@@ -1093,7 +1092,7 @@ export default function NewFeasibilityProjectPage() {
                     <div className="flex items-center space-x-2">
                       <span className="text-sm text-gray-600">Modalità:</span>
                       <div className="relative group">
-                        <InfoIcon className="h-4 w-4 text-gray-400 hover:text-blue-500 cursor-help" />
+                        <QuestionMarkIcon className="h-4 w-4 text-gray-400 hover:text-blue-500 cursor-help" />
                         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
                           <div className="text-center">
                             <div className="font-semibold mb-1">Modalità Costi Costruzione</div>

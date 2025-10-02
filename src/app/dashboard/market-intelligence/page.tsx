@@ -22,6 +22,7 @@ import {
   EyeIcon,
   PlusIcon,
   BuildingIcon,
+  TrashIcon,
 } from '@/components/icons';
 import {
   BarChart3,
@@ -47,6 +48,7 @@ import TeamCollaborationPanel from '@/components/ui/TeamCollaborationPanel';
 import CollaborativeSearchSession from '@/components/ui/CollaborativeSearchSession';
 import TeamCommentsVoting from '@/components/ui/TeamCommentsVoting';
 import MarketIntelligenceMapModal from '@/components/ui/MarketIntelligenceMapModal';
+import HelpTooltip from '@/components/ui/HelpTooltip';
 
 // Gestione Team spostata nelle Impostazioni
 
@@ -379,6 +381,25 @@ export default function LandScrapingPage() {
   const saveScheduledSearches = (searches: any[]) => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('landScrapingScheduled', JSON.stringify(searches));
+    }
+  };
+
+  const deleteSearchFromHistory = (searchId: string) => {
+    try {
+      // Rimuovi dalla cronologia locale
+      const updatedHistory = searchHistory.filter(entry => entry.id !== searchId);
+      setSearchHistory(updatedHistory);
+
+      // Aggiorna localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('landScrapingHistory', JSON.stringify(updatedHistory));
+      }
+
+      // Mostra conferma
+      toast('Ricerca eliminata dalla cronologia', { icon: '✅' });
+    } catch (error) {
+      console.error('Errore eliminazione ricerca:', error);
+      toast('Errore durante l\'eliminazione della ricerca', { icon: '❌' });
     }
   };
 
@@ -1213,30 +1234,6 @@ export default function LandScrapingPage() {
           sourcesTotal={searchProgress.sourcesTotal}
         />
 
-        {/* Avviso database ISTAT */}
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <div className="w-5 h-5 bg-green-400 rounded-full flex items-center justify-center">
-                <span className="text-white text-xs">✓</span>
-              </div>
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-green-800">
-                🎉 Database ISTAT Completo Integrato!
-              </h3>
-              <div className="mt-2 text-sm text-green-700">
-                <p>
-                  Ora puoi cercare in <strong>tutti i 7.904 comuni italiani</strong> e migliaia di zone. 
-                  Il selettore di localizzazione utilizza il database ISTAT completo con dati aggiornati.
-                </p>
-                <p className="mt-1">
-                  💡 <strong>Suggerimento:</strong> Usa il pulsante "Cerca su Mappa ISTAT" per una ricerca geografica avanzata!
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Criteri di ricerca principali */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
@@ -1257,13 +1254,19 @@ export default function LandScrapingPage() {
                   showFilters={true}
                   maxResults={20}
                 />
-                <button
-                  onClick={() => setShowMapModal(true)}
-                  className="w-full px-3 py-2 text-sm bg-blue-600 text-white border border-blue-600 rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-                >
-                  <MapIcon className="w-4 h-4" />
-                  Mappa ISTAT
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowMapModal(true)}
+                    className="flex-1 px-3 py-2 text-sm bg-blue-600 text-white border border-blue-600 rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <MapIcon className="w-4 h-4" />
+                    Mappa ISTAT
+                  </button>
+                  <HelpTooltip 
+                    content="Ora puoi cercare in tutti i 7.904 comuni italiani e migliaia di zone. Il selettore di localizzazione utilizza il database ISTAT completo con dati aggiornati. 💡 Suggerimento: Usa il pulsante 'Cerca su Mappa ISTAT' per una ricerca geografica avanzata!"
+                    position="top"
+                  />
+                </div>
                 <p className="text-xs text-gray-500">
                   💡 Seleziona direttamente dal menu sopra o usa la mappa per una ricerca geografica avanzata
                 </p>
@@ -1815,17 +1818,27 @@ export default function LandScrapingPage() {
                         : 'Data non disponibile'}
                     </p>
                   </div>
-                  <button
-                    onClick={() => {
-                      setSearchCriteria(entry.criteria);
-                      setEmail(entry.email);
-                      // CORREZIONE: Esegue automaticamente la ricerca
-                      handleSearch(entry.criteria, entry.email);
-                    }}
-                    className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 border border-blue-600 rounded hover:bg-blue-50 transition-colors"
-                  >
-                    Ripeti
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        setSearchCriteria(entry.criteria);
+                        setEmail(entry.email);
+                        // CORREZIONE: Esegue automaticamente la ricerca
+                        handleSearch(entry.criteria, entry.email);
+                      }}
+                      className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 border border-blue-600 rounded hover:bg-blue-50 transition-colors"
+                    >
+                      Ripeti
+                    </button>
+                    <button
+                      onClick={() => deleteSearchFromHistory(entry.id)}
+                      className="px-3 py-1 text-sm text-red-600 hover:text-red-700 border border-red-600 rounded hover:bg-red-50 transition-colors flex items-center gap-1"
+                      title="Elimina ricerca"
+                    >
+                      <TrashIcon className="w-3 h-3" />
+                      Elimina
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

@@ -3767,16 +3767,23 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
   /**
    * Valida e securizza richiesta
    */
-  private async validateAndSecureRequest(request: UrbanovaOSRequest): Promise<void> {
+  private async validateAndSecureRequest(request: UrbanovaOSRequest): Promise<{ isValid: boolean; errors?: string[] }> {
     console.log('🔒 [UrbanovaOS Orchestrator] Validando e securizzando richiesta');
 
-    // 1. Valida struttura richiesta
-    if (!request.userId || !request.userEmail || !request.message.content) {
-      throw new Error('Richiesta non valida: campi obbligatori mancanti');
-    }
+    try {
+      // 1. Valida struttura richiesta
+      if (!request.userId || !request.userEmail || !request.message.content) {
+        return { isValid: false, errors: ['Campi obbligatori mancanti'] };
+      }
 
-    // 2. Controlla sicurezza
-    await this.securityManager.validateRequest(request);
+      // 2. Controlla sicurezza
+      await this.securityManager.validateRequest(request);
+      
+      return { isValid: true };
+    } catch (error) {
+      console.error('❌ [UrbanovaOS Orchestrator] Errore validazione:', error);
+      return { isValid: false, errors: [(error as Error).message] };
+    }
 
     // 3. Controlla rate limiting
     await this.securityManager.checkRateLimit(request.userId);

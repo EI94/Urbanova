@@ -225,22 +225,30 @@ export class WorkspaceService {
         });
 
         // Crea notifica reale per l'utente invitato (se ha un account)
-        // Nota: In un sistema reale, dovresti cercare l'utente per email
-        // e creare la notifica solo se esiste un account
         try {
-          // Per ora creiamo una notifica demo per l'email invitata
-          // In un sistema reale, dovresti cercare l'userId per email
-          const invitedUserId = `user_${request.email.replace('@', '_').replace('.', '_')}`;
-          
-          await firebaseNotificationService.createWorkspaceInviteNotification(
-            invitedUserId,
-            workspace.name,
-            'Collega Urbanova' // In un sistema reale, dovresti ottenere il nome dell'utente
+          // Cerca l'utente per email nel database
+          const usersQuery = query(
+            collection(db, 'userProfiles'),
+            where('email', '==', request.email)
           );
+          const usersSnapshot = await getDocs(usersQuery);
           
-          console.log('✅ [Workspace] Notifica invito creata per:', request.email);
+          if (!usersSnapshot.empty) {
+            const userDoc = usersSnapshot.docs[0];
+            const invitedUserId = userDoc.id;
+            
+            await firebaseNotificationService.createWorkspaceInviteNotification(
+              invitedUserId,
+              workspace.name,
+              'Collega Urbanova' // TODO: Ottenere il nome reale dell'utente che invita
+            );
+            
+            console.log('✅ [Workspace] Notifica invito creata per:', invitedUserId);
+          } else {
+            console.log('ℹ️ [Workspace] Utente non trovato per email:', request.email);
+          }
         } catch (notificationError) {
-          console.warn('⚠️ [Workspace] Errore creazione notifica invito:', notificationError);
+          console.warn('⚠️ [Workspace] Errore creazione notifica invito (non critico):', notificationError);
           // Non bloccare il processo per errori di notifica
         }
 

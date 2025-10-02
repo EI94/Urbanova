@@ -495,6 +495,19 @@ ${calculations.roi > 20 ? '✅ **FATTIBILE** - ROI eccellente' : calculations.ro
       // Aggiungi messaggio di salvataggio alla risposta
       const responseWithSave = response + `\n\n## 💾 SALVATAGGIO AUTOMATICO\n\n✅ **Progetto salvato automaticamente** nella pagina Analisi Fattibilità!\n- **ID Progetto**: ${projectRef.id}\n- **Nome**: ${projectData.name}\n- **Data**: ${new Date().toLocaleString('it-IT')}\n\n*Il progetto è ora consultabile sia nella pagina Analisi Fattibilità che tramite l'OS.*`;
       
+      // Crea notifica di completamento analisi fattibilità
+      try {
+        const { firebaseNotificationService } = await import('@/lib/firebaseNotificationService');
+        await firebaseNotificationService.createFeasibilityAnalysisCompleteNotification(
+          projectData.createdBy || 'unknown',
+          projectData.name,
+          projectRef.id
+        );
+        console.log('✅ [FEASIBILITY SMART] Notifica completamento creata per:', projectData.createdBy || 'unknown');
+      } catch (notificationError) {
+        console.warn('⚠️ [FEASIBILITY SMART] Errore creazione notifica (non critico):', notificationError);
+      }
+      
       return NextResponse.json({
         success: true,
         response: responseWithSave,
@@ -569,12 +582,12 @@ ${calculations.roi > 20 ? '✅ **FATTIBILE** - ROI eccellente' : calculations.ro
       });
     }
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ [FEASIBILITY SMART] Errore:', error);
     return NextResponse.json({
       success: false,
       error: 'Errore interno del server',
-      details: error.message
+      details: error?.message || 'Errore sconosciuto'
     }, { status: 500 });
   }
 }

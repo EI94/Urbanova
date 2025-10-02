@@ -39,38 +39,14 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
   useEffect(() => {
     if (isOpen && currentUser) {
       loadNotifications();
-      // Crea notifiche demo se non ci sono notifiche
-      if (notifications.length === 0) {
-        createDemoNotifications();
-      }
+      // RIMOSSO: Mock automatico delle notifiche demo
+      // Le notifiche devono essere generate solo dai trigger reali dell'applicazione
     }
   }, [isOpen, currentUser]);
 
-  const createDemoNotifications = async () => {
-    try {
-      // Crea notifica di benvenuto
-      await firebaseNotificationService.createWelcomeNotification(userId);
-      
-      // Crea notifiche demo per testare il sistema
-      const response = await fetch('/api/notifications/demo', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId }),
-      });
-
-      if (response.ok) {
-        console.log('✅ Notifiche demo create');
-        // Ricarica le notifiche dopo averle create
-        setTimeout(() => {
-          loadNotifications();
-        }, 1000);
-      }
-    } catch (error) {
-      console.error('❌ Errore creazione notifiche demo:', error);
-    }
-  };
+  // NOTA: Le notifiche reali vengono create automaticamente dai trigger dell'applicazione
+  
+  // RIMOSSO: Funzione per pulire notifiche demo - non più necessaria
 
   // CHIRURGICO: Riabilitato listener real-time per notifiche
   useEffect(() => {
@@ -318,6 +294,8 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
             </button>
           </div>
         )}
+
+        {/* RIMOSSO: Pulsante per pulire notifiche demo - non più necessario */}
 
         <div className="flex-1 overflow-y-auto">
           {loading ? (
