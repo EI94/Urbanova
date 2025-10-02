@@ -39,7 +39,16 @@ import '@/lib/cssErrorHandler'; // CSS Error Handler per analisi fattibilità
 
 export default function FeasibilityAnalysisPage() {
   const { t, formatCurrency: fmtCurrency } = useLanguage();
-  const { currentUser, loading: authLoading } = useAuth();
+  
+  // Protezione per useAuth
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    console.error('❌ [FeasibilityAnalysisPage] Errore useAuth:', error);
+    authContext = { currentUser: null, loading: false };
+  }
+  const { currentUser, loading: authLoading } = authContext;
   const [projects, setProjects] = useState<FeasibilityProject[]>([]);
   const [ranking, setRanking] = useState<FeasibilityProject[]>([]);
   const [statistics, setStatistics] = useState<any>(null);

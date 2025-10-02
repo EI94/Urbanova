@@ -25,7 +25,16 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function FeasibilityProjectPage() {
   const router = useRouter();
   const params = useParams();
-  const { currentUser } = useAuth();
+  
+  // Protezione per useAuth
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    console.error('❌ [FeasibilityProjectPage] Errore useAuth:', error);
+    authContext = { currentUser: null };
+  }
+  const { currentUser } = authContext;
   const [isEditMode, setIsEditMode] = useState(false);
   const [projectId, setProjectId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
