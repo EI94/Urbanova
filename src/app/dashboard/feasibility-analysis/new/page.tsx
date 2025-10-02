@@ -33,7 +33,16 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function NewFeasibilityProjectPage() {
   const router = useRouter();
-  const { currentUser } = useAuth();
+  
+  // Protezione per useAuth
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    console.error('❌ [NewFeasibilityProjectPage] Errore useAuth:', error);
+    authContext = { currentUser: null };
+  }
+  const { currentUser } = authContext;
   const [loading, setLoading] = useState(false);
   const [marketDataLoading, setMarketDataLoading] = useState(false);
   const [marketData, setMarketData] = useState<any>(null);
