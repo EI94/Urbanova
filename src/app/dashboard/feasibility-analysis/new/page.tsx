@@ -539,8 +539,8 @@ export default function NewFeasibilityProjectPage() {
         console.log('✅ [AUTO SAVE] Progetto aggiornato automaticamente:', savedProjectId);
       } else {
         console.log('🆕 [AUTO SAVE] Creazione nuovo progetto...');
-        // Crea nuovo progetto usando l'endpoint API
-        const response = await fetch('/api/feasibility-smart', {
+        // Crea nuovo progetto usando il nuovo endpoint API dedicato
+        const response = await fetch('/api/feasibility-projects', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -630,34 +630,30 @@ export default function NewFeasibilityProjectPage() {
         resultsMargin: finalProject.results?.margin
       });
 
-      // Prova prima con il metodo standard
-      let projectId: string;
-      try {
-        console.log('🔄 [HANDLE SAVE] Tentativo salvataggio con metodo standard...');
-        projectId = await feasibilityService.createProject(finalProject);
-        console.log('✅ [HANDLE SAVE] Progetto creato con metodo standard:', projectId);
-      } catch (standardError) {
-        console.warn('⚠️ [HANDLE SAVE] Metodo standard fallito, prova con transazione:', standardError);
+      // Usa l'endpoint API dedicato per il salvataggio
+      console.log('🔄 [HANDLE SAVE] Salvataggio via API endpoint...');
+      
+      const response = await fetch('/api/feasibility-projects', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(finalProject),
+      });
 
-        // Fallback: prova con transazione
-        try {
-          console.log('🔄 [HANDLE SAVE] Tentativo salvataggio con transazione...');
-          projectId = await feasibilityService.createProjectWithTransaction(finalProject);
-          console.log('✅ [HANDLE SAVE] Progetto creato con transazione:', projectId);
-        } catch (transactionError) {
-          console.error('❌ [HANDLE SAVE] Anche la transazione è fallita:', transactionError);
-
-          // Fallback finale: prova con batch
-          try {
-            console.log('🔄 [HANDLE SAVE] Tentativo salvataggio con batch...');
-            projectId = await feasibilityService.createProjectWithBatch(finalProject);
-            console.log('✅ [HANDLE SAVE] Progetto creato con batch:', projectId);
-          } catch (batchError) {
-            console.error('❌ [HANDLE SAVE] Tutti i metodi sono falliti:', batchError);
-            throw batchError;
-          }
-        }
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
       }
+
+      const result = await response.json();
+      
+      if (!result.success || !result.projectId) {
+        throw new Error(result.error || 'Errore nel salvataggio del progetto');
+      }
+      
+      const projectId = result.projectId;
+      console.log('✅ [HANDLE SAVE] Progetto creato via API:', projectId);
 
       setSavedProjectId(projectId);
       toast('✅ Progetto creato con successo! Ora puoi generare il report.', { icon: '✅' });

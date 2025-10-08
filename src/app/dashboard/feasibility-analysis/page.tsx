@@ -156,9 +156,9 @@ export default function FeasibilityAnalysisPage() {
       
       const statisticsData = {
         totalProjects: projectsData.length,
-        totalInvestment: projectsData.reduce((sum, p) => sum + (p.costs?.total || 0), 0),
-        averageReturn: projectsData.reduce((sum, p) => sum + (p.results?.margin || 0), 0) / projectsData.length,
-        averageROI: projectsData.reduce((sum, p) => sum + (p.results?.roi || 0), 0) / projectsData.length
+        totalInvestment: projectsData.reduce((sum: number, p: FeasibilityProject) => sum + (p.costs?.total || 0), 0),
+        averageReturn: projectsData.reduce((sum: number, p: FeasibilityProject) => sum + (p.results?.margin || 0), 0) / projectsData.length,
+        averageROI: projectsData.reduce((sum: number, p: FeasibilityProject) => sum + (p.results?.roi || 0), 0) / projectsData.length
       };
 
       setProjects(projectsData);
@@ -183,32 +183,55 @@ export default function FeasibilityAnalysisPage() {
     setError(null);
     
     try {
-      console.log('🔄 [FEASIBILITY] Caricamento progetti reali da Firebase...');
+      console.log('🔄 [FEASIBILITY] Caricamento progetti via API...');
       
-      // Carica dati reali da Firebase
-      const [projectsData, rankingData] = await Promise.all([
-        feasibilityService.getAllProjects(), // Carica TUTTI i progetti, non solo per utente
-        feasibilityService.getProjectsRanking()
-      ]);
+      // Usa il nuovo endpoint API per recuperare i progetti
+      const response = await fetch('/api/feasibility-projects', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const apiData = await response.json();
+      
+      if (!apiData.success) {
+        throw new Error(apiData.error || 'Errore API');
+      }
+      
+      const projectsData = apiData.projects || [];
+      
+      // Carica anche il ranking (fallback al servizio diretto se necessario)
+      let rankingData = [];
+      try {
+        rankingData = await feasibilityService.getProjectsRanking();
+      } catch (rankingError) {
+        console.warn('⚠️ [FEASIBILITY] Errore caricamento ranking, uso progetti come fallback:', rankingError);
+        rankingData = projectsData.slice(0, 5); // Prendi i primi 5 progetti come ranking
+      }
       
       const statisticsData = {
         totalProjects: projectsData.length,
-        totalInvestment: projectsData.reduce((sum, p) => sum + (p.costs?.total || 0), 0),
-        averageReturn: projectsData.length > 0 ? projectsData.reduce((sum, p) => sum + (p.results?.margin || 0), 0) / projectsData.length : 0,
-        averageROI: projectsData.length > 0 ? projectsData.reduce((sum, p) => sum + (p.results?.roi || 0), 0) / projectsData.length : 0
+        totalInvestment: projectsData.reduce((sum: number, p: any) => sum + (p.costs?.total || 0), 0),
+        averageReturn: projectsData.length > 0 ? projectsData.reduce((sum: number, p: any) => sum + (p.results?.margin || 0), 0) / projectsData.length : 0,
+        averageROI: projectsData.length > 0 ? projectsData.reduce((sum: number, p: any) => sum + (p.results?.roi || 0), 0) / projectsData.length : 0
       };
 
       setProjects(projectsData);
       setRanking(rankingData);
       setStatistics(statisticsData);
       
-      console.log('✅ [FEASIBILITY] Progetti caricati con successo:', {
+      console.log('✅ [FEASIBILITY] Progetti caricati con successo via API:', {
         projects: projectsData.length,
         ranking: rankingData.length,
         statistics: statisticsData
       });
     } catch (error) {
-      console.error('❌ [FEASIBILITY] Errore caricamento progetti:', error);
+      console.error('❌ [FEASIBILITY] Errore caricamento progetti via API:', error);
       setError('Errore nel caricamento dei progetti');
       
       // Fallback: imposta dati vuoti
