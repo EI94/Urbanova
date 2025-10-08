@@ -14,6 +14,7 @@ import {doc,
   onSnapshot } from 'firebase/firestore';
 
 import { db } from './firebase.ts';
+import { notificationPreferencesService } from './notificationPreferencesService';
 
 // 🛡️ OS PROTECTION - Importa protezione CSS per firebase notification service
 import '@/lib/osProtection';
@@ -123,17 +124,65 @@ class FirebaseNotificationService {
 
       return notification;
     } catch (error) {
-      console.error('Error creating notification:', error);
+      console.error('❌ [NotificationService] Errore creazione notifica:', error);
       
-      // Se è un errore di permessi Firestore, non bloccare l'app
-      if (error instanceof Error && error.message.includes('permission')) {
-        console.warn('⚠️ [NotificationService] Permessi Firestore insufficienti per creare notifiche');
-        return null as any; // Ritorna null invece di lanciare errore
+      // Per debugging, lancia l'errore invece di restituire null
+      throw error;
+    }
+  }
+
+  /**
+   * Crea una nuova notifica rispettando le preferenze utente
+   */
+  async createNotificationWithPreferences(data: {
+    userId: string;
+    type: Notification['type'];
+    priority: Notification['priority'];
+    title: string;
+    message: string;
+    data?: any;
+    expiresAt?: Date;
+    actions?: Notification['actions'];
+  }): Promise<Notification | null> {
+    try {
+      console.log('📝 [FirebaseNotification] Creazione notifica con preferenze per utente:', data.userId);
+      
+      // Verifica se il tipo di notifica è abilitato
+      const isTypeEnabled = await notificationPreferencesService.isNotificationTypeEnabled(
+        data.userId, 
+        data.type
+      );
+      
+      if (!isTypeEnabled) {
+        console.log('🚫 [FirebaseNotification] Tipo notifica disabilitato:', data.type);
+        return null;
       }
       
-      // Per altri errori, logga ma non blocca l'app
-      console.warn('⚠️ [NotificationService] Errore creazione notifica (non critico):', error);
-      return null as any;
+      // Verifica se la priorità è sufficiente
+      const isPrioritySufficient = await notificationPreferencesService.isPrioritySufficient(
+        data.userId,
+        data.type,
+        data.priority
+      );
+      
+      if (!isPrioritySufficient) {
+        console.log('🚫 [FirebaseNotification] Priorità insufficiente:', data.priority);
+        return null;
+      }
+      
+      // Verifica se è in quiet hours
+      const isQuietHours = await notificationPreferencesService.isQuietHours(data.userId);
+      if (isQuietHours && data.priority !== 'URGENT') {
+        console.log('🚫 [FirebaseNotification] In quiet hours, notifica non critica bloccata');
+        return null;
+      }
+      
+      // Crea la notifica
+      return await this.createNotification(data);
+      
+    } catch (error) {
+      console.error('❌ [FirebaseNotification] Errore creazione notifica con preferenze:', error);
+      return null;
     }
   }
 
@@ -187,21 +236,54 @@ class FirebaseNotificationService {
 
       return notifications;
     } catch (error) {
-      console.error('Error fetching notifications:', error);
-      return [];
+      console.error('❌ [NotificationService] Errore recupero notifiche:', error);
+      
+      // Per debugging, lancia l'errore invece di restituire array vuoto
+      throw error;
     }
   }
 
-  async markAsRead(notificationId: string): Promise<void> {
+  async markAsUnread(notificationId: string): Promise<void> {
     try {
       const notificationRef = doc(db, 'notifications', notificationId);
       await updateDoc(notificationRef, {
-        isRead: true,
+        isRead: false,
         updatedAt: serverTimestamp(),
       });
     } catch (error) {
-      console.error('Error marking notification as read:', error);
-      throw new Error('Failed to mark notification as read');
+      console.error('Error marking notification as unread:', error);
+      throw new Error('Failed to mark notification as unread');
+    }
+  }
+
+  async getNotificationById(notificationId: string): Promise<Notification | null> {
+    try {
+      const notificationRef = doc(db, 'notifications', notificationId);
+      const notificationSnap = await getDoc(notificationRef);
+
+      if (!notificationSnap.exists()) {
+        return null;
+      }
+
+      const data = notificationSnap.data();
+      return {
+        id: notificationSnap.id,
+        userId: data.userId,
+        type: data.type,
+        priority: data.priority,
+        title: data.title,
+        message: data.message,
+        data: data.data,
+        isRead: data.isRead || false,
+        isArchived: data.isArchived || false,
+        expiresAt: data.expiresAt?.toDate() || null,
+        actions: data.actions || [],
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date(),
+      } as Notification;
+    } catch (error) {
+      console.error('Error getting notification by ID:', error);
+      return null;
     }
   }
 
@@ -352,40 +434,36 @@ class FirebaseNotificationService {
       orderBy('createdAt', 'desc')
     );
 
-    // CHIRURGICO: Disabilitato onSnapshot temporaneamente per evitare Firebase 400 error
-    // const unsubscribe = onSnapshot(q, snapshot => {
-    //   try {
-    //     const notifications: Notification[] = [];
-    //     snapshot.forEach(doc => {
-    //       const data = doc.data();
-    //       notifications.push({
-    //         id: doc.id,
-    //         userId: data.userId,
-    //         type: data.type,
-    //         priority: data.priority,
-    //         title: data.title,
-    //         message: data.message,
-    //         data: data.data,
-    //         isRead: data.isRead || false,
-    //         isArchived: data.isArchived || false,
-    //         expiresAt: data.expiresAt?.toDate() || null,
-    //         actions: data.actions || [],
-    //         createdAt: data.createdAt?.toDate() || new Date(),
-    //         updatedAt: data.updatedAt?.toDate() || new Date(),
-    //       });
-    //     });
-    //     callback(notifications);
-    //   } catch (error) {
-    //     console.error('❌ [FirebaseNotification] Errore onSnapshot:', error);
-    //     // Non propagare l'errore per evitare loop infiniti
-    //   }
-    // }, error => {
-    //   console.error('❌ [FirebaseNotification] Errore listener notifiche:', error);
-    //   // Non propagare l'errore per evitare loop infiniti
-    // });
-    
-    // CHIRURGICO: Callback vuoto per evitare Firebase 400 error
-    const unsubscribe = () => {};
+    const unsubscribe = onSnapshot(q, snapshot => {
+      try {
+        const notifications: Notification[] = [];
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          notifications.push({
+            id: doc.id,
+            userId: data.userId,
+            type: data.type,
+            priority: data.priority,
+            title: data.title,
+            message: data.message,
+            data: data.data,
+            isRead: data.isRead || false,
+            isArchived: data.isArchived || false,
+            expiresAt: data.expiresAt?.toDate() || null,
+            actions: data.actions || [],
+            createdAt: data.createdAt?.toDate() || new Date(),
+            updatedAt: data.updatedAt?.toDate() || new Date(),
+          });
+        });
+        callback(notifications);
+      } catch (error) {
+        console.error('❌ [FirebaseNotification] Errore onSnapshot:', error);
+        // Non propagare l'errore per evitare loop infiniti
+      }
+    }, error => {
+      console.error('❌ [FirebaseNotification] Errore listener notifiche:', error);
+      // Non propagare l'errore per evitare loop infiniti
+    });
 
     return unsubscribe;
   }

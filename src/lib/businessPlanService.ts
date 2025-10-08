@@ -12,6 +12,7 @@
 
 import { addDoc, getDocs, getDoc, updateDoc, deleteDoc, doc, query, where, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
+import { notificationTriggerService } from './notificationTriggerService';
 import { safeCollection } from './firebaseUtils';
 
 // ============================================================================
@@ -1411,6 +1412,26 @@ class BusinessPlanService {
       const docRef = await addDoc(safeCollection(this.COLLECTION_NAME), businessPlanData);
       
       console.log('✅ [BusinessPlan] Business Plan salvato con ID:', docRef.id);
+      
+      // Invia notifica di Business Plan completato
+      try {
+        // Trova lo scenario migliore (quello con VAN più alto)
+        const bestScenario = outputs.reduce((best, current) => 
+          current.metrics.npv > best.metrics.npv ? current : best
+        );
+        
+        await notificationTriggerService.notifyBusinessPlanCompleted(userId, {
+          projectId: input.projectId || docRef.id,
+          projectName: input.projectName,
+          npv: bestScenario.metrics.npv,
+          irr: bestScenario.metrics.irr,
+          bestScenario: bestScenario.scenarioName
+        });
+        console.log('✅ [BusinessPlan] Notifica Business Plan completato inviata');
+      } catch (notificationError) {
+        console.error('❌ [BusinessPlan] Errore invio notifica:', notificationError);
+        // Non bloccare il salvataggio se la notifica fallisce
+      }
       
       // IMPORTANTE: Ritorna l'ID generato da Firestore
       return docRef.id;

@@ -135,6 +135,22 @@ export class FeasibilityService {
 
       const docRef = await addDoc(collection(db, this.COLLECTION), project);
       console.log(`✅ [FEASIBILITY SERVICE] Progetto fattibilità creato: ${project.name} con ID: ${docRef.id}`);
+      
+      // Invia notifica di progetto creato (OPZIONALE - non blocca il salvataggio)
+      try {
+        // Import dinamico per evitare errori di build
+        const { notificationTriggerService } = await import('./notificationTriggerService');
+        await notificationTriggerService.notifyProjectCreated(projectData.createdBy, {
+          projectId: docRef.id,
+          projectName: project.name,
+          projectType: 'Analisi di Fattibilità'
+        });
+        console.log('✅ [FEASIBILITY SERVICE] Notifica progetto creato inviata');
+      } catch (notificationError) {
+        console.warn('⚠️ [FEASIBILITY SERVICE] Notifica fallita (non critico):', notificationError);
+        // Non bloccare il salvataggio se la notifica fallisce
+      }
+      
       return docRef.id;
     } catch (error) {
       console.error('❌ Errore creazione progetto:', error);
@@ -324,6 +340,29 @@ export class FeasibilityService {
       });
 
       console.log(`✅ Progetto fattibilità ${id} aggiornato`);
+      
+      // Se l'analisi è stata completata (ha risultati), invia notifica (OPZIONALE)
+      if (updates.results && updates.results.margin && updates.results.roi) {
+        try {
+          // Import dinamico per evitare errori di build
+          const { notificationTriggerService } = await import('./notificationTriggerService');
+          // Recupera i dati del progetto per la notifica
+          const projectDoc = await getDoc(projectRef);
+          if (projectDoc.exists()) {
+            const projectData = projectDoc.data();
+            await notificationTriggerService.notifyFeasibilityCompleted(projectData.createdBy, {
+              projectId: id,
+              projectName: projectData.name,
+              roi: updates.results.roi,
+              margin: updates.results.margin
+            });
+            console.log('✅ [FEASIBILITY SERVICE] Notifica analisi completata inviata');
+          }
+        } catch (notificationError) {
+          console.warn('⚠️ [FEASIBILITY SERVICE] Notifica completamento fallita (non critico):', notificationError);
+          // Non bloccare l'aggiornamento se la notifica fallisce
+        }
+      }
     } catch (error) {
       console.error(`❌ Errore aggiornamento progetto ${id}:`, error);
       throw new Error(

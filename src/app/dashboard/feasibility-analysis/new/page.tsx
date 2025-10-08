@@ -220,26 +220,10 @@ export default function NewFeasibilityProjectPage() {
     return undefined;
   }, [project.name, project.address, calculatedCosts, calculatedRevenues, calculatedResults, loading]);
 
-  // Cleanup timeout on unmount e navigazione
+  // Cleanup timeout on unmount
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      // Pulisce tutti i timeout quando l'utente naviga via
-      if (autoSaveTimeout) {
-        clearTimeout(autoSaveTimeout);
-      }
-      if (recalculateTimeout) {
-        clearTimeout(recalculateTimeout);
-      }
-    };
-
-    // Aggiunge listener per beforeunload
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
     return () => {
-      // Rimuove listener
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      
-      // Pulisce timeout
+      // Pulisce timeout solo al unmount del componente
       if (autoSaveTimeout) {
         clearTimeout(autoSaveTimeout);
         setAutoSaveTimeout(null);
@@ -249,7 +233,7 @@ export default function NewFeasibilityProjectPage() {
         setRecalculateTimeout(null);
       }
     };
-  }, [autoSaveTimeout, recalculateTimeout]);
+  }, []);
 
   // Aggiorna createdBy quando l'utente cambia
   useEffect(() => {
@@ -512,17 +496,31 @@ export default function NewFeasibilityProjectPage() {
   const autoSaveProject = async () => {
     // Non salvare se mancano i campi obbligatori
     if (!project.name || !project.address) {
+      console.log('⚠️ [AUTO SAVE] Salvataggio saltato - campi obbligatori mancanti:', {
+        name: project.name,
+        address: project.address
+      });
       return;
     }
 
     // Non salvare se è già in corso un salvataggio manuale
     if (loading) {
+      console.log('⚠️ [AUTO SAVE] Salvataggio saltato - salvataggio manuale in corso');
       return;
     }
 
     setAutoSaving(true);
     try {
-      console.log('🧠 Salvataggio automatico progetto fattibilità in corso...');
+      console.log('🧠 [AUTO SAVE] Salvataggio automatico progetto fattibilità in corso...');
+      console.log('🧠 [AUTO SAVE] Dati progetto:', {
+        name: project.name,
+        address: project.address,
+        totalArea: project.totalArea,
+        createdBy: currentUser?.uid || 'anonymous',
+        hasCosts: !!calculatedCosts,
+        hasRevenues: !!calculatedRevenues,
+        hasResults: !!calculatedResults
+      });
 
       const finalProject = {
         ...project,
@@ -535,10 +533,12 @@ export default function NewFeasibilityProjectPage() {
 
       // Se il progetto è già stato salvato, aggiorna
       if (savedProjectId) {
+        console.log('🔄 [AUTO SAVE] Aggiornamento progetto esistente:', savedProjectId);
         await feasibilityService.updateProject(savedProjectId, finalProject);
         setLastSaved(new Date());
-        console.log('✅ Progetto aggiornato automaticamente:', savedProjectId);
+        console.log('✅ [AUTO SAVE] Progetto aggiornato automaticamente:', savedProjectId);
       } else {
+        console.log('🆕 [AUTO SAVE] Creazione nuovo progetto...');
         // Crea nuovo progetto usando l'endpoint API
         const response = await fetch('/api/feasibility-smart', {
           method: 'POST',
@@ -551,6 +551,12 @@ export default function NewFeasibilityProjectPage() {
           }),
         });
 
+        console.log('🔍 [AUTO SAVE] Risposta endpoint:', {
+          status: response.status,
+          statusText: response.statusText,
+          ok: response.ok
+        });
+
         if (response.ok) {
           const result = await response.json();
           console.log('🔍 [AUTO SAVE] Risposta endpoint:', result);
@@ -558,17 +564,21 @@ export default function NewFeasibilityProjectPage() {
           if (result.success && result.projectId) {
             setSavedProjectId(result.projectId);
             setLastSaved(new Date());
-            console.log('✅ Nuovo progetto salvato automaticamente:', result.projectId);
+            console.log('✅ [AUTO SAVE] Nuovo progetto salvato automaticamente:', result.projectId);
           } else {
             console.error('❌ [AUTO SAVE] Endpoint restituisce success: false o projectId mancante:', result);
+            throw new Error('Endpoint non ha restituito projectId valido');
           }
         } else {
-          console.error('❌ [AUTO SAVE] Errore HTTP:', response.status, response.statusText);
+          const errorText = await response.text();
+          console.error('❌ [AUTO SAVE] Errore HTTP:', response.status, response.statusText, errorText);
+          throw new Error(`Errore HTTP ${response.status}: ${response.statusText}`);
         }
       }
 
     } catch (error: any) {
-      console.error('❌ Errore salvataggio automatico:', error);
+      console.error('❌ [AUTO SAVE] Errore salvataggio automatico:', error);
+      console.error('❌ [AUTO SAVE] Stack trace:', error.stack);
       // Non mostrare errori per il salvataggio automatico per non disturbare l'utente
     } finally {
       setAutoSaving(false);
@@ -592,18 +602,12 @@ export default function NewFeasibilityProjectPage() {
       console.log('🔄 [HANDLE SAVE] Project data:', {
         name: project.name,
         address: project.address,
-        createdBy: project.createdBy
+        createdBy: project.createdBy,
+        totalArea: project.totalArea,
+        hasCosts: !!calculatedCosts,
+        hasRevenues: !!calculatedRevenues,
+        hasResults: !!calculatedResults
       });
-
-      // Test connessione Firebase prima del salvataggio
-      console.log('🔍 Test connessione Firebase...');
-      const diagnostic = await firebaseDebugService.runFullDiagnostic();
-
-      if (diagnostic.overall === 'failed') {
-        console.error('❌ Problemi di connessione Firebase rilevati:', diagnostic);
-        toast('❌ Problemi di connessione Firebase. Controlla la console per dettagli.', { icon: '❌' });
-        return;
-      }
 
       const finalProject = {
         ...project,
@@ -620,30 +624,36 @@ export default function NewFeasibilityProjectPage() {
         address: finalProject.address,
         createdBy: finalProject.createdBy,
         hasCosts: !!finalProject.costs,
-        hasRevenues: !!finalProject.revenues
+        hasRevenues: !!finalProject.revenues,
+        costsTotal: finalProject.costs?.total,
+        revenuesTotal: finalProject.revenues?.total,
+        resultsMargin: finalProject.results?.margin
       });
 
       // Prova prima con il metodo standard
       let projectId: string;
       try {
+        console.log('🔄 [HANDLE SAVE] Tentativo salvataggio con metodo standard...');
         projectId = await feasibilityService.createProject(finalProject);
-        console.log('✅ Progetto creato con metodo standard:', projectId);
+        console.log('✅ [HANDLE SAVE] Progetto creato con metodo standard:', projectId);
       } catch (standardError) {
-        console.warn('⚠️ Metodo standard fallito, prova con transazione:', standardError);
+        console.warn('⚠️ [HANDLE SAVE] Metodo standard fallito, prova con transazione:', standardError);
 
         // Fallback: prova con transazione
         try {
+          console.log('🔄 [HANDLE SAVE] Tentativo salvataggio con transazione...');
           projectId = await feasibilityService.createProjectWithTransaction(finalProject);
-          console.log('✅ Progetto creato con transazione:', projectId);
+          console.log('✅ [HANDLE SAVE] Progetto creato con transazione:', projectId);
         } catch (transactionError) {
-          console.error('❌ Anche la transazione è fallita:', transactionError);
+          console.error('❌ [HANDLE SAVE] Anche la transazione è fallita:', transactionError);
 
           // Fallback finale: prova con batch
           try {
+            console.log('🔄 [HANDLE SAVE] Tentativo salvataggio con batch...');
             projectId = await feasibilityService.createProjectWithBatch(finalProject);
-            console.log('✅ Progetto creato con batch:', projectId);
+            console.log('✅ [HANDLE SAVE] Progetto creato con batch:', projectId);
           } catch (batchError) {
-            console.error('❌ Tutti i metodi sono falliti:', batchError);
+            console.error('❌ [HANDLE SAVE] Tutti i metodi sono falliti:', batchError);
             throw batchError;
           }
         }
@@ -658,10 +668,8 @@ export default function NewFeasibilityProjectPage() {
       // Mostra il report generator
       setShowReportGenerator(true);
     } catch (error: any) {
-      console.error('❌ Errore creazione progetto:', error);
-
-      // Log dettagliato dell'errore
-      firebaseDebugService.logFirebaseError(error, 'Creazione progetto fattibilità');
+      console.error('❌ [HANDLE SAVE] Errore creazione progetto:', error);
+      console.error('❌ [HANDLE SAVE] Stack trace:', error.stack);
 
       // Messaggio di errore più specifico
       let errorMessage = '❌ Errore nella creazione del progetto';
@@ -730,7 +738,8 @@ export default function NewFeasibilityProjectPage() {
                     toast('⏳ Attendere il completamento del salvataggio...', { icon: '⏳' });
                     return;
                   }
-                  router.back();
+                  // Naviga direttamente alla pagina principale invece di usare router.back()
+                  router.push('/dashboard/feasibility-analysis');
                 }}
                 disabled={loading || autoSaving}
                 className="btn btn-ghost btn-sm hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -844,6 +853,51 @@ export default function NewFeasibilityProjectPage() {
               className="btn btn-secondary"
             >
               📊 Genera Report
+            </button>
+            <button
+              onClick={async () => {
+                console.log('🔍 [DEBUG] Test salvataggio debug...');
+                try {
+                  const response = await fetch('/api/feasibility-debug', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      action: 'test-real-save',
+                      projectData: {
+                        name: project.name || 'Test Debug',
+                        address: project.address || 'Via Test Debug 123',
+                        status: project.status || 'PIANIFICAZIONE',
+                        totalArea: project.totalArea || 100,
+                        targetMargin: project.targetMargin || 25,
+                        createdBy: currentUser?.uid || 'debug-user',
+                        costs: calculatedCosts,
+                        revenues: calculatedRevenues,
+                        results: calculatedResults,
+                        isTargetAchieved: calculatedResults.margin >= (project.targetMargin || 30),
+                        notes: 'Test debug salvataggio'
+                      }
+                    }),
+                  });
+                  
+                  const result = await response.json();
+                  console.log('🔍 [DEBUG] Risultato test:', result);
+                  
+                  if (result.success && result.result.success) {
+                    toast('✅ Test debug salvataggio riuscito!', { icon: '✅' });
+                  } else {
+                    toast('❌ Test debug salvataggio fallito!', { icon: '❌' });
+                  }
+                } catch (error) {
+                  console.error('❌ [DEBUG] Errore test:', error);
+                  toast('❌ Errore test debug!', { icon: '❌' });
+                }
+              }}
+              className="btn btn-outline btn-sm"
+              title="Test debug salvataggio"
+            >
+              🔍 Debug
             </button>
           </div>
         </div>

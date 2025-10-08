@@ -2,8 +2,9 @@
 
 import { MessageSquare, Bell, User, Users, Settings, X, Building2, BarChart3, FileText } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
+import { NotificationPreferencesComponent } from '@/components/ui/NotificationPreferences';
 // Rimossi tutti i sistemi di protezione globale dopo fix chirurgico
 
 import {
@@ -35,6 +36,7 @@ import SettingsPanel from '@/components/ui/SettingsPanel';
 import { useAuth } from '@/contexts/AuthContext';
 import '@/lib/osProtection'; // OS Protection per dashboard
 import { useLanguage } from '@/contexts/LanguageContext';
+import { notificationTriggerService } from '@/lib/notificationTriggerService';
 import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
 import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 import { NotificationStats } from '@/types/notifications';
@@ -57,6 +59,8 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
 
 function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayoutProps) {
   const { t } = useLanguage();
+  const router = useRouter();
+  
   // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
   let authContext;
   try {
@@ -78,6 +82,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationPreferencesOpen, setNotificationPreferencesOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [teamOpen, setTeamOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -91,6 +96,21 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
   });
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [workspaces, setWorkspaces] = useState<any[]>([]);
+
+  // Funzione per generare notifiche di test
+  const generateTestNotifications = async () => {
+    try {
+      if (auth && typeof auth === 'object' && 'currentUser' in auth && auth.currentUser?.uid) {
+        await notificationTriggerService.generateTestNotifications(auth.currentUser.uid);
+        console.log('✅ Notifiche di test generate');
+        // Ricarica le statistiche delle notifiche
+        const notificationsData = await firebaseNotificationService.getNotificationStats(auth.currentUser.uid);
+        setNotifications(notificationsData);
+      }
+    } catch (error) {
+      console.error('❌ Errore generazione notifiche test:', error);
+    }
+  };
 
   // Carica notifiche e profilo utente solo se l'utente è autenticato
   useEffect(() => {
@@ -213,6 +233,13 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                       ? 'bg-blue-50 text-blue-700 shadow-sm active'
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                   }`}
+                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                    // 🔧 FIX: Forza navigazione anche se si è in una sottopagina
+                    if (pathname?.includes('/feasibility-analysis/') || pathname?.includes('/design-center/') || pathname?.includes('/business-plan/')) {
+                      e.preventDefault();
+                      router.push('/dashboard');
+                    }
+                  }}
                 >
                   <DashboardIcon className="w-4 h-4 mr-3" />
                   Dashboard
@@ -242,11 +269,12 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                       ? 'bg-blue-50 text-blue-700 shadow-sm'
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                   }`}
-                  onClick={(e) => {
-                    // 🔧 FIX: Forza navigazione anche se si è in una sottopagina
+                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                    // 🔧 FIX: Forza navigazione anche se si è in una sottopagina di feasibility-analysis
                     if (pathname?.includes('/feasibility-analysis/')) {
                       e.preventDefault();
-                      window.location.href = '/dashboard/feasibility-analysis';
+                      // Usa router.push invece di window.location.href per navigazione più fluida
+                      router.push('/dashboard/feasibility-analysis');
                     }
                   }}
                 >
@@ -260,6 +288,13 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                       ? 'bg-blue-50 text-blue-700 shadow-sm'
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                   }`}
+                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                    // 🔧 FIX: Forza navigazione anche se si è in una sottopagina di design-center
+                    if (pathname?.includes('/design-center/')) {
+                      e.preventDefault();
+                      router.push('/dashboard/design-center');
+                    }
+                  }}
                 >
                   <PaletteIcon className="w-4 h-4 mr-3" />
                   Design Center
@@ -278,6 +313,13 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                       ? 'bg-blue-50 text-blue-700 shadow-sm'
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                   }`}
+                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                    // 🔧 FIX: Forza navigazione anche se si è in una sottopagina di business-plan
+                    if (pathname?.includes('/business-plan/')) {
+                      e.preventDefault();
+                      router.push('/dashboard/business-plan');
+                    }
+                  }}
                 >
                   <BarChart3 className="w-4 h-4 mr-3" />
                   Business Plan
@@ -407,19 +449,40 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
               </div>
 
               <div className="flex items-center space-x-4">
-                {/* Notifiche */}
-              <button
-                  onClick={() => setNotificationsOpen(!notificationsOpen)}
-                  className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100 header-icon"
-                  title="Notifiche"
-              >
-                <Bell className="w-5 h-5" />
-                  {notifications.unread > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {notifications.unread > 9 ? '9+' : notifications.unread}
-                  </span>
+                {/* Test Notifiche (solo sviluppo) */}
+                {process.env.NODE_ENV === 'development' && (
+                  <button
+                    onClick={generateTestNotifications}
+                    className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                    title="Genera Notifiche di Test"
+                  >
+                    Test Notifiche
+                  </button>
                 )}
-              </button>
+
+                {/* Notifiche */}
+              <div className="flex items-center gap-2">
+                <button
+                    onClick={() => setNotificationsOpen(!notificationsOpen)}
+                    className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100 header-icon"
+                    title="Notifiche"
+                >
+                  <Bell className="w-5 h-5" />
+                    {notifications.unread > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {notifications.unread > 9 ? '9+' : notifications.unread}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                    onClick={() => setNotificationPreferencesOpen(!notificationPreferencesOpen)}
+                    className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100 header-icon"
+                    title="Preferenze Notifiche"
+                >
+                  <Settings className="w-4 h-4" />
+                </button>
+              </div>
 
                 {/* Profilo Utente */}
                 <button 
@@ -464,6 +527,19 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
           isOpen={notificationsOpen}
           onClose={() => setNotificationsOpen(false)}
         />
+      )}
+
+      {notificationPreferencesOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <NotificationPreferencesComponent
+                userId={userProfile?.id || ''}
+                onClose={() => setNotificationPreferencesOpen(false)}
+              />
+            </div>
+          </div>
+        </div>
       )}
       
       {profileOpen && (

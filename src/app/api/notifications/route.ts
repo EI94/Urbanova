@@ -1,31 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
+import { withAuth, AuthenticatedUser } from '@/lib/authMiddleware';
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request: NextRequest, user: AuthenticatedUser) => {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
     const limit = parseInt(searchParams.get('limit') || '50');
     const unreadOnly = searchParams.get('unreadOnly') === 'true';
     const type = searchParams.get('type') as any;
     const priority = searchParams.get('priority') as any;
 
-    // Validazione input
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: 'User ID è obbligatorio' },
-        { status: 400 }
-      );
-    }
-
-    const notifications = await firebaseNotificationService.getNotifications(userId, {
+    // Usa l'userId dall'utente autenticato
+    const notifications = await firebaseNotificationService.getNotifications(user.uid, {
       limit,
       unreadOnly,
       type,
       priority
     });
 
-    console.log('✅ [API] Notifiche recuperate:', notifications.length);
+    console.log('✅ [API] Notifiche recuperate:', notifications.length, 'per utente:', user.uid);
 
     return NextResponse.json({
       success: true,
@@ -43,19 +36,33 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request: NextRequest, user: AuthenticatedUser) => {
   try {
     const body = await request.json();
-    const { userId, type, priority, title, message, data, expiresAt, actions } = body;
+    const { type, priority, title, message, data, expiresAt, actions, targetUserId } = body;
 
     // Validazione input
-    if (!userId || !type || !priority || !title || !message) {
+    if (!type || !priority || !title || !message) {
       return NextResponse.json(
         { success: false, error: 'Campi obbligatori mancanti' },
         { status: 400 }
       );
+    }
+
+    // Determina l'userId target (può essere diverso dall'utente autenticato per admin)
+    let userId = user.uid;
+    
+    // Solo admin possono creare notifiche per altri utenti
+    if (targetUserId && targetUserId !== user.uid) {
+      if (user.role !== 'ADMIN') {
+        return NextResponse.json(
+          { success: false, error: 'Non autorizzato a creare notifiche per altri utenti' },
+          { status: 403 }
+        );
+      }
+      userId = targetUserId;
     }
 
     const notification = await firebaseNotificationService.createNotification({
@@ -69,7 +76,7 @@ export async function POST(request: NextRequest) {
       actions
     });
 
-    console.log('✅ [API] Notifica creata:', notification?.id);
+    console.log('✅ [API] Notifica creata:', notification?.id, 'per utente:', userId);
 
     return NextResponse.json({
       success: true,
@@ -87,4 +94,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

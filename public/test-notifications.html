@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Sistema Notifiche - Urbanova</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .test-section {
+            @apply bg-white rounded-lg shadow-md p-6 mb-4;
+        }
+        .test-result {
+            @apply p-2 rounded mb-2;
+        }
+        .test-success {
+            @apply bg-green-100 text-green-800;
+        }
+        .test-error {
+            @apply bg-red-100 text-red-800;
+        }
+        .test-info {
+            @apply bg-blue-100 text-blue-800;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-4xl font-bold mb-8 text-center">🧪 Test Sistema Notifiche Urbanova</h1>
+        
+        <div class="test-section">
+            <h2 class="text-2xl font-bold mb-4">📋 Setup & Autenticazione</h2>
+            <div id="auth-status" class="mb-4"></div>
+            <div class="space-x-2">
+                <button onclick="window.location.href='/dashboard'" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    🔐 Vai al Dashboard (Login)
+                </button>
+                <button onclick="checkAuth()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    ✓ Verifica Autenticazione
+                </button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2 class="text-2xl font-bold mb-4">🔔 Test API Notifiche</h2>
+            <div class="space-x-2 mb-4">
+                <button onclick="testGetNotifications()" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                    📋 GET Notifiche
+                </button>
+                <button onclick="testCreateNotification()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    ➕ Crea Notifica
+                </button>
+                <button onclick="testMarkAsRead()" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+                    ✓ Marca Come Letta
+                </button>
+                <button onclick="testMarkAllAsRead()" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+                    ✓✓ Marca Tutte Come Lette
+                </button>
+            </div>
+            <div id="notifications-results" class="space-y-2"></div>
+        </div>
+
+        <div class="test-section">
+            <h2 class="text-2xl font-bold mb-4">⚙️ Test API Preferenze</h2>
+            <div class="space-x-2 mb-4">
+                <button onclick="testGetPreferences()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    📋 GET Preferenze
+                </button>
+                <button onclick="testUpdatePreferences()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    📝 Aggiorna Preferenze
+                </button>
+                <button onclick="testResetPreferences()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                    🔄 Reset Preferenze
+                </button>
+            </div>
+            <div id="preferences-results" class="space-y-2"></div>
+        </div>
+
+        <div class="test-section">
+            <h2 class="text-2xl font-bold mb-4">🔗 Test Integrazione</h2>
+            <div class="space-x-2 mb-4">
+                <button onclick="testPreferencesIntegration()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">
+                    🧪 Test Preferenze + Notifiche
+                </button>
+                <button onclick="testPushNotifications()" class="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600">
+                    📱 Test Push Notifications
+                </button>
+            </div>
+            <div id="integration-results" class="space-y-2"></div>
+        </div>
+
+        <div class="test-section">
+            <h2 class="text-2xl font-bold mb-4">📊 Risultati Completi</h2>
+            <button onclick="runAllTests()" class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-pink-600 font-bold">
+                🚀 ESEGUI TUTTI I TEST
+            </button>
+            <div id="all-results" class="mt-4 space-y-2"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        // Configurazione Firebase (prendi da .env.local)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        let currentUser = null;
+        let authToken = null;
+
+        // Monitora stato autenticazione
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            if (user) {
+                authToken = await user.getIdToken();
+                showResult('auth-status', `✅ Autenticato come: ${user.email}`, 'success');
+            } else {
+                showResult('auth-status', '⚠️ Non autenticato. Vai al dashboard per accedere.', 'error');
+            }
+        });
+
+        // Helper functions
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const div = document.createElement('div');
+            div.className = `test-result test-${type}`;
+            div.textContent = message;
+            element.appendChild(div);
+        }
+
+        function clearResults(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+
+        async function apiCall(method, endpoint, body = null) {
+            if (!authToken) {
+                throw new Error('Non autenticato. Effettua il login prima.');
+            }
+
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                }
+            };
+
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+
+            const response = await fetch(endpoint, options);
+            const data = await response.json();
+            return { response, data };
+        }
+
+        // Test functions
+        window.checkAuth = function() {
+            clearResults('auth-status');
+            if (currentUser) {
+                showResult('auth-status', `✅ Autenticato: ${currentUser.email}`, 'success');
+                showResult('auth-status', `📧 Email verificata: ${currentUser.emailVerified}`, 'info');
+                showResult('auth-status', `🆔 UID: ${currentUser.uid}`, 'info');
+            } else {
+                showResult('auth-status', '❌ Non autenticato', 'error');
+            }
+        };
+
+        window.testGetNotifications = async function() {
+            clearResults('notifications-results');
+            try {
+                const { response, data } = await apiCall('GET', '/api/notifications?limit=10');
+                if (data.success) {
+                    showResult('notifications-results', `✅ Recuperate ${data.count} notifiche`, 'success');
+                    data.notifications.forEach(n => {
+                        showResult('notifications-results', `  - ${n.title} (${n.type}, ${n.priority})`, 'info');
+                    });
+                } else {
+                    showResult('notifications-results', `❌ Errore: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('notifications-results', `❌ Errore: ${error.message}`, 'error');
+            }
+        };
+
+        window.testCreateNotification = async function() {
+            clearResults('notifications-results');
+            try {
+                const { response, data } = await apiCall('POST', '/api/notifications', {
+                    type: 'SYSTEM',
+                    priority: 'MEDIUM',
+                    title: '🧪 Test Notifica',
+                    message: 'Questa è una notifica di test creata dal pannello di test'
+                });
+                if (data.success) {
+                    showResult('notifications-results', `✅ Notifica creata: ${data.notification.id}`, 'success');
+                } else {
+                    showResult('notifications-results', `❌ Errore: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('notifications-results', `❌ Errore: ${error.message}`, 'error');
+            }
+        };
+
+        window.testMarkAsRead = async function() {
+            clearResults('notifications-results');
+            try {
+                // Prima ottieni una notifica
+                const { data: listData } = await apiCall('GET', '/api/notifications?limit=1&unreadOnly=true');
+                if (listData.notifications && listData.notifications.length > 0) {
+                    const notificationId = listData.notifications[0].id;
+                    const { data } = await apiCall('PUT', `/api/notifications/${notificationId}?action=read`);
+                    if (data.success) {
+                        showResult('notifications-results', `✅ Notifica ${notificationId} marcata come letta`, 'success');
+                    } else {
+                        showResult('notifications-results', `❌ Errore: ${data.error}`, 'error');
+                    }
+                } else {
+                    showResult('notifications-results', '⚠️ Nessuna notifica non letta da marcare', 'info');
+                }
+            } catch (error) {
+                showResult('notifications-results', `❌ Errore: ${error.message}`, 'error');
+            }
+        };
+
+        window.testMarkAllAsRead = async function() {
+            clearResults('notifications-results');
+            try {
+                const { data } = await apiCall('PUT', '/api/notifications/bulk?action=read-all');
+                if (data.success) {
+                    showResult('notifications-results', `✅ Tutte le notifiche marcate come lette`, 'success');
+                } else {
+                    showResult('notifications-results', `❌ Errore: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('notifications-results', `❌ Errore: ${error.message}`, 'error');
+            }
+        };
+
+        window.testGetPreferences = async function() {
+            clearResults('preferences-results');
+            try {
+                const { data } = await apiCall('GET', '/api/notifications/preferences');
+                if (data.success) {
+                    showResult('preferences-results', `✅ Preferenze recuperate`, 'success');
+                    showResult('preferences-results', `  Global enabled: ${data.preferences.global?.enabled}`, 'info');
+                    showResult('preferences-results', `  Quiet hours: ${data.preferences.global?.quiet_hours?.enabled}`, 'info');
+                } else {
+                    showResult('preferences-results', `❌ Errore: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('preferences-results', `❌ Errore: ${error.message}`, 'error');
+            }
+        };
+
+        window.testUpdatePreferences = async function() {
+            clearResults('preferences-results');
+            try {
+                const { data } = await apiCall('PUT', '/api/notifications/preferences', {
+                    preferences: {
+                        global: {
+                            enabled: true,
+                            quiet_hours: {
+                                enabled: true,
+                                start_time: "22:00",
+                                end_time: "07:00",
+                                timezone: "Europe/Rome"
+                            }
+                        }
+                    }
+                });
+                if (data.success) {
+                    showResult('preferences-results', `✅ Preferenze aggiornate`, 'success');
+                } else {
+                    showResult('preferences-results', `❌ Errore: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('preferences-results', `❌ Errore: ${error.message}`, 'error');
+            }
+        };
+
+        window.testResetPreferences = async function() {
+            clearResults('preferences-results');
+            try {
+                const { data } = await apiCall('POST', '/api/notifications/preferences', {
+                    action: 'reset'
+                });
+                if (data.success) {
+                    showResult('preferences-results', `✅ Preferenze reset`, 'success');
+                } else {
+                    showResult('preferences-results', `❌ Errore: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult('preferences-results', `❌ Errore: ${error.message}`, 'error');
+            }
+        };
+
+        window.testPreferencesIntegration = async function() {
+            clearResults('integration-results');
+            showResult('integration-results', '🧪 Test integrazione preferenze + notifiche...', 'info');
+            
+            try {
+                // 1. Disabilita tipo FEASIBILITY
+                await apiCall('PUT', '/api/notifications/preferences', {
+                    preferences: {
+                        types: {
+                            FEASIBILITY: {
+                                enabled: false,
+                                channels: { in_app: false, push: false, email: false },
+                                priority_threshold: 'MEDIUM'
+                            }
+                        }
+                    }
+                });
+                showResult('integration-results', '✅ Tipo FEASIBILITY disabilitato', 'success');
+                
+                // 2. Prova a creare notifica FEASIBILITY (dovrebbe essere bloccata)
+                const { data: blockedData } = await apiCall('POST', '/api/notifications', {
+                    type: 'FEASIBILITY',
+                    priority: 'MEDIUM',
+                    title: 'Test Bloccata',
+                    message: 'Dovrebbe essere bloccata'
+                });
+                
+                if (!blockedData.success || !blockedData.notification) {
+                    showResult('integration-results', '✅ Notifica correttamente bloccata dalle preferenze', 'success');
+                } else {
+                    showResult('integration-results', '⚠️ Notifica non bloccata (problema?)', 'error');
+                }
+                
+                // 3. Riabilita PROJECT
+                await apiCall('PUT', '/api/notifications/preferences', {
+                    preferences: {
+                        types: {
+                            PROJECT: {
+                                enabled: true,
+                                channels: { in_app: true, push: true, email: false },
+                                priority_threshold: 'MEDIUM'
+                            }
+                        }
+                    }
+                });
+                showResult('integration-results', '✅ Tipo PROJECT abilitato', 'success');
+                
+                // 4. Crea notifica PROJECT (dovrebbe passare)
+                const { data: allowedData } = await apiCall('POST', '/api/notifications', {
+                    type: 'PROJECT',
+                    priority: 'HIGH',
+                    title: 'Test Permessa',
+                    message: 'Dovrebbe passare'
+                });
+                
+                if (allowedData.success && allowedData.notification) {
+                    showResult('integration-results', `✅ Notifica creata: ${allowedData.notification.id}`, 'success');
+                } else {
+                    showResult('integration-results', '❌ Notifica non creata', 'error');
+                }
+                
+            } catch (error) {
+                showResult('integration-results', `❌ Errore: ${error.message}`, 'error');
+            }
+        };
+
+        window.testPushNotifications = async function() {
+            clearResults('integration-results');
+            try {
+                const testToken = `test-fcm-token-${Date.now()}`;
+                
+                // Register
+                const { data: regData } = await apiCall('POST', '/api/notifications/push/register', {
+                    token: testToken,
+                    deviceType: 'web',
+                    deviceInfo: {
+                        userAgent: navigator.userAgent,
+                        platform: navigator.platform,
+                        language: navigator.language
+                    }
+                });
+                
+                if (regData.success) {
+                    showResult('integration-results', `✅ Token registrato`, 'success');
+                } else {
+                    showResult('integration-results', `❌ Registrazione fallita: ${regData.error}`, 'error');
+                }
+                
+                // Unregister
+                const { data: unregData } = await apiCall('POST', '/api/notifications/push/unregister', {
+                    token: testToken
+                });
+                
+                if (unregData.success) {
+                    showResult('integration-results', `✅ Token rimosso`, 'success');
+                } else {
+                    showResult('integration-results', `❌ Rimozione fallita: ${unregData.error}`, 'error');
+                }
+                
+            } catch (error) {
+                showResult('integration-results', `❌ Errore: ${error.message}`, 'error');
+            }
+        };
+
+        window.runAllTests = async function() {
+            clearResults('all-results');
+            showResult('all-results', '🚀 Esecuzione test completi...', 'info');
+            
+            await testGetNotifications();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testCreateNotification();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testGetPreferences();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testPreferencesIntegration();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testPushNotifications();
+            
+            showResult('all-results', '✅ Tutti i test completati! Controlla i risultati sopra.', 'success');
+        };
+    </script>
+</body>
+</html>

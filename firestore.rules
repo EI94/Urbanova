@@ -112,24 +112,69 @@ service cloud.firestore {
     // NOTIFICATIONS COLLECTION
     // ============================================================================
     
-    match /notifications/{notificationId} {
-      // Solo l'owner può leggere le proprie notifiche
-      allow read: if isAuthenticated() && 
-                   resource.data.userId == request.auth.uid;
-      
-      // Solo l'owner può creare/aggiornare le proprie notifiche
-      allow create, update: if isAuthenticated() && 
-                             request.resource.data.userId == request.auth.uid;
-      
-      // Solo l'owner può eliminare le proprie notifiche
-      allow delete: if isAuthenticated() && 
-                     resource.data.userId == request.auth.uid;
-      
-      // Eccezione: admin possono leggere tutte le notifiche
-      allow read: if isAuthenticated() && 
-                   exists(/databases/$(database)/documents/userProfiles/$(request.auth.uid)) &&
-                   get(/databases/$(database)/documents/userProfiles/$(request.auth.uid)).data.role == 'admin';
-    }
+match /notifications/{notificationId} {
+  // Solo l'owner può leggere le proprie notifiche
+  allow read: if isAuthenticated() && 
+               resource.data.userId == request.auth.uid;
+  
+  // Solo l'owner può creare/aggiornare le proprie notifiche
+  allow create, update: if isAuthenticated() && 
+                         request.resource.data.userId == request.auth.uid;
+  
+  // Solo l'owner può eliminare le proprie notifiche
+  allow delete: if isAuthenticated() && 
+                 resource.data.userId == request.auth.uid;
+  
+  // Eccezione: admin possono leggere tutte le notifiche
+  allow read: if isAuthenticated() && 
+               exists(/databases/$(database)/documents/userProfiles/$(request.auth.uid)) &&
+               get(/databases/$(database)/documents/userProfiles/$(request.auth.uid)).data.role == 'admin';
+  
+  // Eccezione: admin possono creare notifiche per altri utenti
+  allow create: if isAuthenticated() && 
+                 exists(/databases/$(database)/documents/userProfiles/$(request.auth.uid)) &&
+                 get(/databases/$(database)/documents/userProfiles/$(request.auth.uid)).data.role == 'admin';
+}
+
+// Regole per le preferenze notifiche
+match /notificationPreferences/{userId} {
+  // Solo l'owner può leggere le proprie preferenze
+  allow read: if isAuthenticated() && 
+               resource.data.userId == request.auth.uid;
+  
+  // Solo l'owner può creare/aggiornare le proprie preferenze
+  allow create, update: if isAuthenticated() && 
+                         request.resource.data.userId == request.auth.uid;
+  
+  // Solo l'owner può eliminare le proprie preferenze
+  allow delete: if isAuthenticated() && 
+                 resource.data.userId == request.auth.uid;
+  
+  // Eccezione: admin possono leggere tutte le preferenze
+  allow read: if isAuthenticated() && 
+               exists(/databases/$(database)/documents/userProfiles/$(request.auth.uid)) &&
+               get(/databases/$(database)/documents/userProfiles/$(request.auth.uid)).data.role == 'admin';
+}
+
+// Regole per i token dispositivi FCM
+match /deviceTokens/{tokenId} {
+  // Solo l'owner può leggere i propri token
+  allow read: if isAuthenticated() && 
+               resource.data.userId == request.auth.uid;
+  
+  // Solo l'owner può creare/aggiornare i propri token
+  allow create, update: if isAuthenticated() && 
+                         request.resource.data.userId == request.auth.uid;
+  
+  // Solo l'owner può eliminare i propri token
+  allow delete: if isAuthenticated() && 
+                 resource.data.userId == request.auth.uid;
+  
+  // Eccezione: admin possono leggere tutti i token
+  allow read: if isAuthenticated() && 
+               exists(/databases/$(database)/documents/userProfiles/$(request.auth.uid)) &&
+               get(/databases/$(database)/documents/userProfiles/$(request.auth.uid)).data.role == 'admin';
+}
     
     // ============================================================================
     // PROJECTS COLLECTION
