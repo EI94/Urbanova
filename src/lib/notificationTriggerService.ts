@@ -30,7 +30,7 @@ export class NotificationTriggerService {
       await firebaseNotificationService.createNotificationWithPreferences({
         userId,
         type: 'PROJECT',
-        priority: 'MEDIUM',
+        
         title: '🎉 Nuovo Progetto Creato',
         message: `Il progetto "${projectData.projectName}" è stato creato con successo.`,
         data: {
@@ -66,7 +66,7 @@ export class NotificationTriggerService {
       await firebaseNotificationService.createNotificationWithPreferences({
         userId,
         type: 'SUCCESS',
-        priority: 'HIGH',
+        
         title: '📊 Analisi di Fattibilità Completata',
         message: `L'analisi per "${analysisData.projectName}" mostra ROI ${analysisData.roi.toFixed(1)}% e margine ${analysisData.margin.toFixed(1)}%.`,
         data: {
@@ -109,7 +109,7 @@ export class NotificationTriggerService {
       await firebaseNotificationService.createNotificationWithPreferences({
         userId,
         type: 'SUCCESS',
-        priority: 'HIGH',
+        
         title: '💰 Business Plan Completato',
         message: `Business Plan per "${bpData.projectName}" completato. VAN: €${bpData.npv.toLocaleString()}, TIR: ${bpData.irr.toFixed(1)}%. Scenario migliore: ${bpData.bestScenario}.`,
         data: {
@@ -201,7 +201,7 @@ export class NotificationTriggerService {
       await firebaseNotificationService.createNotificationWithPreferences({
         userId,
         type: 'MESSAGE',
-        priority: 'LOW',
+        
         title: '🤖 Risposta OS Disponibile',
         message: `Urbanova OS ha risposto alla tua richiesta${messageData.toolUsed ? ` usando ${messageData.toolUsed}` : ''}.`,
         data: {
@@ -242,7 +242,7 @@ export class NotificationTriggerService {
       await firebaseNotificationService.createNotificationWithPreferences({
         userId,
         type: 'SUCCESS',
-        priority: 'HIGH',
+        
         title: '🎯 Nuovo Lead Ricevuto',
         message: `Nuovo lead: ${leadData.leadName} (${leadData.leadEmail}) da ${leadData.leadSource}.`,
         data: {
@@ -284,7 +284,7 @@ export class NotificationTriggerService {
       await firebaseNotificationService.createNotificationWithPreferences({
         userId,
         type: 'SUCCESS',
-        priority: 'HIGH',
+        
         title: '🎉 Lead Convertito!',
         message: `Il lead ${conversionData.leadName} è stato convertito nel progetto "${conversionData.projectName}".`,
         data: {
@@ -330,7 +330,7 @@ export class NotificationTriggerService {
       await firebaseNotificationService.createNotificationWithPreferences({
         userId,
         type: 'ERROR',
-        priority: 'HIGH',
+        
         title: '⚠️ Errore Sistema',
         message: `Errore in ${errorData.component}: ${errorData.errorMessage}`,
         data: {
@@ -372,7 +372,7 @@ export class NotificationTriggerService {
       await firebaseNotificationService.createNotificationWithPreferences({
         userId,
         type: 'WARNING',
-        priority: 'MEDIUM',
+        
         title: '⚡ Warning Performance',
         message: `${warningData.component}: ${warningData.metric} è ${warningData.value} (soglia: ${warningData.threshold}).`,
         data: {
@@ -416,7 +416,7 @@ export class NotificationTriggerService {
       await firebaseNotificationService.createNotificationWithPreferences({
         userId,
         type: 'SUCCESS',
-        priority: 'HIGH',
+        
         title: '🎉 Benvenuto in Urbanova!',
         message: `Ciao ${userData.userName}! Benvenuto nella piattaforma Urbanova. Inizia creando il tuo primo progetto.`,
         data: {
@@ -454,7 +454,7 @@ export class NotificationTriggerService {
       await firebaseNotificationService.createNotificationWithPreferences({
         userId,
         type: 'SUCCESS',
-        priority: 'MEDIUM',
+        
         title: '🎯 Onboarding Completato!',
         message: `Hai completato ${completionData.stepsCompleted}/${completionData.totalSteps} passi dell'onboarding. Sei pronto per iniziare!`,
         data: {

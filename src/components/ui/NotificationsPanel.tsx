@@ -87,6 +87,25 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
     }
   };
 
+  const handleNotificationAction = async (notificationId: string, action: any) => {
+    try {
+      // Prima marca come letta
+      await firebaseNotificationService.markAsRead(notificationId);
+      
+      // Poi esegui l'azione
+      if (action.url) {
+        window.location.href = action.url;
+      } else if (action.type === 'navigate') {
+        // Logica per navigazione programmatica
+        console.log('Navigate to:', action.url);
+      }
+      
+      loadNotifications();
+    } catch (error) {
+      console.error('Error handling notification action:', error);
+    }
+  };
+
   const handleMarkAllAsRead = async () => {
     try {
       await firebaseNotificationService.markAllAsRead(userId);
@@ -137,35 +156,7 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'URGENT':
-        return 'border-red-500 bg-red-50';
-      case 'HIGH':
-        return 'border-orange-500 bg-orange-50';
-      case 'MEDIUM':
-        return 'border-yellow-500 bg-yellow-50';
-      case 'LOW':
-        return 'border-green-500 bg-green-50';
-      default:
-        return 'border-gray-500 bg-gray-50';
-    }
-  };
-
-  const getPriorityText = (priority: string) => {
-    switch (priority) {
-      case 'URGENT':
-        return t('priorities.urgent', 'notifications');
-      case 'HIGH':
-        return t('priorities.high', 'notifications');
-      case 'MEDIUM':
-        return t('priorities.medium', 'notifications');
-      case 'LOW':
-        return t('priorities.low', 'notifications');
-      default:
-        return priority;
-    }
-  };
+  // Priorità rimosse dal sistema
 
   const getTypeText = (type: string) => {
     switch (type) {
@@ -327,11 +318,6 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
                       <span className="text-xs font-medium text-gray-500 uppercase">
                         {getTypeText(notification.type)}
                       </span>
-                      <span
-                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(notification.priority)}`}
-                      >
-                        {getPriorityText(notification.priority)}
-                      </span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <span className="text-xs text-gray-400">
@@ -350,20 +336,36 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      {!notification.isRead ? (
-                        <button
-                          onClick={() => handleMarkAsRead(notification.id)}
-                          className="text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-100 px-2 py-1 rounded transition-colors"
-                        >
-                          {t('actions.view', 'notifications')}
-                        </button>
+                      {/* Mostra azioni specifiche se disponibili */}
+                      {notification.actions && notification.actions.length > 0 ? (
+                        notification.actions.map((action, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleNotificationAction(notification.id, action)}
+                            className="text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-100 px-2 py-1 rounded transition-colors"
+                          >
+                            {action.label}
+                          </button>
+                        ))
                       ) : (
-                        <button
-                          onClick={() => handleMarkAsRead(notification.id)}
-                          className="text-xs text-gray-600 hover:text-gray-700 hover:bg-gray-100 px-2 py-1 rounded transition-colors"
-                        >
-                          {t('markAsUnread', 'notifications')}
-                        </button>
+                        /* Azioni di default */
+                        <>
+                          {!notification.isRead ? (
+                            <button
+                              onClick={() => handleMarkAsRead(notification.id)}
+                              className="text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-100 px-2 py-1 rounded transition-colors"
+                            >
+                              {t('actions.view', 'notifications')}
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleMarkAsRead(notification.id)}
+                              className="text-xs text-gray-600 hover:text-gray-700 hover:bg-gray-100 px-2 py-1 rounded transition-colors"
+                            >
+                              {t('markAsUnread', 'notifications')}
+                            </button>
+                          )}
+                        </>
                       )}
                       <button
                         onClick={() => handleDismissNotification(notification.id)}

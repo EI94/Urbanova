@@ -3,7 +3,6 @@ export interface Notification {
   title: string;
   message: string;
   type: 'project' | 'permit' | 'task' | 'system' | 'marketing';
-  priority: 'low' | 'medium' | 'high' | 'critical';
   isRead: boolean;
   isDismissed: boolean;
   createdAt: Date;
@@ -27,12 +26,6 @@ export interface NotificationPreferences {
     system: boolean;
     marketing: boolean;
   };
-  priorities: {
-    low: boolean;
-    medium: boolean;
-    high: boolean;
-    critical: boolean;
-  };
   quietHours: {
     enabled: boolean;
     start: string; // HH:mm format
@@ -47,5 +40,4 @@ export interface NotificationStats {
   read: number;
   dismissed: number;
   byType: Record<string, number>;
-  byPriority: Record<string, number>;
 }

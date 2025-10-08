@@ -24,7 +24,6 @@ export interface Notification {
   id: string;
   userId: string;
   type: 'SYSTEM' | 'PROJECT' | 'TASK' | 'MESSAGE' | 'ALERT' | 'SUCCESS' | 'WARNING' | 'ERROR';
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
   title: string;
   message: string;
   data?: any;
@@ -85,7 +84,6 @@ class FirebaseNotificationService {
   async createNotification(data: {
     userId: string;
     type: Notification['type'];
-    priority: Notification['priority'];
     title: string;
     message: string;
     data?: any;
@@ -101,7 +99,6 @@ class FirebaseNotificationService {
       const notificationData = {
         userId: data.userId,
         type: data.type,
-        priority: data.priority,
         title: data.title,
         message: data.message,
         data: data.data || {},
@@ -137,7 +134,6 @@ class FirebaseNotificationService {
   async createNotificationWithPreferences(data: {
     userId: string;
     type: Notification['type'];
-    priority: Notification['priority'];
     title: string;
     message: string;
     data?: any;
@@ -158,22 +154,10 @@ class FirebaseNotificationService {
         return null;
       }
       
-      // Verifica se la priorità è sufficiente
-      const isPrioritySufficient = await notificationPreferencesService.isPrioritySufficient(
-        data.userId,
-        data.type,
-        data.priority
-      );
-      
-      if (!isPrioritySufficient) {
-        console.log('🚫 [FirebaseNotification] Priorità insufficiente:', data.priority);
-        return null;
-      }
-      
       // Verifica se è in quiet hours
       const isQuietHours = await notificationPreferencesService.isQuietHours(data.userId);
-      if (isQuietHours && data.priority !== 'URGENT') {
-        console.log('🚫 [FirebaseNotification] In quiet hours, notifica non critica bloccata');
+      if (isQuietHours) {
+        console.log('🚫 [FirebaseNotification] In quiet hours, notifica bloccata');
         return null;
       }
       
@@ -192,11 +176,10 @@ class FirebaseNotificationService {
       limit?: number;
       unreadOnly?: boolean;
       type?: Notification['type'];
-      priority?: Notification['priority'];
     } = {}
   ): Promise<Notification[]> {
     try {
-      const { limit = 50, unreadOnly = false, type, priority } = options;
+      const { limit = 50, unreadOnly = false, type } = options;
 
       let q = query(
         collection(db, 'notifications'),
@@ -212,9 +195,6 @@ class FirebaseNotificationService {
         q = query(q, where('type', '==', type));
       }
 
-      if (priority) {
-        q = query(q, where('priority', '==', priority));
-      }
 
       if (limit > 0) {
         q = query(q, firestoreLimit(limit));
@@ -243,6 +223,20 @@ class FirebaseNotificationService {
     }
   }
 
+  async markAsRead(notificationId: string): Promise<void> {
+    try {
+      const notificationRef = doc(db, 'notifications', notificationId);
+      await updateDoc(notificationRef, {
+        isRead: true,
+        updatedAt: serverTimestamp(),
+      });
+      console.log('✅ [FirebaseNotification] Notifica marcata come letta:', notificationId);
+    } catch (error) {
+      console.error('❌ [FirebaseNotification] Error marking notification as read:', error);
+      throw new Error('Failed to mark notification as read');
+    }
+  }
+
   async markAsUnread(notificationId: string): Promise<void> {
     try {
       const notificationRef = doc(db, 'notifications', notificationId);
@@ -250,8 +244,9 @@ class FirebaseNotificationService {
         isRead: false,
         updatedAt: serverTimestamp(),
       });
+      console.log('✅ [FirebaseNotification] Notifica marcata come non letta:', notificationId);
     } catch (error) {
-      console.error('Error marking notification as unread:', error);
+      console.error('❌ [FirebaseNotification] Error marking notification as unread:', error);
       throw new Error('Failed to mark notification as unread');
     }
   }
@@ -270,7 +265,6 @@ class FirebaseNotificationService {
         id: notificationSnap.id,
         userId: data.userId,
         type: data.type,
-        priority: data.priority,
         title: data.title,
         message: data.message,
         data: data.data,
@@ -383,23 +377,13 @@ class FirebaseNotificationService {
         byType[type] = (byType[type] || 0) + 1;
       });
 
-      // Count by priority
-      const priorityQuery = query(collection(db, 'notifications'), where('userId', '==', userId));
-      const prioritySnapshot = await getDocs(priorityQuery);
-      const byPriority: Record<string, number> = {};
-      prioritySnapshot.docs.forEach(doc => {
-        const data = doc.data();
-        const priority = data.priority || 'unknown';
-        byPriority[priority] = (byPriority[priority] || 0) + 1;
-      });
 
       return {
         total,
         unread,
         read,
         dismissed,
-        byType,
-        byPriority,
+        byType
       };
     } catch (error) {
       console.error('❌ [FirebaseNotification] Errore caricamento statistiche:', error);
@@ -555,7 +539,7 @@ class FirebaseNotificationService {
     return this.createNotification({
       userId,
       type: 'SYSTEM',
-      priority: 'MEDIUM',
+      
       title,
       message,
       data,
@@ -571,7 +555,7 @@ class FirebaseNotificationService {
     return this.createNotification({
       userId,
       type: 'PROJECT',
-      priority: 'MEDIUM',
+      
       title: `Progetto: ${action}`,
       message: `${action} per il progetto "${projectName}"`,
       data: { projectId, projectName, action },
@@ -587,23 +571,99 @@ class FirebaseNotificationService {
     return this.createNotification({
       userId,
       type: 'TASK',
-      priority: 'MEDIUM',
+      
       title: `Task: ${action}`,
       message: `${action} per il task "${taskName}"`,
       data: { taskId, taskName, action },
     });
   }
 
-  async createWelcomeNotification(userId: string): Promise<Notification> {
-    return this.createNotification({
-      userId,
-      type: 'SYSTEM',
-      priority: 'HIGH',
-      title: 'Benvenuto in Urbanova!',
-      message:
-        'Il tuo account è stato creato con successo. Inizia a esplorare le funzionalità della piattaforma.',
-      data: { action: 'welcome' },
-    });
+  async createWelcomeNotification(userId: string): Promise<Notification | null> {
+    try {
+      // Verifica se l'utente ha già una notifica di benvenuto
+      const existingWelcomeNotifications = await this.getNotifications(userId, {
+        type: 'SYSTEM',
+        limit: 10
+      });
+      
+      const hasWelcomeNotification = existingWelcomeNotifications.some(
+        notification => 
+          notification.title === 'Benvenuto in Urbanova!' &&
+          notification.data?.action === 'welcome'
+      );
+      
+      if (hasWelcomeNotification) {
+        console.log('✅ [FirebaseNotification] Utente ha già una notifica di benvenuto');
+        return null;
+      }
+      
+      return this.createNotification({
+        userId,
+        type: 'SYSTEM',
+        
+        title: 'Benvenuto in Urbanova!',
+        message:
+          'Il tuo account è stato creato con successo. Inizia a esplorare le funzionalità della piattaforma.',
+        data: { 
+          action: 'welcome',
+          actionUrl: '/dashboard'
+        },
+        actions: [
+          {
+            type: 'navigate',
+            label: 'Vai al Dashboard',
+            url: '/dashboard'
+          }
+        ]
+      });
+    } catch (error) {
+      console.error('❌ [FirebaseNotification] Errore creazione notifica benvenuto:', error);
+      return null;
+    }
+  }
+
+  // ========================================
+  // PULIZIA NOTIFICHE DUPLICATE
+  // ========================================
+
+  async cleanupDuplicateWelcomeNotifications(userId: string): Promise<void> {
+    try {
+      console.log('🧹 [FirebaseNotification] Pulizia notifiche benvenuto duplicate per utente:', userId);
+      
+      const welcomeNotifications = await this.getNotifications(userId, {
+        type: 'SYSTEM',
+        limit: 50
+      });
+      
+      const duplicateWelcomeNotifications = welcomeNotifications.filter(
+        notification => 
+          notification.title === 'Benvenuto in Urbanova!' &&
+          notification.data?.action === 'welcome'
+      );
+      
+      if (duplicateWelcomeNotifications.length <= 1) {
+        console.log('✅ [FirebaseNotification] Nessuna notifica benvenuto duplicata trovata');
+        return;
+      }
+      
+      // Mantieni la più recente, elimina le altre
+      const sortedNotifications = duplicateWelcomeNotifications.sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+      );
+      
+      const notificationsToDelete = sortedNotifications.slice(1); // Rimuovi tutte tranne la prima
+      
+      console.log(`🗑️ [FirebaseNotification] Eliminando ${notificationsToDelete.length} notifiche benvenuto duplicate`);
+      
+      for (const notification of notificationsToDelete) {
+        await this.deleteNotification(notification.id);
+        console.log(`🗑️ Eliminata notifica duplicata: ${notification.id}`);
+      }
+      
+      console.log('✅ [FirebaseNotification] Pulizia notifiche benvenuto completata');
+    } catch (error) {
+      console.error('❌ [FirebaseNotification] Errore pulizia notifiche benvenuto:', error);
+    }
   }
 
   // ========================================
@@ -618,7 +678,7 @@ class FirebaseNotificationService {
     return this.createNotification({
       userId,
       type: 'PROJECT',
-      priority: 'HIGH',
+      
       title: 'Invito al Workspace',
       message: `${inviterName} ti ha invitato a far parte del workspace "${workspaceName}"`,
       data: { 
@@ -650,7 +710,7 @@ class FirebaseNotificationService {
     return this.createNotification({
       userId,
       type: 'PROJECT',
-      priority: 'MEDIUM',
+      
       title: 'File Condiviso',
       message: `${sharerName} ha condiviso il file "${fileName}" nel progetto "${projectName}"`,
       data: { 
@@ -678,7 +738,7 @@ class FirebaseNotificationService {
     return this.createNotification({
       userId,
       type: 'PROJECT',
-      priority: 'MEDIUM',
+      
       title: 'Progetto Aggiornato',
       message: `${updaterName} ha ${updateType} il progetto "${projectName}"`,
       data: { 
@@ -705,7 +765,7 @@ class FirebaseNotificationService {
     return this.createNotification({
       userId,
       type: 'PROJECT',
-      priority: 'HIGH',
+      
       title: 'Richiesta Collaborazione',
       message: `${requesterName} vuole collaborare al progetto "${projectName}"`,
       data: { 
@@ -736,7 +796,7 @@ class FirebaseNotificationService {
     return this.createNotification({
       userId,
       type: 'SUCCESS',
-      priority: 'MEDIUM',
+      
       title: 'Analisi di Fattibilità Completata',
       message: `L'analisi di fattibilità per "${projectName}" è stata completata`,
       data: { 
@@ -762,7 +822,7 @@ class FirebaseNotificationService {
     return this.createNotification({
       userId,
       type: 'SUCCESS',
-      priority: 'MEDIUM',
+      
       title: 'Business Plan Pronto',
       message: `Il Business Plan per "${projectName}" è stato generato ed è pronto per la revisione`,
       data: { 
@@ -788,7 +848,7 @@ class FirebaseNotificationService {
     return this.createNotification({
       userId,
       type: 'INFO',
-      priority: 'LOW',
+      
       title: 'Nuove Opportunità di Mercato',
       message: `Trovate ${newOpportunities} nuove opportunità immobiliari a ${location}`,
       data: { 
@@ -814,7 +874,7 @@ class FirebaseNotificationService {
     return this.createNotification({
       userId,
       type: 'SYSTEM',
-      priority: 'MEDIUM',
+      
       title: 'Manutenzione Sistema',
       message: `Manutenzione ${maintenanceType} programmata per ${scheduledTime}`,
       data: { 
@@ -834,7 +894,7 @@ class FirebaseNotificationService {
     return this.createNotification({
       userId,
       type: 'ALERT',
-      priority: 'HIGH',
+      
       title: 'Scadenza Imminente',
       message: `La scadenza per "${taskName}" nel progetto "${projectName}" è il ${deadline}`,
       data: { 

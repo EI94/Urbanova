@@ -15,10 +15,7 @@ export type NotificationType =
   | 'MESSAGE'           // Messaggi generici
   | 'ALERT';            // Allerte urgenti
 
-/**
- * Priorità delle notifiche
- */
-export type NotificationPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+// Priorità rimosse dal sistema
 
 /**
  * Canali di notifica
@@ -35,7 +32,6 @@ export interface NotificationTypePreferences {
     push: boolean;
     email: boolean;
   };
-  priority_threshold: NotificationPriority; // Solo notifiche con priorità >= threshold
 }
 
 /**
@@ -111,63 +107,51 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: Omit<NotificationPreferences, 'id
   types: {
     PROJECT: {
       enabled: true,
-      channels: { in_app: true, push: true, email: false },
-      priority_threshold: 'MEDIUM'
+      channels: { in_app: true, push: true, email: false }
     },
     FEASIBILITY: {
       enabled: true,
-      channels: { in_app: true, push: true, email: true },
-      priority_threshold: 'MEDIUM'
+      channels: { in_app: true, push: true, email: true }
     },
     BUSINESS_PLAN: {
       enabled: true,
-      channels: { in_app: true, push: true, email: true },
-      priority_threshold: 'MEDIUM'
+      channels: { in_app: true, push: true, email: true }
     },
     DEADLINE: {
       enabled: true,
-      channels: { in_app: true, push: true, email: true },
-      priority_threshold: 'HIGH'
+      channels: { in_app: true, push: true, email: true }
     },
     LEAD: {
       enabled: true,
-      channels: { in_app: true, push: true, email: false },
-      priority_threshold: 'MEDIUM'
+      channels: { in_app: true, push: true, email: false }
     },
     SYSTEM: {
       enabled: true,
-      channels: { in_app: true, push: false, email: false },
-      priority_threshold: 'LOW'
+      channels: { in_app: true, push: false, email: false }
     },
     PERFORMANCE: {
       enabled: true,
-      channels: { in_app: true, push: false, email: false },
-      priority_threshold: 'MEDIUM'
+      channels: { in_app: true, push: false, email: false }
     },
     ERROR: {
       enabled: true,
-      channels: { in_app: true, push: true, email: true },
-      priority_threshold: 'HIGH'
+      channels: { in_app: true, push: true, email: true }
     },
     WARNING: {
       enabled: true,
-      channels: { in_app: true, push: true, email: false },
-      priority_threshold: 'MEDIUM'
+      channels: { in_app: true, push: true, email: false }
     },
     SUCCESS: {
       enabled: true,
-      channels: { in_app: true, push: false, email: false },
-      priority_threshold: 'LOW'
+      channels: { in_app: true, push: false, email: false }
     },
     MESSAGE: {
       enabled: true,
-      channels: { in_app: true, push: true, email: false },
-      priority_threshold: 'MEDIUM'
+      channels: { in_app: true, push: true, email: false }
     },
     ALERT: {
       enabled: true,
-      channels: { in_app: true, push: true, email: true },
-      priority_threshold: 'URGENT'
+      channels: { in_app: true, push: true, email: true }
     }
   },
   
