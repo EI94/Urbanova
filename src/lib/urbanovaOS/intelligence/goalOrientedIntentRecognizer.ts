@@ -106,7 +106,8 @@ Analizza il messaggio e rispondi SOLO con un JSON valido nel seguente formato:
 }
 
 OBIETTIVI POSSIBILI:
-- feasibility_analysis: L'utente vuole fare un'analisi di fattibilità
+- business_plan: L'utente vuole un Business Plan completo con VAN, TIR, DSCR, scenari terreno e leve di negoziazione
+- feasibility_analysis: L'utente vuole fare un'analisi di fattibilità (più semplice del BP)
 - project_consultation: L'utente vuole consultare progetti esistenti
 - market_analysis: L'utente vuole analisi di mercato
 - design_support: L'utente vuole supporto progettuale
@@ -114,7 +115,8 @@ OBIETTIVI POSSIBILI:
 - investment_advice: L'utente vuole consigli di investimento
 
 TOOL DISPONIBILI:
-- feasibility_analysis: Analisi di fattibilità immobiliare
+- business_plan_calculator: Business Plan completo con cash flow, scenari, VAN, TIR, DSCR, LTV, LTC e leve di negoziazione
+- feasibility_analysis: Analisi di fattibilità immobiliare (ROI, margini, payback)
 - project_consultation: Consultazione progetti esistenti
 - market_benchmark: Benchmark di mercato
 - design_center: Supporto progettuale

@@ -411,26 +411,59 @@ export class UrbanovaOSOrchestrator {
       'cambia', 'modifica', 'invece di', 'metti', 'ricalcola', 'aggiorna'
     ];
 
-    // 2. RILEVA INTENTI DI SENSIBILITÀ
+    // 2. RILEVA INTENTI SPECIFICI BUSINESS PLAN (più completo di feasibility)
+    const businessPlanIndicators = [
+      // Keywords Business Plan
+      'business plan', 'businessplan', 'bp', 'piano business',
+      
+      // Metriche avanzate
+      'van', 'npv', 'tir', 'irr', 'dscr', 'ltv', 'ltc',
+      'debt service', 'servizio del debito',
+      
+      // Scenari terreno
+      'permuta', 'pagamento differito', 'earn-out', 'opzione terreno',
+      'cash upfront', 'contributo cash', 'contributo permuta',
+      
+      // Cash flow
+      'cash flow', 'flussi di cassa', 'flusso di cassa',
+      'per periodo', 't0', 't1', 't2', 't3',
+      'trimestri', 'mensili', 'annuali',
+      
+      // Leve di negoziazione
+      'leve', 'negoziazione', 'trattativa', 'quanto contributo',
+      'quanto sconto', 'quanto serve per pareggiare',
+      'punto di equivalenza', 'break-even',
+      
+      // Scenari comparativi
+      'confronta scenari', 'quale scenario', 'migliore scenario',
+      's1 vs s2', 'scenario a vs b',
+      
+      // Sensitivity
+      'sensitivity', 'sensibilità su', 'variazione prezzi',
+      'variazione costi', 'variazione tasso'
+    ];
+    
+    // 3. RILEVA INTENTI DI SENSIBILITÀ
     const sensitivityIndicators = [
       'sensibilità', 'sensitivity', 'variazione', 'scenario',
       'cosa succede se', 'e se', 'simulazione', 'simula',
-      'pessimistico', 'ottimistico', 'conservativo'
+      'pessimistico', 'ottimistico', 'conservativo',
+      '±', 'plus minus', 'delta'
     ];
 
-    // 3. RILEVA INTENTI DI RISCHIO
+    // 4. RILEVA INTENTI DI RISCHIO
     const riskIndicators = [
       'rischio', 'risk', 'pericolo', 'problema', 'difficoltà',
       'mitigazione', 'protezione', 'sicurezza'
     ];
 
-    // 4. RILEVA INTENTI DI MERCATO
+    // 5. RILEVA INTENTI DI MERCATO
     const marketIndicators = [
       'mercato', 'market', 'prezzi', 'concorrenza', 'competizione',
       'benchmark', 'confronto', 'analisi mercato'
     ];
 
-    // 5. RILEVA INTENTI DI VALUTAZIONE
+    // 6. RILEVA INTENTI DI VALUTAZIONE
     const valuationIndicators = [
       'valutazione', 'valuation', 'valore', 'irr', 'npv', 'van',
       'payback', 'ritorno investimento', 'investimento'
@@ -438,12 +471,16 @@ export class UrbanovaOSOrchestrator {
 
     // 🧠 CALCOLA CONFIDENCE PER OGNI INTENTO
     let feasibilityScore = 0;
+    let businessPlanScore = 0;
     let sensitivityScore = 0;
     let riskScore = 0;
     let marketScore = 0;
     let valuationScore = 0;
 
     // Conta indicatori per ogni categoria
+    businessPlanIndicators.forEach(indicator => {
+      if (text.includes(indicator)) businessPlanScore++;
+    });
     feasibilityIndicators.forEach(indicator => {
       if (text.includes(indicator)) {
         feasibilityScore += 1;
@@ -480,9 +517,16 @@ export class UrbanovaOSOrchestrator {
     });
 
     // 🎯 DETERMINA GOAL TYPE E CONFIDENCE
-    const maxScore = Math.max(feasibilityScore, sensitivityScore, riskScore, marketScore, valuationScore);
+    // Business Plan ha priorità SE ha score significativo (indica richiesta più avanzata)
+    const maxScore = Math.max(feasibilityScore, businessPlanScore, sensitivityScore, riskScore, marketScore, valuationScore);
     
-    if (feasibilityScore === maxScore && feasibilityScore > 0) {
+    if (businessPlanScore === maxScore && businessPlanScore >= 2) {
+      // Se ha almeno 2 indicatori BP, è chiaramente una richiesta di Business Plan
+      goalType = 'business_plan';
+      confidence = Math.min(confidence + 0.2, 0.95);
+      reasoning = `Rilevati ${businessPlanScore} indicatori di Business Plan (VAN, TIR, DSCR, scenari, leve)`;
+      extractedData.isBusinessPlanRequest = true;
+    } else if (feasibilityScore === maxScore && feasibilityScore > 0) {
       goalType = 'feasibility';
       confidence = Math.min(confidence, 0.9);
       reasoning = `Rilevati ${feasibilityScore} indicatori di fattibilità`;
@@ -507,13 +551,19 @@ export class UrbanovaOSOrchestrator {
     // 🔍 ESTRAZIONE DATI INTELLIGENTE (anche da messaggi confusi)
     this.extractDataIntelligently(message, extractedData);
     
+    // 🏦 ESTRAZIONE DATI BUSINESS PLAN (se è una richiesta BP)
+    if (extractedData.isBusinessPlanRequest) {
+      this.extractBusinessPlanData(message, extractedData);
+    }
+    
     console.log('🔍 [DEEP DEBUG] Dati estratti dal sistema intelligente:', {
       message: message.substring(0, 100),
       extractedData: extractedData,
       hasBuildableArea: !!extractedData.buildableArea,
       hasConstructionCost: !!extractedData.constructionCostPerSqm,
       hasPurchasePrice: !!extractedData.purchasePrice,
-      hasTargetMargin: !!extractedData.targetMargin
+      hasTargetMargin: !!extractedData.targetMargin,
+      isBusinessPlanRequest: !!extractedData.isBusinessPlanRequest
     });
 
     // 🧠 BOOST CONFIDENCE SE ABBIAMO DATI ESTRATTI
@@ -728,6 +778,142 @@ export class UrbanovaOSOrchestrator {
       hasProjectContext: !!savedMemory?.projectContext,
       projectName: savedMemory?.projectContext?.name
     });
+  }
+  
+  /**
+   * 🏦 ESTRAZIONE DATI BUSINESS PLAN
+   * Estrae scenari terreno, periodi, contributi, unità, prezzi, tasso
+   */
+  private extractBusinessPlanData(message: string, extractedData: any): void {
+    const text = message.toLowerCase();
+    
+    console.log('🏦 [BusinessPlan] Estrazione dati Business Plan da:', message.substring(0, 100));
+    
+    // Inizializza struttura BP
+    extractedData.businessPlanData = {
+      scenarios: [],
+      units: 0,
+      averagePrice: 0,
+      constructionCostPerUnit: 0,
+      discountRate: 0,
+      salesCalendar: []
+    };
+    
+    // 🏘️ NUMERO UNITÀ
+    const unitsPatterns = [
+      /(\d+)\s*(?:case|unità|unit|appartamenti|app)/i,
+      /(\d+)\s*u(?:nità)?/i
+    ];
+    
+    for (const pattern of unitsPatterns) {
+      const match = message.match(pattern);
+      if (match) {
+        extractedData.businessPlanData.units = parseInt(match[1]);
+        break;
+      }
+    }
+    
+    // 💰 PREZZO UNITÀ
+    const pricePatterns = [
+      /prezzo\s*(\d+)k/i,
+      /(\d+)k\s*prezzo/i,
+      /prezzo\s*(\d+)\.?(\d*)\s*mila/i,
+      /(\d+)\.?(\d*)\s*mila.*?prezzo/i
+    ];
+    
+    for (const pattern of pricePatterns) {
+      const match = message.match(pattern);
+      if (match) {
+        const value = match[2] ? parseFloat(`${match[1]}.${match[2]}`) : parseInt(match[1]);
+        extractedData.businessPlanData.averagePrice = value * 1000;
+        break;
+      }
+    }
+    
+    // 🏗️ COSTO COSTRUZIONE UNITÀ
+    const costPatterns = [
+      /costo\s*(\d+)k/i,
+      /(\d+)k\s*costo/i,
+      /costruzione\s*(\d+)k/i
+    ];
+    
+    for (const pattern of costPatterns) {
+      const match = message.match(pattern);
+      if (match) {
+        extractedData.businessPlanData.constructionCostPerUnit = parseInt(match[1]) * 1000;
+        break;
+      }
+    }
+    
+    // 📊 TASSO DI SCONTO
+    const ratePatterns = [
+      /tasso\s*(\d+(?:\.\d+)?)\s*%?/i,
+      /(\d+(?:\.\d+)?)\s*%.*?tasso/i,
+      /tasso\s*sconto\s*(\d+)/i
+    ];
+    
+    for (const pattern of ratePatterns) {
+      const match = message.match(pattern);
+      if (match) {
+        extractedData.businessPlanData.discountRate = parseFloat(match[1]);
+        break;
+      }
+    }
+    
+    // 🏞️ SCENARIO 1: CASH (S1)
+    const s1Match = message.match(/s1[:\s]*(?:terreno\s*)?(\d+)k?/i);
+    if (s1Match) {
+      const amount = parseInt(s1Match[1]) * (s1Match[1].length <= 3 ? 1000 : 1);
+      extractedData.businessPlanData.scenarios.push({
+        id: 's1',
+        name: 'S1: Cash',
+        type: 'CASH',
+        upfrontPayment: amount
+      });
+    }
+    
+    // 🏞️ SCENARIO 2: PERMUTA (S2)
+    const s2Match = message.match(/s2[:\s]*(?:permuta\s*)?(\d+)\s*(?:casa|unità|unit)?[^\d]*\+?\s*(\d+)k?\s*(?:a\s*)?(t\d)?/i);
+    if (s2Match) {
+      const unitsInPermuta = parseInt(s2Match[1]);
+      const contribution = parseInt(s2Match[2]) * 1000;
+      const period = s2Match[3] || 't2';
+      
+      extractedData.businessPlanData.scenarios.push({
+        id: 's2',
+        name: 'S2: Permuta',
+        type: 'PERMUTA',
+        unitsInPermuta: unitsInPermuta,
+        cashContribution: contribution,
+        cashContributionPeriod: period
+      });
+    }
+    
+    // 🏞️ SCENARIO 3: PAGAMENTO DIFFERITO (S3)
+    const s3Match = message.match(/s3[:\s]*(?:pagamento\s*)?(\d+)k?\s*(?:a\s*)?(t\d)?/i);
+    if (s3Match) {
+      const payment = parseInt(s3Match[1]) * 1000;
+      const period = s3Match[2] || 't1';
+      
+      extractedData.businessPlanData.scenarios.push({
+        id: 's3',
+        name: 'S3: Pagamento Differito',
+        type: 'DEFERRED_PAYMENT',
+        deferredPayment: payment,
+        deferredPaymentPeriod: period
+      });
+    }
+    
+    // 📅 CALENDARIO VENDITE
+    const salesMatches = message.matchAll(/(t\d)[:\s]*(\d+)\s*(?:unità|case)?/gi);
+    for (const match of salesMatches) {
+      extractedData.businessPlanData.salesCalendar.push({
+        period: match[1].toLowerCase(),
+        units: parseInt(match[2])
+      });
+    }
+    
+    console.log('🏦 [BusinessPlan] Dati BP estratti:', extractedData.businessPlanData);
   }
 
   private addConversationStep(sessionId: string, step: Omit<ConversationStep, 'id' | 'timestamp'>): void {

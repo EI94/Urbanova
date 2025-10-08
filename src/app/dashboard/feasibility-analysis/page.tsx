@@ -26,7 +26,8 @@ import {
   Search,
   Settings,
   Share2,
-  Users
+  Users,
+  Sparkles
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
@@ -466,24 +467,42 @@ export default function FeasibilityAnalysisPage() {
                           <Link
                             href={`/dashboard/feasibility-analysis/${project.id}`}
                             className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                            title="Visualizza"
                           >
                             <Eye className="w-4 h-4" />
                           </Link>
                           <Link
                             href={`/dashboard/feasibility-analysis/${project.id}/edit`}
                             className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                            title="Modifica"
                           >
                             <Edit className="w-4 h-4" />
                           </Link>
+                          
+                          {/* 🆕 BUSINESS PLAN BUTTON - PREMIUM STYLE */}
+                          <Link
+                            href={`/dashboard/business-plan?projectId=${project.id}&fromFeasibility=true`}
+                            className="group relative px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center space-x-2"
+                            title="Crea Business Plan da questo progetto"
+                          >
+                            <BarChart3 className="w-4 h-4 transition-transform group-hover:scale-110" />
+                            <span className="text-sm font-medium whitespace-nowrap">Business Plan</span>
+                            
+                            {/* Sparkle Animation */}
+                            <Sparkles className="w-3 h-3 animate-pulse absolute -top-1 -right-1 text-yellow-300" />
+                          </Link>
+                          
                           <button
                             onClick={() => openShareModal(project)}
                             className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                            title="Condividi"
                           >
                             <Share2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDeleteProject(project.id!)}
                             className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Elimina"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
