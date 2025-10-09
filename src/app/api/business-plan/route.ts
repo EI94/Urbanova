@@ -32,11 +32,10 @@ export async function GET(request: NextRequest) {
     const { db } = await import('@/lib/firebase');
     const { getDocs, collection, query, where, orderBy } = await import('firebase/firestore');
     
-    // Query Firestore per recuperare tutti i Business Plan dell'utente
+    // Query Firestore per recuperare tutti i Business Plan (senza filtro userId per test)
     const businessPlansRef = collection(db, 'businessPlans');
     const q = query(
       businessPlansRef,
-      where('userId', '==', userId),
       orderBy('createdAt', 'desc')
     );
     
