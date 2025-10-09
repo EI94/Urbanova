@@ -1,7 +1,7 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
 
 import { BuildingIcon } from '@/components/icons';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -14,8 +14,10 @@ type NewProjectData = any;
 export default function NuovoProgettoPage() {
   const { t } = useLanguage();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isLoadingFromBusinessPlan, setIsLoadingFromBusinessPlan] = useState(false);
 
   const [formData, setFormData] = useState<Partial<NewProjectData>>({
     name: '',
@@ -32,6 +34,68 @@ export default function NuovoProgettoPage() {
     energyClass: '',
     images: [],
   });
+
+  // Carica dati da Business Plan se specificato
+  useEffect(() => {
+    const businessPlanId = searchParams?.get('businessPlanId');
+    const fromBusinessPlan = searchParams?.get('fromBusinessPlan');
+    
+    if (businessPlanId && fromBusinessPlan === 'true') {
+      loadFromBusinessPlan(businessPlanId);
+    }
+  }, [searchParams]);
+
+  const loadFromBusinessPlan = async (businessPlanId: string) => {
+    setIsLoadingFromBusinessPlan(true);
+    try {
+      console.log('📊 [NuovoProgetto] Caricamento dati da Business Plan:', businessPlanId);
+      
+      // Carica i dati del Business Plan
+      const response = await fetch(`/api/business-plan/calculate?id=${businessPlanId}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      
+      if (!result.success || !result.input) {
+        throw new Error('Business Plan non trovato');
+      }
+
+      const businessPlanData = result.input;
+      console.log('📊 [NuovoProgetto] Business Plan caricato:', businessPlanData);
+
+      // Pre-popolare il form con i dati del Business Plan
+      setFormData({
+        name: businessPlanData.projectName || '',
+        description: `Progetto derivato da Business Plan: ${businessPlanData.projectName}`,
+        location: businessPlanData.location || '',
+        surface: businessPlanData.totalUnits * (businessPlanData.averageUnitSize || 100), // Stima superficie
+        units: businessPlanData.totalUnits,
+        budget: businessPlanData.averagePrice * businessPlanData.totalUnits, // Stima budget
+        propertyType: businessPlanData.type === 'RESIDENTIAL' ? 'RESIDENZIALE' : 
+                     businessPlanData.type === 'COMMERCIAL' ? 'COMMERCIALE' : 'MISTO',
+        status: 'PIANIFICAZIONE',
+        startDate: undefined,
+        endDate: undefined,
+        manager: '',
+        energyClass: '',
+        images: [],
+      });
+
+      console.log('✅ [NuovoProgetto] Form pre-popolato con dati Business Plan');
+      
+    } catch (error: any) {
+      console.error('❌ [NuovoProgetto] Errore caricamento Business Plan:', error);
+      setError(`Errore nel caricamento del Business Plan: ${error.message}`);
+    } finally {
+      setIsLoadingFromBusinessPlan(false);
+    }
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -77,7 +141,14 @@ export default function NuovoProgettoPage() {
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center mb-6">
             <BuildingIcon className="h-8 w-8 text-blue-600 mr-3" />
-            <h2 className="text-2xl font-semibold text-gray-800">{t('subtitle', 'newProject')}</h2>
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-800">{t('subtitle', 'newProject')}</h2>
+              {isLoadingFromBusinessPlan && (
+                <p className="text-sm text-blue-600 mt-1">
+                  📊 Caricamento dati dal Business Plan...
+                </p>
+              )}
+            </div>
           </div>
 
           {error && (

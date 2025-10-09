@@ -522,34 +522,46 @@ export default function BusinessPlanPage() {
                             <span>{bp.scenariosCount} scenari</span>
                           </div>
                         </div>
-                        <div className="flex space-x-1">
-                          <button
-                            onClick={() => {
-                              // TODO: Implementare visualizzazione Business Plan
-                              toast('Funzionalità in sviluppo');
-                            }}
-                            className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
-                            title="Visualizza"
+                        <div className="flex flex-col space-y-1">
+                          <div className="flex space-x-1">
+                            <button
+                              onClick={() => {
+                                // TODO: Implementare visualizzazione Business Plan
+                                toast('Funzionalità in sviluppo');
+                              }}
+                              className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                              title="Visualizza"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                // TODO: Implementare modifica Business Plan
+                                toast('Funzionalità in sviluppo');
+                              }}
+                              className="p-1 text-gray-400 hover:text-green-600 transition-colors"
+                              title="Modifica"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => deleteBusinessPlan(bp.id)}
+                              className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                              title="Elimina"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                          
+                          {/* Pulsante Crea Progetto */}
+                          <Link
+                            href={`/dashboard/progetti/nuovo?businessPlanId=${bp.id}&fromBusinessPlan=true`}
+                            className="group relative px-3 py-1.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 flex items-center justify-center space-x-1 text-xs font-medium"
+                            title="Crea Progetto da questo Business Plan"
                           >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => {
-                              // TODO: Implementare modifica Business Plan
-                              toast('Funzionalità in sviluppo');
-                            }}
-                            className="p-1 text-gray-400 hover:text-green-600 transition-colors"
-                            title="Modifica"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => deleteBusinessPlan(bp.id)}
-                            className="p-1 text-gray-400 hover:text-red-600 transition-colors"
-                            title="Elimina"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                            <Plus className="w-3 h-3 transition-transform group-hover:scale-110" />
+                            <span className="whitespace-nowrap">Crea Progetto</span>
+                          </Link>
                         </div>
                       </div>
                       
