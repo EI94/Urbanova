@@ -45,6 +45,7 @@ import ScenarioComparison from '@/components/business-plan/ScenarioComparison';
 import SensitivityAnalysis from '@/components/business-plan/SensitivityAnalysis';
 import type { BusinessPlanInput, BusinessPlanOutput, ScenarioComparison as ScenarioComparisonType, SensitivityOutput } from '@/lib/businessPlanService';
 import { businessPlanExportService } from '@/lib/businessPlanExportService';
+import { toast } from 'react-hot-toast';
 
 // State management type
 type ViewMode = 'welcome' | 'form' | 'results' | 'chat';
@@ -64,6 +65,7 @@ export default function BusinessPlanPage() {
   const [comparison, setComparison] = useState<ScenarioComparisonType | null>(null);
   const [sensitivity, setSensitivity] = useState<SensitivityOutput[]>([]);
   const [selectedScenarioId, setSelectedScenarioId] = useState<string>('');
+  const [feasibilityProjectId, setFeasibilityProjectId] = useState<string | null>(null);
   
   // Loading e stati
   const [isCalculating, setIsCalculating] = useState(false);
@@ -90,13 +92,79 @@ export default function BusinessPlanPage() {
    */
   const loadFromFeasibility = async (projectId: string) => {
     try {
-      // TODO: Chiamata API per caricare dati feasibility
       console.log('📊 [BusinessPlan] Loading feasibility data for:', projectId);
       
-      // Per ora, mostra il form direttamente
+      // Carica i dati del progetto di fattibilità
+      const response = await fetch(`/api/feasibility-projects/${projectId}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      
+      if (!result.success || !result.project) {
+        throw new Error('Progetto non trovato');
+      }
+
+      const feasibilityProject = result.project;
+      console.log('📊 [BusinessPlan] Progetto caricato:', feasibilityProject);
+
+      // Pre-popolare il form con i dati del progetto di fattibilità
+      const businessPlanData = {
+        projectName: feasibilityProject.name || '',
+        location: feasibilityProject.address || '',
+        type: 'RESIDENTIAL' as const, // Default, può essere modificato
+        totalUnits: feasibilityProject.revenues?.units || 1,
+        
+        // Ricavi dal progetto di fattibilità
+        averagePrice: feasibilityProject.revenues?.pricePerSqm ? 
+          feasibilityProject.revenues.pricePerSqm * (feasibilityProject.revenues.averageArea || 100) : 0,
+        salesCommission: 3, // Default
+        discounts: 0, // Default
+        
+        // Costi dal progetto di fattibilità
+        constructionCostPerUnit: feasibilityProject.costs?.pricePerSqm ? 
+          feasibilityProject.costs.pricePerSqm * (feasibilityProject.revenues?.averageArea || 100) : 0,
+        contingency: feasibilityProject.costs?.contingency || 0,
+        
+        // Costi indiretti
+        softCostPercentage: 8, // Default
+        developmentCharges: 0, // Default
+        utilities: 0, // Default
+        
+        // Finanza
+        discountRate: 12, // Default
+        
+        // Tempi (default)
+        salesCalendar: [],
+        constructionTimeline: [],
+        
+        // Scenari terreno (vuoti)
+        landScenarios: [],
+        
+        // Target
+        targetMargin: feasibilityProject.targetMargin || 15,
+        minimumDSCR: 1.2 // Default
+      };
+
+      // Imposta i dati nel form
+      setBpInput(businessPlanData);
+      setFeasibilityProjectId(projectId);
+      
+      // Mostra il form pre-popolato
       setViewMode('form');
+      
+      toast('✅ Dati del progetto di fattibilità caricati nel Business Plan');
+      
     } catch (error) {
-      console.error('Errore caricamento feasibility:', error);
+      console.error('❌ [BusinessPlan] Errore caricamento feasibility:', error);
+      toast('❌ Errore nel caricamento del progetto di fattibilità');
+      // Mostra comunque il form vuoto
+      setViewMode('form');
     }
   };
   
@@ -166,23 +234,34 @@ export default function BusinessPlanPage() {
     setIsChatLoading(true);
     
     try {
-      // Chiama OS per interpretare richiesta BP
-      const response = await fetch('/api/feasibility-smart', {
+      // Chiama Urbanova OS per interpretare richiesta BP
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: chatInput,
           userId: currentUser?.uid || 'anonymous',
-          context: 'business_plan'
+          userEmail: currentUser?.email || 'anonymous@urbanova.it',
+          context: 'business_plan',
+          history: chatMessages.map(msg => ({
+            id: msg.id,
+            content: msg.content,
+            role: msg.type === 'user' ? 'user' : 'assistant',
+            timestamp: msg.timestamp.toISOString()
+          }))
         })
       });
       
       const data = await response.json();
       
+      if (!response.ok) {
+        throw new Error(data.error || 'Errore nella risposta dell\'OS');
+      }
+      
       const aiMessage = {
         id: (Date.now() + 1).toString(),
         type: 'assistant' as const,
-        content: data.response,
+        content: data.response || data.message || 'Risposta ricevuta',
         timestamp: new Date()
       };
       
@@ -193,6 +272,13 @@ export default function BusinessPlanPage() {
         // TODO: Popola form con dati estratti
         console.log('📊 Dati BP estratti dal chat:', data.extractedData.businessPlanData);
       }
+      
+      // Log per debugging
+      console.log('🤖 [BusinessPlan OS] Risposta ricevuta:', {
+        hasResponse: !!data.response,
+        hasMessage: !!data.message,
+        responseLength: data.response?.length || 0
+      });
       
     } catch (error) {
       console.error('❌ Chat error:', error);
@@ -366,6 +452,7 @@ export default function BusinessPlanPage() {
 
             <BusinessPlanForm
               initialData={bpInput as Partial<BusinessPlanInput> | undefined}
+              feasibilityProjectId={feasibilityProjectId || undefined}
               onSubmit={calculateBusinessPlan}
               onCancel={() => setViewMode('welcome')}
               loading={isCalculating}
