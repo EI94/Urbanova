@@ -157,8 +157,8 @@ export default function FeasibilityAnalysisPage() {
       const statisticsData = {
         totalProjects: projectsData.length,
         totalInvestment: projectsData.reduce((sum: number, p: FeasibilityProject) => sum + (p.costs?.total || 0), 0),
-        averageReturn: projectsData.reduce((sum: number, p: FeasibilityProject) => sum + (p.results?.margin || 0), 0) / projectsData.length,
-        averageROI: projectsData.reduce((sum: number, p: FeasibilityProject) => sum + (p.results?.roi || 0), 0) / projectsData.length
+        averageReturn: Number((projectsData.reduce((sum: number, p: FeasibilityProject) => sum + (p.results?.margin || 0), 0) / projectsData.length).toFixed(2)),
+        averageROI: Number((projectsData.reduce((sum: number, p: FeasibilityProject) => sum + (p.results?.roi || 0), 0) / projectsData.length).toFixed(2))
       };
 
       setProjects(projectsData);
@@ -217,8 +217,8 @@ export default function FeasibilityAnalysisPage() {
       const statisticsData = {
         totalProjects: projectsData.length,
         totalInvestment: projectsData.reduce((sum: number, p: any) => sum + (p.costs?.total || 0), 0),
-        averageReturn: projectsData.length > 0 ? projectsData.reduce((sum: number, p: any) => sum + (p.results?.margin || 0), 0) / projectsData.length : 0,
-        averageROI: projectsData.length > 0 ? projectsData.reduce((sum: number, p: any) => sum + (p.results?.roi || 0), 0) / projectsData.length : 0
+        averageReturn: projectsData.length > 0 ? Number((projectsData.reduce((sum: number, p: any) => sum + (p.results?.margin || 0), 0) / projectsData.length).toFixed(2)) : 0,
+        averageROI: projectsData.length > 0 ? Number((projectsData.reduce((sum: number, p: any) => sum + (p.results?.roi || 0), 0) / projectsData.length).toFixed(2)) : 0
       };
 
       setProjects(projectsData);
