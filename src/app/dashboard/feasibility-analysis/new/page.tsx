@@ -78,10 +78,10 @@ export default function NewFeasibilityProjectPage() {
   });
 
   // Nuovo stato per gestire le modalità di input ricavi
-  const [revenueInputMode, setRevenueInputMode] = useState<'lumpSumTotal' | 'lumpSumPerSqm' | 'detailed'>('detailed');
+  const [revenueInputMode, setRevenueInputMode] = useState<'lumpSumTotal' | 'lumpSumPerUnit' | 'detailed'>('detailed');
   const [lumpSumRevenues, setLumpSumRevenues] = useState({
     total: 0,
-    perSqm: 0,
+    perUnit: 0,
   });
 
   const [autoSaving, setAutoSaving] = useState(false);
@@ -400,17 +400,17 @@ export default function NewFeasibilityProjectPage() {
   };
 
   // Funzioni per gestire le modalità di input ricavi
-  const handleRevenueInputModeChange = (mode: 'lumpSumTotal' | 'lumpSumPerSqm' | 'detailed') => {
+  const handleRevenueInputModeChange = (mode: 'lumpSumTotal' | 'lumpSumPerUnit' | 'detailed') => {
     setRevenueInputMode(mode);
 
     // Se si passa da modalità dettagliata a a corpo, calcola i totali
     if (mode === 'lumpSumTotal' && project.revenues) {
       const totalRevenues = (project.revenues.totalSales || 0) + (project.revenues.otherRevenues || 0);
       setLumpSumRevenues(prev => ({ ...prev, total: totalRevenues }));
-    } else if (mode === 'lumpSumPerSqm' && project.revenues && project.totalArea && project.totalArea > 0) {
+    } else if (mode === 'lumpSumPerUnit' && project.revenues?.units && project.revenues.units > 0) {
       const totalRevenues = (project.revenues.totalSales || 0) + (project.revenues.otherRevenues || 0);
-      const perSqm = totalRevenues / project.totalArea;
-      setLumpSumRevenues(prev => ({ ...prev, perSqm }));
+      const perUnit = totalRevenues / project.revenues.units;
+      setLumpSumRevenues(prev => ({ ...prev, perUnit }));
     }
 
     // Ricalcola automaticamente
@@ -418,7 +418,7 @@ export default function NewFeasibilityProjectPage() {
   };
 
   // Funzioni per gestire i ricavi a corpo
-  const handleLumpSumRevenueChange = (type: 'total' | 'perSqm', value: string) => {
+  const handleLumpSumRevenueChange = (type: 'total' | 'perUnit', value: string) => {
     const numValue = parseFloat(value) || 0;
     setLumpSumRevenues(prev => ({ ...prev, [type]: numValue }));
 
@@ -437,16 +437,15 @@ export default function NewFeasibilityProjectPage() {
           total: numValue,
         },
       } as Partial<FeasibilityProject>));
-    } else if (type === 'perSqm' && project.totalArea && project.totalArea > 0) {
-      const total = numValue * project.totalArea;
+    } else if (type === 'perUnit' && project.revenues?.units && project.revenues.units > 0) {
+      const total = numValue * project.revenues.units;
       setProject(prev => ({
         ...prev,
         revenues: {
           ...prev.revenues,
-          units: 1, // Default per modalità a corpo
-          averageArea: project.totalArea,
-          pricePerSqm: numValue,
-          revenuePerUnit: total,
+          averageArea: project.totalArea && project.revenues?.units && project.revenues.units > 0 ? project.totalArea / project.revenues.units : 100,
+          pricePerSqm: project.totalArea && project.totalArea > 0 ? total / project.totalArea : 0,
+          revenuePerUnit: numValue,
           totalSales: total,
           otherRevenues: 0, // Reset altri ricavi per modalità a corpo
           total: total,
@@ -1685,7 +1684,25 @@ export default function NewFeasibilityProjectPage() {
                   <TrendingUpIcon className="h-5 w-5 mr-2 text-green-600" />
                   Ricavi
                 </h2>
-                <div className="flex bg-gray-100 rounded-lg p-1">
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-medium text-gray-700">Modalità:</span>
+                    <div className="group relative">
+                      <QuestionMarkIcon className="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help" />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                        <div className="text-center">
+                          <div className="font-semibold mb-1">Modalità Ricavi</div>
+                          <div className="text-left space-y-1">
+                            <div><strong>A corpo totale:</strong> Prezzo fisso totale</div>
+                            <div><strong>A corpo per unità:</strong> Prezzo fisso per unità</div>
+                            <div><strong>In dettaglio:</strong> Calcolo dettagliato per unità</div>
+                          </div>
+                        </div>
+                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex bg-gray-100 rounded-lg p-1">
                   <button
                     onClick={() => handleRevenueInputModeChange('lumpSumTotal')}
                     className={`px-3 py-1 text-sm rounded-md transition-all ${
@@ -1697,14 +1714,14 @@ export default function NewFeasibilityProjectPage() {
                     A corpo totale
                   </button>
                   <button
-                    onClick={() => handleRevenueInputModeChange('lumpSumPerSqm')}
+                    onClick={() => handleRevenueInputModeChange('lumpSumPerUnit')}
                     className={`px-3 py-1 text-sm rounded-md transition-all ${
-                      revenueInputMode === 'lumpSumPerSqm'
+                      revenueInputMode === 'lumpSumPerUnit'
                         ? 'bg-green-500 text-white shadow-sm'
                         : 'text-gray-600 hover:text-gray-800'
                     }`}
                   >
-                    A corpo per mq
+                    A corpo per unità
                   </button>
                   <button
                     onClick={() => handleRevenueInputModeChange('detailed')}
@@ -1717,32 +1734,33 @@ export default function NewFeasibilityProjectPage() {
                     In dettaglio
                   </button>
                 </div>
+                </div>
               </div>
 
-              {/* Avviso se mancano i mq per modalità per mq */}
-              {revenueInputMode === 'lumpSumPerSqm' &&
-                (!project.totalArea || project.totalArea <= 0) && (
+              {/* Avviso se mancano le unità per modalità per unità */}
+              {revenueInputMode === 'lumpSumPerUnit' &&
+                (!project.revenues?.units || project.revenues.units <= 0) && (
                   <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <div className="flex items-center">
                       <AlertTriangleIcon className="h-4 w-4 text-yellow-600 mr-2" />
                       <span className="text-sm text-yellow-800">
-                        Inserisci la superficie totale nella sezione "Dati Base Progetto" per
+                        Inserisci il numero di unità nella sezione "In dettaglio" per
                         calcolare automaticamente i ricavi totali
                       </span>
                     </div>
                   </div>
                 )}
 
-              {/* Informazioni calcolo per modalità per mq */}
-              {revenueInputMode === 'lumpSumPerSqm' &&
-                project.totalArea &&
-                project.totalArea > 0 && (
+              {/* Informazioni calcolo per modalità per unità */}
+              {revenueInputMode === 'lumpSumPerUnit' &&
+                project.revenues?.units &&
+                project.revenues.units > 0 && (
                   <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <span className="h-4 w-4 text-green-600 mr-2">💰</span>
                         <span className="text-sm text-green-800">
-                          Calcolo automatico: {project.totalArea} mq × {formatCurrency(lumpSumRevenues.perSqm)}/mq = {formatCurrency(lumpSumRevenues.perSqm * project.totalArea)}
+                          Calcolo automatico: {project.revenues.units} unità × {formatCurrency(lumpSumRevenues.perUnit)}/unità = {formatCurrency(lumpSumRevenues.perUnit * project.revenues.units)}
                         </span>
                       </div>
                       <div className="text-sm text-green-600 font-medium">
@@ -1770,36 +1788,36 @@ export default function NewFeasibilityProjectPage() {
               )}
 
               {/* Campi per modalità a corpo */}
-              {(revenueInputMode === 'lumpSumTotal' || revenueInputMode === 'lumpSumPerSqm') && (
+              {(revenueInputMode === 'lumpSumTotal' || revenueInputMode === 'lumpSumPerUnit') && (
                 <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-medium text-gray-900">
-                      {revenueInputMode === 'lumpSumTotal' ? 'Ricavo Totale a Corpo' : 'Ricavo per mq a Corpo'}
+                      {revenueInputMode === 'lumpSumTotal' ? 'Ricavo Totale a Corpo' : 'Ricavo per Unità a Corpo'}
                     </h4>
                     <div className="text-sm text-gray-500">
-                      {revenueInputMode === 'lumpSumTotal' ? 'Importo fisso totale' : 'Importo fisso per mq'}
+                      {revenueInputMode === 'lumpSumTotal' ? 'Importo fisso totale' : 'Importo fisso per unità'}
                     </div>
                   </div>
                   <div className="flex items-center space-x-4">
                     <div className="flex-1">
                       <input
                         type="text"
-                        value={revenueInputMode === 'lumpSumTotal' ? lumpSumRevenues.total || '' : lumpSumRevenues.perSqm || ''}
+                        value={revenueInputMode === 'lumpSumTotal' ? lumpSumRevenues.total || '' : lumpSumRevenues.perUnit || ''}
                         onChange={e => handleLumpSumRevenueChange(
-                          revenueInputMode === 'lumpSumTotal' ? 'total' : 'perSqm',
+                          revenueInputMode === 'lumpSumTotal' ? 'total' : 'perUnit',
                           handleNumberInput(e).toString()
                         )}
                         className="input input-bordered w-full text-lg font-medium"
-                        placeholder={revenueInputMode === 'lumpSumTotal' ? 'Es. 500000' : 'Es. 2500'}
+                        placeholder={revenueInputMode === 'lumpSumTotal' ? 'Es. 500000' : 'Es. 150000'}
                       />
                     </div>
                     <div className="text-sm text-gray-600">
-                      {revenueInputMode === 'lumpSumTotal' ? '€' : '€/mq'}
+                      {revenueInputMode === 'lumpSumTotal' ? '€' : '€/unità'}
                     </div>
                   </div>
-                  {revenueInputMode === 'lumpSumPerSqm' && project.totalArea && project.totalArea > 0 && (
+                  {revenueInputMode === 'lumpSumPerUnit' && project.revenues?.units && project.revenues.units > 0 && (
                     <div className="mt-2 text-sm text-green-600">
-                      Totale: {formatCurrency(lumpSumRevenues.perSqm * project.totalArea)}
+                      Totale: {formatCurrency(lumpSumRevenues.perUnit * project.revenues.units)}
                     </div>
                   )}
                 </div>
