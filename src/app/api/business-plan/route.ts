@@ -28,11 +28,50 @@ export async function GET(request: NextRequest) {
     
     console.log(`📋 [API BusinessPlan] Caricamento lista BP per utente: ${userId}`);
     
-    // TEMPORANEO: Restituisce lista vuota per evitare errori di permessi Firebase
-    // TODO: Implementare Firebase Admin SDK per accesso server-side corretto
-    const businessPlans: any[] = [];
+    // Import dinamico per evitare errori di build
+    const { db } = await import('@/lib/firebase');
+    const { getDocs, collection, query, orderBy, limit } = await import('firebase/firestore');
     
-    console.log(`✅ [API BusinessPlan] Lista vuota restituita (fix temporaneo)`);
+    // Query per ottenere tutti i Business Plan (come feasibilityProjects)
+    const businessPlansRef = collection(db, 'businessPlans');
+    const q = query(businessPlansRef, orderBy('createdAt', 'desc'), limit(100));
+    
+    console.log('🔄 [API BusinessPlan] Eseguendo query Business Plans...');
+    const snapshot = await getDocs(q);
+    
+    if (snapshot.empty) {
+      console.log('⚠️ [API BusinessPlan] Nessun Business Plan trovato');
+      return NextResponse.json({
+        success: true,
+        businessPlans: [],
+        count: 0,
+        message: 'Nessun Business Plan trovato'
+      });
+    }
+    
+    const businessPlans = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        projectName: data.projectName,
+        location: data.input?.location || '',
+        totalUnits: data.input?.totalUnits || 0,
+        averagePrice: data.input?.averagePrice || 0,
+        userId: data.userId, // Manteniamo userId per filtrare nel frontend se necessario
+        createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
+        updatedAt: data.updatedAt?.toDate?.()?.toISOString() || null,
+        // Metriche del miglior scenario
+        bestNPV: data.outputs?.length > 0 ? 
+          Math.max(...data.outputs.map((o: any) => o.metrics?.npv || 0)) : 0,
+        bestIRR: data.outputs?.length > 0 ? 
+          Math.max(...data.outputs.map((o: any) => o.metrics?.irr || 0)) : 0,
+        bestMargin: data.outputs?.length > 0 ? 
+          Math.max(...data.outputs.map((o: any) => o.summary?.marginPercentage || 0)) : 0,
+        scenariosCount: data.outputs?.length || 0
+      };
+    }).filter(bp => bp.userId === userId); // Filtriamo nel codice invece che nella query
+    
+    console.log(`✅ [API BusinessPlan] Trovati ${businessPlans.length} Business Plan per utente`);
     
     return NextResponse.json({
       success: true,
