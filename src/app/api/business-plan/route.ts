@@ -8,8 +8,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { businessPlanService } from '@/lib/businessPlanService';
-import { query, where, orderBy, getDocs } from 'firebase/firestore';
-import { safeCollection } from '@/lib/firebaseUtils';
+import { query, where, orderBy, getDocs, collection } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 /**
  * 📋 GET: Lista tutti i Business Plan dell'utente
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     
     // Query Firestore per recuperare tutti i Business Plan dell'utente
     const q = query(
-      safeCollection('businessPlans'),
+      collection(db, 'businessPlans'),
       where('userId', '==', userId),
       orderBy('createdAt', 'desc')
     );

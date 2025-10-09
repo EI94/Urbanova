@@ -10,7 +10,7 @@
  * - Spiegabilità per ogni metrica
  */
 
-import { addDoc, getDocs, getDoc, updateDoc, deleteDoc, doc, query, where, serverTimestamp } from 'firebase/firestore';
+import { addDoc, getDocs, getDoc, updateDoc, deleteDoc, doc, collection, query, where, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import { notificationTriggerService } from './notificationTriggerService';
 import { safeCollection } from './firebaseUtils';
@@ -1503,7 +1503,7 @@ class BusinessPlanService {
       console.log('🗑️ [BusinessPlan] Eliminazione Business Plan:', businessPlanId);
       
       // Verifica che il Business Plan appartenga all'utente
-      const businessPlanDoc = await getDoc(doc(safeCollection(this.COLLECTION_NAME), businessPlanId));
+      const businessPlanDoc = await getDoc(doc(collection(db, this.COLLECTION_NAME), businessPlanId));
       
       if (!businessPlanDoc.exists()) {
         throw new Error('Business Plan non trovato');
@@ -1515,7 +1515,7 @@ class BusinessPlanService {
       }
       
       // Elimina il documento
-      await deleteDoc(doc(safeCollection(this.COLLECTION_NAME), businessPlanId));
+      await deleteDoc(doc(collection(db, this.COLLECTION_NAME), businessPlanId));
       
       console.log('✅ [BusinessPlan] Business Plan eliminato con successo');
       return true;
