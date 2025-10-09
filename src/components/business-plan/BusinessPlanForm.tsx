@@ -31,69 +31,40 @@ export default function BusinessPlanForm({
     projectName: initialData?.projectName || '',
     location: initialData?.location || '',
     type: initialData?.type || 'RESIDENTIAL',
-    totalUnits: initialData?.totalUnits || 4,
+    totalUnits: initialData?.totalUnits || 0,
     
-    // Ricavi (defaults ragionevoli)
-    averagePrice: initialData?.averagePrice || 390000,
-    salesCommission: initialData?.salesCommission || 3,
+    // Ricavi (campi vuoti di default)
+    averagePrice: initialData?.averagePrice || 0,
+    salesCommission: initialData?.salesCommission || 0,
     discounts: initialData?.discounts || 0,
     
     // Costi diretti
-    constructionCostPerUnit: initialData?.constructionCostPerUnit || 200000,
-    contingency: initialData?.contingency || 10,
+    constructionCostPerUnit: initialData?.constructionCostPerUnit || 0,
+    contingency: initialData?.contingency || 0,
     
     // Costi indiretti
-    softCostPercentage: initialData?.softCostPercentage || 8,
-    developmentCharges: initialData?.developmentCharges || 50000,
-    utilities: initialData?.utilities || 20000,
+    softCostPercentage: initialData?.softCostPercentage || 0,
+    developmentCharges: initialData?.developmentCharges || 0,
+    utilities: initialData?.utilities || 0,
     
     // Finanza
-    discountRate: initialData?.discountRate || 12,
+    discountRate: initialData?.discountRate || 0,
     
-    // Tempi
-    salesCalendar: initialData?.salesCalendar || [
-      { period: 't1', units: 1 },
-      { period: 't2', units: 3 }
-    ],
-    constructionTimeline: initialData?.constructionTimeline || [
-      { phase: 'Fondazioni', period: 't1' },
-      { phase: 'Struttura', period: 't1' },
-      { phase: 'Finiture', period: 't2' }
-    ],
+    // Tempi (vuoti di default)
+    salesCalendar: initialData?.salesCalendar || [],
+    constructionTimeline: initialData?.constructionTimeline || [],
     
-    // Scenari terreno (parte da 3 scenari pre-configurati)
+    // Scenari terreno (vuoti di default)
     landScenarios: initialData?.landScenarios || [],
     
     // Target
-    targetMargin: initialData?.targetMargin || 15,
-    minimumDSCR: initialData?.minimumDSCR || 1.2
+    targetMargin: initialData?.targetMargin || 0,
+    minimumDSCR: initialData?.minimumDSCR || 0
   });
   
   const [activeTab, setActiveTab] = useState<'base' | 'revenue' | 'costs' | 'land' | 'finance' | 'timing'>('base');
   const [landScenarios, setLandScenarios] = useState<LandScenario[]>(
-    initialData?.landScenarios || [
-      {
-        id: 's1',
-        name: 'S1: Cash Upfront',
-        type: 'CASH',
-        upfrontPayment: 220000
-      },
-      {
-        id: 's2',
-        name: 'S2: Permuta',
-        type: 'PERMUTA',
-        unitsInPermuta: 1,
-        cashContribution: 80000,
-        cashContributionPeriod: 't2'
-      },
-      {
-        id: 's3',
-        name: 'S3: Pagamento Differito',
-        type: 'DEFERRED_PAYMENT',
-        deferredPayment: 300000,
-        deferredPaymentPeriod: 't1'
-      }
-    ]
+    initialData?.landScenarios || []
   );
   
   const [showDebtConfig, setShowDebtConfig] = useState(false);
@@ -142,16 +113,21 @@ export default function BusinessPlanForm({
     
     if (!formData.projectName) errors.push('Nome progetto richiesto');
     if (!formData.totalUnits || formData.totalUnits < 1) errors.push('Numero unità deve essere >= 1');
-    if (!formData.averagePrice || formData.averagePrice < 1000) errors.push('Prezzo medio troppo basso');
-    if (!formData.constructionCostPerUnit || formData.constructionCostPerUnit < 1000) errors.push('Costo costruzione troppo basso');
-    if (landScenarios.length === 0) errors.push('Almeno uno scenario terreno richiesto');
     
-    // Verifica calendario vendite
-    const totalSalesUnits = (formData.salesCalendar || []).reduce((sum, s) => sum + s.units, 0);
-    const unitsInPermuta = landScenarios.reduce((sum, s) => sum + (s.unitsInPermuta || 0), 0);
+    // Validazioni solo se i dati sono stati inseriti
+    if (formData.averagePrice && formData.averagePrice < 1000) errors.push('Prezzo medio troppo basso');
+    if (formData.constructionCostPerUnit && formData.constructionCostPerUnit < 1000) errors.push('Costo costruzione troppo basso');
     
-    if (totalSalesUnits + unitsInPermuta !== formData.totalUnits) {
-      errors.push(`Incongruenza unità: ${totalSalesUnits} vendute + ${unitsInPermuta} permuta ≠ ${formData.totalUnits} totali`);
+    // Verifica calendario vendite solo se ci sono dati
+    if (formData.totalUnits > 0 && (formData.salesCalendar || []).length > 0) {
+      const totalSalesUnits = (formData.salesCalendar || []).reduce((sum, s) => sum + s.units, 0);
+      const unitsInPermuta = landScenarios.reduce((sum, s) => sum + (s.unitsInPermuta || 0), 0);
+      
+      // Le unità in permuta sono scambiate con terreno, non vendute
+      // Quindi: unità vendute + unità in permuta = unità totali
+      if (totalSalesUnits + unitsInPermuta !== formData.totalUnits) {
+        errors.push(`Incongruenza unità: ${totalSalesUnits} vendute + ${unitsInPermuta} permuta ≠ ${formData.totalUnits} totali`);
+      }
     }
     
     setValidationErrors(errors);
