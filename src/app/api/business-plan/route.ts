@@ -8,8 +8,25 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { businessPlanService } from '@/lib/businessPlanService';
-import { query, where, orderBy, getDocs, collection } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getFirestore } from 'firebase-admin/firestore';
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
+
+// Inizializza Firebase Admin SDK se non già inizializzato
+if (!getApps().length) {
+  try {
+    initializeApp({
+      credential: cert({
+        projectId: process.env.FIREBASE_PROJECT_ID || 'urbanova-b623e',
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      }),
+    });
+  } catch (error) {
+    console.error('❌ [API BusinessPlan] Errore inizializzazione Firebase Admin:', error);
+  }
+}
+
+const adminDb = getFirestore();
 
 /**
  * 📋 GET: Lista tutti i Business Plan dell'utente
@@ -28,14 +45,13 @@ export async function GET(request: NextRequest) {
     
     console.log(`📋 [API BusinessPlan] Caricamento lista BP per utente: ${userId}`);
     
-    // Query Firestore per recuperare tutti i Business Plan dell'utente
-    const q = query(
-      collection(db, 'businessPlans'),
-      where('userId', '==', userId),
-      orderBy('createdAt', 'desc')
-    );
+    // Query Firestore per recuperare tutti i Business Plan dell'utente usando Admin SDK
+    const businessPlansRef = adminDb.collection('businessPlans');
+    const snapshot = await businessPlansRef
+      .where('userId', '==', userId)
+      .orderBy('createdAt', 'desc')
+      .get();
     
-    const snapshot = await getDocs(q);
     const businessPlans: any[] = [];
     
     snapshot.forEach((doc) => {
@@ -98,11 +114,20 @@ export async function DELETE(request: NextRequest) {
     
     console.log(`🗑️ [API BusinessPlan] Eliminazione BP: ${businessPlanId} per utente: ${userId}`);
     
-    const success = await businessPlanService.deleteBusinessPlan(businessPlanId, userId);
+    // Elimina usando Firebase Admin SDK
+    const businessPlanDoc = adminDb.collection('businessPlans').doc(businessPlanId);
+    const docSnapshot = await businessPlanDoc.get();
     
-    if (!success) {
-      throw new Error('Errore durante l\'eliminazione');
+    if (!docSnapshot.exists) {
+      throw new Error('Business Plan non trovato');
     }
+    
+    const businessPlanData = docSnapshot.data();
+    if (businessPlanData?.userId !== userId) {
+      throw new Error('Non autorizzato a eliminare questo Business Plan');
+    }
+    
+    await businessPlanDoc.delete();
     
     console.log('✅ [API BusinessPlan] Business Plan eliminato con successo');
     
