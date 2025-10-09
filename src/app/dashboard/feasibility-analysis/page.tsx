@@ -252,12 +252,30 @@ export default function FeasibilityAnalysisPage() {
     if (!confirm('Sei sicuro di voler eliminare questo progetto?')) return;
     
     try {
-      await feasibilityService.deleteProject(projectId);
-      await loadData();
+      console.log('🗑️ [DELETE PROJECT] Eliminazione progetto via API:', projectId);
+      
+      // Usa l'endpoint API invece del servizio diretto
+      const response = await fetch(`/api/feasibility-projects/${projectId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ [DELETE PROJECT] Eliminazione completata:', result);
+      
+      // Ricarica i dati
+      await loadDataForTest();
       toast('Progetto eliminato con successo', { icon: '✅' });
-    } catch (err) {
-      console.error('Error deleting project:', err);
-      toast('Errore nell\'eliminazione del progetto', { icon: '❌' });
+    } catch (err: any) {
+      console.error('❌ [DELETE PROJECT] Errore eliminazione:', err);
+      toast(`Errore nell'eliminazione del progetto: ${err.message}`, { icon: '❌' });
     }
   };
 
