@@ -8,36 +8,13 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { businessPlanService } from '@/lib/businessPlanService';
-import { getFirestore } from 'firebase-admin/firestore';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-
-// Inizializza Firebase Admin SDK
-let adminDb: any = null;
-
-try {
-  const apps = getApps();
-  if (apps.length === 0) {
-    initializeApp({
-      credential: cert({
-        projectId: process.env.FIREBASE_PROJECT_ID || 'urbanova-b623e',
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      }),
-    });
-  }
-  adminDb = getFirestore();
-} catch (error) {
-  console.error('❌ [API BusinessPlan] Errore inizializzazione Firebase Admin:', error);
-}
 
 /**
  * 📋 GET: Lista tutti i Business Plan dell'utente
  */
 export async function GET(request: NextRequest) {
   try {
-    if (!adminDb) {
-      throw new Error('Firebase Admin SDK non inizializzato');
-    }
+    console.log('🔄 [API BusinessPlan] Richiesta lista Business Plan...');
     
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
@@ -51,13 +28,19 @@ export async function GET(request: NextRequest) {
     
     console.log(`📋 [API BusinessPlan] Caricamento lista BP per utente: ${userId}`);
     
-    // Query Firestore per recuperare tutti i Business Plan dell'utente usando Admin SDK
-    const businessPlansRef = adminDb.collection('businessPlans');
-    const snapshot = await businessPlansRef
-      .where('userId', '==', userId)
-      .orderBy('createdAt', 'desc')
-      .get();
+    // Import dinamico per evitare errori di build
+    const { db } = await import('@/lib/firebase');
+    const { getDocs, collection, query, where, orderBy } = await import('firebase/firestore');
     
+    // Query Firestore per recuperare tutti i Business Plan dell'utente
+    const businessPlansRef = collection(db, 'businessPlans');
+    const q = query(
+      businessPlansRef,
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
+    
+    const snapshot = await getDocs(q);
     const businessPlans: any[] = [];
     
     snapshot.forEach((doc) => {
@@ -68,8 +51,8 @@ export async function GET(request: NextRequest) {
         location: data.input?.location || '',
         totalUnits: data.input?.totalUnits || 0,
         averagePrice: data.input?.averagePrice || 0,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt,
+        createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
+        updatedAt: data.updatedAt?.toDate?.()?.toISOString() || null,
         // Metriche del miglior scenario
         bestNPV: data.outputs?.length > 0 ? 
           Math.max(...data.outputs.map((o: any) => o.metrics?.npv || 0)) : 0,
@@ -107,10 +90,6 @@ export async function GET(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
-    if (!adminDb) {
-      throw new Error('Firebase Admin SDK non inizializzato');
-    }
-    
     const { searchParams } = new URL(request.url);
     const businessPlanId = searchParams.get('id');
     const userId = searchParams.get('userId');
@@ -124,11 +103,15 @@ export async function DELETE(request: NextRequest) {
     
     console.log(`🗑️ [API BusinessPlan] Eliminazione BP: ${businessPlanId} per utente: ${userId}`);
     
-    // Elimina usando Firebase Admin SDK
-    const businessPlanDoc = adminDb.collection('businessPlans').doc(businessPlanId);
-    const docSnapshot = await businessPlanDoc.get();
+    // Import dinamico per evitare errori di build
+    const { db } = await import('@/lib/firebase');
+    const { getDoc, deleteDoc, doc } = await import('firebase/firestore');
     
-    if (!docSnapshot.exists) {
+    // Verifica che il Business Plan appartenga all'utente
+    const businessPlanDoc = doc(db, 'businessPlans', businessPlanId);
+    const docSnapshot = await getDoc(businessPlanDoc);
+    
+    if (!docSnapshot.exists()) {
       throw new Error('Business Plan non trovato');
     }
     
@@ -137,7 +120,7 @@ export async function DELETE(request: NextRequest) {
       throw new Error('Non autorizzato a eliminare questo Business Plan');
     }
     
-    await businessPlanDoc.delete();
+    await deleteDoc(businessPlanDoc);
     
     console.log('✅ [API BusinessPlan] Business Plan eliminato con successo');
     
