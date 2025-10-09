@@ -264,16 +264,38 @@ export default function NewFeasibilityProjectPage() {
         setSavedProjectId(editId); // FORZO L'IMPOSTAZIONE PER FAR FUNZIONARE I BOTTONI
 
         try {
-          // Carica il progetto esistente
-          const existingProject = await feasibilityService.getProjectById(editId);
-          if (existingProject) {
-            setProject(existingProject);
+          // Carica il progetto esistente via API
+          console.log('🔄 [EDIT MODE] Caricamento progetto via API:', editId);
+          const response = await fetch(`/api/feasibility-projects/${editId}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (!response.ok) {
+            if (response.status === 404) {
+              console.log('❌ [EDIT MODE] Progetto non trovato:', editId);
+              toast('❌ Progetto non trovato');
+              return;
+            }
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          const result = await response.json();
+          console.log('✅ [EDIT MODE] Progetto caricato via API:', result);
+          
+          if (result.success && result.project) {
+            setProject(result.project);
             setSavedProjectId(editId); // RICONFERMO L'ID
             toast('✅ Progetto caricato per la modifica');
-          }
-        } catch (error) {
-          console.error('❌ Errore caricamento progetto per edit:', error);
+          } else {
+            console.log('❌ [EDIT MODE] Risposta API non valida:', result);
           toast('❌ Errore nel caricamento del progetto');
+          }
+        } catch (error: any) {
+          console.error('❌ [EDIT MODE] Errore caricamento progetto per edit:', error);
+          toast(`❌ Errore nel caricamento del progetto: ${error.message}`);
         }
       }
     };
@@ -812,7 +834,7 @@ export default function NewFeasibilityProjectPage() {
             <div>
               <div className="flex items-center space-x-3">
                 <h1 className="text-3xl font-bold text-gray-900">
-                  🏗️ Nuovo Progetto di Fattibilità
+                  {isEditMode ? '✏️ Modifica Progetto di Fattibilità' : '🏗️ Nuovo Progetto di Fattibilità'}
                 </h1>
                 {autoSaving && (
                   <div className="flex items-center space-x-2 text-sm text-blue-600">
@@ -827,7 +849,9 @@ export default function NewFeasibilityProjectPage() {
                   </div>
                 )}
               </div>
-              <p className="text-gray-600 mt-1">Crea un nuovo studio di fattibilità immobiliare</p>
+              <p className="text-gray-600 mt-1">
+                {isEditMode ? 'Modifica il tuo studio di fattibilità immobiliare' : 'Crea un nuovo studio di fattibilità immobiliare'}
+              </p>
             </div>
           </div>
           <div className="flex space-x-2">
@@ -1681,9 +1705,9 @@ export default function NewFeasibilityProjectPage() {
             <div className="bg-white shadow-sm rounded-lg p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                  <TrendingUpIcon className="h-5 w-5 mr-2 text-green-600" />
-                  Ricavi
-                </h2>
+                <TrendingUpIcon className="h-5 w-5 mr-2 text-green-600" />
+                Ricavi
+              </h2>
                 <div className="flex items-center space-x-3">
                   <div className="flex items-center space-x-2">
                     <span className="text-sm font-medium text-gray-700">Modalità:</span>
@@ -1825,65 +1849,65 @@ export default function NewFeasibilityProjectPage() {
 
               {/* Campi dettagliati per modalità in dettaglio */}
               {revenueInputMode === 'detailed' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="label">
-                      <span className="label-text">Numero Unità</span>
-                    </label>
-                    <input
-                      type="number"
-                      value={project.revenues?.units || ''}
-                      onChange={e => handleInputChange('revenues', 'units', parseInt(e.target.value))}
-                      className="input input-bordered w-full"
-                      placeholder="Inserisci numero unità"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="label">
-                      <span className="label-text">Superficie Media (m²)</span>
-                    </label>
-                    <input
-                      type="number"
-                      value={project.revenues?.averageArea || ''}
-                      onChange={e =>
-                        handleInputChange('revenues', 'averageArea', parseInt(e.target.value))
-                      }
-                      className="input input-bordered w-full"
-                      placeholder="144"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="label">
-                      <span className="label-text">Prezzo Vendita (€/m²)</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={project.revenues?.pricePerSqm || ''}
-                      onChange={e =>
-                        handleInputChange('revenues', 'pricePerSqm', handleNumberInput(e))
-                      }
-                      className="input input-bordered w-full"
-                      placeholder="Inserisci prezzo"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="label">
-                      <span className="label-text">Altri Ricavi</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={project.revenues?.otherRevenues || ''}
-                      onChange={e =>
-                        handleInputChange('revenues', 'otherRevenues', handleNumberInput(e))
-                      }
-                      className="input input-bordered w-full"
-                      placeholder="Inserisci importo"
-                    />
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="label">
+                    <span className="label-text">Numero Unità</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={project.revenues?.units || ''}
+                    onChange={e => handleInputChange('revenues', 'units', parseInt(e.target.value))}
+                    className="input input-bordered w-full"
+                    placeholder="Inserisci numero unità"
+                  />
                 </div>
+
+                <div>
+                  <label className="label">
+                    <span className="label-text">Superficie Media (m²)</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={project.revenues?.averageArea || ''}
+                    onChange={e =>
+                      handleInputChange('revenues', 'averageArea', parseInt(e.target.value))
+                    }
+                    className="input input-bordered w-full"
+                    placeholder="144"
+                  />
+                </div>
+
+                <div>
+                  <label className="label">
+                    <span className="label-text">Prezzo Vendita (€/m²)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={project.revenues?.pricePerSqm || ''}
+                    onChange={e =>
+                      handleInputChange('revenues', 'pricePerSqm', handleNumberInput(e))
+                    }
+                    className="input input-bordered w-full"
+                    placeholder="Inserisci prezzo"
+                  />
+                </div>
+
+                <div>
+                  <label className="label">
+                    <span className="label-text">Altri Ricavi</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={project.revenues?.otherRevenues || ''}
+                    onChange={e =>
+                      handleInputChange('revenues', 'otherRevenues', handleNumberInput(e))
+                    }
+                    className="input input-bordered w-full"
+                    placeholder="Inserisci importo"
+                  />
+                </div>
+              </div>
               )}
             </div>
 

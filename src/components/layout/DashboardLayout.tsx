@@ -235,7 +235,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   }`}
                   onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     // 🔧 FIX: Forza navigazione anche se si è in una sottopagina
-                    if (pathname?.includes('/feasibility-analysis/') || pathname?.includes('/design-center/') || pathname?.includes('/business-plan/')) {
+                    if (pathname?.includes('/feasibility-analysis/') || pathname?.includes('/design-center/') || pathname?.includes('/business-plan/') || pathname?.includes('/progetti/')) {
                       e.preventDefault();
                       console.log('🔄 [DASHBOARD LAYOUT] Navigazione forzata da', pathname, 'a /dashboard');
                       try {
@@ -409,6 +409,25 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                       ? 'bg-blue-50 text-blue-700 shadow-sm'
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                   }`}
+                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                    // 🔧 FIX: Forza navigazione anche se si è in una sottopagina
+                    if (pathname?.includes('/feasibility-analysis/') || pathname?.includes('/design-center/') || pathname?.includes('/business-plan/') || pathname?.includes('/progetti/')) {
+                      e.preventDefault();
+                      console.log('🔄 [DASHBOARD LAYOUT] Navigazione forzata da', pathname, 'a /dashboard/progetti');
+                      try {
+                        router.push('/dashboard/progetti');
+                        setTimeout(() => {
+                          if (window.location.pathname === pathname) {
+                            console.log('⚠️ [DASHBOARD LAYOUT] Router.push fallito, uso window.location');
+                            window.location.href = '/dashboard/progetti';
+                          }
+                        }, 100);
+                      } catch (error) {
+                        console.error('❌ [DASHBOARD LAYOUT] Errore navigazione:', error);
+                        window.location.href = '/dashboard/progetti';
+                      }
+                    }
+                  }}
                 >
                   <BuildingIcon className="w-4 h-4 mr-3" />
                   Progetti
