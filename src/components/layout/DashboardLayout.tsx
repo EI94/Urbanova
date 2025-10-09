@@ -112,6 +112,60 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
     }
   };
 
+  // 🔧 FIX NAVIGAZIONE: Intercettatore universale per tutti i click sui link
+  useEffect(() => {
+    console.log('🚀 [NAVIGATION INTERCEPTOR] Inizializzazione intercettatore navigazione, pathname:', pathname);
+    
+    const handleNavigationClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      const link = target.closest('a[href]') as HTMLAnchorElement;
+      
+      if (link && link.href) {
+        console.log('🔍 [NAVIGATION INTERCEPTOR] Click rilevato su link:', link.href, 'pathname attuale:', pathname);
+        
+        // Controlla se siamo in una pagina di feasibility analysis
+        if (pathname?.includes('/feasibility-analysis/')) {
+          console.log('🔄 [NAVIGATION INTERCEPTOR] Rilevata pagina feasibility-analysis, forzando navigazione');
+          
+          // Preveni la navigazione normale
+          event.preventDefault();
+          event.stopPropagation();
+          
+          // Estrai il path di destinazione
+          const url = new URL(link.href);
+          const destinationPath = url.pathname;
+          
+          console.log('🎯 [NAVIGATION INTERCEPTOR] Navigazione forzata verso:', destinationPath);
+          
+          // Forza la navigazione
+          try {
+            router.push(destinationPath);
+            console.log('✅ [NAVIGATION INTERCEPTOR] Router.push eseguito');
+            
+            // Fallback dopo 100ms
+            setTimeout(() => {
+              if (window.location.pathname === pathname) {
+                console.log('⚠️ [NAVIGATION INTERCEPTOR] Router.push fallito, uso window.location');
+                window.location.href = destinationPath;
+              }
+            }, 100);
+          } catch (error) {
+            console.error('❌ [NAVIGATION INTERCEPTOR] Errore router.push:', error);
+            window.location.href = destinationPath;
+          }
+        }
+      }
+    };
+
+    // Aggiungi l'intercettatore globale
+    document.addEventListener('click', handleNavigationClick, true);
+    
+    return () => {
+      console.log('🧹 [NAVIGATION INTERCEPTOR] Rimozione intercettatore');
+      document.removeEventListener('click', handleNavigationClick, true);
+    };
+  }, [pathname, router]);
+
   // Carica notifiche e profilo utente solo se l'utente è autenticato
   useEffect(() => {
     const loadData = async () => {
