@@ -39,16 +39,39 @@ export default function FeasibilityProjectDetailPage() {
   const loadProject = async (projectId: string) => {
     setLoading(true);
     try {
-      const projectData = await feasibilityService.getProjectById(projectId);
-      if (projectData) {
-        setProject(projectData);
+      console.log('🔄 [PROJECT DETAIL] Caricamento progetto via API:', projectId);
+      
+      // Usa l'endpoint API invece del servizio client-side
+      const response = await fetch(`/api/feasibility-projects/${projectId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.log('❌ [PROJECT DETAIL] Progetto non trovato:', projectId);
+          toast('❌ Progetto non trovato', { icon: '❌' });
+          router.push('/dashboard/feasibility-analysis');
+          return;
+        }
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ [PROJECT DETAIL] Progetto caricato via API:', result);
+      
+      if (result.success && result.project) {
+        setProject(result.project);
       } else {
+        console.log('❌ [PROJECT DETAIL] Risposta API non valida:', result);
         toast('❌ Progetto non trovato', { icon: '❌' });
         router.push('/dashboard/feasibility-analysis');
       }
-    } catch (error) {
-      console.error('Errore caricamento progetto:', error);
-      toast('❌ Errore nel caricamento del progetto', { icon: '❌' });
+    } catch (error: any) {
+      console.error('❌ [PROJECT DETAIL] Errore caricamento progetto:', error);
+      toast(`❌ Errore nel caricamento del progetto: ${error.message}`, { icon: '❌' });
       router.push('/dashboard/feasibility-analysis');
     } finally {
       setLoading(false);

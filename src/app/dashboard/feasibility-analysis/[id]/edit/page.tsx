@@ -19,10 +19,33 @@ export default function EditFeasibilityProjectPage() {
           return;
         }
 
-        // Carica il progetto per verificare che esista
-        const project = await feasibilityService.getProjectById(params?.id as string);
+        // Carica il progetto per verificare che esista via API
+        console.log('🔄 [PROJECT EDIT] Verifica esistenza progetto via API:', params?.id);
+        const response = await fetch(`/api/feasibility-projects/${params?.id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
-        if (!project) {
+        if (!response.ok) {
+          if (response.status === 404) {
+            console.log('❌ [PROJECT EDIT] Progetto non trovato:', params?.id);
+            toast('❌ Progetto non trovato', { icon: '❌' });
+          } else {
+            const errorText = await response.text();
+            console.error('❌ [PROJECT EDIT] Errore API:', response.status, errorText);
+            toast('❌ Errore nel caricamento del progetto', { icon: '❌' });
+          }
+          router.push('/dashboard/feasibility-analysis');
+          return;
+        }
+
+        const result = await response.json();
+        console.log('✅ [PROJECT EDIT] Progetto verificato via API:', result);
+        
+        if (!result.success || !result.project) {
+          console.log('❌ [PROJECT EDIT] Risposta API non valida:', result);
           toast('❌ Progetto non trovato', { icon: '❌' });
           router.push('/dashboard/feasibility-analysis');
           return;
