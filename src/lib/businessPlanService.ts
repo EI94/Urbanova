@@ -10,7 +10,7 @@
  * - Spiegabilità per ogni metrica
  */
 
-import { addDoc, getDocs, getDoc, updateDoc, deleteDoc, doc, collection, query, where, serverTimestamp } from 'firebase/firestore';
+import { addDoc, getDocs, getDoc, updateDoc, deleteDoc, doc, collection, query, where, orderBy, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import { notificationTriggerService } from './notificationTriggerService';
 import { safeCollection } from './firebaseUtils';
@@ -1495,6 +1495,53 @@ class BusinessPlanService {
     }
   }
   
+  /**
+   * 📋 LISTA TUTTI I BUSINESS PLAN DI UN UTENTE
+   */
+  async getAllBusinessPlans(userId: string): Promise<any[]> {
+    try {
+      console.log('📋 [BusinessPlan] Caricamento lista BP per utente:', userId);
+      
+      const businessPlansRef = collection(db, this.COLLECTION_NAME);
+      const q = query(
+        businessPlansRef,
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc')
+      );
+      
+      const snapshot = await getDocs(q);
+      const businessPlans: any[] = [];
+      
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        businessPlans.push({
+          id: doc.id,
+          projectName: data.projectName,
+          location: data.input?.location || '',
+          totalUnits: data.input?.totalUnits || 0,
+          averagePrice: data.input?.averagePrice || 0,
+          createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
+          updatedAt: data.updatedAt?.toDate?.()?.toISOString() || null,
+          // Metriche del miglior scenario
+          bestNPV: data.outputs?.length > 0 ? 
+            Math.max(...data.outputs.map((o: any) => o.metrics?.npv || 0)) : 0,
+          bestIRR: data.outputs?.length > 0 ? 
+            Math.max(...data.outputs.map((o: any) => o.metrics?.irr || 0)) : 0,
+          bestMargin: data.outputs?.length > 0 ? 
+            Math.max(...data.outputs.map((o: any) => o.summary?.marginPercentage || 0)) : 0,
+          scenariosCount: data.outputs?.length || 0
+        });
+      });
+      
+      console.log(`✅ [BusinessPlan] Trovati ${businessPlans.length} Business Plan`);
+      return businessPlans;
+      
+    } catch (error) {
+      console.error('❌ [BusinessPlan] Errore caricamento lista:', error);
+      throw error;
+    }
+  }
+
   /**
    * 🗑️ ELIMINA BUSINESS PLAN
    */
