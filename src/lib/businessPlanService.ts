@@ -1494,6 +1494,37 @@ class BusinessPlanService {
       return [];
     }
   }
+  
+  /**
+   * 🗑️ ELIMINA BUSINESS PLAN
+   */
+  async deleteBusinessPlan(businessPlanId: string, userId: string): Promise<boolean> {
+    try {
+      console.log('🗑️ [BusinessPlan] Eliminazione Business Plan:', businessPlanId);
+      
+      // Verifica che il Business Plan appartenga all'utente
+      const businessPlanDoc = await getDoc(doc(safeCollection(this.COLLECTION_NAME), businessPlanId));
+      
+      if (!businessPlanDoc.exists()) {
+        throw new Error('Business Plan non trovato');
+      }
+      
+      const businessPlanData = businessPlanDoc.data();
+      if (businessPlanData.userId !== userId) {
+        throw new Error('Non autorizzato a eliminare questo Business Plan');
+      }
+      
+      // Elimina il documento
+      await deleteDoc(doc(safeCollection(this.COLLECTION_NAME), businessPlanId));
+      
+      console.log('✅ [BusinessPlan] Business Plan eliminato con successo');
+      return true;
+      
+    } catch (error) {
+      console.error('❌ [BusinessPlan] Errore eliminazione:', error);
+      throw error;
+    }
+  }
 }
 
 // Export singleton instance

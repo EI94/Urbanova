@@ -36,7 +36,10 @@ import {
   CheckCircle,
   AlertCircle,
   DollarSign,
-  Info
+  Info,
+  Eye,
+  Edit,
+  Trash2
 } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
@@ -48,8 +51,18 @@ import { businessPlanExportService } from '@/lib/businessPlanExportService';
 import { toast } from 'react-hot-toast';
 
 // State management type
-type ViewMode = 'welcome' | 'form' | 'results' | 'chat';
+type ViewMode = 'welcome' | 'list' | 'form' | 'results' | 'chat';
 type ResultsTab = 'overview' | 'scenarios' | 'sensitivity' | 'cashflow' | 'levers';
+
+// Utility function per formattare numeri
+const formatNumber = (num: number): string => {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + 'M';
+  } else if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'K';
+  }
+  return Math.round(num).toString();
+};
 
 export default function BusinessPlanPage() {
   const searchParams = useSearchParams();
@@ -71,11 +84,22 @@ export default function BusinessPlanPage() {
   const [isCalculating, setIsCalculating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
+  // Lista Business Plan salvati
+  const [savedBusinessPlans, setSavedBusinessPlans] = useState<any[]>([]);
+  const [isLoadingBusinessPlans, setIsLoadingBusinessPlans] = useState(false);
+  
   // Chat mode
   const [chatMessages, setChatMessages] = useState<Array<{id: string; type: 'user' | 'assistant'; content: string; timestamp: Date}>>([]);
   const [chatInput, setChatInput] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
   
+  // Carica lista Business Plan salvati
+  useEffect(() => {
+    if (currentUser?.uid) {
+      loadSavedBusinessPlans();
+    }
+  }, [currentUser]);
+
   // Pre-fill da Feasibility Analysis (se viene da lì)
   useEffect(() => {
     const projectId = searchParams?.get('projectId');
@@ -87,6 +111,80 @@ export default function BusinessPlanPage() {
     }
   }, [searchParams]);
   
+  /**
+   * Carica lista Business Plan salvati
+   */
+  const loadSavedBusinessPlans = async () => {
+    if (!currentUser?.uid) return;
+    
+    setIsLoadingBusinessPlans(true);
+    try {
+      console.log('📋 [BusinessPlan] Caricamento Business Plan salvati...');
+      
+      const response = await fetch(`/api/business-plan?userId=${currentUser.uid}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Errore caricamento lista');
+      }
+
+      setSavedBusinessPlans(result.businessPlans || []);
+      console.log(`✅ [BusinessPlan] Caricati ${result.businessPlans?.length || 0} Business Plan`);
+      
+    } catch (error: any) {
+      console.error('❌ [BusinessPlan] Errore caricamento lista:', error);
+      toast(`❌ Errore nel caricamento dei Business Plan: ${error.message}`);
+    } finally {
+      setIsLoadingBusinessPlans(false);
+    }
+  };
+
+  /**
+   * Elimina Business Plan
+   */
+  const deleteBusinessPlan = async (businessPlanId: string) => {
+    if (!currentUser?.uid) return;
+    
+    if (!confirm('Sei sicuro di voler eliminare questo Business Plan?')) {
+      return;
+    }
+
+    try {
+      console.log('🗑️ [BusinessPlan] Eliminazione Business Plan:', businessPlanId);
+      
+      const response = await fetch(`/api/business-plan?id=${businessPlanId}&userId=${currentUser.uid}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Errore eliminazione');
+      }
+
+      // Aggiorna la lista
+      await loadSavedBusinessPlans();
+      toast('✅ Business Plan eliminato con successo');
+      
+    } catch (error: any) {
+      console.error('❌ [BusinessPlan] Errore eliminazione:', error);
+      toast(`❌ Errore nell'eliminazione: ${error.message}`);
+    }
+  };
+
   /**
    * Carica dati da progetto Feasibility Analysis
    */
@@ -240,6 +338,9 @@ export default function BusinessPlanPage() {
       setViewMode('results');
       setResultsTab('overview');
       
+      // Aggiorna la lista dei Business Plan salvati
+      await loadSavedBusinessPlans();
+      
       toast('✅ Business Plan calcolato con successo!', { icon: '🎉' });
       
     } catch (err) {
@@ -383,27 +484,106 @@ export default function BusinessPlanPage() {
         {/* WELCOME SCREEN - MINIMALE E BELLISSIMO */}
         {/* ============================================================================ */}
         {viewMode === 'welcome' && (
-          <div className="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center">
-            {/* Hero Animation */}
-            <div className="relative mb-8">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-600 rounded-full blur-3xl opacity-20 animate-pulse"></div>
-              <div className="relative w-24 h-24 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl transform hover:scale-110 transition-transform duration-500">
-                <BarChart3 className="w-12 h-12 text-white" />
-              </div>
+          <div className="space-y-8">
+            {/* Header */}
+            <div className="text-center">
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                Business Plan
+              </h1>
+              <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+                Genera, valuta e spiega business plan immobiliari con VAN, TIR, DSCR e leve di negoziazione.
+                <br />
+                <span className="text-base text-gray-500 mt-2 block">Input in 3-5 minuti • Scenari multipli • Sensitivity automatica</span>
+              </p>
             </div>
+
+            {/* Lista Business Plan salvati */}
+            {savedBusinessPlans.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                    <BarChart3 className="w-6 h-6 text-blue-600 mr-3" />
+                    I tuoi Business Plan
+                  </h2>
+                  <span className="text-sm text-gray-500">
+                    {savedBusinessPlans.length} Business Plan
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {savedBusinessPlans.map((bp) => (
+                    <div key={bp.id} className="bg-gray-50 rounded-xl p-4 border border-gray-200 hover:border-blue-300 transition-colors">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900 mb-1">{bp.projectName}</h3>
+                          <p className="text-sm text-gray-600 mb-2">{bp.location}</p>
+                          <div className="flex items-center space-x-4 text-xs text-gray-500">
+                            <span>{bp.totalUnits} unità</span>
+                            <span>{bp.scenariosCount} scenari</span>
+                          </div>
+                        </div>
+                        <div className="flex space-x-1">
+                          <button
+                            onClick={() => {
+                              // TODO: Implementare visualizzazione Business Plan
+                              toast('Funzionalità in sviluppo');
+                            }}
+                            className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                            title="Visualizza"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              // TODO: Implementare modifica Business Plan
+                              toast('Funzionalità in sviluppo');
+                            }}
+                            className="p-1 text-gray-400 hover:text-green-600 transition-colors"
+                            title="Modifica"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => deleteBusinessPlan(bp.id)}
+                            className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                            title="Elimina"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      {/* Metriche principali */}
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="font-medium text-green-600">€{formatNumber(bp.bestNPV)}</div>
+                          <div className="text-gray-500">VAN</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-medium text-blue-600">{bp.bestIRR.toFixed(1)}%</div>
+                          <div className="text-gray-500">TIR</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-medium text-purple-600">{bp.bestMargin.toFixed(1)}%</div>
+                          <div className="text-gray-500">Margine</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* CTA per creare nuovi Business Plan */}
+            <div className="text-center">
+              <div className="inline-flex items-center space-x-2 text-gray-500 mb-6">
+                <div className="h-px bg-gray-300 flex-1 w-24"></div>
+                <span className="text-sm">Crea nuovo Business Plan</span>
+                <div className="h-px bg-gray-300 flex-1 w-24"></div>
+              </div>
             
-            <h1 className="text-5xl font-bold text-gray-900 mb-4 text-center">
-                    Business Plan
-                  </h1>
-            
-            <p className="text-xl text-gray-600 mb-12 text-center max-w-2xl">
-              Genera, valuta e spiega business plan immobiliari con VAN, TIR, DSCR e leve di negoziazione.
-              <br />
-              <span className="text-base text-gray-500 mt-2 block">Input in 3-5 minuti • Scenari multipli • Sensitivity automatica</span>
-            </p>
-            
-            {/* CTA Cards - Eleganti */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
+              {/* CTA Cards - Eleganti */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mx-auto">
               {/* Form Mode */}
               <button
                 onClick={() => setViewMode('form')}
@@ -448,25 +628,26 @@ export default function BusinessPlanPage() {
                     </div>
                 </div>
               </button>
-                  </div>
+              </div>
 
-            {/* Quick Example */}
-            <div className="mt-12 max-w-2xl">
-              <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-                <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Zap className="w-4 h-4 text-purple-600" />
+              {/* Quick Example */}
+              <div className="mt-12 max-w-2xl mx-auto">
+                <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Zap className="w-4 h-4 text-purple-600" />
                     </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-900 mb-1">Esempio prompt chat:</div>
-                    <p className="text-sm text-gray-600 italic">
-                      "Ciliegie: 4 case, prezzo 390k, costo 200k, S1 terreno 220k cash, S2 permuta 1 casa +80k a t2, S3 pagamento 300k a t1, tasso 12%. Dammi VAN, TIR, margini e leve."
-                    </p>
+                    <div>
+                      <div className="text-sm font-medium text-gray-900 mb-1">Esempio prompt chat:</div>
+                      <p className="text-sm text-gray-600 italic">
+                        "Ciliegie: 4 case, prezzo 390k, costo 200k, S1 terreno 220k cash, S2 permuta 1 casa +80k a t2, S3 pagamento 300k a t1, tasso 12%. Dammi VAN, TIR, margini e leve."
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-            </div>
+          </div>
           )}
 
         {/* ============================================================================ */}
