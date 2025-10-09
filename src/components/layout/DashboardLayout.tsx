@@ -118,6 +118,8 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
     
     const handleNavigationClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
+      
+      // Cerca prima un link
       const link = target.closest('a[href]') as HTMLAnchorElement;
       
       if (link && link.href) {
@@ -151,6 +153,43 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
             }, 100);
           } catch (error) {
             console.error('❌ [NAVIGATION INTERCEPTOR] Errore router.push:', error);
+            window.location.href = destinationPath;
+          }
+        }
+      }
+      
+      // Gestisci anche i pulsanti "Indietro" e altri elementi di navigazione
+      const button = target.closest('button') as HTMLButtonElement;
+      if (button && button.textContent?.includes('Indietro')) {
+        console.log('🔍 [NAVIGATION INTERCEPTOR] Click rilevato su pulsante Indietro, pathname attuale:', pathname);
+        
+        // Controlla se siamo in una pagina di feasibility analysis
+        if (pathname?.includes('/feasibility-analysis/')) {
+          console.log('🔄 [NAVIGATION INTERCEPTOR] Pulsante Indietro in pagina feasibility-analysis, forzando navigazione');
+          
+          // Preveni il comportamento normale del pulsante
+          event.preventDefault();
+          event.stopPropagation();
+          
+          // Naviga alla pagina principale delle analisi di fattibilità
+          const destinationPath = '/dashboard/feasibility-analysis';
+          
+          console.log('🎯 [NAVIGATION INTERCEPTOR] Navigazione pulsante Indietro verso:', destinationPath);
+          
+          // Forza la navigazione
+          try {
+            router.push(destinationPath);
+            console.log('✅ [NAVIGATION INTERCEPTOR] Router.push pulsante Indietro eseguito');
+            
+            // Fallback dopo 100ms
+            setTimeout(() => {
+              if (window.location.pathname === pathname) {
+                console.log('⚠️ [NAVIGATION INTERCEPTOR] Router.push pulsante Indietro fallito, uso window.location');
+                window.location.href = destinationPath;
+              }
+            }, 100);
+          } catch (error) {
+            console.error('❌ [NAVIGATION INTERCEPTOR] Errore router.push pulsante Indietro:', error);
             window.location.href = destinationPath;
           }
         }
