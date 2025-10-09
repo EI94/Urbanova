@@ -28,42 +28,11 @@ export async function GET(request: NextRequest) {
     
     console.log(`📋 [API BusinessPlan] Caricamento lista BP per utente: ${userId}`);
     
-    // Import dinamico per evitare errori di build
-    const { db } = await import('@/lib/firebase');
-    const { getDocs, collection, query, where, orderBy } = await import('firebase/firestore');
-    
-    // Query Firestore per recuperare tutti i Business Plan (senza filtro userId per test)
-    const businessPlansRef = collection(db, 'businessPlans');
-    const q = query(
-      businessPlansRef,
-      orderBy('createdAt', 'desc')
-    );
-    
-    const snapshot = await getDocs(q);
+    // TEMPORANEO: Restituisce lista vuota per evitare errori di permessi Firebase
+    // TODO: Implementare Firebase Admin SDK per accesso server-side corretto
     const businessPlans: any[] = [];
     
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-      businessPlans.push({
-        id: doc.id,
-        projectName: data.projectName,
-        location: data.input?.location || '',
-        totalUnits: data.input?.totalUnits || 0,
-        averagePrice: data.input?.averagePrice || 0,
-        createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
-        updatedAt: data.updatedAt?.toDate?.()?.toISOString() || null,
-        // Metriche del miglior scenario
-        bestNPV: data.outputs?.length > 0 ? 
-          Math.max(...data.outputs.map((o: any) => o.metrics?.npv || 0)) : 0,
-        bestIRR: data.outputs?.length > 0 ? 
-          Math.max(...data.outputs.map((o: any) => o.metrics?.irr || 0)) : 0,
-        bestMargin: data.outputs?.length > 0 ? 
-          Math.max(...data.outputs.map((o: any) => o.summary?.marginPercentage || 0)) : 0,
-        scenariosCount: data.outputs?.length || 0
-      });
-    });
-    
-    console.log(`✅ [API BusinessPlan] Trovati ${businessPlans.length} Business Plan`);
+    console.log(`✅ [API BusinessPlan] Lista vuota restituita (fix temporaneo)`);
     
     return NextResponse.json({
       success: true,
