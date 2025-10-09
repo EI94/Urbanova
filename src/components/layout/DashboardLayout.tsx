@@ -235,6 +235,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   }`}
                   onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     // 🔧 FIX: Forza navigazione anche se si è in una sottopagina
+                    console.log('🔍 [DASHBOARD LAYOUT] Click su Dashboard, pathname attuale:', pathname);
                     if (pathname?.includes('/feasibility-analysis/') || pathname?.includes('/design-center/') || pathname?.includes('/business-plan/') || pathname?.includes('/progetti/')) {
                       e.preventDefault();
                       console.log('🔄 [DASHBOARD LAYOUT] Navigazione forzata da', pathname, 'a /dashboard');
@@ -250,6 +251,8 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                         console.error('❌ [DASHBOARD LAYOUT] Errore navigazione:', error);
                         window.location.href = '/dashboard';
                       }
+                    } else {
+                      console.log('✅ [DASHBOARD LAYOUT] Navigazione normale per pathname:', pathname);
                     }
                   }}
                 >
@@ -283,6 +286,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   }`}
                   onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     // 🔧 FIX: Forza navigazione anche se si è in una sottopagina di feasibility-analysis
+                    console.log('🔍 [DASHBOARD LAYOUT] Click su Analisi Fattibilità, pathname attuale:', pathname);
                     if (pathname?.includes('/feasibility-analysis/')) {
                       e.preventDefault();
                       console.log('🔄 [DASHBOARD LAYOUT] Navigazione forzata da', pathname, 'a /dashboard/feasibility-analysis');
@@ -300,6 +304,8 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                         console.error('❌ [DASHBOARD LAYOUT] Errore navigazione:', error);
                         window.location.href = '/dashboard/feasibility-analysis';
                       }
+                    } else {
+                      console.log('✅ [DASHBOARD LAYOUT] Navigazione normale per pathname:', pathname);
                     }
                   }}
                 >
@@ -315,6 +321,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   }`}
                   onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     // 🔧 FIX: Forza navigazione anche se si è in una sottopagina di design-center
+                    console.log('🔍 [DASHBOARD LAYOUT] Click su Design Center, pathname attuale:', pathname);
                     if (pathname?.includes('/design-center/')) {
                       e.preventDefault();
                       console.log('🔄 [DASHBOARD LAYOUT] Navigazione forzata da', pathname, 'a /dashboard/design-center');
@@ -330,6 +337,8 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                         console.error('❌ [DASHBOARD LAYOUT] Errore navigazione:', error);
                         window.location.href = '/dashboard/design-center';
                       }
+                    } else {
+                      console.log('✅ [DASHBOARD LAYOUT] Navigazione normale per pathname:', pathname);
                     }
                   }}
                 >
@@ -352,6 +361,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   }`}
                   onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     // 🔧 FIX: Forza navigazione anche se si è in una sottopagina di business-plan
+                    console.log('🔍 [DASHBOARD LAYOUT] Click su Business Plan, pathname attuale:', pathname);
                     if (pathname?.includes('/business-plan/')) {
                       e.preventDefault();
                       console.log('🔄 [DASHBOARD LAYOUT] Navigazione forzata da', pathname, 'a /dashboard/business-plan');
@@ -367,6 +377,8 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                         console.error('❌ [DASHBOARD LAYOUT] Errore navigazione:', error);
                         window.location.href = '/dashboard/business-plan';
                       }
+                    } else {
+                      console.log('✅ [DASHBOARD LAYOUT] Navigazione normale per pathname:', pathname);
                     }
                   }}
                 >
@@ -411,6 +423,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   }`}
                   onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     // 🔧 FIX: Forza navigazione anche se si è in una sottopagina
+                    console.log('🔍 [DASHBOARD LAYOUT] Click su Progetti, pathname attuale:', pathname);
                     if (pathname?.includes('/feasibility-analysis/') || pathname?.includes('/design-center/') || pathname?.includes('/business-plan/') || pathname?.includes('/progetti/')) {
                       e.preventDefault();
                       console.log('🔄 [DASHBOARD LAYOUT] Navigazione forzata da', pathname, 'a /dashboard/progetti');
@@ -426,6 +439,8 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                         console.error('❌ [DASHBOARD LAYOUT] Errore navigazione:', error);
                         window.location.href = '/dashboard/progetti';
                       }
+                    } else {
+                      console.log('✅ [DASHBOARD LAYOUT] Navigazione normale per pathname:', pathname);
                     }
                   }}
                 >
