@@ -11,9 +11,12 @@ import { businessPlanService } from '@/lib/businessPlanService';
 import { getFirestore } from 'firebase-admin/firestore';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 
-// Inizializza Firebase Admin SDK se non già inizializzato
-if (!getApps().length) {
-  try {
+// Inizializza Firebase Admin SDK
+let adminDb: any = null;
+
+try {
+  const apps = getApps();
+  if (apps.length === 0) {
     initializeApp({
       credential: cert({
         projectId: process.env.FIREBASE_PROJECT_ID || 'urbanova-b623e',
@@ -21,18 +24,21 @@ if (!getApps().length) {
         privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
       }),
     });
-  } catch (error) {
-    console.error('❌ [API BusinessPlan] Errore inizializzazione Firebase Admin:', error);
   }
+  adminDb = getFirestore();
+} catch (error) {
+  console.error('❌ [API BusinessPlan] Errore inizializzazione Firebase Admin:', error);
 }
-
-const adminDb = getFirestore();
 
 /**
  * 📋 GET: Lista tutti i Business Plan dell'utente
  */
 export async function GET(request: NextRequest) {
   try {
+    if (!adminDb) {
+      throw new Error('Firebase Admin SDK non inizializzato');
+    }
+    
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
     
@@ -101,6 +107,10 @@ export async function GET(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
+    if (!adminDb) {
+      throw new Error('Firebase Admin SDK non inizializzato');
+    }
+    
     const { searchParams } = new URL(request.url);
     const businessPlanId = searchParams.get('id');
     const userId = searchParams.get('userId');
