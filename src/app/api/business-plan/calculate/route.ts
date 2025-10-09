@@ -30,17 +30,60 @@ export async function POST(request: NextRequest) {
       compareScenarios?: boolean;
     };
     
-    // Validazione input
+    // Validazione input dettagliata
     if (!input || !input.projectName) {
       return NextResponse.json(
-        { error: 'Input Business Plan non valido: projectName richiesto' },
+        { 
+          error: 'Dati progetto mancanti',
+          details: 'Il nome del progetto è obbligatorio per calcolare il Business Plan',
+          requiredFields: ['projectName']
+        },
+        { status: 400 }
+      );
+    }
+    
+    if (!input.totalUnits || input.totalUnits <= 0) {
+      return NextResponse.json(
+        { 
+          error: 'Numero unità non valido',
+          details: 'Il numero totale di unità deve essere maggiore di zero',
+          requiredFields: ['totalUnits']
+        },
+        { status: 400 }
+      );
+    }
+    
+    if (!input.averagePrice || input.averagePrice <= 0) {
+      return NextResponse.json(
+        { 
+          error: 'Prezzo medio non valido',
+          details: 'Il prezzo medio per unità deve essere maggiore di zero',
+          requiredFields: ['averagePrice']
+        },
         { status: 400 }
       );
     }
     
     if (!input.landScenarios || input.landScenarios.length === 0) {
       return NextResponse.json(
-        { error: 'Almeno uno scenario terreno richiesto' },
+        { 
+          error: 'Scenari terreno mancanti',
+          details: 'È necessario definire almeno uno scenario terreno (Cash, Permuta o Pagamento Differito)',
+          requiredFields: ['landScenarios'],
+          suggestion: 'Aggiungi uno scenario terreno nella sezione "Scenari Terreno" del form'
+        },
+        { status: 400 }
+      );
+    }
+    
+    if (!input.salesCalendar || input.salesCalendar.length === 0) {
+      return NextResponse.json(
+        { 
+          error: 'Calendario vendite mancante',
+          details: 'È necessario definire quando e quante unità vendere nel tempo',
+          requiredFields: ['salesCalendar'],
+          suggestion: 'Configura il calendario vendite nella sezione "Tempi" del form'
+        },
         { status: 400 }
       );
     }

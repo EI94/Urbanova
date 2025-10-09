@@ -140,11 +140,28 @@ export default function BusinessPlanPage() {
         discountRate: 12, // Default
         
         // Tempi (default)
-        salesCalendar: [],
-        constructionTimeline: [],
+        salesCalendar: [
+          { period: 't1', units: Math.floor((feasibilityProject.revenues?.units || 1) / 2) },
+          { period: 't2', units: Math.ceil((feasibilityProject.revenues?.units || 1) / 2) }
+        ],
+        constructionTimeline: [
+          { phase: 'Fondazioni', period: 't0' },
+          { phase: 'Struttura', period: 't1' },
+          { phase: 'Finiture', period: 't2' }
+        ],
         
-        // Scenari terreno (vuoti)
-        landScenarios: [],
+        // Scenari terreno (default basato sui dati fattibilità)
+        landScenarios: [{
+          id: 'default-scenario',
+          name: 'Scenario Base',
+          type: 'CASH' as const,
+          landCost: feasibilityProject.costs?.land || 200000,
+          cashContribution: feasibilityProject.costs?.land || 200000,
+          deferredPayment: 0,
+          unitsInPermuta: 0,
+          permutaValue: 0,
+          paymentTiming: 't0' as const
+        }],
         
         // Target
         targetMargin: feasibilityProject.targetMargin || 15,
@@ -190,7 +207,22 @@ export default function BusinessPlanPage() {
       });
       
       if (!response.ok) {
-        throw new Error('Errore calcolo Business Plan');
+        const errorData = await response.json();
+        console.error('❌ [BusinessPlan] Errore API:', errorData);
+        
+        // Gestisci errori di validazione con messaggi dettagliati
+        if (errorData.details) {
+          setError(`${errorData.error}: ${errorData.details}`);
+          if (errorData.suggestion) {
+            toast(`💡 Suggerimento: ${errorData.suggestion}`, { 
+              icon: '💡',
+              duration: 8000 
+            });
+          }
+        } else {
+          setError(errorData.error || `Errore HTTP ${response.status}`);
+        }
+        return;
       }
       
       const data = await response.json();
@@ -208,9 +240,13 @@ export default function BusinessPlanPage() {
       setViewMode('results');
       setResultsTab('overview');
       
+      toast('✅ Business Plan calcolato con successo!', { icon: '🎉' });
+      
     } catch (err) {
       console.error('❌ [BusinessPlan] Errore:', err);
-      setError(err instanceof Error ? err.message : 'Errore sconosciuto');
+      const errorMessage = err instanceof Error ? err.message : 'Errore sconosciuto';
+      setError(errorMessage);
+      toast(`❌ Errore nel calcolo: ${errorMessage}`, { icon: '❌' });
     } finally {
       setIsCalculating(false);
     }
