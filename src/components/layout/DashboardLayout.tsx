@@ -237,7 +237,19 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                     // 🔧 FIX: Forza navigazione anche se si è in una sottopagina
                     if (pathname?.includes('/feasibility-analysis/') || pathname?.includes('/design-center/') || pathname?.includes('/business-plan/')) {
                       e.preventDefault();
-                      router.push('/dashboard');
+                      console.log('🔄 [DASHBOARD LAYOUT] Navigazione forzata da', pathname, 'a /dashboard');
+                      try {
+                        router.push('/dashboard');
+                        setTimeout(() => {
+                          if (window.location.pathname === pathname) {
+                            console.log('⚠️ [DASHBOARD LAYOUT] Router.push fallito, uso window.location');
+                            window.location.href = '/dashboard';
+                          }
+                        }, 100);
+                      } catch (error) {
+                        console.error('❌ [DASHBOARD LAYOUT] Errore navigazione:', error);
+                        window.location.href = '/dashboard';
+                      }
                     }
                   }}
                 >
@@ -273,8 +285,21 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                     // 🔧 FIX: Forza navigazione anche se si è in una sottopagina di feasibility-analysis
                     if (pathname?.includes('/feasibility-analysis/')) {
                       e.preventDefault();
-                      // Usa router.push invece di window.location.href per navigazione più fluida
-                      router.push('/dashboard/feasibility-analysis');
+                      console.log('🔄 [DASHBOARD LAYOUT] Navigazione forzata da', pathname, 'a /dashboard/feasibility-analysis');
+                      try {
+                        // Usa router.push con fallback a window.location
+                        router.push('/dashboard/feasibility-analysis');
+                        // Fallback: se router.push fallisce, usa window.location dopo un breve delay
+                        setTimeout(() => {
+                          if (window.location.pathname === pathname) {
+                            console.log('⚠️ [DASHBOARD LAYOUT] Router.push fallito, uso window.location');
+                            window.location.href = '/dashboard/feasibility-analysis';
+                          }
+                        }, 100);
+                      } catch (error) {
+                        console.error('❌ [DASHBOARD LAYOUT] Errore navigazione:', error);
+                        window.location.href = '/dashboard/feasibility-analysis';
+                      }
                     }
                   }}
                 >
@@ -292,7 +317,19 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                     // 🔧 FIX: Forza navigazione anche se si è in una sottopagina di design-center
                     if (pathname?.includes('/design-center/')) {
                       e.preventDefault();
-                      router.push('/dashboard/design-center');
+                      console.log('🔄 [DASHBOARD LAYOUT] Navigazione forzata da', pathname, 'a /dashboard/design-center');
+                      try {
+                        router.push('/dashboard/design-center');
+                        setTimeout(() => {
+                          if (window.location.pathname === pathname) {
+                            console.log('⚠️ [DASHBOARD LAYOUT] Router.push fallito, uso window.location');
+                            window.location.href = '/dashboard/design-center';
+                          }
+                        }, 100);
+                      } catch (error) {
+                        console.error('❌ [DASHBOARD LAYOUT] Errore navigazione:', error);
+                        window.location.href = '/dashboard/design-center';
+                      }
                     }
                   }}
                 >
@@ -317,7 +354,19 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                     // 🔧 FIX: Forza navigazione anche se si è in una sottopagina di business-plan
                     if (pathname?.includes('/business-plan/')) {
                       e.preventDefault();
-                      router.push('/dashboard/business-plan');
+                      console.log('🔄 [DASHBOARD LAYOUT] Navigazione forzata da', pathname, 'a /dashboard/business-plan');
+                      try {
+                        router.push('/dashboard/business-plan');
+                        setTimeout(() => {
+                          if (window.location.pathname === pathname) {
+                            console.log('⚠️ [DASHBOARD LAYOUT] Router.push fallito, uso window.location');
+                            window.location.href = '/dashboard/business-plan';
+                          }
+                        }, 100);
+                      } catch (error) {
+                        console.error('❌ [DASHBOARD LAYOUT] Errore navigazione:', error);
+                        window.location.href = '/dashboard/business-plan';
+                      }
                     }
                   }}
                 >
