@@ -28,8 +28,41 @@ export async function GET(request: NextRequest) {
     
     console.log(`📋 [API BusinessPlan] Caricamento lista BP per utente: ${userId}`);
     
-    // Usa il servizio businessPlanService che ha già l'autenticazione
-    const businessPlans = await businessPlanService.getAllBusinessPlans(userId);
+    // Import dinamico per evitare errori di build
+    const { db } = await import('@/lib/firebase');
+    const { getDocs, collection, query, where, orderBy } = await import('firebase/firestore');
+    
+    // Query Firestore per recuperare tutti i Business Plan dell'utente
+    const businessPlansRef = collection(db, 'businessPlans');
+    const q = query(
+      businessPlansRef,
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
+    
+    const snapshot = await getDocs(q);
+    const businessPlans: any[] = [];
+    
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      businessPlans.push({
+        id: doc.id,
+        projectName: data.projectName,
+        location: data.input?.location || '',
+        totalUnits: data.input?.totalUnits || 0,
+        averagePrice: data.input?.averagePrice || 0,
+        createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
+        updatedAt: data.updatedAt?.toDate?.()?.toISOString() || null,
+        // Metriche del miglior scenario
+        bestNPV: data.outputs?.length > 0 ? 
+          Math.max(...data.outputs.map((o: any) => o.metrics?.npv || 0)) : 0,
+        bestIRR: data.outputs?.length > 0 ? 
+          Math.max(...data.outputs.map((o: any) => o.metrics?.irr || 0)) : 0,
+        bestMargin: data.outputs?.length > 0 ? 
+          Math.max(...data.outputs.map((o: any) => o.summary?.marginPercentage || 0)) : 0,
+        scenariosCount: data.outputs?.length || 0
+      });
+    });
     
     console.log(`✅ [API BusinessPlan] Trovati ${businessPlans.length} Business Plan`);
     
