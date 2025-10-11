@@ -1405,6 +1405,8 @@ class BusinessPlanService {
         projectName: input.projectName,
         input: input,
         outputs: outputs,
+        // Campo speciale per identificare i Business Plan
+        documentType: 'BUSINESS_PLAN',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
@@ -1514,6 +1516,7 @@ class BusinessPlanService {
       const q = query(
         businessPlansRef,
         where('userId', '==', userId),
+        where('documentType', '==', 'BUSINESS_PLAN'),
         orderBy('createdAt', 'desc')
       );
       
