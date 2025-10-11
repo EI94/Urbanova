@@ -296,27 +296,24 @@ export default function BusinessPlanPage() {
     try {
       console.log('💾 [BusinessPlan] Salvataggio Business Plan...');
       
-      const response = await fetch('/api/business-plan/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          input: bpInput,
-          outputs: bpOutputs,
-          userId: currentUser.uid
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const result = await response.json();
+      // Import dinamico per evitare errori di build
+      const { db } = await import('@/lib/firebase');
+      const { addDoc, collection, serverTimestamp } = await import('firebase/firestore');
       
-      if (!result.success) {
-        throw new Error(result.error || 'Errore nel salvataggio');
-      }
-
-      setSavedBusinessPlanId(result.businessPlanId);
+      const businessPlanData = {
+        userId: currentUser.uid,
+        projectId: bpInput.projectId || `bp_${Date.now()}`,
+        projectName: bpInput.projectName,
+        input: bpInput,
+        outputs: bpOutputs,
+        documentType: 'BUSINESS_PLAN',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+      
+      const docRef = await addDoc(collection(db, 'feasibilityProjects'), businessPlanData);
+      
+      setSavedBusinessPlanId(docRef.id);
       
       // Aggiorna la lista dei Business Plan salvati
       await loadSavedBusinessPlans();
