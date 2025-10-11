@@ -1409,7 +1409,11 @@ class BusinessPlanService {
         updatedAt: serverTimestamp()
       };
       
-      const docRef = await addDoc(safeCollection(this.COLLECTION_NAME), businessPlanData);
+      // Import dinamico per evitare errori di build
+      const { db } = await import('@/lib/firebase');
+      const { addDoc, collection } = await import('firebase/firestore');
+      
+      const docRef = await addDoc(collection(db, this.COLLECTION_NAME), businessPlanData);
       
       console.log('✅ [BusinessPlan] Business Plan salvato con ID:', docRef.id);
       
@@ -1548,6 +1552,10 @@ class BusinessPlanService {
   async deleteBusinessPlan(businessPlanId: string, userId: string): Promise<boolean> {
     try {
       console.log('🗑️ [BusinessPlan] Eliminazione Business Plan:', businessPlanId);
+      
+      // Import dinamico per evitare errori di build
+      const { db } = await import('@/lib/firebase');
+      const { getDoc, deleteDoc, doc, collection } = await import('firebase/firestore');
       
       // Verifica che il Business Plan appartenga all'utente
       const businessPlanDoc = await getDoc(doc(collection(db, this.COLLECTION_NAME), businessPlanId));
