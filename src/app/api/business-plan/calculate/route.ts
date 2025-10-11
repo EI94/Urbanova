@@ -131,26 +131,17 @@ export async function POST(request: NextRequest) {
       sensitivity = await businessPlanService.performSensitivityAnalysis(input, sensitivityInput);
     }
     
-    // 4. Salva su Firestore se userId fornito
-    let businessPlanId: string | undefined;
-    if (userId) {
-      try {
-        businessPlanId = await businessPlanService.saveBusinessPlan(input, outputs, userId);
-        console.log(`✅ [API BusinessPlan] Salvato su Firestore: ${businessPlanId}`);
-      } catch (saveError) {
-        console.warn('⚠️ [API BusinessPlan] Errore salvataggio (non critico):', saveError);
-        // Non blocchiamo la risposta se il salvataggio fallisce
-      }
-    }
+    // 4. Salvataggio rimosso - ora avviene dal frontend
+    // Il salvataggio automatico è stato rimosso per evitare problemi di permessi Firebase
+    // I Business Plan vengono salvati dal frontend dopo aver ricevuto i risultati
     
     const executionTime = Date.now() - startTime;
     
     console.log(`✅ [API BusinessPlan] Calcolo completato in ${executionTime}ms`);
     
-    // Risposta completa
+    // Risposta completa (senza businessPlanId - salvataggio dal frontend)
     return NextResponse.json({
       success: true,
-      businessPlanId,
       outputs,
       comparison,
       sensitivity,

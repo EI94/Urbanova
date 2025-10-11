@@ -234,7 +234,7 @@ export interface ScenarioComparison {
 // ============================================================================
 
 class BusinessPlanService {
-  private readonly COLLECTION_NAME = 'feasibilityProjects' // TEMPORANEO: usa collezione che funziona;
+  private readonly COLLECTION_NAME = 'businessPlans';
   
   /**
    * 🎯 CALCOLO BUSINESS PLAN COMPLETO

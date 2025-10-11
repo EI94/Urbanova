@@ -80,9 +80,9 @@ export default function BusinessPlanPage() {
   const [selectedScenarioId, setSelectedScenarioId] = useState<string>('');
   const [feasibilityProjectId, setFeasibilityProjectId] = useState<string | null>(null);
   
-  // Loading e stati
-  const [isCalculating, setIsCalculating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Stato per salvataggio Business Plan
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedBusinessPlanId, setSavedBusinessPlanId] = useState<string | null>(null);
   
   // Lista Business Plan salvati
   const [savedBusinessPlans, setSavedBusinessPlans] = useState<any[]>([]);
@@ -284,6 +284,54 @@ export default function BusinessPlanPage() {
   };
   
   /**
+   * 💾 SALVA BUSINESS PLAN
+   */
+  const saveBusinessPlan = async () => {
+    if (!bpInput || !bpOutputs.length || !currentUser?.uid) {
+      toast('❌ Dati mancanti per il salvataggio');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      console.log('💾 [BusinessPlan] Salvataggio Business Plan...');
+      
+      const response = await fetch('/api/business-plan/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          input: bpInput,
+          outputs: bpOutputs,
+          userId: currentUser.uid
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Errore nel salvataggio');
+      }
+
+      setSavedBusinessPlanId(result.businessPlanId);
+      
+      // Aggiorna la lista dei Business Plan salvati
+      await loadSavedBusinessPlans();
+      
+      toast('✅ Business Plan salvato con successo!', { icon: '💾' });
+      
+    } catch (error: any) {
+      console.error('❌ [BusinessPlan] Errore salvataggio:', error);
+      toast(`❌ Errore nel salvataggio: ${error.message}`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  /**
    * 🎯 CALCOLA BUSINESS PLAN
    */
   const calculateBusinessPlan = async (input: BusinessPlanInput) => {
@@ -338,8 +386,8 @@ export default function BusinessPlanPage() {
       setViewMode('results');
       setResultsTab('overview');
       
-      // Aggiorna la lista dei Business Plan salvati
-      await loadSavedBusinessPlans();
+      // Reset stato salvataggio
+      setSavedBusinessPlanId(null);
       
       toast('✅ Business Plan calcolato con successo!', { icon: '🎉' });
       
@@ -853,6 +901,35 @@ export default function BusinessPlanPage() {
                       </div>
 
               <div className="flex items-center space-x-3">
+                {/* Bottone Salva */}
+                {!savedBusinessPlanId && (
+                  <button
+                    onClick={saveBusinessPlan}
+                    disabled={isSaving}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-blue-400 transition-colors flex items-center space-x-2"
+                  >
+                    {isSaving ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Salvataggio...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-4 h-4" />
+                        <span>Salva Business Plan</span>
+                      </>
+                    )}
+                  </button>
+                )}
+                
+                {/* Indicatore salvato */}
+                {savedBusinessPlanId && (
+                  <div className="px-4 py-2 bg-green-100 text-green-700 rounded-xl flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Salvato</span>
+                  </div>
+                )}
+
                 <button
                   onClick={() => setViewMode('form')}
                   className="px-4 py-2 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors flex items-center space-x-2"
