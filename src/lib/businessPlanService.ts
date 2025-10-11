@@ -234,7 +234,7 @@ export interface ScenarioComparison {
 // ============================================================================
 
 class BusinessPlanService {
-  private readonly COLLECTION_NAME = 'businessPlans';
+  private readonly COLLECTION_NAME = 'feasibilityProjects' // TEMPORANEO: usa collezione che funziona;
   
   /**
    * 🎯 CALCOLO BUSINESS PLAN COMPLETO
@@ -1505,6 +1505,10 @@ class BusinessPlanService {
   async getAllBusinessPlans(userId: string): Promise<any[]> {
     try {
       console.log('📋 [BusinessPlan] Caricamento lista BP per utente:', userId);
+      
+      // Import dinamico per evitare errori di build
+      const { db } = await import('@/lib/firebase');
+      const { getDocs, collection, query, where, orderBy } = await import('firebase/firestore');
       
       const businessPlansRef = collection(db, this.COLLECTION_NAME);
       const q = query(
