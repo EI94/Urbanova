@@ -37,7 +37,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-// Componenti rimossi per semplificare
 
 import { useLanguage } from '@/contexts/LanguageContext';
 import { emailService, EmailConfig } from '@/lib/emailService';
@@ -595,6 +594,26 @@ export default function LandScrapingPage() {
               <div className="text-center">
                 <p className="text-2xl font-bold text-purple-600">100%</p>
                 <p className="text-sm text-gray-600">Copertura Mercato</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modali */}
+        {showMapModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Mappa ISTAT</h2>
+                <button
+                  onClick={() => setShowMapModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
+                <p className="text-gray-500">Mappa ISTAT in costruzione...</p>
               </div>
             </div>
           </div>
