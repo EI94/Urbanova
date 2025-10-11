@@ -37,6 +37,18 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdvancedFilters from '@/components/ui/AdvancedFilters';
+import { GeographicSearch } from '@/components/ui/GeographicSearch';
+import LandCard from '@/components/ui/LandCard';
+import ProgressBar from '@/components/ui/ProgressBar';
+import PerformanceStats from '@/components/ui/PerformanceStats';
+import SearchSchedulerModal from '@/components/ui/SearchSchedulerModal';
+import SecurityCompliance from '@/components/ui/SecurityCompliance';
+import TeamCollaborationPanel from '@/components/ui/TeamCollaborationPanel';
+import CollaborativeSearchSession from '@/components/ui/CollaborativeSearchSession';
+import TeamCommentsVoting from '@/components/ui/TeamCommentsVoting';
+import MarketIntelligenceMapModal from '@/components/ui/MarketIntelligenceMapModal';
+import HelpTooltip from '@/components/ui/HelpTooltip';
 
 import { useLanguage } from '@/contexts/LanguageContext';
 import { emailService, EmailConfig } from '@/lib/emailService';
@@ -58,7 +70,7 @@ interface FilterState {
   propertyTypes: string[];
   hasPermits: boolean;
   minAIScore: number;
-  riskLevel: string;
+  riskLevel: 'all' | 'low' | 'medium' | 'high';
   maxDistance: number;
 }
 
@@ -155,8 +167,8 @@ export default function LandScrapingPage() {
   const checkServicesStatus = async () => {
     try {
       const response = await fetch('/api/health');
-      if (response.ok) {
-        const data = await response.json();
+          if (response.ok) {
+            const data = await response.json();
         setServicesStatus(data.services || null);
       }
     } catch (error) {
@@ -185,17 +197,17 @@ export default function LandScrapingPage() {
     });
 
     try {
-      const response = await fetch('/api/land-scraping', {
-        method: 'POST',
+          const response = await fetch('/api/land-scraping', {
+            method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+            body: JSON.stringify({
           criteria: searchCriteria,
           email,
           filters,
-        }),
-      });
+            }),
+          });
 
-      if (!response.ok) {
+          if (!response.ok) {
         throw new Error('Errore nella ricerca');
       }
 
@@ -203,13 +215,13 @@ export default function LandScrapingPage() {
       
       setSearchResults(data);
       setFilteredResults(data.results || []);
-      
-      setSearchProgress({
-        phase: 'complete',
-        currentSource: '',
+
+          setSearchProgress({
+            phase: 'complete',
+            currentSource: '',
         sourcesCompleted: data.sourcesCompleted || [],
         sourcesTotal: data.sourcesTotal || [],
-        progress: 100,
+            progress: 100,
         message: `Trovati ${data.results?.length || 0} risultati`,
       });
 
@@ -219,7 +231,7 @@ export default function LandScrapingPage() {
         id: searchId,
         criteria: searchCriteria,
         email,
-        date: new Date(),
+            date: new Date(),
         resultsCount: data.results?.length || 0,
         emailSent: data.emailSent || false,
       }, ...prev]);
@@ -301,33 +313,33 @@ export default function LandScrapingPage() {
                 <span className={`text-sm ${isOnline ? 'text-green-600' : 'text-red-600'}`}>
                   {isOnline ? t('online', 'aiLandScraping') : 'Offline'}
                 </span>
-              </div>
-
-              {servicesStatus ? (
-                <div className="flex items-center gap-2 text-sm">
-                  <div
-                    className={`w-2 h-2 rounded-full ${servicesStatus.email ? 'bg-green-500' : 'bg-red-500'}`}
-                  ></div>
-                  <span className="text-gray-600">{t('email', 'aiLandScraping')}</span>
-                  <div
-                    className={`w-2 h-2 rounded-full ${servicesStatus.webScraping ? 'bg-green-500' : 'bg-red-500'}`}
-                  ></div>
-                  <span className="text-gray-600">{t('scraping', 'aiLandScraping')}</span>
-                </div>
-              ) : null}
             </div>
+
+            {servicesStatus ? (
+              <div className="flex items-center gap-2 text-sm">
+                <div
+                  className={`w-2 h-2 rounded-full ${servicesStatus.email ? 'bg-green-500' : 'bg-red-500'}`}
+                ></div>
+                <span className="text-gray-600">{t('email', 'aiLandScraping')}</span>
+                <div
+                  className={`w-2 h-2 rounded-full ${servicesStatus.webScraping ? 'bg-green-500' : 'bg-red-500'}`}
+                ></div>
+                <span className="text-gray-600">{t('scraping', 'aiLandScraping')}</span>
+              </div>
+            ) : null}
           </div>
         </div>
+                </div>
 
         {/* Sezione di ricerca */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Localizzazione */}
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                   Localizzazione
-                </label>
+              </label>
                 <input
                   type="text"
                   value={searchCriteria.location}
@@ -353,75 +365,75 @@ export default function LandScrapingPage() {
                 <p className="text-xs text-gray-500 mt-1">
                   Seleziona direttamente dal menu sopra o usa la mappa per una ricerca geografica avanzata
                 </p>
-              </div>
+            </div>
 
               {/* Prezzo */}
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Prezzo Min (€)
-                  </label>
-                  <input
-                    type="number"
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Prezzo Min (€)
+              </label>
+              <input
+                type="number"
                     value={searchCriteria.minPrice || ''}
                     onChange={(e) => setSearchCriteria(prev => ({ ...prev, minPrice: parseInt(e.target.value) || 0 }))}
                     className="w-full border rounded-lg px-3 py-2"
-                    placeholder="0"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Lascia vuoto o inserisci 0 per nessun limite minimo
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Prezzo Max (€)
-                  </label>
-                  <input
-                    type="number"
+                placeholder="0"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Lascia vuoto o inserisci 0 per nessun limite minimo
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Prezzo Max (€)
+              </label>
+              <input
+                type="number"
                     value={searchCriteria.maxPrice || ''}
                     onChange={(e) => setSearchCriteria(prev => ({ ...prev, maxPrice: parseInt(e.target.value) || 0 }))}
                     className="w-full border rounded-lg px-3 py-2"
-                    placeholder="Nessun limite"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Lascia vuoto o inserisci 0 per nessun limite massimo
-                  </p>
+                placeholder="Nessun limite"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Lascia vuoto o inserisci 0 per nessun limite massimo
+              </p>
                 </div>
-              </div>
+            </div>
 
               {/* Area */}
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Area Min (m²)
-                  </label>
-                  <input
-                    type="number"
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Area Min (m²)
+              </label>
+              <input
+                type="number"
                     value={searchCriteria.minArea || ''}
                     onChange={(e) => setSearchCriteria(prev => ({ ...prev, minArea: parseInt(e.target.value) || 0 }))}
                     className="w-full border rounded-lg px-3 py-2"
-                    placeholder="500"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Lascia vuoto o inserisci 0 per nessun limite minimo
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Area Max (m²)
-                  </label>
-                  <input
-                    type="number"
+                placeholder="500"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Lascia vuoto o inserisci 0 per nessun limite minimo
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Area Max (m²)
+              </label>
+              <input
+                type="number"
                     value={searchCriteria.maxArea || ''}
                     onChange={(e) => setSearchCriteria(prev => ({ ...prev, maxArea: parseInt(e.target.value) || 0 }))}
                     className="w-full border rounded-lg px-3 py-2"
-                    placeholder="Nessun limite"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Lascia vuoto o inserisci 0 per nessun limite massimo
-                  </p>
-                </div>
-              </div>
+                placeholder="Nessun limite"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Lascia vuoto o inserisci 0 per nessun limite massimo
+              </p>
+            </div>
+          </div>
 
               {/* Filtri Avanzati */}
               <div className="flex items-center justify-between">
@@ -446,32 +458,102 @@ export default function LandScrapingPage() {
               </div>
 
               {showAdvancedFilters && (
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-600">Filtri avanzati in costruzione...</p>
+                <div className="p-4 bg-gray-50 rounded-lg border">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Tipi di proprietà */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">Tipi di Proprietà</label>
+                      <div className="space-y-2">
+                        {['tutti', 'residenziale', 'commerciale', 'industriale', 'agricolo', 'misto'].map((type) => (
+                          <label key={type} className="flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={filters.propertyTypes.includes(type)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setFilters(prev => ({ ...prev, propertyTypes: [...prev.propertyTypes, type] }));
+                                } else {
+                                  setFilters(prev => ({ ...prev, propertyTypes: prev.propertyTypes.filter(t => t !== type) }));
+                                }
+                              }}
+                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            />
+                            <span className="ml-2 text-sm text-gray-700 capitalize">{type}</span>
+                          </label>
+                        ))}
+            </div>
+          </div>
+
+                    {/* Permessi */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">Permessi</label>
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={filters.hasPermits}
+                          onChange={(e) => setFilters(prev => ({ ...prev, hasPermits: e.target.checked }))}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">
+                          Solo terreni con permessi edificabilità
+                        </span>
+                      </label>
+                    </div>
+
+                    {/* AI Score */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        AI Score Minimo: {filters.minAIScore}
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={filters.minAIScore}
+                        onChange={(e) => setFilters(prev => ({ ...prev, minAIScore: parseInt(e.target.value) }))}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </div>
+
+                    {/* Livello di Rischio */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">Livello di Rischio</label>
+                      <select
+                        value={filters.riskLevel}
+                        onChange={(e) => setFilters(prev => ({ ...prev, riskLevel: e.target.value as 'all' | 'low' | 'medium' | 'high' }))}
+                        className="w-full border rounded-lg px-3 py-2"
+                      >
+                        <option value="all">Tutti i livelli</option>
+                        <option value="low">Basso</option>
+                        <option value="medium">Medio</option>
+                        <option value="high">Alto</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
 
             {/* Email e Azioni */}
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                   Email per Notifiche
-                </label>
+              </label>
                 <div className="flex gap-2">
-                  <input
-                    type="email"
-                    value={email}
+              <input
+                type="email"
+                value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="flex-1 border rounded-lg px-3 py-2"
-                    placeholder="pierpaolo.laurito@gmail.com"
-                  />
-                  <button
+                placeholder="pierpaolo.laurito@gmail.com"
+              />
+              <button
                     onClick={() => setShowEmailSettings(true)}
                     className="p-2 text-gray-400 hover:text-gray-600"
                   >
                     <SettingsIcon className="w-5 h-5" />
-                  </button>
+              </button>
                 </div>
               </div>
 
@@ -496,13 +578,12 @@ export default function LandScrapingPage() {
               {/* Progress Bar */}
               {searchProgress.phase === 'searching' && (
                 <div className="space-y-2">
-                  <div className="bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${searchProgress.progress}%` }}
-                    ></div>
-                  </div>
-                  <p className="text-sm text-gray-600">{searchProgress.message}</p>
+                  <ProgressBar
+                    phase={searchProgress.phase}
+                    progress={searchProgress.progress}
+                    message={searchProgress.message}
+                    currentSource={searchProgress.currentSource}
+                  />
                 </div>
               )}
             </div>
@@ -513,9 +594,9 @@ export default function LandScrapingPage() {
         {searchResults && (
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-xl font-semibold text-gray-900">
                 Risultati ({filteredResults.length})
-              </h2>
+                </h2>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setSelectedView('cards')}
@@ -541,12 +622,28 @@ export default function LandScrapingPage() {
             {selectedView === 'cards' && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredResults.map((land, index) => (
-                  <div key={index} className="border rounded-lg p-4 hover:bg-gray-50">
-                    <h3 className="font-medium text-gray-900">{land.title || 'Terreno'}</h3>
-                    <p className="text-sm text-gray-600">{land.location || 'Localizzazione'}</p>
-                    <p className="text-lg font-semibold text-blue-600 mt-2">{land.price || 'Prezzo non disponibile'}</p>
-                    <p className="text-sm text-gray-500">{land.area || 'Area non disponibile'}</p>
-                  </div>
+                  <LandCard
+                    key={index}
+                    land={land}
+                    isFavorite={favorites.has(land.id)}
+                    onToggleFavorite={(id) => {
+                      setFavorites(prev => {
+                        const newSet = new Set(prev);
+                        if (newSet.has(id)) {
+                          newSet.delete(id);
+                        } else {
+                          newSet.add(id);
+                        }
+                        return newSet;
+                      });
+                    }}
+                    onCreateFeasibility={(land) => {
+                      console.log('Creazione analisi di fattibilità per:', land);
+                    }}
+                    onViewDetails={(land) => {
+                      console.log('Visualizzazione dettagli per:', land);
+                    }}
+                  />
                 ))}
               </div>
             )}
@@ -556,25 +653,25 @@ export default function LandScrapingPage() {
                 {filteredResults.map((land, index) => (
                   <div key={index} className="border rounded-lg p-4 hover:bg-gray-50">
                     <div className="flex items-center justify-between">
-                      <div>
+                          <div>
                         <h3 className="font-medium text-gray-900">{land.title}</h3>
                         <p className="text-sm text-gray-600">{land.location}</p>
-                      </div>
+                          </div>
                       <div className="text-right">
                         <p className="font-medium text-gray-900">{land.price}</p>
                         <p className="text-sm text-gray-600">{land.area}</p>
-                      </div>
+                          </div>
                     </div>
                   </div>
                 ))}
-              </div>
-            )}
+          </div>
+        )}
 
             {selectedView === 'map' && (
               <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
                 <p className="text-gray-500">Mappa in costruzione...</p>
-              </div>
-            )}
+          </div>
+        )}
           </div>
         )}
 
@@ -586,42 +683,34 @@ export default function LandScrapingPage() {
               <div className="text-center">
                 <p className="text-2xl font-bold text-blue-600">{filteredResults.length}</p>
                 <p className="text-sm text-gray-600">Risultati Trovati</p>
-              </div>
+                  </div>
               <div className="text-center">
                 <p className="text-2xl font-bold text-green-600">{searchHistory.length}</p>
                 <p className="text-sm text-gray-600">Ricerche Effettuate</p>
-              </div>
+                  </div>
               <div className="text-center">
                 <p className="text-2xl font-bold text-purple-600">100%</p>
                 <p className="text-sm text-gray-600">Copertura Mercato</p>
-              </div>
+                </div>
             </div>
           </div>
         )}
 
         {/* Modali */}
         {showMapModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Mappa ISTAT</h2>
-                <button
-                  onClick={() => setShowMapModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
-                <p className="text-gray-500">Mappa ISTAT in costruzione...</p>
-              </div>
-            </div>
-          </div>
+      <MarketIntelligenceMapModal
+        isOpen={showMapModal}
+        onClose={() => setShowMapModal(false)}
+        onLocationSelect={(location) => {
+          setSearchCriteria(prev => ({ ...prev, location }));
+          setShowMapModal(false);
+        }}
+      />
         )}
-        
-        {/* Feedback Widget */}
-        <FeedbackWidget />
-      </div>
+      
+      {/* Feedback Widget */}
+      <FeedbackWidget />
+    </div>
     </DashboardLayout>
   );
 }
