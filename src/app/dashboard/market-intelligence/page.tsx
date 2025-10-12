@@ -880,16 +880,7 @@ export default function LandScrapingPage() {
 
   // Non renderizzare nulla durante il prerendering
   if (!isClient) {
-    return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">{t('loading', 'common')}</p>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
+    return null;
   }
 
   return (
@@ -1840,7 +1831,6 @@ export default function LandScrapingPage() {
         />
 
         {/* Gestione Avanzata Team spostata nelle Impostazioni */}
-      </div>
         </div>
       </div>
       
@@ -1856,6 +1846,6 @@ export default function LandScrapingPage() {
       
       {/* Feedback Widget */}
       <FeedbackWidget />
-    </div>
+    </DashboardLayout>
   );
 }
