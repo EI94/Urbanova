@@ -334,10 +334,20 @@ export class RealWebScraper {
     const results: ScrapedLand[] = [];
 
     try {
-      const location = criteria.location.toLowerCase().replace(/\s+/g, '-');
+      // Clean location: rimuovi virgole, provincie, paesi
+      const location = criteria.location
+        .split(',')[0]        // Take only first part (city name)
+        .trim()               // Remove spaces
+        .toLowerCase()
+        .replace(/\s+/g, '-') // Replace spaces with dash
+        .replace(/'/g, '')    // Remove apostrophes (Sant'Angelo → santangelo)
+        .normalize('NFD')     // Normalize accents
+        .replace(/[\u0300-\u036f]/g, '');  // Remove diacritics
+      
       const url = `https://www.immobiliare.it/vendita-terreni/${location}/`;
 
       console.log('📡 URL Immobiliare.it FUNZIONANTE:', url);
+      console.log('🧹 Location cleaned:', criteria.location, '→', location);
 
       // Headers semplici che funzionano (basati sui test)
       const headers = {

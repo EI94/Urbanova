@@ -26,17 +26,22 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Validazione completata, avvio scraping...');
 
-    // Esegui web scraping
+    // Esegui web scraping con gestione corretta "0 = no limit"
     const searchCriteria: LandSearchCriteria = {
       location,
-      minPrice: criteria?.minPrice || 0,
-      maxPrice: criteria?.maxPrice || 1000000,
-      minArea: criteria?.minArea || 500,
-      maxArea: criteria?.maxArea || 10000,
+      minPrice: criteria?.minPrice ?? 0,
+      maxPrice: criteria?.maxPrice && criteria.maxPrice > 0 
+        ? criteria.maxPrice 
+        : 999999999,  // 0 = no limit → set to max possible
+      minArea: criteria?.minArea ?? 0,  // 0 = accept all
+      maxArea: criteria?.maxArea && criteria.maxArea > 0
+        ? criteria.maxArea
+        : 999999999,  // 0 = no limit → set to max possible
       propertyType: criteria?.propertyType || 'residenziale',
     };
 
-    console.log('🔍 Criteri di ricerca:', searchCriteria);
+    console.log('🔍 Criteri di ricerca (0 = no limit):', searchCriteria);
+    console.log('📋 Criteri originali user:', criteria);
 
     // Scraping terreni
     const lands = await realWebScraper.scrapeLands(searchCriteria);

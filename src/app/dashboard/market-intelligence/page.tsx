@@ -496,16 +496,26 @@ export default function LandScrapingPage() {
 
     let filtered = [...searchResults.lands];
 
-    // Filtro prezzo
-    filtered = filtered.filter(
-      land => land.price >= filters.priceRange[0] && land.price <= filters.priceRange[1]
-    );
+    // Filtro prezzo - SOLO se specificato (evita [0,0] che esclude tutto)
+    if (filters.priceRange[0] > 0 || filters.priceRange[1] > 0) {
+      filtered = filtered.filter(land => {
+        const min = filters.priceRange[0] || 0;
+        const max = filters.priceRange[1];
+        if (max === 0) return land.price >= min;  // No upper limit
+        return land.price >= min && land.price <= max;
+      });
+    }
 
-    // Filtro area - CORREZIONE: Gestisce area = 0 (non specificata)
-    filtered = filtered.filter(land => {
-      if (land.area === 0) return true; // Se area non specificata, include sempre
-      return land.area >= filters.areaRange[0] && land.area <= filters.areaRange[1];
-    });
+    // Filtro area - SOLO se specificato (evita [0,0] che esclude tutto)
+    if (filters.areaRange[0] > 0 || filters.areaRange[1] > 0) {
+      filtered = filtered.filter(land => {
+        if (land.area === 0) return true; // Area non specificata = include
+        const min = filters.areaRange[0] || 0;
+        const max = filters.areaRange[1];
+        if (max === 0) return land.area >= min;  // No upper limit
+        return land.area >= min && land.area <= max;
+      });
+    }
 
     // Filtro tipologia - CORREZIONE: Gestisce "tutti" come default inclusivo
     if (filters.propertyTypes.length > 0 && !filters.propertyTypes.includes('tutti')) {
