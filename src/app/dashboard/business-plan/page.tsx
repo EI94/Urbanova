@@ -241,6 +241,17 @@ export default function BusinessPlanPage() {
         // Finanza
         discountRate: 12, // Default
         
+        // Finanziamento (campi obbligatori per Business Plan)
+        debt: {
+          enabled: false,
+          amount: 0,
+          interestRate: 4.5,
+          term: 20,
+          ltv: 0,
+          dscr: 1.2,
+          fees: 0
+        },
+        
         // Tempi (default)
         salesCalendar: [
           { period: 't1', units: Math.floor((feasibilityProject.revenues?.units || 1) / 2) },
@@ -288,29 +299,52 @@ export default function BusinessPlanPage() {
   };
   
   /**
-   * 💾 SALVA BUSINESS PLAN
+   * 🧹 SANITIZZA DATI PER FIRESTORE
    */
-  const saveBusinessPlan = async () => {
-    if (!bpInput || !bpOutputs.length || !currentUser?.uid) {
+  const sanitizeForFirestore = (obj: any): any => {
+    if (obj === null || obj === undefined) return null;
+    if (typeof obj !== 'object') return obj;
+    if (Array.isArray(obj)) return obj.map(sanitizeForFirestore);
+    
+    const sanitized: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (value !== undefined) {
+        sanitized[key] = sanitizeForFirestore(value);
+      }
+    }
+    return sanitized;
+  };
+
+  /**
+   * 💾 SALVA BUSINESS PLAN (CON SANITIZZAZIONE)
+   */
+  const saveBusinessPlan = async (isDraft: boolean = false) => {
+    if (!bpInput || !currentUser?.uid) {
       toast('❌ Dati mancanti per il salvataggio');
       return;
     }
 
     setIsSaving(true);
     try {
-      console.log('💾 [BusinessPlan] Salvataggio Business Plan...');
+      console.log(`💾 [BusinessPlan] Salvataggio ${isDraft ? 'bozza' : 'completo'} Business Plan...`);
       
       // Import dinamico per evitare errori di build
       const { db } = await import('@/lib/firebase');
       const { addDoc, collection, serverTimestamp } = await import('firebase/firestore');
       
+      // Sanitizza i dati per rimuovere valori undefined
+      const sanitizedInput = sanitizeForFirestore(bpInput);
+      const sanitizedOutputs = bpOutputs.length > 0 ? sanitizeForFirestore(bpOutputs) : [];
+      
       const businessPlanData = {
         userId: currentUser.uid,
-        projectId: bpInput.projectId || `bp_${Date.now()}`,
-        projectName: bpInput.projectName,
-        input: bpInput,
-        outputs: bpOutputs,
+        projectId: sanitizedInput.projectId || `bp_${Date.now()}`,
+        projectName: sanitizedInput.projectName || 'Business Plan senza nome',
+        input: sanitizedInput,
+        outputs: sanitizedOutputs,
         documentType: 'BUSINESS_PLAN',
+        isDraft: isDraft,
+        status: isDraft ? 'draft' : 'completed',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
@@ -322,13 +356,31 @@ export default function BusinessPlanPage() {
       // Aggiorna la lista dei Business Plan salvati
       await loadSavedBusinessPlans();
       
-      toast('✅ Business Plan salvato con successo!', { icon: '💾' });
+      if (isDraft) {
+        toast('✅ Business Plan salvato come bozza! Puoi completarlo in seguito.', { icon: '📝' });
+      } else {
+        toast('✅ Business Plan salvato con successo!', { icon: '💾' });
+      }
       
     } catch (error: any) {
       console.error('❌ [BusinessPlan] Errore salvataggio:', error);
       toast(`❌ Errore nel salvataggio: ${error.message}`);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  /**
+   * 🚀 SALVA AUTOMATICAMENTE IN BOZZA
+   */
+  const autoSaveDraft = async () => {
+    if (!bpInput || !currentUser?.uid) return;
+    
+    try {
+      console.log('🔄 [BusinessPlan] Auto-salvataggio bozza...');
+      await saveBusinessPlan(true);
+    } catch (error) {
+      console.error('❌ [BusinessPlan] Errore auto-salvataggio:', error);
     }
   };
 
@@ -389,6 +441,13 @@ export default function BusinessPlanPage() {
       
       // Reset stato salvataggio
       setSavedBusinessPlanId(null);
+      
+      // Auto-salva in bozza se ci sono risultati
+      if (data.outputs && data.outputs.length > 0) {
+        setTimeout(() => {
+          autoSaveDraft();
+        }, 1000); // Aspetta 1 secondo per permettere il rendering
+      }
       
       toast('✅ Business Plan calcolato con successo!', { icon: '🎉' });
       
@@ -543,6 +602,11 @@ export default function BusinessPlanPage() {
                 Genera, valuta e spiega business plan immobiliari con VAN, TIR, DSCR e leve di negoziazione.
                 <br />
                 <span className="text-base text-gray-500 mt-2 block">Input in 3-5 minuti • Scenari multipli • Sensitivity automatica</span>
+                <br />
+                <span className="text-sm text-blue-600 mt-2 block flex items-center justify-center">
+                  <CheckCircle className="w-4 h-4 mr-1" />
+                  Auto-salvataggio: i tuoi Business Plan vengono salvati automaticamente come bozze
+                </span>
               </p>
             </div>
 
@@ -564,11 +628,21 @@ export default function BusinessPlanPage() {
                     <div key={bp.id} className="bg-gray-50 rounded-xl p-4 border border-gray-200 hover:border-blue-300 transition-colors">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900 mb-1">{bp.projectName}</h3>
+                          <div className="flex items-center space-x-2 mb-1">
+                            <h3 className="font-semibold text-gray-900">{bp.projectName}</h3>
+                            {bp.isDraft && (
+                              <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full font-medium">
+                                Bozza
+                              </span>
+                            )}
+                          </div>
                           <p className="text-sm text-gray-600 mb-2">{bp.location}</p>
                           <div className="flex items-center space-x-4 text-xs text-gray-500">
                             <span>{bp.totalUnits} unità</span>
                             <span>{bp.scenariosCount} scenari</span>
+                            <span className={bp.isDraft ? 'text-yellow-600' : 'text-green-600'}>
+                              {bp.isDraft ? 'In lavorazione' : 'Completato'}
+                            </span>
                           </div>
                         </div>
                         <div className="flex flex-col space-y-1">
@@ -902,32 +976,51 @@ export default function BusinessPlanPage() {
                       </div>
 
               <div className="flex items-center space-x-3">
-                {/* Bottone Salva */}
-                {!savedBusinessPlanId && (
-                  <button
-                    onClick={saveBusinessPlan}
-                    disabled={isSaving}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-blue-400 transition-colors flex items-center space-x-2"
-                  >
-                    {isSaving ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>Salvataggio...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Download className="w-4 h-4" />
-                        <span>Salva Business Plan</span>
-                      </>
-                    )}
-                  </button>
-                )}
-                
-                {/* Indicatore salvato */}
-                {savedBusinessPlanId && (
-                  <div className="px-4 py-2 bg-green-100 text-green-700 rounded-xl flex items-center space-x-2">
-                    <CheckCircle className="w-4 h-4" />
-                    <span>Salvato</span>
+                {/* Pulsanti Salva Intelligenti */}
+                {!savedBusinessPlanId ? (
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => saveBusinessPlan(false)}
+                      disabled={isSaving}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-blue-400 transition-colors flex items-center space-x-2"
+                    >
+                      {isSaving ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Salvataggio...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Download className="w-4 h-4" />
+                          <span>Salva Completo</span>
+                        </>
+                      )}
+                    </button>
+                    
+                    <button
+                      onClick={() => saveBusinessPlan(true)}
+                      disabled={isSaving}
+                      className="px-3 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 disabled:bg-gray-50 transition-colors flex items-center space-x-2 text-sm"
+                    >
+                      <FileText className="w-4 h-4" />
+                      <span>Bozza</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <div className="px-4 py-2 bg-green-100 text-green-700 rounded-xl flex items-center space-x-2">
+                      <CheckCircle className="w-4 h-4" />
+                      <span>Salvato</span>
+                    </div>
+                    
+                    <button
+                      onClick={() => saveBusinessPlan(false)}
+                      disabled={isSaving}
+                      className="px-3 py-2 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 disabled:bg-blue-50 transition-colors flex items-center space-x-2 text-sm"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Aggiorna</span>
+                    </button>
                   </div>
                 )}
 
