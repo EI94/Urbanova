@@ -799,8 +799,8 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                       message,
-                      userId: auth.currentUser?.uid || 'anonymous',
-                      userEmail: auth.currentUser?.email || '',
+                      userId: (auth && typeof auth === 'object' && 'currentUser' in auth && auth.currentUser?.uid) ? auth.currentUser.uid : 'anonymous',
+                      userEmail: (auth && typeof auth === 'object' && 'currentUser' in auth && auth.currentUser?.email) ? auth.currentUser.email : '',
                       sessionId: Date.now().toString(),
                     }),
                   });
