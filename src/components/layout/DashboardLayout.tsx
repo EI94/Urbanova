@@ -95,13 +95,9 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
     read: 0,
     dismissed: 0,
     byType: {},
-    byPriority: {},
   });
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [workspaces, setWorkspaces] = useState<any[]>([]);
-  
-  // 🆕 OS 2.0 Sidecar state
-  const [os2SidecarOpen, setOs2SidecarOpen] = useState(false);
 
   // Funzione per generare notifiche di test
   const generateTestNotifications = async () => {
@@ -118,20 +114,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
     }
   };
 
-  // 🆕 OS 2.0 Keyboard Shortcut ⌘J (Ctrl+J) - sempre attivo
-  useEffect(() => {
-    const handleKeyboardShortcut = (e: KeyboardEvent) => {
-      // ⌘J (Mac) or Ctrl+J (Windows/Linux)
-      if ((e.metaKey || e.ctrlKey) && e.key === 'j') {
-        e.preventDefault();
-        setOs2SidecarOpen(prev => !prev);
-        console.log('🎹 [OS2] Keyboard shortcut ⌘J triggered, sidecar:', !os2SidecarOpen);
-      }
-    };
-    
-    window.addEventListener('keydown', handleKeyboardShortcut);
-    return () => window.removeEventListener('keydown', handleKeyboardShortcut);
-  }, [os2SidecarOpen]);
+  // 🆕 OS 2.0 Keyboard Shortcut ⌘J (Ctrl+J) - gestito dal Sidecar internamente
   
   // 🔧 FIX NAVIGAZIONE: Intercettatore universale per tutti i click sui link
   useEffect(() => {
@@ -241,13 +224,12 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
           } catch (notificationError) {
             console.error('❌ [DashboardLayout] Errore caricamento notifiche:', notificationError);
             // Non bloccare il caricamento se le notifiche falliscono
-            setNotifications({ 
+            setNotifications({
               unread: 0, 
               total: 0, 
               read: 0, 
               dismissed: 0, 
               byType: {}, 
-              byPriority: {} 
             });
           }
           
@@ -707,6 +689,19 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                 >
                   <Settings className="w-5 h-5" />
                 </button>
+
+                {/* 🆕 OS 2.0 Icona nell'header */}
+                <button
+                  onClick={() => {
+                    // Il Sidecar gestisce internamente l'apertura
+                    console.log('🎯 [OS2] Icona header clicked - Sidecar gestisce apertura');
+                  }}
+                  className="p-2 text-blue-600 hover:text-blue-700 transition-colors rounded-lg hover:bg-blue-50 header-icon relative"
+                  title="Apri Urbanova OS (⌘J)"
+                >
+                  <Bot className="w-5 h-5" />
+                  <Sparkles className="absolute -top-1 -right-1 w-3 h-3 text-yellow-400 animate-pulse" />
+                </button>
               </div>
             </div>
           </header>
@@ -773,27 +768,11 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
       <FeedbackWidget className="" />
       
       {/* 🆕 OS 2.0 Sidecar - sempre visibile */}
-      <>
-        {/* Floating Trigger Button */}
-        <button
-          onClick={() => setOs2SidecarOpen(true)}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-2xl hover:scale-110 transition-all duration-300 flex items-center justify-center group"
-          title="Apri Urbanova OS (⌘J)"
-          aria-label="Apri Urbanova OS"
-        >
-          <Bot className="w-6 h-6 group-hover:scale-110 transition-transform" />
-          <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-yellow-400 animate-pulse" />
-        </button>
-        
-        {/* OS 2.0 Sidecar Component */}
-        {os2SidecarOpen && (
-            <Sidecar
-              projects={[]} // TODO: Pass real projects
-              skills={[]}   // TODO: Pass real skills
-              onMessageSend={async (message) => {
-                console.log('📤 [OS2] Message sent:', message);
-                // TODO: Send to /api/os2/chat
+      <Sidecar
+              onMessageSend={async (message: string) => {
                 try {
+                  console.log('🎯 [OS2] Invio messaggio:', message);
+                  
                   const response = await fetch('/api/os2/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -829,8 +808,6 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                 console.log('🎬 [OS2] Action clicked:', actionId, 'on message:', messageId);
               }}
             />
-          )}
-        </>
     </div>
   );
 }
