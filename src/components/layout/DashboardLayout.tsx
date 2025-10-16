@@ -42,6 +42,9 @@ import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 import { NotificationStats } from '@/types/notifications';
 import { UserProfile } from '@/types/userProfile';
 import AuthGuard from '@/components/AuthGuard';
+import { Sidecar } from '@/app/components/os2/Sidecar';
+import { OS_V2_ENABLED } from '@/lib/featureFlags';
+import { Bot, Sparkles } from 'lucide-react';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -96,6 +99,9 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
   });
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [workspaces, setWorkspaces] = useState<any[]>([]);
+  
+  // 🆕 OS 2.0 Sidecar state
+  const [os2SidecarOpen, setOs2SidecarOpen] = useState(false);
 
   // Funzione per generare notifiche di test
   const generateTestNotifications = async () => {
@@ -112,6 +118,23 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
     }
   };
 
+  // 🆕 OS 2.0 Keyboard Shortcut ⌘J (Ctrl+J)
+  useEffect(() => {
+    if (!OS_V2_ENABLED) return;
+    
+    const handleKeyboardShortcut = (e: KeyboardEvent) => {
+      // ⌘J (Mac) or Ctrl+J (Windows/Linux)
+      if ((e.metaKey || e.ctrlKey) && e.key === 'j') {
+        e.preventDefault();
+        setOs2SidecarOpen(prev => !prev);
+        console.log('🎹 [OS2] Keyboard shortcut ⌘J triggered, sidecar:', !os2SidecarOpen);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyboardShortcut);
+    return () => window.removeEventListener('keydown', handleKeyboardShortcut);
+  }, [os2SidecarOpen]);
+  
   // 🔧 FIX NAVIGAZIONE: Intercettatore universale per tutti i click sui link
   useEffect(() => {
     console.log('🚀 [NAVIGATION INTERCEPTOR] Inizializzazione intercettatore navigazione, pathname:', pathname);
@@ -750,6 +773,68 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
 
       {/* Feedback Widget */}
       <FeedbackWidget className="" />
+      
+      {/* 🆕 OS 2.0 Sidecar (se abilitato) */}
+      {OS_V2_ENABLED && (
+        <>
+          {/* Floating Trigger Button */}
+          <button
+            onClick={() => setOs2SidecarOpen(true)}
+            className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-2xl hover:scale-110 transition-all duration-300 flex items-center justify-center group"
+            title="Apri Urbanova OS (⌘J)"
+            aria-label="Apri Urbanova OS"
+          >
+            <Bot className="w-6 h-6 group-hover:scale-110 transition-transform" />
+            <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-yellow-400 animate-pulse" />
+          </button>
+          
+          {/* OS 2.0 Sidecar Component */}
+          {os2SidecarOpen && (
+            <Sidecar
+              projects={[]} // TODO: Pass real projects
+              skills={[]}   // TODO: Pass real skills
+              onMessageSend={async (message) => {
+                console.log('📤 [OS2] Message sent:', message);
+                // TODO: Send to /api/os2/chat
+                try {
+                  const response = await fetch('/api/os2/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      message,
+                      userId: auth.currentUser?.uid || 'anonymous',
+                      userEmail: auth.currentUser?.email || '',
+                      sessionId: Date.now().toString(),
+                    }),
+                  });
+                  
+                  const result = await response.json();
+                  console.log('📥 [OS2] Response received:', result);
+                } catch (error) {
+                  console.error('❌ [OS2] Error sending message:', error);
+                }
+              }}
+              onSkillClick={(skillId) => {
+                console.log('🎯 [OS2] Skill clicked:', skillId);
+                // Navigate to skill tab
+                const skillRoute = skillId.split('.')[0]; // e.g., "business_plan.run" → "business_plan"
+                router.push(`/dashboard/${skillRoute}`);
+              }}
+              onProjectClick={(projectId) => {
+                console.log('🏢 [OS2] Project clicked:', projectId);
+                // Navigate to project
+                router.push(`/dashboard/projects/${projectId}`);
+              }}
+              onQuickAction={(actionId) => {
+                console.log('⚡ [OS2] Quick action:', actionId);
+              }}
+              onActionClick={(messageId, actionId) => {
+                console.log('🎬 [OS2] Action clicked:', actionId, 'on message:', messageId);
+              }}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 }

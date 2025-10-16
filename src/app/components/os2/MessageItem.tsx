@@ -24,7 +24,7 @@ import {
 import { OsMessage, MessageStatus } from '@/hooks/os2/useOsSidecar';
 import { cn } from '@/lib/utils';
 import { getSkillStatusLine } from '@/os2/conversation/systemPrompt';
-import osTranslations from '@/i18n/it/os2.json';
+import osTranslations from '../../../../i18n/it/os2.json';
 import { ThinkingDots } from './ThinkingDots';
 import '@/app/styles/os2.css';
 
