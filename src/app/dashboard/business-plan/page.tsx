@@ -104,14 +104,19 @@ export default function BusinessPlanPage() {
     }
   }, [currentUser]);
 
-  // Pre-fill da Feasibility Analysis (se viene da lì)
+  // Pre-fill da Feasibility Analysis o Business Plan esistente
   useEffect(() => {
     const projectId = searchParams?.get('projectId');
     const fromFeasibility = searchParams?.get('fromFeasibility');
+    const businessPlanId = searchParams?.get('businessPlanId');
+    const mode = searchParams?.get('mode'); // 'view', 'edit'
     
     if (projectId && fromFeasibility === 'true') {
       console.log('📊 [BusinessPlan] Caricamento dati da Feasibility:', projectId);
       loadFromFeasibility(projectId);
+    } else if (businessPlanId) {
+      console.log('📋 [BusinessPlan] Caricamento Business Plan esistente:', businessPlanId, 'mode:', mode);
+      loadExistingBusinessPlan(businessPlanId, mode);
     }
   }, [searchParams]);
   
@@ -186,6 +191,64 @@ export default function BusinessPlanPage() {
     } catch (error: any) {
       console.error('❌ [BusinessPlan] Errore eliminazione:', error);
       toast(`❌ Errore nell'eliminazione: ${error.message}`);
+    }
+  };
+
+  /**
+   * 📋 CARICA BUSINESS PLAN ESISTENTE
+   */
+  const loadExistingBusinessPlan = async (businessPlanId: string, mode: 'view' | 'edit' = 'view') => {
+    try {
+      console.log('📋 [BusinessPlan] Loading existing BP:', businessPlanId, 'mode:', mode);
+      
+      // Import dinamico per evitare errori di build
+      const { db } = await import('@/lib/firebase');
+      const { getDoc, doc } = await import('firebase/firestore');
+      
+      const businessPlanDoc = doc(db, 'feasibilityProjects', businessPlanId);
+      const docSnapshot = await getDoc(businessPlanDoc);
+      
+      if (!docSnapshot.exists()) {
+        throw new Error('Business Plan non trovato');
+      }
+      
+      const businessPlanData = docSnapshot.data();
+      
+      // Verifica che appartenga all'utente corrente
+      if (businessPlanData?.userId !== currentUser?.uid) {
+        throw new Error('Non autorizzato ad accedere a questo Business Plan');
+      }
+      
+      // Verifica che sia un Business Plan
+      if (businessPlanData?.documentType !== 'BUSINESS_PLAN') {
+        throw new Error('Documento non è un Business Plan');
+      }
+      
+      console.log('📋 [BusinessPlan] Business Plan caricato:', businessPlanData);
+      
+      // Carica i dati nel form
+      setBpInput(businessPlanData.input);
+      setBpOutputs(businessPlanData.outputs || []);
+      setComparison(businessPlanData.comparison || null);
+      setSensitivity(businessPlanData.sensitivity || []);
+      setSelectedScenarioId(businessPlanData.outputs?.[0]?.scenarioId || '');
+      setSavedBusinessPlanId(businessPlanId);
+      
+      // Imposta la modalità appropriata
+      if (mode === 'edit') {
+        setViewMode('form');
+        toast('✅ Business Plan caricato per la modifica', { icon: '✏️' });
+      } else {
+        setViewMode('results');
+        setResultsTab('overview');
+        toast('✅ Business Plan caricato per la visualizzazione', { icon: '👁️' });
+      }
+      
+    } catch (error) {
+      console.error('❌ [BusinessPlan] Errore caricamento BP esistente:', error);
+      toast(`❌ Errore nel caricamento: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`);
+      // Torna alla welcome screen
+      setViewMode('welcome');
     }
   };
 
@@ -381,6 +444,56 @@ export default function BusinessPlanPage() {
       await saveBusinessPlan(true);
     } catch (error) {
       console.error('❌ [BusinessPlan] Errore auto-salvataggio:', error);
+    }
+  };
+
+  /**
+   * 👁️ VISUALIZZA BUSINESS PLAN
+   */
+  const viewBusinessPlan = (businessPlanId: string) => {
+    const url = `/dashboard/business-plan?businessPlanId=${businessPlanId}&mode=view`;
+    window.open(url, '_blank');
+  };
+
+  /**
+   * ✏️ MODIFICA BUSINESS PLAN
+   */
+  const editBusinessPlan = (businessPlanId: string) => {
+    const url = `/dashboard/business-plan?businessPlanId=${businessPlanId}&mode=edit`;
+    window.location.href = url;
+  };
+
+  /**
+   * 📤 CONDIVIDI BUSINESS PLAN
+   */
+  const shareBusinessPlan = async (businessPlanId: string, businessPlanName: string) => {
+    try {
+      // Crea URL di condivisione
+      const shareUrl = `${window.location.origin}/dashboard/business-plan?businessPlanId=${businessPlanId}&mode=view&shared=true`;
+      
+      // Copia negli appunti
+      await navigator.clipboard.writeText(shareUrl);
+      
+      toast('✅ Link di condivisione copiato negli appunti!', { icon: '📋' });
+      
+      // Mostra modal di condivisione (opzionale)
+      const shareData = {
+        title: `Business Plan: ${businessPlanName}`,
+        text: `Guarda questo Business Plan su Urbanova: ${businessPlanName}`,
+        url: shareUrl
+      };
+      
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData);
+        } catch (err) {
+          console.log('Condivisione nativa annullata');
+        }
+      }
+      
+    } catch (error) {
+      console.error('❌ [BusinessPlan] Errore condivisione:', error);
+      toast('❌ Errore nella condivisione');
     }
   };
 
@@ -648,24 +761,25 @@ export default function BusinessPlanPage() {
                         <div className="flex flex-col space-y-1">
                           <div className="flex space-x-1">
                             <button
-                              onClick={() => {
-                                // TODO: Implementare visualizzazione Business Plan
-                                toast('Funzionalità in sviluppo');
-                              }}
+                              onClick={() => viewBusinessPlan(bp.id)}
                               className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
                               title="Visualizza"
                             >
                               <Eye className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => {
-                                // TODO: Implementare modifica Business Plan
-                                toast('Funzionalità in sviluppo');
-                              }}
+                              onClick={() => editBusinessPlan(bp.id)}
                               className="p-1 text-gray-400 hover:text-green-600 transition-colors"
                               title="Modifica"
                             >
                               <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => shareBusinessPlan(bp.id, bp.projectName)}
+                              className="p-1 text-gray-400 hover:text-purple-600 transition-colors"
+                              title="Condividi"
+                            >
+                              <Send className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => deleteBusinessPlan(bp.id)}
@@ -792,15 +906,23 @@ export default function BusinessPlanPage() {
           <div className="animate-fade-in">
             {/* Breadcrumb elegante */}
             <div className="mb-6 flex items-center space-x-2 text-sm">
-                    <button
+              <button
                 onClick={() => setViewMode('welcome')}
                 className="text-gray-500 hover:text-gray-700 transition-colors"
-                    >
+              >
                 Business Plan
-                    </button>
+              </button>
               <ChevronRight className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-900 font-medium">Nuovo</span>
-                </div>
+              {savedBusinessPlanId ? (
+                <>
+                  <span className="text-gray-500">{bpInput?.projectName || 'Business Plan'}</span>
+                  <ChevronRight className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-900 font-medium">Modifica</span>
+                </>
+              ) : (
+                <span className="text-gray-900 font-medium">Nuovo</span>
+              )}
+            </div>
 
             <BusinessPlanForm
               initialData={bpInput as Partial<BusinessPlanInput> | undefined}
@@ -961,7 +1083,7 @@ export default function BusinessPlanPage() {
         {viewMode === 'results' && bpOutputs.length > 0 && (
           <div className="space-y-6 animate-fade-in">
             {/* Header con breadcrumb e actions */}
-                  <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <button 
                   onClick={() => setViewMode('welcome')}
@@ -969,11 +1091,18 @@ export default function BusinessPlanPage() {
                 >
                   <ArrowRight className="w-5 h-5 rotate-180" />
                 </button>
-                      <div>
+                <div>
                   <h1 className="text-3xl font-bold text-gray-900">{bpInput?.projectName}</h1>
-                  <p className="text-sm text-gray-600 mt-1">{bpInput?.location} • {bpOutputs.length} scenari analizzati</p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {bpInput?.location} • {bpOutputs.length} scenari analizzati
+                    {savedBusinessPlanId && (
+                      <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                        Salvato
+                      </span>
+                    )}
+                  </p>
                 </div>
-                      </div>
+              </div>
 
               <div className="flex items-center space-x-3">
                 {/* Pulsanti Salva Intelligenti */}
@@ -1031,6 +1160,16 @@ export default function BusinessPlanPage() {
                   <FileText className="w-4 h-4" />
                   <span>Modifica</span>
                 </button>
+                
+                {savedBusinessPlanId && (
+                  <button
+                    onClick={() => shareBusinessPlan(savedBusinessPlanId, bpInput?.projectName || 'Business Plan')}
+                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors flex items-center space-x-2"
+                  >
+                    <Send className="w-4 h-4" />
+                    <span>Condividi</span>
+                  </button>
+                )}
                 
                 <button
                   onClick={handleExportExcel}
