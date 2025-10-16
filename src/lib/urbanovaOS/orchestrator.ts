@@ -4,7 +4,7 @@
 // import { ChatMessage } from '@/types/chat';
 import { UrbanovaOSClassificationEngine, ClassificationResult } from './ml/classificationEngine';
 import { AdvancedConversationalEngine } from './conversational/advancedConversationalEngine';
-import { OS_V2_ENABLED } from '@/lib/featureFlags';
+// Feature flag OS_V2_ENABLED rimosso - OS2 sempre attivo
 import { getOS2, type OS2Request, type OS2Response } from '@/os2';
 
 // Definizione locale per evitare errori di import
@@ -249,11 +249,9 @@ export class UrbanovaOSOrchestrator {
       priority: request.metadata.priority
     });
     
-    // 🚀 DELEGA A OS2 PLANNER/EXECUTOR SE FEATURE FLAG ATTIVO
-    if (OS_V2_ENABLED) {
-      console.log('🎯 [UrbanovaOS] Delegando a OS2 Planner/Executor...');
-      return await this.processWithOS2(request);
-    }
+    // 🚀 USA SEMPRE OS2 PLANNER/EXECUTOR (feature flag rimosso)
+    console.log('🎯 [UrbanovaOS] Delegando a OS2 Planner/Executor...');
+    return await this.processWithOS2(request);
     
     // 🚀 OTTIMIZZAZIONE: Timeout per evitare richieste troppo lunghe
     const timeoutPromise = new Promise<never>((_, reject) => {
