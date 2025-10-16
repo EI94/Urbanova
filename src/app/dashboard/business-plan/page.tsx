@@ -111,6 +111,12 @@ export default function BusinessPlanPage() {
     const businessPlanId = searchParams?.get('businessPlanId');
     const mode = searchParams?.get('mode'); // 'view', 'edit'
     
+    // Aspetta che l'utente sia autenticato prima di caricare i dati
+    if (!currentUser?.uid) {
+      console.log('⏳ [BusinessPlan] Aspetto autenticazione per caricamento dati...');
+      return;
+    }
+    
     if (projectId && fromFeasibility === 'true') {
       console.log('📊 [BusinessPlan] Caricamento dati da Feasibility:', projectId);
       loadFromFeasibility(projectId);
@@ -118,7 +124,7 @@ export default function BusinessPlanPage() {
       console.log('📋 [BusinessPlan] Caricamento Business Plan esistente:', businessPlanId, 'mode:', mode);
       loadExistingBusinessPlan(businessPlanId, mode);
     }
-  }, [searchParams]);
+  }, [searchParams, currentUser]);
   
   /**
    * Carica lista Business Plan salvati
@@ -200,6 +206,22 @@ export default function BusinessPlanPage() {
   const loadExistingBusinessPlan = async (businessPlanId: string, mode: 'view' | 'edit' = 'view') => {
     try {
       console.log('📋 [BusinessPlan] Loading existing BP:', businessPlanId, 'mode:', mode);
+      console.log('📋 [BusinessPlan] Current user:', currentUser?.uid);
+      
+      // Aspetta che l'utente sia autenticato
+      if (!currentUser?.uid) {
+        console.log('⏳ [BusinessPlan] Aspetto autenticazione utente...');
+        // Aspetta fino a 5 secondi per l'autenticazione
+        let attempts = 0;
+        while (!currentUser?.uid && attempts < 50) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          attempts++;
+        }
+        
+        if (!currentUser?.uid) {
+          throw new Error('Utente non autenticato. Effettua il login per accedere ai Business Plan.');
+        }
+      }
       
       // Import dinamico per evitare errori di build
       const { db } = await import('@/lib/firebase');
@@ -213,9 +235,20 @@ export default function BusinessPlanPage() {
       }
       
       const businessPlanData = docSnapshot.data();
+      console.log('📋 [BusinessPlan] Business Plan data:', {
+        userId: businessPlanData?.userId,
+        currentUserId: currentUser?.uid,
+        documentType: businessPlanData?.documentType,
+        projectName: businessPlanData?.input?.projectName
+      });
       
       // Verifica che appartenga all'utente corrente
       if (businessPlanData?.userId !== currentUser?.uid) {
+        console.error('❌ [BusinessPlan] Autorizzazione fallita:', {
+          businessPlanUserId: businessPlanData?.userId,
+          currentUserId: currentUser?.uid,
+          match: businessPlanData?.userId === currentUser?.uid
+        });
         throw new Error('Non autorizzato ad accedere a questo Business Plan');
       }
       
@@ -224,7 +257,7 @@ export default function BusinessPlanPage() {
         throw new Error('Documento non è un Business Plan');
       }
       
-      console.log('📋 [BusinessPlan] Business Plan caricato:', businessPlanData);
+      console.log('📋 [BusinessPlan] Business Plan caricato con successo:', businessPlanData);
       
       // Carica i dati nel form
       setBpInput(businessPlanData.input);
@@ -696,6 +729,21 @@ export default function BusinessPlanPage() {
 
   // Ottieni scenario selezionato
   const selectedScenario = bpOutputs.find(s => s.scenarioId === selectedScenarioId);
+
+  // Loading state per autenticazione quando si carica un BP esistente
+  if (!currentUser && (searchParams?.get('businessPlanId') || searchParams?.get('projectId'))) {
+    return (
+      <DashboardLayout title="Business Plan">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Verifica autenticazione...</p>
+            <p className="text-sm text-gray-500 mt-2">Caricamento dati Business Plan</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="Business Plan">
