@@ -690,20 +690,10 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   <Settings className="w-5 h-5" />
                 </button>
 
-                {/* 🆕 OS 2.0 Icona nell'header - DEBUG */}
-                <button
-                  onClick={() => {
-                    console.log('🎯 [OS2] Icona header clicked - Sidecar gestisce apertura');
-                    console.log('🔍 [DEBUG] Auth state:', auth);
-                    console.log('🔍 [DEBUG] Current user:', auth?.currentUser);
-                  }}
-                  className="p-2 text-red-600 hover:text-red-700 transition-colors rounded-lg hover:bg-red-50 header-icon relative border-2 border-red-500"
-                  title="OS 2.0 DEBUG - Apri Urbanova OS (⌘J)"
-                >
-                  <Bot className="w-5 h-5" />
-                  <Sparkles className="absolute -top-1 -right-1 w-3 h-3 text-yellow-400 animate-pulse" />
-                  <span className="absolute -bottom-1 -right-1 text-xs bg-red-500 text-white px-1 rounded">OS2</span>
-                </button>
+                {/* 🆕 OS 2.0 Icona nell'header - DEBUG SEMPLICE */}
+                <div className="p-2 bg-red-500 text-white text-xs font-bold border-2 border-yellow-400">
+                  OS2 DEBUG
+                </div>
               </div>
             </div>
           </header>
