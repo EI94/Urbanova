@@ -93,6 +93,10 @@ export default function BusinessPlanPage() {
   const [chatInput, setChatInput] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
   
+  // Stati per calcolo e errori
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
   // Carica lista Business Plan salvati
   useEffect(() => {
     if (currentUser?.uid) {
