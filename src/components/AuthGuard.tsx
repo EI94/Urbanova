@@ -41,9 +41,25 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     );
   }
 
-  // Se non autenticato, non mostrare nulla (il redirect è in corso)
+  // Se non autenticato, mostra solo l'icona OS 2.0 e reindirizza
   if (!currentUser) {
-    return null;
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Icona OS 2.0 sempre visibile anche senza autenticazione */}
+        <div className="fixed top-4 right-4 z-50">
+          <div className="p-2 bg-red-500 text-white text-xs font-bold border-2 border-yellow-400">
+            OS2 DEBUG
+          </div>
+        </div>
+        {/* Reindirizza al login */}
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Reindirizzamento al login...</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // Se autenticato, mostra il contenuto

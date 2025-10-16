@@ -54,9 +54,9 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children, title = 'Dashboard' }: DashboardLayoutProps) {
   return (
-    // <AuthGuard> // TEMPORANEAMENTE RIMOSSO PER DEBUG
+    <AuthGuard>
       <DashboardLayoutContent children={children} title={title} />
-    // </AuthGuard> // TEMPORANEAMENTE RIMOSSO PER DEBUG
+    </AuthGuard>
   );
 }
 
