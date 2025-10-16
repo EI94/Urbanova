@@ -54,9 +54,7 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children, title = 'Dashboard' }: DashboardLayoutProps) {
   return (
-    <AuthGuard>
-      <DashboardLayoutContent children={children} title={title} />
-    </AuthGuard>
+    <DashboardLayoutContent children={children} title={title} />
   );
 }
 
@@ -777,7 +775,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
         {/* Floating Trigger Button */}
         <button
           onClick={() => setOs2SidecarOpen(true)}
-          className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-2xl hover:scale-110 transition-all duration-300 flex items-center justify-center group"
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-2xl hover:scale-110 transition-all duration-300 flex items-center justify-center group"
           title="Apri Urbanova OS (⌘J)"
           aria-label="Apri Urbanova OS"
         >
