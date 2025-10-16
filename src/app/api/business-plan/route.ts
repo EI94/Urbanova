@@ -32,8 +32,8 @@ export async function GET(request: NextRequest) {
     const { db } = await import('@/lib/firebase');
     const { getDocs, collection, query, orderBy, limit } = await import('firebase/firestore');
     
-    // Query per ottenere tutti i Business Plan (come feasibilityProjects)
-    const businessPlansRef = collection(db, 'businessPlans');
+    // Query per ottenere tutti i Business Plan (salvati come feasibilityProjects con documentType)
+    const businessPlansRef = collection(db, 'feasibilityProjects');
     const q = query(businessPlansRef, orderBy('createdAt', 'desc'), limit(100));
     
     console.log('🔄 [API BusinessPlan] Eseguendo query Business Plans...');
@@ -58,6 +58,7 @@ export async function GET(request: NextRequest) {
         totalUnits: data.input?.totalUnits || 0,
         averagePrice: data.input?.averagePrice || 0,
         userId: data.userId, // Manteniamo userId per filtrare nel frontend se necessario
+        documentType: data.documentType, // Tipo documento per distinguere BP da FP
         createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
         updatedAt: data.updatedAt?.toDate?.()?.toISOString() || null,
         // Metriche del miglior scenario
@@ -69,7 +70,7 @@ export async function GET(request: NextRequest) {
           Math.max(...data.outputs.map((o: any) => o.summary?.marginPercentage || 0)) : 0,
         scenariosCount: data.outputs?.length || 0
       };
-    }).filter(bp => bp.userId === userId); // Filtriamo nel codice invece che nella query
+    }).filter(bp => bp.userId === userId && bp.documentType === 'BUSINESS_PLAN'); // Filtriamo per utente e tipo documento
     
     console.log(`✅ [API BusinessPlan] Trovati ${businessPlans.length} Business Plan per utente`);
     
@@ -115,7 +116,7 @@ export async function DELETE(request: NextRequest) {
     const { getDoc, deleteDoc, doc } = await import('firebase/firestore');
     
     // Verifica che il Business Plan appartenga all'utente
-    const businessPlanDoc = doc(db, 'businessPlans', businessPlanId);
+    const businessPlanDoc = doc(db, 'feasibilityProjects', businessPlanId);
     const docSnapshot = await getDoc(businessPlanDoc);
     
     if (!docSnapshot.exists()) {
@@ -123,7 +124,7 @@ export async function DELETE(request: NextRequest) {
     }
     
     const businessPlanData = docSnapshot.data();
-    if (businessPlanData?.userId !== userId) {
+    if (businessPlanData?.userId !== userId || businessPlanData?.documentType !== 'BUSINESS_PLAN') {
       throw new Error('Non autorizzato a eliminare questo Business Plan');
     }
     
