@@ -42,9 +42,10 @@ import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 import { NotificationStats } from '@/types/notifications';
 import { UserProfile } from '@/types/userProfile';
 import AuthGuard from '@/components/AuthGuard';
-import { Sidecar } from '@/app/components/os2/Sidecar';
+// Sidecar temporaneamente rimosso per debug
+// import { Sidecar } from '@/app/components/os2/Sidecar';
 // OS 2.0 sempre abilitato - feature flag rimosso
-import { Bot, Sparkles } from 'lucide-react';
+// import { Bot, Sparkles } from 'lucide-react';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -772,65 +773,8 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
       {/* Feedback Widget */}
       <FeedbackWidget className="" />
       
-      {/* 🆕 OS 2.0 Sidecar - sempre visibile */}
-      <>
-        {/* Floating Trigger Button */}
-        <button
-          onClick={() => setOs2SidecarOpen(true)}
-          className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-2xl hover:scale-110 transition-all duration-300 flex items-center justify-center group"
-          title="Apri Urbanova OS (⌘J)"
-          aria-label="Apri Urbanova OS"
-        >
-          <Bot className="w-6 h-6 group-hover:scale-110 transition-transform" />
-          <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-yellow-400 animate-pulse" />
-        </button>
-        
-        {/* OS 2.0 Sidecar Component */}
-        {os2SidecarOpen && (
-            <Sidecar
-              projects={[]} // TODO: Pass real projects
-              skills={[]}   // TODO: Pass real skills
-              onMessageSend={async (message) => {
-                console.log('📤 [OS2] Message sent:', message);
-                // TODO: Send to /api/os2/chat
-                try {
-                  const response = await fetch('/api/os2/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      message,
-                      userId: (auth && typeof auth === 'object' && 'currentUser' in auth && auth.currentUser?.uid) ? auth.currentUser.uid : 'anonymous',
-                      userEmail: (auth && typeof auth === 'object' && 'currentUser' in auth && auth.currentUser?.email) ? auth.currentUser.email : '',
-                      sessionId: Date.now().toString(),
-                    }),
-                  });
-                  
-                  const result = await response.json();
-                  console.log('📥 [OS2] Response received:', result);
-                } catch (error) {
-                  console.error('❌ [OS2] Error sending message:', error);
-                }
-              }}
-              onSkillClick={(skillId) => {
-                console.log('🎯 [OS2] Skill clicked:', skillId);
-                // Navigate to skill tab
-                const skillRoute = skillId.split('.')[0]; // e.g., "business_plan.run" → "business_plan"
-                router.push(`/dashboard/${skillRoute}`);
-              }}
-              onProjectClick={(projectId) => {
-                console.log('🏢 [OS2] Project clicked:', projectId);
-                // Navigate to project
-                router.push(`/dashboard/projects/${projectId}`);
-              }}
-              onQuickAction={(actionId) => {
-                console.log('⚡ [OS2] Quick action:', actionId);
-              }}
-              onActionClick={(messageId, actionId) => {
-                console.log('🎬 [OS2] Action clicked:', actionId, 'on message:', messageId);
-              }}
-            />
-          )}
-        </>
+      {/* 🆕 OS 2.0 Sidecar - TEMPORANEAMENTE DISABILITATO PER DEBUG */}
+      {/* Floating button rimosso per debug */}
     </div>
   );
 }
