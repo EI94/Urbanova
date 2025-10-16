@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { Bot, Sparkles } from 'lucide-react';
 import '@/lib/osProtection'; // OS Protection per auth guard
 
 interface AuthGuardProps {
@@ -47,9 +48,16 @@ export default function AuthGuard({ children }: AuthGuardProps) {
       <div className="min-h-screen bg-gray-50">
         {/* Icona OS 2.0 sempre visibile anche senza autenticazione */}
         <div className="fixed top-4 right-4 z-50">
-          <div className="p-2 bg-red-500 text-white text-xs font-bold border-2 border-yellow-400">
-            OS2 DEBUG
-          </div>
+          <button
+            onClick={() => {
+              console.log('🎯 [OS2] Icona header clicked - Sidecar gestisce apertura');
+            }}
+            className="p-2 text-blue-600 hover:text-blue-700 transition-colors rounded-lg hover:bg-blue-50 header-icon relative"
+            title="Apri Urbanova OS (⌘J)"
+          >
+            <Bot className="w-5 h-5" />
+            <Sparkles className="absolute -top-1 -right-1 w-3 h-3 text-yellow-400 animate-pulse" />
+          </button>
         </div>
         {/* Reindirizza al login */}
         <div className="min-h-screen flex items-center justify-center">
