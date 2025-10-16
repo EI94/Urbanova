@@ -47,17 +47,8 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     return (
       <div className="min-h-screen bg-gray-50">
         {/* Icona OS 2.0 sempre visibile anche senza autenticazione */}
-        <div className="fixed top-4 right-4 z-50">
-          <button
-            onClick={() => {
-              console.log('🎯 [OS2] Icona header clicked - Sidecar gestisce apertura');
-            }}
-            className="p-2 text-blue-600 hover:text-blue-700 transition-colors rounded-lg hover:bg-blue-50 header-icon relative"
-            title="Apri Urbanova OS (⌘J)"
-          >
-            <Bot className="w-5 h-5" />
-            <Sparkles className="absolute -top-1 -right-1 w-3 h-3 text-yellow-400 animate-pulse" />
-          </button>
+        <div className="fixed top-4 right-4 z-50 bg-red-500 text-white p-4 text-xl font-bold border-4 border-yellow-400">
+          OS 2.0 FUNZIONA!
         </div>
         {/* Reindirizza al login */}
         <div className="min-h-screen flex items-center justify-center">
