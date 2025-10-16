@@ -118,10 +118,8 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
     }
   };
 
-  // 🆕 OS 2.0 Keyboard Shortcut ⌘J (Ctrl+J)
+  // 🆕 OS 2.0 Keyboard Shortcut ⌘J (Ctrl+J) - sempre attivo
   useEffect(() => {
-    if (!OS_V2_ENABLED) return;
-    
     const handleKeyboardShortcut = (e: KeyboardEvent) => {
       // ⌘J (Mac) or Ctrl+J (Windows/Linux)
       if ((e.metaKey || e.ctrlKey) && e.key === 'j') {
