@@ -4,6 +4,8 @@
 // import { ChatMessage } from '@/types/chat';
 import { UrbanovaOSClassificationEngine, ClassificationResult } from './ml/classificationEngine';
 import { AdvancedConversationalEngine } from './conversational/advancedConversationalEngine';
+import { OS_V2_ENABLED } from '@/lib/featureFlags';
+import { getOS2, type OS2Request, type OS2Response } from '@/os2';
 
 // Definizione locale per evitare errori di import
 interface ChatMessage {
@@ -247,6 +249,12 @@ export class UrbanovaOSOrchestrator {
       priority: request.metadata.priority
     });
     
+    // 🚀 DELEGA A OS2 PLANNER/EXECUTOR SE FEATURE FLAG ATTIVO
+    if (OS_V2_ENABLED) {
+      console.log('🎯 [UrbanovaOS] Delegando a OS2 Planner/Executor...');
+      return await this.processWithOS2(request);
+    }
+    
     // 🚀 OTTIMIZZAZIONE: Timeout per evitare richieste troppo lunghe
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => reject(new Error('Orchestrator timeout')), 20000); // 20s timeout
@@ -255,6 +263,91 @@ export class UrbanovaOSOrchestrator {
     const processPromise = this.processRequestInternal(request);
     
     return await Promise.race([processPromise, timeoutPromise]);
+  }
+  
+  /**
+   * 🚀 PROCESSAMENTO CON OS2 PLANNER/EXECUTOR
+   */
+  private async processWithOS2(request: UrbanovaOSRequest): Promise<UrbanovaOSResponse> {
+    try {
+      // Classifica per ottenere intent ed entities
+      const classification = await this.classifyRequest(request);
+      
+      // Prepara request per OS2 (con classification completa per Decision Layer)
+      const os2Request: OS2Request = {
+        userMessage: request.message.content,
+        intent: classification.intent,
+        entities: classification.entities.reduce((acc, entity) => {
+          acc[entity.name] = entity.value;
+          return acc;
+        }, {} as Record<string, unknown>),
+        confidence: classification.confidence,
+        classification: classification, // ← Aggiungi classification completa per Decision Layer
+        userId: request.userId,
+        userEmail: request.userEmail,
+        sessionId: request.sessionId,
+        projectId: request.context.projectId,
+        userRoles: ['editor'], // TODO: Get from user profile
+        conversationHistory: request.conversationHistory.map(msg => ({
+          role: msg.type,
+          content: msg.content,
+          timestamp: msg.timestamp,
+        })),
+        environment: request.context.environment,
+      };
+      
+      // Processa con OS2
+      const os2 = getOS2();
+      const os2Response = await os2.process(os2Request);
+      
+      // Converti OS2Response in UrbanovaOSResponse
+      const urbanovaResponse: UrbanovaOSResponse = {
+        type: os2Response.success ? 'success' : 'error',
+        response: os2Response.response,
+        confidence: os2Response.plan.metadata?.confidence || 0.85,
+        metadata: {
+          systemsUsed: ['os2-planner', 'os2-executor'],
+          executionTime: os2Response.metadata.executionTimeMs,
+          memoryUsage: 0,
+          cpuUsage: 0,
+          pluginsExecuted: os2Response.execution.stepResults
+            .filter(r => r.status === 'success')
+            .map(r => r.skillId),
+          workflowsTriggered: [],
+          classifications: [classification],
+          vectorMatches: [],
+        },
+        suggestedActions: [],
+        nextSteps: [],
+        systemStatus: {
+          overall: 'healthy',
+          components: {
+            ml: 'healthy',
+            vector: 'healthy',
+            workflow: 'healthy',
+            plugins: 'healthy',
+          },
+          performance: {
+            avgResponseTime: os2Response.metadata.executionTimeMs,
+            successRate: os2Response.metadata.stepsSuccessful / os2Response.metadata.stepsExecuted,
+            errorRate: os2Response.metadata.stepsFailed / os2Response.metadata.stepsExecuted,
+            activeConnections: 1,
+            memoryUsage: 0,
+            cpuUsage: 0,
+          },
+          lastHealthCheck: new Date(),
+        },
+        timestamp: new Date(),
+      };
+      
+      return urbanovaResponse;
+      
+    } catch (error) {
+      console.error('❌ [UrbanovaOS] Errore OS2 processing:', error);
+      
+      // Fallback a processamento tradizionale
+      return this.processRequestInternal(request);
+    }
   }
 
   /**

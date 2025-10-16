@@ -9,6 +9,7 @@ import '@/lib/osProtection'; // OS Protection per API
 import { responseCache, logCacheStats } from '@/lib/responseCache';
 import { retryLogic, logRetryStats } from '@/lib/retryLogic';
 import { OpenAIOptimizer } from '@/lib/openaiOptimizer';
+import { OS_V2_ENABLED } from '@/lib/featureFlags';
 
 // Inizializza OpenAI solo se la chiave è disponibile
 let openai: OpenAI | null = null;
@@ -53,14 +54,14 @@ export async function POST(request: NextRequest) {
     logRetryStats();
 
       // 🚀 URBANOVA OS - Sistema Enterprise avanzato
-      console.log('🚀 [UrbanovaOS] Processando richiesta con architettura enterprise avanzata...');
+      console.log(`🚀 [UrbanovaOS] OS v2.0 ${OS_V2_ENABLED ? 'ENABLED' : 'DISABLED'}`);
 
       let urbanovaResponse: UrbanovaOSResponse | null = null;
       let intelligentResponse: IntelligentResponse | null = null;
       let projectPreview: ProjectPreview | null = null;
 
-      // Se abbiamo userId e userEmail, usa Urbanova OS
-      if (userId && userEmail) {
+      // Se abbiamo userId e userEmail, usa Urbanova OS (solo se OS_V2_ENABLED)
+      if (userId && userEmail && OS_V2_ENABLED) {
         try {
           console.log('🎯 [UrbanovaOS] Processando con sistema enterprise avanzato...');
 

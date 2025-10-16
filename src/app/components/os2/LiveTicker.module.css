@@ -1,0 +1,86 @@
+/* 🎬 LIVE TICKER ANIMATIONS */
+
+/* Animazione tre puntini */
+@keyframes dots {
+  0%, 20% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.4;
+  }
+}
+
+.dots {
+  display: inline-flex;
+  gap: 1px;
+}
+
+.dots span {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background-color: currentColor;
+  animation: dots 1.4s infinite;
+}
+
+.dots span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Progress bar pulse */
+@keyframes progress-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.progress-pulse {
+  animation: progress-pulse 2s ease-in-out infinite;
+}
+
+/* Ticker slide in */
+@keyframes ticker-slide-in {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.ticker-slide-in {
+  animation: ticker-slide-in 0.3s ease-out;
+}
+
+/* Step fade in */
+@keyframes step-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.step-fade-in {
+  animation: step-fade-in 0.2s ease-out;
+}
+

@@ -1,0 +1,193 @@
+{
+  "actions": {
+    "openSensitivity": "Apri sensitivity",
+    "generateTermSheet": "Genera term sheet",
+    "confirmRDO": "Conferma RDO",
+    "exportPDF": "Esporta PDF",
+    "exportExcel": "Esporta Excel",
+    "sendEmail": "Invia email",
+    "recordSAL": "Registra SAL",
+    "createProposal": "Crea proposta",
+    "viewProject": "Vai al progetto",
+    "editParams": "Modifica parametri",
+    "saveDefaults": "Salva defaults",
+    "cancel": "Annulla",
+    "confirm": "Conferma",
+    "modify": "Modifica",
+    "retry": "Riprova",
+    "viewDetails": "Mostra dettagli",
+    "hideDetails": "Nascondi dettagli",
+    "download": "Scarica",
+    "share": "Condividi",
+    "delete": "Elimina"
+  },
+  
+  "status": {
+    "buildFeasibility": "Costruire analisi di fattibilità…",
+    "fetchMarket": "Cercare comparabili di mercato…",
+    "calcBP": "Calcolare VAN/TIR…",
+    "sensitivity": "Eseguire sensitivity…",
+    "generatePDF": "Generare PDF…",
+    "termSheet": "Preparare term sheet…",
+    "sendRDO": "Inviare RDO ai fornitori…",
+    "recordSAL": "Registrare SAL…",
+    "prepareProposal": "Preparare proposta cliente…",
+    "idle": "In attesa…",
+    "done": "Completato",
+    "failed": "Errore",
+    "working": "Sta lavorando…",
+    "thinking": "Sto pensando…",
+    "planning": "Creo piano d'azione…",
+    "executing": "Eseguo…",
+    "awaitingConfirm": "In attesa di conferma…",
+    "analyzingInputs": "Analizzo i dati…",
+    "loadingProject": "Carico progetto…",
+    "savingResults": "Salvo risultati…",
+    "exportingFile": "Esporto file…",
+    "sendingEmail": "Invio email…",
+    "processingPayment": "Processo pagamento…",
+    "updatingDatabase": "Aggiorno database…",
+    "searchingProjects": "Cerco tra i progetti…",
+    "calculatingMetrics": "Calcolo metriche…",
+    "generatingReport": "Genero report…"
+  },
+  
+  "skills": {
+    "business_plan.run": "Business Plan",
+    "sensitivity.run": "Sensitivity",
+    "term_sheet.create": "Term Sheet",
+    "rdo.create": "RDO",
+    "sal.record": "SAL",
+    "sales.proposal": "Proposta Vendita",
+    "email.send": "Email",
+    "feasibility.analyze": "Analisi Fattibilità",
+    "market.research": "Ricerca Mercato",
+    "project.query": "Cerca Progetti",
+    "project.list": "Lista Progetti"
+  },
+  
+  "modes": {
+    "ask": {
+      "label": "Ask",
+      "description": "Solo analisi, nessuna azione",
+      "info": "Modalità sicura: nessuna modifica ai dati"
+    },
+    "ask_to_act": {
+      "label": "Ask-to-Act",
+      "description": "Anteprima + conferma azioni",
+      "badge": "Default",
+      "info": "Modalità equilibrata con conferme"
+    },
+    "act": {
+      "label": "Act",
+      "description": "Esecuzione diretta (safe only)",
+      "warning": "Azioni pericolose richiederanno sempre conferma"
+    }
+  },
+  
+  "messages": {
+    "emptyState": "Nessun messaggio ancora",
+    "emptyStateHint": "Invia un messaggio per iniziare",
+    "searchEmptyState": "Nessun messaggio trovato",
+    "searchEmptyStateHint": "Prova a cambiare la ricerca",
+    "typing": "Scrivendo…",
+    "sending": "Invio in corso…",
+    "placeholder": "Scrivi un messaggio... (⌘K per cercare)",
+    "helperSend": "per inviare",
+    "helperNewline": "per nuova riga"
+  },
+  
+  "filters": {
+    "title": "Filtri",
+    "active": "Attivi",
+    "clear": "Pulisci",
+    "project": "Progetto",
+    "skill": "Skill",
+    "status": "Stato",
+    "period": "Periodo",
+    "dateFrom": "Da",
+    "dateTo": "A",
+    "onlyActions": "Solo messaggi con azioni",
+    "noProjects": "Nessun progetto disponibile"
+  },
+  
+  "actionPlan": {
+    "title": "Action Plan",
+    "goal": "Obiettivo",
+    "steps": "Step",
+    "completed": "completati",
+    "status": {
+      "draft": "Piano in preparazione",
+      "running": "Esecuzione in corso…",
+      "done": "Piano completato con successo",
+      "error": "Esecuzione fallita",
+      "awaiting_confirm": "In attesa di conferma"
+    },
+    "step": {
+      "pending": "In attesa",
+      "running": "In esecuzione",
+      "done": "Completato",
+      "error": "Errore",
+      "completedIn": "Completato in {duration}s"
+    }
+  },
+  
+  "memory": {
+    "projectParams": "Parametri Progetto",
+    "discountRate": "Tasso Sconto",
+    "marginTarget": "Margine Target",
+    "salesCommission": "Commissioni",
+    "contingency": "Contingency",
+    "edit": "Modifica parametri",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "noProject": "Seleziona un progetto per vedere i parametri"
+  },
+  
+  "quickActions": {
+    "title": "Azioni Rapide",
+    "businessPlan": "Business Plan",
+    "sensitivity": "Sensitivity",
+    "sendRDO": "Invia RDO",
+    "export": "Esporta"
+  },
+  
+  "suggestions": {
+    "title": "Suggerimenti",
+    "createBP": "Crea business plan per progetto {projectName}",
+    "sensitivity": "Sensitivity ±15% sul prezzo",
+    "exportPDF": "Esporta business plan in PDF",
+    "sendRDO": "Invia RDO a fornitori"
+  },
+  
+  "errors": {
+    "rbacDenied": "Non hai i permessi per questa azione",
+    "requiredRole": "Ruolo richiesto: {role}",
+    "yourRole": "Il tuo ruolo: {role}",
+    "contactAdmin": "Contatta un amministratore",
+    "skillFailed": "Skill fallita",
+    "executionTimeout": "Timeout esecuzione",
+    "invalidInputs": "Input non validi",
+    "networkError": "Errore di rete",
+    "unknownError": "Errore sconosciuto"
+  },
+  
+  "kpis": {
+    "van": "VAN",
+    "tir": "TIR",
+    "dscr": "DSCR",
+    "payback": "Payback",
+    "roi": "ROI",
+    "margin": "Margine"
+  },
+  
+  "artifacts": {
+    "pdf": "PDF",
+    "excel": "Excel",
+    "link": "Link",
+    "download": "Scarica",
+    "view": "Visualizza",
+    "open": "Apri"
+  }
+}
+
