@@ -878,7 +878,7 @@ export default function UnifiedDashboardPage() {
                       <div className="flex flex-col items-center justify-center h-full space-y-8">
                         <div className="text-center">
                           <h2 className={`text-3xl font-medium ${darkMode ? 'text-white' : 'text-gray-800'} mb-2`}>
-                            Urbanova OS 2.0 - Cosa c'è in programma oggi?
+                            Cosa c'è in programma oggi?
                           </h2>
                         </div>
                         
