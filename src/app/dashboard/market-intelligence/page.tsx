@@ -494,20 +494,27 @@ export default function LandScrapingPage() {
   const applyFilters = useCallback(() => {
     if (!searchResults?.lands) return;
 
+    console.log('🔍 [FILTRI] Applicando filtri ai risultati...');
+    console.log('📊 [FILTRI] Risultati originali:', searchResults.lands.length);
+    console.log('⚙️ [FILTRI] Filtri attivi:', filters);
+
     let filtered = [...searchResults.lands];
 
     // Filtro prezzo - SOLO se specificato (evita [0,0] che esclude tutto)
     if (filters.priceRange[0] > 0 || filters.priceRange[1] > 0) {
+      const beforeCount = filtered.length;
       filtered = filtered.filter(land => {
         const min = filters.priceRange[0] || 0;
         const max = filters.priceRange[1];
         if (max === 0) return land.price >= min;  // No upper limit
         return land.price >= min && land.price <= max;
       });
+      console.log(`💰 [FILTRI] Prezzo: ${beforeCount} → ${filtered.length} (min: ${filters.priceRange[0]}, max: ${filters.priceRange[1]})`);
     }
 
     // Filtro area - SOLO se specificato (evita [0,0] che esclude tutto)
     if (filters.areaRange[0] > 0 || filters.areaRange[1] > 0) {
+      const beforeCount = filtered.length;
       filtered = filtered.filter(land => {
         if (land.area === 0) return true; // Area non specificata = include
         const min = filters.areaRange[0] || 0;
@@ -515,20 +522,24 @@ export default function LandScrapingPage() {
         if (max === 0) return land.area >= min;  // No upper limit
         return land.area >= min && land.area <= max;
       });
+      console.log(`📐 [FILTRI] Area: ${beforeCount} → ${filtered.length} (min: ${filters.areaRange[0]}, max: ${filters.areaRange[1]})`);
     }
 
     // Filtro tipologia - CORREZIONE: Gestisce "tutti" come default inclusivo
     if (filters.propertyTypes.length > 0 && !filters.propertyTypes.includes('tutti')) {
+      const beforeCount = filtered.length;
       filtered = filtered.filter(land =>
         filters.propertyTypes.some(type =>
           land.features.some(feature => feature.toLowerCase().includes(type.toLowerCase()))
         )
       );
+      console.log(`🏠 [FILTRI] Tipologia: ${beforeCount} → ${filtered.length} (types: ${filters.propertyTypes.join(', ')})`);
     }
     // Se "tutti" è selezionato, non filtra per tipologia (include tutto)
 
     // Filtro permessi
     if (filters.hasPermits) {
+      const beforeCount = filtered.length;
       filtered = filtered.filter(land =>
         land.features.some(
           feature =>
@@ -536,19 +547,27 @@ export default function LandScrapingPage() {
             feature.toLowerCase().includes('edificabile')
         )
       );
+      console.log(`📋 [FILTRI] Permessi: ${beforeCount} → ${filtered.length}`);
     }
 
-    // Filtro AI Score
-    filtered = filtered.filter(land => (land.aiScore || 0) >= filters.minAIScore);
+    // Filtro AI Score - CORREZIONE: Solo se minAIScore > 0
+    if (filters.minAIScore > 0) {
+      const beforeCount = filtered.length;
+      filtered = filtered.filter(land => (land.aiScore || 0) >= filters.minAIScore);
+      console.log(`🤖 [FILTRI] AI Score: ${beforeCount} → ${filtered.length} (min: ${filters.minAIScore})`);
+    }
 
     // Filtro rischio
     if (filters.riskLevel !== 'all') {
+      const beforeCount = filtered.length;
       filtered = filtered.filter(land => {
         const risk = (land as any).analysis?.riskAssessment?.toLowerCase() || 'medium';
         return risk.includes(filters.riskLevel);
       });
+      console.log(`⚠️ [FILTRI] Rischio: ${beforeCount} → ${filtered.length} (level: ${filters.riskLevel})`);
     }
 
+    console.log(`✅ [FILTRI] Risultato finale: ${searchResults.lands.length} → ${filtered.length} terreni`);
     setFilteredResults(filtered);
   }, [filters, searchResults]);
 
@@ -880,9 +899,9 @@ export default function LandScrapingPage() {
     setFilters({
       priceRange: [0, 0], // 0 = nessun limite
       areaRange: [0, 0], // 0 = nessun limite
-      propertyTypes: ['residenziale'],
+      propertyTypes: ['tutti'], // CORREZIONE: Coerente con inizializzazione
       hasPermits: false,
-      minAIScore: 70,
+      minAIScore: 0, // CORREZIONE: Coerente con inizializzazione (0 = mostra tutti)
       riskLevel: 'all',
       maxDistance: 50,
     });
