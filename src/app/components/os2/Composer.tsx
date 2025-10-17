@@ -16,7 +16,7 @@ import {
   Paperclip,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { VoiceAI } from './VoiceAI';
+import { VoiceAIChatGPT } from './VoiceAIChatGPT';
 
 interface ComposerProps {
   onSend: (message: string) => void;
@@ -211,8 +211,8 @@ export function Composer({
           </button>
         </div>
         
-        {/* Voice AI */}
-        <VoiceAI
+        {/* Voice AI ChatGPT Style */}
+        <VoiceAIChatGPT
           onTranscription={(text) => {
             console.log('🎤 [COMPOSER] Trascrizione ricevuta:', text);
             setInput(text);

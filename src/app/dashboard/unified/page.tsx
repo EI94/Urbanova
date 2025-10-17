@@ -53,7 +53,7 @@ import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
 import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 import MarkdownRenderer from '@/components/ui/MarkdownRenderer';
 import { GeographicSearch, GeographicSearchResult } from '@/components/ui/GeographicSearch';
-import { VoiceAI, useVoiceAI } from '@/app/components/os2/VoiceAI';
+import { VoiceAIChatGPT, useVoiceAI } from '@/app/components/os2/VoiceAIChatGPT';
 // TEMPORANEAMENTE DISABILITATO: import { InteractiveMap, MapMarker } from '@/components/map/InteractiveMap';
 // TEMPORANEAMENTE DISABILITATO: import { useMapData } from '@/hooks/useMapData';
 
@@ -1064,16 +1064,16 @@ export default function UnifiedDashboardPage() {
                   
                   <div className="p-4 border-t border-gray-200">
                     <div className="flex space-x-2">
-                      {/* 🎤 Voice AI - Design Johnny Ive */}
-                      <VoiceAI
-                        onTranscription={(text) => {
-                          console.log('🎤 [UNIFIED] Trascrizione ricevuta:', text);
-                          handleTranscription(text);
-                          setInputValue(text);
-                        }}
-                        onSpeaking={handleSpeakingState}
-                        className="mr-2"
-                      />
+                    {/* 🎤 Voice AI ChatGPT Style */}
+                    <VoiceAIChatGPT
+                      onTranscription={(text) => {
+                        console.log('🎤 [UNIFIED] Trascrizione ricevuta:', text);
+                        handleTranscription(text);
+                        setInputValue(text);
+                      }}
+                      onSpeaking={handleSpeakingState}
+                      className="mr-2"
+                    />
                       
                       <input
                         type="text"
@@ -1316,8 +1316,8 @@ export default function UnifiedDashboardPage() {
                   
                   <div className="p-4 border-t border-gray-200">
                     <div className="flex space-x-2">
-                      {/* 🎤 Voice AI - Design Johnny Ive */}
-                      <VoiceAI
+                      {/* 🎤 Voice AI ChatGPT Style */}
+                      <VoiceAIChatGPT
                         onTranscription={(text) => {
                           console.log('🎤 [UNIFIED-TOOLS] Trascrizione ricevuta:', text);
                           handleTranscription(text);

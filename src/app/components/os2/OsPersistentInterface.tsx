@@ -23,8 +23,9 @@ import { MessageItem } from './MessageItem';
 import { Composer } from './Composer';
 import { FiltersDrawer } from './FiltersDrawer';
 import { ActionPlanPanel } from './ActionPlanPanel';
-import { VoiceAI, useVoiceAI } from './VoiceAI';
+import { VoiceAIChatGPT, useVoiceAI } from './VoiceAIChatGPT';
 import '@/app/styles/os-persistent.css';
+import '@/app/styles/voice-ai-chatgpt.css';
 
 interface OsPersistentInterfaceProps {
   // Props esterni (opzionali)
@@ -159,8 +160,8 @@ export function OsPersistentInterface({
           </div>
           
           <div className="flex items-center gap-1 ml-auto">
-            {/* Voice AI */}
-            <VoiceAI
+            {/* Voice AI ChatGPT Style */}
+            <VoiceAIChatGPT
               onTranscription={(text) => {
                 console.log('🎤 [OS-PERSISTENT] Trascrizione ricevuta:', text);
                 handleTranscription(text);
