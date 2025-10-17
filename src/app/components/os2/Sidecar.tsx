@@ -19,6 +19,7 @@ import { MessageItem } from './MessageItem';
 import { Composer } from './Composer';
 import { FiltersDrawer } from './FiltersDrawer';
 import { ActionPlanPanel } from './ActionPlanPanel';
+import '@/app/styles/os2-sidecar.css';
 
 interface SidecarProps {
   // Props esterni (opzionali)
@@ -68,6 +69,16 @@ export function Sidecar({
   const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  
+  // Debug logging per identificare problemi
+  useEffect(() => {
+    console.log('🎯 [SIDECAR] Stato isOpen cambiato:', isOpen);
+    if (isOpen) {
+      console.log('✅ [SIDECAR] Sidecar aperto - rendering container');
+    } else {
+      console.log('❌ [SIDECAR] Sidecar chiuso - non rendering');
+    }
+  }, [isOpen]);
   
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -131,18 +142,22 @@ export function Sidecar({
     <>
       {/* Overlay (mobile) */}
       <div
-        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
+        className={cn(
+          'os2-sidecar-overlay lg:hidden',
+          isOpen && 'open'
+        )}
         onClick={close}
         aria-hidden="true"
       />
       
-      {/* Sidecar Container */}
-      <div className={cn(
-        'fixed top-0 right-0 h-full bg-white shadow-2xl z-50 flex flex-col',
-        'w-full lg:w-[560px]', // 560px desktop, full mobile
-        'transform transition-transform duration-300',
-        isOpen ? 'translate-x-0' : 'translate-x-full'
-      )}>
+      {/* Sidecar Container - Design Johnny Ive */}
+      <div 
+        className={cn(
+          'os2-sidecar-container flex flex-col',
+          isOpen && 'open'
+        )}
+        data-testid="os2-sidecar"
+      >
         {/* Header */}
         <div className="flex-shrink-0 border-b border-gray-200">
           {/* Top Bar */}

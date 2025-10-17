@@ -121,9 +121,26 @@ export function useOsSidecar(): UseOsSidecarState {
   const [searchQuery, setSearchQuery] = useState('');
   
   // Open/Close
-  const open = useCallback(() => setIsOpen(true), []);
-  const close = useCallback(() => setIsOpen(false), []);
-  const toggle = useCallback(() => setIsOpen(prev => !prev), []);
+  const open = useCallback(() => {
+    console.log('🎯 [useOsSidecar] Funzione open() chiamata');
+    setIsOpen(true);
+    console.log('✅ [useOsSidecar] isOpen impostato a true');
+  }, []);
+  
+  const close = useCallback(() => {
+    console.log('🎯 [useOsSidecar] Funzione close() chiamata');
+    setIsOpen(false);
+    console.log('✅ [useOsSidecar] isOpen impostato a false');
+  }, []);
+  
+  const toggle = useCallback(() => {
+    console.log('🎯 [useOsSidecar] Funzione toggle() chiamata');
+    setIsOpen(prev => {
+      const newValue = !prev;
+      console.log(`✅ [useOsSidecar] isOpen cambiato da ${prev} a ${newValue}`);
+      return newValue;
+    });
+  }, []);
   
   // Messages
   const addMessage = useCallback((message: Omit<OsMessage, 'id' | 'timestamp'>) => {

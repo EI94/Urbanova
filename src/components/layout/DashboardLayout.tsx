@@ -696,7 +696,9 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                 <button
                   onClick={() => {
                     console.log('🎯 [OS2] Icona header clicked - Apertura Sidecar');
+                    console.log('🎯 [OS2] Stato isOpen prima:', isOpen);
                     open(); // Apre il Sidecar tramite hook
+                    console.log('🎯 [OS2] Funzione open() chiamata');
                   }}
                   className="p-2 text-blue-600 hover:text-blue-700 transition-all duration-200 rounded-lg hover:bg-blue-50 header-icon relative group"
                   title="Apri Urbanova OS (⌘J)"

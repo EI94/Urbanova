@@ -1,0 +1,70 @@
+/* 🎨 OS 2.0 SIDECAR STYLES - Design Johnny Ive */
+/* Garantisce posizionamento perfetto e visibilità */
+
+.os2-sidecar-container {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  height: 100vh !important;
+  width: 100% !important;
+  max-width: 560px !important;
+  z-index: 9999 !important;
+  background-color: white !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  border-left: 1px solid #e5e7eb !important;
+  transform: translateX(100%) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.os2-sidecar-container.open {
+  transform: translateX(0) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.os2-sidecar-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  backdrop-filter: blur(4px) !important;
+  z-index: 9998 !important;
+  opacity: 0 !important;
+  transition: opacity 0.3s ease-in-out !important;
+  pointer-events: none !important;
+}
+
+.os2-sidecar-overlay.open {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Responsive design */
+@media (min-width: 1024px) {
+  .os2-sidecar-container {
+    width: 560px !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .os2-sidecar-container {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Debug styles per identificare problemi */
+.os2-debug-border {
+  border: 3px solid red !important;
+  background-color: rgba(255, 0, 0, 0.1) !important;
+}
+
+.os2-debug-text {
+  color: red !important;
+  font-weight: bold !important;
+  font-size: 12px !important;
+}
