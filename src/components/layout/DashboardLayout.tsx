@@ -43,6 +43,7 @@ import { NotificationStats } from '@/types/notifications';
 import { UserProfile } from '@/types/userProfile';
 import AuthGuard from '@/components/AuthGuard';
 import { Sidecar } from '@/app/components/os2/Sidecar';
+import { useOsSidecar } from '@/hooks/os2/useOsSidecar';
 // OS 2.0 sempre abilitato - feature flag rimosso
 import { Bot, Sparkles } from 'lucide-react';
 
@@ -63,6 +64,9 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
 function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayoutProps) {
   const { t } = useLanguage();
   const router = useRouter();
+  
+  // 🎯 OS 2.0 Hook per gestire stato del Sidecar
+  const { isOpen, open, close } = useOsSidecar();
   
   // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
   let authContext;
@@ -114,21 +118,6 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
     }
   };
 
-  // 🎯 OS 2.0 Keyboard Shortcut ⌘J (Ctrl+J) - Apertura elegante del Sidecar
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // ⌘J su Mac o Ctrl+J su Windows/Linux
-      if ((event.metaKey || event.ctrlKey) && event.key === 'j') {
-        event.preventDefault();
-        console.log('🎯 [OS2] Shortcut ⌘J/Ctrl+J pressed - Apertura Sidecar');
-        // Il Sidecar gestisce internamente l'apertura tramite useOsSidecar hook
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
-  
   // 🔧 FIX NAVIGAZIONE: Intercettatore universale per tutti i click sui link
   useEffect(() => {
     console.log('🚀 [NAVIGATION INTERCEPTOR] Inizializzazione intercettatore navigazione, pathname:', pathname);
@@ -707,7 +696,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                 <button
                   onClick={() => {
                     console.log('🎯 [OS2] Icona header clicked - Apertura Sidecar');
-                    // Il Sidecar gestisce internamente l'apertura tramite useOsSidecar hook
+                    open(); // Apre il Sidecar tramite hook
                   }}
                   className="p-2 text-blue-600 hover:text-blue-700 transition-all duration-200 rounded-lg hover:bg-blue-50 header-icon relative group"
                   title="Apri Urbanova OS (⌘J)"
