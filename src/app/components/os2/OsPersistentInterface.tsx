@@ -164,7 +164,6 @@ export function OsPersistentInterface({
           <div className="flex items-center gap-2">
             <Bot className="w-5 h-5 text-blue-600" />
             <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
-            <span className="font-semibold text-gray-900">Urbanova OS 2.0</span>
           </div>
           
           <div className="flex items-center gap-1 ml-auto">
@@ -300,7 +299,7 @@ export function OsPersistentInterface({
                 console.log('🎤 [OS-PERSISTENT-COMPOSER] Trascrizione ricevuta:', text);
                 handleTranscription(text);
               }}
-              placeholder="Chiedi qualcosa..."
+              placeholder="Chiedi..."
               disabled={false}
             />
           </div>

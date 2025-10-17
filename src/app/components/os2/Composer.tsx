@@ -185,7 +185,7 @@ export function Composer({
           placeholder={placeholder}
           disabled={disabled}
           rows={1}
-          className="flex-1 resize-none bg-transparent text-sm text-gray-900 placeholder:text-gray-400 outline-none min-h-[40px] max-h-[200px]"
+          className="flex-1 resize-none bg-transparent text-xs text-gray-900 placeholder:text-gray-400 outline-none min-h-[40px] max-h-[200px]"
           data-os-search
           aria-label="Messaggio"
         />
