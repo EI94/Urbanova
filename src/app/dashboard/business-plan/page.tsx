@@ -20,9 +20,6 @@ import {
   BarChart3,
   FileText,
   Plus,
-  Bot,
-  Sparkles,
-  MessageCircle,
   TrendingUp,
   TrendingDown,
   Download,
@@ -51,7 +48,7 @@ import { businessPlanExportService } from '@/lib/businessPlanExportService';
 import { toast } from 'react-hot-toast';
 
 // State management type
-type ViewMode = 'welcome' | 'list' | 'form' | 'results' | 'chat';
+type ViewMode = 'welcome' | 'list' | 'form' | 'results';
 type ResultsTab = 'overview' | 'scenarios' | 'sensitivity' | 'cashflow' | 'levers';
 
 // Utility function per formattare numeri
@@ -88,10 +85,6 @@ export default function BusinessPlanPage() {
   const [savedBusinessPlans, setSavedBusinessPlans] = useState<any[]>([]);
   const [isLoadingBusinessPlans, setIsLoadingBusinessPlans] = useState(false);
   
-  // Chat mode
-  const [chatMessages, setChatMessages] = useState<Array<{id: string; type: 'user' | 'assistant'; content: string; timestamp: Date}>>([]);
-  const [chatInput, setChatInput] = useState('');
-  const [isChatLoading, setIsChatLoading] = useState(false);
   
   // Stati per calcolo e errori
   const [isCalculating, setIsCalculating] = useState(false);
@@ -607,85 +600,6 @@ export default function BusinessPlanPage() {
     }
   };
   
-  /**
-   * 💬 CHAT HANDLER
-   */
-  const handleChatMessage = async () => {
-    if (!chatInput.trim() || isChatLoading) return;
-    
-    const userMessage = {
-      id: Date.now().toString(),
-      type: 'user' as const,
-      content: chatInput,
-      timestamp: new Date()
-    };
-    
-    setChatMessages(prev => [...prev, userMessage]);
-    setChatInput('');
-    setIsChatLoading(true);
-    
-    try {
-      // Chiama Urbanova OS per interpretare richiesta BP
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: chatInput,
-          userId: currentUser?.uid || 'anonymous',
-          userEmail: currentUser?.email || 'anonymous@urbanova.it',
-          context: 'business_plan',
-          history: chatMessages.map(msg => ({
-            id: msg.id,
-            content: msg.content,
-            role: msg.type === 'user' ? 'user' : 'assistant',
-            timestamp: msg.timestamp.toISOString()
-          }))
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Errore nella risposta dell\'OS');
-      }
-      
-      const aiMessage = {
-        id: (Date.now() + 1).toString(),
-        type: 'assistant' as const,
-        content: data.response || data.message || 'Risposta ricevuta',
-        timestamp: new Date()
-      };
-      
-      setChatMessages(prev => [...prev, aiMessage]);
-      
-      // Se l'OS ha estratto dati BP, proponi di calcolarli
-      if (data.extractedData && data.extractedData.businessPlanData) {
-        // TODO: Popola form con dati estratti
-        console.log('📊 Dati BP estratti dal chat:', data.extractedData.businessPlanData);
-      }
-      
-      // Log per debugging
-      console.log('🤖 [BusinessPlan OS] Risposta ricevuta:', {
-        hasResponse: !!data.response,
-        hasMessage: !!data.message,
-        responseLength: data.response?.length || 0
-      });
-      
-    } catch (error) {
-      console.error('❌ Chat error:', error);
-      
-      const errorMessage = {
-        id: (Date.now() + 1).toString(),
-        type: 'assistant' as const,
-        content: 'Mi dispiace, c\'è stato un errore. Puoi provare a riformulare la richiesta?',
-        timestamp: new Date()
-      };
-      
-      setChatMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsChatLoading(false);
-    }
-  };
 
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat('it-IT', {
@@ -879,65 +793,41 @@ export default function BusinessPlanPage() {
                 <div className="h-px bg-gray-300 flex-1 w-24"></div>
               </div>
             
-              {/* CTA Cards - Eleganti */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mx-auto">
-              {/* Form Mode */}
-              <button
-                onClick={() => setViewMode('form')}
-                className="group relative bg-white rounded-3xl p-8 shadow-lg border-2 border-gray-200 hover:border-blue-500 hover:shadow-2xl transition-all duration-300 hover:scale-105"
-              >
-                <div className="absolute top-6 right-6 w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <FileText className="w-6 h-6 text-blue-600" />
-          </div>
+              {/* CTA Cards - Centrata */}
+              <div className="flex justify-center">
+                {/* Form Mode - Centrato */}
+                <button
+                  onClick={() => setViewMode('form')}
+                  className="group relative bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl p-8 shadow-lg border-2 border-blue-200 hover:border-blue-500 hover:shadow-2xl transition-all duration-300 hover:scale-105 max-w-md w-full"
+                >
+                  <div className="absolute top-6 right-6 w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <FileText className="w-6 h-6 text-blue-600" />
+                  </div>
 
-                <div className="text-left">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Form Strutturato</h3>
-                  <p className="text-gray-600 mb-4">
-                    Input guidato con defaults intelligenti. Tab organizzati per ricavi, costi, scenari terreno e finanza.
-                  </p>
-                  
-                  <div className="flex items-center text-blue-600 font-medium group-hover:translate-x-2 transition-transform">
-                    <span>Inizia →</span>
+                  <div className="text-left">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Crea nuovo Business Plan</h3>
+                    <p className="text-gray-600 mb-4">
+                      Input guidato con defaults intelligenti. Tab organizzati per ricavi, costi, scenari terreno e finanza.
+                    </p>
+                    
+                    <div className="flex items-center text-blue-600 font-medium group-hover:translate-x-2 transition-transform">
+                      <span>Inizia →</span>
                     </div>
                   </div>
-              </button>
-              
-              {/* Chat Mode */}
-              <button
-                onClick={() => setViewMode('chat')}
-                className="group relative bg-gradient-to-br from-purple-50 to-blue-50 rounded-3xl p-8 shadow-lg border-2 border-purple-200 hover:border-purple-500 hover:shadow-2xl transition-all duration-300 hover:scale-105"
-              >
-                <div className="absolute top-6 right-6 w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Bot className="w-6 h-6 text-purple-600" />
-                    </div>
-                
-                <div className="text-left">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <h3 className="text-2xl font-bold text-gray-900">Chat con OS</h3>
-                    <Sparkles className="w-5 h-5 text-purple-600 animate-pulse" />
-                    </div>
-                  <p className="text-gray-600 mb-4">
-                    Linguaggio naturale. Scrivi "Ciliegie: 4 case, 390k prezzo..." e l'OS estrae i dati e calcola tutto.
-                  </p>
-                  
-                  <div className="flex items-center text-purple-600 font-medium group-hover:translate-x-2 transition-transform">
-                    <span>Prova →</span>
-                    </div>
-                </div>
-              </button>
+                </button>
               </div>
 
               {/* Quick Example */}
               <div className="mt-12 max-w-2xl mx-auto">
                 <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
                   <div className="flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Zap className="w-4 h-4 text-purple-600" />
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Info className="w-4 h-4 text-blue-600" />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-gray-900 mb-1">Esempio prompt chat:</div>
-                      <p className="text-sm text-gray-600 italic">
-                        "Ciliegie: 4 case, prezzo 390k, costo 200k, S1 terreno 220k cash, S2 permuta 1 casa +80k a t2, S3 pagamento 300k a t1, tasso 12%. Dammi VAN, TIR, margini e leve."
+                      <div className="text-sm font-medium text-gray-900 mb-1">Come funziona:</div>
+                      <p className="text-sm text-gray-600">
+                        Compila il form guidato con i dati del tuo progetto immobiliare. L'OS 2.0 ti aiuterà con suggerimenti intelligenti e calcoli automatici per VAN, TIR e scenari multipli.
                       </p>
                     </div>
                   </div>
@@ -982,148 +872,6 @@ export default function BusinessPlanPage() {
                       </div>
         )}
         
-        {/* ============================================================================ */}
-        {/* CHAT MODE */}
-        {/* ============================================================================ */}
-        {viewMode === 'chat' && (
-          <div className="animate-fade-in">
-            {/* Breadcrumb */}
-            <div className="mb-6 flex items-center space-x-2 text-sm">
-              <button 
-                onClick={() => setViewMode('welcome')}
-                className="text-gray-500 hover:text-gray-700 transition-colors"
-              >
-                Business Plan
-              </button>
-              <ChevronRight className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-900 font-medium">Chat</span>
-                      </div>
-
-            {/* Chat Interface - Stile ChatGPT */}
-            <div className="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden" style={{ height: 'calc(100vh - 250px)' }}>
-              {/* Chat Header */}
-              <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-                      <Bot className="w-6 h-6 text-white" />
-                    </div>
-                      <div>
-                      <div className="font-semibold text-gray-900">Urbanova Business Plan OS</div>
-                      <div className="text-xs text-gray-500">Powered by AI • Linguaggio naturale</div>
-                    </div>
-                      </div>
-
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-xs text-gray-500">Online</span>
-                  </div>
-                      </div>
-                    </div>
-
-              {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-4" style={{ height: 'calc(100% - 180px)' }}>
-                {chatMessages.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full space-y-6">
-                    <div className="text-center max-w-xl">
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                        Dimmi tutto del tuo progetto
-                      </h3>
-                      <p className="text-gray-600">
-                        Scrivi in linguaggio naturale. L'OS estrarrà i dati e calcolerà VAN, TIR, DSCR e leve di negoziazione.
-                      </p>
-                    </div>
-                    
-                    {/* Quick Examples */}
-                    <div className="w-full max-w-2xl space-y-2">
-                      <div className="text-xs text-gray-500 text-center mb-3">Esempi rapidi:</div>
-                      {[
-                        "Ciliegie: 4 case, 390k prezzo, 200k costo, terreno 220k cash",
-                        "Permuta: 1 casa in permuta + 80k contributo a t2",
-                        "Sensitivity su prezzo ±10% e tasso 8-20%"
-                      ].map((example, i) => (
-                        <button
-                          key={i}
-                          onClick={() => setChatInput(example)}
-                          className="w-full p-4 text-left bg-white border border-gray-200 rounded-xl hover:border-purple-300 hover:shadow-md transition-all duration-200"
-                        >
-                          <span className="text-sm text-gray-700">{example}</span>
-                        </button>
-                      ))}
-                      </div>
-                  </div>
-                ) : (
-                  chatMessages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'} animate-slide-in`}
-                    >
-                      <div
-                        className={`max-w-2xl rounded-3xl px-6 py-4 ${
-                          msg.type === 'user'
-                            ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                            : 'bg-gray-100 text-gray-900'
-                        }`}
-                      >
-                        <div className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</div>
-                        <div className={`text-xs mt-2 ${msg.type === 'user' ? 'text-blue-100' : 'text-gray-500'}`}>
-                          {msg.timestamp.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-                
-                {isChatLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-gray-100 rounded-3xl px-6 py-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                        </div>
-                        <span className="text-sm text-gray-600">Urbanova sta analizzando...</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                      </div>
-
-              {/* Input Area - Premium */}
-              <div className="p-6 border-t border-gray-200 bg-gray-50">
-                <div className="flex space-x-3">
-                        <input
-                    type="text"
-                    value={chatInput}
-                    onChange={e => setChatInput(e.target.value)}
-                    onKeyPress={e => e.key === 'Enter' && !e.shiftKey && handleChatMessage()}
-                    placeholder="Scrivi qui i dati del progetto..."
-                    className="flex-1 px-6 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 placeholder-gray-400 transition-all shadow-sm"
-                    disabled={isChatLoading}
-                  />
-                  <button
-                    onClick={handleChatMessage}
-                    disabled={!chatInput.trim() || isChatLoading}
-                    className="px-6 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-2xl hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                  >
-                    <Send className="w-5 h-5" />
-                  </button>
-                      </div>
-
-                {/* Switch to Form */}
-                <div className="mt-3 text-center">
-                  <button
-                    onClick={() => setViewMode('form')}
-                    className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
-                  >
-                    Preferisci il form strutturato? <span className="underline">Passa al form</span>
-                  </button>
-                      </div>
-                    </div>
-                      </div>
-            </div>
-          )}
 
         {/* ============================================================================ */}
         {/* RESULTS VIEW - METRICHE E SCENARI */}
