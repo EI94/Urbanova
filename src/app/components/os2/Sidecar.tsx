@@ -19,6 +19,7 @@ import { MessageItem } from './MessageItem';
 import { Composer } from './Composer';
 import { FiltersDrawer } from './FiltersDrawer';
 import { ActionPlanPanel } from './ActionPlanPanel';
+import { VoiceAI, useVoiceAI } from './VoiceAI';
 import '@/app/styles/os2-sidecar.css';
 
 interface SidecarProps {
@@ -70,6 +71,9 @@ export function Sidecar({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   
+  // 🎤 Voice AI Hook
+  const { handleTranscription, handleSpeaking } = useVoiceAI();
+  
   // Debug logging per identificare problemi
   useEffect(() => {
     console.log('🎯 [SIDECAR] Stato isOpen cambiato:', isOpen);
@@ -98,9 +102,11 @@ export function Sidecar({
     
     // Simulate OS response (in real app, this comes from OS2)
     setTimeout(() => {
+      const responseContent = 'Messaggio di test OS 2.0. Risposta elaborata.';
+      
       addMessage({
         role: 'assistant',
-        content: 'Messaggio di test OS 2.0. Risposta elaborata.',
+        content: responseContent,
         skillId: 'business_plan.run',
         projectId: 'proj123',
         projectName: 'Progetto Ciliegie',
@@ -117,6 +123,31 @@ export function Sidecar({
           { id: 'sensitivity', label: 'Sensitivity', variant: 'primary' },
         ],
       });
+      
+      // 🎤 Sintesi vocale della risposta
+      setTimeout(() => {
+        console.log('🔊 [SIDECAR] Avvio sintesi vocale risposta...');
+        handleSpeaking(true);
+        
+        const utterance = new SpeechSynthesisUtterance(responseContent);
+        utterance.lang = 'it-IT';
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+        utterance.volume = 0.8;
+        
+        utterance.onend = () => {
+          console.log('🔊 [SIDECAR] Sintesi vocale completata');
+          handleSpeaking(false);
+        };
+        
+        utterance.onerror = (event) => {
+          console.error('❌ [SIDECAR] Errore sintesi vocale:', event.error);
+          handleSpeaking(false);
+        };
+        
+        speechSynthesis.speak(utterance);
+      }, 500);
+      
     }, 1000);
   };
   
@@ -181,6 +212,18 @@ export function Sidecar({
             </div>
             
             <div className="flex items-center gap-2">
+              {/* 🎤 Voice AI */}
+              <VoiceAI
+                onTranscription={(text) => {
+                  console.log('🎤 [SIDECAR] Trascrizione ricevuta:', text);
+                  handleTranscription(text);
+                  // Auto-invia il testo trascritto
+                  handleSend(text);
+                }}
+                onSpeaking={handleSpeaking}
+                className="mr-2"
+              />
+              
               {/* Action Plan Toggle */}
               <button
                 onClick={() => setShowActionPlan(!showActionPlan)}

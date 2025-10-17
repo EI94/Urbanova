@@ -16,6 +16,7 @@ import {
   Paperclip,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { VoiceAI } from './VoiceAI';
 
 interface ComposerProps {
   onSend: (message: string) => void;
@@ -23,6 +24,7 @@ interface ComposerProps {
   placeholder?: string;
   disabled?: boolean;
   suggestions?: Array<{ id: string; label: string; icon?: React.ReactNode }>;
+  onVoiceTranscription?: (text: string) => void;
 }
 
 /**
@@ -44,6 +46,7 @@ export function Composer({
   placeholder = 'Scrivi un messaggio... (⌘K per cercare)',
   disabled = false,
   suggestions = [],
+  onVoiceTranscription,
 }: ComposerProps) {
   const [input, setInput] = useState('');
   const [showQuickActions, setShowQuickActions] = useState(false);
@@ -208,6 +211,16 @@ export function Composer({
           </button>
         </div>
         
+        {/* Voice AI */}
+        <VoiceAI
+          onTranscription={(text) => {
+            console.log('🎤 [COMPOSER] Trascrizione ricevuta:', text);
+            setInput(text);
+            onVoiceTranscription?.(text);
+          }}
+          className="mr-2"
+        />
+
         {/* Send Button */}
         <button
           onClick={handleSend}
