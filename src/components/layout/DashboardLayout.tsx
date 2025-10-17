@@ -114,7 +114,20 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
     }
   };
 
-  // 🆕 OS 2.0 Keyboard Shortcut ⌘J (Ctrl+J) - gestito dal Sidecar internamente
+  // 🎯 OS 2.0 Keyboard Shortcut ⌘J (Ctrl+J) - Apertura elegante del Sidecar
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // ⌘J su Mac o Ctrl+J su Windows/Linux
+      if ((event.metaKey || event.ctrlKey) && event.key === 'j') {
+        event.preventDefault();
+        console.log('🎯 [OS2] Shortcut ⌘J/Ctrl+J pressed - Apertura Sidecar');
+        // Il Sidecar gestisce internamente l'apertura tramite useOsSidecar hook
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
   
   // 🔧 FIX NAVIGAZIONE: Intercettatore universale per tutti i click sui link
   useEffect(() => {
@@ -690,10 +703,23 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   <Settings className="w-5 h-5" />
                 </button>
 
-                {/* 🆕 OS 2.0 Icona nell'header - DEBUG SEMPLICE */}
-                <div className="p-2 bg-red-500 text-white text-xs font-bold border-2 border-yellow-400">
-                  OS2 DEBUG
-                </div>
+                {/* 🎯 OS 2.0 - Icona elegante nell'header */}
+                <button
+                  onClick={() => {
+                    console.log('🎯 [OS2] Icona header clicked - Apertura Sidecar');
+                    // Il Sidecar gestisce internamente l'apertura tramite useOsSidecar hook
+                  }}
+                  className="p-2 text-blue-600 hover:text-blue-700 transition-all duration-200 rounded-lg hover:bg-blue-50 header-icon relative group"
+                  title="Apri Urbanova OS (⌘J)"
+                >
+                  <Bot className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
+                  <Sparkles className="absolute -top-1 -right-1 w-3 h-3 text-yellow-400 animate-pulse" />
+                  
+                  {/* Tooltip elegante */}
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                    Urbanova OS 2.0
+                  </div>
+                </button>
               </div>
             </div>
           </header>

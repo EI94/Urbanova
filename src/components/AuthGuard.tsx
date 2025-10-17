@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { Bot, Sparkles } from 'lucide-react';
 import '@/lib/osProtection'; // OS Protection per auth guard
 
 interface AuthGuardProps {
@@ -42,23 +41,9 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     );
   }
 
-  // Se non autenticato, mostra solo l'icona OS 2.0 e reindirizza
+  // Se non autenticato, non mostrare nulla (il redirect è in corso)
   if (!currentUser) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        {/* Icona OS 2.0 sempre visibile anche senza autenticazione */}
-        <div className="fixed top-4 right-4 z-50 bg-red-500 text-white p-4 text-xl font-bold border-4 border-yellow-400">
-          OS 2.0 FUNZIONA!
-        </div>
-        {/* Reindirizza al login */}
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Reindirizzamento al login...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   // Se autenticato, mostra il contenuto

@@ -78,10 +78,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="manifest" href="/site.webmanifest" />
       </head>
       <body className={inter.className}>
-        {/* 🚨 TEST IMPOSSIBILE DA NON VEDERE - VERSIONE 2 */}
-        <div style={{position: 'fixed', top: 0, left: 0, width: '100%', height: '120px', background: 'linear-gradient(45deg, #ff0000, #ff6600)', color: 'white', fontSize: '35px', fontWeight: 'bold', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', textShadow: '2px 2px 4px rgba(0,0,0,0.8)', border: '5px solid #ffff00'}}>
-          🚨 OS 2.0 FUNZIONA DAVVERO! VERSIONE 2 🚨
-        </div>
         <LanguageProvider>
           <AuthProvider>
             <DarkModeProvider>
