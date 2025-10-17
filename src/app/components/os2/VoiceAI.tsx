@@ -97,45 +97,89 @@ export function VoiceAI({
     }
   }, []);
 
-  // 📝 Trascrizione audio con Whisper
+  // 📝 Trascrizione audio con Whisper + Fallback Web Speech API
   const transcribeAudio = useCallback(async (audioBlob: Blob) => {
     try {
       setState('processing');
+      setError(null); // Reset error
       
-      // Crea FormData per Whisper API
-      const formData = new FormData();
-      formData.append('file', audioBlob, 'audio.webm');
-      formData.append('model', 'whisper-1');
-      formData.append('language', 'it'); // Italiano
-      
-      console.log('📝 [VoiceAI] Invio audio a Whisper API...');
-      
-      // Chiama API Whisper tramite nostro endpoint
-      const response = await fetch('/api/os2/whisper', {
-        method: 'POST',
-        body: formData,
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Whisper API error: ${response.status}`);
+      // Prima prova: Whisper API
+      try {
+        const formData = new FormData();
+        formData.append('file', audioBlob, 'audio.webm');
+        formData.append('model', 'whisper-1');
+        formData.append('language', 'it');
+        
+        console.log('📝 [VoiceAI] Tentativo Whisper API...');
+        
+        const response = await fetch('/api/os2/whisper', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          const transcribedText = result.text?.trim();
+          
+          if (transcribedText) {
+            console.log('✅ [VoiceAI] Whisper trascrizione completata:', transcribedText);
+            setTranscribedText(transcribedText);
+            onTranscription?.(transcribedText);
+            setState('idle');
+            return;
+          }
+        }
+        
+        // Se Whisper fallisce, prova Web Speech API
+        console.log('⚠️ [VoiceAI] Whisper fallito, provo Web Speech API...');
+        
+      } catch (whisperError) {
+        console.warn('⚠️ [VoiceAI] Whisper errore:', whisperError);
       }
       
-      const result = await response.json();
-      const transcribedText = result.text?.trim();
-      
-      if (transcribedText) {
-        console.log('✅ [VoiceAI] Trascrizione completata:', transcribedText);
-        setTranscribedText(transcribedText);
-        onTranscription?.(transcribedText);
-        setState('idle');
-      } else {
-        throw new Error('Nessun testo trascritto');
+      // Fallback: Web Speech API (solo per test, non per produzione)
+      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        console.log('🔄 [VoiceAI] Usando Web Speech API come fallback...');
+        
+        const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+        const recognition = new SpeechRecognition();
+        
+        recognition.lang = 'it-IT';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        
+        return new Promise<void>((resolve, reject) => {
+          recognition.onresult = (event: any) => {
+            const transcript = event.results[0][0].transcript;
+            console.log('✅ [VoiceAI] Web Speech trascrizione:', transcript);
+            setTranscribedText(transcript);
+            onTranscription?.(transcript);
+            setState('idle');
+            resolve();
+          };
+          
+          recognition.onerror = (event: any) => {
+            console.error('❌ [VoiceAI] Web Speech errore:', event.error);
+            reject(new Error(`Web Speech errore: ${event.error}`));
+          };
+          
+          recognition.start();
+        });
       }
+      
+      throw new Error('Nessun servizio di trascrizione disponibile');
       
     } catch (err) {
       console.error('❌ [VoiceAI] Errore trascrizione:', err);
-      setError('Errore trascrizione audio');
+      const errorMessage = err instanceof Error ? err.message : 'Errore trascrizione audio';
+      setError(errorMessage);
       setState('error');
+      
+      // Auto-reset dopo 5 secondi
+      setTimeout(() => {
+        setError(null);
+        setState('idle');
+      }, 5000);
     }
   }, [onTranscription]);
 
