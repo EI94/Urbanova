@@ -33,6 +33,10 @@ interface OsPersistentInterfaceProps {
   projects?: Array<{ id: string; name: string }>;
   skills?: Array<{ id: string; name: string; icon: React.ReactNode }>;
   
+  // Props per controllo stato esterno
+  isOpen?: boolean;
+  onClose?: () => void;
+  
   // Callbacks
   onMessageSend?: (message: string) => void;
   onQuickAction?: (actionId: string) => void;
@@ -45,6 +49,8 @@ export function OsPersistentInterface({
   initialMode = 'ask_to_act',
   projects = [],
   skills = [],
+  isOpen: externalIsOpen,
+  onClose: externalOnClose,
   onMessageSend,
   onQuickAction,
   onActionClick,
@@ -52,7 +58,6 @@ export function OsPersistentInterface({
   onProjectClick,
 }: OsPersistentInterfaceProps) {
   const {
-    isOpen,
     mode,
     messages,
     filters,
@@ -61,8 +66,11 @@ export function OsPersistentInterface({
     updateMessage,
     toggleFilters,
     clearMessages,
-    close,
   } = useOsSidecar();
+
+  // Usa stato esterno se fornito, altrimenti usa hook interno
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : false;
+  const close = externalOnClose || (() => {});
 
   const { handleTranscription, handleSpeaking } = useVoiceAI();
   const [isMinimized, setIsMinimized] = useState(false);

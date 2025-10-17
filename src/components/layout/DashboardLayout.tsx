@@ -778,6 +778,8 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
       
       {/* 🆕 OS 2.0 Persistent Interface - Design Johnny Ive */}
       <OsPersistentInterface
+        isOpen={isOpen}
+        onClose={close}
         onMessageSend={async (message: string) => {
           try {
             console.log('🎯 [OS2] Invio messaggio:', message);
