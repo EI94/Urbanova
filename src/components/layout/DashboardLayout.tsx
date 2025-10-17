@@ -42,7 +42,7 @@ import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 import { NotificationStats } from '@/types/notifications';
 import { UserProfile } from '@/types/userProfile';
 import AuthGuard from '@/components/AuthGuard';
-import { Sidecar } from '@/app/components/os2/Sidecar';
+import { OsPersistentInterface } from '@/app/components/os2/OsPersistentInterface';
 import { useOsSidecar } from '@/hooks/os2/useOsSidecar';
 // OS 2.0 sempre abilitato - feature flag rimosso
 import { Bot, Sparkles } from 'lucide-react';
@@ -776,47 +776,47 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
       {/* Feedback Widget */}
       <FeedbackWidget className="" />
       
-      {/* 🆕 OS 2.0 Sidecar - sempre visibile */}
-      <Sidecar
-              onMessageSend={async (message: string) => {
-                try {
-                  console.log('🎯 [OS2] Invio messaggio:', message);
-                  
-                  const response = await fetch('/api/os2/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      message,
-                      userId: (auth && typeof auth === 'object' && 'currentUser' in auth && auth.currentUser?.uid) ? auth.currentUser.uid : 'anonymous',
-                      userEmail: (auth && typeof auth === 'object' && 'currentUser' in auth && auth.currentUser?.email) ? auth.currentUser.email : '',
-                      sessionId: Date.now().toString(),
-                    }),
-                  });
-                  
-                  const result = await response.json();
-                  console.log('📥 [OS2] Response received:', result);
-                } catch (error) {
-                  console.error('❌ [OS2] Error sending message:', error);
-                }
-              }}
-              onSkillClick={(skillId) => {
-                console.log('🎯 [OS2] Skill clicked:', skillId);
-                // Navigate to skill tab
-                const skillRoute = skillId.split('.')[0]; // e.g., "business_plan.run" → "business_plan"
-                router.push(`/dashboard/${skillRoute}`);
-              }}
-              onProjectClick={(projectId) => {
-                console.log('🏢 [OS2] Project clicked:', projectId);
-                // Navigate to project
-                router.push(`/dashboard/projects/${projectId}`);
-              }}
-              onQuickAction={(actionId) => {
-                console.log('⚡ [OS2] Quick action:', actionId);
-              }}
-              onActionClick={(messageId, actionId) => {
-                console.log('🎬 [OS2] Action clicked:', actionId, 'on message:', messageId);
-              }}
-            />
+      {/* 🆕 OS 2.0 Persistent Interface - Design Johnny Ive */}
+      <OsPersistentInterface
+        onMessageSend={async (message: string) => {
+          try {
+            console.log('🎯 [OS2] Invio messaggio:', message);
+            
+            const response = await fetch('/api/os2/chat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                message,
+                userId: (auth && typeof auth === 'object' && 'currentUser' in auth && auth.currentUser?.uid) ? auth.currentUser.uid : 'anonymous',
+                userEmail: (auth && typeof auth === 'object' && 'currentUser' in auth && auth.currentUser?.email) ? auth.currentUser.email : '',
+                sessionId: Date.now().toString(),
+              }),
+            });
+            
+            const result = await response.json();
+            console.log('📥 [OS2] Response received:', result);
+          } catch (error) {
+            console.error('❌ [OS2] Error sending message:', error);
+          }
+        }}
+        onSkillClick={(skillId) => {
+          console.log('🎯 [OS2] Skill clicked:', skillId);
+          // Navigate to skill tab
+          const skillRoute = skillId.split('.')[0]; // e.g., "business_plan.run" → "business_plan"
+          router.push(`/dashboard/${skillRoute}`);
+        }}
+        onProjectClick={(projectId) => {
+          console.log('🏢 [OS2] Project clicked:', projectId);
+          // Navigate to project
+          router.push(`/dashboard/projects/${projectId}`);
+        }}
+        onQuickAction={(actionId) => {
+          console.log('⚡ [OS2] Quick action:', actionId);
+        }}
+        onActionClick={(messageId, actionId) => {
+          console.log('🎬 [OS2] Action clicked:', actionId, 'on message:', messageId);
+        }}
+      />
     </div>
   );
 }
