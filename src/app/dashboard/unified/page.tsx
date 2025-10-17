@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Search,
@@ -53,6 +53,7 @@ import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
 import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 import MarkdownRenderer from '@/components/ui/MarkdownRenderer';
 import { GeographicSearch, GeographicSearchResult } from '@/components/ui/GeographicSearch';
+import { VoiceAI, useVoiceAI } from '@/app/components/os2/VoiceAI';
 // TEMPORANEAMENTE DISABILITATO: import { InteractiveMap, MapMarker } from '@/components/map/InteractiveMap';
 // TEMPORANEAMENTE DISABILITATO: import { useMapData } from '@/hooks/useMapData';
 
@@ -124,6 +125,18 @@ export default function UnifiedDashboardPage() {
   const [geographicSearchResults, setGeographicSearchResults] = useState<GeographicSearchResult[]>([]);
   const [showGeographicSearch, setShowGeographicSearch] = useState(false);
   const [showInteractiveMap, setShowInteractiveMap] = useState(false);
+  
+  // 🎤 Voice AI Hook - Design Johnny Ive
+  const { handleTranscription, handleSpeaking } = useVoiceAI();
+  
+  // Stato per sintesi vocale
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  
+  // Gestione sintesi vocale
+  const handleSpeakingState = useCallback((speaking: boolean) => {
+    setIsSpeaking(speaking);
+    handleSpeaking(speaking);
+  }, [handleSpeaking]);
   
   // TEMPORANEAMENTE DISABILITATO: Hook per dati mappa
   // const {
@@ -315,8 +328,8 @@ export default function UnifiedDashboardPage() {
     setIsLoading(true);
 
     try {
-      // Chiama l'API OS funzionante (feasibility-smart)
-      const response = await fetch('/api/feasibility-smart', {
+      // 🎯 Chiama OS 2.0 API per esperienza completa
+      const response = await fetch('/api/os2/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -325,6 +338,7 @@ export default function UnifiedDashboardPage() {
           message: inputValue,
           userId: currentUser?.uid || 'anonymous',
           userEmail: currentUser?.email || 'user@urbanova.life',
+          sessionId: Date.now().toString(),
         }),
       });
 
@@ -359,6 +373,30 @@ export default function UnifiedDashboardPage() {
 
       const finalMessages = [...newMessages, aiResponse];
       setMessages(finalMessages);
+
+      // 🎤 Sintesi vocale automatica della risposta - Design Johnny Ive
+      setTimeout(() => {
+        console.log('🔊 [UNIFIED] Avvio sintesi vocale risposta...');
+        handleSpeaking(true);
+        
+        const utterance = new SpeechSynthesisUtterance(aiResponse.content);
+        utterance.lang = 'it-IT';
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+        utterance.volume = 0.8;
+        
+        utterance.onend = () => {
+          console.log('🔊 [UNIFIED] Sintesi vocale completata');
+          handleSpeakingState(false);
+        };
+        
+        utterance.onerror = (event) => {
+          console.error('❌ [UNIFIED] Errore sintesi vocale:', event.error);
+          handleSpeakingState(false);
+        };
+        
+        speechSynthesis.speak(utterance);
+      }, 500);
 
       // Salva nella chat history persistente se è una conversazione significativa
       if (finalMessages.length > 2) {
@@ -840,7 +878,7 @@ export default function UnifiedDashboardPage() {
                       <div className="flex flex-col items-center justify-center h-full space-y-8">
                         <div className="text-center">
                           <h2 className={`text-3xl font-medium ${darkMode ? 'text-white' : 'text-gray-800'} mb-2`}>
-                            Cosa c'è in programma oggi?
+                            Urbanova OS 2.0 - Cosa c'è in programma oggi?
                           </h2>
                         </div>
                         
@@ -993,7 +1031,23 @@ export default function UnifiedDashboardPage() {
                         <div className="bg-gray-100 text-gray-900 px-4 py-3 rounded-2xl">
                           <div className="flex items-center space-x-2">
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
-                            <span className="text-sm">Urbanova sta pensando...</span>
+                            <span className="text-sm">Urbanova OS 2.0 sta pensando...</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* 🎤 Indicatore sintesi vocale - Design Johnny Ive */}
+                    {isSpeaking && (
+                      <div className="flex justify-start">
+                        <div className="bg-gradient-to-r from-green-100 to-blue-100 text-gray-900 px-4 py-3 rounded-2xl border border-green-200">
+                          <div className="flex items-center space-x-2">
+                            <div className="flex space-x-1">
+                              <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                              <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                              <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                            </div>
+                            <span className="text-sm font-medium">Urbanova OS 2.0 sta parlando...</span>
                           </div>
                         </div>
                       </div>
@@ -1010,6 +1064,17 @@ export default function UnifiedDashboardPage() {
                   
                   <div className="p-4 border-t border-gray-200">
                     <div className="flex space-x-2">
+                      {/* 🎤 Voice AI - Design Johnny Ive */}
+                      <VoiceAI
+                        onTranscription={(text) => {
+                          console.log('🎤 [UNIFIED] Trascrizione ricevuta:', text);
+                          handleTranscription(text);
+                          setInputValue(text);
+                        }}
+                        onSpeaking={handleSpeakingState}
+                        className="mr-2"
+                      />
+                      
                       <input
                         type="text"
                         value={inputValue}
@@ -1180,10 +1245,10 @@ export default function UnifiedDashboardPage() {
             {activeTab === 'tools' && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                  <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Urbanova Tool OS</h1>
-                    <p className="text-gray-600 mt-1">Assistente Intelligente</p>
-                  </div>
+                    <div>
+                      <h1 className="text-3xl font-bold text-gray-900">Urbanova OS 2.0</h1>
+                      <p className="text-gray-600 mt-1">Assistente Intelligente con Voice AI</p>
+                    </div>
                 </div>
 
                 {/* Chat Interface */}
@@ -1191,8 +1256,8 @@ export default function UnifiedDashboardPage() {
                   <div className="p-4 border-b border-gray-200">
                     <div className="flex items-center space-x-2">
                       <Bot className="w-5 h-5 text-blue-600" />
-                      <span className="font-medium text-gray-900">Urbanova Tool OS</span>
-                      <span className="text-sm text-gray-500">• Assistente Intelligente</span>
+                      <span className="font-medium text-gray-900">Urbanova OS 2.0</span>
+                      <span className="text-sm text-gray-500">• Assistente Intelligente con Voice AI</span>
                     </div>
                   </div>
                   
@@ -1224,7 +1289,23 @@ export default function UnifiedDashboardPage() {
                         <div className="bg-gray-100 text-gray-900 px-4 py-2 rounded-lg">
                           <div className="flex items-center space-x-2">
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
-                            <span className="text-sm">Urbanova sta pensando...</span>
+                            <span className="text-sm">Urbanova OS 2.0 sta pensando...</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* 🎤 Indicatore sintesi vocale - Design Johnny Ive */}
+                    {isSpeaking && (
+                      <div className="flex justify-start">
+                        <div className="bg-gradient-to-r from-green-100 to-blue-100 text-gray-900 px-4 py-2 rounded-lg border border-green-200">
+                          <div className="flex items-center space-x-2">
+                            <div className="flex space-x-1">
+                              <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                              <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                              <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                            </div>
+                            <span className="text-sm font-medium">Urbanova OS 2.0 sta parlando...</span>
                           </div>
                         </div>
                       </div>
@@ -1235,6 +1316,17 @@ export default function UnifiedDashboardPage() {
                   
                   <div className="p-4 border-t border-gray-200">
                     <div className="flex space-x-2">
+                      {/* 🎤 Voice AI - Design Johnny Ive */}
+                      <VoiceAI
+                        onTranscription={(text) => {
+                          console.log('🎤 [UNIFIED-TOOLS] Trascrizione ricevuta:', text);
+                          handleTranscription(text);
+                          setInputValue(text);
+                        }}
+                        onSpeaking={handleSpeakingState}
+                        className="mr-2"
+                      />
+                      
                       <input
                         type="text"
                         value={inputValue}
