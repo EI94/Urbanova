@@ -27,6 +27,9 @@ export interface BusinessPlanInput {
   type: 'RESIDENTIAL' | 'COMMERCIAL' | 'MIXED';
   totalUnits: number;
   
+  // Origine del Business Plan (per tracciamento storico)
+  sourceFeasibilityId?: string; // ID dell'analisi di fattibilità da cui è stato creato
+  
   // Ricavi
   averagePrice: number; // Prezzo medio per unità
   unitMix?: { type: string; count: number; price: number }[];
@@ -1407,6 +1410,8 @@ class BusinessPlanService {
         outputs: outputs,
         // Campo speciale per identificare i Business Plan
         documentType: 'BUSINESS_PLAN',
+        // Traccia l'origine per riferimento storico
+        sourceFeasibilityId: input.sourceFeasibilityId,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };

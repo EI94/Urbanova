@@ -143,11 +143,16 @@ export default function BusinessPlanForm({
     
     // Costruisci input completo
     const input: BusinessPlanInput = {
-      projectId: feasibilityProjectId,
+      // NON usare feasibilityProjectId come projectId per evitare dipendenze
+      // Il Business Plan deve essere indipendente dall'analisi di fattibilità
+      projectId: undefined, // Genererà un nuovo ID indipendente
       projectName: formData.projectName!,
       location: formData.location || 'Non specificata',
       type: formData.type!,
       totalUnits: formData.totalUnits!,
+      
+      // Traccia l'origine per riferimento storico (senza dipendenza)
+      sourceFeasibilityId: feasibilityProjectId, // Solo per tracciamento, non per dipendenza
       
       averagePrice: formData.averagePrice!,
       salesCalendar: formData.salesCalendar!,

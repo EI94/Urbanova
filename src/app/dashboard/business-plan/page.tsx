@@ -270,6 +270,14 @@ export default function BusinessPlanPage() {
         toast('✅ Business Plan caricato per la visualizzazione', { icon: '👁️' });
       }
       
+      // Mostra messaggio informativo se creato da analisi di fattibilità
+      if (businessPlanData.sourceFeasibilityId) {
+        toast('ℹ️ Questo Business Plan è stato creato da un\'analisi di fattibilità ed è ora indipendente', { 
+          icon: '🔗',
+          duration: 5000 
+        });
+      }
+      
     } catch (error) {
       console.error('❌ [BusinessPlan] Errore caricamento BP esistente:', error);
       toast(`❌ Errore nel caricamento: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`);
@@ -378,6 +386,10 @@ export default function BusinessPlanPage() {
       setViewMode('form');
       
       toast('✅ Dati del progetto di fattibilità caricati nel Business Plan');
+      toast('ℹ️ Il Business Plan sarà indipendente dall\'analisi di fattibilità originale', { 
+        icon: '🔗',
+        duration: 5000 
+      });
       
     } catch (error) {
       console.error('❌ [BusinessPlan] Errore caricamento feasibility:', error);
