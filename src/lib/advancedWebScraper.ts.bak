@@ -5,7 +5,7 @@ import puppeteer, { Browser, Page } from 'puppeteer';
 import puppeteerExtra from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker';
-import { ScrapedLand, LandSearchCriteria } from '@/types/land';
+import { ScrapedLand, LandSearchCriteria } from '../../src/types/land';
 
 // Configura Puppeteer Extra con plugin stealth
 puppeteerExtra.use(StealthPlugin());

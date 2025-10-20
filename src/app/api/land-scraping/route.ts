@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { realEmailService } from '@/lib/realEmailService';
-import { realWebScraper } from '@/lib/realWebScraper';
+import { simplifiedAdvancedScraper } from '@/lib/simplifiedAdvancedScraper';
 import { LandSearchCriteria, RealLandScrapingResult } from '@/types/land';
 
 export async function POST(request: NextRequest) {
@@ -43,8 +43,8 @@ export async function POST(request: NextRequest) {
     console.log('🔍 Criteri di ricerca (0 = no limit):', searchCriteria);
     console.log('📋 Criteri originali user:', criteria);
 
-    // Scraping terreni
-    const lands = await realWebScraper.scrapeLands(searchCriteria);
+    // Scraping terreni con Simplified Advanced Scraper
+    const lands = await simplifiedAdvancedScraper.scrapeLands(searchCriteria);
 
     console.log(`✅ Scraping completato: ${lands.length} terreni trovati`);
 
@@ -174,6 +174,13 @@ export async function POST(request: NextRequest) {
       },
       { status: 500 }
     );
+  } finally {
+    // Chiudi il browser per liberare risorse
+    try {
+      await simplifiedAdvancedScraper.close();
+    } catch (closeError) {
+      console.warn('⚠️ Errore chiusura browser:', closeError);
+    }
   }
 }
 
