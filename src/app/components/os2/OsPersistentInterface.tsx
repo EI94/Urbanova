@@ -96,6 +96,7 @@ export function OsPersistentInterface({
   if (!isOpen) return null;
 
   const handleSend = (content: string) => {
+    // Aggiungi messaggio utente (SENZA sintesi vocale)
     addMessage({ role: 'user', content });
     onMessageSend?.(content);
 
@@ -123,9 +124,9 @@ export function OsPersistentInterface({
         ],
       });
 
-      // Sintesi vocale automatica
+      // 🔊 Sintesi vocale SOLO per risposte dell'OS (role: 'assistant')
       setTimeout(() => {
-        console.log('🔊 [OS-PERSISTENT] Avvio sintesi vocale risposta...');
+        console.log('🔊 [OS-PERSISTENT] Avvio sintesi vocale risposta OS...');
         handleSpeaking(true);
         const utterance = new SpeechSynthesisUtterance(responseContent);
         utterance.lang = 'it-IT';

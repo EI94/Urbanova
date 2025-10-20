@@ -91,7 +91,7 @@ export function Sidecar({
   
   // Handle send message
   const handleSend = (content: string) => {
-    // Add user message
+    // Aggiungi messaggio utente (SENZA sintesi vocale)
     addMessage({
       role: 'user',
       content,
@@ -124,9 +124,9 @@ export function Sidecar({
         ],
       });
       
-      // 🎤 Sintesi vocale della risposta
+      // 🔊 Sintesi vocale SOLO per risposte dell'OS (role: 'assistant')
       setTimeout(() => {
-        console.log('🔊 [SIDECAR] Avvio sintesi vocale risposta...');
+        console.log('🔊 [SIDECAR] Avvio sintesi vocale risposta OS...');
         handleSpeaking(true);
         
         const utterance = new SpeechSynthesisUtterance(responseContent);

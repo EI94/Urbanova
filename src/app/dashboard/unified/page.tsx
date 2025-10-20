@@ -1031,7 +1031,7 @@ export default function UnifiedDashboardPage() {
                         <div className="bg-gray-100 text-gray-900 px-4 py-3 rounded-2xl">
                           <div className="flex items-center space-x-2">
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
-                            <span className="text-sm">Urbanova OS 2.0 sta pensando...</span>
+                            <span className="text-sm">Sto pensando...</span>
                           </div>
                         </div>
                       </div>
@@ -1289,7 +1289,7 @@ export default function UnifiedDashboardPage() {
                         <div className="bg-gray-100 text-gray-900 px-4 py-2 rounded-lg">
                           <div className="flex items-center space-x-2">
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
-                            <span className="text-sm">Urbanova OS 2.0 sta pensando...</span>
+                            <span className="text-sm">Sto pensando...</span>
                           </div>
                         </div>
                       </div>
