@@ -47,30 +47,46 @@ export class CloudflareWorkerScraper {
         }
       ];
 
-      for (const site of sites) {
-        try {
-          console.log(`🔍 Scraping ${site.name}...`);
-          
-          const html = await this.fetchViaWorker(site.url);
-          if (html) {
-            const siteResults = site.parser(html, criteria);
-            if (siteResults.length > 0) {
-              results.push(...siteResults);
-              console.log(`✅ ${site.name}: ${siteResults.length} terreni trovati`);
-            } else {
-              console.log(`⚠️ ${site.name}: HTML ricevuto ma nessun risultato parsato`);
+            for (const site of sites) {
+              try {
+                console.log(`🔍 Scraping ${site.name}...`);
+                
+                // Prova URL alternativi per ogni sito
+                const alternativeUrls = this.getAlternativeUrls(site.url, site.name);
+                let siteResults: ScrapedLand[] = [];
+                
+                for (const url of alternativeUrls) {
+                  console.log(`📡 Tentativo URL: ${url}`);
+                  const html = await this.fetchViaWorker(url);
+                  
+                  if (html) {
+                    const parsedResults = site.parser(html, criteria);
+                    if (parsedResults.length > 0) {
+                      siteResults = parsedResults;
+                      console.log(`✅ ${site.name}: ${parsedResults.length} terreni trovati con URL: ${url}`);
+                      break; // Esci dal loop se troviamo risultati
+                    } else {
+                      console.log(`⚠️ ${site.name}: HTML ricevuto ma nessun risultato parsato da ${url}`);
+                    }
+                  } else {
+                    console.log(`❌ ${site.name}: Nessun HTML ricevuto da ${url}`);
+                  }
+                  
+                  // Delay tra tentativi
+                  await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+                }
+                
+                if (siteResults.length > 0) {
+                  results.push(...siteResults);
+                }
+                
+                // Delay tra siti diversi
+                await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1000));
+                
+              } catch (error) {
+                console.error(`❌ Errore ${site.name}:`, error);
+              }
             }
-          } else {
-            console.log(`❌ ${site.name}: Nessun HTML ricevuto`);
-          }
-          
-          // Delay tra richieste per evitare rate limiting
-          await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1000));
-          
-        } catch (error) {
-          console.error(`❌ Errore ${site.name}:`, error);
-        }
-      }
 
       // Se abbiamo risultati reali, restituiscili
       if (results.length > 0) {
@@ -78,13 +94,15 @@ export class CloudflareWorkerScraper {
         return results;
       }
 
-      // Fallback: genera dati realistici basati sulla location
-      console.log('⚠️ Nessun risultato reale, genero dati realistici per la location:', criteria.location);
-      return this.generateRealisticData(criteria);
+            // NO FALLBACK: Restituisci array vuoto invece di dati mock
+            console.log('⚠️ Nessun risultato reale trovato. Scraping reale necessario per risultati validi.');
+            console.log('💡 Suggerimento: I siti immobiliari hanno protezioni anti-bot avanzate. Risultati reali richiedono scraping più sofisticato.');
+            return [];
 
     } catch (error) {
       console.error('❌ Errore generale Worker Scraper:', error);
-      return this.generateRealisticData(criteria);
+      console.log('⚠️ Nessun risultato reale disponibile a causa di errori di scraping.');
+      return [];
     }
   }
 
@@ -94,6 +112,44 @@ export class CloudflareWorkerScraper {
       .replace(/[^a-z0-9\s]/g, '')
       .replace(/\s+/g, '-')
       .trim();
+  }
+
+  private getAlternativeUrls(baseUrl: string, siteName: string): string[] {
+    const urls = [baseUrl];
+    
+    // URL alternativi per ogni sito
+    if (siteName === 'Immobiliare.it') {
+      urls.push(
+        `${baseUrl}?criterio=rilevanza`,
+        `${baseUrl}?criterio=prezzo`,
+        `${baseUrl}?criterio=superficie`,
+        `${baseUrl}?criterio=data`,
+        `${baseUrl}?criterio=rilevanza&pag=1`,
+        `${baseUrl}?criterio=rilevanza&pag=2`
+      );
+    } else if (siteName === 'Casa.it') {
+      urls.push(
+        `${baseUrl}?sort=relevance`,
+        `${baseUrl}?sort=price`,
+        `${baseUrl}?sort=date`,
+        `${baseUrl}?sort=area`
+      );
+    } else if (siteName === 'Idealista.it') {
+      urls.push(
+        `${baseUrl}?orden=relevancia`,
+        `${baseUrl}?orden=precio`,
+        `${baseUrl}?orden=fecha`,
+        `${baseUrl}?orden=superficie`
+      );
+    } else if (siteName === 'BorsinoImmobiliare.it') {
+      urls.push(
+        `${baseUrl}?sort=relevance`,
+        `${baseUrl}?sort=price`,
+        `${baseUrl}?sort=date`
+      );
+    }
+    
+    return urls;
   }
 
   private async fetchViaWorker(url: string): Promise<string | null> {
@@ -327,95 +383,6 @@ export class CloudflareWorkerScraper {
       console.error('❌ Errore parsing Immobiliare:', error);
       return [];
     }
-  }
-
-  private generateRealisticData(criteria: LandSearchCriteria): ScrapedLand[] {
-    console.log('📝 Generazione dati realistici per:', criteria.location);
-    
-    const results: ScrapedLand[] = [];
-    const location = criteria.location;
-    
-    // Prezzi realistici basati sulla location
-    const priceRanges = this.getPriceRangeForLocation(location);
-    const areaRanges = this.getAreaRangeForLocation(location);
-    
-    // Genera 6-8 terreni realistici
-    const count = Math.floor(Math.random() * 3) + 6; // 6-8 terreni
-    
-    for (let i = 0; i < count; i++) {
-      const price = Math.floor(Math.random() * (priceRanges.max - priceRanges.min)) + priceRanges.min;
-      const area = Math.floor(Math.random() * (areaRanges.max - areaRanges.min)) + areaRanges.min;
-      
-      const terreno = this.generateSingleTerreno(i, location, price, area);
-      results.push(terreno);
-    }
-    
-    console.log(`✅ Generati ${results.length} terreni realistici per ${location}`);
-    return results;
-  }
-
-  private getPriceRangeForLocation(location: string): { min: number; max: number } {
-    const locationLower = location.toLowerCase();
-    
-    if (locationLower.includes('roma') || locationLower.includes('milano')) {
-      return { min: 200000, max: 800000 }; // Grandi città: 200k-800k
-    } else if (locationLower.includes('napoli') || locationLower.includes('torino') || locationLower.includes('firenze')) {
-      return { min: 150000, max: 600000 }; // Città medie: 150k-600k
-    } else if (locationLower.includes('bologna') || locationLower.includes('genova') || locationLower.includes('venezia')) {
-      return { min: 180000, max: 700000 }; // Città universitarie: 180k-700k
-    } else {
-      return { min: 80000, max: 400000 }; // Altre località: 80k-400k
-    }
-  }
-
-  private getAreaRangeForLocation(location: string): { min: number; max: number } {
-    const locationLower = location.toLowerCase();
-    
-    if (locationLower.includes('roma') || locationLower.includes('milano')) {
-      return { min: 300, max: 2000 }; // Grandi città: 300-2000m²
-    } else {
-      return { min: 500, max: 3000 }; // Altre località: 500-3000m²
-    }
-  }
-
-  private generateSingleTerreno(index: number, location: string, price: number, area: number): ScrapedLand {
-    const types = [
-      'Terreno edificabile',
-      'Terreno agricolo edificabile', 
-      'Terreno con permessi',
-      'Terreno residenziale',
-      'Terreno commerciale',
-      'Terreno industriale'
-    ];
-    
-    const features = [
-      'Edificabile',
-      'Servizi disponibili',
-      'Permessi edilizi',
-      'Zona residenziale',
-      'Accesso strada',
-      'Piano regolatore',
-      'Allacciamenti'
-    ];
-    
-    const type = types[Math.floor(Math.random() * types.length)];
-    const selectedFeatures = features.slice(0, Math.floor(Math.random() * 3) + 2);
-    
-    return {
-      id: `realistic_${location.toLowerCase().replace(/\s+/g, '_')}_${index}`,
-      title: `${type} in ${location}`,
-      price,
-      area,
-      location,
-      url: `https://example.com/terreno-${location.toLowerCase()}-${index}`,
-      source: 'market-data',
-      description: `${type} di ${area}m² in ${location}, ideale per costruzione residenziale o commerciale`,
-      images: [],
-      features: selectedFeatures,
-      coordinates: null,
-      aiScore: Math.floor(Math.random() * 30) + 70, // 70-100
-      lastUpdated: new Date().toISOString(),
-    };
   }
 
   async close(): Promise<void> {
