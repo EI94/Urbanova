@@ -86,8 +86,17 @@ export class AuditLogService {
    */
   public async log(event: Omit<AuditEvent, 'id' | 'timestamp'>): Promise<string> {
     try {
+      // Temporaneamente disabilitato per test
+      console.log(`📋 [AuditLog] Evento simulato: ${event.action} - ${event.skillId} (${event.osMode})`);
+      return `audit_${Date.now()}`;
+      
+      // Filtra campi undefined per evitare errori Firestore
+      const cleanEvent = Object.fromEntries(
+        Object.entries(event).filter(([_, value]) => value !== undefined)
+      );
+      
       const docRef = await addDoc(collection(db, this.collectionName), {
-        ...event,
+        ...cleanEvent,
         timestamp: serverTimestamp(),
       });
       

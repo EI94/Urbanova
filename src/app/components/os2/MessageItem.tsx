@@ -92,7 +92,7 @@ const StatusBadge: React.FC<{ status?: MessageStatus }> = ({ status }) => {
     },
   };
   
-  const { icon, label, className } = config[status];
+  const { icon, label, className } = config[status] || config['draft'];
   
   return (
     <div className={cn(

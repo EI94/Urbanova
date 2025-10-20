@@ -424,5 +424,32 @@ export class Planner {
     
     return Math.max(0.5, Math.min(1.0, confidence));
   }
+  
+  /**
+   * Carica memoria del progetto
+   */
+  private async loadProjectMemory(input: PlannerInput): Promise<ProjectMemory | null> {
+    try {
+      if (input.userContext.projectId) {
+        return await this.memoryStore.getProjectMemory(input.userContext.projectId);
+      }
+      return null;
+    } catch (error) {
+      console.warn('⚠️ [Planner] Errore caricamento memoria progetto:', error);
+      return null;
+    }
+  }
+  
+  /**
+   * Carica memoria dell'utente
+   */
+  private async loadUserMemory(input: PlannerInput): Promise<UserMemory | null> {
+    try {
+      return await this.memoryStore.getUserMemory(input.userContext.userId);
+    } catch (error) {
+      console.warn('⚠️ [Planner] Errore caricamento memoria utente:', error);
+      return null;
+    }
+  }
 }
 

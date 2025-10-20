@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       confidence: body.confidence,
       classification: body.classification,
       userId,
-      userEmail: userEmail || `${userId}@urbanova.local`,
+      userEmail: userEmail && userEmail.trim() ? userEmail : `${userId}@urbanova.local`,
       sessionId,
       projectId,
       userRoles,
@@ -53,6 +53,7 @@ export async function POST(request: NextRequest) {
     
     // Process with OS2 (con SSE callbacks + timing tracking)
     const os2 = getOS2();
+    const startTime = Date.now();
     const requestSentAt = Date.now();
     let firstStatusAt: number | undefined;
     
