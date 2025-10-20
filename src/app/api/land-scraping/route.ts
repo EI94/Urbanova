@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { realEmailService } from '@/lib/realEmailService';
-import { simplifiedAdvancedScraper } from '@/lib/simplifiedAdvancedScraper';
+import { cloudflareWorkerScraper } from '@/lib/cloudflareWorkerScraper';
 import { LandSearchCriteria, RealLandScrapingResult } from '@/types/land';
 
 export async function POST(request: NextRequest) {
@@ -44,7 +44,8 @@ export async function POST(request: NextRequest) {
     console.log('📋 Criteri originali user:', criteria);
 
     // Scraping terreni con Simplified Advanced Scraper
-    const lands = await simplifiedAdvancedScraper.scrapeLands(searchCriteria);
+    // Usa il nuovo Cloudflare Worker Scraper
+    const lands = await cloudflareWorkerScraper.scrapeLands(searchCriteria);
 
     console.log(`✅ Scraping completato: ${lands.length} terreni trovati`);
 
@@ -175,11 +176,11 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   } finally {
-    // Chiudi il browser per liberare risorse
+    // Chiudi il scraper per liberare risorse
     try {
-      await simplifiedAdvancedScraper.close();
+      await cloudflareWorkerScraper.close();
     } catch (closeError) {
-      console.warn('⚠️ Errore chiusura browser:', closeError);
+      console.warn('⚠️ Errore chiusura scraper:', closeError);
     }
   }
 }

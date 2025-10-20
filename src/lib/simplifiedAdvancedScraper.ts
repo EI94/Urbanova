@@ -1,9 +1,10 @@
 // 🚀 SIMPLIFIED ADVANCED SCRAPER - Compatibile con Vercel
 // Scraper che bypassa le protezioni usando tecniche avanzate
 
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import * as cheerio from 'cheerio';
 import { ScrapedLand, LandSearchCriteria } from '@/types/land';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
 export class SimplifiedAdvancedScraper {
   private isInitialized = true;
@@ -26,6 +27,97 @@ export class SimplifiedAdvancedScraper {
 
   private getRandomUserAgent(): string {
     return this.userAgents[Math.floor(Math.random() * this.userAgents.length)]!;
+  }
+
+  private getProxyList(): string[] {
+    const raw = process.env.SCRAPER_PROXIES || process.env.SCRAPER_HTTP_PROXY || '';
+    return raw
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
+  }
+
+  private randomIp(): string {
+    const rnd = () => Math.floor(Math.random() * 255);
+    return `${rnd()}.${rnd()}.${rnd()}.${rnd()}`;
+  }
+
+  private buildAxiosConfig(proxyUrl?: string): AxiosRequestConfig {
+    const headers = {
+      'User-Agent': this.getRandomUserAgent(),
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+      'Accept-Language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'DNT': '1',
+      'Connection': 'keep-alive',
+      'Upgrade-Insecure-Requests': '1',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'none',
+      'Sec-Fetch-User': '?1',
+      'Cache-Control': 'max-age=0',
+      'X-Forwarded-For': this.randomIp(),
+    } as const;
+
+    const config: AxiosRequestConfig = {
+      headers,
+      timeout: 15000,
+      maxRedirects: 5,
+      validateStatus: status => (status ?? 0) < 500,
+    };
+
+    if (proxyUrl) {
+      try {
+        const agent = new HttpsProxyAgent(proxyUrl);
+        (config as any).httpsAgent = agent;
+        (config as any).httpAgent = agent;
+        console.log('🛰️ Proxy attivo per scraping');
+      } catch (e) {
+        console.warn('⚠️ Proxy non valido, procedo senza:', (e as Error).message);
+      }
+    }
+
+    return config;
+  }
+
+  private async getWithProxyRotation(url: string): Promise<{ html: string; proxyUsed?: string } | null> {
+    const proxies = this.getProxyList();
+    const candidates = proxies.length > 0 ? proxies : [undefined as unknown as string];
+
+    for (let i = 0; i < candidates.length; i++) {
+      const proxy = candidates[i];
+      try {
+        const res = await axios.get(url, this.buildAxiosConfig(proxy));
+        if (res.status === 200 && typeof res.data === 'string' && res.data.length > 1000) {
+          return { html: res.data, proxyUsed: proxy };
+        }
+        console.log(`⚠️ GET ${url} via ${proxy ? 'proxy' : 'direct'} status=${res.status}`);
+      } catch (err) {
+        console.warn(`❌ GET fallita via ${proxy || 'direct'}:`, (err as Error).message);
+      }
+
+      // piccolo backoff tra tentativi
+      await new Promise(r => setTimeout(r, 800 + Math.random() * 700));
+    }
+    return null;
+  }
+
+  private async getViaRelay(url: string): Promise<string | null> {
+    const relay = process.env.SCRAPER_RELAY_URL;
+    if (!relay) return null;
+    try {
+      const relayUrl = `${relay}?url=${encodeURIComponent(url)}`;
+      const res = await axios.get(relayUrl, this.buildAxiosConfig());
+      if ((res.status ?? 0) >= 200 && (res.status ?? 0) < 300 && typeof res.data === 'string') {
+        console.log('🛰️ Relay usato con successo');
+        return res.data as string;
+      }
+      console.log('⚠️ Relay status:', res.status);
+      return null;
+    } catch (e) {
+      console.warn('⚠️ Relay fallito:', (e as Error).message);
+      return null;
+    }
   }
 
   async scrapeLands(criteria: LandSearchCriteria): Promise<ScrapedLand[]> {
@@ -100,40 +192,24 @@ export class SimplifiedAdvancedScraper {
       console.log(`📡 Tentativo Immobiliare.it: ${url}`);
       
       // Headers molto realistici per bypassare protezioni
-      const headers = {
-        'User-Agent': this.getRandomUserAgent(),
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-        'Accept-Language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'DNT': '1',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'none',
-        'Sec-Fetch-User': '?1',
-        'Cache-Control': 'max-age=0',
-        'sec-ch-ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"macOS"',
-      };
+      console.log('🔍 [DEBUG] Tentativo getWithProxyRotation per Immobiliare.it');
+      let respImm = await this.getWithProxyRotation(url);
+      console.log('🔍 [DEBUG] getWithProxyRotation risultato:', respImm ? 'SUCCESS' : 'FAILED');
+      if (!respImm) {
+        console.log('🔍 [DEBUG] Fallback a relay per Immobiliare.it');
+        const relayHtml = await this.getViaRelay(url);
+        if (relayHtml) respImm = { html: relayHtml } as any;
+      }
 
-      const response = await axios.get(url, {
-        headers,
-        timeout: 15000,
-        maxRedirects: 5,
-        validateStatus: status => status < 500,
-      });
-
-      if (response.status !== 200) {
-        console.log(`❌ Immobiliare.it: Status ${response.status}`);
+      if (!respImm) {
+        console.log('❌ Immobiliare.it: impossibile ottenere HTML');
         return [];
       }
 
       console.log(`✅ Immobiliare.it: Accesso riuscito`);
-      console.log(`📄 Content-Length: ${response.data.length}`);
+      console.log(`📄 Content-Length: ${respImm.html.length}`);
 
-      const $ = cheerio.load(response.data);
+      const $ = cheerio.load(respImm.html);
 
       // Controlla se siamo stati bloccati
       const bodyText = $('body').text();
@@ -210,31 +286,14 @@ export class SimplifiedAdvancedScraper {
       
       console.log(`📡 Strategia alternativa Immobiliare.it: ${url}`);
       
-      // Headers ancora più realistici
-      const headers = {
-        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'it-IT,it;q=0.9,en;q=0.8',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'DNT': '1',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-        'Referer': 'https://www.google.com/',
-      };
-
-      const response = await axios.get(url, {
-        headers,
-        timeout: 15000,
-        maxRedirects: 5,
-        validateStatus: status => status < 500,
-      });
-
-      if (response.status !== 200) {
-        console.log(`❌ Immobiliare.it alternativa: Status ${response.status}`);
-        return [];
+      let respAlt = await this.getWithProxyRotation(url);
+      if (!respAlt) {
+        const relayHtml = await this.getViaRelay(url);
+        if (relayHtml) respAlt = { html: relayHtml } as any;
       }
+      if (!respAlt) return [];
 
-      const $ = cheerio.load(response.data);
+      const $ = cheerio.load(respAlt.html);
       
       // Estrai con selettori più generici
       const elements = $('div, article, section');
@@ -292,23 +351,7 @@ export class SimplifiedAdvancedScraper {
       
       console.log(`📡 Tentativo Casa.it: ${url}`);
       
-      const headers = {
-        'User-Agent': this.getRandomUserAgent(),
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-        'Accept-Language': 'it-IT,it;q=0.9,en;q=0.8',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'DNT': '1',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-        'Referer': 'https://www.google.com/',
-      };
-
-      const response = await axios.get(url, {
-        headers,
-        timeout: 15000,
-        maxRedirects: 5,
-        validateStatus: status => status < 500,
-      });
+      const response = await axios.get(url, this.buildAxiosConfig());
 
       if (response.status !== 200) {
         console.log(`❌ Casa.it: Status ${response.status}`);
@@ -386,23 +429,7 @@ export class SimplifiedAdvancedScraper {
       
       console.log(`📡 Tentativo Idealista.it: ${url}`);
       
-      const headers = {
-        'User-Agent': this.getRandomUserAgent(),
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-        'Accept-Language': 'it-IT,it;q=0.9,en;q=0.8',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'DNT': '1',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-        'Referer': 'https://www.google.com/',
-      };
-
-      const response = await axios.get(url, {
-        headers,
-        timeout: 15000,
-        maxRedirects: 5,
-        validateStatus: status => status < 500,
-      });
+      const response = await axios.get(url, this.buildAxiosConfig());
 
       if (response.status !== 200) {
         console.log(`❌ Idealista.it: Status ${response.status}`);
