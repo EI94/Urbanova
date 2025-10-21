@@ -5,6 +5,8 @@ import { OpenAI } from 'openai';
 import { URBANOVA_PARAHELP_TEMPLATE, ParaHelpDecisionEngine } from './ParaHelpTemplate';
 import { getRAGSystem, RAGContext } from './RAGSystem';
 import { SkillCatalog } from '../skills/SkillCatalog';
+import { CacheFactory } from '../utils/ResponseCache';
+import { getWorkflowEngine, WorkflowTemplates } from '../workflows/WorkflowEngine';
 
 export interface FunctionCall {
   name: string;
@@ -21,8 +23,12 @@ export interface FunctionCallResult {
 }
 
 export interface SmartDecision {
-  action: 'function_call' | 'conversation' | 'clarification' | 'escalation';
+  action: 'function_call' | 'conversation' | 'clarification' | 'escalation' | 'workflow';
   functionCalls?: FunctionCall[];
+  workflow?: {
+    name: string;
+    steps: any[];
+  };
   response?: string;
   reasoning: string;
   confidence: number;
@@ -53,6 +59,129 @@ export class OpenAIFunctionCallingSystem {
   }
 
   /**
+   * Sistema ibrido per decisioni senza OpenAI
+   */
+  private makeHybridDecision(userMessage: string, context: RAGContext): SmartDecision | null {
+    const message = userMessage.toLowerCase();
+    
+    // Workflow Multi-step
+    if (this.isMultiStepRequest(message)) {
+      return this.handleMultiStepWorkflow(message, context);
+    }
+    
+    // Analisi Fattibilità - Pattern più ampi
+    if ((message.includes('analisi') && (message.includes('fattibilità') || message.includes('terreno') || message.includes('terreno'))) ||
+        message.includes('analizza') ||
+        message.includes('fattibilità') ||
+        (message.includes('terreno') && (message.includes('costruire') || message.includes('appartamenti')))) {
+      return {
+        action: 'function_call',
+        functionCalls: [{
+          name: 'feasibility.analyze',
+          arguments: {
+            landArea: this.extractArea(userMessage) || 1000,
+            constructionCostPerSqm: 1200,
+            salePrice: 3000
+          },
+          confidence: 0.9,
+          reasoning: 'Rilevata richiesta analisi fattibilità'
+        }],
+        reasoning: 'Sistema ibrido: analisi fattibilità',
+        confidence: 0.9,
+        requiresConfirmation: false,
+        context: { relevantMemories: [] },
+      };
+    }
+    
+    // Business Plan - Pattern più ampi
+    if (message.includes('business plan') || 
+        message.includes('piano') || 
+        message.includes('bp') ||
+        message.includes('business') ||
+        (message.includes('calcola') && message.includes('roi')) ||
+        (message.includes('progetto') && message.includes('residenziale'))) {
+      return {
+        action: 'function_call',
+        functionCalls: [{
+          name: 'business_plan.calculate',
+          arguments: {
+            projectName: this.extractProjectName(userMessage),
+            units: this.extractUnits(userMessage) || 8,
+            salePrice: 3000,
+            constructionCost: 1200,
+            landScenarios: [
+              { price: 500, area: 1000 },
+              { price: 600, area: 1200 }
+            ]
+          },
+          confidence: 0.9,
+          reasoning: 'Rilevata richiesta business plan'
+        }],
+        reasoning: 'Sistema ibrido: business plan',
+        confidence: 0.9,
+        requiresConfirmation: false,
+        context: { relevantMemories: [] },
+      };
+    }
+    
+    // Lista Progetti - Pattern più ampi
+    if ((message.includes('mostra') && (message.includes('progetti') || message.includes('analisi') || message.includes('business'))) ||
+        message.includes('visualizza') ||
+        message.includes('lista') ||
+        message.includes('tutti i miei')) {
+      return {
+        action: 'function_call',
+        functionCalls: [{
+          name: 'project.list',
+          arguments: {
+            type: this.extractProjectType(userMessage)
+          },
+          confidence: 0.8,
+          reasoning: 'Rilevata richiesta lista progetti'
+        }],
+        reasoning: 'Sistema ibrido: lista progetti',
+        confidence: 0.8,
+        requiresConfirmation: false,
+        context: { relevantMemories: [] },
+      };
+    }
+    
+    return null; // Nessuna decisione ibrida disponibile
+  }
+
+  /**
+   * Estrae informazioni dal messaggio utente
+   */
+  private extractLocation(message: string): string {
+    const locations = ['roma', 'milano', 'firenze', 'torino', 'bologna', 'napoli', 'venezia', 'genova'];
+    const found = locations.find(loc => message.toLowerCase().includes(loc));
+    return found || 'Non specificata';
+  }
+
+  private extractProjectType(message: string): string {
+    if (message.includes('residenziale') || message.includes('appartamenti')) return 'residenziale';
+    if (message.includes('commerciale') || message.includes('uffici')) return 'commerciale';
+    if (message.includes('misto')) return 'misto';
+    return 'residenziale';
+  }
+
+  private extractArea(message: string): number {
+    const match = message.match(/(\d+)\s*m[²2]?/i);
+    return match ? parseInt(match[1]) : 0;
+  }
+
+  private extractProjectName(message: string): string {
+    // Estrae nome progetto se presente
+    const match = message.match(/progetto\s+([a-zA-Z\s]+)/i);
+    return match ? match[1].trim() : 'Nuovo Progetto';
+  }
+
+  private extractUnits(message: string): number {
+    const match = message.match(/(\d+)\s*unità/i);
+    return match ? parseInt(match[1]) : 0;
+  }
+
+  /**
    * Prende una decisione intelligente basata su contesto e memoria
    */
   async makeSmartDecision(
@@ -62,7 +191,7 @@ export class OpenAIFunctionCallingSystem {
     try {
       console.log('🧠 [FunctionCalling] Prendendo decisione intelligente per:', userMessage);
 
-      // 1. Costruisci contesto completo
+      // 1. Costruisci contesto completo per LLM
       const ragContext = await this.ragSystem.buildConversationContext(userMessage, context);
       
       // 2. Prepara prompt per OpenAI con function calling
@@ -175,61 +304,82 @@ export class OpenAIFunctionCallingSystem {
   private buildSystemPrompt(ragContext: any): string {
     const template = URBANOVA_PARAHELP_TEMPLATE;
     
-    return `Sei l'assistente AI di Urbanova per lo sviluppo immobiliare. 
+    return `Sei Urbanova OS, l'assistente AI avanzato per lo sviluppo immobiliare.
 
-IDENTITÀ E RUOLO:
-- ${template.role.identity}
-- Dominio: ${template.purpose.domain}
-- Audience: ${template.audience.primary}
+🎯 TUA MISSIONE:
+${template.purpose.mission}
 
-CAPACITÀ DISPONIBILI:
+👤 CHI SEI:
+${template.role.identity}
+Sei un collega collaborativo, preciso e brillante che eccede sempre le aspettative del cliente.
+
+🛠️ COSA PUOI FARE:
+Hai accesso a potenti funzioni (tools) per:
 ${template.role.capabilities.map(cap => `• ${cap}`).join('\n')}
 
-LIMITAZIONI:
-${template.role.limitations.map(lim => `• ${lim}`).join('\n')}
+📋 CONTESTO UTENTE:
+- User ID: ${ragContext.userContext?.userId}
+- Progetti attivi: ${ragContext.projectContext?.activeProjects || 0}
+- Conversazione: ${ragContext.conversationHistory?.length || 0} messaggi precedenti
 
-AZIONI CHE RICHIEDONO CONFERMA:
-${template.actionFlow.confirmation_required.map(action => `• ${action}`).join('\n')}
+💬 CONVERSAZIONE PRECEDENTE:
+${ragContext.conversationHistory?.slice(-3).map((msg: any) => 
+  `${msg.role === 'user' ? '👤 Utente' : '🤖 Tu'}: ${msg.content}`
+).join('\n') || 'Nessuna conversazione precedente'}
 
-AZIONI PROIBITE:
-${template.exclusions.forbidden_actions.map(action => `• ${action}`).join('\n')}
+🧠 MEMORIA RILEVANTE:
+${ragContext.relevantMemories?.map((m: any) => `• ${m.contentSnippet}`).join('\n') || 'Nessuna memoria rilevante'}
 
-CONTESTO CONVERSAZIONE:
-${ragContext.conversationSummary}
+📌 COME DECIDERE:
 
-CONTESTO PROGETTO:
-${ragContext.projectContext ? JSON.stringify(ragContext.projectContext, null, 2) : 'Nessun progetto attivo'}
+1. **Per Azioni Concrete** (analisi, business plan, progetti):
+   → USA FUNCTION CALLING
+   → Chiama la function appropriata con parametri completi
+   → Esempio: Se utente dice "analizza terreno a Roma", chiama feasibility.analyze
 
-MEMORIE RILEVANTI:
-${ragContext.relevantMemories.map(m => `• ${m.contextSnippet}`).join('\n')}
+2. **Per Conversazioni** (saluti, domande generali, chiarimenti):
+   → RISPONDI DIRETTAMENTE
+   → Nessuna function calling necessaria
+   → Sii amichevole ma professionale
 
-ISTRUZIONI:
-1. Analizza il messaggio utente e determina l'azione più appropriata
-2. Usa function calling per azioni concrete quando possibile
-3. Mantieni conversazione naturale per chiarimenti
-4. Rispetta sempre le limitazioni e richieste di conferma
-5. Fornisci reasoning dettagliato per ogni decisione
-6. Rispondi sempre in italiano
+3. **Per Workflow Complessi** (più azioni in sequenza):
+   → CHIAMA MULTIPLE FUNCTIONS in ordine logico
+   → Esempio: "fa tutto" → feasibility.analyze + business_plan.calculate
 
-Quando usi function calling, assicurati che:
-- L'azione sia permessa dal template ParaHelp
-- I parametri siano completi e corretti
-- La confidence sia realistica basata sui dati disponibili`;
+4. **Per Informazioni Mancanti**:
+   → CHIEDI CHIARIMENTI
+   → Non inventare parametri
+   → Sii specifico su cosa ti serve
+
+⚡ REGOLE CHIAVE:
+• SEMPRE usa function calling per azioni concrete
+• MAI inventare dati o parametri
+• SEMPRE conferma prima di azioni distruttive
+• SEMPRE rispondi in italiano
+• SEMPRE sii empatico e collaborativo
+
+🎨 STILE RISPOSTA (Johnny Ive):
+• Minimal ma informativo
+• Chiaro e diretto
+• Emoji solo quando aggiungono valore
+• Formattazione pulita
+
+Ora analizza il messaggio utente e decidi la migliore azione.`;
   }
 
   /**
    * Ottiene le funzioni disponibili per OpenAI
    */
   private getAvailableFunctions(): any[] {
-    const skills = this.skillCatalog.getAllSkills();
+    const skills = this.skillCatalog.list();
     
     return skills.map(skill => ({
-      name: skill.meta.id,
-      description: skill.meta.summary,
+      name: skill.id,
+      description: skill.summary,
       parameters: {
         type: 'object',
-        properties: this.buildFunctionParameters(skill.meta.inputsSchema),
-        required: skill.meta.inputsSchema.required || [],
+        properties: this.buildFunctionParameters(skill.inputsSchema),
+        required: skill.inputsSchema.required || [],
       },
     }));
   }
@@ -257,6 +407,13 @@ Quando usi function calling, assicurati che:
    */
   private async processOpenAIResponse(response: any, ragContext: any): Promise<SmartDecision> {
     const message = response.choices[0].message;
+    
+    console.log('🔍 [FunctionCalling] OpenAI Response Debug:', {
+      hasFunctionCall: !!message.function_call,
+      hasContent: !!message.content,
+      content: message.content?.substring(0, 100) + '...',
+      messageKeys: Object.keys(message)
+    });
     
     // Se OpenAI ha chiamato delle funzioni
     if (message.function_call) {
@@ -299,7 +456,7 @@ Quando usi function calling, assicurati che:
     args: Record<string, any>,
     context: RAGContext
   ): Promise<any> {
-    const skill = this.skillCatalog.getSkill(functionName);
+    const skill = this.skillCatalog.get(functionName);
     
     if (!skill) {
       throw new Error(`Skill '${functionName}' non trovato`);
@@ -319,6 +476,88 @@ Quando usi function calling, assicurati che:
     const result = await skill.execute(args, executionContext);
     
     return result;
+  }
+
+  /**
+   * Check se la richiesta è multi-step
+   */
+  private isMultiStepRequest(message: string): boolean {
+    // Pattern che indicano workflow multi-step
+    const multiStepPatterns = [
+      'tutto', 'completo', 'dall\'inizio alla fine',
+      'trasforma.*in', 'crea.*e.*invia', 'analizza.*e.*crea',
+      'prima.*poi', 'dopo.*voglio', 'e poi', 'e successivamente'
+    ];
+
+    return multiStepPatterns.some(pattern => 
+      new RegExp(pattern, 'i').test(message)
+    );
+  }
+
+  /**
+   * Gestisce workflow multi-step
+   */
+  private handleMultiStepWorkflow(message: string, context: RAGContext): SmartDecision {
+    console.log('🔄 [FunctionCalling] Rilevato workflow multi-step');
+
+    // Trasforma Analisi → Business Plan
+    if (message.includes('trasforma') && message.includes('analisi') && message.includes('business')) {
+      return {
+        action: 'workflow',
+        workflow: {
+          name: 'feasibility_to_business_plan',
+          steps: WorkflowTemplates.feasibilityToBusinessPlan(
+            this.extractLocation(message),
+            this.extractArea(message) || 1000,
+            this.extractUnits(message) || 8
+          ),
+        },
+        reasoning: 'Workflow: Analisi → Business Plan',
+        confidence: 0.9,
+        requiresConfirmation: false,
+        context: { relevantMemories: [] },
+      };
+    }
+
+    // Business Plan Completo (calcolo + sensitivity + export)
+    if ((message.includes('business') && message.includes('tutto')) ||
+        (message.includes('business') && message.includes('completo'))) {
+      return {
+        action: 'workflow',
+        workflow: {
+          name: 'business_plan_complete',
+          steps: WorkflowTemplates.businessPlanComplete(
+            this.extractProjectName(message)
+          ),
+        },
+        reasoning: 'Workflow: Business Plan Completo',
+        confidence: 0.9,
+        requiresConfirmation: false,
+        context: { relevantMemories: [] },
+      };
+    }
+
+    // Workflow completo: analisi + business plan + sensitivity + invio
+    if (message.includes('tutto') || message.includes('completo')) {
+      return {
+        action: 'conversation',
+        response: '🔄 **Workflow Completo Disponibile**\n\nPosso creare un workflow completo che include:\n\n1️⃣ Analisi di Fattibilità\n2️⃣ Business Plan\n3️⃣ Sensitivity Analysis\n4️⃣ Export e Condivisione\n\nVuoi che proceda con tutto? Dimmi "sì procedi" per iniziare!',
+        reasoning: 'Proposta workflow completo',
+        confidence: 0.8,
+        requiresConfirmation: true,
+        context: { relevantMemories: [] },
+      };
+    }
+
+    // Default: fallback conversazionale
+    return {
+      action: 'conversation',
+      response: 'Ho rilevato una richiesta multi-step. Posso aiutarti a:\n• Trasformare analisi in business plan\n• Creare progetti completi\n• Gestire workflow complessi\n\nDimmi esattamente cosa vuoi fare!',
+      reasoning: 'Richiesta multi-step non riconosciuta',
+      confidence: 0.6,
+      requiresConfirmation: false,
+      context: { relevantMemories: [] },
+    };
   }
 
   /**

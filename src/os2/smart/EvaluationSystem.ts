@@ -84,8 +84,13 @@ export class EvaluationSystem {
    */
   async recordEvaluationEvent(event: Omit<EvaluationEvent, 'id' | 'timestamp'>): Promise<string> {
     try {
+      // Filtra campi undefined per Firestore
+      const cleanEvent = Object.fromEntries(
+        Object.entries(event).filter(([_, value]) => value !== undefined)
+      );
+
       const docRef = await addDoc(collection(db, this.collectionName), {
-        ...event,
+        ...cleanEvent,
         timestamp: serverTimestamp(),
       });
 

@@ -37,8 +37,8 @@ export class Planner {
       hasUserPreferences: !!userMemory?.preferences,
     });
     
-    // Seleziona la strategia di pianificazione basata sull'intent (con memory)
-    const steps = await this.planForIntent(input, projectMemory, userMemory);
+    // Seleziona la strategia di pianificazione basata sull'intent
+    const steps = await this.planForIntent(input);
     
     // Identifica assumptions
     const assumptions = this.identifyAssumptions(input);

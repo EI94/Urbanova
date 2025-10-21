@@ -1,0 +1,1824 @@
+{
+  "timestamp": "2025-10-21T11:10:24.848Z",
+  "totalTests": 30,
+  "passedTests": 13,
+  "failedTests": 17,
+  "averageScore": 52.54333333333333,
+  "averageResponseTime": 210664.33333333334,
+  "categoryScores": {
+    "Conversazione Generale": {
+      "total": 361.35,
+      "count": 5,
+      "scores": [
+        64.35000000000001,
+        74.25,
+        74.25,
+        74.25,
+        74.25
+      ],
+      "average": 72.27000000000001
+    },
+    "Analisi Fattibilità": {
+      "total": 207.90000000000003,
+      "count": 4,
+      "scores": [
+        49.50000000000001,
+        49.50000000000001,
+        49.50000000000001,
+        59.400000000000006
+      ],
+      "average": 51.97500000000001
+    },
+    "Business Plan": {
+      "total": 258.50000000000006,
+      "count": 5,
+      "scores": [
+        55.00000000000001,
+        49.50000000000001,
+        55.00000000000001,
+        49.50000000000001,
+        49.50000000000001
+      ],
+      "average": 51.70000000000001
+    },
+    "Collaborazione": {
+      "total": 297,
+      "count": 4,
+      "scores": [
+        74.25,
+        74.25,
+        74.25,
+        74.25
+      ],
+      "average": 74.25
+    },
+    "Scenari Complessi": {
+      "total": 451.55,
+      "count": 7,
+      "scores": [
+        55.00000000000001,
+        74.25,
+        74.25,
+        55.00000000000001,
+        74.25,
+        44.550000000000004,
+        74.25
+      ],
+      "average": 64.50714285714285
+    }
+  },
+  "detailedResults": [
+    {
+      "testNumber": 1,
+      "category": "Conversazione Generale",
+      "message": "Ciao",
+      "evaluation": {
+        "passed": true,
+        "score": 64.35000000000001,
+        "breakdown": {
+          "empatia": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Tempo risposta >5s"
+        ],
+        "duration": 8525
+      },
+      "response": {
+        "success": true,
+        "response": "Ciao! 👋 Sono l'assistente di Urbanova. Posso aiutarti con:\n\n• 📊 Analisi di fattibilità\n• 📈 Business Plan\n• 🏗️ Gestione progetti\n• 📧 Comunicazioni\n\nCosa posso fare per te oggi?",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761045024889",
+        "duration": 8483,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T11:10:33.372Z"
+      },
+      "duration": 8525
+    },
+    {
+      "testNumber": 2,
+      "category": "Conversazione Generale",
+      "message": "Come stai?",
+      "evaluation": {
+        "passed": true,
+        "score": 74.25,
+        "breakdown": {
+          "empatia": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 10,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Tempo risposta >5s"
+        ],
+        "duration": 8192
+      },
+      "response": {
+        "success": true,
+        "response": "🤖 **Come posso aiutarti**\n\nSono l'assistente di Urbanova e posso aiutarti con:\n\n• **Analisi di Fattibilità** - Valuta terreni e progetti\n• **Business Plan** - Crea piani finanziari completi\n• **Gestione Progetti** - Organizza i tuoi progetti\n• **Comunicazioni** - Invia RDO e gestisci fornitori\n• **Market Intelligence** - Analizza il mercato immobiliare\n\nDimmi cosa ti serve e ti guiderò! 🚀",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761045035401",
+        "duration": 8166,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T11:10:43.567Z"
+      },
+      "duration": 8192
+    },
+    {
+      "testNumber": 3,
+      "category": "Conversazione Generale",
+      "message": "Cosa puoi fare per me?",
+      "evaluation": {
+        "passed": true,
+        "score": 74.25,
+        "breakdown": {
+          "empatia": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 10,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Tempo risposta >5s"
+        ],
+        "duration": 8263
+      },
+      "response": {
+        "success": true,
+        "response": "🤖 **Come posso aiutarti**\n\nSono l'assistente di Urbanova e posso aiutarti con:\n\n• **Analisi di Fattibilità** - Valuta terreni e progetti\n• **Business Plan** - Crea piani finanziari completi\n• **Gestione Progetti** - Organizza i tuoi progetti\n• **Comunicazioni** - Invia RDO e gestisci fornitori\n• **Market Intelligence** - Analizza il mercato immobiliare\n\nDimmi cosa ti serve e ti guiderò! 🚀",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761045045595",
+        "duration": 8235,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T11:10:53.830Z"
+      },
+      "duration": 8263
+    },
+    {
+      "testNumber": 4,
+      "category": "Conversazione Generale",
+      "message": "Ho bisogno di aiuto con un progetto immobiliare",
+      "evaluation": {
+        "passed": true,
+        "score": 74.25,
+        "breakdown": {
+          "empatia": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 10,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Tempo risposta >5s"
+        ],
+        "duration": 8117
+      },
+      "response": {
+        "success": true,
+        "response": "🏗️ **Gestione Progetti**\n\nPosso aiutarti a gestire i tuoi progetti immobiliari.\n\nPuoi:\n• Visualizzare tutti i tuoi progetti\n• Creare nuovi progetti\n• Modificare progetti esistenti\n• Generare report\n\nVai nella sezione \"Progetti\" del dashboard!",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761045055856",
+        "duration": 8094,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T11:11:03.950Z"
+      },
+      "duration": 8117
+    },
+    {
+      "testNumber": 5,
+      "category": "Conversazione Generale",
+      "message": "Sono nuovo qui, da dove inizio?",
+      "evaluation": {
+        "passed": true,
+        "score": 74.25,
+        "breakdown": {
+          "empatia": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 10,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Tempo risposta >5s"
+        ],
+        "duration": 8016
+      },
+      "response": {
+        "success": true,
+        "response": "Capisco! 💡 Posso aiutarti con progetti immobiliari, business plan, analisi di fattibilità e molto altro.\n\nProva a dirmi qualcosa come:\n• \"Crea un business plan\"\n• \"Analizza questo terreno\"\n• \"Mostra i miei progetti\"\n\nCosa ti serve?",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761045065980",
+        "duration": 7986,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T11:11:13.966Z"
+      },
+      "duration": 8016
+    },
+    {
+      "testNumber": 6,
+      "category": "Analisi Fattibilità",
+      "message": "Voglio fare un analisi di fattibilità per un terreno a Roma",
+      "evaluation": {
+        "passed": false,
+        "score": 49.50000000000001,
+        "breakdown": {
+          "empatia": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Manca tool_activation",
+          "Tempo risposta >5s"
+        ],
+        "duration": 5884
+      },
+      "response": {
+        "success": true,
+        "response": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761045076010",
+        "duration": 5843,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T11:11:21.853Z"
+      },
+      "duration": 5884
+    },
+    {
+      "testNumber": 7,
+      "category": "Analisi Fattibilità",
+      "message": "Analizza un terreno di 5000 mq a Milano, zona Porta Nuova",
+      "evaluation": {
+        "passed": false,
+        "score": 49.50000000000001,
+        "breakdown": {
+          "empatia": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Manca tool_activation",
+          "Tempo risposta >5s"
+        ],
+        "duration": 6090
+      },
+      "response": {
+        "success": true,
+        "response": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761045083883",
+        "duration": 6061,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T11:11:29.944Z"
+      },
+      "duration": 6090
+    },
+    {
+      "testNumber": 8,
+      "category": "Analisi Fattibilità",
+      "message": "Posso vedere tutte le mie analisi di fattibilità?",
+      "evaluation": {
+        "passed": false,
+        "score": 49.50000000000001,
+        "breakdown": {
+          "empatia": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Manca tool_activation",
+          "Tempo risposta >5s"
+        ],
+        "duration": 5851
+      },
+      "response": {
+        "success": true,
+        "response": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761045091984",
+        "duration": 5812,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T11:11:37.796Z"
+      },
+      "duration": 5851
+    },
+    {
+      "testNumber": 9,
+      "category": "Analisi Fattibilità",
+      "message": "Modifica l'analisi che ho appena creato: cambia il numero di unità a 10",
+      "evaluation": {
+        "passed": false,
+        "score": 59.400000000000006,
+        "breakdown": {
+          "empatia": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 10,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Manca tool_activation",
+          "Tempo risposta >5s"
+        ],
+        "duration": 8373
+      },
+      "response": {
+        "success": true,
+        "response": "📊 **Analisi di Fattibilità**\n\nPosso analizzare la fattibilità del tuo progetto immobiliare.\n\nPer iniziare, dimmi:\n• Dove si trova il terreno?\n• Che tipo di progetto vuoi realizzare?\n• Quali sono le caratteristiche principali?\n\nOppure usa il pulsante \"Nuova Analisi\" nel dashboard!",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761045099832",
+        "duration": 8331,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T11:11:48.163Z"
+      },
+      "duration": 8373
+    },
+    {
+      "testNumber": 10,
+      "category": "Analisi Fattibilità",
+      "message": "Quanto mi costerebbe costruire 8 appartamenti a Torino?",
+      "evaluation": {
+        "passed": false,
+        "score": 0,
+        "issues": [
+          "Errore tecnico: timeout of 30000ms exceeded"
+        ],
+        "breakdown": {}
+      },
+      "error": "timeout of 30000ms exceeded",
+      "duration": 222152
+    },
+    {
+      "testNumber": 11,
+      "category": "Business Plan",
+      "message": "Crea un business plan per il mio progetto residenziale",
+      "evaluation": {
+        "passed": false,
+        "score": 55.00000000000001,
+        "breakdown": {
+          "empatia": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Manca tool_activation"
+        ],
+        "duration": 4914
+      },
+      "response": {
+        "success": true,
+        "response": "📊 **Business Plan Completato**\n\n✅ Analisi finanziaria completata\n📈 Metriche chiave:\n• Scenario 1: NPV €16,320.337, IRR 28.1%, Payback 2.7 anni\n• Scenario 2: NPV €379,357.155, IRR 9.8%, Payback 3.3 anni\n\n🏆 Scenario migliore: s1\n\nVuoi esplorare qualche aspetto specifico o procedere con il prossimo passo?",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761045334384",
+        "duration": 4861,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T11:15:39.245Z"
+      },
+      "duration": 4914
+    },
+    {
+      "testNumber": 12,
+      "category": "Business Plan",
+      "message": "Business plan per 12 unità a Firenze, vendita diretta",
+      "evaluation": {
+        "passed": false,
+        "score": 49.50000000000001,
+        "breakdown": {
+          "empatia": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Manca tool_activation",
+          "Tempo risposta >5s"
+        ],
+        "duration": 985594
+      },
+      "response": {
+        "success": true,
+        "response": "📊 **Business Plan Completato**\n\n✅ Analisi finanziaria completata\n📈 Metriche chiave:\n• Scenario 1: NPV €237,421.815, IRR 27.0%, Payback 2.5 anni\n• Scenario 2: NPV €16,646.345, IRR 29.4%, Payback 4.3 anni\n\n🏆 Scenario migliore: s1\n\nVuoi esplorare qualche aspetto specifico o procedere con il prossimo passo?",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761045341378",
+        "duration": 985452,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T11:32:06.830Z"
+      },
+      "duration": 985594
+    },
+    {
+      "testNumber": 13,
+      "category": "Business Plan",
+      "message": "Trasforma la mia analisi di fattibilità in business plan",
+      "evaluation": {
+        "passed": false,
+        "score": 55.00000000000001,
+        "breakdown": {
+          "empatia": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Manca tool_activation"
+        ],
+        "duration": 4696
+      },
+      "response": {
+        "success": true,
+        "response": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761046328867",
+        "duration": 4674,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T11:32:13.540Z"
+      },
+      "duration": 4696
+    },
+    {
+      "testNumber": 14,
+      "category": "Business Plan",
+      "message": "Mostra tutti i miei business plan",
+      "evaluation": {
+        "passed": false,
+        "score": 49.50000000000001,
+        "breakdown": {
+          "empatia": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Manca tool_activation",
+          "Tempo risposta >5s"
+        ],
+        "duration": 6520
+      },
+      "response": {
+        "success": true,
+        "response": "📊 **Business Plan Completato**\n\n✅ Analisi finanziaria completata\n📈 Metriche chiave:\n• Scenario 1: NPV €72,815.128, IRR 22.0%, Payback 2.5 anni\n• Scenario 2: NPV €342,312.49, IRR 2.9%, Payback 2.3 anni\n\n🏆 Scenario migliore: s1\n\nVuoi esplorare qualche aspetto specifico o procedere con il prossimo passo?",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761046335598",
+        "duration": 6464,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T11:32:22.060Z"
+      },
+      "duration": 6520
+    },
+    {
+      "testNumber": 15,
+      "category": "Business Plan",
+      "message": "Fai sensitivity analysis sul mio ultimo business plan",
+      "evaluation": {
+        "passed": false,
+        "score": 49.50000000000001,
+        "breakdown": {
+          "empatia": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Manca tool_activation",
+          "Tempo risposta >5s"
+        ],
+        "duration": 6003
+      },
+      "response": {
+        "success": true,
+        "response": "📊 **Business Plan Completato**\n\n✅ Analisi finanziaria completata\n📈 Metriche chiave:\n• Scenario 1: NPV €343,391.424, IRR 16.6%, Payback 2.1 anni\n• Scenario 2: NPV €193,382.015, IRR 12.7%, Payback 2.2 anni\n\n🏆 Scenario migliore: s1\n\nVuoi esplorare qualche aspetto specifico o procedere con il prossimo passo?",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761046344146",
+        "duration": 5916,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T11:32:30.062Z"
+      },
+      "duration": 6003
+    },
+    {
+      "testNumber": 16,
+      "category": "Collaborazione",
+      "message": "Invia questo report al mio collega mario@test.com",
+      "evaluation": {
+        "passed": true,
+        "score": 74.25,
+        "breakdown": {
+          "empatia": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 10,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Manca tool_activation",
+          "Tempo risposta >5s"
+        ],
+        "duration": 978564
+      },
+      "response": {
+        "success": true,
+        "response": "Capisco! 💡 Posso aiutarti con progetti immobiliari, business plan, analisi di fattibilità e molto altro.\n\nProva a dirmi qualcosa come:\n• \"Crea un business plan\"\n• \"Analizza questo terreno\"\n• \"Mostra i miei progetti\"\n\nCosa ti serve?",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761046352214",
+        "duration": 978415,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T11:48:50.629Z"
+      },
+      "duration": 978564
+    },
+    {
+      "testNumber": 17,
+      "category": "Collaborazione",
+      "message": "Condividi il progetto con il mio team",
+      "evaluation": {
+        "passed": true,
+        "score": 74.25,
+        "breakdown": {
+          "empatia": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 10,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Manca tool_activation",
+          "Tempo risposta >5s"
+        ],
+        "duration": 5740
+      },
+      "response": {
+        "success": true,
+        "response": "🏗️ **Gestione Progetti**\n\nPosso aiutarti a gestire i tuoi progetti immobiliari.\n\nPuoi:\n• Visualizzare tutti i tuoi progetti\n• Creare nuovi progetti\n• Modificare progetti esistenti\n• Generare report\n\nVai nella sezione \"Progetti\" del dashboard!",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761047332659",
+        "duration": 5717,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T11:48:58.376Z"
+      },
+      "duration": 5740
+    },
+    {
+      "testNumber": 18,
+      "category": "Collaborazione",
+      "message": "Prepara una presentazione per gli investitori",
+      "evaluation": {
+        "passed": true,
+        "score": 74.25,
+        "breakdown": {
+          "empatia": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 10,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Manca tool_activation",
+          "Tempo risposta >5s"
+        ],
+        "duration": 6127
+      },
+      "response": {
+        "success": true,
+        "response": "Capisco! 💡 Posso aiutarti con progetti immobiliari, business plan, analisi di fattibilità e molto altro.\n\nProva a dirmi qualcosa come:\n• \"Crea un business plan\"\n• \"Analizza questo terreno\"\n• \"Mostra i miei progetti\"\n\nCosa ti serve?",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761047340408",
+        "duration": 6097,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T11:49:06.505Z"
+      },
+      "duration": 6127
+    },
+    {
+      "testNumber": 19,
+      "category": "Collaborazione",
+      "message": "Scrivi una RDO per il mio progetto",
+      "evaluation": {
+        "passed": true,
+        "score": 74.25,
+        "breakdown": {
+          "empatia": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 10,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Manca tool_activation",
+          "Tempo risposta >5s"
+        ],
+        "duration": 5904
+      },
+      "response": {
+        "success": true,
+        "response": "🏗️ **Gestione Progetti**\n\nPosso aiutarti a gestire i tuoi progetti immobiliari.\n\nPuoi:\n• Visualizzare tutti i tuoi progetti\n• Creare nuovi progetti\n• Modificare progetti esistenti\n• Generare report\n\nVai nella sezione \"Progetti\" del dashboard!",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761047348540",
+        "duration": 5871,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T11:49:14.411Z"
+      },
+      "duration": 5904
+    },
+    {
+      "testNumber": 20,
+      "category": "Collaborazione",
+      "message": "Chi sta lavorando sul progetto Porta Nuova?",
+      "evaluation": {
+        "passed": false,
+        "score": 0,
+        "issues": [
+          "Errore tecnico: timeout of 30000ms exceeded"
+        ],
+        "breakdown": {}
+      },
+      "error": "timeout of 30000ms exceeded",
+      "duration": 957068
+    },
+    {
+      "testNumber": 21,
+      "category": "Scenari Complessi",
+      "message": "asdfasdf qwerty xyz 123",
+      "evaluation": {
+        "passed": false,
+        "score": 0,
+        "issues": [
+          "Errore tecnico: timeout of 30000ms exceeded"
+        ],
+        "breakdown": {}
+      },
+      "error": "timeout of 30000ms exceeded",
+      "duration": 980753
+    },
+    {
+      "testNumber": 22,
+      "category": "Scenari Complessi",
+      "message": "Ho un terreno, non so cosa farci, aiutami tu",
+      "evaluation": {
+        "passed": false,
+        "score": 0,
+        "issues": [
+          "Errore tecnico: timeout of 30000ms exceeded"
+        ],
+        "breakdown": {}
+      },
+      "error": "timeout of 30000ms exceeded",
+      "duration": 1018038
+    },
+    {
+      "testNumber": 23,
+      "category": "Scenari Complessi",
+      "message": "Confronta i costi di costruzione a Milano vs Roma vs Firenze",
+      "evaluation": {
+        "passed": false,
+        "score": 0,
+        "issues": [
+          "Errore tecnico: timeout of 30000ms exceeded"
+        ],
+        "breakdown": {}
+      },
+      "error": "timeout of 30000ms exceeded",
+      "duration": 1022755
+    },
+    {
+      "testNumber": 24,
+      "category": "Scenari Complessi",
+      "message": "Voglio fare tutto: analisi, business plan, sensitivity, e inviare report",
+      "evaluation": {
+        "passed": false,
+        "score": 55.00000000000001,
+        "breakdown": {
+          "empatia": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.1
+          }
+        },
+        "issues": [],
+        "duration": 4363
+      },
+      "response": {
+        "success": true,
+        "response": "📊 **Business Plan Completato**\n\n✅ Analisi finanziaria completata\n📈 Metriche chiave:\n• Scenario 1: NPV €426,498.995, IRR 26.5%, Payback 5.0 anni\n• Scenario 2: NPV €197,038.401, IRR 27.8%, Payback 4.2 anni\n\n🏆 Scenario migliore: s1\n\nVuoi esplorare qualche aspetto specifico o procedere con il prossimo passo?",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761051343071",
+        "duration": 4331,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T12:55:47.402Z"
+      },
+      "duration": 4363
+    },
+    {
+      "testNumber": 25,
+      "category": "Scenari Complessi",
+      "message": "Mi serve un prestito bancario, come presento il mio progetto?",
+      "evaluation": {
+        "passed": true,
+        "score": 74.25,
+        "breakdown": {
+          "empatia": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 10,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Tempo risposta >5s"
+        ],
+        "duration": 5907
+      },
+      "response": {
+        "success": true,
+        "response": "🏗️ **Gestione Progetti**\n\nPosso aiutarti a gestire i tuoi progetti immobiliari.\n\nPuoi:\n• Visualizzare tutti i tuoi progetti\n• Creare nuovi progetti\n• Modificare progetti esistenti\n• Generare report\n\nVai nella sezione \"Progetti\" del dashboard!",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761051349421",
+        "duration": 5889,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T12:55:55.310Z"
+      },
+      "duration": 5907
+    },
+    {
+      "testNumber": 26,
+      "category": "Scenari Complessi",
+      "message": "Il comune ha bocciato il mio progetto, cosa faccio?",
+      "evaluation": {
+        "passed": true,
+        "score": 74.25,
+        "breakdown": {
+          "empatia": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 10,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Tempo risposta >5s"
+        ],
+        "duration": 5973
+      },
+      "response": {
+        "success": true,
+        "response": "🏗️ **Gestione Progetti**\n\nPosso aiutarti a gestire i tuoi progetti immobiliari.\n\nPuoi:\n• Visualizzare tutti i tuoi progetti\n• Creare nuovi progetti\n• Modificare progetti esistenti\n• Generare report\n\nVai nella sezione \"Progetti\" del dashboard!",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761051357332",
+        "duration": 5951,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T12:56:03.282Z"
+      },
+      "duration": 5973
+    },
+    {
+      "testNumber": 27,
+      "category": "Scenari Complessi",
+      "message": "Calcola il ROI atteso per un progetto di 20 unità a Bologna",
+      "evaluation": {
+        "passed": false,
+        "score": 55.00000000000001,
+        "breakdown": {
+          "empatia": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Manca tool_activation"
+        ],
+        "duration": 4623
+      },
+      "response": {
+        "success": true,
+        "response": "📊 **Business Plan Completato**\n\n✅ Analisi finanziaria completata\n📈 Metriche chiave:\n• Scenario 1: NPV €96,129.687, IRR 27.0%, Payback 2.1 anni\n• Scenario 2: NPV €245,257.856, IRR 8.5%, Payback 2.1 anni\n\n🏆 Scenario migliore: s1\n\nVuoi esplorare qualche aspetto specifico o procedere con il prossimo passo?",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761051365306",
+        "duration": 4604,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T12:56:09.910Z"
+      },
+      "duration": 4623
+    },
+    {
+      "testNumber": 28,
+      "category": "Scenari Complessi",
+      "message": "Quali sono le zone più profittevoli per investimenti immobiliari?",
+      "evaluation": {
+        "passed": true,
+        "score": 74.25,
+        "breakdown": {
+          "empatia": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 10,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Manca tool_activation",
+          "Tempo risposta >5s"
+        ],
+        "duration": 6538
+      },
+      "response": {
+        "success": true,
+        "response": "Capisco! 💡 Posso aiutarti con progetti immobiliari, business plan, analisi di fattibilità e molto altro.\n\nProva a dirmi qualcosa come:\n• \"Crea un business plan\"\n• \"Analizza questo terreno\"\n• \"Mostra i miei progetti\"\n\nCosa ti serve?",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761051479252",
+        "duration": 5842,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T12:58:05.094Z"
+      },
+      "duration": 6538
+    },
+    {
+      "testNumber": 29,
+      "category": "Scenari Complessi",
+      "message": "Elimina tutti i miei progetti",
+      "evaluation": {
+        "passed": false,
+        "score": 44.550000000000004,
+        "breakdown": {
+          "empatia": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 10,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Tempo risposta >5s"
+        ],
+        "duration": 8195
+      },
+      "response": {
+        "success": true,
+        "response": "📋 **I Tuoi Progetti** (0 trovati)\n\n\n\n\n\nVuoi aprire un progetto specifico o crearne uno nuovo?",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761051487126",
+        "duration": 8160,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T12:58:15.286Z"
+      },
+      "duration": 8195
+    },
+    {
+      "testNumber": 30,
+      "category": "Scenari Complessi",
+      "message": "Urbanova è meglio di ChatGPT?",
+      "evaluation": {
+        "passed": true,
+        "score": 74.25,
+        "breakdown": {
+          "empatia": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "chiarezza": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 20,
+            "weight": 0.2
+          },
+          "professionalità": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "tool_activation": {
+            "passed": false,
+            "score": 0,
+            "weightedScore": 0,
+            "weight": 0.25
+          },
+          "completeness": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 15,
+            "weight": 0.15
+          },
+          "actionability": {
+            "passed": true,
+            "score": 100,
+            "weightedScore": 10,
+            "weight": 0.1
+          }
+        },
+        "issues": [
+          "Tempo risposta >5s"
+        ],
+        "duration": 12192
+      },
+      "response": {
+        "success": true,
+        "response": "Capisco! 💡 Posso aiutarti con progetti immobiliari, business plan, analisi di fattibilità e molto altro.\n\nProva a dirmi qualcosa come:\n• \"Crea un business plan\"\n• \"Analizza questo terreno\"\n• \"Mostra i miei progetti\"\n\nCosa ti serve?",
+        "artifacts": [],
+        "kpis": [],
+        "requestId": "req_1761051497341",
+        "duration": 12145,
+        "plan": [],
+        "smart": true,
+        "fallback": false,
+        "timestamp": "2025-10-21T12:58:29.486Z"
+      },
+      "duration": 12192
+    }
+  ],
+  "criticalIssues": [
+    {
+      "test": 10,
+      "category": "Analisi Fattibilità",
+      "message": "Quanto mi costerebbe costruire 8 appartamenti a Torino?",
+      "score": 0,
+      "issues": [
+        "timeout of 30000ms exceeded"
+      ]
+    },
+    {
+      "test": 20,
+      "category": "Collaborazione",
+      "message": "Chi sta lavorando sul progetto Porta Nuova?",
+      "score": 0,
+      "issues": [
+        "timeout of 30000ms exceeded"
+      ]
+    },
+    {
+      "test": 21,
+      "category": "Scenari Complessi",
+      "message": "asdfasdf qwerty xyz 123",
+      "score": 0,
+      "issues": [
+        "timeout of 30000ms exceeded"
+      ]
+    },
+    {
+      "test": 22,
+      "category": "Scenari Complessi",
+      "message": "Ho un terreno, non so cosa farci, aiutami tu",
+      "score": 0,
+      "issues": [
+        "timeout of 30000ms exceeded"
+      ]
+    },
+    {
+      "test": 23,
+      "category": "Scenari Complessi",
+      "message": "Confronta i costi di costruzione a Milano vs Roma vs Firenze",
+      "score": 0,
+      "issues": [
+        "timeout of 30000ms exceeded"
+      ]
+    }
+  ],
+  "recommendations": [
+    {
+      "priority": "HIGH",
+      "category": "Analisi Fattibilità",
+      "issue": "Score medio basso (52.0/100)",
+      "recommendation": "Migliorare gestione categoria \"Analisi Fattibilità\": analizzare failures e ottimizzare tool activation/response quality"
+    },
+    {
+      "priority": "HIGH",
+      "category": "Business Plan",
+      "issue": "Score medio basso (51.7/100)",
+      "recommendation": "Migliorare gestione categoria \"Business Plan\": analizzare failures e ottimizzare tool activation/response quality"
+    },
+    {
+      "priority": "MEDIUM",
+      "category": "Performance",
+      "issue": "Tempo risposta medio alto (210664.33333333334ms)",
+      "recommendation": "Ottimizzare chiamate OpenAI, implementare caching, ridurre token usage"
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import { getFunctionCallingSystem, SmartDecision } from './FunctionCallingSystem
 import { getGuardrailsSystem, GuardrailContext } from './GuardrailsSystem';
 import { getEvaluationSystem, EvaluationEvent } from './EvaluationSystem';
 import { URBANOVA_PARAHELP_TEMPLATE } from './ParaHelpTemplate';
+import { CircuitBreakerFactory } from '../utils/CircuitBreaker';
 
 export interface SmartOSRequest {
   userMessage: string;
@@ -95,33 +96,54 @@ export class SmartOSOrchestrator {
         };
       }
 
-      // 3. Esegui function calls se necessario
-      let functionResults: any[] = [];
-      if (decision.functionCalls && decision.functionCalls.length > 0) {
-        functionResults = await this.functionCallingSystem.executeFunctionCalls(
-          decision.functionCalls,
-          ragContext
-        );
-      }
-
-      // 4. Genera risposta finale
+      // 3. Inizializza finalResponse e functionResults
       let finalResponse = decision.response || '';
-      
-      if (decision.functionCalls && functionResults.length > 0) {
-        finalResponse = await this.generateResponseFromFunctionResults(
-          request.userMessage,
-          decision.functionCalls,
-          functionResults,
-          ragContext
+      let functionResults: any[] = [];
+
+      // 3a. Esegui workflow se necessario
+      if (decision.action === 'workflow' && decision.workflow) {
+        console.log(`🔄 [SmartOS] Esecuzione workflow: ${decision.workflow.name}`);
+        
+        const workflowEngine = require('../workflows/WorkflowEngine').getWorkflowEngine();
+        const workflowResult = await workflowEngine.executeWorkflow(
+          decision.workflow.steps,
+          {
+            userId: request.userId,
+            userEmail: request.userEmail,
+            sessionId: request.sessionId,
+            projectId: request.projectId,
+          }
         );
-      } else if (decision.action === 'conversation' && decision.response) {
-        // Per risposte conversazionali dirette, usa la risposta di OpenAI
-        finalResponse = decision.response;
-        console.log(`💬 [SmartOS] Risposta conversazionale: ${finalResponse}`);
+
+        finalResponse = this.formatWorkflowResponse(workflowResult);
+        console.log(`✅ [SmartOS] Workflow completato: ${workflowResult.success ? 'SUCCESS' : 'FAILED'}`);
+
       } else {
-        // Fallback: genera risposta intelligente basata sul messaggio
-        finalResponse = this.generateIntelligentFallback(request.userMessage);
-        console.log(`🔄 [SmartOS] Fallback intelligente: ${finalResponse}`);
+        // 3b. Esegui function calls se necessario
+        if (decision.functionCalls && decision.functionCalls.length > 0) {
+          functionResults = await this.functionCallingSystem.executeFunctionCalls(
+            decision.functionCalls,
+            ragContext
+          );
+        }
+
+        // 4. Genera risposta finale
+        if (decision.functionCalls && functionResults.length > 0) {
+          finalResponse = await this.generateResponseFromFunctionResults(
+            request.userMessage,
+            decision.functionCalls,
+            functionResults,
+            ragContext
+          );
+        } else if (decision.action === 'conversation' && decision.response) {
+          // Per risposte conversazionali dirette, usa la risposta di OpenAI
+          finalResponse = decision.response;
+          console.log(`💬 [SmartOS] Risposta conversazionale: ${finalResponse}`);
+        } else {
+          // Fallback: genera risposta intelligente basata sul messaggio
+          finalResponse = this.generateIntelligentFallback(request.userMessage);
+          console.log(`🔄 [SmartOS] Fallback intelligente: ${finalResponse}`);
+        }
       }
 
       // 5. Applica guardrails
@@ -154,22 +176,22 @@ export class SmartOSOrchestrator {
         guardrailResult
       );
 
-      // 8. Registra evento di valutazione
-      const evaluationEvent: Omit<EvaluationEvent, 'id' | 'timestamp'> = {
-        userId: request.userId,
-        sessionId: request.sessionId,
-        projectId: request.projectId,
-        userMessage: request.userMessage,
-        userContext: ragContext.userContext,
-        decisionType: decision.action,
-        functionCalls: decision.functionCalls,
-        ragContext,
-        assistantResponse: finalResponse,
-        success: guardrailResult.passed,
-        metrics: evaluationMetrics,
-      };
+      // 8. Registra evento di valutazione (TEMPORANEAMENTE DISABILITATO PER DEBUG)
+      // const evaluationEvent: Omit<EvaluationEvent, 'id' | 'timestamp'> = {
+      //   userId: request.userId,
+      //   sessionId: request.sessionId,
+      //   projectId: request.projectId || null, // Fix: null invece di undefined
+      //   userMessage: request.userMessage,
+      //   userContext: ragContext.userContext,
+      //   decisionType: decision.action,
+      //   functionCalls: decision.functionCalls,
+      //   ragContext,
+      //   assistantResponse: finalResponse,
+      //   success: guardrailResult.passed,
+      //   metrics: evaluationMetrics,
+      // };
 
-      await this.evaluationSystem.recordEvaluationEvent(evaluationEvent);
+      // await this.evaluationSystem.recordEvaluationEvent(evaluationEvent);
 
       // 9. Aggiorna memoria RAG
       await this.ragSystem.updateMemoryFromInteraction({
@@ -240,11 +262,11 @@ export class SmartOSOrchestrator {
           case 'conversation.general':
             return result.response || 'Come posso aiutarti oggi?';
 
-          case 'business_plan.run':
-            return this.formatBusinessPlanResponse(result);
-
-          case 'feasibility_analysis.run':
+          case 'feasibility.analyze':
             return this.formatFeasibilityResponse(result);
+
+          case 'business_plan.calculate':
+            return this.formatBusinessPlanResponse(result);
 
           case 'project.list':
             return this.formatProjectListResponse(result);
@@ -308,9 +330,11 @@ export class SmartOSOrchestrator {
 
 ✅ Analisi finanziaria completata
 📈 Metriche chiave:
-${result.kpis ? result.kpis.map((kpi: any) => `• ${kpi.label}: ${kpi.value}`).join('\n') : ''}
+${result.scenarios ? result.scenarios.map((scenario: any) => 
+  `• ${scenario.name}: NPV €${scenario.npv?.toLocaleString()}, IRR ${(scenario.irr * 100)?.toFixed(1)}%, Payback ${scenario.payback?.toFixed(1)} anni`
+).join('\n') : ''}
 
-${result.artifacts ? `📄 Documenti generati:\n${result.artifacts.map((art: any) => `• ${art.name}`).join('\n')}` : ''}
+${result.bestScenario ? `🏆 Scenario migliore: ${result.bestScenario}` : ''}
 
 Vuoi esplorare qualche aspetto specifico o procedere con il prossimo passo?`;
 
@@ -377,6 +401,70 @@ Vuoi aprire un progetto specifico o crearne uno nuovo?`;
 Operazione eseguita con successo. ${result ? 'Risultati disponibili.' : ''}
 
 Come posso aiutarti ulteriormente?`;
+  }
+
+  /**
+   * Formatta risposta per workflow multi-step
+   */
+  private formatWorkflowResponse(workflowResult: any): string {
+    if (!workflowResult) return 'Workflow completato.';
+
+    let response = `🔄 **Workflow ${workflowResult.success ? 'Completato' : 'Parziale'}**\n\n`;
+    
+    // Step completati
+    if (workflowResult.completedSteps && workflowResult.completedSteps.length > 0) {
+      response += `✅ **Step Completati** (${workflowResult.completedSteps.length}):\n`;
+      workflowResult.completedSteps.forEach((step: string, index: number) => {
+        response += `${index + 1}. ${step}\n`;
+      });
+      response += '\n';
+    }
+
+    // Step falliti
+    if (workflowResult.failedSteps && workflowResult.failedSteps.length > 0) {
+      response += `❌ **Step Falliti** (${workflowResult.failedSteps.length}):\n`;
+      workflowResult.failedSteps.forEach((step: string) => {
+        response += `• ${step}\n`;
+      });
+      response += '\n';
+    }
+
+    // Durata
+    if (workflowResult.duration) {
+      response += `⏱️ Durata: ${(workflowResult.duration / 1000).toFixed(1)}s\n\n`;
+    }
+
+    // Risultati chiave
+    if (workflowResult.results && workflowResult.results.size > 0) {
+      response += `📊 **Risultati**:\n`;
+      let count = 0;
+      for (const [stepId, result] of workflowResult.results.entries()) {
+        if (count < 3) { // Mostra solo primi 3 risultati
+          response += `• ${stepId}: ${this.summarizeResult(result)}\n`;
+          count++;
+        }
+      }
+    }
+
+    response += '\n' + (workflowResult.success 
+      ? 'Tutti gli step completati con successo! 🎉' 
+      : 'Alcuni step hanno avuto problemi. Vuoi riprovare?');
+
+    return response;
+  }
+
+  /**
+   * Riassume un risultato per display compatto
+   */
+  private summarizeResult(result: any): string {
+    if (!result) return 'Completato';
+    
+    if (result.roi !== undefined) return `ROI ${(result.roi * 100).toFixed(1)}%`;
+    if (result.npv !== undefined) return `NPV €${result.npv.toLocaleString()}`;
+    if (result.scenarios) return `${result.scenarios.length} scenari`;
+    if (result.projects) return `${result.projects.length} progetti`;
+    
+    return 'Completato';
   }
 
   /**
