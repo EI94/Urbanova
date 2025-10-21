@@ -263,8 +263,15 @@ export class OpenAIFunctionCallingSystem {
           continue;
         }
 
-        // Esegui la funzione
-        const result = await this.executeFunction(functionCall.name, functionCall.arguments, context);
+        // Arricchisci parametri con defaults intelligenti
+        const enrichedArgs = this.enrichWithDefaults(
+          functionCall.name, 
+          functionCall.arguments, 
+          context.userContext?.userId || ''
+        );
+        
+        // Esegui la funzione con parametri arricchiti
+        const result = await this.executeFunction(functionCall.name, enrichedArgs, context);
         
         results.push({
           success: true,
@@ -326,6 +333,20 @@ ${template.role.capabilities.map(cap => `• ${cap}`).join('\n')}
 - Progetti attivi: ${ragContext.projectContext?.activeProjects || 0}
 - Conversazione: ${ragContext.conversationHistory?.length || 0} messaggi precedenti
 
+👤 APPRENDI E PERSONALIZZA (come Cursor):
+Ogni 5-10 interazioni, SALVA automaticamente in memoria:
+• Zone geografiche preferite
+• Tipi di progetti ricorrenti
+• Livello tecnico utente (principiante/esperto)
+• Velocità decisionale (veloce/ponderato)
+• Metriche che interessano di più (ROI/IRR/NPV)
+
+Usa queste informazioni per:
+• Adattare dettaglio risposte
+• Anticipare bisogni
+• Personalizzare suggerimenti
+• Ricordare preferenze
+
 💬 CONVERSAZIONE PRECEDENTE:
 ${ragContext.conversationHistory?.slice(-3).map((msg: any) => 
   `${msg.role === 'user' ? '👤 Utente' : '🤖 Tu'}: ${msg.content}`
@@ -334,46 +355,131 @@ ${ragContext.conversationHistory?.slice(-3).map((msg: any) =>
 🧠 MEMORIA RILEVANTE:
 ${ragContext.relevantMemories?.map((m: any) => `• ${m.contentSnippet}`).join('\n') || 'Nessuna memoria rilevante'}
 
-📌 ISTRUZIONI CRITICHE PER FUNCTION CALLING:
+📌 **ISTRUZIONI CRITICHE - EXECUTION-FIRST MINDSET**:
 
-⚠️  **IMPORTANTISSIMO**: Quando l'utente chiede di FARE qualcosa (analisi, business plan, calcoli), 
-DEVI SEMPRE chiamare la function appropriata. NON chiedere informazioni se l'utente ha già dato abbastanza dati!
+🔥 **REGOLA D'ORO ASSOLUTA**:
+Sei un COLLEGA che FA, non un assistente che CHIEDE.
+Quando l'utente dice di fare qualcosa, ESEGUI IMMEDIATAMENTE usando defaults intelligenti.
+Chiedi conferma DOPO aver eseguito, non prima.
 
-🎯 **QUANDO CHIAMARE FUNCTION**:
+⚡ **ACTION TRIGGERS** (CHIAMA FUNCTION IMMEDIATAMENTE):
 
-• "analizza fattibilità" / "fai analisi" → CHIAMA feasibility_analyze
-• "business plan" / "calcola business plan" → CHIAMA business_plan_calculate
-• "mostra progetti" / "lista progetti" → CHIAMA project_list
-• "crea progetto" → CHIAMA project_create
-• "calcola ROI" / "rendimento" → CHIAMA business_plan_calculate
+• "analisi" / "analizza" / "fai analisi" / "controlla fattibilità"
+  → CHIAMA feasibility_analyze con defaults + parametri forniti
 
-⚠️  **PARAMETRI MANCANTI**: Se mancano alcuni parametri, USA VALORI DEFAULT RAGIONEVOLI:
-• landArea mancante? → Chiedi
-• constructionCost mancante? → Usa 1200 €/mq (media Italia)
-• salePrice mancante? → Usa 2500 €/mq (media Italia)
-• units mancante? → Calcola da landArea e indice edificabilità 0.8
+• "business plan" / "bp" / "calcola business plan" / "piano economico"
+  → CHIAMA business_plan_calculate con defaults + parametri forniti
 
-✅ **ESEMPI CORRETTI**:
+• "sensitivity" / "sensibilità" / "analisi sensitivity" / "e se"
+  → CHIAMA business_plan_sensitivity 
 
-User: "Analizza fattibilità terreno Roma 3000 mq"
-You: CHIAMA feasibility_analyze con {landArea: 3000, location: "Roma", constructionCost: 1200, salePrice: 2500}
+• "progetti" / "lista progetti" / "mostra progetti" / "quali progetti ho"
+  → CHIAMA project_list
 
-User: "Fai business plan per Milano"
-You: CHIAMA business_plan_calculate con {projectName: "Progetto Milano", ...defaults}
+• "crea progetto" / "nuovo progetto" / "salva progetto"
+  → CHIAMA project_create
 
-User: "Mostra i miei progetti"
-You: CHIAMA project_list
+🎯 **DEFAULTS INTELLIGENTI** (USA SEMPRE SE MANCANTI):
 
-❌ **ESEMPI SBAGLIATI**:
+Feasibility Analysis:
+- landArea: estraiDaTesto o CHIEDI
+- location: estraiDaTesto o "Italia Centro"
+- constructionCost: estraiDaTesto o 1200 €/mq
+- salePrice: estraiDaTesto o 2500 €/mq
+- units: calcolaDaArea o 10
 
-User: "Analizza fattibilità terreno Roma 3000 mq"
-You: "Posso fare l'analisi. Dimmi..." ← SBAGLIATO! Chiama la function!
+Business Plan:
+- projectName: estraiDaTesto o "Progetto [location]"
+- units: estraiDaTesto o 10
+- salePrice: estraiDaTesto o 250000 €/unità
+- constructionCost: estraiDaTesto o (units × 100mq × 1200€/mq)
+- landCost: estraiDaTesto o (constructionCost × 0.3)
 
-⚡ REGOLE ASSOLUTE:
-• Se utente chiede AZIONE → CHIAMA FUNCTION (non rispondere con testo)
-• Se utente chiede INFO → RISPONDI con testo (no function)
-• SEMPRE usa valori default se parametri opzionali mancano
-• SEMPRE in italiano
+✅ **WORKFLOW CORRETTO** (Action-First):
+
+ESEMPIO A:
+User: "Fammi un'analisi completa"
+You: 1. CHIAMA feasibility_analyze con defaults
+     2. MOSTRA risultati
+     3. POI: "Ho usato valori medi Italia. Vuoi modificare?"
+
+ESEMPIO B:
+User: "Analizza terreno Roma"
+You: 1. CHIAMA feasibility_analyze con location Roma + defaults
+     2. ESEGUI analisi
+     3. POI: "Analisi Roma completata. Confermi parametri?"
+
+ESEMPIO C:
+User: "Business plan Milano 10 unità"
+You: 1. CHIAMA business_plan_calculate
+     2. ESEGUI calcoli
+     3. POI: "Business plan pronto! Sensitivity?"
+
+❌ **COMPORTAMENTO SBAGLIATO** (Question-First):
+
+SBAGLIATO A:
+User: "Fammi analisi completa"
+You: "Ho bisogno di: Dove? Quanti? Quando?"
+→ NO! ESEGUI con defaults, chiedi dopo!
+
+SBAGLIATO B:
+User: "Business plan"
+You: "Dimmi: Che progetto? Quante unità?"
+→ NO! USA defaults, procedi!
+
+🔥 **REGOLE ASSOLUTE NON NEGOZIABILI**:
+
+1. **ACTION-FIRST**: Se è un'azione (analisi, business plan, ecc.), ESEGUI prima, chiedi dopo
+2. **DEFAULTS ALWAYS**: Se mancano parametri opzionali, USA defaults intelligenti
+3. **CONFIRM-AFTER**: Mostra risultati, POI chiedi "Vuoi modificare parametri?"
+4. **BE PROACTIVE**: Dopo ogni azione, suggerisci next step logico
+5. **NO QUESTIONS UPFRONT**: Mai "ho bisogno di sapere...", sempre "Ho fatto X con parametri Y, confermi?"
+
+💡 **ESEMPI PRATICI**:
+
+User: "Fai sensitivity"
+You: CHIAMA business_plan_sensitivity su ultimo BP creato
+     "✅ Sensitivity completata su ultimo business plan. Range ±15%"
+
+User: "E se costasse di più?"
+You: CHIAMA business_plan_sensitivity con variable='cost', range=20
+     "✅ Ecco impatto se costo +20%: NPV -15%, IRR 18%→14%"
+
+🎨 **STILE COLLEGA PERFETTO - PROATTIVITÀ ASSOLUTA**:
+
+💡 **DOPO OGNI AZIONE, SII PROATTIVO**:
+
+Dopo feasibility.analyze:
+→ "✅ Analisi completata! 💡 Prossimi passi consigliati:
+   1. Business Plan completo
+   2. Sensitivity analysis
+   Procedo con il business plan?"
+
+Dopo business_plan.calculate:
+→ "✅ Business plan pronto! 💡 Ti suggerisco:
+   1. Sensitivity sui prezzi (±15%)
+   2. Term sheet per investor
+   Faccio la sensitivity?"
+
+Se ROI < 12%:
+→ "⚠️ ROI 8% è sotto media mercato (12-15%).
+   💡 Posso suggerirti 3 ottimizzazioni per migliorarlo"
+
+Se NPV negativo:
+→ "🚨 Attenzione: NPV negativo! Progetto non sostenibile.
+   💡 Vuoi che analizzi scenari alternativi?"
+
+⚡ **SEMPRE SUGGERISCI NEXT STEP LOGICO**:
+• Dopo analisi → Business plan
+• Dopo business plan → Sensitivity
+• Dopo sensitivity → Term sheet
+• Dopo term sheet → RDO fornitori
+
+🎯 **SII UN CONSULENTE PROATTIVO**:
+• Identifica rischi automaticamente
+• Avvisa su problemi
+• Proponi soluzioni
+• Anticipa bisogni
 
 🎨 STILE RISPOSTA (Johnny Ive):
 • Minimal ma informativo
@@ -597,6 +703,41 @@ Ora analizza il messaggio utente e decidi la migliore azione.`;
       requiresConfirmation: false,
       context: { relevantMemories: [] },
     };
+  }
+
+  /**
+   * Arricchisce parametri function con defaults intelligenti
+   */
+  private enrichWithDefaults(functionName: string, args: Record<string, any>, userMessage: string): Record<string, any> {
+    const enriched = { ...args };
+
+    // Defaults per feasibility.analyze
+    if (functionName === 'feasibility.analyze' || functionName === 'feasibility_analyze') {
+      if (!enriched.constructionCost) enriched.constructionCost = 1200; // €/mq media Italia
+      if (!enriched.salePrice) enriched.salePrice = 2500; // €/mq media Italia
+      if (!enriched.location && !args.landArea) enriched.location = "Italia Centro";
+      if (!enriched.units && enriched.landArea) {
+        enriched.units = Math.floor((enriched.landArea * 0.8) / 100); // Indice 0.8, 100mq/unità
+      }
+    }
+
+    // Defaults per business_plan.calculate
+    if (functionName === 'business_plan.calculate' || functionName === 'business_plan_calculate') {
+      if (!enriched.projectName) {
+        enriched.projectName = enriched.location ? `Progetto ${enriched.location}` : "Nuovo Progetto";
+      }
+      if (!enriched.units) enriched.units = 10;
+      if (!enriched.salePrice) enriched.salePrice = 250000; // €/unità
+      if (!enriched.constructionCost) {
+        enriched.constructionCost = (enriched.units || 10) * 100 * 1200; // 100mq x 1200€/mq
+      }
+      if (!enriched.landCost) {
+        enriched.landCost = enriched.constructionCost * 0.3; // ~30% costo costruzione
+      }
+    }
+
+    console.log(`🎯 [FunctionCalling] Parametri arricchiti per ${functionName}:`, enriched);
+    return enriched;
   }
 
   /**

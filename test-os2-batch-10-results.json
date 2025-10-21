@@ -1,0 +1,306 @@
+[
+  {
+    "profilo": "Utente46",
+    "id": 46,
+    "batch": 10,
+    "messaggiTotali": 5,
+    "successRate": 100,
+    "toolActivationRate": 0,
+    "durataMedia": 5085,
+    "risultati": [
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Ciao! 👋 Sono l'assistente di Urbanova. Posso aiutarti con:\n\n• 📊 Analisi di fattibilità\n• 📈 Business Plan\n• 🏗️ Gestione progetti\n• 📧 Comunicazioni\n\nCosa posso fare per te oggi?",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074683265",
+          "duration": 4365,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:24:47.630Z"
+        },
+        "duration": 4382
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Per aiutarti al meglio, possiamo iniziare con un'analisi di fattibilità del tuo terreno. Potresti fornirmi alcune informazioni di base come la località del terreno e la sua superficie in metri quadrati? Se hai già un'idea del costo di costruzione o del prezzo di vendita, fammelo sapere!",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074688145",
+          "duration": 5814,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:24:53.959Z"
+        },
+        "duration": 5829
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Per procedere con un'analisi completa, ho bisogno di alcune informazioni di base sul progetto. Potresti fornirmi i dettagli seguenti?\n\n1. Nome del progetto\n2. Località del progetto\n3. Tipo di progetto (residenziale, commerciale, misto)\n4. Numero totale di unità\n5. Prezzo medio di vendita per unità\n\nSe hai altre informazioni come i costi di costruzione, scenari di acquisto del terreno o dettagli di finanziamento, sentiti libero di condividerli!",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074694475",
+          "duration": 4653,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:24:59.128Z"
+        },
+        "duration": 4669
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Per procedere con il calcolo del business plan, ho bisogno di alcune informazioni di base. Puoi fornirmi i dettagli seguenti, oppure posso utilizzare valori predefiniti:\n\n1. Nome del progetto\n2. Numero di unità\n3. Prezzo di vendita per unità\n4. Costo di costruzione totale o per unità (se non specificato, userò 1200 €/mq)\n5. Costo del terreno (se disponibile)\n\nSe hai già queste informazioni, per favore condividile con me. Altrimenti, posso procedere con i valori predefiniti.",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074699657",
+          "duration": 6357,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:25:06.014Z"
+        },
+        "duration": 6386
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Potresti specificare cosa desideri salvare? Se si tratta di un'analisi di fattibilità o di un business plan, fammi sapere così posso procedere con l'azione corretta.",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074706532",
+          "duration": 4142,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:25:10.674Z"
+        },
+        "duration": 4159
+      }
+    ],
+    "memoria": [
+      {
+        "messaggio": "Ciao, sono l'utente 46",
+        "risposta": "Ciao! 👋 Sono l'assistente di Urbanova. Posso aiutarti con:\n\n• 📊 Analisi di fattibilità\n• 📈 Business Plan\n• 🏗️ Gestione progetti\n• 📧 Comunicazioni\n\nCosa posso fare per te oggi?",
+        "tools": []
+      },
+      {
+        "messaggio": "Ho un terreno e voglio svilupparlo",
+        "risposta": "Per aiutarti al meglio, possiamo iniziare con un'analisi di fattibilità del tuo terreno. Potresti fornirmi alcune informazioni di base come la località del terreno e la sua superficie in metri quadrati? Se hai già un'idea del costo di costruzione o del prezzo di vendita, fammelo sapere!",
+        "tools": []
+      },
+      {
+        "messaggio": "Fammi un'analisi completa",
+        "risposta": "Per procedere con un'analisi completa, ho bisogno di alcune informazioni di base sul progetto. Potresti fornirmi i dettagli seguenti?\n\n1. Nome del progetto\n2. Località del progetto\n3. Tipo di progetto (residenziale, commerciale, misto)\n4. Numero totale di unità\n5. Prezzo medio di vendita per unità\n\nSe hai altre informazioni come i costi di costruzione, scenari di acquisto del terreno o dettagli di finanziamento, sentiti libero di condividerli!",
+        "tools": []
+      },
+      {
+        "messaggio": "Procedi con business plan",
+        "risposta": "Per procedere con il calcolo del business plan, ho bisogno di alcune informazioni di base. Puoi fornirmi i dettagli seguenti, oppure posso utilizzare valori predefiniti:\n\n1. Nome del progetto\n2. Numero di unità\n3. Prezzo di vendita per unità\n4. Costo di costruzione totale o per unità (se non specificato, userò 1200 €/mq)\n5. Costo del terreno (se disponibile)\n\nSe hai già queste informazioni, per favore condividile con me. Altrimenti, posso procedere con i valori predefiniti.",
+        "tools": []
+      },
+      {
+        "messaggio": "Salvami tutto",
+        "risposta": "Potresti specificare cosa desideri salvare? Se si tratta di un'analisi di fattibilità o di un business plan, fammi sapere così posso procedere con l'azione corretta.",
+        "tools": []
+      }
+    ],
+    "score": 40
+  },
+  {
+    "profilo": "Utente47",
+    "id": 47,
+    "batch": 10,
+    "messaggiTotali": 5,
+    "successRate": 40,
+    "toolActivationRate": 0,
+    "durataMedia": 5001,
+    "risultati": [
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Ciao! 👋 Sono l'assistente di Urbanova. Posso aiutarti con:\n\n• 📊 Analisi di fattibilità\n• 📈 Business Plan\n• 🏗️ Gestione progetti\n• 📧 Comunicazioni\n\nCosa posso fare per te oggi?",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074711196",
+          "duration": 4683,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:25:15.879Z"
+        },
+        "duration": 4705
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Per aiutarti a sviluppare il tuo terreno, possiamo iniziare con un'analisi di fattibilità per valutare le potenzialità del progetto. Potresti fornirmi alcune informazioni di base come la località del terreno e la sua superficie? Se non hai tutti i dettagli, posso utilizzare dei valori predefiniti per procedere.",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074716397",
+          "duration": 5280,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:25:21.677Z"
+        },
+        "duration": 5297
+      },
+      {
+        "success": false,
+        "error": "fetch failed",
+        "duration": 1269
+      },
+      {
+        "success": false,
+        "error": "fetch failed",
+        "duration": 4
+      },
+      {
+        "success": false,
+        "error": "fetch failed",
+        "duration": 1
+      }
+    ],
+    "memoria": [
+      {
+        "messaggio": "Ciao, sono l'utente 47",
+        "risposta": "Ciao! 👋 Sono l'assistente di Urbanova. Posso aiutarti con:\n\n• 📊 Analisi di fattibilità\n• 📈 Business Plan\n• 🏗️ Gestione progetti\n• 📧 Comunicazioni\n\nCosa posso fare per te oggi?",
+        "tools": []
+      },
+      {
+        "messaggio": "Ho un terreno e voglio svilupparlo",
+        "risposta": "Per aiutarti a sviluppare il tuo terreno, possiamo iniziare con un'analisi di fattibilità per valutare le potenzialità del progetto. Potresti fornirmi alcune informazioni di base come la località del terreno e la sua superficie? Se non hai tutti i dettagli, posso utilizzare dei valori predefiniti per procedere.",
+        "tools": []
+      }
+    ],
+    "score": 16
+  },
+  {
+    "profilo": "Utente48",
+    "id": 48,
+    "batch": 10,
+    "messaggiTotali": 5,
+    "successRate": 0,
+    "toolActivationRate": 0,
+    "durataMedia": 0,
+    "risultati": [
+      {
+        "success": false,
+        "error": "fetch failed",
+        "duration": 1
+      },
+      {
+        "success": false,
+        "error": "fetch failed",
+        "duration": 1
+      },
+      {
+        "success": false,
+        "error": "fetch failed",
+        "duration": 1
+      },
+      {
+        "success": false,
+        "error": "fetch failed",
+        "duration": 1
+      },
+      {
+        "success": false,
+        "error": "fetch failed",
+        "duration": 0
+      }
+    ],
+    "memoria": [],
+    "score": 0
+  },
+  {
+    "profilo": "Utente49",
+    "id": 49,
+    "batch": 10,
+    "messaggiTotali": 5,
+    "successRate": 0,
+    "toolActivationRate": 0,
+    "durataMedia": 0,
+    "risultati": [
+      {
+        "success": false,
+        "error": "fetch failed",
+        "duration": 1
+      },
+      {
+        "success": false,
+        "error": "fetch failed",
+        "duration": 2
+      },
+      {
+        "success": false,
+        "error": "fetch failed",
+        "duration": 1
+      },
+      {
+        "success": false,
+        "error": "fetch failed",
+        "duration": 1
+      },
+      {
+        "success": false,
+        "error": "fetch failed",
+        "duration": 1
+      }
+    ],
+    "memoria": [],
+    "score": 0
+  },
+  {
+    "profilo": "Utente50",
+    "id": 50,
+    "batch": 10,
+    "messaggiTotali": 5,
+    "successRate": 0,
+    "toolActivationRate": 0,
+    "durataMedia": 0,
+    "risultati": [
+      {
+        "success": false,
+        "error": "fetch failed",
+        "duration": 2
+      },
+      {
+        "success": false,
+        "error": "fetch failed",
+        "duration": 1
+      },
+      {
+        "success": false,
+        "error": "fetch failed",
+        "duration": 1
+      },
+      {
+        "success": false,
+        "error": "fetch failed",
+        "duration": 1
+      },
+      {
+        "success": false,
+        "error": "fetch failed",
+        "duration": 2
+      }
+    ],
+    "memoria": [],
+    "score": 0
+  }
+]

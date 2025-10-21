@@ -3,7 +3,7 @@
 
 import { OpenAI } from 'openai';
 import { db } from '../../lib/firebase';
-import { collection, query, where, getDocs, orderBy, limit, doc, getDoc } from 'firebase/firestore';
+import { collection, query as firestoreQuery, where, getDocs, orderBy, limit as firestoreLimit, doc, getDoc, addDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 export interface RAGContext {
   userContext: {
@@ -111,8 +111,15 @@ export class AdvancedRAGSystem {
         }
       };
 
-      // Salva in Firestore
-      await db.collection('os2_rag_memories').doc(memoryDoc.id).set(memoryDoc);
+      // Rimuovi campi undefined prima di salvare su Firestore
+      const cleanMemoryDoc = Object.fromEntries(
+        Object.entries(memoryDoc).filter(([_, value]) => value !== undefined)
+      );
+      
+      // Salva in Firestore v9+
+      const memoriesRef = collection(db, 'os2_rag_memories');
+      const docRef = doc(memoriesRef, memoryDoc.id);
+      await setDoc(docRef, cleanMemoryDoc);
       
       console.log(`✅ [RAG] Memoria salvata: ${memoryDoc.id} (${memory.type})`);
       return memoryDoc.id;
@@ -138,25 +145,25 @@ export class AdvancedRAGSystem {
       const memoriesRef = collection(db, 'os2_rag_memories');
       
       // Filtra per utente e progetto se specificato
-      let q = query(memoriesRef);
+      let searchQuery;
       
       if (context.userContext.projectId) {
-        q = query(
+        searchQuery = firestoreQuery(
           memoriesRef,
           where('projectId', '==', context.userContext.projectId),
           orderBy('metadata.timestamp', 'desc'),
-          limit(50) // Limita per performance
+          firestoreLimit(50) // Limita per performance
         );
       } else {
-        q = query(
+        searchQuery = firestoreQuery(
           memoriesRef,
           where('userId', '==', context.userContext.userId),
           orderBy('metadata.timestamp', 'desc'),
-          limit(50)
+          firestoreLimit(50)
         );
       }
 
-      const snapshot = await getDocs(q);
+      const snapshot = await getDocs(searchQuery);
       const memories: RAGMemory[] = [];
       
       snapshot.forEach(doc => {

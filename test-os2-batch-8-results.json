@@ -1,0 +1,597 @@
+[
+  {
+    "profilo": "Utente36",
+    "id": 36,
+    "batch": 8,
+    "messaggiTotali": 5,
+    "successRate": 100,
+    "toolActivationRate": 0,
+    "durataMedia": 5417.4,
+    "risultati": [
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Ciao! 👋 Sono l'assistente di Urbanova. Posso aiutarti con:\n\n• 📊 Analisi di fattibilità\n• 📈 Business Plan\n• 🏗️ Gestione progetti\n• 📧 Comunicazioni\n\nCosa posso fare per te oggi?",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074364381",
+          "duration": 5341,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:19:29.723Z"
+        },
+        "duration": 5369
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Per aiutarti al meglio, posso eseguire un'analisi di fattibilità per il tuo terreno. Potresti fornirmi alcune informazioni di base come la località e la dimensione del terreno? Se non hai tutti i dettagli, posso utilizzare dei valori predefiniti per procedere.",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074370260",
+          "duration": 4554,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:19:34.814Z"
+        },
+        "duration": 4588
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Per procedere con un'analisi completa, ho bisogno di alcuni dettagli sul progetto. Ecco le informazioni che mi servono:\n\n1. **Nome del progetto**: Come vuoi chiamare il progetto?\n2. **Località**: Dove si trova il progetto?\n3. **Tipo di progetto**: È residenziale, commerciale o misto?\n4. **Numero totale di unità**: Quante unità sono previste?\n5. **Prezzo medio di vendita per unità**: Qual è il prezzo di vendita previsto per ciascuna unità?\n6. **Costo costruzione per unità o per mq**: Qual è il costo di costruzione stimato?\n7. **Scenari di acquisto terreno**: Hai dettagli sugli scenari di acquisto del terreno?\n\nSe hai già queste informazioni, posso procedere con l'analisi. Altrimenti, posso utilizzare valori predefiniti per alcuni parametri. Fammi sapere come preferisci procedere!",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074375341",
+          "duration": 5888,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:19:41.229Z"
+        },
+        "duration": 5916
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Per procedere con il calcolo del business plan, ho bisogno di alcune informazioni di base. Puoi fornirmi i dettagli seguenti o confermare se posso utilizzare i valori predefiniti:\n\n1. **Nome del progetto**: \n2. **Numero di unità**: \n3. **Prezzo di vendita per unità**: \n4. **Costo costruzione totale o per unità** (se diverso dal predefinito di 1200 €/mq):\n5. **Costo del terreno** (se disponibile):\n\nSe non hai tutte le informazioni, posso procedere con i valori predefiniti per alcuni parametri. Fammi sapere come preferisci procedere!",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074381761",
+          "duration": 5330,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:19:47.091Z"
+        },
+        "duration": 5361
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Potresti specificare cosa desideri salvare? Ad esempio, se hai un'analisi di fattibilità o un business plan che vuoi salvare, fammi sapere i dettagli.",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074387620",
+          "duration": 5825,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:19:53.445Z"
+        },
+        "duration": 5853
+      }
+    ],
+    "memoria": [
+      {
+        "messaggio": "Ciao, sono l'utente 36",
+        "risposta": "Ciao! 👋 Sono l'assistente di Urbanova. Posso aiutarti con:\n\n• 📊 Analisi di fattibilità\n• 📈 Business Plan\n• 🏗️ Gestione progetti\n• 📧 Comunicazioni\n\nCosa posso fare per te oggi?",
+        "tools": []
+      },
+      {
+        "messaggio": "Ho un terreno e voglio svilupparlo",
+        "risposta": "Per aiutarti al meglio, posso eseguire un'analisi di fattibilità per il tuo terreno. Potresti fornirmi alcune informazioni di base come la località e la dimensione del terreno? Se non hai tutti i dettagli, posso utilizzare dei valori predefiniti per procedere.",
+        "tools": []
+      },
+      {
+        "messaggio": "Fammi un'analisi completa",
+        "risposta": "Per procedere con un'analisi completa, ho bisogno di alcuni dettagli sul progetto. Ecco le informazioni che mi servono:\n\n1. **Nome del progetto**: Come vuoi chiamare il progetto?\n2. **Località**: Dove si trova il progetto?\n3. **Tipo di progetto**: È residenziale, commerciale o misto?\n4. **Numero totale di unità**: Quante unità sono previste?\n5. **Prezzo medio di vendita per unità**: Qual è il prezzo di vendita previsto per ciascuna unità?\n6. **Costo costruzione per unità o per mq**: Qual è il costo di costruzione stimato?\n7. **Scenari di acquisto terreno**: Hai dettagli sugli scenari di acquisto del terreno?\n\nSe hai già queste informazioni, posso procedere con l'analisi. Altrimenti, posso utilizzare valori predefiniti per alcuni parametri. Fammi sapere come preferisci procedere!",
+        "tools": []
+      },
+      {
+        "messaggio": "Procedi con business plan",
+        "risposta": "Per procedere con il calcolo del business plan, ho bisogno di alcune informazioni di base. Puoi fornirmi i dettagli seguenti o confermare se posso utilizzare i valori predefiniti:\n\n1. **Nome del progetto**: \n2. **Numero di unità**: \n3. **Prezzo di vendita per unità**: \n4. **Costo costruzione totale o per unità** (se diverso dal predefinito di 1200 €/mq):\n5. **Costo del terreno** (se disponibile):\n\nSe non hai tutte le informazioni, posso procedere con i valori predefiniti per alcuni parametri. Fammi sapere come preferisci procedere!",
+        "tools": []
+      },
+      {
+        "messaggio": "Salvami tutto",
+        "risposta": "Potresti specificare cosa desideri salvare? Ad esempio, se hai un'analisi di fattibilità o un business plan che vuoi salvare, fammi sapere i dettagli.",
+        "tools": []
+      }
+    ],
+    "score": 40
+  },
+  {
+    "profilo": "Utente37",
+    "id": 37,
+    "batch": 8,
+    "messaggiTotali": 5,
+    "successRate": 100,
+    "toolActivationRate": 0,
+    "durataMedia": 4545.4,
+    "risultati": [
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Ciao! 👋 Sono l'assistente di Urbanova. Posso aiutarti con:\n\n• 📊 Analisi di fattibilità\n• 📈 Business Plan\n• 🏗️ Gestione progetti\n• 📧 Comunicazioni\n\nCosa posso fare per te oggi?",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074393981",
+          "duration": 3506,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:19:57.487Z"
+        },
+        "duration": 3537
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Per aiutarti al meglio, posso eseguire un'analisi di fattibilità per il tuo terreno. Potresti fornirmi alcune informazioni di base come la località e la dimensione del terreno? Se non hai tutti i dettagli, posso utilizzare dei valori predefiniti per procedere.",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074398023",
+          "duration": 4807,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:20:02.830Z"
+        },
+        "duration": 4843
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Per procedere con un'analisi completa, ho bisogno di alcuni dettagli sul progetto. Potresti fornirmi le seguenti informazioni?\n\n1. Nome del progetto\n2. Località del progetto\n3. Tipo di progetto (residenziale, commerciale, misto)\n4. Numero totale di unità\n5. Prezzo medio di vendita per unità\n6. Costo di costruzione per unità o per mq\n7. Eventuali scenari di acquisto del terreno\n\nSe non hai tutte le informazioni, posso utilizzare dei valori predefiniti per alcuni parametri.",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074403357",
+          "duration": 4794,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:20:08.151Z"
+        },
+        "duration": 4820
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Per procedere con il calcolo del business plan, ho bisogno di alcune informazioni di base. Se non hai dettagli specifici, posso utilizzare valori predefiniti. Ecco cosa mi serve:\n\n1. **Nome del progetto**: Come vuoi chiamare il progetto?\n2. **Numero di unità**: Quante unità saranno costruite?\n3. **Prezzo di vendita per unità**: Qual è il prezzo di vendita previsto per ciascuna unità?\n4. **Costo costruzione**: Se non specificato, userò il costo medio di 1200 €/mq.\n5. **Costo del terreno**: Se non specificato, posso procedere senza questo dato.\n\nSe hai già queste informazioni, fammele sapere e procederò con il calcolo!",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074408672",
+          "duration": 5077,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:20:13.749Z"
+        },
+        "duration": 5098
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Potresti specificare cosa desideri salvare? Ad esempio, se si tratta di un'analisi di fattibilità o di un business plan, posso aiutarti a salvare quei documenti specifici.",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074414273",
+          "duration": 4406,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:20:18.678Z"
+        },
+        "duration": 4429
+      }
+    ],
+    "memoria": [
+      {
+        "messaggio": "Ciao, sono l'utente 37",
+        "risposta": "Ciao! 👋 Sono l'assistente di Urbanova. Posso aiutarti con:\n\n• 📊 Analisi di fattibilità\n• 📈 Business Plan\n• 🏗️ Gestione progetti\n• 📧 Comunicazioni\n\nCosa posso fare per te oggi?",
+        "tools": []
+      },
+      {
+        "messaggio": "Ho un terreno e voglio svilupparlo",
+        "risposta": "Per aiutarti al meglio, posso eseguire un'analisi di fattibilità per il tuo terreno. Potresti fornirmi alcune informazioni di base come la località e la dimensione del terreno? Se non hai tutti i dettagli, posso utilizzare dei valori predefiniti per procedere.",
+        "tools": []
+      },
+      {
+        "messaggio": "Fammi un'analisi completa",
+        "risposta": "Per procedere con un'analisi completa, ho bisogno di alcuni dettagli sul progetto. Potresti fornirmi le seguenti informazioni?\n\n1. Nome del progetto\n2. Località del progetto\n3. Tipo di progetto (residenziale, commerciale, misto)\n4. Numero totale di unità\n5. Prezzo medio di vendita per unità\n6. Costo di costruzione per unità o per mq\n7. Eventuali scenari di acquisto del terreno\n\nSe non hai tutte le informazioni, posso utilizzare dei valori predefiniti per alcuni parametri.",
+        "tools": []
+      },
+      {
+        "messaggio": "Procedi con business plan",
+        "risposta": "Per procedere con il calcolo del business plan, ho bisogno di alcune informazioni di base. Se non hai dettagli specifici, posso utilizzare valori predefiniti. Ecco cosa mi serve:\n\n1. **Nome del progetto**: Come vuoi chiamare il progetto?\n2. **Numero di unità**: Quante unità saranno costruite?\n3. **Prezzo di vendita per unità**: Qual è il prezzo di vendita previsto per ciascuna unità?\n4. **Costo costruzione**: Se non specificato, userò il costo medio di 1200 €/mq.\n5. **Costo del terreno**: Se non specificato, posso procedere senza questo dato.\n\nSe hai già queste informazioni, fammele sapere e procederò con il calcolo!",
+        "tools": []
+      },
+      {
+        "messaggio": "Salvami tutto",
+        "risposta": "Potresti specificare cosa desideri salvare? Ad esempio, se si tratta di un'analisi di fattibilità o di un business plan, posso aiutarti a salvare quei documenti specifici.",
+        "tools": []
+      }
+    ],
+    "score": 40
+  },
+  {
+    "profilo": "Utente38",
+    "id": 38,
+    "batch": 8,
+    "messaggiTotali": 5,
+    "successRate": 100,
+    "toolActivationRate": 0,
+    "durataMedia": 4908,
+    "risultati": [
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Ciao! 👋 Sono l'assistente di Urbanova. Posso aiutarti con:\n\n• 📊 Analisi di fattibilità\n• 📈 Business Plan\n• 🏗️ Gestione progetti\n• 📧 Comunicazioni\n\nCosa posso fare per te oggi?",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074419197",
+          "duration": 4493,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:20:23.690Z"
+        },
+        "duration": 4510
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Per aiutarti a sviluppare il tuo terreno, possiamo iniziare con un'analisi di fattibilità. Potresti fornirmi alcune informazioni di base come la località del terreno e la sua superficie? Se non hai tutti i dettagli, posso utilizzare dei valori predefiniti per procedere.",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074424209",
+          "duration": 4775,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:20:28.984Z"
+        },
+        "duration": 4794
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Per eseguire un'analisi completa, ho bisogno di alcuni dettagli sul progetto. Potresti fornirmi le seguenti informazioni?\n\n1. Nome del progetto\n2. Località del progetto\n3. Tipo di progetto (residenziale, commerciale, misto)\n4. Numero totale di unità\n5. Prezzo medio di vendita per unità\n6. Costo di costruzione per unità o per mq\n7. Eventuali scenari di acquisto del terreno (ad esempio, pagamento in contanti, permuta, ecc.)\n\nSe non hai tutte le informazioni, posso utilizzare dei valori predefiniti ragionevoli. Fammi sapere!",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074429510",
+          "duration": 5937,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:20:35.447Z"
+        },
+        "duration": 5964
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Per procedere con il calcolo del business plan, ho bisogno di alcune informazioni di base. Ecco cosa mi serve:\n\n1. **Nome del progetto**: Come vuoi chiamare il progetto?\n2. **Numero di unità**: Quante unità saranno costruite?\n3. **Prezzo di vendita per unità**: Qual è il prezzo di vendita previsto per ciascuna unità?\n4. **Costo costruzione**: Se hai un costo specifico, altrimenti userò il valore medio di 1200 €/mq.\n5. **Costo del terreno**: Se disponibile, altrimenti posso procedere senza.\n\nSe hai già queste informazioni, fammele sapere e procederò con il calcolo!",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074435971",
+          "duration": 4557,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:20:40.528Z"
+        },
+        "duration": 4581
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Potresti specificare cosa desideri salvare? Ad esempio, se si tratta di un'analisi di fattibilità o di un business plan, posso aiutarti a salvare quei dati specifici.",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074441057",
+          "duration": 4662,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:20:45.719Z"
+        },
+        "duration": 4691
+      }
+    ],
+    "memoria": [
+      {
+        "messaggio": "Ciao, sono l'utente 38",
+        "risposta": "Ciao! 👋 Sono l'assistente di Urbanova. Posso aiutarti con:\n\n• 📊 Analisi di fattibilità\n• 📈 Business Plan\n• 🏗️ Gestione progetti\n• 📧 Comunicazioni\n\nCosa posso fare per te oggi?",
+        "tools": []
+      },
+      {
+        "messaggio": "Ho un terreno e voglio svilupparlo",
+        "risposta": "Per aiutarti a sviluppare il tuo terreno, possiamo iniziare con un'analisi di fattibilità. Potresti fornirmi alcune informazioni di base come la località del terreno e la sua superficie? Se non hai tutti i dettagli, posso utilizzare dei valori predefiniti per procedere.",
+        "tools": []
+      },
+      {
+        "messaggio": "Fammi un'analisi completa",
+        "risposta": "Per eseguire un'analisi completa, ho bisogno di alcuni dettagli sul progetto. Potresti fornirmi le seguenti informazioni?\n\n1. Nome del progetto\n2. Località del progetto\n3. Tipo di progetto (residenziale, commerciale, misto)\n4. Numero totale di unità\n5. Prezzo medio di vendita per unità\n6. Costo di costruzione per unità o per mq\n7. Eventuali scenari di acquisto del terreno (ad esempio, pagamento in contanti, permuta, ecc.)\n\nSe non hai tutte le informazioni, posso utilizzare dei valori predefiniti ragionevoli. Fammi sapere!",
+        "tools": []
+      },
+      {
+        "messaggio": "Procedi con business plan",
+        "risposta": "Per procedere con il calcolo del business plan, ho bisogno di alcune informazioni di base. Ecco cosa mi serve:\n\n1. **Nome del progetto**: Come vuoi chiamare il progetto?\n2. **Numero di unità**: Quante unità saranno costruite?\n3. **Prezzo di vendita per unità**: Qual è il prezzo di vendita previsto per ciascuna unità?\n4. **Costo costruzione**: Se hai un costo specifico, altrimenti userò il valore medio di 1200 €/mq.\n5. **Costo del terreno**: Se disponibile, altrimenti posso procedere senza.\n\nSe hai già queste informazioni, fammele sapere e procederò con il calcolo!",
+        "tools": []
+      },
+      {
+        "messaggio": "Salvami tutto",
+        "risposta": "Potresti specificare cosa desideri salvare? Ad esempio, se si tratta di un'analisi di fattibilità o di un business plan, posso aiutarti a salvare quei dati specifici.",
+        "tools": []
+      }
+    ],
+    "score": 40
+  },
+  {
+    "profilo": "Utente39",
+    "id": 39,
+    "batch": 8,
+    "messaggiTotali": 5,
+    "successRate": 100,
+    "toolActivationRate": 0,
+    "durataMedia": 5188.6,
+    "risultati": [
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Ciao! 👋 Sono l'assistente di Urbanova. Posso aiutarti con:\n\n• 📊 Analisi di fattibilità\n• 📈 Business Plan\n• 🏗️ Gestione progetti\n• 📧 Comunicazioni\n\nCosa posso fare per te oggi?",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074446247",
+          "duration": 4244,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:20:50.491Z"
+        },
+        "duration": 4272
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Per aiutarti a sviluppare il tuo terreno, possiamo iniziare con un'analisi di fattibilità. Potresti fornirmi alcune informazioni di base come la località del terreno e la sua superficie? Se non hai tutti i dettagli, posso utilizzare dei valori predefiniti per procedere.",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074451019",
+          "duration": 6133,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:20:57.152Z"
+        },
+        "duration": 6161
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Per procedere con un'analisi completa, ho bisogno di alcuni dettagli sul progetto. Potresti fornirmi le seguenti informazioni:\n\n1. Nome del progetto\n2. Località del progetto\n3. Tipo di progetto (residenziale, commerciale, misto)\n4. Numero totale di unità\n5. Prezzo medio di vendita per unità\n6. Costo di costruzione per unità o per mq\n7. Eventuali scenari di acquisto terreno (se disponibili)\n\nSe non hai tutte le informazioni, posso utilizzare dei valori predefiniti ragionevoli. Fammi sapere!",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074457674",
+          "duration": 6449,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:21:04.123Z"
+        },
+        "duration": 6474
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Per procedere con il calcolo del business plan, ho bisogno di alcune informazioni di base. Potresti fornirmi il nome del progetto e, se possibile, il numero di unità, il prezzo di vendita per unità e il costo di costruzione? Se non hai tutti i dettagli, posso utilizzare dei valori predefiniti.",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074464663",
+          "duration": 5056,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:21:09.719Z"
+        },
+        "duration": 5092
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Potresti specificare cosa intendi per \"salvami tutto\"? Se hai bisogno di salvare un'analisi di fattibilità o un business plan, fammi sapere e procederò con l'azione appropriata.",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074470236",
+          "duration": 3927,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:21:14.163Z"
+        },
+        "duration": 3944
+      }
+    ],
+    "memoria": [
+      {
+        "messaggio": "Ciao, sono l'utente 39",
+        "risposta": "Ciao! 👋 Sono l'assistente di Urbanova. Posso aiutarti con:\n\n• 📊 Analisi di fattibilità\n• 📈 Business Plan\n• 🏗️ Gestione progetti\n• 📧 Comunicazioni\n\nCosa posso fare per te oggi?",
+        "tools": []
+      },
+      {
+        "messaggio": "Ho un terreno e voglio svilupparlo",
+        "risposta": "Per aiutarti a sviluppare il tuo terreno, possiamo iniziare con un'analisi di fattibilità. Potresti fornirmi alcune informazioni di base come la località del terreno e la sua superficie? Se non hai tutti i dettagli, posso utilizzare dei valori predefiniti per procedere.",
+        "tools": []
+      },
+      {
+        "messaggio": "Fammi un'analisi completa",
+        "risposta": "Per procedere con un'analisi completa, ho bisogno di alcuni dettagli sul progetto. Potresti fornirmi le seguenti informazioni:\n\n1. Nome del progetto\n2. Località del progetto\n3. Tipo di progetto (residenziale, commerciale, misto)\n4. Numero totale di unità\n5. Prezzo medio di vendita per unità\n6. Costo di costruzione per unità o per mq\n7. Eventuali scenari di acquisto terreno (se disponibili)\n\nSe non hai tutte le informazioni, posso utilizzare dei valori predefiniti ragionevoli. Fammi sapere!",
+        "tools": []
+      },
+      {
+        "messaggio": "Procedi con business plan",
+        "risposta": "Per procedere con il calcolo del business plan, ho bisogno di alcune informazioni di base. Potresti fornirmi il nome del progetto e, se possibile, il numero di unità, il prezzo di vendita per unità e il costo di costruzione? Se non hai tutti i dettagli, posso utilizzare dei valori predefiniti.",
+        "tools": []
+      },
+      {
+        "messaggio": "Salvami tutto",
+        "risposta": "Potresti specificare cosa intendi per \"salvami tutto\"? Se hai bisogno di salvare un'analisi di fattibilità o un business plan, fammi sapere e procederò con l'azione appropriata.",
+        "tools": []
+      }
+    ],
+    "score": 40
+  },
+  {
+    "profilo": "Utente40",
+    "id": 40,
+    "batch": 8,
+    "messaggiTotali": 5,
+    "successRate": 100,
+    "toolActivationRate": 0,
+    "durataMedia": 5063,
+    "risultati": [
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Ciao! 👋 Sono l'assistente di Urbanova. Posso aiutarti con:\n\n• 📊 Analisi di fattibilità\n• 📈 Business Plan\n• 🏗️ Gestione progetti\n• 📧 Comunicazioni\n\nCosa posso fare per te oggi?",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074474686",
+          "duration": 4652,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:21:19.338Z"
+        },
+        "duration": 4674
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Per aiutarti al meglio, possiamo iniziare con un'analisi di fattibilità del tuo terreno. Potresti fornirmi alcune informazioni di base come la località e la dimensione del terreno? Se non hai tutti i dettagli, posso utilizzare dei valori predefiniti per procedere.",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074479858",
+          "duration": 5120,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:21:24.978Z"
+        },
+        "duration": 5139
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Per eseguire un'analisi completa, ho bisogno di alcuni dettagli sul progetto. Potresti fornirmi le seguenti informazioni?\n\n1. Nome del progetto\n2. Località del progetto\n3. Tipo di progetto (residenziale, commerciale, misto)\n4. Numero totale di unità\n5. Prezzo medio di vendita per unità\n6. Costo di costruzione per unità o per mq\n7. Eventuali scenari di acquisto del terreno (ad esempio, pagamento in contanti, permuta, ecc.)\n\nSe non hai tutte le informazioni, posso utilizzare dei valori predefiniti ragionevoli. Fammi sapere come preferisci procedere!",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074485504",
+          "duration": 5402,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:21:30.906Z"
+        },
+        "duration": 5428
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Per procedere con il calcolo del business plan, ho bisogno di alcune informazioni di base. Potresti fornirmi il nome del progetto e, se possibile, il numero di unità, il prezzo di vendita per unità e il costo di costruzione? Se non hai tutti i dettagli, posso utilizzare dei valori predefiniti.",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074491433",
+          "duration": 4435,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:21:35.868Z"
+        },
+        "duration": 4462
+      },
+      {
+        "success": true,
+        "data": {
+          "success": true,
+          "response": "Potresti specificare cosa desideri salvare? Ad esempio, se si tratta di un'analisi di fattibilità o di un business plan, posso aiutarti a salvarlo nel sistema.",
+          "artifacts": [],
+          "kpis": [],
+          "requestId": "req_1761074496396",
+          "duration": 5584,
+          "plan": [],
+          "smart": true,
+          "fallback": false,
+          "timestamp": "2025-10-21T19:21:41.981Z"
+        },
+        "duration": 5612
+      }
+    ],
+    "memoria": [
+      {
+        "messaggio": "Ciao, sono l'utente 40",
+        "risposta": "Ciao! 👋 Sono l'assistente di Urbanova. Posso aiutarti con:\n\n• 📊 Analisi di fattibilità\n• 📈 Business Plan\n• 🏗️ Gestione progetti\n• 📧 Comunicazioni\n\nCosa posso fare per te oggi?",
+        "tools": []
+      },
+      {
+        "messaggio": "Ho un terreno e voglio svilupparlo",
+        "risposta": "Per aiutarti al meglio, possiamo iniziare con un'analisi di fattibilità del tuo terreno. Potresti fornirmi alcune informazioni di base come la località e la dimensione del terreno? Se non hai tutti i dettagli, posso utilizzare dei valori predefiniti per procedere.",
+        "tools": []
+      },
+      {
+        "messaggio": "Fammi un'analisi completa",
+        "risposta": "Per eseguire un'analisi completa, ho bisogno di alcuni dettagli sul progetto. Potresti fornirmi le seguenti informazioni?\n\n1. Nome del progetto\n2. Località del progetto\n3. Tipo di progetto (residenziale, commerciale, misto)\n4. Numero totale di unità\n5. Prezzo medio di vendita per unità\n6. Costo di costruzione per unità o per mq\n7. Eventuali scenari di acquisto del terreno (ad esempio, pagamento in contanti, permuta, ecc.)\n\nSe non hai tutte le informazioni, posso utilizzare dei valori predefiniti ragionevoli. Fammi sapere come preferisci procedere!",
+        "tools": []
+      },
+      {
+        "messaggio": "Procedi con business plan",
+        "risposta": "Per procedere con il calcolo del business plan, ho bisogno di alcune informazioni di base. Potresti fornirmi il nome del progetto e, se possibile, il numero di unità, il prezzo di vendita per unità e il costo di costruzione? Se non hai tutti i dettagli, posso utilizzare dei valori predefiniti.",
+        "tools": []
+      },
+      {
+        "messaggio": "Salvami tutto",
+        "risposta": "Potresti specificare cosa desideri salvare? Ad esempio, se si tratta di un'analisi di fattibilità o di un business plan, posso aiutarti a salvarlo nel sistema.",
+        "tools": []
+      }
+    ],
+    "score": 40
+  }
+]
