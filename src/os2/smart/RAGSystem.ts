@@ -4,6 +4,7 @@
 import { OpenAI } from 'openai';
 import { db } from '../../lib/firebase';
 import { collection, query as firestoreQuery, where, getDocs, orderBy, limit as firestoreLimit, doc, getDoc, addDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { getInMemoryFallback } from './InMemoryFallback';
 
 export interface RAGContext {
   userContext: {
@@ -97,8 +98,12 @@ export class AdvancedRAGSystem {
    */
   async saveMemory(memory: Omit<RAGMemory, 'id' | 'embedding'>): Promise<string> {
     try {
+      console.log(`💾 [RAG] Tentativo salvataggio memoria tipo: ${memory.type}, userId: ${memory.userId}`);
+      
       // Genera embedding per il contenuto
+      console.log(`🔄 [RAG] Generando embedding per: "${memory.content.substring(0, 50)}..."`);
       const embedding = await this.generateEmbedding(memory.content);
+      console.log(`✅ [RAG] Embedding generato: ${embedding.length} dimensioni`);
       
       // Crea documento Firestore
       const memoryDoc = {
@@ -116,16 +121,29 @@ export class AdvancedRAGSystem {
         Object.entries(memoryDoc).filter(([_, value]) => value !== undefined)
       );
       
+      console.log(`📝 [RAG] Salvando in Firestore: os2_rag_memories/${memoryDoc.id}`);
+      
       // Salva in Firestore v9+
       const memoriesRef = collection(db, 'os2_rag_memories');
       const docRef = doc(memoriesRef, memoryDoc.id);
       await setDoc(docRef, cleanMemoryDoc);
       
-      console.log(`✅ [RAG] Memoria salvata: ${memoryDoc.id} (${memory.type})`);
+      console.log(`✅ [RAG] Memoria salvata con successo: ${memoryDoc.id} (${memory.type})`);
       return memoryDoc.id;
     } catch (error) {
-      console.error('❌ [RAG] Errore salvataggio memoria:', error);
-      throw error;
+      console.error('❌ [RAG] Errore salvataggio Firestore:', error);
+      console.warn('🔄 [RAG] Fallback a sistema in-memory...');
+      
+      // FALLBACK: Usa sistema in-memory
+      try {
+        const fallback = getInMemoryFallback();
+        const memoryId = await fallback.saveMemory(memory);
+        console.log(`✅ [RAG Fallback] Memoria salvata in-memory: ${memoryId}`);
+        return memoryId;
+      } catch (fallbackError) {
+        console.error('❌ [RAG Fallback] Errore anche in fallback:', fallbackError);
+        throw fallbackError;
+      }
     }
   }
 
@@ -193,8 +211,19 @@ export class AdvancedRAGSystem {
         .slice(0, limit);
 
     } catch (error) {
-      console.error('❌ [RAG] Errore ricerca memorie:', error);
-      return [];
+      console.error('❌ [RAG] Errore ricerca Firestore:', error);
+      console.warn('🔄 [RAG] Fallback a ricerca in-memory...');
+      
+      // FALLBACK: Usa ricerca in-memory
+      try {
+        const fallback = getInMemoryFallback();
+        const results = fallback.searchRelevantMemories(query, context, limit);
+        console.log(`✅ [RAG Fallback] Trovate ${results.length} memorie in-memory`);
+        return results;
+      } catch (fallbackError) {
+        console.error('❌ [RAG Fallback] Errore anche in fallback:', fallbackError);
+        return [];
+      }
     }
   }
 
