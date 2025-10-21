@@ -203,6 +203,7 @@ export class SkillCatalog {
     this.register(new EmailSendSkill());
     this.register(new ProjectQuerySkill());
     this.register(new ProjectListSkill());
+    this.register(new ConversationGeneralSkill());
     
     console.log(`✅ [SkillCatalog] ${this.skills.size} skill core registrate`);
   }
@@ -658,5 +659,68 @@ interface QueryOutput {
 interface ListOutput {
   projects: Array<Record<string, unknown>>;
   count: number;
+}
+
+/**
+ * Conversation General Skill - Risposte conversazionali
+ */
+class ConversationGeneralSkill implements Skill<ConversationInput, ConversationOutput> {
+  public meta: SkillMeta = {
+    id: 'conversation.general',
+    summary: 'Risposta conversazionale amichevole per saluti e messaggi generali',
+    visibility: 'global',
+    inputsSchema: {
+      type: 'object',
+      required: ['userMessage'],
+      properties: {
+        userMessage: { type: 'string' },
+        responseType: { type: 'string', enum: ['greeting', 'help', 'general'] },
+      },
+    },
+    preconditions: [],
+    latencyBudgetMs: 1000,
+    idempotent: true,
+    requiresConfirm: false,
+    sideEffects: [],
+  };
+
+  public async execute(inputs: ConversationInput, context: SkillExecutionContext): Promise<ConversationOutput> {
+    const { userMessage, responseType = 'general' } = inputs;
+    
+    // Genera risposta conversazionale basata sul tipo
+    let response: string;
+    
+    if (responseType === 'greeting' || userMessage.toLowerCase().includes('ciao') || userMessage.toLowerCase().includes('salve')) {
+      response = `Ciao! 👋 Sono l'assistente di Urbanova. Posso aiutarti con:\n\n• 📊 Analisi di fattibilità\n• 📈 Business Plan\n• 🏗️ Gestione progetti\n• 📧 Comunicazioni\n\nCosa posso fare per te oggi?`;
+    } else if (responseType === 'help' || userMessage.toLowerCase().includes('aiuto') || userMessage.toLowerCase().includes('help')) {
+      response = `Ecco come posso aiutarti:\n\n• **"Crea Business Plan"** - Genera un BP completo\n• **"Analisi fattibilità"** - Valuta un terreno\n• **"Invia RDO"** - Comunica con fornitori\n• **"Mostra progetti"** - Lista i tuoi progetti\n\nDimmi cosa vuoi fare! 🚀`;
+    } else {
+      response = `Capisco! 💡 Posso aiutarti con progetti immobiliari, business plan, analisi di fattibilità e molto altro.\n\nProva a dirmi qualcosa come:\n• "Crea un business plan"\n• "Analizza questo terreno"\n• "Mostra i miei progetti"\n\nCosa ti serve?`;
+    }
+    
+    return {
+      response,
+      responseType,
+      suggestions: [
+        'Crea Business Plan',
+        'Analisi Fattibilità', 
+        'Mostra Progetti',
+        'Invia RDO'
+      ],
+      timestamp: new Date().toISOString(),
+    };
+  }
+}
+
+interface ConversationInput {
+  userMessage: string;
+  responseType?: 'greeting' | 'help' | 'general';
+}
+
+interface ConversationOutput {
+  response: string;
+  responseType: string;
+  suggestions: string[];
+  timestamp: string;
 }
 

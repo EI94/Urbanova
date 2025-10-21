@@ -95,55 +95,112 @@ export function OsPersistentInterface({
 
   if (!isOpen) return null;
 
-  const handleSend = (content: string) => {
+  const handleSend = async (content: string) => {
     // Aggiungi messaggio utente (SENZA sintesi vocale)
     addMessage({ role: 'user', content });
-    onMessageSend?.(content);
+    
+    // Chiama l'API OS 2.0 reale
+    try {
+      console.log('🎯 [OS-PERSISTENT] Invio messaggio a OS 2.0:', content);
+      
+      const response = await fetch('/api/os2/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: content,
+          userId: 'test-user', // TODO: Usa userId reale
+          userEmail: 'test@test.com', // TODO: Usa userEmail reale
+          sessionId: Date.now().toString(),
+        }),
+      });
+      
+      const result = await response.json();
+      console.log('📥 [OS-PERSISTENT] Response ricevuta:', result);
+      
+      if (result.success && result.response) {
+        // Estrai solo il contenuto conversazionale dalla risposta
+        let responseContent = result.response;
+        
+        // Se la risposta contiene output tecnico, estrai solo la parte conversazionale
+        if (typeof responseContent === 'string' && responseContent.includes('🎯 Esegui:')) {
+          // Cerca il contenuto dopo i dettagli tecnici
+          const lines = responseContent.split('\n');
+          const contentStart = lines.findIndex(line => 
+            line.includes('📊 Risultato:') || 
+            line.includes('💡 Assumptions:') ||
+            line.includes('⚠️ Rischi:')
+          );
+          
+          if (contentStart !== -1) {
+            // Estrai solo le righe dopo i dettagli tecnici
+            responseContent = lines.slice(contentStart + 1).join('\n').trim();
+          }
+        }
+        
+        // Aggiungi risposta dell'OS
+        addMessage({
+          role: 'assistant',
+          content: responseContent,
+          timestamp: new Date(),
+          status: 'completed',
+        });
 
-    // Simula risposta OS 2.0
-    setTimeout(() => {
-      const responseContent = 'Messaggio di test OS 2.0. Risposta elaborata.';
+        // 🔊 Sintesi vocale SOLO per risposte dell'OS (role: 'assistant')
+        setTimeout(() => {
+          console.log('🔊 [OS-PERSISTENT] Avvio sintesi vocale risposta OS...');
+          handleSpeaking(true);
+          
+          // Pulisci il contenuto per la sintesi vocale (rimuovi emoji e formattazione)
+          const cleanContent = responseContent
+            .replace(/[🎯✅📋📊💡⚠️⏱️]/g, '') // Rimuovi emoji
+            .replace(/\*\*(.*?)\*\*/g, '$1') // Rimuovi markdown bold
+            .replace(/\n\n/g, '. ') // Sostituisci doppi newline con punti
+            .replace(/\n/g, ' ') // Sostituisci newline con spazi
+            .trim();
+          
+          const utterance = new SpeechSynthesisUtterance(cleanContent);
+          utterance.lang = 'it-IT';
+          utterance.rate = 0.9;
+          utterance.pitch = 1.0;
+          utterance.volume = 0.8;
+          
+          utterance.onend = () => {
+            console.log('🔊 [OS-PERSISTENT] Sintesi vocale completata');
+            handleSpeaking(false);
+          };
+          
+          utterance.onerror = (event) => {
+            console.error('❌ [OS-PERSISTENT] Errore sintesi vocale:', event.error);
+            handleSpeaking(false);
+          };
+          
+          speechSynthesis.speak(utterance);
+        }, 500);
+        
+      } else {
+        // Fallback se l'API fallisce
+        addMessage({
+          role: 'assistant',
+          content: 'Mi dispiace, ho avuto un problema. Riprova tra un momento.',
+          timestamp: new Date(),
+          status: 'completed',
+        });
+      }
+      
+    } catch (error) {
+      console.error('❌ [OS-PERSISTENT] Errore chiamata API:', error);
+      
+      // Fallback in caso di errore
       addMessage({
         role: 'assistant',
-        content: responseContent,
+        content: 'Mi dispiace, ho avuto un problema di connessione. Riprova tra un momento.',
         timestamp: new Date(),
         status: 'completed',
-        skills: ['business-plan'],
-        projects: ['test-project'],
-        kpis: [
-          { label: 'VAN', value: '+€245k', trend: 'up' },
-          { label: 'TIR', value: '12.5%', trend: 'up' },
-        ],
-        artifacts: [
-          { type: 'pdf', name: 'Business Plan.pdf', url: '#' },
-          { type: 'excel', name: 'Sensitivity Analysis.xlsx', url: '#' },
-        ],
-        actions: [
-          { id: 'open-sensitivity', label: 'Apri sensitivity', icon: '📊' },
-          { id: 'generate-term-sheet', label: 'Genera term sheet', icon: '📄' },
-        ],
       });
-
-      // 🔊 Sintesi vocale SOLO per risposte dell'OS (role: 'assistant')
-      setTimeout(() => {
-        console.log('🔊 [OS-PERSISTENT] Avvio sintesi vocale risposta OS...');
-        handleSpeaking(true);
-        const utterance = new SpeechSynthesisUtterance(responseContent);
-        utterance.lang = 'it-IT';
-        utterance.rate = 0.9;
-        utterance.pitch = 1.0;
-        utterance.volume = 0.8;
-        utterance.onend = () => {
-          console.log('🔊 [OS-PERSISTENT] Sintesi vocale completata');
-          handleSpeaking(false);
-        };
-        utterance.onerror = (event) => {
-          console.error('❌ [OS-PERSISTENT] Errore sintesi vocale:', event.error);
-          handleSpeaking(false);
-        };
-        speechSynthesis.speak(utterance);
-      }, 500);
-    }, 1000);
+    }
+    
+    // Chiama callback esterno se fornito
+    onMessageSend?.(content);
   };
 
   return (

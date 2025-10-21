@@ -112,7 +112,7 @@ export class Planner {
     }
     
     // Default: general inquiry
-    return this.planGeneralInquiry(entities);
+    return this.planGeneralInquiry(entities, input.userMessage);
   }
   
   /**
@@ -299,16 +299,21 @@ export class Planner {
   }
   
   /**
-   * Piano per general inquiry (fallback)
+   * Piano per general inquiry (fallback) - Risposta conversazionale
    */
-  private planGeneralInquiry(entities: Record<string, unknown>): OsActionStep[] {
+  private planGeneralInquiry(entities: Record<string, unknown>, userMessage: string): OsActionStep[] {
+    // Per messaggi semplici come "Ciao", non eseguiamo skill tecnici
+    // ma forniamo una risposta conversazionale diretta
     return [
       {
-        skillId: 'project.list',
-        inputs: {},
+        skillId: 'conversation.general',
+        inputs: {
+          userMessage: userMessage || 'Messaggio generico',
+          responseType: 'greeting'
+        },
         idempotent: true,
-        name: 'Informazioni Generali',
-        description: 'Risposta generica',
+        name: 'Risposta Conversazionale',
+        description: 'Risposta amichevole e conversazionale',
       },
     ];
   }
