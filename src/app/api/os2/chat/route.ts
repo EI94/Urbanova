@@ -142,7 +142,9 @@ export async function POST(request: NextRequest) {
     // Note: Questo richiede che OS2.process() supporti callbacks
     // Per ora, il processo normale funziona, SSE sarà aggiunto quando Executor viene chiamato con callbacks
     
-    const response = await os2.process(os2Request);
+    // Usa il sistema smart per processare la richiesta
+    console.log('📡 [OS2 Smart API] Invio richiesta a OS2 Smart...');
+    const response = await os2.processRequestSmart(os2Request);
     
     const totalTime = Date.now() - startTime;
     
@@ -150,22 +152,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: response.success,
       response: response.response,
-      planId: response.plan.id,
-      plan: {
-        goal: response.plan.goal,
-        steps: response.plan.steps.length,
-        assumptions: response.plan.assumptions,
-      },
-      execution: {
-        status: response.execution.status,
-        successfulSteps: response.execution.successfulSteps,
-        failedSteps: response.execution.failedSteps,
-        awaitingConfirmSteps: response.execution.awaitingConfirmSteps,
-      },
-      metadata: {
-        ...response.metadata,
-        totalTimeMs: totalTime,
-      },
+      artifacts: response.artifacts || [],
+      kpis: response.kpis || [],
+      requestId: response.requestId,
+      duration: totalTime,
+      plan: response.plan || [],
+      smart: response.smart || false,
+      fallback: response.fallback || false,
       timestamp: new Date().toISOString(),
     });
     

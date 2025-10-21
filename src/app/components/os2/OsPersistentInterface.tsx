@@ -117,33 +117,36 @@ export function OsPersistentInterface({
       const result = await response.json();
       console.log('📥 [OS-PERSISTENT] Response ricevuta:', result);
       
-      if (result.success && result.response) {
-        // Estrai solo il contenuto conversazionale dalla risposta
-        let responseContent = result.response;
-        
-        // Se la risposta contiene output tecnico, estrai solo la parte conversazionale
-        if (typeof responseContent === 'string' && responseContent.includes('🎯 Esegui:')) {
-          // Cerca il contenuto dopo i dettagli tecnici
-          const lines = responseContent.split('\n');
-          const contentStart = lines.findIndex(line => 
-            line.includes('📊 Risultato:') || 
-            line.includes('💡 Assumptions:') ||
-            line.includes('⚠️ Rischi:')
-          );
-          
-          if (contentStart !== -1) {
-            // Estrai solo le righe dopo i dettagli tecnici
-            responseContent = lines.slice(contentStart + 1).join('\n').trim();
-          }
-        }
-        
-        // Aggiungi risposta dell'OS
-        addMessage({
-          role: 'assistant',
-          content: responseContent,
-          timestamp: new Date(),
-          status: 'completed',
-        });
+           if (result.success && result.response) {
+             // Usa direttamente la risposta smart (già pulita)
+             let responseContent = result.response;
+             
+             // Se è una risposta smart, usa direttamente il contenuto
+             if (result.smart) {
+               console.log('🧠 [OS-PERSISTENT] Risposta smart ricevuta:', responseContent);
+             } else {
+               // Per risposte tradizionali, estrai solo il contenuto conversazionale
+               if (typeof responseContent === 'string' && responseContent.includes('🎯 Esegui:')) {
+                 const lines = responseContent.split('\n');
+                 const contentStart = lines.findIndex(line => 
+                   line.includes('📊 Risultato:') || 
+                   line.includes('💡 Assumptions:') ||
+                   line.includes('⚠️ Rischi:')
+                 );
+                 
+                 if (contentStart !== -1) {
+                   responseContent = lines.slice(contentStart + 1).join('\n').trim();
+                 }
+               }
+             }
+             
+             // Aggiungi risposta dell'OS
+             addMessage({
+               role: 'assistant',
+               content: responseContent,
+               timestamp: new Date(),
+               status: 'completed',
+             });
 
         // 🔊 Sintesi vocale SOLO per risposte dell'OS (role: 'assistant')
         setTimeout(() => {

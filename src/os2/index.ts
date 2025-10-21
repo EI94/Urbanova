@@ -1,11 +1,12 @@
-// 🚀 URBANOVA OS 2.0 - Bootstrap e Orchestrazione Planner/Executor
-// Entry point principale per OS 2.0 con architettura Planner → Executor
+// 🚀 URBANOVA OS 2.0 SMART - Sistema intelligente con RAG, Function Calling e Guardrails
+// Entry point principale per OS 2.0 Smart con architettura avanzata
 
 import { Planner } from './planner/Planner';
 import { PlanExecutor } from './executor/PlanExecutor';
 import { SkillCatalog } from './skills/SkillCatalog';
 import { Arbitrator, ArbitratorDecision } from './decider/Arbitrator';
 import { FallbackManager } from './decider/Fallbacks';
+import { getSmartOSOrchestrator, SmartOSRequest, SmartOSResponse } from './smart/SmartOrchestrator';
 import {
   ActionPlan,
   PlanExecutionResult,
@@ -105,7 +106,7 @@ export interface OS2Response {
 }
 
 /**
- * Urbanova OS 2.0 - Main Orchestrator con Planner/Executor
+ * Urbanova OS 2.0 Smart - Main Orchestrator con sistema intelligente
  */
 export class UrbanovaOS2 {
   private planner: Planner;
@@ -113,6 +114,7 @@ export class UrbanovaOS2 {
   private skillCatalog: SkillCatalog;
   private arbitrator: Arbitrator;
   private fallbackManager: FallbackManager;
+  private smartOrchestrator = getSmartOSOrchestrator();
   
   constructor() {
     this.skillCatalog = SkillCatalog.getInstance();
@@ -125,7 +127,7 @@ export class UrbanovaOS2 {
     this.arbitrator = new Arbitrator();
     this.fallbackManager = new FallbackManager();
     
-    console.log('🚀 [OS2] Urbanova OS 2.0 inizializzato con Decision Layer + Planner/Executor');
+    console.log('🚀 [OS2 Smart] Urbanova OS 2.0 Smart inizializzato con RAG + Function Calling + Guardrails');
   }
   
   /**
@@ -574,6 +576,51 @@ export class UrbanovaOS2 {
     return fallbacks;
   }
   
+  /**
+   * Processa una richiesta utente con il sistema OS 2.0 Smart
+   */
+  async processRequestSmart(input: OsRequest): Promise<OsResponse> {
+    const startTime = Date.now();
+    const requestId = `req_${Date.now()}`;
+    
+    try {
+      console.log(`🎯 [OS2 Smart] Processo richiesta ${requestId}:`, input.message);
+      
+      // Usa il sistema intelligente per processare la richiesta
+      const smartResponse = await this.smartOrchestrator.processRequest(input);
+      
+      console.log(`📥 [OS2 Smart] Risposta ricevuta:`, {
+        success: smartResponse.success,
+        hasResponse: !!smartResponse.response,
+        response: smartResponse.response?.substring(0, 100) + '...',
+        requiresConfirmation: smartResponse.requiresConfirmation,
+        reasoning: smartResponse.reasoning
+      });
+      
+      const duration = Date.now() - startTime;
+      console.log(`✅ [OS2 Smart] Richiesta ${requestId} completata in ${duration}ms`);
+      
+      return {
+        success: true,
+        response: smartResponse.response,
+        artifacts: smartResponse.artifacts || [],
+        kpis: smartResponse.kpis || [],
+        requestId,
+        duration,
+        plan: smartResponse.plan || [],
+        smart: true, // Indica che è stata usata la modalità smart
+      };
+      
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      console.error(`❌ [OS2 Smart] Errore richiesta ${requestId}:`, error);
+      
+      // Fallback al sistema tradizionale in caso di errore
+      console.log(`🔄 [OS2 Smart] Fallback al sistema tradizionale...`);
+      return await this.processRequest(input);
+    }
+  }
+
   /**
    * Health check OS 2.0
    */
