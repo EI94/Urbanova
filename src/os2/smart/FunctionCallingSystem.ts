@@ -198,6 +198,9 @@ export class OpenAIFunctionCallingSystem {
       const systemPrompt = this.buildSystemPrompt(ragContext);
       const availableFunctions = this.getAvailableFunctions();
       
+      console.log(`📋 [FunctionCalling] Invio a OpenAI ${availableFunctions.length} functions:`, 
+        availableFunctions.map(f => f.name).join(', '));
+      
       // 3. Chiama OpenAI con function calling
       const response = await this.openai.chat.completions.create({
         model: 'gpt-4o',
@@ -220,6 +223,7 @@ export class OpenAIFunctionCallingSystem {
 
     } catch (error) {
       console.error('❌ [FunctionCalling] Errore decisione intelligente:', error);
+      console.error('❌ [FunctionCalling] Stack:', (error as Error).stack);
       
       // Fallback intelligente basato sul messaggio utente
       const fallbackResponse = this.generateFallbackResponse(userMessage);
@@ -227,7 +231,7 @@ export class OpenAIFunctionCallingSystem {
       return {
         action: 'conversation',
         response: fallbackResponse,
-        reasoning: 'Fallback intelligente per errore tecnico',
+        reasoning: `Fallback per errore: ${(error as Error).message}`,
         confidence: 0.7,
         requiresConfirmation: false,
         context: { relevantMemories: [] },
@@ -330,33 +334,46 @@ ${ragContext.conversationHistory?.slice(-3).map((msg: any) =>
 🧠 MEMORIA RILEVANTE:
 ${ragContext.relevantMemories?.map((m: any) => `• ${m.contentSnippet}`).join('\n') || 'Nessuna memoria rilevante'}
 
-📌 COME DECIDERE:
+📌 ISTRUZIONI CRITICHE PER FUNCTION CALLING:
 
-1. **Per Azioni Concrete** (analisi, business plan, progetti):
-   → USA FUNCTION CALLING
-   → Chiama la function appropriata con parametri completi
-   → Esempio: Se utente dice "analizza terreno a Roma", chiama feasibility.analyze
+⚠️  **IMPORTANTISSIMO**: Quando l'utente chiede di FARE qualcosa (analisi, business plan, calcoli), 
+DEVI SEMPRE chiamare la function appropriata. NON chiedere informazioni se l'utente ha già dato abbastanza dati!
 
-2. **Per Conversazioni** (saluti, domande generali, chiarimenti):
-   → RISPONDI DIRETTAMENTE
-   → Nessuna function calling necessaria
-   → Sii amichevole ma professionale
+🎯 **QUANDO CHIAMARE FUNCTION**:
 
-3. **Per Workflow Complessi** (più azioni in sequenza):
-   → CHIAMA MULTIPLE FUNCTIONS in ordine logico
-   → Esempio: "fa tutto" → feasibility.analyze + business_plan.calculate
+• "analizza fattibilità" / "fai analisi" → CHIAMA feasibility_analyze
+• "business plan" / "calcola business plan" → CHIAMA business_plan_calculate
+• "mostra progetti" / "lista progetti" → CHIAMA project_list
+• "crea progetto" → CHIAMA project_create
+• "calcola ROI" / "rendimento" → CHIAMA business_plan_calculate
 
-4. **Per Informazioni Mancanti**:
-   → CHIEDI CHIARIMENTI
-   → Non inventare parametri
-   → Sii specifico su cosa ti serve
+⚠️  **PARAMETRI MANCANTI**: Se mancano alcuni parametri, USA VALORI DEFAULT RAGIONEVOLI:
+• landArea mancante? → Chiedi
+• constructionCost mancante? → Usa 1200 €/mq (media Italia)
+• salePrice mancante? → Usa 2500 €/mq (media Italia)
+• units mancante? → Calcola da landArea e indice edificabilità 0.8
 
-⚡ REGOLE CHIAVE:
-• SEMPRE usa function calling per azioni concrete
-• MAI inventare dati o parametri
-• SEMPRE conferma prima di azioni distruttive
-• SEMPRE rispondi in italiano
-• SEMPRE sii empatico e collaborativo
+✅ **ESEMPI CORRETTI**:
+
+User: "Analizza fattibilità terreno Roma 3000 mq"
+You: CHIAMA feasibility_analyze con {landArea: 3000, location: "Roma", constructionCost: 1200, salePrice: 2500}
+
+User: "Fai business plan per Milano"
+You: CHIAMA business_plan_calculate con {projectName: "Progetto Milano", ...defaults}
+
+User: "Mostra i miei progetti"
+You: CHIAMA project_list
+
+❌ **ESEMPI SBAGLIATI**:
+
+User: "Analizza fattibilità terreno Roma 3000 mq"
+You: "Posso fare l'analisi. Dimmi..." ← SBAGLIATO! Chiama la function!
+
+⚡ REGOLE ASSOLUTE:
+• Se utente chiede AZIONE → CHIAMA FUNCTION (non rispondere con testo)
+• Se utente chiede INFO → RISPONDI con testo (no function)
+• SEMPRE usa valori default se parametri opzionali mancano
+• SEMPRE in italiano
 
 🎨 STILE RISPOSTA (Johnny Ive):
 • Minimal ma informativo
@@ -374,7 +391,7 @@ Ora analizza il messaggio utente e decidi la migliore azione.`;
     const skills = this.skillCatalog.list();
     
     return skills.map(skill => ({
-      name: skill.id,
+      name: skill.id.replace(/\./g, '_'), // OpenAI non accetta punti nei nomi
       description: skill.summary,
       parameters: {
         type: 'object',
@@ -390,12 +407,31 @@ Ora analizza il messaggio utente e decidi la migliore azione.`;
   private buildFunctionParameters(schema: any): any {
     const properties: any = {};
     
+    // Se è uno schema Zod shape, salta (non supportato per ora)
+    // Questi skill non verranno esposti a OpenAI
+    if (schema && typeof schema === 'object' && !schema.type && !schema.properties) {
+      console.warn('⚠️  [FunctionCalling] Schema Zod shape non supportato, skill skippato');
+      return properties;
+    }
+    
     if (schema.properties) {
       for (const [key, value] of Object.entries(schema.properties)) {
-        properties[key] = {
+        const prop: any = {
           type: (value as any).type,
           description: (value as any).description || `Parametro ${key}`,
         };
+        
+        // Se è un array, aggiungi items
+        if ((value as any).type === 'array' && (value as any).items) {
+          prop.items = (value as any).items;
+        }
+        
+        // Se ha enum, aggiungilo
+        if ((value as any).enum) {
+          prop.enum = (value as any).enum;
+        }
+        
+        properties[key] = prop;
       }
     }
     
@@ -417,11 +453,14 @@ Ora analizza il messaggio utente e decidi la migliore azione.`;
     
     // Se OpenAI ha chiamato delle funzioni
     if (message.function_call) {
+      // Converte nome function da underscore a punto (feasibility_analyze → feasibility.analyze)
+      const originalName = message.function_call.name.replace(/_/g, '.');
+      
       const functionCall: FunctionCall = {
-        name: message.function_call.name,
+        name: originalName,
         arguments: JSON.parse(message.function_call.arguments),
         confidence: 0.8, // Default confidence per function calls
-        reasoning: message.function_call.name,
+        reasoning: originalName,
       };
 
       // Verifica se richiede conferma

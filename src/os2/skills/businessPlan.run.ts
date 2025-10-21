@@ -82,7 +82,58 @@ export const meta: SkillMeta = {
   id: 'business_plan.run',
   summary: 'Calcola Business Plan completo con VAN, TIR, DSCR, cash flow e scenari multipli',
   visibility: 'global',
-  inputsSchema: BusinessPlanInputSchema.shape,
+  inputsSchema: {
+    type: 'object',
+    required: ['projectName', 'totalUnits', 'averagePrice', 'landScenarios'],
+    properties: {
+      projectName: { type: 'string', description: 'Nome del progetto' },
+      location: { type: 'string', description: 'Località del progetto' },
+      type: { type: 'string', enum: ['RESIDENTIAL', 'COMMERCIAL', 'MIXED'], description: 'Tipo di progetto' },
+      totalUnits: { type: 'number', description: 'Numero totale di unità', minimum: 1 },
+      averagePrice: { type: 'number', description: 'Prezzo medio di vendita per unità' },
+      salesCommission: { type: 'number', description: 'Commissione di vendita (%)' },
+      constructionCostPerUnit: { type: 'number', description: 'Costo costruzione per unità' },
+      constructionCostPerSqm: { type: 'number', description: 'Costo costruzione per mq' },
+      averageUnitSize: { type: 'number', description: 'Dimensione media unità in mq' },
+      contingency: { type: 'number', description: 'Contingency (%)' },
+      softCostPercentage: { type: 'number', description: 'Soft costs (%)' },
+      developmentCharges: { type: 'number', description: 'Oneri di urbanizzazione' },
+      utilities: { type: 'number', description: 'Costi utilities' },
+      landScenarios: {
+        type: 'array',
+        description: 'Scenari di acquisto terreno',
+        minItems: 1,
+        items: {
+          type: 'object',
+          properties: {
+            name: { type: 'string', description: 'Nome scenario' },
+            type: { type: 'string', enum: ['CASH', 'PERMUTA', 'PAGAMENTO_DIFFERITO', 'EARN_OUT', 'OPZIONE'], description: 'Tipo scenario' },
+            upfrontPayment: { type: 'number', description: 'Pagamento iniziale' },
+            units: { type: 'number', description: 'Numero unità in permuta' },
+            cashContribution: { type: 'number', description: 'Contributo cash' },
+            period: { type: 'string', description: 'Periodo' },
+            amount: { type: 'number', description: 'Importo' }
+          }
+        }
+      },
+      discountRate: { type: 'number', description: 'Tasso di sconto (%)' },
+      useDebt: { type: 'boolean', description: 'Usa finanziamento' },
+      debtAmount: { type: 'number', description: 'Importo debito' },
+      debtInterestRate: { type: 'number', description: 'Tasso interesse debito (%)' },
+      debtTerm: { type: 'number', description: 'Durata debito (anni)' },
+      salesCalendar: {
+        type: 'array',
+        description: 'Calendario vendite',
+        items: {
+          type: 'object',
+          properties: {
+            period: { type: 'string', description: 'Periodo' },
+            units: { type: 'number', description: 'Unità vendute' }
+          }
+        }
+      }
+    }
+  },
   preconditions: [],
   latencyBudgetMs: 5000,
   idempotent: true,

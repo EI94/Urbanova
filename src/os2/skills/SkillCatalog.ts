@@ -234,13 +234,25 @@ class BusinessPlanCalculateSkill implements Skill<BusinessPlanInput, BusinessPla
     visibility: 'global',
     inputsSchema: {
       type: 'object',
-      required: ['projectName', 'units', 'salePrice', 'constructionCost', 'landScenarios'],
+      required: ['projectName', 'units', 'salePrice'],
       properties: {
-        projectName: { type: 'string' },
-        units: { type: 'number', minimum: 1 },
-        salePrice: { type: 'number', minimum: 0 },
-        constructionCost: { type: 'number', minimum: 0 },
-        landScenarios: { type: 'array', minItems: 1 },
+        projectName: { type: 'string', description: 'Nome del progetto' },
+        units: { type: 'number', minimum: 1, description: 'Numero di unità' },
+        salePrice: { type: 'number', minimum: 0, description: 'Prezzo di vendita per unità' },
+        constructionCost: { type: 'number', minimum: 0, description: 'Costo costruzione totale o per unità' },
+        landCost: { type: 'number', minimum: 0, description: 'Costo del terreno' },
+        landScenarios: {
+          type: 'array',
+          description: 'Scenari di acquisto terreno (opzionale, verrà creato default se mancante)',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              type: { type: 'string' },
+              cost: { type: 'number' }
+            }
+          }
+        },
       },
     },
     preconditions: [],
@@ -257,10 +269,17 @@ class BusinessPlanCalculateSkill implements Skill<BusinessPlanInput, BusinessPla
   public async execute(inputs: BusinessPlanInput, context: SkillExecutionContext): Promise<BusinessPlanOutput> {
     console.log(`🎯 [Skill:BP.Calculate] Esecuzione per ${context.userId}`);
     
+    // Crea landScenarios default se mancante
+    const landScenarios = inputs.landScenarios || [{
+      name: 'Scenario Cash',
+      type: 'CASH',
+      cost: (inputs as any).landCost || (inputs.constructionCost * inputs.units * 0.3) || 500000
+    }];
+    
     // Simula calcolo (in produzione, chiamerebbe businessPlanService)
     const mockResult: BusinessPlanOutput = {
       projectName: inputs.projectName,
-      scenarios: inputs.landScenarios.map((scenario, idx) => ({
+      scenarios: landScenarios.map((scenario, idx) => ({
         id: `s${idx + 1}`,
         name: scenario.name || `Scenario ${idx + 1}`,
         npv: Math.random() * 500000,
