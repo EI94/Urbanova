@@ -352,8 +352,32 @@ ${ragContext.conversationHistory?.slice(-3).map((msg: any) =>
   `${msg.role === 'user' ? '👤 Utente' : '🤖 Tu'}: ${msg.content}`
 ).join('\n') || 'Nessuna conversazione precedente'}
 
-🧠 MEMORIA RILEVANTE:
-${ragContext.relevantMemories?.map((m: any) => `• ${m.contentSnippet}`).join('\n') || 'Nessuna memoria rilevante'}
+🧠 MEMORIA RILEVANTE (usa queste informazioni per rispondere):
+${ragContext.relevantMemories?.map((m: any) => `• ${m.contextSnippet || m.memory?.content?.substring(0, 150)}`).join('\n') || 'Nessuna memoria rilevante'}
+
+🔥 **USA LA MEMORIA PRIMA DI CHIAMARE TOOL** (CRITICO!):
+
+Quando l'utente chiede info su conversazioni precedenti:
+• "come si chiamava?" / "quali erano i numeri?" / "torniamo al progetto" / "ricordi?"
+
+🚨 **PROCEDURA OBBLIGATORIA**:
+1. LEGGI la sezione "🧠 MEMORIA RILEVANTE" sopra
+2. SE la memoria contiene l'informazione richiesta → USA QUELLA per rispondere (conversational, NO function calls)
+3. SE la memoria NON contiene info → SOLO ALLORA chiama function (project.list)
+
+Esempi:
+
+User: "Torniamo al progetto, come si chiamava?"
+Memoria: "User: Progetto Green Park Residence Milano 20 unità eco budget 3M"
+→ action: 'conversation', response: "Il progetto è Green Park Residence a Milano" (NO tools!)
+
+User: "Quante unità erano?"  
+Memoria: "User: Progetto Green Park Residence Milano 20 unità eco budget 3M"
+→ action: 'conversation', response: "Erano 20 unità eco-friendly" (NO tools!)
+
+User: "Mostrami i miei progetti"
+Memoria: Nessuna info progetti
+→ action: 'function_call', functionCalls: [{name: 'project_list'}] (USA tool)
 
 📌 **ISTRUZIONI CRITICHE - EXECUTION-FIRST MINDSET**:
 

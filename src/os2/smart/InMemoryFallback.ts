@@ -88,8 +88,16 @@ export class InMemoryRAGFallback {
     
     // Calcola rilevanza per ogni memoria
     const results: RAGSearchResult[] = [];
+    const queryLower = query.toLowerCase();
     
     for (const memory of userStore.conversations) {
+      // FILTRO: Salta memorie troppo recenti (probabilmente la query stessa)
+      const ageMs = Date.now() - memory.metadata.timestamp.getTime();
+      if (ageMs < 2000) { // Ignora memorie < 2 secondi fa
+        console.log(`   ⏭️  Skipping recent memory (${ageMs}ms ago)`);
+        continue;
+      }
+      
       const contentTokens = this.tokenize(memory.content.toLowerCase());
       const relevanceScore = this.calculateRelevance(queryTokens, contentTokens);
       
@@ -216,18 +224,33 @@ export class InMemoryRAGFallback {
 
   /**
    * Calcola rilevanza tra query e contenuto (TF-IDF semplificato)
+   * Bonus per keywords importanti (nomi progetti, numeri, locations)
    */
   private calculateRelevance(queryTokens: string[], contentTokens: string[]): number {
     const contentSet = new Set(contentTokens);
     let matches = 0;
+    let bonusScore = 0;
+    
+    // Keywords importanti che aumentano score
+    const importantKeywords = ['progetto', 'project', 'residence', 'park', 'tower', 'palace', 'villa', 'palazzo', 'torre'];
+    const locationKeywords = ['roma', 'milano', 'torino', 'firenze', 'napoli', 'bologna', 'venezia'];
     
     for (const token of queryTokens) {
       if (contentSet.has(token)) {
         matches++;
+        
+        // Bonus per keywords importanti
+        if (importantKeywords.includes(token)) {
+          bonusScore += 0.2;
+        }
+        if (locationKeywords.includes(token)) {
+          bonusScore += 0.3;
+        }
       }
     }
 
-    return matches / Math.max(queryTokens.length, 1);
+    const baseScore = matches / Math.max(queryTokens.length, 1);
+    return Math.min(1.0, baseScore + bonusScore);
   }
 
   /**

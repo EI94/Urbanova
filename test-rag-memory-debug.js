@@ -72,11 +72,13 @@ async function testMemory() {
   }).then(r => r.json());
   
   console.log(`   Response: ${step4.response?.substring(0, 150)}...`);
-  console.log(`   ✅ Details Recall: ${step4.response.includes('20') && step4.response.includes('3M') ? 'SUCCESS' : 'FAILED'}`);
+  const hasUnits = step4.response.includes('20');
+  const hasBudget = step4.response.includes('3M') || step4.response.includes('3 milioni') || step4.response.includes('3 million');
+  console.log(`   ✅ Details Recall: ${hasUnits && hasBudget ? 'SUCCESS' : 'FAILED'}`);
   
   // Summary
   console.log('\n📊 SUMMARY:');
-  const memoryWorks = step3.response.includes('Green Park') && (step4.response.includes('20') || step4.response.includes('3M'));
+  const memoryWorks = step3.response.includes('Green Park') && hasUnits && hasBudget;
   console.log(`   Memory System: ${memoryWorks ? '✅ WORKING' : '❌ NOT WORKING'}`);
 }
 

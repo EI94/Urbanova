@@ -81,14 +81,19 @@ export class AdvancedRAGSystem {
    */
   async generateEmbedding(text: string): Promise<number[]> {
     try {
+      console.log(`🔄 [RAG] Generando embedding con OpenAI per: "${text.substring(0, 50)}..."`);
+      
       const response = await this.openai.embeddings.create({
         model: this.embeddingModel,
         input: text,
       });
       
+      console.log(`✅ [RAG] Embedding generato: ${response.data[0].embedding.length} dimensioni`);
       return response.data[0].embedding;
     } catch (error) {
-      console.error('❌ [RAG] Errore generazione embedding:', error);
+      console.error('❌ [RAG] ERRORE generazione embedding OpenAI:', error);
+      console.error('❌ [RAG] Text length:', text.length);
+      console.error('❌ [RAG] Model:', this.embeddingModel);
       throw error;
     }
   }
@@ -293,8 +298,17 @@ export class AdvancedRAGSystem {
       metadata?: any;
     }
   ): Promise<void> {
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🔥 [RAG] updateMemoryFromInteraction CHIAMATO!');
+    console.log(`   User: ${interaction.userMessage.substring(0, 80)}`);
+    console.log(`   Assistant: ${interaction.assistantResponse.substring(0, 80)}`);
+    console.log(`   UserId: ${interaction.context.userContext.userId}`);
+    console.log(`   SessionId: ${interaction.context.userContext.sessionId}`);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    
     try {
       // Salva conversazione
+      console.log('💾 [RAG] Chiamando saveMemory per conversazione...');
       await this.saveMemory({
         userId: interaction.context.userContext.userId,
         sessionId: interaction.context.userContext.sessionId,
@@ -313,6 +327,7 @@ export class AdvancedRAGSystem {
 
       // Se è un'esecuzione di skill, salva anche quello
       if (interaction.metadata?.skillId) {
+        console.log(`💾 [RAG] Chiamando saveMemory per skill: ${interaction.metadata.skillId}...`);
         await this.saveMemory({
           userId: interaction.context.userContext.userId,
           sessionId: interaction.context.userContext.sessionId,
@@ -330,8 +345,14 @@ export class AdvancedRAGSystem {
         });
       }
 
+      console.log('✅ [RAG] updateMemoryFromInteraction COMPLETATO con successo!');
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
     } catch (error) {
-      console.error('❌ [RAG] Errore aggiornamento memoria:', error);
+      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.error('❌ [RAG] ERRORE in updateMemoryFromInteraction:', error);
+      console.error('❌ Stack:', (error as Error).stack);
+      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     }
   }
 

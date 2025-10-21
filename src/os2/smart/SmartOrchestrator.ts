@@ -196,8 +196,11 @@ export class SmartOSOrchestrator {
 
       // await this.evaluationSystem.recordEvaluationEvent(evaluationEvent);
 
-      // 9. Aggiorna memoria RAG
-      await this.ragSystem.updateMemoryFromInteraction({
+      // 9. Aggiorna memoria RAG (ASINCRONO - non blocca risposta)
+      console.log('📝 [SmartOS] Avvio salvataggio memoria ASINCRONO...');
+      
+      // Fire-and-forget: non aspettiamo che finisca
+      this.ragSystem.updateMemoryFromInteraction({
         userMessage: request.userMessage,
         assistantResponse: finalResponse,
         context: ragContext,
@@ -207,7 +210,12 @@ export class SmartOSOrchestrator {
           inputs: decision.functionCalls?.[0]?.arguments,
           outputs: functionResults,
         },
+      }).catch(error => {
+        // Log ma non bloccare
+        console.error('⚠️ [SmartOS] Errore salvataggio memoria (non critico):', error.message);
       });
+      
+      console.log('✅ [SmartOS] Memoria in background - continuo con risposta');
 
       console.log(`✅ [SmartOS] Richiesta processata: ${decision.action} (${processingTime}ms)`);
 
