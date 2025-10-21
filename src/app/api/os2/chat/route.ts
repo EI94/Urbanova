@@ -152,6 +152,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: response.success,
       response: response.response,
+      functionCalls: response.functionCalls || [],
       artifacts: response.artifacts || [],
       kpis: response.kpis || [],
       requestId: response.requestId,

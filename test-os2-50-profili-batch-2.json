@@ -1,0 +1,360 @@
+[
+  {
+    "profilo": "Chiara - Input Minimali",
+    "userId": "test-user-6",
+    "sessionId": "session-6-1761078807766",
+    "messaggi": [
+      {
+        "num": 1,
+        "input": "terreno",
+        "output": "Per analizzare un terreno, posso eseguire un'analisi di fattibilità immobiliare. Procedo con l'analisi utilizzando parametri predefiniti per l'Italia centrale?",
+        "duration": 4822,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 2,
+        "input": "milano",
+        "output": "Vuoi che esegua un'analisi di fattibilità o un business plan per un progetto a Milano? Posso iniziare subito con i parametri predefiniti.",
+        "duration": 3503,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 3,
+        "input": "2000 mq",
+        "output": "Vuoi che esegua un'analisi di fattibilità per un terreno di 2000 mq? Procedo con i parametri di default per l'Italia Centro, con un costo di costruzione di 1200 €/mq e un prezzo di vendita di 2500 €/mq. Confermi?",
+        "duration": 4562,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 4,
+        "input": "analisi",
+        "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
+        "duration": 4173,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 5,
+        "input": "bp",
+        "output": "🔄 **Operazioni Completate**\n\n\n❌ **Fallite** (1):\n• business.plan.calculate\n\nCome posso aiutarti ulteriormente?",
+        "duration": 5588,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 6,
+        "input": "sensitivity",
+        "output": "🔄 **Operazioni Completate**\n\n\n❌ **Fallite** (1):\n• business.plan.sensitivity\n\nCome posso aiutarti ulteriormente?",
+        "duration": 3457,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 7,
+        "input": "ok",
+        "output": "Capisco! 💡 Posso aiutarti con progetti immobiliari, business plan, analisi di fattibilità e molto altro.\n\nProva a dirmi qualcosa come:\n• \"Crea un business plan\"\n• \"Analizza questo terreno\"\n• \"Mostra i miei progetti\"\n\nCosa ti serve?",
+        "duration": 3457,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      }
+    ],
+    "valutazioni": {
+      "clarification": "DA_VALUTARE_MANUALMENTE",
+      "defaults": "DA_VALUTARE_MANUALMENTE",
+      "inference": "DA_VALUTARE_MANUALMENTE"
+    }
+  },
+  {
+    "profilo": "Roberto - Multilingual Pro",
+    "userId": "test-user-7",
+    "sessionId": "session-7-1761078844331",
+    "messaggi": [
+      {
+        "num": 1,
+        "input": "Progetto Roma, serve analisi",
+        "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
+        "duration": 5799,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 2,
+        "input": "Can you switch to English? I have international investors",
+        "output": "Absolutely! I'm here to assist you in English. How can I help you with your international investors today?",
+        "duration": 4199,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 3,
+        "input": "Analyze feasibility for 15 units luxury development",
+        "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
+        "duration": 4914,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 4,
+        "input": "What's the ROI and payback?",
+        "output": "🔄 **Operazioni Completate**\n\n\n❌ **Fallite** (1):\n• business.plan.calculate\n\nCome posso aiutarti ulteriormente?",
+        "duration": 7310,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 5,
+        "input": "Torna italiano, devo presentare al comune",
+        "output": "Ecco come posso aiutarti:\n\n• **\"Crea Business Plan\"** - Genera un BP completo\n• **\"Analisi fattibilità\"** - Valuta un terreno\n• **\"Invia RDO\"** - Comunica con fornitori\n• **\"Mostra progetti\"** - Lista i tuoi progetti\n\nDimmi cosa vuoi fare! 🚀",
+        "duration": 3722,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 6,
+        "input": "Prepara documentazione italiana per permessi",
+        "output": "Per preparare la documentazione italiana per i permessi di costruzione, è importante includere i seguenti elementi:\n\n1. **Relazione Tecnica**: Descrizione dettagliata del progetto, inclusi obiettivi, metodologia e impatto ambientale.\n\n2. **Progetto Architettonico**: Disegni tecnici e planimetrie che mostrano la disposizione degli spazi, le altezze, i materiali e le finiture.\n\n3. **Relazione Geologica**: Analisi del terreno e delle condizioni geologiche del sito.\n\n4. **Calcoli Strutturali**: Dettagli sui calcoli strutturali per garantire la sicurezza e la stabilità dell'edificio.\n\n5. **Documentazione Urbanistica**: Conformità con i piani regolatori e le normative urbanistiche locali.\n\n6. **Certificazioni Energetiche**: Valutazione dell'efficienza energetica dell'edificio.\n\n7. **Autorizzazioni Ambientali**: Se necessario, permessi relativi all'impatto ambientale.\n\n8. **Dichiarazioni di Conformità**: Dichiarazioni che attestano la conformità del progetto alle normative vigenti.\n\n9. **Documentazione Amministrativa**: Moduli e documenti richiesti dalle autorità locali, come il modulo di richiesta del permesso di costruzione.\n\n10. **Piano di Sicurezza**: Misure di sicurezza previste durante la costruzione.\n\nSe hai bisogno di assistenza per generare o organizzare questi documenti, fammi sapere e posso aiutarti ulteriormente!",
+        "duration": 11579,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 7,
+        "input": "Switch back English for investor deck",
+        "output": "Sure! If you need assistance with creating an investor deck or any related tasks, feel free to let me know how I can help. Whether it's generating a business plan, performing a feasibility analysis, or preparing a term sheet, I'm here to assist you.",
+        "duration": 4145,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      }
+    ],
+    "valutazioni": {
+      "language_switch": "DA_VALUTARE_MANUALMENTE",
+      "context_preservation": "DA_VALUTARE_MANUALMENTE",
+      "multilingual": "DA_VALUTARE_MANUALMENTE"
+    }
+  },
+  {
+    "profilo": "Valentina - Emotiva e Values-Driven",
+    "userId": "test-user-8",
+    "sessionId": "session-8-1761078893007",
+    "messaggi": [
+      {
+        "num": 1,
+        "input": "Questo progetto significa molto, è terreno di famiglia",
+        "output": "Capisco quanto possa essere importante un progetto legato a un terreno di famiglia. Posso aiutarti a massimizzare il valore del progetto attraverso un'analisi di fattibilità o un business plan dettagliato. Vuoi che inizi con un'analisi di fattibilità per valutare le potenzialità del terreno?",
+        "duration": 5565,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 2,
+        "input": "Voglio qualcosa speciale ma sostenibile",
+        "output": "Per creare un progetto immobiliare speciale e sostenibile, possiamo considerare diversi aspetti come l'uso di materiali ecologici, l'efficienza energetica, e l'integrazione di spazi verdi. Ecco alcuni passi che possiamo intraprendere:\n\n1. **Progettazione Sostenibile**: Utilizzare materiali riciclati o a basso impatto ambientale e progettare edifici con un'alta efficienza energetica.\n\n2. **Certificazioni Ambientali**: Puntare a certificazioni come LEED o BREEAM per garantire la sostenibilità del progetto.\n\n3. **Integrazione di Spazi Verdi**: Creare giardini pensili o spazi comuni verdi per migliorare la qualità dell'aria e il benessere degli abitanti.\n\n4. **Tecnologie Smart**: Implementare tecnologie per la gestione intelligente dell'energia e delle risorse idriche.\n\n5. **Coinvolgimento della Comunità**: Progettare spazi che favoriscano l'interazione sociale e il coinvolgimento della comunità locale.\n\nPosso aiutarti a iniziare con un'analisi di fattibilità per un progetto sostenibile o creare un business plan che tenga conto di questi aspetti. Vuoi procedere con uno di questi passi?",
+        "duration": 8393,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 3,
+        "input": "Housing accessibile per giovani famiglie + profit, è possibile?",
+        "output": "Sì, è possibile sviluppare progetti di housing accessibile per giovani famiglie mantenendo un margine di profitto. Ecco alcuni approcci che possono essere considerati:\n\n1. **Partnership Pubblico-Privato**: Collaborare con enti pubblici per ottenere incentivi fiscali, terreni a prezzi ridotti o finanziamenti agevolati.\n\n2. **Ottimizzazione dei Costi di Costruzione**: Utilizzare tecniche di costruzione modulari o prefabbricate per ridurre i costi e i tempi di costruzione.\n\n3. **Economia di Scala**: Sviluppare progetti su larga scala per beneficiare di economie di scala nei costi di costruzione e approvvigionamento.\n\n4. **Mix di Unità**: Integrare unità a prezzo di mercato con unità a prezzo accessibile per bilanciare i margini di profitto.\n\n5. **Finanziamenti Innovativi**: Utilizzare modelli di finanziamento innovativi come il crowdfunding o i fondi di investimento socialmente responsabili.\n\n6. **Efficienza Energetica**: Progettare edifici ad alta efficienza energetica per ridurre i costi operativi a lungo termine, rendendo le unità più attraenti per gli acquirenti.\n\n7. **Utilizzo di Terreni Inutilizzati**: Sfruttare terreni inutilizzati o sottoutilizzati in aree urbane per ridurre i costi di acquisizione del terreno.\n\nSe desideri, posso eseguire un'analisi di fattibilità per un progetto specifico o calcolare un business plan per valutare la sostenibilità economica di un progetto di questo tipo. Vuoi procedere con un'analisi o un business plan?",
+        "duration": 9809,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 4,
+        "input": "Aiutami a bilanciare cuore e numeri",
+        "output": "Capisco! 💡 Posso aiutarti con progetti immobiliari, business plan, analisi di fattibilità e molto altro.\n\nProva a dirmi qualcosa come:\n• \"Crea un business plan\"\n• \"Analizza questo terreno\"\n• \"Mostra i miei progetti\"\n\nCosa ti serve?",
+        "duration": 5537,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 5,
+        "input": "60% market rate + 40% affordable housing funzionerebbe?",
+        "output": "Per valutare se una combinazione di 60% di unità a prezzo di mercato e 40% di unità di housing a prezzi accessibili è fattibile, possiamo eseguire un'analisi di fattibilità o un business plan. Questo ci permetterà di capire l'impatto finanziario di tale mix sul progetto.\n\nProcedo con un'analisi di fattibilità utilizzando parametri predefiniti per darti un'idea iniziale?",
+        "duration": 6687,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 6,
+        "input": "Aggiungi pannelli solari e verde, quanto costa?",
+        "output": "Per calcolare il costo dell'aggiunta di pannelli solari e verde a un progetto immobiliare, avrei bisogno di alcune informazioni aggiuntive, come la dimensione dell'area su cui verranno installati i pannelli solari e il verde, e se ci sono specifiche preferenze o requisiti per i materiali.\n\nTuttavia, posso fornirti una stima approssimativa basata su dati medi:\n\n1. **Pannelli Solari**: \n   - Il costo medio per l'installazione di pannelli solari è di circa 1.000-1.500 €/kW installato. \n   - La dimensione dell'impianto dipende dal fabbisogno energetico dell'edificio.\n\n2. **Verde (Giardini Pensili o Tetti Verdi)**:\n   - Il costo medio per l'installazione di un tetto verde varia tra 100-200 €/mq, a seconda del tipo di sistema verde scelto (estensivo o intensivo).\n\nSe mi fornisci la dimensione dell'area e il fabbisogno energetico, posso calcolare una stima più precisa. Vuoi procedere con queste informazioni?",
+        "duration": 7251,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 7,
+        "input": "Vale la pena sacrificare 2% ROI per impatto sociale?",
+        "output": "Sacrificare un 2% di ROI per un impatto sociale positivo può essere una decisione strategica valida, a seconda degli obiettivi complessivi del progetto e delle priorità dell'investitore. Ecco alcuni fattori da considerare:\n\n1. **Valore a Lungo Termine**: Un impatto sociale positivo può migliorare la reputazione del progetto e attrarre investitori o clienti che apprezzano la sostenibilità e la responsabilità sociale, potenzialmente aumentando il valore a lungo termine.\n\n2. **Accesso a Finanziamenti**: Progetti con impatto sociale possono beneficiare di finanziamenti agevolati, sovvenzioni o incentivi fiscali, che potrebbero compensare la riduzione del ROI.\n\n3. **Rischio Reputazionale**: Investire in progetti con impatto sociale può ridurre il rischio reputazionale, specialmente in settori o comunità sensibili.\n\n4. **Allineamento con Valori Aziendali**: Se l'impatto sociale è in linea con i valori aziendali o personali, il sacrificio del ROI può essere giustificato come parte della missione dell'organizzazione.\n\n5. **Domanda di Mercato**: Valuta se c'è una crescente domanda di progetti con impatto sociale nella tua area di mercato, il che potrebbe portare a benefici indiretti.\n\nSe desideri, posso aiutarti a eseguire un'analisi di sensitivity per vedere come l'impatto sociale potrebbe influenzare altri aspetti del tuo progetto. Vuoi procedere con questa analisi?",
+        "duration": 9838,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      }
+    ],
+    "valutazioni": {
+      "empathy": "DA_VALUTARE_MANUALMENTE",
+      "values": "DA_VALUTARE_MANUALMENTE",
+      "balance": "DA_VALUTARE_MANUALMENTE",
+      "advice": "DA_VALUTARE_MANUALMENTE"
+    }
+  },
+  {
+    "profilo": "Francesco - Speed Demon",
+    "userId": "test-user-9",
+    "sessionId": "session-9-1761078953097",
+    "messaggi": [
+      {
+        "num": 1,
+        "input": "Veloce: Napoli 6000 mq analisi ORA",
+        "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
+        "duration": 4386,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 2,
+        "input": "BP subito",
+        "output": "🔄 **Operazioni Completate**\n\n\n❌ **Fallite** (1):\n• business.plan.calculate\n\nCome posso aiutarti ulteriormente?",
+        "duration": 3647,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 3,
+        "input": "Sensitivity ora",
+        "output": "🔄 **Operazioni Completate**\n\n\n❌ **Fallite** (1):\n• business.plan.sensitivity\n\nCome posso aiutarti ulteriormente?",
+        "duration": 4385,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 4,
+        "input": "Go",
+        "output": "Ciao! Come posso aiutarti oggi nel tuo progetto di sviluppo immobiliare? Se hai bisogno di un'analisi di fattibilità, un business plan o qualsiasi altra cosa, fammi sapere e procederò immediatamente!",
+        "duration": 4220,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      }
+    ],
+    "valutazioni": {
+      "speed": "DA_VALUTARE_MANUALMENTE",
+      "efficiency": "DA_VALUTARE_MANUALMENTE",
+      "no_friction": "DA_VALUTARE_MANUALMENTE"
+    }
+  },
+  {
+    "profilo": "Giulia - Memory Tester",
+    "userId": "test-user-10",
+    "sessionId": "session-10-1761078973737",
+    "messaggi": [
+      {
+        "num": 1,
+        "input": "Progetto Green Park Residence, Milano, 20 unità eco-friendly",
+        "output": "🔄 **Operazioni Completate**\n\n\n❌ **Fallite** (1):\n• business.plan.calculate\n\nCome posso aiutarti ulteriormente?",
+        "duration": 5170,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 2,
+        "input": "Budget 3M, target vendita 5.2M",
+        "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
+        "duration": 4543,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 3,
+        "input": "Fai business plan completo",
+        "output": "🔄 **Operazioni Completate**\n\n\n❌ **Fallite** (1):\n• business.plan.calculate\n\nCome posso aiutarti ulteriormente?",
+        "duration": 4142,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 4,
+        "input": "Come funziona Urbanova? Spiegami features",
+        "output": "Urbanova è un assistente AI avanzato progettato per supportare lo sviluppo immobiliare attraverso una serie di funzionalità potenti e integrate. Ecco una panoramica delle principali caratteristiche:\n\n1. **Analisi Finanziaria Avanzata**:\n   - Calcolo di indicatori finanziari come VAN (Valore Attuale Netto), TIR (Tasso Interno di Rendimento) e DSCR (Debt Service Coverage Ratio).\n   - Analisi di fattibilità per valutare la sostenibilità economica di un progetto.\n\n2. **Gestione Progetti Multi-Fase**:\n   - Creazione e gestione di progetti immobiliari complessi, suddivisi in fasi.\n   - Monitoraggio delle timeline e delle milestone per garantire il rispetto delle scadenze.\n\n3. **Comunicazione Automatizzata con Fornitori**:\n   - Invio di Richieste di Offerta (RDO) e gestione delle comunicazioni con i fornitori.\n   - Generazione di Term Sheet e proposte commerciali.\n\n4. **Monitoraggio Compliance Normativa**:\n   - Verifica della conformità normativa dei progetti.\n   - Aggiornamenti su cambiamenti normativi rilevanti.\n\n5. **Generazione Documentazione Professionale**:\n   - Creazione di documenti come Business Plan, Term Sheet e proposte commerciali in formato PDF o Excel.\n\n6. **Analisi di Mercato e Comparabili**:\n   - Valutazione del mercato immobiliare e analisi dei comparabili per determinare prezzi di vendita e costi di costruzione.\n\n7. **Calcoli Tecnici Edilizi**:\n   - Supporto nei calcoli tecnici per la progettazione e la costruzione.\n\n8. **Analisi di Sensitivity**:\n   - Esecuzione di analisi di sensitivity per valutare l'impatto di variazioni nei costi e nei prezzi sui risultati finanziari.\n\nUrbanova è progettato per essere un collega collaborativo e proattivo, anticipando i bisogni dell'utente e suggerendo i prossimi passi logici nel processo di sviluppo immobiliare.",
+        "duration": 11932,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 5,
+        "input": "Torniamo al progetto, come si chiamava?",
+        "output": "📋 **I Tuoi Progetti** (0 trovati)\n\n\n\n\n\nVuoi aprire un progetto specifico o crearne uno nuovo?",
+        "duration": 3576,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 6,
+        "input": "Quali erano budget e target che ti ho detto?",
+        "output": "Al momento non ho informazioni sui budget e target che mi hai fornito in precedenza, poiché non ci sono conversazioni o progetti attivi registrati nel sistema. Se hai dettagli specifici che desideri condividere, posso aiutarti a impostare un nuovo progetto o analisi.",
+        "duration": 5641,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 7,
+        "input": "Aggiungi certificazione LEED, quanto costa?",
+        "output": "Il costo per ottenere una certificazione LEED (Leadership in Energy and Environmental Design) può variare notevolmente in base a diversi fattori, tra cui la dimensione del progetto, la complessità, la località e il livello di certificazione desiderato (Certified, Silver, Gold, Platinum).\n\nEcco una stima generale dei costi associati alla certificazione LEED:\n\n1. **Registrazione del Progetto**: La registrazione presso il Green Business Certification Inc. (GBCI) può costare tra i 1.200 e i 1.500 USD.\n\n2. **Costi di Certificazione**: I costi di revisione e certificazione possono variare da 2.500 a oltre 10.000 USD, a seconda delle dimensioni del progetto e del livello di certificazione.\n\n3. **Consulenza e Documentazione**: I costi per i consulenti LEED e la preparazione della documentazione possono variare da 20.000 a 50.000 USD o più, a seconda della complessità del progetto.\n\n4. **Implementazione delle Strategie LEED**: I costi per implementare le strategie necessarie per ottenere la certificazione possono variare ampiamente. Questi includono miglioramenti all'efficienza energetica, utilizzo di materiali sostenibili, gestione delle acque, ecc.\n\n5. **Commissioning**: Il processo di commissioning per verificare che tutti i sistemi siano progettati, installati e funzionanti correttamente può aggiungere ulteriori costi.\n\nSe hai un progetto specifico in mente, posso aiutarti a stimare i costi più precisamente. Vuoi procedere con un'analisi dettagliata per il tuo progetto?",
+        "duration": 11487,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 8,
+        "input": "ROI finale considerando tutto?",
+        "output": "🔄 **Operazioni Completate**\n\n\n❌ **Fallite** (1):\n• business.plan.calculate\n\nCome posso aiutarti ulteriormente?",
+        "duration": 4826,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      }
+    ],
+    "valutazioni": {
+      "long_term_memory": "DA_VALUTARE_MANUALMENTE",
+      "context_recall": "DA_VALUTARE_MANUALMENTE",
+      "project_tracking": "DA_VALUTARE_MANUALMENTE"
+    }
+  }
+]

@@ -603,6 +603,7 @@ export class UrbanovaOS2 {
       return {
         success: true,
         response: smartResponse.response,
+        functionCalls: smartResponse.functionCalls || [],
         artifacts: smartResponse.artifacts || [],
         kpis: smartResponse.kpis || [],
         requestId,

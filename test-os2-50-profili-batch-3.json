@@ -1,0 +1,359 @@
+[
+  {
+    "profilo": "Davide - Divagazzioni Continue",
+    "userId": "test-user-11",
+    "sessionId": "session-11-1761079036069",
+    "messaggi": [
+      {
+        "num": 1,
+        "input": "Progetto Torino 4000 mq",
+        "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
+        "duration": 5260,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 2,
+        "input": "A proposito, come sta andando mercato immobiliare Italia?",
+        "output": "Capisco! 💡 Posso aiutarti con progetti immobiliari, business plan, analisi di fattibilità e molto altro.\n\nProva a dirmi qualcosa come:\n• \"Crea un business plan\"\n• \"Analizza questo terreno\"\n• \"Mostra i miei progetti\"\n\nCosa ti serve?",
+        "duration": 4787,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 3,
+        "input": "E i tassi interesse? Impattano i miei calcoli?",
+        "output": "Sì, i tassi di interesse possono avere un impatto significativo sui calcoli finanziari nei progetti immobiliari. Ecco come:\n\n1. **Costo del Debito**: Se il tuo progetto prevede l'uso di finanziamenti, il tasso di interesse influenzerà il costo totale del debito. Un tasso di interesse più alto aumenterà i costi di finanziamento, riducendo il margine di profitto.\n\n2. **Valore Attuale Netto (VAN)**: Il tasso di sconto utilizzato per calcolare il VAN è spesso basato sui tassi di interesse di mercato. Un tasso di sconto più alto riduce il VAN, rendendo il progetto meno attraente.\n\n3. **Tasso Interno di Rendimento (TIR)**: I tassi di interesse influenzano anche il TIR, che è il tasso di rendimento atteso del progetto. Un aumento dei tassi di interesse può rendere più difficile raggiungere un TIR competitivo.\n\n4. **Decisioni di Investimento**: Tassi di interesse più alti possono rendere gli investimenti immobiliari meno attraenti rispetto ad altre opportunità di investimento, come obbligazioni o conti di risparmio.\n\nSe desideri, posso eseguire un'analisi di sensitivity per vedere come variazioni nei tassi di interesse potrebbero influenzare il tuo progetto. Vuoi procedere con questa analisi?",
+        "duration": 8590,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 4,
+        "input": "Comunque torniamo al progetto, fai analisi",
+        "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
+        "duration": 5691,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 5,
+        "input": "Aspetta, mi consigli meglio Torino o Roma?",
+        "output": "Per consigliarti tra Torino e Roma, dovrei considerare diversi fattori come il mercato immobiliare attuale, i costi di costruzione, i prezzi di vendita, e le opportunità di sviluppo in entrambe le città. \n\nEcco alcune considerazioni generali:\n\n- **Roma**: È la capitale e ha un mercato immobiliare più grande e dinamico. I prezzi di vendita possono essere più alti, ma anche i costi di costruzione e il costo del terreno possono essere maggiori. Roma offre una maggiore varietà di progetti, sia residenziali che commerciali.\n\n- **Torino**: Potrebbe offrire opportunità di investimento più convenienti, con costi di ingresso potenzialmente più bassi. Il mercato potrebbe essere meno competitivo rispetto a Roma, ma con un buon potenziale di crescita, specialmente in aree in fase di riqualificazione.\n\nSe hai specifiche esigenze o parametri di progetto, posso eseguire un'analisi di fattibilità per entrambe le città per darti un confronto più dettagliato. Vuoi che proceda con un'analisi?",
+        "duration": 9923,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 6,
+        "input": "Ok Torino, ma zona centrale o periferica?",
+        "output": "Per un'analisi di fattibilità o un business plan, posso procedere con entrambe le opzioni. Vuoi che esegua un'analisi per la zona centrale di Torino, quella periferica, o entrambe?",
+        "duration": 4349,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 7,
+        "input": "Va bene centrale, procedi con BP",
+        "output": "🔄 **Operazioni Completate**\n\n\n❌ **Fallite** (1):\n• business.plan.calculate\n\nCome posso aiutarti ulteriormente?",
+        "duration": 5692,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      }
+    ],
+    "valutazioni": {
+      "digression_handling": "DA_VALUTARE_MANUALMENTE",
+      "context_recovery": "DA_VALUTARE_MANUALMENTE",
+      "patience": "DA_VALUTARE_MANUALMENTE"
+    }
+  },
+  {
+    "profilo": "Elena - Vocale Intensive",
+    "userId": "test-user-12",
+    "sessionId": "session-12-1761079087371",
+    "messaggi": [
+      {
+        "num": 1,
+        "input": "[SIMULA VOCE] Urbanova, analizza terreno Venezia 2500 metri quadri",
+        "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
+        "duration": 4510,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 2,
+        "input": "[VOCE] Quanto potrei guadagnare?",
+        "output": "Per determinare quanto potresti guadagnare da un progetto immobiliare, è necessario eseguire un'analisi di fattibilità e un business plan. Posso iniziare con un'analisi di fattibilità utilizzando parametri predefiniti, come la località, il costo di costruzione e il prezzo di vendita. Procedo con l'analisi?",
+        "duration": 5087,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 3,
+        "input": "[VOCE] Fai business plan",
+        "output": "🔄 **Operazioni Completate**\n\n\n❌ **Fallite** (1):\n• business.plan.calculate\n\nCome posso aiutarti ulteriormente?",
+        "duration": 6800,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 4,
+        "input": "[VOCE] Sensitivity su prezzi vendita",
+        "output": "🔄 **Operazioni Completate**\n\n\n❌ **Fallite** (1):\n• business.plan.sensitivity\n\nCome posso aiutarti ulteriormente?",
+        "duration": 3795,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 5,
+        "input": "Ora scrivo: dammi report completo",
+        "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
+        "duration": 5887,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      }
+    ],
+    "valutazioni": {
+      "voice_handling": "DA_VALUTARE_MANUALMENTE",
+      "mode_switch": "DA_VALUTARE_MANUALMENTE",
+      "context_preservation": "DA_VALUTARE_MANUALMENTE"
+    }
+  },
+  {
+    "profilo": "Matteo - Scenario Complesso",
+    "userId": "test-user-13",
+    "sessionId": "session-13-1761079118457",
+    "messaggi": [
+      {
+        "num": 1,
+        "input": "Terreno 10000 mq + edificio esistente da demolire",
+        "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
+        "duration": 4453,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 2,
+        "input": "Costi demolizione €150k, bonifica €80k",
+        "output": "Se desideri che includa questi costi in un'analisi di fattibilità o in un business plan, posso procedere con l'analisi utilizzando questi dati. Vuoi che li integri in un progetto specifico o che esegua un'analisi generale?",
+        "duration": 4260,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 3,
+        "input": "Posso fare 30 unità ma 10 devono essere social housing",
+        "output": "Per gestire un progetto con 30 unità, di cui 10 destinate a social housing, possiamo procedere con la creazione di un business plan che tenga conto di queste specifiche. Procedo con il calcolo del business plan utilizzando i seguenti parametri:\n\n- Numero totale di unità: 30\n- Unità social housing: 10\n\nProcedo con l'elaborazione del business plan?",
+        "duration": 4132,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 4,
+        "input": "Incentivi comunali €200k se faccio 15% social",
+        "output": "Per integrare gli incentivi comunali di €200k nel tuo progetto, possiamo considerare questo importo come una riduzione dei costi complessivi o come un contributo al capitale. Inoltre, il 15% di social housing potrebbe influenzare il prezzo di vendita medio e i costi di costruzione.\n\nProcedo con l'aggiornamento del business plan includendo questi incentivi e la percentuale di social housing?",
+        "duration": 5070,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 5,
+        "input": "Analizza con tutti questi vincoli",
+        "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
+        "duration": 8295,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 6,
+        "input": "E se convinco comune a ridurre social housing al 10%?",
+        "output": "Per valutare l'impatto di una riduzione della quota di social housing al 10% sul tuo progetto, possiamo eseguire un'analisi di sensitivity. Questo ci permetterà di vedere come cambiano i parametri finanziari chiave, come il VAN (Valore Attuale Netto) e il TIR (Tasso Interno di Rendimento), con questa modifica.\n\nProcedo con l'analisi di sensitivity considerando la riduzione del social housing?",
+        "duration": 5544,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 7,
+        "input": "Confronta i due scenari",
+        "output": "Per confrontare due scenari, ho bisogno di sapere quali scenari specifici vuoi confrontare. Potrebbe trattarsi di scenari di business plan, di acquisto terreno, di costi di costruzione, o altro. Se hai già creato dei business plan o delle analisi di fattibilità, posso eseguire un'analisi di sensitivity o un confronto diretto tra i due. Fammi sapere i dettagli e procederò immediatamente!",
+        "duration": 5265,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      }
+    ],
+    "valutazioni": {
+      "complexity": "DA_VALUTARE_MANUALMENTE",
+      "constraints": "DA_VALUTARE_MANUALMENTE",
+      "scenarios": "DA_VALUTARE_MANUALMENTE"
+    }
+  },
+  {
+    "profilo": "Francesca - Partnership Deal",
+    "userId": "test-user-14",
+    "sessionId": "session-14-1761079162485",
+    "messaggi": [
+      {
+        "num": 1,
+        "input": "Terreno non è mio, accordo con proprietario: lui terreno, io sviluppo",
+        "output": "Per gestire un progetto in cui il proprietario del terreno fornisce il terreno e tu ti occupi dello sviluppo, possiamo considerare diverse opzioni di accordo, come la permuta o un'opzione di acquisto. Posso aiutarti a creare un business plan che includa questi scenari. Procedo con la creazione di un business plan considerando un'opzione di permuta?",
+        "duration": 5640,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 2,
+        "input": "Split 40% lui 60% me sul profit",
+        "output": "Per gestire una divisione del profitto in un progetto immobiliare, possiamo impostare un modello di distribuzione dei profitti. Supponiamo che il profitto totale del progetto sia X. La divisione proposta è 40% per \"lui\" e 60% per \"te\". \n\nEcco come possiamo calcolare la distribuzione:\n\n1. **Profitto totale (X):** Supponiamo che il profitto totale sia X.\n2. **Quota di \"lui\" (40%):** \\(0.4 \\times X\\)\n3. **Quota tua (60%):** \\(0.6 \\times X\\)\n\nSe hai già un business plan o un progetto specifico in mente, posso aiutarti a calcolare la distribuzione esatta basata sui dati attuali. Vuoi procedere con un calcolo specifico o hai bisogno di ulteriori dettagli su un progetto esistente?",
+        "duration": 9170,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 3,
+        "input": "Terreno vale €600k, sviluppo costa €2.1M, vendita €3.5M",
+        "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
+        "duration": 4066,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 4,
+        "input": "Analizza deal considerando partnership",
+        "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
+        "duration": 6453,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 5,
+        "input": "Proprietario vuole 45%, conviene ancora a me?",
+        "output": "Per valutare se la richiesta del proprietario del 45% conviene ancora, è necessario eseguire un'analisi di fattibilità o un business plan che consideri questa nuova condizione. Procedo con un'analisi di sensitivity per vedere l'impatto di questa richiesta sui tuoi ritorni?",
+        "duration": 4755,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 6,
+        "input": "E se propongo di comprare terreno invece? Serve loan €600k",
+        "output": "Per valutare l'impatto dell'acquisto del terreno con un finanziamento di €600k, possiamo eseguire un'analisi di sensitivity sul business plan attuale. Procedo con l'analisi considerando l'acquisto del terreno e l'utilizzo del debito?",
+        "duration": 6909,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 7,
+        "input": "Confronta partnership vs acquisto con debt",
+        "output": "Per confrontare una partnership con l'acquisto tramite debito, possiamo considerare diversi aspetti finanziari e strategici. Ecco un'analisi di base:\n\n### Partnership\n- **Vantaggi:**\n  - **Condivisione del rischio:** I rischi finanziari e operativi sono condivisi tra i partner.\n  - **Accesso a risorse:** Potresti avere accesso a risorse, competenze e network del partner.\n  - **Minor capitale iniziale richiesto:** Potresti non dover investire tutto il capitale da solo.\n\n- **Svantaggi:**\n  - **Condivisione dei profitti:** I profitti devono essere divisi tra i partner.\n  - **Meno controllo:** Potresti avere meno controllo decisionale sul progetto.\n  - **Possibili conflitti:** Differenze di opinione o obiettivi tra i partner possono causare conflitti.\n\n### Acquisto con Debito\n- **Vantaggi:**\n  - **Maggior controllo:** Mantieni il controllo totale sul progetto e sulle decisioni.\n  - **Benefici fiscali:** Gli interessi sul debito possono essere deducibili fiscalmente.\n  - **Potenziale di profitto maggiore:** Non devi condividere i profitti con un partner.\n\n- **Svantaggi:**\n  - **Rischio finanziario:** Sei responsabile del rimborso del debito, indipendentemente dal successo del progetto.\n  - **Impatto sul cash flow:** I pagamenti del debito possono influenzare il flusso di cassa.\n  - **Requisiti di garanzia:** Potrebbe essere necessario fornire garanzie per ottenere il finanziamento.\n\n### Analisi Finanziaria\nPer una valutazione più dettagliata, possiamo eseguire un'analisi finanziaria comparativa che includa:\n- **VAN (Valore Attuale Netto)**\n- **TIR (Tasso Interno di Rendimento)**\n- **DSCR (Debt Service Coverage Ratio)**\n\nVuoi che proceda con un'analisi finanziaria dettagliata per confrontare questi due scenari?",
+        "duration": 11941,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      }
+    ],
+    "valutazioni": {
+      "partnership": "DA_VALUTARE_MANUALMENTE",
+      "deal_structure": "DA_VALUTARE_MANUALMENTE",
+      "financing": "DA_VALUTARE_MANUALMENTE"
+    }
+  },
+  {
+    "profilo": "Andrea - Phased Development",
+    "userId": "test-user-15",
+    "sessionId": "session-15-1761079218427",
+    "messaggi": [
+      {
+        "num": 1,
+        "input": "Terreno 15000 mq, troppo grande per fare tutto subito",
+        "output": "Per un terreno di 15.000 mq, possiamo considerare un approccio di sviluppo a fasi. Questo ti permetterà di gestire meglio i costi e il rischio, oltre a ottimizzare il ritorno sull'investimento. Posso aiutarti a pianificare un business plan che preveda lo sviluppo in più fasi. Vuoi procedere con un'analisi di fattibilità iniziale per capire le potenzialità del terreno?",
+        "duration": 5668,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 2,
+        "input": "Fase 1: 10 unità, Fase 2: 15 unità, Fase 3: 10 unità",
+        "output": "🔄 **Operazioni Completate**\n\n\n❌ **Fallite** (1):\n• business.plan.calculate\n\nCome posso aiutarti ulteriormente?",
+        "duration": 4419,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 3,
+        "input": "Fasi distanti 18 mesi una dall'altra",
+        "output": "Potresti fornirmi maggiori dettagli su cosa intendi per \"fasi distanti 18 mesi una dall'altra\"? Stai parlando di un progetto di sviluppo immobiliare con fasi di costruzione o finanziamento? Se hai bisogno di aiuto per pianificare un progetto o gestire le fasi, fammi sapere come posso assisterti!",
+        "duration": 5547,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 4,
+        "input": "Analizza cashflow multi-fase",
+        "output": "🔄 **Operazioni Completate**\n\n\n❌ **Fallite** (1):\n• business.plan.calculate\n\nCome posso aiutarti ulteriormente?",
+        "duration": 5982,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 5,
+        "input": "Posso usare profit Fase 1 per finanziare Fase 2?",
+        "output": "Sì, è possibile utilizzare i profitti generati dalla Fase 1 di un progetto per finanziare la Fase 2. Questo approccio è comune nei progetti di sviluppo immobiliare multi-fase, dove i ricavi e i profitti di una fase vengono reinvestiti per sostenere le fasi successive.\n\nTuttavia, è importante considerare alcuni aspetti chiave:\n\n1. **Tempistica**: Assicurati che i tempi di completamento e vendita della Fase 1 siano allineati con l'inizio della Fase 2 per evitare ritardi nel finanziamento.\n\n2. **Flusso di Cassa**: Analizza attentamente il flusso di cassa per garantire che ci siano fondi sufficienti disponibili al momento giusto.\n\n3. **Rischi**: Valuta i rischi associati, come eventuali ritardi nelle vendite o costi imprevisti che potrebbero influenzare la disponibilità di fondi.\n\n4. **Finanziamento Esterno**: Considera se è necessario integrare con finanziamenti esterni per coprire eventuali gap di liquidità.\n\nSe desideri, posso aiutarti a creare un business plan dettagliato per valutare la fattibilità di questo approccio. Vuoi procedere con un'analisi più approfondita?",
+        "duration": 11036,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 6,
+        "input": "Sensitivity su timing tra fasi (12-24 mesi)",
+        "output": "Per eseguire un'analisi di sensitivity sul timing tra le fasi di un progetto, è necessario avere un business plan già creato. Procederò con l'analisi di sensitivity considerando un range di 12-24 mesi per il timing tra le fasi. \n\nProcedo con l'analisi di sensitivity?",
+        "duration": 4850,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      },
+      {
+        "num": 7,
+        "input": "Quale timing ottimizza IRR?",
+        "output": "Per ottimizzare l'Internal Rate of Return (IRR) in un progetto immobiliare, è fondamentale gestire con attenzione il timing delle seguenti fasi:\n\n1. **Acquisizione del terreno**: Acquistare il terreno al momento giusto può ridurre i costi iniziali e migliorare il flusso di cassa.\n\n2. **Fase di costruzione**: Ridurre i tempi di costruzione può diminuire i costi di finanziamento e accelerare i ricavi dalle vendite o dagli affitti.\n\n3. **Vendita o affitto delle unità**: Pianificare le vendite o gli affitti in modo da massimizzare i ricavi, magari approfittando di periodi di alta domanda.\n\n4. **Finanziamento**: Strutturare il debito in modo da avere tassi di interesse favorevoli e scadenze che allineano i pagamenti con i flussi di cassa del progetto.\n\n5. **Gestione dei costi operativi**: Minimizzare i costi operativi durante e dopo la costruzione per migliorare il margine operativo.\n\nVuoi che esegua un'analisi di sensitivity per vedere come variazioni nel timing possono influenzare l'IRR del tuo progetto?",
+        "duration": 11831,
+        "toolsUsed": [],
+        "smart": true,
+        "artifacts": 0
+      }
+    ],
+    "valutazioni": {
+      "phasing": "DA_VALUTARE_MANUALMENTE",
+      "cashflow": "DA_VALUTARE_MANUALMENTE",
+      "optimization": "DA_VALUTARE_MANUALMENTE"
+    }
+  }
+]

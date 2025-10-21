@@ -26,6 +26,9 @@ export interface SmartOSResponse {
   success: boolean;
   response?: string;
   functionCalls?: any[];
+  artifacts?: any[];
+  kpis?: any[];
+  plan?: any[];
   requiresConfirmation: boolean;
   reasoning: string;
   confidence: number;
@@ -211,7 +214,10 @@ export class SmartOSOrchestrator {
       return {
         success: guardrailResult.passed,
         response: finalResponse,
-        functionCalls: decision.functionCalls,
+        functionCalls: decision.functionCalls || [],
+        artifacts: functionResults.map(r => r.result) || [],
+        kpis: [],
+        plan: decision.workflow?.steps || [],
         requiresConfirmation: decision.requiresConfirmation,
         reasoning: decision.reasoning,
         confidence: decision.confidence,
