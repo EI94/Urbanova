@@ -315,6 +315,14 @@ export class OpenAIFunctionCallingSystem {
   private buildSystemPrompt(ragContext: any): string {
     const template = URBANOVA_PARAHELP_TEMPLATE;
     
+    // Log critico: verifica memorie nel context
+    console.log(`🔍 [System Prompt] Memorie disponibili: ${ragContext.relevantMemories?.length || 0}`);
+    if (ragContext.relevantMemories && ragContext.relevantMemories.length > 0) {
+      ragContext.relevantMemories.forEach((m: any, i: number) => {
+        console.log(`   ${i+1}. "${m.contextSnippet?.substring(0, 80) || m.memory?.content?.substring(0, 80)}..."`);
+      });
+    }
+    
     return `Sei Urbanova OS, l'assistente AI avanzato per lo sviluppo immobiliare.
 
 🎯 TUA MISSIONE:

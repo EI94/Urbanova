@@ -153,38 +153,28 @@ export class AdvancedRAGSystem {
   }
 
   /**
-   * Cerca memorie rilevanti per un contesto
+   * Restituisce memorie recenti per contesto LLM
+   * LLM-DRIVEN: NO keyword matching, NO similarity threshold
+   * L'LLM decide autonomamente cosa è rilevante
    */
   async searchRelevantMemories(
     query: string,
     context: RAGContext,
-    limit: number = 10
+    limit: number = 20  // Più memorie per LLM
   ): Promise<RAGSearchResult[]> {
     try {
-      // Genera embedding per la query
-      const queryEmbedding = await this.generateEmbedding(query);
+      console.log(`🔍 [RAG] Recupero memorie recenti per user ${context.userContext.userId}...`);
       
-      // Cerca memorie rilevanti
+      // Cerca memorie in Firestore
       const memoriesRef = collection(db, 'os2_rag_memories');
       
-      // Filtra per utente e progetto se specificato
-      let searchQuery;
-      
-      if (context.userContext.projectId) {
-        searchQuery = firestoreQuery(
-          memoriesRef,
-          where('projectId', '==', context.userContext.projectId),
-          orderBy('metadata.timestamp', 'desc'),
-          firestoreLimit(50) // Limita per performance
-        );
-      } else {
-        searchQuery = firestoreQuery(
-          memoriesRef,
-          where('userId', '==', context.userContext.userId),
-          orderBy('metadata.timestamp', 'desc'),
-          firestoreLimit(50)
-        );
-      }
+      // Query semplice: ultime N memorie utente, ordinate per timestamp
+      const searchQuery = firestoreQuery(
+        memoriesRef,
+        where('userId', '==', context.userContext.userId),
+        orderBy('metadata.timestamp', 'desc'),
+        firestoreLimit(limit)
+      );
 
       const snapshot = await getDocs(searchQuery);
       const memories: RAGMemory[] = [];
@@ -193,27 +183,20 @@ export class AdvancedRAGSystem {
         memories.push(doc.data() as RAGMemory);
       });
 
-      // Calcola similarità coseno per ogni memoria
-      const results: RAGSearchResult[] = [];
-      
-      for (const memory of memories) {
-        if (memory.embedding) {
-          const similarity = this.cosineSimilarity(queryEmbedding, memory.embedding);
-          
-          if (similarity >= this.relevanceThreshold) {
-            results.push({
-              memory,
-              relevanceScore: similarity,
-              contextSnippet: this.extractContextSnippet(memory.content, query),
-            });
-          }
-        }
-      }
+      // Converti in RAGSearchResult (NO similarity calc - inutile)
+      const results: RAGSearchResult[] = memories.map((memory, index) => {
+        const freshnessScore = 1.0 - (index / memories.length) * 0.3;
+        
+        return {
+          memory,
+          relevanceScore: freshnessScore, // Score basato SOLO su freshness
+          contextSnippet: memory.content.substring(0, 200), // Snippet lungo per LLM
+        };
+      });
 
-      // Ordina per rilevanza e limita risultati
-      return results
-        .sort((a, b) => b.relevanceScore - a.relevanceScore)
-        .slice(0, limit);
+      console.log(`✅ [RAG] Trovate ${results.length} memorie (LLM decide rilevanza)`);
+      
+      return results;
 
     } catch (error) {
       console.error('❌ [RAG] Errore ricerca Firestore:', error);
@@ -256,10 +239,13 @@ export class AdvancedRAGSystem {
         projectContext = await this.loadProjectContext(context.projectContext.projectId);
       }
 
-      // 3. Carica contesto di mercato se rilevante
+      // 3. Carica contesto di mercato (sempre - LLM decide se usarlo)
       let marketContext;
-      if (this.isMarketRelatedQuery(userMessage)) {
+      try {
         marketContext = await this.loadMarketContext(context.userContext.userId);
+      } catch (error) {
+        // Market context opzionale
+        marketContext = null;
       }
 
       // 4. Genera riassunto conversazione
@@ -357,60 +343,10 @@ export class AdvancedRAGSystem {
   }
 
   /**
-   * Calcola similarità coseno tra due vettori
+   * ELIMINATI: cosineSimilarity, extractContextSnippet, isMarketRelatedQuery
+   * Architettura LLM-DRIVEN pura - NO keyword matching stupido
+   * L'LLM riceve tutte le memorie recenti e decide autonomamente
    */
-  private cosineSimilarity(a: number[], b: number[]): number {
-    if (a.length !== b.length) return 0;
-    
-    let dotProduct = 0;
-    let normA = 0;
-    let normB = 0;
-    
-    for (let i = 0; i < a.length; i++) {
-      dotProduct += a[i] * b[i];
-      normA += a[i] * a[i];
-      normB += b[i] * b[i];
-    }
-    
-    return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
-  }
-
-  /**
-   * Estrae snippet di contesto da un contenuto
-   */
-  private extractContextSnippet(content: string, query: string): string {
-    const queryWords = query.toLowerCase().split(' ');
-    const sentences = content.split(/[.!?]+/);
-    
-    // Trova la frase più rilevante
-    let bestSentence = sentences[0];
-    let maxScore = 0;
-    
-    for (const sentence of sentences) {
-      const sentenceWords = sentence.toLowerCase().split(' ');
-      const score = queryWords.filter(word => sentenceWords.includes(word)).length;
-      
-      if (score > maxScore) {
-        maxScore = score;
-        bestSentence = sentence;
-      }
-    }
-    
-    return bestSentence.trim();
-  }
-
-  /**
-   * Determina se una query è relativa al mercato
-   */
-  private isMarketRelatedQuery(query: string): boolean {
-    const marketKeywords = [
-      'mercato', 'prezzo', 'vendita', 'affitto', 'comparabili',
-      'trend', 'analisi', 'intelligence', 'terreno', 'immobile'
-    ];
-    
-    const lowerQuery = query.toLowerCase();
-    return marketKeywords.some(keyword => lowerQuery.includes(keyword));
-  }
 
   /**
    * Carica contesto progetto

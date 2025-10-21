@@ -63,12 +63,13 @@ export class InMemoryRAGFallback {
   }
 
   /**
-   * Cerca memorie rilevanti usando keyword matching semplice
+   * Restituisce TUTTE le memorie recenti (LLM decide cosa usare)
+   * NO keyword matching - l'LLM è smart abbastanza da capire
    */
   searchRelevantMemories(
     query: string,
     context: RAGContext,
-    limit: number = 10
+    limit: number = 20  // Aumentato per dare più context all'LLM
   ): RAGSearchResult[] {
     const userId = context.userContext.userId;
     const userStore = this.memoryStore[userId];
@@ -78,49 +79,41 @@ export class InMemoryRAGFallback {
       return [];
     }
 
-    console.log(`🔍 [InMemory Fallback] Cercando in ${userStore.conversations.length} memorie...`);
+    console.log(`🔍 [InMemory Fallback] Recupero memorie per user ${userId} (${userStore.conversations.length} totali)`);
 
     // Pulisci memorie vecchie
     this.cleanupOldMemories(userId);
-
-    // Tokenizza query
-    const queryTokens = this.tokenize(query.toLowerCase());
     
-    // Calcola rilevanza per ogni memoria
-    const results: RAGSearchResult[] = [];
-    const queryLower = query.toLowerCase();
-    
-    for (const memory of userStore.conversations) {
-      // FILTRO: Salta memorie troppo recenti (probabilmente la query stessa)
-      const ageMs = Date.now() - memory.metadata.timestamp.getTime();
-      if (ageMs < 2000) { // Ignora memorie < 2 secondi fa
-        console.log(`   ⏭️  Skipping recent memory (${ageMs}ms ago)`);
-        continue;
-      }
-      
-      const contentTokens = this.tokenize(memory.content.toLowerCase());
-      const relevanceScore = this.calculateRelevance(queryTokens, contentTokens);
-      
-      if (relevanceScore > 0.3) { // Threshold più basso di embeddings
-        results.push({
-          memory,
-          relevanceScore,
-          contextSnippet: this.extractSnippet(memory.content, query),
-        });
-      }
-    }
-
-    // Ordina per rilevanza e limita
-    const sortedResults = results
-      .sort((a, b) => b.relevanceScore - a.relevanceScore)
-      .slice(0, limit);
-
-    console.log(`✅ [InMemory Fallback] Trovate ${sortedResults.length} memorie rilevanti`);
-    sortedResults.forEach(r => {
-      console.log(`   - Score: ${r.relevanceScore.toFixed(2)} | ${r.contextSnippet.substring(0, 60)}...`);
+    // Filtra solo per timestamp (evita self-match recenti)
+    const now = Date.now();
+    const validMemories = userStore.conversations.filter(memory => {
+      const ageMs = now - memory.metadata.timestamp.getTime();
+      return ageMs >= 2000; // Ignora memorie < 2s fa (probabilmente query stessa)
     });
 
-    return sortedResults;
+    // Ordina per timestamp DESC (più recenti prima) e limita
+    const sortedMemories = validMemories
+      .sort((a, b) => b.metadata.timestamp.getTime() - a.metadata.timestamp.getTime())
+      .slice(0, limit);
+
+    // Converti in RAGSearchResult (score = freshness)
+    const results: RAGSearchResult[] = sortedMemories.map((memory, index) => {
+      const ageMs = now - memory.metadata.timestamp.getTime();
+      const freshnessScore = 1.0 - (index / sortedMemories.length) * 0.5; // Decrescente ma non troppo
+      
+      return {
+        memory,
+        relevanceScore: freshnessScore, // Score basato su freshness, non keyword
+        contextSnippet: memory.content.substring(0, 200), // Più context per LLM
+      };
+    });
+
+    console.log(`✅ [InMemory Fallback] Restituite ${results.length} memorie recenti (LLM decide rilevanza)`);
+    results.slice(0, 3).forEach(r => {
+      console.log(`   - ${r.contextSnippet.substring(0, 80)}...`);
+    });
+
+    return results;
   }
 
   /**
@@ -212,64 +205,10 @@ export class InMemoryRAGFallback {
   }
 
   /**
-   * Tokenizza testo
+   * ELIMINATI: tokenize, calculateRelevance, extractSnippet
+   * Non servono più - l'LLM decide autonomamente la rilevanza
+   * Architettura LLM-driven pura!
    */
-  private tokenize(text: string): string[] {
-    return text
-      .toLowerCase()
-      .replace(/[^\w\s]/g, ' ')
-      .split(/\s+/)
-      .filter(token => token.length > 2);
-  }
-
-  /**
-   * Calcola rilevanza tra query e contenuto (TF-IDF semplificato)
-   * Bonus per keywords importanti (nomi progetti, numeri, locations)
-   */
-  private calculateRelevance(queryTokens: string[], contentTokens: string[]): number {
-    const contentSet = new Set(contentTokens);
-    let matches = 0;
-    let bonusScore = 0;
-    
-    // Keywords importanti che aumentano score
-    const importantKeywords = ['progetto', 'project', 'residence', 'park', 'tower', 'palace', 'villa', 'palazzo', 'torre'];
-    const locationKeywords = ['roma', 'milano', 'torino', 'firenze', 'napoli', 'bologna', 'venezia'];
-    
-    for (const token of queryTokens) {
-      if (contentSet.has(token)) {
-        matches++;
-        
-        // Bonus per keywords importanti
-        if (importantKeywords.includes(token)) {
-          bonusScore += 0.2;
-        }
-        if (locationKeywords.includes(token)) {
-          bonusScore += 0.3;
-        }
-      }
-    }
-
-    const baseScore = matches / Math.max(queryTokens.length, 1);
-    return Math.min(1.0, baseScore + bonusScore);
-  }
-
-  /**
-   * Estrae snippet rilevante
-   */
-  private extractSnippet(content: string, query: string, maxLength: number = 100): string {
-    const queryLower = query.toLowerCase();
-    const contentLower = content.toLowerCase();
-    
-    const index = contentLower.indexOf(queryLower);
-    
-    if (index !== -1) {
-      const start = Math.max(0, index - 20);
-      const end = Math.min(content.length, index + maxLength);
-      return content.substring(start, end);
-    }
-
-    return content.substring(0, maxLength);
-  }
 
   /**
    * Pulisce memorie vecchie
