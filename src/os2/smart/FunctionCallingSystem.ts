@@ -211,7 +211,7 @@ export class OpenAIFunctionCallingSystem {
         ],
         functions: availableFunctions,
         function_call: 'auto',
-        temperature: 0.1,
+        temperature: 0.05, // Ultra-deterministico per max tool activation
         max_tokens: 2000,
       });
 
