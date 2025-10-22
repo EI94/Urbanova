@@ -7,6 +7,7 @@ import { getRAGSystem, RAGContext } from './RAGSystem';
 import { SkillCatalog } from '../skills/SkillCatalog';
 import { CacheFactory } from '../utils/ResponseCache';
 import { getWorkflowEngine, WorkflowTemplates } from '../workflows/WorkflowEngine';
+import { getContextTracker } from './ConversationContextTracker';
 
 export interface FunctionCall {
   name: string;
@@ -48,6 +49,7 @@ export class OpenAIFunctionCallingSystem {
   private paraHelpEngine: ParaHelpDecisionEngine;
   private ragSystem: any;
   private skillCatalog: SkillCatalog;
+  private contextTracker = getContextTracker();
 
   constructor() {
     this.openai = new OpenAI({
@@ -57,6 +59,41 @@ export class OpenAIFunctionCallingSystem {
     this.ragSystem = getRAGSystem();
     this.skillCatalog = SkillCatalog.getInstance();
     console.log(`🔧 [FunctionCalling] Inizializzato con ${this.skillCatalog.list().length} skill nel catalog`);
+  }
+
+  /**
+   * Mappa tool name a operation type
+   */
+  private mapToolToType(toolName: string): 'feasibility' | 'businessPlan' | 'sensitivity' | 'save' | 'query' {
+    if (toolName.includes('feasibility')) return 'feasibility';
+    if (toolName.includes('business_plan') && toolName.includes('sensitivity')) return 'sensitivity';
+    if (toolName.includes('business_plan')) return 'businessPlan';
+    if (toolName.includes('save')) return 'save';
+    return 'query';
+  }
+
+  /**
+   * Genera summary breve di un'operazione
+   */
+  private generateOperationSummary(toolName: string, inputs: any, result: any): string {
+    if (toolName === 'feasibility_analyze') {
+      const loc = inputs.location || 'Italia';
+      const area = inputs.landArea || '?';
+      return `Analisi fattibilità ${loc} (${area}mq) - ROI: ${result?.roi || '?'}%`;
+    }
+    if (toolName === 'business_plan_calculate') {
+      const name = inputs.projectName || 'Progetto';
+      const units = inputs.units || inputs.totalUnits || '?';
+      return `Business Plan "${name}" (${units} unità)`;
+    }
+    if (toolName === 'project_save') {
+      return `Progetto salvato: "${result?.projectName || inputs.projectName}"`;
+    }
+    if (toolName === 'business_plan_sensitivity') {
+      const variable = inputs.variable || 'vari parametri';
+      return `Sensitivity su ${variable}`;
+    }
+    return `${toolName} eseguito`;
   }
 
   /**
@@ -326,6 +363,17 @@ export class OpenAIFunctionCallingSystem {
           },
         });
 
+        // Registra operazione nel context tracker
+        const sessionId = context.userContext?.sessionId || 'default';
+        this.contextTracker.recordOperation(sessionId, {
+          type: this.mapToolToType(functionCall.name),
+          tool: functionCall.name,
+          inputs: enrichedArgs,
+          result,
+          timestamp: new Date(),
+          summary: this.generateOperationSummary(functionCall.name, enrichedArgs, result)
+        });
+
         // Aggiorna memoria RAG
         await this.ragSystem.updateMemoryFromInteraction({
           userMessage: `Eseguito: ${functionCall.name}`,
@@ -366,7 +414,46 @@ export class OpenAIFunctionCallingSystem {
       });
     }
     
+    // Genera context summary intelligente
+    const sessionId = ragContext.userContext?.sessionId || 'default';
+    const contextSummary = this.contextTracker.generateContextSummary(sessionId);
+    
     return `Sei Urbanova OS, l'assistente AI avanzato per lo sviluppo immobiliare.
+
+🧠 CONTESTO CONVERSAZIONE CORRENTE:
+${contextSummary}
+
+⚡ **RISOLUZIONE RIFERIMENTI IMPLICITI** (USA CONTESTO SOPRA):
+
+PATTERN 1 - Domande COMPARATIVE senza oggetto:
+• "Quale ha miglior ROI?" / "Quale conviene?"
+  → SE ci sono PROGETTI MENZIONATI sopra: usa quelli per confronto
+  → SE c'è ULTIMA OPERAZIONE con risultati: usa quelli
+  → CHIAMA project_query O usa conversation_general con dati memoria
+
+PATTERN 2 - Pronomi VAGHI:
+• "Salva questi dati" / "questo progetto"
+  → Riferimento a ULTIMA OPERAZIONE
+  → CHIAMA project_save con dati da ultima operazione
+  
+PATTERN 3 - Context SWITCH:
+• "No torna indietro, fai X" / "Dimenticalo, fai Y"
+  → Identifica X/Y da località/progetto menzionato
+  → CHIAMA function per X/Y
+  
+PATTERN 4 - Azioni con parametri MANCANTI:
+• "Crea BP dettagliato" senza dati
+  → NON chiedere parametri
+  → USA DEFAULTS + dati da ultima operazione se disponibili
+  → CHIAMA business_plan_calculate
+
+PATTERN 5 - Domande ANALITICHE:
+• "Analizza pro e contro"
+  → SE ci sono opzioni/scenari discussi: usa quelli
+  → CHIAMA feasibility_analyze multi scenario
+  → O conversation_general se troppo vago
+
+Sei Urbanova OS, l'assistente AI avanzato per lo sviluppo immobiliare.
 
 🎯 TUA MISSIONE:
 ${template.purpose.mission}
@@ -561,6 +648,33 @@ User: "Questo ROI è buono?"
 User: "E se non ho tutti i soldi?"
 ✅ CORRETTO: Call business_plan_calculate con financing scenarios
 ❌ SBAGLIATO: Solo teoria su financing
+
+🎯 **ESEMPI EDGE CASE CONTEXT-AWARE**:
+
+User: "Quale ha il miglior ROI?"
+Context: Progetti "Milano", "Roma" menzionati prima
+✅ CORRETTO: Usa MEMORIA/CONTESTO per confrontare Milano vs Roma
+❌ SBAGLIATO: "Dipende..." senza usare contesto
+
+User: "Salva questi dati per dopo"
+Context: Ultima operazione = feasibility_analyze su Napoli
+✅ CORRETTO: Call project_save con projectName da context
+❌ SBAGLIATO: "Quali dati?" (ignorare contesto)
+
+User: "No torna indietro, fai Napoli"
+Context: Napoli menzionato 2 messaggi fa
+✅ CORRETTO: Call feasibility_analyze per Napoli
+❌ SBAGLIATO: "Cosa intendi?" (ignorare menzione)
+
+User: "Quale conviene?"
+Context: Confronto Firenze vs Napoli discusso prima
+✅ CORRETTO: Usa CONTESTO per rispondere O call project_query
+❌ SBAGLIATO: "Tra cosa?" (ignorare context)
+
+User: "Fai BP completo"
+Context: Nessun dato precedente
+✅ CORRETTO: Call business_plan_calculate CON DEFAULTS
+❌ SBAGLIATO: "Ho bisogno di..." (chiedere parametri)
 
 🎯 **DEFAULTS INTELLIGENTI** (USA SEMPRE SE MANCANTI):
 
