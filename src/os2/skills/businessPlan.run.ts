@@ -79,7 +79,7 @@ export type BusinessPlanInput = z.infer<typeof BusinessPlanInputSchema>;
 // ============================================================================
 
 export const meta: SkillMeta = {
-  id: 'business_plan.run',
+  id: 'business_plan_calculate',
   summary: 'Calcola Business Plan completo con VAN, TIR, DSCR, cash flow e scenari multipli',
   visibility: 'global',
   inputsSchema: {

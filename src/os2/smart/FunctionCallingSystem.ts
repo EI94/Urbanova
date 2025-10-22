@@ -56,6 +56,7 @@ export class OpenAIFunctionCallingSystem {
     this.paraHelpEngine = new ParaHelpDecisionEngine(URBANOVA_PARAHELP_TEMPLATE);
     this.ragSystem = getRAGSystem();
     this.skillCatalog = SkillCatalog.getInstance();
+    console.log(`🔧 [FunctionCalling] Inizializzato con ${this.skillCatalog.list().length} skill nel catalog`);
   }
 
   /**
@@ -576,10 +577,14 @@ Ora analizza il messaggio utente e decidi la migliore azione.`;
   private buildFunctionParameters(schema: any): any {
     const properties: any = {};
     
+    // DEBUG: Log schema ricevuto
+    console.log(`🔍 [FunctionCalling] buildFunctionParameters schema keys:`, Object.keys(schema || {}));
+    
     // Se è uno schema Zod shape, salta (non supportato per ora)
     // Questi skill non verranno esposti a OpenAI
     if (schema && typeof schema === 'object' && !schema.type && !schema.properties) {
       console.warn('⚠️  [FunctionCalling] Schema Zod shape non supportato, skill skippato');
+      console.warn('   Schema debug:', JSON.stringify(schema).substring(0, 200));
       return properties;
     }
     
@@ -622,8 +627,8 @@ Ora analizza il messaggio utente e decidi la migliore azione.`;
     
     // Se OpenAI ha chiamato delle funzioni
     if (message.function_call) {
-      // Converte nome function da underscore a punto (feasibility_analyze → feasibility.analyze)
-      const originalName = message.function_call.name.replace(/_/g, '.');
+      // Usa il nome esattamente come OpenAI lo ritorna (con underscore)
+      const originalName = message.function_call.name;
       
       const functionCall: FunctionCall = {
         name: originalName,
@@ -664,6 +669,9 @@ Ora analizza il messaggio utente e decidi la migliore azione.`;
     args: Record<string, any>,
     context: RAGContext
   ): Promise<any> {
+    console.log(`🔍 [FunctionCalling] Cercando skill: ${functionName}`);
+    console.log(`📚 [FunctionCalling] Skill disponibili: ${this.skillCatalog.list().map(s => s.id).join(', ')}`);
+    
     const skill = this.skillCatalog.get(functionName);
     
     if (!skill) {

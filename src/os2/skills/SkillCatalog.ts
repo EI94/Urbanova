@@ -126,9 +126,25 @@ export class SkillCatalog {
   
   /**
    * Ottiene una skill dal catalog
+   * Supporta sia formato con underscore (business_plan.calculate) che con punto (business.plan.calculate)
    */
   public get(skillId: string): Skill | undefined {
-    return this.skills.get(skillId);
+    // Prova con il nome originale
+    let skill = this.skills.get(skillId);
+    
+    // Se non trovato, prova a sostituire punti con underscore
+    if (!skill && skillId.includes('.')) {
+      const alternativeId = skillId.replace(/\./g, '_');
+      skill = this.skills.get(alternativeId);
+    }
+    
+    // Se non trovato, prova a sostituire underscore con punti  
+    if (!skill && skillId.includes('_')) {
+      const alternativeId = skillId.replace(/_/g, '.');
+      skill = this.skills.get(alternativeId);
+    }
+    
+    return skill;
   }
   
   /**
@@ -212,11 +228,14 @@ export class SkillCatalog {
    * Carica skill reali (chiamato da OS2 bootstrap)
    */
   public loadRealSkills(skills: Skill[]): void {
+    console.log(`🔄 [SkillCatalog] Caricamento ${skills.length} skill reali...`);
     skills.forEach(skill => {
+      console.log(`  📦 [SkillCatalog] Carico real skill: ${skill.meta.id}`);
       this.skills.set(skill.meta.id, skill);
     });
     
     console.log(`✅ [SkillCatalog] ${skills.length} skill reali caricate`);
+    console.log(`📊 [SkillCatalog] Totale skill nel catalog: ${this.skills.size}`);
   }
 }
 
@@ -229,7 +248,7 @@ export class SkillCatalog {
  */
 class BusinessPlanCalculateSkill implements Skill<BusinessPlanInput, BusinessPlanOutput> {
   public meta: SkillMeta = {
-    id: 'business_plan.calculate',
+    id: 'business_plan_calculate',
     summary: 'Calcola Business Plan completo con VAN, TIR, DSCR e scenari multipli',
     visibility: 'global',
     inputsSchema: {
@@ -300,7 +319,7 @@ class BusinessPlanCalculateSkill implements Skill<BusinessPlanInput, BusinessPla
  */
 class BusinessPlanSensitivitySkill implements Skill<SensitivityInput, SensitivityOutput> {
   public meta: SkillMeta = {
-    id: 'business_plan.sensitivity',
+    id: 'business_plan_sensitivity',
     summary: 'Esegue analisi di sensitivity su prezzi e costi',
     visibility: 'global',
     inputsSchema: {
@@ -343,7 +362,7 @@ class BusinessPlanSensitivitySkill implements Skill<SensitivityInput, Sensitivit
  */
 class BusinessPlanExportSkill implements Skill<ExportInput, ExportOutput> {
   public meta: SkillMeta = {
-    id: 'business_plan.export',
+    id: 'business_plan_export',
     summary: 'Esporta Business Plan in PDF',
     visibility: 'global',
     inputsSchema: {

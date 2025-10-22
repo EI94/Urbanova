@@ -49,7 +49,7 @@ export type SensitivityInput = z.infer<typeof SensitivityInputSchema>;
 // ============================================================================
 
 export const meta: SkillMeta = {
-  id: 'sensitivity.run',
+  id: 'business_plan_sensitivity',
   summary: 'Esegue analisi di sensitivity su variabili chiave del Business Plan',
   visibility: 'global',
   inputsSchema: SensitivityInputSchema.shape,
