@@ -428,6 +428,9 @@ ESEMPI OBBLIGATORI:
 "Confronta A vs B" → feasibility x2 ✅ (NON: "Per confrontare...")
 "Mostra progetti" → project_list ✅ (NON: "I tuoi progetti sono...")
 "Fai analisi" → feasibility_analyze ✅ (NON: "Posso fare...")
+"Salva come X" → project_save ✅ (NON: project_list!)
+"Salva progetto" → project_save ✅
+"Crea nuovo progetto" → project_create ✅
 
 🔥 ESEMPI CRITICI:
 
@@ -442,6 +445,10 @@ User: "Confronta 3 opzioni"
 User: "Analizza impatto costi +10%"
 ✅ CORRETTO: Call business_plan_sensitivity
 ❌ SBAGLIATO: "L'impatto sarebbe..." (teoria)
+
+User: "Salva questo come MilanoTower"
+✅ CORRETTO: Call project_save con projectName: "MilanoTower"
+❌ SBAGLIATO: Call project_list (sbagliato tool!)
 
 🎯 **DEFAULTS INTELLIGENTI** (USA SEMPRE SE MANCANTI):
 

@@ -8,6 +8,8 @@ import * as termSheetCreate from './termSheet.create';
 import * as rdoCreate from './rdo.create';
 import * as salRecord from './sal.record';
 import * as salesProposal from './sales.proposal';
+import * as projectSave from './project.save';
+import * as projectCreate from './project.create';
 
 // ============================================================================
 // SKILL WRAPPER
@@ -38,6 +40,10 @@ export const SKILLS: Skill[] = [
   createSkill(businessPlanRun.meta, businessPlanRun.invoke),
   createSkill(sensitivityRun.meta, sensitivityRun.invoke),
   createSkill(termSheetCreate.meta, termSheetCreate.invoke),
+  
+  // Project Management Skills
+  createSkill(projectSave.meta, projectSave.invoke),
+  createSkill(projectCreate.meta, projectCreate.invoke),
   
   // Procurement Skills
   createSkill(rdoCreate.meta, rdoCreate.invoke),
@@ -131,4 +137,14 @@ export type {
   SalesProposalInput,
   SalesProposalResult,
 } from './sales.proposal';
+
+export type {
+  ProjectSaveInput,
+  ProjectSaveResult,
+} from './project.save';
+
+export type {
+  ProjectCreateInput,
+  ProjectCreateResult,
+} from './project.create';
 
