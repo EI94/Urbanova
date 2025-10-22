@@ -1,0 +1,84 @@
+{
+  "summary": {
+    "totalMsgs": 107,
+    "shouldActivate": 52,
+    "activated": 52,
+    "missed": 9,
+    "accuracy": "100.0"
+  },
+  "missedDetails": [
+    {
+      "profilo": "Marco - Sviluppatore Base",
+      "msg": "Crea business plan per questo progetto",
+      "hasActionKeyword": true,
+      "detectedKeywords": [
+        "crea"
+      ]
+    },
+    {
+      "profilo": "Giovanni - Investitore Esperto",
+      "msg": "Calcola BP con finanziamento bancario",
+      "hasActionKeyword": true,
+      "detectedKeywords": [
+        "calcola"
+      ]
+    },
+    {
+      "profilo": "Giovanni - Investitore Esperto",
+      "msg": "Waterfall distribution con 3 partner",
+      "hasActionKeyword": true,
+      "detectedKeywords": [
+        "fa"
+      ]
+    },
+    {
+      "profilo": "Laura - Principiante Confusa",
+      "msg": "Salva questi dati per dopo",
+      "hasActionKeyword": true,
+      "detectedKeywords": [
+        "salva"
+      ]
+    },
+    {
+      "profilo": "Alessandro - Multitasker Caotico",
+      "msg": "No torna indietro, fai Napoli",
+      "hasActionKeyword": true,
+      "detectedKeywords": [
+        "fai",
+        "fa"
+      ]
+    },
+    {
+      "profilo": "Francesca - Multilingua",
+      "msg": "Crea business plan dettagliato",
+      "hasActionKeyword": true,
+      "detectedKeywords": [
+        "crea"
+      ]
+    },
+    {
+      "profilo": "Matteo - Memoria Corta",
+      "msg": "Quali erano i numeri dell'analisi?",
+      "hasActionKeyword": true,
+      "detectedKeywords": [
+        "analisi"
+      ]
+    },
+    {
+      "profilo": "Matteo - Memoria Corta",
+      "msg": "Mostrami di nuovo tutto",
+      "hasActionKeyword": true,
+      "detectedKeywords": [
+        "mostra"
+      ]
+    },
+    {
+      "profilo": "Chiara - Strategic Seeker",
+      "msg": "E se faccio mixed-use?",
+      "hasActionKeyword": true,
+      "detectedKeywords": [
+        "fa"
+      ]
+    }
+  ]
+}

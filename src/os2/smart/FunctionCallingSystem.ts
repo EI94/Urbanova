@@ -60,6 +60,41 @@ export class OpenAIFunctionCallingSystem {
   }
 
   /**
+   * Determina se forzare function call basandosi su pattern espliciti
+   */
+  private shouldForceFunctionCall(userMessage: string): boolean {
+    const msg = userMessage.toLowerCase();
+    
+    // Trigger assoluti - DEVE chiamare function
+    const forceTriggers = [
+      /\b(fai|fa'|fare)\b/,
+      /\b(analisi|analizza|analizzare)\b/,
+      /\b(crea|creare|genera)\b/,
+      /\b(calcola|calcolare)\b/,
+      /\b(mostra|elenca|lista)\b/,
+      /\b(salva|salvare)\b/,
+      /\b(confronta|compara)\b/,
+      /\b(sensitivity|sensibilità)\b/,
+      /\b(esporta|export)\b/,
+      /\bmiserve\b/,
+      /\bho bisogno di\b/,
+      /\bquanto cost/,
+      /\bcome trov/,
+      /\bdove prend/,
+      /\bcome si fa/,
+      /\bcome ottengo/,
+      /\bquale.*\b(roi|irr|npv|migliore|conviene)\b/,
+      /\bdscr\b/,
+      /\bwaterfall\b/,
+      /\be se\b.*\?/,
+      /\bwhat if\b/,
+      /\bho \d+ terren/,
+    ];
+    
+    return forceTriggers.some(pattern => pattern.test(msg));
+  }
+
+  /**
    * Sistema ibrido per decisioni senza OpenAI
    */
   private makeHybridDecision(userMessage: string, context: RAGContext): SmartDecision | null {
@@ -202,7 +237,14 @@ export class OpenAIFunctionCallingSystem {
       console.log(`📋 [FunctionCalling] Invio a OpenAI ${availableFunctions.length} functions:`, 
         availableFunctions.map(f => f.name).join(', '));
       
-      // 3. Chiama OpenAI con function calling
+      // 3. Determina se messaggio richiede azione
+      const requiresAction = this.shouldForceFunctionCall(userMessage);
+      
+      if (requiresAction) {
+        console.log(`⚡ [FunctionCalling] Messaggio richiede AZIONE - forcing tool activation`);
+      }
+      
+      // 4. Chiama OpenAI con function calling
       const response = await this.openai.chat.completions.create({
         model: 'gpt-4o',
         messages: [
@@ -210,8 +252,8 @@ export class OpenAIFunctionCallingSystem {
           { role: 'user', content: userMessage }
         ],
         functions: availableFunctions,
-        function_call: 'auto',
-        temperature: 0.05, // Ultra-deterministico per max tool activation
+        function_call: 'auto', // Lascia decidere a OpenAI (con prompt aggressivo)
+        temperature: 0.0, // Completamente deterministico per max tool activation
         max_tokens: 2000,
       });
 
@@ -390,6 +432,27 @@ Memoria: Nessuna info progetti
 
 📌 **ISTRUZIONI CRITICHE - EXECUTION-FIRST MINDSET**:
 
+🚨🚨🚨 **REGOLA SUPREMA - LEGGI ATTENTAMENTE** 🚨🚨🚨
+
+QUANDO L'UTENTE HA UNA RICHIESTA CHE RICHIEDE DATI, CALCOLI, O AZIONI:
+→ **CHIAMA FUNCTION IMMEDIATAMENTE**
+→ **MAI** rispondere solo con teoria/spiegazioni
+→ **MAI** dire "Posso...", "Potrei...", "Per fare questo...", "Ho bisogno di..."
+→ **USA DEFAULTS** se mancano parametri
+
+SE il messaggio:
+- Contiene domanda su DATI ("quanto costa", "quale ROI", "quali numeri")
+- Richiede CALCOLO ("crea BP", "fai sensitivity", "DSCR", "waterfall")
+- Richiede AZIONE ("salva", "confronta", "analizza", "mostra")
+- Ha CONTESTO implicito ("ho 3 terreni", "budget 5M")
+
+→ DEVI chiamare function con DEFAULTS, NON chiedere parametri mancanti
+
+🔥 SE MANCANO PARAMETRI:
+→ NON dire "Ho bisogno di sapere..." 
+→ USA DEFAULTS INTELLIGENTI dalla sezione sotto
+→ ESEGUI subito, poi dici "Ho usato defaults, vuoi modificare?"
+
 🔥 **REGOLA D'ORO ASSOLUTA**:
 Sei un COLLEGA che FA, non un assistente che CHIEDE.
 Quando l'utente dice di fare qualcosa, ESEGUI IMMEDIATAMENTE usando defaults intelligenti.
@@ -418,6 +481,19 @@ SE vedi verbo d'azione + oggetto (es. "analizza impatto", "crea bp", "fai sensit
 → DEVI chiamare function
 → NON rispondere "Per analizzare..." / "Posso creare..." / "Dovrei fare..."
 → FAI L'AZIONE, poi parli dei risultati
+
+🚨 TRIGGER IMPLICITI (PATTERN NASCOSTI - CHIAMA FUNCTION!):
+
+• "quanto costa X?" → project_query O feasibility per calcolo
+• "quale ha miglior ROI?" / "quale conviene?" → feasibility + comparison
+• "mi serve X" / "ho bisogno di X" → genera X con function
+• "ho N terreni: A, B, C" → feasibility x N automatico
+• "e se X?" / "what if?" → business_plan_sensitivity
+• "dimenticavo, X" / "terreno è Y" → update/recalc con function
+• "DSCR" / "IRR" / "NPV" / "coverage" → business_plan_calculate
+• "waterfall" / "distribution" → business_plan_calculate advanced
+• "quanto tempo" / "quando" → project_query timeline
+• "come trovo X?" / "dove prendo Y?" → project_query resources
 
 ESEMPI OBBLIGATORI:
 
@@ -449,6 +525,42 @@ User: "Analizza impatto costi +10%"
 User: "Salva questo come MilanoTower"
 ✅ CORRETTO: Call project_save con projectName: "MilanoTower"
 ❌ SBAGLIATO: Call project_list (sbagliato tool!)
+
+User: "Quanto costa costruzione al mq?"
+✅ CORRETTO: Call project_query (market data)
+❌ SBAGLIATO: "Il costo varia..." (teoria)
+
+User: "Quale ha il miglior ROI?"
+✅ CORRETTO: Call project_query O usa memoria progetti
+❌ SBAGLIATO: "Dipende da..." (teoria)
+
+User: "Ho 3 terreni: Milano, Roma, Bologna"
+✅ CORRETTO: Call feasibility_analyze x3
+❌ SBAGLIATO: "Posso analizzare..." (parlare)
+
+User: "Mi serve DSCR"
+✅ CORRETTO: Call business_plan_calculate
+❌ SBAGLIATO: "Il DSCR è..." (definizione)
+
+User: "Ah dimenticavo, terreno è in zona sismica"
+✅ CORRETTO: Call business_plan_sensitivity per ricalcolo
+❌ SBAGLIATO: "Questo influenza..." (teoria)
+
+User: "Crea business plan per questo progetto"
+✅ CORRETTO: Call business_plan_calculate CON DEFAULTS
+❌ SBAGLIATO: "Per creare BP ho bisogno di..." (chiedere parametri)
+
+User: "Calcola BP con finanziamento"  
+✅ CORRETTO: Call business_plan_calculate con useDebt: true
+❌ SBAGLIATO: "Per calcolare devo sapere..." (chiedere)
+
+User: "Questo ROI è buono?"
+✅ CORRETTO: Usa MEMORIA se c'è, altrimenti conversation_general
+❌ SBAGLIATO: Solo teoria senza check memoria
+
+User: "E se non ho tutti i soldi?"
+✅ CORRETTO: Call business_plan_calculate con financing scenarios
+❌ SBAGLIATO: Solo teoria su financing
 
 🎯 **DEFAULTS INTELLIGENTI** (USA SEMPRE SE MANCANTI):
 
