@@ -285,6 +285,12 @@ export class SmartOSOrchestrator {
           case 'project.list':
             return this.formatProjectListResponse(result);
 
+          case 'project_save':
+            return this.formatProjectSaveResponse(result);
+
+          case 'project_create':
+            return this.formatProjectCreateResponse(result);
+
           default:
             return this.formatGenericFunctionResponse(functionCall.name, result);
         }
@@ -399,6 +405,28 @@ Vuoi aprire un progetto specifico o crearne uno nuovo?`;
   /**
    * Formatta risposta generica per function calls
    */
+  private formatProjectSaveResponse(result: any): string {
+    return `✅ **Progetto Salvato**: "${result.projectName}"
+
+Il progetto è stato salvato con successo! Puoi richiamarlo in qualsiasi momento con il suo nome.
+
+ID Progetto: ${result.projectId}
+
+Come posso aiutarti ulteriormente?`;
+  }
+
+  private formatProjectCreateResponse(result: any): string {
+    const locationInfo = result.location ? ` a ${result.location}` : '';
+    return `✅ **Nuovo Progetto Creato**: "${result.projectName}"${locationInfo}
+
+Il progetto è stato creato con successo!
+
+ID Progetto: ${result.projectId}
+Tipo: ${result.type}
+
+Come posso aiutarti ulteriormente?`;
+  }
+
   private formatGenericFunctionResponse(functionName: string, result: any): string {
     const skillNames: { [key: string]: string } = {
       'business_plan.run': 'Business Plan',
