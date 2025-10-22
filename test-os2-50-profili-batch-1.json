@@ -2,22 +2,34 @@
   {
     "profilo": "Marco - Principiante Assoluto",
     "userId": "test-user-1",
-    "sessionId": "session-1-1761078556293",
+    "sessionId": "session-1-1761089510067",
     "messaggi": [
       {
         "num": 1,
         "input": "Ciao, sono nuovo nello sviluppo immobiliare",
         "output": "Ciao! 👋 Sono l'assistente di Urbanova. Posso aiutarti con:\n\n• 📊 Analisi di fattibilità\n• 📈 Business Plan\n• 🏗️ Gestione progetti\n• 📧 Comunicazioni\n\nCosa posso fare per te oggi?",
-        "duration": 4496,
-        "toolsUsed": [],
+        "duration": 4027,
+        "toolActivation": true,
+        "toolsUsed": [
+          {
+            "name": "conversation.general",
+            "arguments": {
+              "userMessage": "Ciao, sono nuovo nello sviluppo immobiliare",
+              "responseType": "greeting"
+            },
+            "confidence": 0.8,
+            "reasoning": "conversation.general"
+          }
+        ],
         "smart": true,
-        "artifacts": 0
+        "artifacts": 1
       },
       {
         "num": 2,
         "input": "Ho ereditato terreno Roma 3000 mq vicino metro",
-        "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
-        "duration": 6369,
+        "output": "Ottimo! Possedere un terreno in una posizione strategica come Roma, vicino alla metro, offre molte opportunità di sviluppo. Posso aiutarti a valutare la fattibilità di un progetto immobiliare su questo terreno. Procedo con un'analisi di fattibilità utilizzando i dati disponibili?",
+        "duration": 5992,
+        "toolActivation": false,
         "toolsUsed": [],
         "smart": true,
         "artifacts": 0
@@ -25,8 +37,9 @@
       {
         "num": 3,
         "input": "Cosa posso farci? Non so da dove iniziare",
-        "output": "Benvenuto! Sono qui per aiutarti a navigare nel mondo dello sviluppo immobiliare. Ecco alcune cose che possiamo fare insieme:\n\n1. **Analisi di Fattibilità**: Possiamo eseguire un'analisi di fattibilità per valutare se un progetto immobiliare è sostenibile e redditizio.\n\n2. **Business Plan**: Possiamo creare un business plan dettagliato che includa calcoli finanziari come VAN (Valore Attuale Netto), TIR (Tasso Interno di Rendimento) e DSCR (Debt Service Coverage Ratio).\n\n3. **Analisi di Sensitivity**: Possiamo eseguire un'analisi di sensitivity per vedere come le variazioni nei costi o nei prezzi di vendita influenzano la redditività del progetto.\n\n4. **Gestione Progetti**: Possiamo gestire progetti multi-fase, monitorare le scadenze e garantire la conformità normativa.\n\n5. **Comunicazione con Fornitori**: Possiamo automatizzare la comunicazione con i fornitori e inviare richieste di offerta.\n\n6. **Analisi di Mercato**: Possiamo eseguire analisi di mercato per identificare le migliori opportunità di investimento.\n\nSe hai un'idea specifica o un progetto in mente, possiamo iniziare da lì. Altrimenti, possiamo partire con un'analisi di fattibilità per un progetto ipotetico. Fammi sapere come preferisci procedere!",
-        "duration": 7945,
+        "output": "Ciao! 👋 Sono qui per aiutarti a iniziare nel mondo dello sviluppo immobiliare. Ecco alcuni passi che potresti considerare:\n\n1. **Analisi di Fattibilità**: Possiamo iniziare con un'analisi di fattibilità per valutare se un progetto è economicamente sostenibile. Questo include valutare i costi di costruzione, i prezzi di vendita e altri fattori chiave.\n\n2. **Business Plan**: Creare un business plan dettagliato ti aiuterà a pianificare il tuo progetto, stimare i costi e i ricavi, e presentare il progetto a potenziali investitori.\n\n3. **Gestione Progetti**: Una volta che hai un piano, possiamo aiutarti a gestire il progetto, monitorare le scadenze e assicurarti che tutto proceda secondo i piani.\n\n4. **Analisi di Sensitivity**: Questa analisi ti permette di vedere come le variazioni nei costi o nei prezzi di vendita possono influenzare la redditività del tuo progetto.\n\n5. **Compliance Normativa**: Assicurati che il tuo progetto rispetti tutte le normative locali e nazionali.\n\nSe hai un'idea specifica o un progetto in mente, possiamo iniziare con un'analisi di fattibilità. Vuoi procedere con questo?",
+        "duration": 12818,
+        "toolActivation": false,
         "toolsUsed": [],
         "smart": true,
         "artifacts": 0
@@ -35,16 +48,25 @@
         "num": 4,
         "input": "Fammi analisi completa",
         "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
-        "duration": 5963,
-        "toolsUsed": [],
+        "duration": 3744,
+        "toolActivation": true,
+        "toolsUsed": [
+          {
+            "name": "feasibility.analyze",
+            "arguments": {},
+            "confidence": 0.8,
+            "reasoning": "feasibility.analyze"
+          }
+        ],
         "smart": true,
-        "artifacts": 0
+        "artifacts": 1
       },
       {
         "num": 5,
         "input": "E se costruissi 8 unità invece di 10?",
-        "output": "🔄 **Operazioni Completate**\n\n\n❌ **Fallite** (1):\n• business.plan.sensitivity\n\nCome posso aiutarti ulteriormente?",
-        "duration": 3141,
+        "output": "Per valutare l'impatto di costruire 8 unità invece di 10, possiamo eseguire un'analisi di sensitivity sul business plan attuale. Questo ci permetterà di vedere come cambiano i principali indicatori finanziari come il VAN, il TIR e il ROI.\n\nProcedo con l'analisi di sensitivity per vedere l'impatto di questa modifica?",
+        "duration": 4457,
+        "toolActivation": false,
         "toolsUsed": [],
         "smart": true,
         "artifacts": 0
@@ -53,16 +75,31 @@
         "num": 6,
         "input": "Trasforma in business plan dettagliato",
         "output": "🔄 **Operazioni Completate**\n\n\n❌ **Fallite** (1):\n• business.plan.calculate\n\nCome posso aiutarti ulteriormente?",
-        "duration": 6687,
-        "toolsUsed": [],
+        "duration": 8634,
+        "toolActivation": true,
+        "toolsUsed": [
+          {
+            "name": "business.plan.calculate",
+            "arguments": {
+              "projectName": "Progetto Roma",
+              "units": 10,
+              "salePrice": 250000,
+              "constructionCost": 1200000,
+              "landCost": 360000
+            },
+            "confidence": 0.8,
+            "reasoning": "business.plan.calculate"
+          }
+        ],
         "smart": true,
-        "artifacts": 0
+        "artifacts": 1
       },
       {
         "num": 7,
         "input": "Mi serve anche sensitivity per banca",
-        "output": "🔄 **Operazioni Completate**\n\n\n❌ **Fallite** (1):\n• business.plan.sensitivity\n\nCome posso aiutarti ulteriormente?",
-        "duration": 5859,
+        "output": "Per eseguire un'analisi di sensitivity per la banca, possiamo valutare l'impatto delle variazioni nei costi di costruzione o nei prezzi di vendita sul business plan. Procedo con un'analisi di sensitivity su questi parametri? Se hai un progetto specifico in mente, fammi sapere i dettagli.",
+        "duration": 4946,
+        "toolActivation": false,
         "toolsUsed": [],
         "smart": true,
         "artifacts": 0
@@ -70,8 +107,9 @@
       {
         "num": 8,
         "input": "Quali sono i rischi principali?",
-        "output": "Nel contesto dello sviluppo immobiliare, i rischi principali possono includere:\n\n1. **Rischio di mercato**: Cambiamenti nelle condizioni di mercato che possono influenzare la domanda e i prezzi degli immobili.\n\n2. **Rischio finanziario**: Difficoltà nel reperire finanziamenti o variazioni nei tassi di interesse che possono influenzare la redditività del progetto.\n\n3. **Rischio di costruzione**: Problemi durante la fase di costruzione, come ritardi, superamento dei costi o problemi di qualità.\n\n4. **Rischio normativo**: Cambiamenti nelle normative locali o nazionali che possono influenzare la fattibilità o i costi del progetto.\n\n5. **Rischio ambientale**: Problemi legati all'ambiente, come la contaminazione del suolo o restrizioni ambientali.\n\n6. **Rischio operativo**: Inefficienze nella gestione del progetto che possono portare a ritardi o costi aggiuntivi.\n\n7. **Rischio di vendita**: Difficoltà nel vendere le unità al prezzo previsto, influenzando il ritorno sull'investimento.\n\n8. **Rischio di permessi**: Ritardi o difficoltà nell'ottenere i permessi necessari per la costruzione.\n\nPer mitigare questi rischi, è importante condurre un'analisi di fattibilità dettagliata, pianificare accuratamente il progetto e mantenere una comunicazione costante con tutte le parti coinvolte. Vuoi che esegua un'analisi di fattibilità per identificare specificamente i rischi del tuo progetto?",
-        "duration": 10824,
+        "output": "Nel contesto dello sviluppo immobiliare, i rischi principali possono includere:\n\n1. **Rischio di Mercato**: Cambiamenti nella domanda e nell'offerta che possono influenzare i prezzi di vendita e l'assorbimento delle unità.\n\n2. **Rischio Finanziario**: Fluttuazioni nei tassi di interesse e difficoltà nell'ottenere finanziamenti possono influenzare la redditività del progetto.\n\n3. **Rischio di Costruzione**: Superamento dei costi di costruzione previsti o ritardi nei tempi di costruzione possono impattare negativamente sul budget e sui tempi di consegna.\n\n4. **Rischio Normativo**: Cambiamenti nelle normative urbanistiche o nei regolamenti edilizi possono influenzare la fattibilità del progetto.\n\n5. **Rischio di Localizzazione**: Problemi legati alla posizione del terreno, come accessibilità, infrastrutture o vincoli ambientali, possono limitare il potenziale di sviluppo.\n\n6. **Rischio Economico**: Condizioni economiche generali, come recessioni o inflazione, possono ridurre il potere d'acquisto degli acquirenti.\n\n7. **Rischio di Vendita**: Difficoltà nel vendere le unità al prezzo previsto possono ridurre i margini di profitto.\n\n8. **Rischio Legale**: Contenziosi legali o problemi con i diritti di proprietà possono ritardare o bloccare il progetto.\n\nÈ importante effettuare un'analisi di fattibilità dettagliata e pianificare strategie di mitigazione per gestire questi rischi. Vuoi che esegua un'analisi di fattibilità per il tuo progetto?",
+        "duration": 11144,
+        "toolActivation": false,
         "toolsUsed": [],
         "smart": true,
         "artifacts": 0
@@ -88,13 +126,14 @@
   {
     "profilo": "Laura - Indecisa Cronica",
     "userId": "test-user-2",
-    "sessionId": "session-2-1761078615589",
+    "sessionId": "session-2-1761089573838",
     "messaggi": [
       {
         "num": 1,
         "input": "Terreno Milano 4000 mq, non so se vendere o costruire",
-        "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
-        "duration": 4427,
+        "output": "Per aiutarti a decidere se vendere o costruire sul terreno a Milano di 4000 mq, possiamo eseguire un'analisi di fattibilità. Questa analisi ti fornirà una panoramica dei potenziali costi di costruzione, dei ricavi di vendita e del ritorno sull'investimento, confrontandoli con il valore di mercato attuale del terreno.\n\nProcedo con l'analisi di fattibilità utilizzando parametri standard per Milano?",
+        "duration": 5520,
+        "toolActivation": false,
         "toolsUsed": [],
         "smart": true,
         "artifacts": 0
@@ -103,16 +142,25 @@
         "num": 2,
         "input": "Mostrami numeri sviluppo residential",
         "output": "📋 **I Tuoi Progetti** (0 trovati)\n\n\n\n\n\nVuoi aprire un progetto specifico o crearne uno nuovo?",
-        "duration": 4013,
-        "toolsUsed": [],
+        "duration": 3150,
+        "toolActivation": true,
+        "toolsUsed": [
+          {
+            "name": "project.list",
+            "arguments": {},
+            "confidence": 0.8,
+            "reasoning": "project.list"
+          }
+        ],
         "smart": true,
-        "artifacts": 0
+        "artifacts": 1
       },
       {
         "num": 3,
         "input": "Aspetta, e se facessi uffici?",
-        "output": "Se stai considerando di sviluppare un progetto di uffici, posso aiutarti a calcolare un business plan specifico per un progetto commerciale. Procedo con un'analisi di fattibilità per un progetto di uffici utilizzando parametri predefiniti?",
-        "duration": 4495,
+        "output": "Se stai considerando di sviluppare uffici sul terreno a Milano, possiamo eseguire un'analisi di fattibilità specifica per un progetto commerciale. Questo ci aiuterà a capire la redditività e il potenziale di mercato per uffici rispetto ad altre opzioni come residenziale.\n\nProcedo con un'analisi di fattibilità per un progetto di uffici?",
+        "duration": 6181,
+        "toolActivation": false,
         "toolsUsed": [],
         "smart": true,
         "artifacts": 0
@@ -120,8 +168,9 @@
       {
         "num": 4,
         "input": "No aspetta, meglio mixed-use",
-        "output": "Per favore, specifica il contesto in cui desideri applicare il tipo di progetto \"mixed-use\". Vuoi che esegua un'analisi di fattibilità, calcoli un business plan o altro?",
-        "duration": 4301,
+        "output": "Per creare un business plan per un progetto mixed-use, posso procedere con un'analisi completa. Utilizzerò parametri predefiniti e quelli che mi hai fornito. Procedo con il calcolo del business plan per un progetto mixed-use?",
+        "duration": 5123,
+        "toolActivation": false,
         "toolsUsed": [],
         "smart": true,
         "artifacts": 0
@@ -129,8 +178,9 @@
       {
         "num": 5,
         "input": "Confronta tutte e 3 le opzioni",
-        "output": "Per confrontare tutte e tre le opzioni, avrei bisogno di sapere a quali opzioni ti riferisci. Potresti fornirmi maggiori dettagli o specificare le opzioni che desideri confrontare?",
-        "duration": 3639,
+        "output": "Per confrontare tutte e tre le opzioni (vendere il terreno, sviluppare residenziale o sviluppare uffici), possiamo eseguire un'analisi di fattibilità per ciascuna opzione. Questo ci permetterà di valutare i potenziali ritorni finanziari e i rischi associati a ciascuna scelta.\n\nEcco come procederemo:\n\n1. **Vendita del Terreno**:\n   - Valutazione del prezzo di mercato attuale del terreno a Milano.\n\n2. **Sviluppo Residenziale**:\n   - Analisi di fattibilità per un progetto residenziale sul terreno di 4000 mq.\n   - Considerazione di costi di costruzione, prezzo di vendita delle unità, e potenziali ritorni.\n\n3. **Sviluppo Uffici**:\n   - Analisi di fattibilità per un progetto commerciale (uffici) sullo stesso terreno.\n   - Valutazione di costi di costruzione, affitti potenziali, e ritorni attesi.\n\nProcederò con l'analisi di fattibilità per ciascuna opzione. Vuoi che inizi con una di queste in particolare o procedo con tutte e tre contemporaneamente?",
+        "duration": 13327,
+        "toolActivation": false,
         "toolsUsed": [],
         "smart": true,
         "artifacts": 0
@@ -138,8 +188,9 @@
       {
         "num": 6,
         "input": "Quale consigli tu?",
-        "output": "Per poterti consigliare al meglio, avrei bisogno di sapere a quale aspetto del tuo progetto ti riferisci. Ecco alcune opzioni che potrei suggerirti:\n\n1. **Analisi di Fattibilità**: Se stai valutando un nuovo progetto e vuoi capire se è sostenibile.\n2. **Business Plan**: Se hai bisogno di un piano economico dettagliato per il tuo progetto.\n3. **Analisi di Sensitivity**: Se vuoi vedere come variazioni nei costi o nei prezzi influenzano il tuo progetto.\n4. **Term Sheet**: Se hai bisogno di un documento professionale per presentare il progetto a investitori.\n5. **Richiesta di Offerta (RDO)**: Se sei pronto a contattare fornitori per ottenere preventivi.\n\nFammi sapere quale di queste opzioni ti interessa di più, e procederò con l'azione appropriata!",
-        "duration": 6364,
+        "output": "Per aiutarti al meglio, potresti specificare a quale progetto o decisione ti riferisci? Se stai considerando se vendere o costruire sul terreno a Milano, posso eseguire un'analisi di fattibilità per entrambe le opzioni e fornirti un confronto dettagliato. Fammi sapere come preferisci procedere!",
+        "duration": 4592,
+        "toolActivation": false,
         "toolsUsed": [],
         "smart": true,
         "artifacts": 0
@@ -147,17 +198,32 @@
       {
         "num": 7,
         "input": "Ok fai business plan per mixed-use",
-        "output": "🔄 **Operazioni Completate**\n\n\n❌ **Fallite** (1):\n• business.plan.run\n\nCome posso aiutarti ulteriormente?",
-        "duration": 11372,
-        "toolsUsed": [],
+        "output": "🔄 **Operazioni Completate**\n\n\n❌ **Fallite** (1):\n• business.plan.calculate\n\nCome posso aiutarti ulteriormente?",
+        "duration": 4951,
+        "toolActivation": true,
+        "toolsUsed": [
+          {
+            "name": "business.plan.calculate",
+            "arguments": {
+              "projectName": "Progetto Mixed-Use",
+              "units": 10,
+              "salePrice": 250000,
+              "constructionCost": 1200000,
+              "landCost": 360000
+            },
+            "confidence": 0.8,
+            "reasoning": "business.plan.calculate"
+          }
+        ],
         "smart": true,
-        "artifacts": 0
+        "artifacts": 1
       },
       {
         "num": 8,
         "input": "Cambia idea, facciamo residential",
-        "output": "Per procedere con un progetto residenziale, posso calcolare un business plan completo. Utilizzerò i parametri predefiniti per un progetto residenziale, a meno che tu non abbia specifiche particolari da aggiungere. Procedo con il calcolo del business plan?",
-        "duration": 4712,
+        "output": "Per sviluppare un progetto residenziale sul terreno a Milano, possiamo procedere con un'analisi di fattibilità specifica per questo tipo di sviluppo. Utilizzerò parametri predefiniti e quelli che mi hai fornito in precedenza. Procedo con l'analisi?",
+        "duration": 4417,
+        "toolActivation": false,
         "toolsUsed": [],
         "smart": true,
         "artifacts": 0
@@ -174,13 +240,14 @@
   {
     "profilo": "Giuseppe - Tecnico Esigente",
     "userId": "test-user-3",
-    "sessionId": "session-3-1761078666922",
+    "sessionId": "session-3-1761089629109",
     "messaggi": [
       {
         "num": 1,
         "input": "Terreno Firenze 5000 mq, indice 0.8, H max 18m",
-        "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
-        "duration": 4668,
+        "output": "Per il terreno a Firenze con una superficie di 5000 mq, un indice di edificabilità di 0.8 e un'altezza massima di 18 metri, posso eseguire un'analisi di fattibilità per determinare il potenziale di sviluppo. Procedo con l'analisi utilizzando questi parametri?",
+        "duration": 2935,
+        "toolActivation": false,
         "toolsUsed": [],
         "smart": true,
         "artifacts": 0
@@ -189,16 +256,25 @@
         "num": 2,
         "input": "15 unità 80 mq, costruzione 1350 €/mq vendita 3200 €/mq",
         "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
-        "duration": 6968,
-        "toolsUsed": [],
+        "duration": 4957,
+        "toolActivation": true,
+        "toolsUsed": [
+          {
+            "name": "feasibility.analyze",
+            "arguments": {},
+            "confidence": 0.8,
+            "reasoning": "feasibility.analyze"
+          }
+        ],
         "smart": true,
-        "artifacts": 0
+        "artifacts": 1
       },
       {
         "num": 3,
         "input": "Terreno 400k è buon prezzo considerando zona Novoli?",
-        "output": "Per determinare se 400k è un buon prezzo per un terreno nella zona di Novoli, è necessario considerare diversi fattori, tra cui:\n\n1. **Prezzi di mercato attuali**: Confrontare il prezzo del terreno con i prezzi di mercato attuali per terreni simili nella stessa area.\n2. **Potenziale di sviluppo**: Valutare il potenziale di sviluppo del terreno, inclusi i tipi di edifici che possono essere costruiti e il loro valore di mercato.\n3. **Costi di costruzione**: Considerare i costi di costruzione previsti per il tipo di sviluppo pianificato.\n4. **Vincoli normativi**: Verificare eventuali vincoli normativi o restrizioni di zonizzazione che potrebbero influenzare lo sviluppo del terreno.\n\nPosso eseguire un'analisi di fattibilità per aiutarti a valutare meglio il prezzo del terreno. Vuoi procedere con un'analisi di fattibilità per il terreno a Novoli?",
-        "duration": 7600,
+        "output": "Per valutare se 400k è un buon prezzo per un terreno nella zona di Novoli, è importante considerare diversi fattori, tra cui:\n\n1. **Prezzi di mercato**: Confronta il prezzo del terreno con i prezzi medi di mercato nella stessa area. Puoi fare un'analisi dei comparabili per avere un'idea più precisa.\n\n2. **Indice di edificabilità**: Verifica l'indice di edificabilità del terreno. Un indice più alto può giustificare un prezzo più elevato.\n\n3. **Potenziale di sviluppo**: Considera il potenziale di sviluppo del terreno, inclusi i tipi di edifici che possono essere costruiti e la domanda di mercato per tali edifici.\n\n4. **Costi aggiuntivi**: Tieni conto di eventuali costi aggiuntivi, come oneri di urbanizzazione, costi di costruzione e permessi.\n\n5. **Analisi di fattibilità**: Esegui un'analisi di fattibilità per valutare il ritorno sull'investimento (ROI) e il valore attuale netto (NPV).\n\nSe desideri, posso aiutarti a eseguire un'analisi di fattibilità per avere una visione più chiara. Vuoi procedere con un'analisi?",
+        "duration": 10693,
+        "toolActivation": false,
         "toolsUsed": [],
         "smart": true,
         "artifacts": 0
@@ -206,8 +282,9 @@
       {
         "num": 4,
         "input": "Fai sensitivity prezzo terreno 350k-450k step 20k",
-        "output": "Per eseguire un'analisi di sensitivity sul prezzo del terreno con un range di 350k-450k e step di 20k, ho bisogno di sapere a quale progetto applicare questa analisi. Procedo con l'ultimo business plan creato o hai un progetto specifico in mente?",
-        "duration": 4979,
+        "output": "Per eseguire un'analisi di sensitivity sul prezzo del terreno con un range da 350k a 450k e step di 20k, avrei bisogno di sapere a quale progetto specifico applicare questa analisi. Se non hai ancora creato un progetto, posso aiutarti a farlo. Vuoi procedere con la creazione di un nuovo progetto o applicare questa analisi a un progetto esistente?",
+        "duration": 4901,
+        "toolActivation": false,
         "toolsUsed": [],
         "smart": true,
         "artifacts": 0
@@ -215,8 +292,9 @@
       {
         "num": 5,
         "input": "Analizza impatto variazione costi costruzione ±10%",
-        "output": "🔄 **Operazioni Completate**\n\n\n❌ **Fallite** (1):\n• business.plan.sensitivity\n\nCome posso aiutarti ulteriormente?",
-        "duration": 4610,
+        "output": "Per eseguire un'analisi di sensitivity sull'impatto della variazione dei costi di costruzione del ±10%, ho bisogno di sapere a quale progetto specifico applicare questa analisi. Al momento, non ho informazioni sui tuoi progetti attivi.\n\nVuoi che proceda con la lista dei tuoi progetti per selezionare quello corretto?",
+        "duration": 4728,
+        "toolActivation": false,
         "toolsUsed": [],
         "smart": true,
         "artifacts": 0
@@ -225,16 +303,25 @@
         "num": 6,
         "input": "IRR minimo accettabile 16%, valuta fattibilità",
         "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
-        "duration": 4354,
-        "toolsUsed": [],
+        "duration": 4258,
+        "toolActivation": true,
+        "toolsUsed": [
+          {
+            "name": "feasibility.analyze",
+            "arguments": {},
+            "confidence": 0.8,
+            "reasoning": "feasibility.analyze"
+          }
+        ],
         "smart": true,
-        "artifacts": 0
+        "artifacts": 1
       },
       {
         "num": 7,
         "input": "Dammi NPV scontato al 8% e payback period",
-        "output": "Per calcolare il NPV (Net Present Value) scontato all'8% e il payback period, ho bisogno di un business plan specifico su cui lavorare. Procedo con la creazione di un business plan utilizzando i parametri di default, a meno che tu non abbia un progetto specifico in mente. Vuoi che proceda con i valori predefiniti?",
-        "duration": 4673,
+        "output": "Per calcolare il NPV scontato all'8% e il payback period, ho bisogno di eseguire un'analisi di fattibilità o un business plan con i parametri specifici del tuo progetto. \n\nSe hai già un progetto in mente o dei dati specifici, fammi sapere così posso procedere con i calcoli. Altrimenti, posso utilizzare dei valori predefiniti per eseguire l'analisi.",
+        "duration": 5577,
+        "toolActivation": false,
         "toolsUsed": [],
         "smart": true,
         "artifacts": 0
@@ -250,31 +337,48 @@
   {
     "profilo": "Sofia - Multi-Progetto Simultaneo",
     "userId": "test-user-4",
-    "sessionId": "session-4-1761078711786",
+    "sessionId": "session-4-1761089674168",
     "messaggi": [
       {
         "num": 1,
         "input": "Gestisco 3 progetti: Roma 10 unità, Milano 5 negozi, Torino mixed-use",
         "output": "📋 **I Tuoi Progetti** (0 trovati)\n\n\n\n\n\nVuoi aprire un progetto specifico o crearne uno nuovo?",
-        "duration": 4575,
-        "toolsUsed": [],
+        "duration": 4265,
+        "toolActivation": true,
+        "toolsUsed": [
+          {
+            "name": "project.list",
+            "arguments": {},
+            "confidence": 0.8,
+            "reasoning": "project.list"
+          }
+        ],
         "smart": true,
-        "artifacts": 0
+        "artifacts": 1
       },
       {
         "num": 2,
         "input": "Analisi completa progetto Roma",
         "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
-        "duration": 4332,
-        "toolsUsed": [],
+        "duration": 3115,
+        "toolActivation": true,
+        "toolsUsed": [
+          {
+            "name": "feasibility.analyze",
+            "arguments": {},
+            "confidence": 0.8,
+            "reasoning": "feasibility.analyze"
+          }
+        ],
         "smart": true,
-        "artifacts": 0
+        "artifacts": 1
       },
       {
         "num": 3,
         "input": "Ok perfetto, ora passa a Milano",
-        "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
-        "duration": 4842,
+        "output": "Attualmente non ci sono progetti attivi registrati per Milano. Vuoi creare un nuovo progetto o hai bisogno di altre informazioni specifiche su Milano?",
+        "duration": 2834,
+        "toolActivation": false,
         "toolsUsed": [],
         "smart": true,
         "artifacts": 0
@@ -283,16 +387,31 @@
         "num": 4,
         "input": "Business plan negozi Milano",
         "output": "🔄 **Operazioni Completate**\n\n\n❌ **Fallite** (1):\n• business.plan.calculate\n\nCome posso aiutarti ulteriormente?",
-        "duration": 3905,
-        "toolsUsed": [],
+        "duration": 6933,
+        "toolActivation": true,
+        "toolsUsed": [
+          {
+            "name": "business.plan.calculate",
+            "arguments": {
+              "projectName": "Negozi Milano",
+              "units": 5,
+              "salePrice": 250000,
+              "constructionCost": 600000,
+              "landCost": 360000
+            },
+            "confidence": 0.8,
+            "reasoning": "business.plan.calculate"
+          }
+        ],
         "smart": true,
-        "artifacts": 0
+        "artifacts": 1
       },
       {
         "num": 5,
         "input": "Torna a Roma, quali erano ROI e margine?",
-        "output": "📋 **I Tuoi Progetti** (0 trovati)\n\n\n\n\n\nVuoi aprire un progetto specifico o crearne uno nuovo?",
-        "duration": 4046,
+        "output": "Per il progetto a Roma, i risultati dell'analisi di fattibilità sono stati:\n\n- **ROI**: 28.5%\n- **Margine**: 2,000,000 €\n\nSe hai bisogno di ulteriori dettagli o vuoi procedere con un'analisi più approfondita, fammi sapere!",
+        "duration": 4364,
+        "toolActivation": false,
         "toolsUsed": [],
         "smart": true,
         "artifacts": 0
@@ -300,26 +419,43 @@
       {
         "num": 6,
         "input": "Confronta ROI Roma vs Milano",
-        "output": "📋 **I Tuoi Progetti** (0 trovati)\n\n\n\n\n\nVuoi aprire un progetto specifico o crearne uno nuovo?",
-        "duration": 4323,
-        "toolsUsed": [],
+        "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
+        "duration": 6849,
+        "toolActivation": true,
+        "toolsUsed": [
+          {
+            "name": "feasibility.analyze",
+            "arguments": {},
+            "confidence": 0.8,
+            "reasoning": "feasibility.analyze"
+          }
+        ],
         "smart": true,
-        "artifacts": 0
+        "artifacts": 1
       },
       {
         "num": 7,
         "input": "Ora Torino: analisi mixed 12 residential + 3 commercial",
         "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
-        "duration": 4190,
-        "toolsUsed": [],
+        "duration": 4493,
+        "toolActivation": true,
+        "toolsUsed": [
+          {
+            "name": "feasibility.analyze",
+            "arguments": {},
+            "confidence": 0.8,
+            "reasoning": "feasibility.analyze"
+          }
+        ],
         "smart": true,
-        "artifacts": 0
+        "artifacts": 1
       },
       {
         "num": 8,
         "input": "Quale progetto ha migliore risk-adjusted return?",
-        "output": "Per determinare quale progetto ha il miglior \"risk-adjusted return\", è necessario confrontare i progetti esistenti utilizzando metriche come il VAN (Valore Attuale Netto), il TIR (Tasso Interno di Rendimento) e il DSCR (Debt Service Coverage Ratio), tenendo conto del rischio associato a ciascun progetto.\n\nAttualmente, non hai progetti attivi nel sistema. Vuoi creare un nuovo progetto o analizzare un progetto specifico per calcolare il suo risk-adjusted return?",
-        "duration": 5170,
+        "output": "Attualmente non ci sono progetti attivi registrati per confrontare il risk-adjusted return. Vuoi creare un nuovo progetto o hai bisogno di altre informazioni specifiche?",
+        "duration": 4005,
+        "toolActivation": false,
         "toolsUsed": [],
         "smart": true,
         "artifacts": 0
@@ -335,49 +471,82 @@
   {
     "profilo": "Alessandro - Investor Istituzionale",
     "userId": "test-user-5",
-    "sessionId": "session-5-1761078755177",
+    "sessionId": "session-5-1761089719033",
     "messaggi": [
       {
         "num": 1,
         "input": "Cerco deal IRR >18% payback <4 anni per fund immobiliare",
-        "output": "Per trovare un deal immobiliare con un IRR superiore al 18% e un payback inferiore a 4 anni, possiamo iniziare con un'analisi di fattibilità su potenziali progetti. Posso eseguire un'analisi di fattibilità utilizzando parametri predefiniti e poi affinare i risultati per soddisfare i tuoi criteri specifici.\n\nVuoi che proceda con un'analisi di fattibilità iniziale per identificare potenziali progetti?",
-        "duration": 4774,
-        "toolsUsed": [],
+        "output": "📋 **I Tuoi Progetti** (0 trovati)\n\n\n\n\n\nVuoi aprire un progetto specifico o crearne uno nuovo?",
+        "duration": 2922,
+        "toolActivation": true,
+        "toolsUsed": [
+          {
+            "name": "project.list",
+            "arguments": {},
+            "confidence": 0.8,
+            "reasoning": "project.list"
+          }
+        ],
         "smart": true,
-        "artifacts": 0
+        "artifacts": 1
       },
       {
         "num": 2,
         "input": "Opportunità Bologna 8000 mq luxury 25 unità €500k cadauna",
         "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
-        "duration": 5697,
-        "toolsUsed": [],
+        "duration": 4413,
+        "toolActivation": true,
+        "toolsUsed": [
+          {
+            "name": "feasibility.analyze",
+            "arguments": {},
+            "confidence": 0.8,
+            "reasoning": "feasibility.analyze"
+          }
+        ],
         "smart": true,
-        "artifacts": 0
+        "artifacts": 1
       },
       {
         "num": 3,
         "input": "Analizza e dimmi se raggiunge hurdle rate 18%",
         "output": "🏗️ **Analisi di Fattibilità Completata**\n\n✅ Valutazione terreno completata\n📊 Risultati:\n• ROI: 0.285%\n• Margine: 2000000%\n• Payback: 3.2 anni\n\n\n\nVuoi procedere con un Business Plan dettagliato?",
-        "duration": 3887,
-        "toolsUsed": [],
+        "duration": 4233,
+        "toolActivation": true,
+        "toolsUsed": [
+          {
+            "name": "feasibility.analyze",
+            "arguments": {},
+            "confidence": 0.8,
+            "reasoning": "feasibility.analyze"
+          }
+        ],
         "smart": true,
-        "artifacts": 0
+        "artifacts": 1
       },
       {
         "num": 4,
         "input": "Sensitivity su tutti i parametri chiave",
         "output": "✅ **sensitivity.run Completato**\n\nOperazione eseguita con successo. Risultati disponibili.\n\nCome posso aiutarti ulteriormente?",
-        "duration": 3408,
-        "toolsUsed": [],
+        "duration": 3658,
+        "toolActivation": true,
+        "toolsUsed": [
+          {
+            "name": "sensitivity.run",
+            "arguments": {},
+            "confidence": 0.8,
+            "reasoning": "sensitivity.run"
+          }
+        ],
         "smart": true,
-        "artifacts": 0
+        "artifacts": 1
       },
       {
         "num": 5,
         "input": "Exit strategy: bulk sale vs vendita graduale",
-        "output": "Quando si pianifica un'uscita da un progetto immobiliare, è fondamentale considerare le diverse strategie di vendita per massimizzare il ritorno sull'investimento. Ecco un confronto tra la vendita in blocco (bulk sale) e la vendita graduale:\n\n### Vendita in Blocco (Bulk Sale)\n- **Vantaggi:**\n  - **Liquidità Immediata:** Consente di ottenere rapidamente liquidità, riducendo il rischio di mercato.\n  - **Riduzione dei Costi di Vendita:** Meno spese di marketing e commissioni di vendita rispetto a vendite multiple.\n  - **Semplicità Operativa:** Gestione più semplice con un unico acquirente o pochi acquirenti.\n\n- **Svantaggi:**\n  - **Prezzo di Vendita Inferiore:** Spesso comporta uno sconto significativo sul prezzo di mercato per incentivare l'acquirente.\n  - **Dipendenza da Pochi Acquirenti:** Rischio elevato se l'acquirente si ritira o non riesce a finanziare l'acquisto.\n\n### Vendita Graduale\n- **Vantaggi:**\n  - **Prezzo di Vendita Maggiore:** Possibilità di ottenere prezzi più alti vendendo unità singolarmente al dettaglio.\n  - **Flessibilità di Mercato:** Capacità di adattarsi alle condizioni di mercato e ottimizzare i tempi di vendita.\n  - **Diversificazione del Rischio:** Riduce il rischio di dipendere da un unico acquirente.\n\n- **Svantaggi:**\n  - **Tempi di Vendita Più Lunghi:** Richiede più tempo per completare la vendita di tutte le unità.\n  - **Costi di Vendita Maggiori:** Maggiori spese di marketing e commissioni di vendita.\n  - **Gestione Complessa:** Richiede una gestione più attenta e continua delle vendite.\n\n### Considerazioni Finali\nLa scelta tra vendita in blocco e vendita graduale dipende da vari fattori, tra cui:\n- **Condizioni di Mercato:** Se il mercato è in crescita, la vendita graduale può essere più vantaggiosa.\n- **Bisogni di Liquidità:** Se è necessaria liquidità immediata, la vendita in blocco può essere preferibile.\n- **Profilo di Rischio:** La vendita graduale può essere più adatta per chi è disposto a gestire un rischio maggiore per un potenziale ritorno più alto.\n\nSe desideri un'analisi più dettagliata o una simulazione finanziaria per il tuo progetto specifico, posso aiutarti a calcolare un business plan o eseguire un'analisi di sensitivity. Vuoi procedere con una di queste opzioni?",
-        "duration": 15822,
+        "output": "Quando si tratta di definire una strategia di uscita per un progetto immobiliare, ci sono due approcci principali: la vendita in blocco (bulk sale) e la vendita graduale. Ecco un confronto tra i due:\n\n### Vendita in Blocco (Bulk Sale)\n- **Vantaggi:**\n  - **Liquidità Immediata:** Consente di ottenere rapidamente un flusso di cassa significativo.\n  - **Riduzione del Rischio:** Minimizza l'esposizione al mercato immobiliare e alle sue fluttuazioni.\n  - **Semplicità Operativa:** Riduce la complessità gestionale, poiché si gestisce un'unica transazione.\n\n- **Svantaggi:**\n  - **Prezzo Inferiore:** Spesso comporta uno sconto sul prezzo di vendita per incentivare l'acquirente a comprare in blocco.\n  - **Dipendenza da un Unico Acquirente:** Rischio elevato se l'acquirente si ritira o non riesce a finanziare l'acquisto.\n\n### Vendita Graduale\n- **Vantaggi:**\n  - **Prezzo di Vendita Maggiore:** Potenziale per ottenere prezzi più alti vendendo unità singolarmente.\n  - **Flessibilità:** Maggiore controllo sul processo di vendita e possibilità di adattarsi alle condizioni di mercato.\n  - **Diversificazione del Rischio:** Riduce il rischio di dipendere da un unico acquirente.\n\n- **Svantaggi:**\n  - **Rischio di Mercato:** Maggiore esposizione alle fluttuazioni del mercato immobiliare nel tempo.\n  - **Gestione Complessa:** Richiede una gestione continua delle vendite e delle operazioni.\n  - **Flusso di Cassa Ritardato:** I ricavi sono distribuiti su un periodo più lungo.\n\n### Considerazioni Finali\nLa scelta tra vendita in blocco e vendita graduale dipende da vari fattori, tra cui:\n- **Obiettivi Finanziari:** Necessità di liquidità immediata vs. massimizzazione del profitto.\n- **Condizioni di Mercato:** Stabilità e trend del mercato immobiliare locale.\n- **Capacità Gestionale:** Risorse disponibili per gestire vendite multiple nel tempo.\n\nSe desideri un'analisi più dettagliata o una simulazione finanziaria per valutare l'impatto di ciascuna strategia sul tuo progetto, posso aiutarti a eseguire un'analisi di scenario. Vuoi procedere con un'analisi specifica?",
+        "duration": 17442,
+        "toolActivation": false,
         "toolsUsed": [],
         "smart": true,
         "artifacts": 0
@@ -385,8 +554,9 @@
       {
         "num": 6,
         "input": "Analizza impatto leveraged 70% LTV",
-        "output": "Per analizzare l'impatto di un finanziamento con un Loan-to-Value (LTV) del 70%, procederò con un'analisi di sensitivity sul business plan esistente, considerando l'uso del debito. Procedo con l'analisi?",
-        "duration": 4618,
+        "output": "Per analizzare l'impatto di un finanziamento con un Loan-to-Value (LTV) del 70%, procederò con un'analisi di business plan considerando l'uso del debito. Utilizzerò i parametri di default e quelli che hai fornito in precedenza. Procedo con l'analisi?",
+        "duration": 6381,
+        "toolActivation": false,
         "toolsUsed": [],
         "smart": true,
         "artifacts": 0
@@ -394,11 +564,19 @@
       {
         "num": 7,
         "input": "Prepara term sheet per investment committee",
-        "output": "Per preparare un term sheet per l'investment committee, devo prima generare un business plan dettagliato. Procedo con il calcolo del business plan utilizzando i parametri predefiniti?",
-        "duration": 4371,
-        "toolsUsed": [],
+        "output": "🔄 **Operazioni Completate**\n\n\n❌ **Fallite** (1):\n• term.sheet.create\n\nCome posso aiutarti ulteriormente?",
+        "duration": 3490,
+        "toolActivation": true,
+        "toolsUsed": [
+          {
+            "name": "term.sheet.create",
+            "arguments": {},
+            "confidence": 0.8,
+            "reasoning": "term.sheet.create"
+          }
+        ],
         "smart": true,
-        "artifacts": 0
+        "artifacts": 1
       }
     ],
     "valutazioni": {
