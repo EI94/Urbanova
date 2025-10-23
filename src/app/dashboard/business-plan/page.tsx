@@ -36,7 +36,8 @@ import {
   Info,
   Eye,
   Edit,
-  Trash2
+  Trash2,
+  Star
 } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import FeedbackWidget from '@/components/ui/FeedbackWidget';
@@ -285,7 +286,7 @@ export default function BusinessPlanPage() {
       setViewMode('welcome');
     }
   };
-
+  
   /**
    * Carica dati da progetto Feasibility Analysis
    */
@@ -313,69 +314,93 @@ export default function BusinessPlanPage() {
       console.log('📊 [BusinessPlan] Progetto caricato:', feasibilityProject);
 
       // Pre-popolare il form con i dati del progetto di fattibilità
-      const businessPlanData = {
+      const businessPlanData: BusinessPlanInput = {
         projectName: feasibilityProject.name || '',
         location: feasibilityProject.address || '',
-        type: 'RESIDENTIAL' as const, // Default, può essere modificato
+        type: 'RESIDENTIAL' as const,
         totalUnits: feasibilityProject.revenues?.units || 1,
         
-        // Ricavi dal progetto di fattibilità
-        averagePrice: feasibilityProject.revenues?.pricePerSqm ? 
-          feasibilityProject.revenues.pricePerSqm * (feasibilityProject.revenues.averageArea || 100) : 0,
-        salesCommission: 3, // Default
-        discounts: 0, // Default
-        
-        // Costi dal progetto di fattibilità
-        constructionCostPerUnit: feasibilityProject.costs?.pricePerSqm ? 
-          feasibilityProject.costs.pricePerSqm * (feasibilityProject.revenues?.averageArea || 100) : 0,
-        contingency: feasibilityProject.costs?.contingency || 0,
-        
-        // Costi indiretti
-        softCostPercentage: 8, // Default
-        developmentCharges: 0, // Default
-        utilities: 0, // Default
-        
-        // Finanza
-        discountRate: 12, // Default
-        
-        // Finanziamento (campi obbligatori per Business Plan)
-        debt: {
-          enabled: false,
-          amount: 0,
-          interestRate: 4.5,
-          term: 20,
-          ltv: 0,
-          dscr: 1.2,
-          fees: 0
+        // Configurazione ricavi
+        revenueConfig: {
+          method: 'PER_UNIT',
+          averagePrice: feasibilityProject.revenues?.pricePerSqm ? 
+            feasibilityProject.revenues.pricePerSqm * (feasibilityProject.revenues.averageArea || 100) : 0,
+          salesCommission: 3,
+          discounts: 0,
+          salesCalendar: [
+            { period: 't1', units: Math.floor((feasibilityProject.revenues?.units || 1) / 2) },
+            { period: 't2', units: Math.ceil((feasibilityProject.revenues?.units || 1) / 2) }
+          ]
         },
         
-        // Tempi (default)
-        salesCalendar: [
-          { period: 't1', units: Math.floor((feasibilityProject.revenues?.units || 1) / 2) },
-          { period: 't2', units: Math.ceil((feasibilityProject.revenues?.units || 1) / 2) }
-        ],
-        constructionTimeline: [
-          { phase: 'Fondazioni', period: 't0' },
-          { phase: 'Struttura', period: 't1' },
-          { phase: 'Finiture', period: 't2' }
-        ],
+        // Configurazione costi
+        costConfig: {
+          constructionMethod: 'PER_UNIT',
+          constructionCostPerUnit: feasibilityProject.costs?.pricePerSqm ? 
+            feasibilityProject.costs.pricePerSqm * (feasibilityProject.revenues?.averageArea || 100) : 0,
+          contingency: feasibilityProject.costs?.contingency || 0,
+          developmentCharges: {
+            method: 'TOTAL',
+            total: 0,
+            breakdown: {
+              urbanization: 0,
+              utilities: 0,
+              permits: 0,
+              taxes: 0
+            }
+          },
+          softCosts: {
+            percentage: 8,
+            breakdown: {
+              permits: 2,
+              design: 3,
+              supervision: 1,
+              safety: 1,
+              insurance: 1,
+              marketing: 2
+            }
+          }
+        },
         
-        // Scenari terreno (default basato sui dati fattibilità)
+        // Configurazione finanza
+        financeConfig: {
+          discountRate: 12,
+          debt: {
+            enabled: false,
+            amount: 0,
+            interestRate: 4.5,
+            term: 20,
+            ltv: 0,
+            dscr: 1.2,
+            fees: 0,
+            amortizationType: 'FRENCH'
+          }
+        },
+        
+        // Configurazione timing
+        timingConfig: {
+          constructionTimeline: [
+            { phase: 'Fondazioni', period: 't0' },
+            { phase: 'Struttura', period: 't1' },
+            { phase: 'Finiture', period: 't2' }
+          ],
+          permitDelay: 6
+        },
+        
+        // Target
+        targets: {
+          margin: feasibilityProject.targetMargin || 15,
+          minimumDSCR: 1.2
+        },
+        
+        // Scenari terreno
         landScenarios: [{
           id: 'default-scenario',
           name: 'Scenario Base',
           type: 'CASH' as const,
-          landCost: feasibilityProject.costs?.land || 200000,
-          cashContribution: feasibilityProject.costs?.land || 200000,
-          deferredPayment: 0,
-          unitsInPermuta: 0,
-          permutaValue: 0,
-          paymentTiming: 't0' as const
-        }],
-        
-        // Target
-        targetMargin: feasibilityProject.targetMargin || 15,
-        minimumDSCR: 1.2 // Default
+          upfrontPayment: feasibilityProject.costs?.land || 200000,
+          description: 'Scenario Base dal progetto di fattibilità'
+        }]
       };
 
       // Imposta i dati nel form
@@ -420,8 +445,14 @@ export default function BusinessPlanPage() {
    * 💾 SALVA BUSINESS PLAN (CON SANITIZZAZIONE)
    */
   const saveBusinessPlan = async (isDraft: boolean = false) => {
-    if (!bpInput || !currentUser?.uid) {
-      toast('❌ Dati mancanti per il salvataggio');
+    if (!currentUser?.uid) {
+      toast('❌ Utente non autenticato');
+      return;
+    }
+    
+    // Per le bozze, permette il salvataggio anche con dati minimi
+    if (!isDraft && !bpInput) {
+      toast('❌ Dati mancanti per il salvataggio completo');
       return;
     }
 
@@ -434,13 +465,17 @@ export default function BusinessPlanPage() {
       const { addDoc, collection, serverTimestamp } = await import('firebase/firestore');
       
       // Sanitizza i dati per rimuovere valori undefined
-      const sanitizedInput = sanitizeForFirestore(bpInput);
+      const sanitizedInput = bpInput ? sanitizeForFirestore(bpInput) : {};
       const sanitizedOutputs = bpOutputs.length > 0 ? sanitizeForFirestore(bpOutputs) : [];
+      
+      // Per le bozze, crea dati minimi se bpInput è vuoto
+      const projectName = sanitizedInput.projectName || 'Business Plan Bozza';
+      const projectId = sanitizedInput.projectId || `bp_${Date.now()}`;
       
       const businessPlanData = {
         userId: currentUser.uid,
-        projectId: sanitizedInput.projectId || `bp_${Date.now()}`,
-        projectName: sanitizedInput.projectName || 'Business Plan senza nome',
+        projectId: projectId,
+        projectName: projectName,
         input: sanitizedInput,
         outputs: sanitizedOutputs,
         documentType: 'BUSINESS_PLAN',
@@ -474,11 +509,20 @@ export default function BusinessPlanPage() {
   /**
    * 🚀 SALVA AUTOMATICAMENTE IN BOZZA
    */
-  const autoSaveDraft = async () => {
-    if (!bpInput || !currentUser?.uid) return;
+  const autoSaveDraft = async (formData?: BusinessPlanInput) => {
+    if (!currentUser?.uid) return;
     
     try {
       console.log('🔄 [BusinessPlan] Auto-salvataggio bozza...');
+      
+      // Usa i dati del form se forniti, altrimenti usa bpInput
+      const dataToSave = formData || bpInput;
+      
+      // Aggiorna bpInput con i nuovi dati
+      if (dataToSave) {
+        setBpInput(dataToSave);
+      }
+      
       await saveBusinessPlan(true);
     } catch (error) {
       console.error('❌ [BusinessPlan] Errore auto-salvataggio:', error);
@@ -534,7 +578,7 @@ export default function BusinessPlanPage() {
       toast('❌ Errore nella condivisione');
     }
   };
-
+  
   /**
    * 🎯 CALCOLA BUSINESS PLAN
    */
@@ -683,12 +727,12 @@ export default function BusinessPlanPage() {
             {/* Header */}
             <div className="text-center">
               <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                Business Plan
-              </h1>
+                    Business Plan
+                  </h1>
               <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-                Genera, valuta e spiega business plan immobiliari con VAN, TIR, DSCR e leve di negoziazione.
-                <br />
-                <span className="text-base text-gray-500 mt-2 block">Input in 3-5 minuti • Scenari multipli • Sensitivity automatica</span>
+              Genera, valuta e spiega business plan immobiliari con VAN, TIR, DSCR e leve di negoziazione.
+              <br />
+              <span className="text-base text-gray-500 mt-2 block">Input in 3-5 minuti • Scenari multipli • Sensitivity automatica</span>
                 <br />
                 <span className="text-sm text-blue-600 mt-2 block flex items-center justify-center">
                   <CheckCircle className="w-4 h-4 mr-1" />
@@ -711,8 +755,8 @@ export default function BusinessPlanPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {savedBusinessPlans.map((bp) => (
-                    <div key={bp.id} className="bg-gray-50 rounded-xl p-4 border border-gray-200 hover:border-blue-300 transition-colors">
+                  {savedBusinessPlans.map((bp, index) => (
+                    <div key={bp.id} className={`bg-gray-50 rounded-xl p-4 border border-gray-200 hover:border-blue-300 transition-colors ${index === 0 ? 'ring-2 ring-blue-200' : ''}`}>
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-1">
@@ -721,6 +765,12 @@ export default function BusinessPlanPage() {
                               <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full font-medium">
                                 Bozza
                               </span>
+                            )}
+                            {index === 0 && (
+                              <div className="flex items-center space-x-1 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
+                                <Star className="w-3 h-3" />
+                                <span>Più recente</span>
+                              </div>
                             )}
                           </div>
                           <p className="text-sm text-gray-600 mb-2">{bp.location}</p>
@@ -734,7 +784,7 @@ export default function BusinessPlanPage() {
                         </div>
                         <div className="flex flex-col space-y-1">
                           <div className="flex space-x-1">
-                            <button
+              <button
                               onClick={() => viewBusinessPlan(bp.id)}
                               className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
                               title="Visualizza"
@@ -762,8 +812,8 @@ export default function BusinessPlanPage() {
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
-                          </div>
-                          
+          </div>
+
                           {/* Pulsante Crea Progetto */}
                           <Link
                             href={`/dashboard/progetti/nuovo?businessPlanId=${bp.id}&fromBusinessPlan=true`}
@@ -781,11 +831,11 @@ export default function BusinessPlanPage() {
                         <div className="text-center">
                           <div className="font-medium text-green-600">€{formatNumber(bp.bestNPV)}</div>
                           <div className="text-gray-500">VAN</div>
-                        </div>
+                    </div>
                         <div className="text-center">
                           <div className="font-medium text-blue-600">{bp.bestIRR.toFixed(1)}%</div>
                           <div className="text-gray-500">TIR</div>
-                        </div>
+                  </div>
                         <div className="text-center">
                           <div className="font-medium text-purple-600">{bp.bestMargin.toFixed(1)}%</div>
                           <div className="text-gray-500">Margine</div>
@@ -808,35 +858,35 @@ export default function BusinessPlanPage() {
               {/* CTA Cards - Centrata */}
               <div className="flex justify-center">
                 {/* Form Mode - Centrato */}
-                <button
+              <button
                   onClick={() => setViewMode('form')}
                   className="group relative bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl p-8 shadow-lg border-2 border-blue-200 hover:border-blue-500 hover:shadow-2xl transition-all duration-300 hover:scale-105 max-w-md w-full"
-                >
+              >
                   <div className="absolute top-6 right-6 w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
                     <FileText className="w-6 h-6 text-blue-600" />
-                  </div>
-
-                  <div className="text-left">
+                    </div>
+                
+                <div className="text-left">
                     <h3 className="text-2xl font-bold text-gray-900 mb-2">Crea nuovo Business Plan</h3>
-                    <p className="text-gray-600 mb-4">
+                  <p className="text-gray-600 mb-4">
                       Input guidato con defaults intelligenti. Tab organizzati per ricavi, costi, scenari terreno e finanza.
-                    </p>
-                    
+                  </p>
+                  
                     <div className="flex items-center text-blue-600 font-medium group-hover:translate-x-2 transition-transform">
                       <span>Inizia →</span>
                     </div>
+                </div>
+              </button>
                   </div>
-                </button>
-              </div>
 
-              {/* Quick Example */}
+            {/* Quick Example */}
               <div className="mt-12 max-w-2xl mx-auto">
-                <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-                  <div className="flex items-start space-x-3">
+              <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                <div className="flex items-start space-x-3">
                     <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Info className="w-4 h-4 text-blue-600" />
                     </div>
-                    <div>
+                  <div>
                       <div className="text-sm font-medium text-gray-900 mb-1">Come funziona:</div>
                       <p className="text-sm text-gray-600">
                         Compila il form guidato con i dati del tuo progetto immobiliare. L'OS 2.0 ti aiuterà con suggerimenti intelligenti e calcoli automatici per VAN, TIR e scenari multipli.
@@ -846,7 +896,7 @@ export default function BusinessPlanPage() {
                 </div>
               </div>
             </div>
-          </div>
+            </div>
           )}
 
         {/* ============================================================================ */}
@@ -856,12 +906,12 @@ export default function BusinessPlanPage() {
           <div className="animate-fade-in">
             {/* Breadcrumb elegante */}
             <div className="mb-6 flex items-center space-x-2 text-sm">
-              <button
+                    <button
                 onClick={() => setViewMode('welcome')}
                 className="text-gray-500 hover:text-gray-700 transition-colors"
-              >
+                    >
                 Business Plan
-              </button>
+                    </button>
               <ChevronRight className="w-4 h-4 text-gray-400" />
               {savedBusinessPlanId ? (
                 <>
@@ -870,9 +920,9 @@ export default function BusinessPlanPage() {
                   <span className="text-gray-900 font-medium">Modifica</span>
                 </>
               ) : (
-                <span className="text-gray-900 font-medium">Nuovo</span>
+              <span className="text-gray-900 font-medium">Nuovo</span>
               )}
-            </div>
+                </div>
 
             <BusinessPlanForm
               initialData={bpInput as Partial<BusinessPlanInput> | undefined}
@@ -880,11 +930,12 @@ export default function BusinessPlanPage() {
               onSubmit={calculateBusinessPlan}
               onCancel={() => setViewMode('welcome')}
               loading={isCalculating}
+              onAutoSave={autoSaveDraft}
                         />
                       </div>
         )}
         
-
+        
         {/* ============================================================================ */}
         {/* RESULTS VIEW - METRICHE E SCENARI */}
         {/* ============================================================================ */}
@@ -893,13 +944,13 @@ export default function BusinessPlanPage() {
             {/* Header con breadcrumb e actions */}
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <button 
-                  onClick={() => setViewMode('welcome')}
-                  className="text-gray-500 hover:text-gray-700 transition-colors"
-                >
+              <button 
+                onClick={() => setViewMode('welcome')}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+              >
                   <ArrowRight className="w-5 h-5 rotate-180" />
-                </button>
-                <div>
+              </button>
+                      <div>
                   <h1 className="text-3xl font-bold text-gray-900">{bpInput?.projectName}</h1>
                   <p className="text-sm text-gray-600 mt-1">
                     {bpInput?.location} • {bpOutputs.length} scenari analizzati
@@ -909,14 +960,14 @@ export default function BusinessPlanPage() {
                       </span>
                     )}
                   </p>
-                </div>
-              </div>
+                    </div>
+                      </div>
 
               <div className="flex items-center space-x-3">
                 {/* Pulsanti Salva Intelligenti */}
                 {!savedBusinessPlanId ? (
                   <div className="flex items-center space-x-2">
-                    <button
+                        <button
                       onClick={() => saveBusinessPlan(false)}
                       disabled={isSaving}
                       className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-blue-400 transition-colors flex items-center space-x-2"
@@ -932,17 +983,17 @@ export default function BusinessPlanPage() {
                           <span>Salva Completo</span>
                         </>
                       )}
-                    </button>
-                    
-                    <button
+                  </button>
+
+                  <button
                       onClick={() => saveBusinessPlan(true)}
                       disabled={isSaving}
                       className="px-3 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 disabled:bg-gray-50 transition-colors flex items-center space-x-2 text-sm"
-                    >
+                  >
                       <FileText className="w-4 h-4" />
                       <span>Bozza</span>
-                    </button>
-                  </div>
+                  </button>
+                      </div>
                 ) : (
                   <div className="flex items-center space-x-2">
                     <div className="px-4 py-2 bg-green-100 text-green-700 rounded-xl flex items-center space-x-2">
@@ -950,15 +1001,15 @@ export default function BusinessPlanPage() {
                       <span>Salvato</span>
                     </div>
                     
-                    <button
+                <button 
                       onClick={() => saveBusinessPlan(false)}
                       disabled={isSaving}
                       className="px-3 py-2 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 disabled:bg-blue-50 transition-colors flex items-center space-x-2 text-sm"
-                    >
+                >
                       <Download className="w-4 h-4" />
                       <span>Aggiorna</span>
-                    </button>
-                  </div>
+                </button>
+                </div>
                 )}
 
                 <button

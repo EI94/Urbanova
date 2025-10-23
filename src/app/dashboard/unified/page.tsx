@@ -55,6 +55,8 @@ import MarkdownRenderer from '@/components/ui/MarkdownRenderer';
 import { GeographicSearch, GeographicSearchResult } from '@/components/ui/GeographicSearch';
 import { VoiceAIChatGPT, useVoiceAI } from '@/app/components/os2/VoiceAIChatGPT';
 import { ResultMessage } from '@/components/chat/ResultMessage';
+import { ConversationDeleteModal } from '@/components/ui/ConversationDeleteModal';
+import { ConversationList } from '@/components/ui/ConversationList';
 // TEMPORANEAMENTE DISABILITATO: import { InteractiveMap, MapMarker } from '@/components/map/InteractiveMap';
 // TEMPORANEAMENTE DISABILITATO: import { useMapData } from '@/hooks/useMapData';
 
@@ -103,6 +105,58 @@ export default function UnifiedDashboardPage() {
   const [showQuickActions, setShowQuickActions] = useState(true);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   
+  // Conversation deletion
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    sessionId: string;
+    title: string;
+  }>({ isOpen: false, sessionId: '', title: '' });
+  const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Funzioni per gestione conversazioni
+  const handleDeleteConversation = async (sessionId: string) => {
+    try {
+      setIsDeleting(true);
+      
+      // Elimina dal localStorage
+      chatHistoryService.deleteChatSession(sessionId);
+      
+      // Aggiorna stato locale
+      const updatedHistory = chatHistoryService.getChatSessions();
+      setChatHistory(updatedHistory);
+      
+      // Se era la conversazione corrente, resetta
+      if (currentSessionId === sessionId) {
+        setCurrentSessionId(null);
+        setMessages([]);
+      }
+      
+      console.log('✅ [Chat History] Conversazione eliminata:', sessionId);
+      
+      // Mostra feedback positivo
+      // TODO: Aggiungere toast notification
+      
+    } catch (error) {
+      console.error('❌ [Chat History] Errore eliminazione:', error);
+      // TODO: Aggiungere toast di errore
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteClick = (sessionId: string, title: string) => {
+    setDeleteModal({
+      isOpen: true,
+      sessionId,
+      title: title || 'Conversazione senza titolo'
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    await handleDeleteConversation(deleteModal.sessionId);
+    setDeleteModal({ isOpen: false, sessionId: '', title: '' });
+  };
+
   // SessionId persistente per utente
   const getPersistentSessionId = useCallback(() => {
     if (currentUser?.uid) {
@@ -1545,50 +1599,17 @@ export default function UnifiedDashboardPage() {
                     </p>
                   </div>
                 ) : (
-                  chatHistory.map(chat => (
-                    <div
-                      key={chat.id}
-                      className={`p-3 rounded-lg hover:bg-gray-800 transition-colors cursor-pointer group relative ${
-                        currentSessionId === chat.id ? 'bg-gray-800' : ''
-                      }`}
-                      onClick={() => {
-                        setMessages(chat.messages);
-                        setCurrentSessionId(chat.id);
-                        setShowChatHistory(false);
-                        console.log('✅ [Chat History] Sessione caricata:', chat.title || 'Senza titolo');
-                      }}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-white text-sm truncate mb-1">{chat.title || 'Sessione senza titolo'}</h4>
-                          <p className="text-xs text-gray-400 truncate">{chat.preview || 'Nessun preview disponibile'}</p>
-                        </div>
-                        <div className="ml-2 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <span className="text-xs text-gray-500">
-                            {new Date(chat.timestamp).toLocaleDateString('it-IT', { 
-                              day: 'numeric', 
-                              month: 'short' 
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (confirm('Sei sicuro di voler eliminare questa conversazione?')) {
-                            chatHistoryService.deleteChatSession(chat.id);
-                            const updatedHistory = chatHistoryService.getChatSessions();
-                            setChatHistory(updatedHistory);
-                            console.log('✅ [Chat History] Sessione eliminata:', chat.title || 'Senza titolo');
-                          }
-                        }}
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-700 rounded transition-all"
-                        title="Elimina conversazione"
-                      >
-                        <Trash2 className="w-3 h-3 text-gray-400 hover:text-red-400" />
-                      </button>
-                    </div>
-                  ))
+                  <ConversationList
+                    chatHistory={chatHistory}
+                    onSelectConversation={(chat) => {
+                      setMessages(chat.messages);
+                      setCurrentSessionId(chat.id);
+                      setShowChatHistory(false);
+                      console.log('✅ [Chat History] Sessione caricata:', chat.title || 'Senza titolo');
+                    }}
+                    onDeleteConversation={(sessionId: string, title: string) => handleDeleteClick(sessionId, title)}
+                    selectedSessionId={currentSessionId || undefined}
+                  />
                 )}
               </div>
             </div>
@@ -1713,10 +1734,14 @@ export default function UnifiedDashboardPage() {
 
       {/* Workspace Manager Modal - Temporaneamente disabilitato */}
       {/* <WorkspaceManager ... /> */}
-      {/* Result Preview Modal - Rimosso, ora integrato nella chat */}
-      {/* {resultPreview && (
-        <ResultPreview ... />
-      )} */}
+      {/* Conversation Delete Modal */}
+      <ConversationDeleteModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, sessionId: '', title: '' })}
+        onConfirm={handleConfirmDelete}
+        conversationTitle={deleteModal.title}
+        isLoading={isDeleting}
+      />
     </div>
   );
 }
