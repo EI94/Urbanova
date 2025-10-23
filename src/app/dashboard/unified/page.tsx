@@ -53,7 +53,7 @@ import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
 import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 import MarkdownRenderer from '@/components/ui/MarkdownRenderer';
 import { GeographicSearch, GeographicSearchResult } from '@/components/ui/GeographicSearch';
-import { VoiceAIChatGPT, useVoiceAI } from '@/app/components/os2/VoiceAIChatGPT';
+import { useOpenAITTS } from '@/hooks/useOpenAITTS';
 import { ResultMessage } from '@/components/chat/ResultMessage';
 import { ConversationDeleteModal } from '@/components/ui/ConversationDeleteModal';
 import { ConversationList } from '@/components/ui/ConversationList';
@@ -223,20 +223,20 @@ export default function UnifiedDashboardPage() {
   const [showGeographicSearch, setShowGeographicSearch] = useState(false);
   const [showInteractiveMap, setShowInteractiveMap] = useState(false);
   
-  // 🎤 Voice AI Hook - Design Johnny Ive
-  const { handleTranscription, handleSpeaking } = useVoiceAI();
+  // 🎤 OpenAI TTS Hook - Voce naturale di alta qualità
+  const { synthesize, stop, isPlaying: isTTSPlaying, isLoading: isTTSLoading, error: TTSError } = useOpenAITTS();
   
   // Voice mode state
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   
-  // Stato per sintesi vocale
+  // Speaking state (per compatibilità con VoiceAI)
   const [isSpeaking, setIsSpeaking] = useState(false);
   
-  // Gestione sintesi vocale
+  // Gestione sintesi vocale (per compatibilità con VoiceAI)
   const handleSpeakingState = useCallback((speaking: boolean) => {
     setIsSpeaking(speaking);
-    handleSpeaking(speaking);
-  }, [handleSpeaking]);
+    // Non più necessario chiamare handleSpeaking
+  }, []);
   
   // TEMPORANEAMENTE DISABILITATO: Hook per dati mappa
   // const {
@@ -491,30 +491,21 @@ export default function UnifiedDashboardPage() {
       });
       setCurrentSessionId(sessionId);
 
-      // 🎤 Sintesi vocale automatica della risposta - SOLO in modalità voce
+      // 🎤 OpenAI TTS - Sintesi vocale naturale di alta qualità (SOLO in modalità voce)
       if (isVoiceMode) {
-        setTimeout(() => {
-          console.log('🔊 [UNIFIED] Avvio sintesi vocale risposta (modalità voce attiva)...');
-          handleSpeaking(true);
+        console.log('🔊 [UNIFIED] Avvio sintesi vocale OpenAI TTS (modalità voce attiva)...');
+        
+        try {
+          await synthesize(aiResponse.content, {
+            voice: 'nova', // Voce femminile giovane e naturale per italiano
+            speed: 1.0,
+            hd: true // Qualità HD per massima qualità
+          });
           
-          const utterance = new SpeechSynthesisUtterance(aiResponse.content);
-          utterance.lang = 'it-IT';
-          utterance.rate = 0.9;
-          utterance.pitch = 1.0;
-          utterance.volume = 0.8;
-          
-          utterance.onend = () => {
-            console.log('🔊 [UNIFIED] Sintesi vocale completata');
-            handleSpeakingState(false);
-          };
-          
-          utterance.onerror = (event) => {
-            console.error('❌ [UNIFIED] Errore sintesi vocale:', event.error);
-            handleSpeakingState(false);
-          };
-          
-          speechSynthesis.speak(utterance);
-        }, 500);
+          console.log('✅ [UNIFIED] Sintesi vocale OpenAI TTS avviata');
+        } catch (error) {
+          console.error('❌ [UNIFIED] Errore sintesi vocale OpenAI TTS:', error);
+        }
       } else {
         console.log('🔇 [UNIFIED] Sintesi vocale disabilitata (modalità testo)');
       }
@@ -1182,8 +1173,8 @@ export default function UnifiedDashboardPage() {
                       </div>
                     )}
                     
-                    {/* 🎤 Indicatore sintesi vocale - Design Johnny Ive */}
-                    {isSpeaking && (
+                    {/* 🎤 Indicatore OpenAI TTS - Design Johnny Ive */}
+                    {isTTSPlaying && (
                       <div className="flex justify-start">
                         <div className="bg-gradient-to-r from-green-100 to-blue-100 text-gray-900 px-4 py-3 rounded-2xl border border-green-200">
                           <div className="flex items-center space-x-2">
@@ -1192,7 +1183,29 @@ export default function UnifiedDashboardPage() {
                               <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
                               <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                             </div>
-                            <span className="text-sm font-medium">Urbanova OS 2.0 sta parlando...</span>
+                            <span className="text-sm font-medium">🎤 Voce naturale OpenAI</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {isTTSLoading && (
+                      <div className="flex justify-start">
+                        <div className="bg-gradient-to-r from-orange-100 to-yellow-100 text-gray-900 px-4 py-3 rounded-2xl border border-orange-200">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                            <span className="text-sm font-medium">🎤 Generazione audio...</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {TTSError && (
+                      <div className="flex justify-start">
+                        <div className="bg-gradient-to-r from-red-100 to-pink-100 text-gray-900 px-4 py-3 rounded-2xl border border-red-200">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                            <span className="text-sm font-medium">❌ Errore audio: {TTSError}</span>
                           </div>
                         </div>
                       </div>
@@ -1444,8 +1457,8 @@ export default function UnifiedDashboardPage() {
                       </div>
                     )}
                     
-                    {/* 🎤 Indicatore sintesi vocale - Design Johnny Ive */}
-                    {isSpeaking && (
+                    {/* 🎤 Indicatore OpenAI TTS - Design Johnny Ive */}
+                    {isTTSPlaying && (
                       <div className="flex justify-start">
                         <div className="bg-gradient-to-r from-green-100 to-blue-100 text-gray-900 px-4 py-2 rounded-lg border border-green-200">
                           <div className="flex items-center space-x-2">
@@ -1454,7 +1467,29 @@ export default function UnifiedDashboardPage() {
                               <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
                               <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                             </div>
-                            <span className="text-sm font-medium">Urbanova OS 2.0 sta parlando...</span>
+                            <span className="text-sm font-medium">🎤 Voce naturale OpenAI</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {isTTSLoading && (
+                      <div className="flex justify-start">
+                        <div className="bg-gradient-to-r from-orange-100 to-yellow-100 text-gray-900 px-4 py-2 rounded-lg border border-orange-200">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                            <span className="text-sm font-medium">🎤 Generazione audio...</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {TTSError && (
+                      <div className="flex justify-start">
+                        <div className="bg-gradient-to-r from-red-100 to-pink-100 text-gray-900 px-4 py-2 rounded-lg border border-red-200">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                            <span className="text-sm font-medium">❌ Errore audio: {TTSError}</span>
                           </div>
                         </div>
                       </div>

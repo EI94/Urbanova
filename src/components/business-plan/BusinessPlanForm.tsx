@@ -347,6 +347,8 @@ export default function BusinessPlanForm({
         totalRevenue = (formData.totalUnits || 0) * formData.revenueConfig.averagePrice;
       } else if (formData.revenueConfig?.method === 'PER_SQM' && formData.revenueConfig?.pricePerSqm && formData.revenueConfig?.averageUnitSize) {
         totalRevenue = (formData.totalUnits || 0) * formData.revenueConfig.pricePerSqm * formData.revenueConfig.averageUnitSize;
+      } else if (formData.revenueConfig?.method === 'DETAILED' && formData.revenueConfig?.unitMix && formData.revenueConfig.unitMix.length > 0) {
+        totalRevenue = formData.revenueConfig.unitMix.reduce((sum, unit) => sum + ((unit.count || 0) * (unit.price || 0)), 0);
       }
       
       // Calcolo costi
@@ -428,6 +430,10 @@ export default function BusinessPlanForm({
       if (formData.revenueConfig.method === 'TOTAL' && (!formData.revenueConfig?.totalRevenue || formData.revenueConfig.totalRevenue <= 0)) {
         errors.push('Ricavi totali obbligatori');
         fieldErrors.totalRevenue = ['Ricavi totali obbligatori'];
+      }
+      if (formData.revenueConfig.method === 'DETAILED' && (!formData.revenueConfig?.unitMix || formData.revenueConfig.unitMix.length === 0)) {
+        errors.push('Aggiungi almeno un tipo di unità per il mix dettagliato');
+        fieldErrors.unitMix = ['Aggiungi almeno un tipo di unità per il mix dettagliato'];
       }
     }
     
@@ -797,6 +803,138 @@ export default function BusinessPlanForm({
                     />
               </div>
             </div>
+              )}
+              
+              {formData.revenueConfig?.method === 'DETAILED' && (
+                <div className="space-y-6">
+                  <div className="mb-4">
+                    <p className="text-sm text-gray-600 mb-3">
+                      <Info className="w-4 h-4 inline mr-1" />
+                      Definisci il mix dettagliato delle unità con prezzi specifici
+                    </p>
+                  </div>
+                  
+                  {/* Lista unità esistenti */}
+                  {formData.revenueConfig?.unitMix && formData.revenueConfig.unitMix.length > 0 && (
+                    <div className="space-y-3">
+                      {formData.revenueConfig.unitMix.map((unit, index) => (
+                        <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Tipo Unità
+                              </label>
+                              <input
+                                type="text"
+                                value={unit.type || ''}
+                                onChange={(e) => {
+                                  const newUnitMix = [...(formData.revenueConfig?.unitMix || [])];
+                                  newUnitMix[index] = { ...unit, type: e.target.value };
+                                  updateFormData('revenueConfig.unitMix', newUnitMix);
+                                }}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                placeholder="es. Bilocale"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Quantità
+                              </label>
+                              <input
+                                type="number"
+                                value={unit.count || ''}
+                                onChange={(e) => {
+                                  const newUnitMix = [...(formData.revenueConfig?.unitMix || [])];
+                                  newUnitMix[index] = { ...unit, count: parseInt(e.target.value) || 0 };
+                                  updateFormData('revenueConfig.unitMix', newUnitMix);
+                                }}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                placeholder="es. 10"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Prezzo (€)
+                              </label>
+                              <input
+                                type="number"
+                                value={unit.price || ''}
+                                onChange={(e) => {
+                                  const newUnitMix = [...(formData.revenueConfig?.unitMix || [])];
+                                  newUnitMix[index] = { ...unit, price: parseFloat(e.target.value) || 0 };
+                                  updateFormData('revenueConfig.unitMix', newUnitMix);
+                                }}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                placeholder="es. 250000"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Superficie (mq)
+                              </label>
+                              <div className="flex space-x-2">
+                                <input
+                                  type="number"
+                                  value={unit.size || ''}
+                                  onChange={(e) => {
+                                    const newUnitMix = [...(formData.revenueConfig?.unitMix || [])];
+                                    newUnitMix[index] = { ...unit, size: parseFloat(e.target.value) || 0 };
+                                    updateFormData('revenueConfig.unitMix', newUnitMix);
+                                  }}
+                                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                  placeholder="es. 80"
+                                />
+                                <button
+                                  onClick={() => {
+                                    const newUnitMix = [...(formData.revenueConfig?.unitMix || [])];
+                                    newUnitMix.splice(index, 1);
+                                    updateFormData('revenueConfig.unitMix', newUnitMix);
+                                  }}
+                                  className="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                                  title="Rimuovi unità"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* Pulsante per aggiungere nuova unità */}
+                  <button
+                    onClick={() => {
+                      const newUnitMix = [...(formData.revenueConfig?.unitMix || [])];
+                      newUnitMix.push({
+                        type: '',
+                        count: 1,
+                        price: 0,
+                        size: 0
+                      });
+                      updateFormData('revenueConfig.unitMix', newUnitMix);
+                    }}
+                    className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-green-400 hover:text-green-600 transition-colors flex items-center justify-center space-x-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Aggiungi Tipo Unità</span>
+                  </button>
+                  
+                  {/* Riepilogo totale */}
+                  {formData.revenueConfig?.unitMix && formData.revenueConfig.unitMix.length > 0 && (
+                    <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-green-800">
+                          Totale Unità: {formData.revenueConfig.unitMix.reduce((sum, unit) => sum + (unit.count || 0), 0)}
+                        </span>
+                        <span className="text-sm font-medium text-green-800">
+                          Ricavi Totali: {formData.revenueConfig.unitMix.reduce((sum, unit) => sum + ((unit.count || 0) * (unit.price || 0)), 0).toLocaleString('it-IT')} €
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             
               {/* Parametri aggiuntivi */}
@@ -1299,7 +1437,306 @@ export default function BusinessPlanForm({
           </SectionCard>
         )}
         
-        {/* Altri tabs continueranno... */}
+        {/* TAB TERRENO */}
+        {activeTab === 'land' && (
+          <SectionCard
+            title="Scenari Terreno"
+            icon={<MapPin className="w-5 h-5 text-green-600" />}
+            helpText="Definisci gli scenari di acquisizione del terreno"
+          >
+            <div className="space-y-6">
+              
+              {/* Lista scenari esistenti */}
+              {landScenarios.length > 0 && (
+                <div className="space-y-4">
+                  {landScenarios.map((scenario, index) => (
+                    <div key={scenario.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900 mb-1">{scenario.name}</h4>
+                          <p className="text-sm text-gray-600 mb-2">{scenario.description}</p>
+                          <div className="flex items-center space-x-4 text-xs text-gray-500">
+                            <span>Tipo: {scenario.type}</span>
+                            <span>Pagamento: {scenario.upfrontPayment?.toLocaleString('it-IT')} €</span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => removeLandScenario(scenario.id)}
+                          className="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Rimuovi scenario"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {/* Pulsante per aggiungere nuovo scenario */}
+              <button
+                onClick={() => addLandScenario()}
+                className="w-full py-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-green-400 hover:text-green-600 transition-colors flex items-center justify-center space-x-2"
+              >
+                <Plus className="w-5 h-5" />
+                <span>Aggiungi Scenario Terreno</span>
+              </button>
+              
+              {landScenarios.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <MapPin className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <p className="text-lg font-medium mb-2">Nessuno scenario terreno definito</p>
+                  <p className="text-sm">Aggiungi almeno uno scenario per procedere con il Business Plan</p>
+                </div>
+              )}
+            </div>
+          </SectionCard>
+        )}
+        
+        {/* TAB FINANZA */}
+        {activeTab === 'finance' && (
+          <SectionCard
+            title="Configurazione Finanziaria"
+            icon={<Landmark className="w-5 h-5 text-purple-600" />}
+            helpText="Configura i parametri finanziari e di finanziamento"
+          >
+            <div className="space-y-6">
+              
+              {/* Tasso di sconto */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tasso di Sconto (%)
+                </label>
+                <input
+                  type="number"
+                  value={formData.financeConfig?.discountRate || ''}
+                  onChange={(e) => updateFormData('financeConfig.discountRate', parseFloat(e.target.value) || 0)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="es. 12"
+                />
+                <p className="mt-1 text-xs text-gray-500">Tasso utilizzato per calcolare il valore attuale netto</p>
+              </div>
+              
+              {/* Finanziamento */}
+              <div className="bg-purple-50 rounded-xl p-6 border border-purple-200">
+                <div className="flex items-center space-x-2 mb-4">
+                  <Landmark className="w-5 h-5 text-purple-600" />
+                  <h3 className="text-lg font-semibold text-gray-900">Finanziamento</h3>
+                  <HelpTooltip text="Configura i parametri del finanziamento bancario" />
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="checkbox"
+                      id="debt-enabled"
+                      checked={formData.financeConfig?.debt?.enabled || false}
+                      onChange={(e) => updateFormData('financeConfig.debt.enabled', e.target.checked)}
+                      className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                    />
+                    <label htmlFor="debt-enabled" className="text-sm font-medium text-gray-700">
+                      Abilita finanziamento bancario
+                    </label>
+                  </div>
+                  
+                  {formData.financeConfig?.debt?.enabled && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Importo Finanziamento (€)
+                        </label>
+                        <input
+                          type="number"
+                          value={formData.financeConfig?.debt?.amount || ''}
+                          onChange={(e) => updateFormData('financeConfig.debt.amount', parseFloat(e.target.value) || 0)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                          placeholder="es. 2000000"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Tasso di Interesse (%)
+                        </label>
+                        <input
+                          type="number"
+                          value={formData.financeConfig?.debt?.interestRate || ''}
+                          onChange={(e) => updateFormData('financeConfig.debt.interestRate', parseFloat(e.target.value) || 0)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                          placeholder="es. 4.5"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Durata (anni)
+                        </label>
+                        <input
+                          type="number"
+                          value={formData.financeConfig?.debt?.term || ''}
+                          onChange={(e) => updateFormData('financeConfig.debt.term', parseInt(e.target.value) || 0)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                          placeholder="es. 20"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          LTV (%)
+                        </label>
+                        <input
+                          type="number"
+                          value={formData.financeConfig?.debt?.ltv || ''}
+                          onChange={(e) => updateFormData('financeConfig.debt.ltv', parseFloat(e.target.value) || 0)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                          placeholder="es. 70"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </SectionCard>
+        )}
+        
+        {/* TAB TIMING */}
+        {activeTab === 'timing' && (
+          <SectionCard
+            title="Configurazione Timing"
+            icon={<Clock className="w-5 h-5 text-orange-600" />}
+            helpText="Definisci i tempi di costruzione e permessi"
+          >
+            <div className="space-y-6">
+              
+              {/* Timeline costruzione */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Durata Costruzione (mesi)
+                </label>
+                <input
+                  type="number"
+                  value={formData.timingConfig?.constructionTimeline || ''}
+                  onChange={(e) => updateFormData('timingConfig.constructionTimeline', parseInt(e.target.value) || 0)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="es. 18"
+                />
+                <p className="mt-1 text-xs text-gray-500">Durata totale del cantiere in mesi</p>
+              </div>
+              
+              {/* Ritardo permessi */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ritardo Permessi (mesi)
+                </label>
+                <input
+                  type="number"
+                  value={formData.timingConfig?.permitDelay || ''}
+                  onChange={(e) => updateFormData('timingConfig.permitDelay', parseInt(e.target.value) || 0)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="es. 6"
+                />
+                <p className="mt-1 text-xs text-gray-500">Ritardo medio per ottenere i permessi</p>
+              </div>
+              
+              {/* Date milestone */}
+              <div className="bg-orange-50 rounded-xl p-6 border border-orange-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Date Milestone</h3>
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Inizio Lavori
+                      </label>
+                      <input
+                        type="date"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Fine Lavori
+                      </label>
+                      <input
+                        type="date"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </SectionCard>
+        )}
+        
+        {/* TAB TARGET */}
+        {activeTab === 'targets' && (
+          <SectionCard
+            title="Target e Obiettivi"
+            icon={<Target className="w-5 h-5 text-red-600" />}
+            helpText="Definisci gli obiettivi finanziari del progetto"
+          >
+            <div className="space-y-6">
+              
+              {/* Target margine */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Margine Target (%)
+                </label>
+                <input
+                  type="number"
+                  value={formData.targets?.margin || ''}
+                  onChange={(e) => updateFormData('targets.margin', parseFloat(e.target.value) || 0)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="es. 20"
+                />
+                <p className="mt-1 text-xs text-gray-500">Margine di profitto obiettivo</p>
+              </div>
+              
+              {/* DSCR minimo */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  DSCR Minimo
+                </label>
+                <input
+                  type="number"
+                  value={formData.targets?.minimumDSCR || ''}
+                  onChange={(e) => updateFormData('targets.minimumDSCR', parseFloat(e.target.value) || 0)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="es. 1.2"
+                />
+                <p className="mt-1 text-xs text-gray-500">Debt Service Coverage Ratio minimo</p>
+              </div>
+              
+              {/* IRR target */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  IRR Target (%)
+                </label>
+                <input
+                  type="number"
+                  value={formData.targets?.targetIRR || ''}
+                  onChange={(e) => updateFormData('targets.targetIRR', parseFloat(e.target.value) || 0)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="es. 15"
+                />
+                <p className="mt-1 text-xs text-gray-500">Tasso di rendimento interno obiettivo</p>
+              </div>
+              
+              {/* NPV target */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  NPV Target (€)
+                </label>
+                <input
+                  type="number"
+                  value={formData.targets?.targetNPV || ''}
+                  onChange={(e) => updateFormData('targets.targetNPV', parseFloat(e.target.value) || 0)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="es. 500000"
+                />
+                <p className="mt-1 text-xs text-gray-500">Valore attuale netto obiettivo</p>
+              </div>
+            </div>
+          </SectionCard>
+        )}
         
                   </div>
       
