@@ -151,110 +151,113 @@ export class SmartOSOrchestrator {
         }
         
         finalResponse = responseData.content;
-      }
 
-      // 5. Applica guardrails
-      const guardrailContext: GuardrailContext = {
-        userMessage: request.userMessage,
-        assistantResponse: finalResponse,
-        functionCalls: decision.functionCalls,
-        userContext: ragContext.userContext,
-        conversationHistory: ragContext.conversationHistory,
-      };
+        // 5. Applica guardrails
+        const guardrailContext: GuardrailContext = {
+          userMessage: request.userMessage,
+          assistantResponse: finalResponse,
+          functionCalls: decision.functionCalls,
+          userContext: ragContext.userContext,
+          conversationHistory: ragContext.conversationHistory,
+        };
 
-      const guardrailResult = await this.guardrailsSystem.validateResponse(guardrailContext);
+        const guardrailResult = await this.guardrailsSystem.validateResponse(guardrailContext);
 
-      // 6. Applica correzioni se necessario
-      if (!guardrailResult.passed) {
-        finalResponse = await this.guardrailsSystem.applyCorrections(
+        // 6. Applica correzioni se necessario
+        if (!guardrailResult.passed) {
+          finalResponse = await this.guardrailsSystem.applyCorrections(
+            finalResponse,
+            guardrailResult.violations
+          );
+        }
+
+        // 7. Calcola metriche di valutazione
+        const processingTime = Date.now() - startTime;
+        const evaluationMetrics = this.evaluationSystem.calculateMetrics(
+          request.userMessage,
           finalResponse,
-          guardrailResult.violations
-        );
-      }
-
-      // 7. Calcola metriche di valutazione
-      const processingTime = Date.now() - startTime;
-      const evaluationMetrics = this.evaluationSystem.calculateMetrics(
-        request.userMessage,
-        finalResponse,
-        decision.functionCalls || [],
-        ragContext,
-        processingTime,
-        guardrailResult
-      );
-
-      // 8. Registra evento di valutazione (TEMPORANEAMENTE DISABILITATO PER DEBUG)
-      // const evaluationEvent: Omit<EvaluationEvent, 'id' | 'timestamp'> = {
-      //   userId: request.userId,
-      //   sessionId: request.sessionId,
-      //   projectId: request.projectId || null, // Fix: null invece di undefined
-      //   userMessage: request.userMessage,
-      //   userContext: ragContext.userContext,
-      //   decisionType: decision.action,
-      //   functionCalls: decision.functionCalls,
-      //   ragContext,
-      //   assistantResponse: finalResponse,
-      //   success: guardrailResult.passed,
-      //   metrics: evaluationMetrics,
-      // };
-
-      // await this.evaluationSystem.recordEvaluationEvent(evaluationEvent);
-
-      // 9. Aggiorna memoria RAG (ASINCRONO - non blocca risposta)
-      console.log('📝 [SmartOS] Avvio salvataggio memoria ASINCRONO...');
-      
-      // Fire-and-forget: non aspettiamo che finisca
-      this.ragSystem.updateMemoryFromInteraction({
-        userMessage: request.userMessage,
-        assistantResponse: finalResponse,
-        context: ragContext,
-        success: guardrailResult.passed,
-        metadata: {
-          skillId: decision.functionCalls?.[0]?.name,
-          inputs: decision.functionCalls?.[0]?.arguments,
-          outputs: functionResults,
-        },
-      }).catch(error => {
-        // Log ma non bloccare
-        console.error('⚠️ [SmartOS] Errore salvataggio memoria (non critico):', error.message);
-      });
-      
-      console.log('✅ [SmartOS] Memoria in background - continuo con risposta');
-
-      console.log(`✅ [SmartOS] Richiesta processata: ${decision.action} (${processingTime}ms)`);
-
-      return {
-        success: guardrailResult.passed,
-        response: finalResponse,
-        resultData: responseData.resultData, // Nuovo: dati risultato per UI
-        functionCalls: decision.functionCalls || [],
-        artifacts: functionResults.map(r => r.result) || [],
-        kpis: [],
-        plan: decision.workflow?.steps || [],
-        requiresConfirmation: decision.requiresConfirmation,
-        reasoning: decision.reasoning,
-        confidence: decision.confidence,
-        metadata: {
+          decision.functionCalls || [],
           ragContext,
-          guardrailResult,
-          evaluationMetrics,
           processingTime,
-        },
-      };
+          guardrailResult
+        );
+
+        // 8. Registra evento di valutazione (TEMPORANEAMENTE DISABILITATO PER DEBUG)
+        // const evaluationEvent: Omit<EvaluationEvent, 'id' | 'timestamp'> = {
+        //   userId: request.userId,
+        //   sessionId: request.sessionId,
+        //   projectId: request.projectId || null, // Fix: null invece di undefined
+        //   userMessage: request.userMessage,
+        //   userContext: ragContext.userContext,
+        //   decisionType: decision.action,
+        //   functionCalls: decision.functionCalls,
+        //   ragContext,
+        //   assistantResponse: finalResponse,
+        //   success: guardrailResult.passed,
+        //   metrics: evaluationMetrics,
+        // };
+
+        // await this.evaluationSystem.recordEvaluationEvent(evaluationEvent);
+
+        // 9. Aggiorna memoria RAG (ASINCRONO - non blocca risposta)
+        console.log('📝 [SmartOS] Avvio salvataggio memoria ASINCRONO...');
+        
+        // Fire-and-forget: non aspettiamo che finisca
+        this.ragSystem.updateMemoryFromInteraction({
+          userMessage: request.userMessage,
+          assistantResponse: finalResponse,
+          context: ragContext,
+          success: guardrailResult.passed,
+          metadata: {
+            skillId: decision.functionCalls?.[0]?.name,
+            inputs: decision.functionCalls?.[0]?.arguments,
+            outputs: functionResults,
+          },
+        }).catch(error => {
+          // Log ma non bloccare
+          console.error('⚠️ [SmartOS] Errore salvataggio memoria (non critico):', error.message);
+        });
+        
+        console.log('✅ [SmartOS] Memoria in background - continuo con risposta');
+
+        console.log(`✅ [SmartOS] Richiesta processata: ${decision.action} (${processingTime}ms)`);
+
+        return {
+          success: guardrailResult.passed,
+          response: finalResponse,
+          resultData: responseData?.resultData, // Nuovo: dati risultato per UI
+          functionCalls: decision.functionCalls || [],
+          artifacts: functionResults.map(r => r.result) || [],
+          kpis: [],
+          plan: decision.workflow?.steps || [],
+          requiresConfirmation: decision.requiresConfirmation,
+          reasoning: decision.reasoning,
+          confidence: decision.confidence,
+          metadata: {
+            ragContext,
+            guardrailResult,
+            evaluationMetrics,
+            processingTime,
+          },
+        };
+      }
 
     } catch (error) {
       console.error('❌ [SmartOS] Errore processamento richiesta:', error);
       
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Errore sconosciuto',
+        response: 'Ho riscontrato un errore nel processare la tua richiesta. Riprova.',
+        resultData: undefined,
+        functionCalls: [],
+        artifacts: [],
+        kpis: [],
+        plan: [],
         requiresConfirmation: false,
         reasoning: 'Errore nel sistema smart',
         confidence: 0,
         metadata: {
-          ragContext: null,
-          guardrailResult: null,
-          evaluationMetrics: null,
+          error: error instanceof Error ? error.message : 'Errore sconosciuto',
           processingTime: Date.now() - startTime,
         },
       };
