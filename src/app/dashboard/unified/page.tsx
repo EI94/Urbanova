@@ -446,6 +446,32 @@ export default function UnifiedDashboardPage() {
     setInputValue('');
     setIsLoading(true);
 
+    // 🔊 SUONO THINKING: Riproduci suono durante elaborazione (solo in modalità voce)
+    if (isVoiceMode) {
+      console.log('🧠 [UNIFIED] Riproduco suono thinking...');
+      // TODO: Implementare suono thinking personalizzato
+      // Per ora usiamo un beep semplice
+      try {
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.1);
+        
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1);
+      } catch (error) {
+        console.log('⚠️ [UNIFIED] Suono thinking non disponibile:', error);
+      }
+    }
+
     try {
       // 🎯 Chiama OS 2.0 API per esperienza completa
       const response = await fetch('/api/os2/chat', {
@@ -1183,10 +1209,28 @@ export default function UnifiedDashboardPage() {
                     
                     {isLoading && (
                       <div className="flex justify-start">
-                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 text-gray-900 px-4 py-3 rounded-2xl border border-blue-200">
+                        <div className={`bg-gradient-to-r ${isVoiceMode ? 'from-green-50 to-blue-50 border-green-200' : 'from-blue-50 to-purple-50 border-blue-200'} text-gray-900 px-4 py-3 rounded-2xl border`}>
                           <div className="flex items-center space-x-2">
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                            <span className="text-sm font-medium">Sto analizzando la tua richiesta...</span>
+                            <div className={`animate-spin rounded-full h-4 w-4 border-b-2 ${isVoiceMode ? 'border-green-600' : 'border-blue-600'}`}></div>
+                            <span className="text-sm font-medium">
+                              {isVoiceMode ? '🎤 Sto pensando...' : 'Sto analizzando la tua richiesta...'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* 🎤 Indicatore Registrazione Vocale */}
+                    {isSpeaking && (
+                      <div className="flex justify-end">
+                        <div className="bg-gradient-to-r from-purple-100 to-pink-100 text-gray-900 px-4 py-3 rounded-2xl border border-purple-200">
+                          <div className="flex items-center space-x-2">
+                            <div className="flex space-x-1">
+                              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></div>
+                              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" style={{ animationDelay: '200ms' }}></div>
+                              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" style={{ animationDelay: '400ms' }}></div>
+                            </div>
+                            <span className="text-sm font-medium">🎤 Sto ascoltando...</span>
                           </div>
                         </div>
                       </div>
@@ -1248,6 +1292,14 @@ export default function UnifiedDashboardPage() {
                         setIsVoiceMode(true); // Attiva modalità voce
                         handleTranscription(text);
                         setInputValue(text);
+                        
+                        // 🚀 AUTO-INVIO: Invia automaticamente il messaggio trascritto
+                        if (text.trim()) {
+                          console.log('🚀 [UNIFIED] Auto-invio messaggio trascritto:', text);
+                          setTimeout(() => {
+                            handleSendMessage();
+                          }, 500); // Piccolo delay per UX migliore
+                        }
                       }}
                       onSpeaking={handleSpeakingState}
                       className="mr-2"
