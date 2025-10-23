@@ -190,7 +190,10 @@ export default function BusinessPlanForm({
     totalRevenue: 0,
     totalCosts: 0,
     estimatedMargin: 0,
-    landCostRange: { min: 0, max: 0 }
+    roi: 0,
+    landCosts: 0,
+    constructionCosts: 0,
+    softCosts: 0
   });
   
   // ============================================================================
@@ -360,27 +363,30 @@ export default function BusinessPlanForm({
         totalCosts = constructionCosts + contingencyCosts + softCosts;
       }
       
-      // Calcolo range costi terreno
-      const landCosts = landScenarios.map(s => {
-        if (s.type === 'CASH' && s.upfrontPayment) return s.upfrontPayment;
+      // Calcolo costi terreno
+      const landCosts = landScenarios.reduce((sum, s) => {
+        if (s.type === 'CASH' && s.upfrontPayment) return sum + s.upfrontPayment;
         if (s.type === 'PERMUTA' && s.permuta) {
-          return (s.permuta.unitsToGive * s.permuta.unitValue) + (s.permuta.cashContribution || 0);
+          return sum + (s.permuta.unitsToGive * s.permuta.unitValue) + (s.permuta.cashContribution || 0);
         }
-        return 0;
-      });
+        return sum;
+      }, 0);
       
-      const landCostRange = {
-        min: Math.min(...landCosts.filter(c => c > 0)),
-        max: Math.max(...landCosts.filter(c => c > 0))
-      };
+      // Aggiungi costi terreno ai costi totali
+      totalCosts += landCosts;
       
-      const estimatedMargin = totalRevenue > 0 ? ((totalRevenue - totalCosts - landCostRange.min) / totalRevenue) * 100 : 0;
-    
-    setQuickMetrics({
+      // Calcolo margine e ROI
+      const estimatedMargin = totalRevenue > 0 ? ((totalRevenue - totalCosts) / totalRevenue) * 100 : 0;
+      const roi = totalCosts > 0 ? ((totalRevenue - totalCosts) / totalCosts) * 100 : 0;
+      
+      setQuickMetrics({
         totalRevenue,
-      totalCosts,
+        totalCosts,
         estimatedMargin,
-        landCostRange
+        roi,
+        landCosts,
+        constructionCosts: totalCosts - landCosts,
+        softCosts: 0
       });
       
     } catch (error) {
@@ -579,7 +585,7 @@ export default function BusinessPlanForm({
           </div>
           
           {/* Metriche quick */}
-          <div className="grid grid-cols-3 gap-4 text-center">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-center">
             <div className="bg-white rounded-xl p-4 shadow-sm">
               <div className="text-2xl font-bold text-green-600">
                 €{quickMetrics.totalRevenue.toLocaleString()}
@@ -590,7 +596,7 @@ export default function BusinessPlanForm({
               <div className="text-2xl font-bold text-blue-600">
                 €{quickMetrics.totalCosts.toLocaleString()}
                 </div>
-              <div className="text-sm text-gray-500">Costi Costruzione</div>
+              <div className="text-sm text-gray-500">Costi Totali</div>
               </div>
             <div className="bg-white rounded-xl p-4 shadow-sm">
               <div className="text-2xl font-bold text-purple-600">
@@ -598,7 +604,13 @@ export default function BusinessPlanForm({
             </div>
               <div className="text-sm text-gray-500">Margine Stimato</div>
         </div>
+            <div className="bg-white rounded-xl p-4 shadow-sm">
+              <div className="text-2xl font-bold text-orange-600">
+                {quickMetrics.roi?.toFixed(1) || 'N/A'}%
               </div>
+              <div className="text-sm text-gray-500">ROI Stimato</div>
+            </div>
+          </div>
             </div>
       </div>
       
@@ -820,7 +832,7 @@ export default function BusinessPlanForm({
                       {formData.revenueConfig.unitMix.map((unit, index) => (
                         <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div>
+            <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Tipo Unità
                               </label>
@@ -839,9 +851,9 @@ export default function BusinessPlanForm({
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Quantità
-                              </label>
-                              <input
-                                type="number"
+              </label>
+              <input
+                type="number"
                                 value={unit.count || ''}
                                 onChange={(e) => {
                                   const newUnitMix = [...(formData.revenueConfig?.unitMix || [])];
@@ -851,11 +863,11 @@ export default function BusinessPlanForm({
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                                 placeholder="es. 10"
                               />
-                            </div>
-                            <div>
+            </div>
+            <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Prezzo (€)
-                              </label>
+              </label>
                               <input
                                 type="number"
                                 value={unit.price || ''}
@@ -873,8 +885,8 @@ export default function BusinessPlanForm({
                                 Superficie (mq)
                               </label>
                               <div className="flex space-x-2">
-                                <input
-                                  type="number"
+                    <input
+                      type="number"
                                   value={unit.size || ''}
                                   onChange={(e) => {
                                     const newUnitMix = [...(formData.revenueConfig?.unitMix || [])];
@@ -884,28 +896,28 @@ export default function BusinessPlanForm({
                                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                                   placeholder="es. 80"
                                 />
-                                <button
-                                  onClick={() => {
+                    <button
+                      onClick={() => {
                                     const newUnitMix = [...(formData.revenueConfig?.unitMix || [])];
                                     newUnitMix.splice(index, 1);
                                     updateFormData('revenueConfig.unitMix', newUnitMix);
-                                  }}
+                      }}
                                   className="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
                                   title="Rimuovi unità"
-                                >
-                                  <X className="w-4 h-4" />
-                                </button>
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                  </div>
+                ))}
                     </div>
                   )}
-                  
+                
                   {/* Pulsante per aggiungere nuova unità */}
-                  <button
-                    onClick={() => {
+                <button
+                  onClick={() => {
                       const newUnitMix = [...(formData.revenueConfig?.unitMix || [])];
                       newUnitMix.push({
                         type: '',
@@ -916,10 +928,10 @@ export default function BusinessPlanForm({
                       updateFormData('revenueConfig.unitMix', newUnitMix);
                     }}
                     className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-green-400 hover:text-green-600 transition-colors flex items-center justify-center space-x-2"
-                  >
-                    <Plus className="w-4 h-4" />
+                >
+                  <Plus className="w-4 h-4" />
                     <span>Aggiungi Tipo Unità</span>
-                  </button>
+                </button>
                   
                   {/* Riepilogo totale */}
                   {formData.revenueConfig?.unitMix && formData.revenueConfig.unitMix.length > 0 && (
@@ -931,12 +943,12 @@ export default function BusinessPlanForm({
                         <span className="text-sm font-medium text-green-800">
                           Ricavi Totali: {formData.revenueConfig.unitMix.reduce((sum, unit) => sum + ((unit.count || 0) * (unit.price || 0)), 0).toLocaleString('it-IT')} €
                         </span>
-                      </div>
-                    </div>
+              </div>
+            </div>
                   )}
-                </div>
-              )}
-            
+          </div>
+        )}
+        
               {/* Parametri aggiuntivi */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
@@ -952,25 +964,25 @@ export default function BusinessPlanForm({
                   />
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                 Sconti Medi (%)
-              </label>
-              <input
-                type="number"
+                  </label>
+                  <input
+                    type="number"
                     value={formData.revenueConfig?.discounts || ''}
                     onChange={(e) => updateFormData('revenueConfig.discounts', parseFloat(e.target.value) || 0)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="es. 2"
                   />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Incremento Prezzi (%)
-              </label>
-                    <input
-                      type="number"
+                  </label>
+                  <input
+                    type="number"
                     value={formData.revenueConfig?.priceEscalation || ''}
                     onChange={(e) => updateFormData('revenueConfig.priceEscalation', parseFloat(e.target.value) || 0)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -1140,7 +1152,7 @@ export default function BusinessPlanForm({
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="es. 800000"
                     />
-                </div>
+          </div>
         )}
         
                 {/* Breakdown dettagliato completo */}
@@ -1149,12 +1161,12 @@ export default function BusinessPlanForm({
                     <div className="space-y-6">
                       
                       {/* Modalità Costi Costruzione */}
-                      <div>
+                <div>
                         <div className="flex items-center space-x-2 mb-4">
                           <Hammer className="w-5 h-5 text-orange-600" />
                           <h4 className="text-lg font-semibold text-gray-900">Costi di Costruzione</h4>
                           <HelpTooltip text="Scegli come identificare i costi di costruzione" />
-                        </div>
+                </div>
                         
                         <div className="mb-6">
                           <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -1166,7 +1178,7 @@ export default function BusinessPlanForm({
                               { id: 'PER_SQM', label: 'A corpo per mq', desc: 'Costo per metro quadro' },
                               { id: 'DETAILED', label: 'In dettaglio', desc: 'Breakdown completo per categoria' }
                             ].map(mode => (
-                              <button
+                <button
                                 key={mode.id}
                                 onClick={() => updateFormData('costConfig.constructionMode', mode.id as any)}
                                 className={`px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium ${
@@ -1176,30 +1188,30 @@ export default function BusinessPlanForm({
                                 }`}
                               >
                                 {mode.label}
-                              </button>
+                </button>
                             ))}
                           </div>
-                        </div>
-                        
+              </div>
+              
                         {/* Input basato sulla modalità selezionata */}
                         {formData.costConfig?.constructionMode === 'TOTAL' && (
                           <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                               Costo Totale Costruzione (€)
                             </label>
-                            <input
+                      <input
                               type="number"
                               value={formData.costConfig?.totalConstructionCost || ''}
                               onChange={(e) => updateFormData('costConfig.totalConstructionCost', parseFloat(e.target.value) || 0)}
                               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               placeholder="es. 1115000"
                             />
-                          </div>
+                    </div>
                         )}
-                        
+                    
                         {formData.costConfig?.constructionMode === 'PER_SQM' && (
-                          <div className="grid grid-cols-2 gap-4 mb-4">
-                            <div>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Costo per mq (€)
                               </label>
@@ -1210,7 +1222,7 @@ export default function BusinessPlanForm({
                                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 placeholder="es. 1500"
                               />
-                            </div>
+                      </div>
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Superficie Totale (mq)
@@ -1225,11 +1237,11 @@ export default function BusinessPlanForm({
                             </div>
                           </div>
                         )}
-                      </div>
-                      
+                    </div>
+                    
                       {/* Breakdown dettagliato per categoria */}
                       {formData.costConfig?.constructionMode === 'DETAILED' && (
-                        <div>
+                      <div>
                           <div className="mb-4">
                             <p className="text-sm text-gray-600 mb-3">
                               <Info className="w-4 h-4 inline mr-1" />
@@ -1239,8 +1251,8 @@ export default function BusinessPlanForm({
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div>
                               <label className="block text-sm text-gray-600 mb-1">Scavi e Fondazioni</label>
-                              <input
-                                type="number"
+                        <input
+                          type="number"
                                 value={formData.costConfig?.constructionBreakdown?.excavation || ''}
                                 onChange={(e) => updateFormData('costConfig.constructionBreakdown.excavation', parseFloat(e.target.value) || 0)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -1292,11 +1304,11 @@ export default function BusinessPlanForm({
                               </span>
                             </div>
                           </div>
-                        </div>
-                      )}
+                      </div>
+                    )}
                     
                       {/* Costi Aggiuntivi */}
-                      <div>
+                        <div>
                         <div className="flex items-center space-x-2 mb-4">
                           <Wrench className="w-5 h-5 text-purple-600" />
                           <h4 className="text-lg font-semibold text-gray-900">Costi Aggiuntivi</h4>
@@ -1304,14 +1316,14 @@ export default function BusinessPlanForm({
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
                             <label className="block text-sm text-gray-600 mb-1">Oneri Concessori</label>
-                        <input
-                          type="number"
+                          <input
+                            type="number"
                               value={formData.costConfig?.constructionBreakdown?.permits || ''}
                               onChange={(e) => updateFormData('costConfig.constructionBreakdown.permits', parseFloat(e.target.value) || 0)}
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                               placeholder="es. 30000"
-                        />
-                      </div>
+                          />
+                        </div>
                         <div>
                             <label className="block text-sm text-gray-600 mb-1">Progettazione</label>
                           <input
@@ -1344,10 +1356,10 @@ export default function BusinessPlanForm({
                         </div>
                         </div>
                       </div>
-            </div>
-          </div>
-        )}
-        
+                        </div>
+                      </div>
+                    )}
+                    
                 {/* Contingenze */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1387,18 +1399,18 @@ export default function BusinessPlanForm({
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Breakdown Costi Indiretti (%)
                     </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
                         <label className="block text-xs text-gray-600 mb-1">Permessi</label>
-                    <input
-                      type="number"
+                          <input
+                            type="number"
                           value={formData.costConfig?.softCosts?.breakdown?.permits || ''}
                           onChange={(e) => updateFormData('costConfig.softCosts.breakdown.permits', parseFloat(e.target.value) || 0)}
                           className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
                           placeholder="2"
-                    />
-                  </div>
-                  <div>
+                          />
+                        </div>
+                        <div>
                         <label className="block text-xs text-gray-600 mb-1">Progettazione</label>
                     <input
                       type="number"
@@ -1407,7 +1419,7 @@ export default function BusinessPlanForm({
                           className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
                           placeholder="3"
                     />
-                  </div>
+                        </div>
                   <div>
                         <label className="block text-xs text-gray-600 mb-1">Legali</label>
                     <input
@@ -1417,7 +1429,7 @@ export default function BusinessPlanForm({
                           className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
                           placeholder="1"
                     />
-                  </div>
+                      </div>
                   <div>
                         <label className="block text-xs text-gray-600 mb-1">Marketing</label>
                     <input
@@ -1468,9 +1480,9 @@ export default function BusinessPlanForm({
                           <X className="w-4 h-4" />
                         </button>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
+              </div>
               )}
               
               {/* Pulsante per aggiungere nuovo scenario */}
@@ -1487,9 +1499,9 @@ export default function BusinessPlanForm({
                   <MapPin className="w-12 h-12 mx-auto mb-3 text-gray-300" />
                   <p className="text-lg font-medium mb-2">Nessuno scenario terreno definito</p>
                   <p className="text-sm">Aggiungi almeno uno scenario per procedere con il Business Plan</p>
-                </div>
-              )}
             </div>
+              )}
+          </div>
           </SectionCard>
         )}
         
@@ -1500,7 +1512,7 @@ export default function BusinessPlanForm({
             icon={<Landmark className="w-5 h-5 text-purple-600" />}
             helpText="Configura i parametri finanziari e di finanziamento"
           >
-            <div className="space-y-6">
+          <div className="space-y-6">
               
               {/* Tasso di sconto */}
               <div>
@@ -1527,8 +1539,8 @@ export default function BusinessPlanForm({
                 
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
-                    <input
-                      type="checkbox"
+                <input
+                  type="checkbox"
                       id="debt-enabled"
                       checked={formData.financeConfig?.debt?.enabled || false}
                       onChange={(e) => updateFormData('financeConfig.debt.enabled', e.target.checked)}
@@ -1536,35 +1548,35 @@ export default function BusinessPlanForm({
                     />
                     <label htmlFor="debt-enabled" className="text-sm font-medium text-gray-700">
                       Abilita finanziamento bancario
-                    </label>
-                  </div>
-                  
+              </label>
+            </div>
+            
                   {formData.financeConfig?.debt?.enabled && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
+                  <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Importo Finanziamento (€)
                         </label>
-                        <input
-                          type="number"
+                    <input
+                      type="number"
                           value={formData.financeConfig?.debt?.amount || ''}
                           onChange={(e) => updateFormData('financeConfig.debt.amount', parseFloat(e.target.value) || 0)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                           placeholder="es. 2000000"
                         />
-                      </div>
-                      <div>
+                  </div>
+                  <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Tasso di Interesse (%)
                         </label>
-                        <input
-                          type="number"
+                    <input
+                      type="number"
                           value={formData.financeConfig?.debt?.interestRate || ''}
                           onChange={(e) => updateFormData('financeConfig.debt.interestRate', parseFloat(e.target.value) || 0)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                           placeholder="es. 4.5"
-                        />
-                      </div>
+                    />
+                  </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Durata (anni)
@@ -1576,19 +1588,19 @@ export default function BusinessPlanForm({
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                           placeholder="es. 20"
                         />
-                      </div>
-                      <div>
+                </div>
+                  <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           LTV (%)
                         </label>
-                        <input
-                          type="number"
+                    <input
+                      type="number"
                           value={formData.financeConfig?.debt?.ltv || ''}
                           onChange={(e) => updateFormData('financeConfig.debt.ltv', parseFloat(e.target.value) || 0)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                           placeholder="es. 70"
-                        />
-                      </div>
+                    />
+                  </div>
                     </div>
                   )}
                 </div>
@@ -1607,34 +1619,34 @@ export default function BusinessPlanForm({
             <div className="space-y-6">
               
               {/* Timeline costruzione */}
-              <div>
+                  <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Durata Costruzione (mesi)
                 </label>
-                <input
-                  type="number"
+                    <input
+                      type="number"
                   value={formData.timingConfig?.constructionTimeline || ''}
                   onChange={(e) => updateFormData('timingConfig.constructionTimeline', parseInt(e.target.value) || 0)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="es. 18"
                 />
                 <p className="mt-1 text-xs text-gray-500">Durata totale del cantiere in mesi</p>
-              </div>
-              
+                  </div>
+                  
               {/* Ritardo permessi */}
-              <div>
+                  <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Ritardo Permessi (mesi)
                 </label>
-                <input
-                  type="number"
+                    <input
+                      type="number"
                   value={formData.timingConfig?.permitDelay || ''}
                   onChange={(e) => updateFormData('timingConfig.permitDelay', parseInt(e.target.value) || 0)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="es. 6"
                 />
                 <p className="mt-1 text-xs text-gray-500">Ritardo medio per ottenere i permessi</p>
-              </div>
+                  </div>
               
               {/* Date milestone */}
               <div className="bg-orange-50 rounded-xl p-6 border border-orange-200">
@@ -1649,7 +1661,7 @@ export default function BusinessPlanForm({
                         type="date"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
                       />
-                    </div>
+                </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Fine Lavori
@@ -1658,7 +1670,7 @@ export default function BusinessPlanForm({
                         type="date"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
                       />
-                    </div>
+              </div>
                   </div>
                 </div>
               </div>
@@ -1676,19 +1688,19 @@ export default function BusinessPlanForm({
             <div className="space-y-6">
               
               {/* Target margine */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                   Margine Target (%)
-                </label>
-                <input
-                  type="number"
+              </label>
+              <input
+                type="number"
                   value={formData.targets?.margin || ''}
                   onChange={(e) => updateFormData('targets.margin', parseFloat(e.target.value) || 0)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   placeholder="es. 20"
                 />
                 <p className="mt-1 text-xs text-gray-500">Margine di profitto obiettivo</p>
-              </div>
+            </div>
               
               {/* DSCR minimo */}
               <div>
@@ -1703,14 +1715,14 @@ export default function BusinessPlanForm({
                   placeholder="es. 1.2"
                 />
                 <p className="mt-1 text-xs text-gray-500">Debt Service Coverage Ratio minimo</p>
-              </div>
-              
+          </div>
+        
               {/* IRR target */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                   IRR Target (%)
-                </label>
-                <input
+              </label>
+                    <input
                   type="number"
                   value={formData.targets?.targetIRR || ''}
                   onChange={(e) => updateFormData('targets.targetIRR', parseFloat(e.target.value) || 0)}
@@ -1738,6 +1750,178 @@ export default function BusinessPlanForm({
           </SectionCard>
         )}
         
+        {/* DASHBOARD ANALYTICS SPETTACOLARE */}
+        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-200">
+          <div className="flex items-center space-x-3 mb-6">
+            <TrendingUp className="w-6 h-6 text-indigo-600" />
+            <h3 className="text-xl font-bold text-gray-900">📊 Dashboard Analytics</h3>
+            <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-sm rounded-full font-medium">
+              Per Investitori & Banche
+            </span>
+                  </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            {/* BREAKDOWN COSTI */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                <Calculator className="w-5 h-5 text-blue-600" />
+                <span>Breakdown Costi</span>
+              </h4>
+              
+              {quickMetrics.totalCosts > 0 ? (
+                <div className="space-y-4">
+                  {/* Terreno */}
+                  {quickMetrics.landCosts > 0 && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-700">Terreno</span>
+              </div>
+                      <div className="text-right">
+                        <div className="text-sm font-semibold text-gray-900">
+                          €{quickMetrics.landCosts.toLocaleString()}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {((quickMetrics.landCosts / quickMetrics.totalCosts) * 100).toFixed(1)}%
+                        </div>
+            </div>
+          </div>
+        )}
+        
+                  {/* Costruzione */}
+                  {quickMetrics.constructionCosts > 0 && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-700">Costruzione</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-semibold text-gray-900">
+                          €{quickMetrics.constructionCosts.toLocaleString()}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {((quickMetrics.constructionCosts / quickMetrics.totalCosts) * 100).toFixed(1)}%
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Soft Costs */}
+                  {quickMetrics.softCosts > 0 && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-700">Soft Costs</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-semibold text-gray-900">
+                          €{quickMetrics.softCosts.toLocaleString()}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {((quickMetrics.softCosts / quickMetrics.totalCosts) * 100).toFixed(1)}%
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Totale */}
+                  <div className="border-t pt-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-gray-900">Totale Costi</span>
+                      <span className="font-bold text-lg text-gray-900">
+                        €{quickMetrics.totalCosts.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Calculator className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <p className="text-sm">Inserisci i costi per vedere il breakdown</p>
+                </div>
+              )}
+            </div>
+            
+            {/* METRICHE FINANZIARIE */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                <Target className="w-5 h-5 text-purple-600" />
+                <span>Metriche Finanziarie</span>
+              </h4>
+              
+              <div className="grid grid-cols-2 gap-4">
+                {/* ROI */}
+                <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                  <div className="text-2xl font-bold text-green-600">
+                    {quickMetrics.roi?.toFixed(1) || 'N/A'}%
+                  </div>
+                  <div className="text-xs text-green-700 font-medium">ROI</div>
+                  <div className="text-xs text-gray-500 mt-1">Return on Investment</div>
+                </div>
+                
+                {/* Margine */}
+                <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {quickMetrics.estimatedMargin.toFixed(1)}%
+                  </div>
+                  <div className="text-xs text-blue-700 font-medium">Margine</div>
+                  <div className="text-xs text-gray-500 mt-1">Profit Margin</div>
+                </div>
+                
+                {/* Ricavi per Unità */}
+                <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-violet-50 rounded-lg border border-purple-200">
+                  <div className="text-2xl font-bold text-purple-600">
+                    €{formData.totalUnits > 0 ? (quickMetrics.totalRevenue / formData.totalUnits).toLocaleString() : 'N/A'}
+                  </div>
+                  <div className="text-xs text-purple-700 font-medium">Ricavi/Unità</div>
+                  <div className="text-xs text-gray-500 mt-1">Revenue per Unit</div>
+                </div>
+                
+                {/* Costi per Unità */}
+                <div className="text-center p-4 bg-gradient-to-br from-orange-50 to-red-50 rounded-lg border border-orange-200">
+                  <div className="text-2xl font-bold text-orange-600">
+                    €{formData.totalUnits > 0 ? (quickMetrics.totalCosts / formData.totalUnits).toLocaleString() : 'N/A'}
+                  </div>
+                  <div className="text-xs text-orange-700 font-medium">Costi/Unità</div>
+                  <div className="text-xs text-gray-500 mt-1">Cost per Unit</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* SPLIT RICAVI DETTAGLIATO */}
+          {formData.revenueConfig?.method === 'DETAILED' && formData.revenueConfig?.unitMix && formData.revenueConfig.unitMix.length > 0 && (
+            <div className="mt-6 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                <BarChart3 className="w-5 h-5 text-green-600" />
+                <span>Split Ricavi per Tipo Unità</span>
+              </h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {formData.revenueConfig.unitMix.map((unit, index) => {
+                  const unitRevenue = (unit.count || 0) * (unit.price || 0);
+                  const percentage = quickMetrics.totalRevenue > 0 ? (unitRevenue / quickMetrics.totalRevenue) * 100 : 0;
+                  
+                  return (
+                    <div key={index} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-4 border border-gray-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <h5 className="font-semibold text-gray-900">{unit.type || 'Tipo Unità'}</h5>
+                        <span className="text-sm font-bold text-green-600">{percentage.toFixed(1)}%</span>
+                      </div>
+                      <div className="space-y-1 text-sm text-gray-600">
+                        <div>Quantità: <span className="font-medium">{unit.count}</span></div>
+                        <div>Prezzo: <span className="font-medium">€{(unit.price || 0).toLocaleString()}</span></div>
+                        <div>Totale: <span className="font-semibold text-gray-900">€{unitRevenue.toLocaleString()}</span></div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+        
                   </div>
       
       {/* Footer con azioni */}
@@ -1752,10 +1936,10 @@ export default function BusinessPlanForm({
               <div className="text-xs text-red-500 max-w-md">
                 {validationErrors.slice(0, 3).join(' • ')}
                 {validationErrors.length > 3 && ` • +${validationErrors.length - 3} altri`}
-              </div>
             </div>
-          )}
-          
+          </div>
+        )}
+        
           {!showValidation && requiredFieldsInfo.length > 0 && (
             <div className="flex flex-col space-y-2">
               <div className="flex items-center space-x-2 text-yellow-600">

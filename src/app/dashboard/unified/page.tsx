@@ -53,6 +53,7 @@ import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
 import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 import MarkdownRenderer from '@/components/ui/MarkdownRenderer';
 import { GeographicSearch, GeographicSearchResult } from '@/components/ui/GeographicSearch';
+import { VoiceAIChatGPT, useVoiceAI } from '@/app/components/os2/VoiceAIChatGPT';
 import { useOpenAITTS } from '@/hooks/useOpenAITTS';
 import { ResultMessage } from '@/components/chat/ResultMessage';
 import { ConversationDeleteModal } from '@/components/ui/ConversationDeleteModal';
@@ -223,6 +224,9 @@ export default function UnifiedDashboardPage() {
   const [showGeographicSearch, setShowGeographicSearch] = useState(false);
   const [showInteractiveMap, setShowInteractiveMap] = useState(false);
   
+  // 🎤 Voice AI Hook - Design Johnny Ive (per compatibilità)
+  const { handleTranscription, handleSpeaking } = useVoiceAI();
+  
   // 🎤 OpenAI TTS Hook - Voce naturale di alta qualità
   const { synthesize, stop, isPlaying: isTTSPlaying, isLoading: isTTSLoading, error: TTSError } = useOpenAITTS();
   
@@ -235,8 +239,8 @@ export default function UnifiedDashboardPage() {
   // Gestione sintesi vocale (per compatibilità con VoiceAI)
   const handleSpeakingState = useCallback((speaking: boolean) => {
     setIsSpeaking(speaking);
-    // Non più necessario chiamare handleSpeaking
-  }, []);
+    handleSpeaking(speaking); // Ripristinato per compatibilità
+  }, [handleSpeaking]);
   
   // TEMPORANEAMENTE DISABILITATO: Hook per dati mappa
   // const {
@@ -1658,7 +1662,7 @@ export default function UnifiedDashboardPage() {
                       console.log('✅ [Chat History] Sessione caricata:', chat.title || 'Senza titolo');
                     }}
                     onDeleteConversation={(sessionId: string, title: string) => handleDeleteClick(sessionId, title)}
-                    selectedSessionId={currentSessionId || undefined}
+                    selectedSessionId={currentSessionId || ''}
                   />
                 )}
               </div>

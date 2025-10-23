@@ -304,8 +304,8 @@ export class OpenAIFunctionCallingSystem {
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userMessage }
         ],
-        functions: requiresAction ? availableFunctions : [], // Se non richiede azione, non passare functions
-        function_call: requiresAction ? 'auto' : 'none', // Se non richiede azione, non chiamare functions
+        functions: availableFunctions, // Sempre passa le funzioni disponibili
+        function_call: requiresAction ? 'auto' : 'none', // Ma controlla se deve usarle
         temperature: 0.0, // Completamente deterministico per max tool activation
         max_tokens: 2000,
       });
