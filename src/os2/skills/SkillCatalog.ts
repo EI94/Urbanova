@@ -417,13 +417,26 @@ class FeasibilityAnalysisSkill implements Skill<FeasibilityInput, FeasibilityOut
   };
   
   public async execute(inputs: FeasibilityInput, context: SkillExecutionContext): Promise<FeasibilityOutput> {
-    console.log(`🎯 [Skill:Feasibility] Esecuzione analisi`);
+    console.log(`🎯 [Skill:Feasibility] Esecuzione analisi con parametri:`, inputs);
+    
+    // Calcolo reale basato sui parametri forniti
+    const { landArea, constructionCostPerSqm, salePrice } = inputs;
+    
+    // Calcoli reali (esempio semplificato)
+    const totalConstructionCost = landArea * constructionCostPerSqm;
+    const totalRevenue = landArea * salePrice;
+    const margin = totalRevenue - totalConstructionCost;
+    const roi = (margin / totalConstructionCost) * 100;
+    const payback = totalConstructionCost / (margin / 12); // mesi
+    const npv = margin * 0.8; // NPV semplificato
     
     return {
-      roi: 0.285,
-      margin: 2000000,
-      payback: 3.2,
-      npv: 1800000,
+      roi: Math.round(roi * 100) / 100, // Arrotonda a 2 decimali
+      margin: Math.round(margin),
+      payback: Math.round(payback * 10) / 10, // Arrotonda a 1 decimale
+      npv: Math.round(npv),
+      feasible: roi > 15, // Soglia di fattibilità
+      summary: `Analisi per terreno ${landArea}mq: ROI ${roi.toFixed(1)}%, Margine €${(margin/1000).toFixed(0)}k`
     };
   }
 }

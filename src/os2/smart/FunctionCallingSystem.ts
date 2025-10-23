@@ -100,37 +100,49 @@ export class OpenAIFunctionCallingSystem {
 
   /**
    * Determina se forzare function call basandosi su pattern espliciti
+   * ORA INTELLIGENTE: distingue tra richieste di aiuto e comandi espliciti
    */
   private shouldForceFunctionCall(userMessage: string): boolean {
     const msg = userMessage.toLowerCase();
     
-    // Trigger assoluti - DEVE chiamare function
-    const forceTriggers = [
-      /\b(fai|fa'|fare)\b/,
-      /\b(analisi|analizza|analizzare)\b/,
-      /\b(crea|creare|genera)\b/,
-      /\b(calcola|calcolare)\b/,
-      /\b(mostra|elenca|lista)\b/,
-      /\b(salva|salvare)\b/,
-      /\b(confronta|compara)\b/,
-      /\b(sensitivity|sensibilità)\b/,
-      /\b(esporta|export)\b/,
-      /\bmiserve\b/,
-      /\bho bisogno di\b/,
-      /\bquanto cost/,
-      /\bcome trov/,
-      /\bdove prend/,
-      /\bcome si fa/,
-      /\bcome ottengo/,
-      /\bquale.*\b(roi|irr|npv|migliore|conviene)\b/,
-      /\bdscr\b/,
-      /\bwaterfall\b/,
-      /\be se\b.*\?/,
-      /\bwhat if\b/,
-      /\bho \d+ terren/,
+    // Pattern di AIUTO GENERICO - NON forzare tool activation
+    const helpPatterns = [
+      /\b(puoi aiutarmi|puoi aiutare|aiutami|aiutare)\b/,
+      /\b(come funziona|come si fa|cosa posso fare)\b/,
+      /\b(mi serve|ho bisogno di)\b.*\?/, // Con punto interrogativo = domanda
+      /\b(cosa|come|quando|dove|perché)\b.*\?/, // Domande generiche
+      /\bpuoi.*aiutarmi.*fare.*analisi\b/, // "puoi aiutarmi a fare analisi"
+      /\bpuoi.*aiutarmi.*creare.*business plan\b/, // "puoi aiutarmi a creare business plan"
     ];
     
-    return forceTriggers.some(pattern => pattern.test(msg));
+    // Se è una richiesta di aiuto generico, NON forzare
+    for (const pattern of helpPatterns) {
+      if (pattern.test(msg)) {
+        console.log(`🤝 [FunctionCalling] Rilevata richiesta di aiuto generico - comportamento collaborativo`);
+        return false;
+      }
+    }
+    
+    // Trigger assoluti - DEVE chiamare function (solo comandi espliciti)
+    const forceTriggers = [
+      /\b(fai|fa'|fare)\b.*\b(analisi|fattibilità|business plan|progetto)\b/,
+      /\b(crea|creare|genera)\b.*\b(business plan|progetto|analisi)\b/,
+      /\b(calcola|calcolare)\b.*\b(roi|margine|fattibilità)\b/,
+      /\b(mostra|elenca|lista)\b.*\b(progetti|terreni)\b/,
+      /\b(salva|salvare)\b.*\b(progetto|analisi|dati)\b/,
+      /\b(confronta|compara)\b.*\b(terreni|progetti)\b/,
+      /\b(sensitivity|sensibilità)\b/,
+      /\b(esporta|export)\b/,
+    ];
+    
+    // Controlla se deve forzare function call
+    const shouldForce = forceTriggers.some(pattern => pattern.test(msg));
+    
+    if (shouldForce) {
+      console.log(`⚡ [FunctionCalling] Rilevato comando esplicito - forcing tool activation`);
+    }
+    
+    return shouldForce;
   }
 
   /**
@@ -144,29 +156,8 @@ export class OpenAIFunctionCallingSystem {
       return this.handleMultiStepWorkflow(message, context);
     }
     
-    // Analisi Fattibilità - Pattern più ampi
-    if ((message.includes('analisi') && (message.includes('fattibilità') || message.includes('terreno') || message.includes('terreno'))) ||
-        message.includes('analizza') ||
-        message.includes('fattibilità') ||
-        (message.includes('terreno') && (message.includes('costruire') || message.includes('appartamenti')))) {
-      return {
-        action: 'function_call',
-        functionCalls: [{
-          name: 'feasibility.analyze',
-          arguments: {
-            landArea: this.extractArea(userMessage) || 1000,
-            constructionCostPerSqm: 1200,
-            salePrice: 3000
-          },
-          confidence: 0.9,
-          reasoning: 'Rilevata richiesta analisi fattibilità'
-        }],
-        reasoning: 'Sistema ibrido: analisi fattibilità',
-        confidence: 0.9,
-        requiresConfirmation: false,
-        context: { relevantMemories: [] },
-      };
-    }
+    // RIMOSSO: Forcing automatico per analisi fattibilità
+    // Ora l'OS sarà collaborativo e chiederà informazioni prima di attivare tool
     
     // Business Plan - Pattern più ampi
     if (message.includes('business plan') || 
@@ -302,6 +293,8 @@ export class OpenAIFunctionCallingSystem {
       
       if (requiresAction) {
         console.log(`⚡ [FunctionCalling] Messaggio richiede AZIONE - forcing tool activation`);
+      } else {
+        console.log(`🤝 [FunctionCalling] Messaggio di aiuto generico - comportamento collaborativo`);
       }
       
       // 4. Chiama OpenAI con function calling
@@ -311,8 +304,8 @@ export class OpenAIFunctionCallingSystem {
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userMessage }
         ],
-        functions: availableFunctions,
-        function_call: 'auto', // Lascia decidere a OpenAI (con prompt aggressivo)
+        functions: requiresAction ? availableFunctions : [], // Se non richiede azione, non passare functions
+        function_call: requiresAction ? 'auto' : 'none', // Se non richiede azione, non chiamare functions
         temperature: 0.0, // Completamente deterministico per max tool activation
         max_tokens: 2000,
       });
@@ -568,26 +561,28 @@ SE il messaggio:
 → ESEGUI subito, poi dici "Ho usato defaults, vuoi modificare?"
 
 🔥 **REGOLA D'ORO ASSOLUTA**:
-Sei un COLLEGA che FA, non un assistente che CHIEDE.
-Quando l'utente dice di fare qualcosa, ESEGUI IMMEDIATAMENTE usando defaults intelligenti.
-Chiedi conferma DOPO aver eseguito, non prima.
+Sei un COLLEGA INTELLIGENTE che collabora, non un robot che esegue ciecamente.
+Quando l'utente chiede aiuto, COLLABORA chiedendo informazioni necessarie.
+Quando l'utente dice di fare qualcosa con dati completi, ESEGUI IMMEDIATAMENTE.
+Quando l'utente chiede aiuto generico, CHIEDI informazioni prima di eseguire.
 
-⚡ **ACTION TRIGGERS - ESEGUI SEMPRE, MAI SOLO PARLARE**:
+⚡ **COMPORTAMENTO COLLABORATIVO - ESEMPI PRATICI**:
 
-🚨 REGOLA ZERO COMPROMESSI: VERBO D'AZIONE = FUNCTION CALL OBBLIGATORIA
+🎯 **QUANDO CHIEDERE INFORMAZIONI (NON attivare tool)**:
+• "Puoi aiutarmi con l'analisi di fattibilità?" → RISPOSTA COLLABORATIVA
+• "Come funziona l'analisi di fattibilità?" → RISPOSTA COLLABORATIVA  
+• "Ho un terreno, cosa posso fare?" → RISPOSTA COLLABORATIVA
+• "Mi serve un business plan" → RISPOSTA COLLABORATIVA
 
-Se il messaggio contiene UN SOLO verbo d'azione → CHIAMA FUNCTION IMMEDIATAMENTE
+🎯 **QUANDO ESEGUIRE IMMEDIATAMENTE (attivare tool)**:
+• "Fai analisi fattibilità per Milano, 20 unità, 3M budget" → feasibility_analyze
+• "Crea business plan per questo progetto" → business_plan_calculate
+• "Calcola ROI per terreno 1000mq" → feasibility_analyze
+• "Mostra i miei progetti" → project_list
 
-VERBI D'AZIONE (TRIGGER ASSOLUTI):
-• "fai", "fa'", "fare" → ESEGUI function
-• "analisi", "analizza", "analizzare" → feasibility_analyze O sensitivity
-• "crea", "creare", "genera", "generare" → business_plan_calculate O project_create
-• "calcola", "calcolare" → business_plan_calculate O sensitivity
-• "confronta", "confrontare", "compara" → feasibility x N + comparison
-• "mostra", "elenca", "lista" → project_list
-• "sensitivity", "sensibilità" → business_plan_sensitivity
-• "valuta", "valutare" → feasibility O sensitivity
-• "esegui", "eseguire" → function appropriata
+🚨 **REGOLA CHIAVE**: 
+Se l'utente chiede AIUTO GENERICO → COLLABORA prima di eseguire
+Se l'utente dice di FARE qualcosa con DATI → ESEGUI immediatamente
 • "prepara", "preparare" → function appropriata
 
 🔥 REGOLA ANTI-TEORIA:
@@ -1117,8 +1112,18 @@ Ora analizza il messaggio utente e decidi la migliore azione.`;
       return `🤖 **Come posso aiutarti**\n\nSono l'assistente di Urbanova e posso aiutarti con:\n\n• **Analisi di Fattibilità** - Valuta terreni e progetti\n• **Business Plan** - Crea piani finanziari completi\n• **Gestione Progetti** - Organizza i tuoi progetti\n• **Comunicazioni** - Invia RDO e gestisci fornitori\n• **Market Intelligence** - Analizza il mercato immobiliare\n\nDimmi cosa ti serve e ti guiderò! 🚀`;
     }
     
+    // Analisi fattibilità - Comportamento collaborativo
+    if (message.includes('analisi') || message.includes('fattibilità') || message.includes('terreno') || message.includes('valutazione')) {
+      return `Perfetto! 🏗️ Posso aiutarti con l'analisi di fattibilità del tuo progetto immobiliare.\n\nPer fare un'analisi precisa, ho bisogno di alcune informazioni:\n• **Dimensione del terreno** (mq)\n• **Costo di costruzione** per mq\n• **Prezzo di vendita** per mq\n• **Localizzazione** del progetto\n\nPuoi dirmi questi dati o usare il microfono per dettarli? Così facciamo l'analisi insieme! 🎤`;
+    }
+    
+    // Business plan - Comportamento collaborativo  
+    if (message.includes('business plan') || message.includes('piano') || message.includes('bp')) {
+      return `Ottimo! 📊 Posso aiutarti a creare un business plan completo per il tuo progetto.\n\nPer iniziare, dimmi:\n• **Tipo di progetto** (residenziale, commerciale, misto)\n• **Dimensione** (mq, unità)\n• **Budget** disponibile\n• **Timeline** del progetto\n\nUna volta che ho questi dati, posso creare un piano dettagliato con proiezioni finanziarie! 💼`;
+    }
+    
     // Default
-    return `Capisco! 💡 Posso aiutarti con progetti immobiliari, business plan, analisi di fattibilità e molto altro.\n\nProva a dirmi qualcosa come:\n• "Crea un business plan"\n• "Analizza questo terreno"\n• "Mostra i miei progetti"\n\nCosa ti serve?`;
+    return `Ciao! 👋 Sono qui per aiutarti con tutto quello che riguarda lo sviluppo immobiliare.\n\nPosso aiutarti con:\n• 🏗️ **Analisi di fattibilità** - valutiamo insieme il tuo progetto\n• 📊 **Business Plan** - creiamo un piano finanziario completo\n• 📍 **Ricerca mercato** - analizziamo la zona e la concorrenza\n• 🏢 **Gestione progetti** - organizziamo il tuo lavoro\n\nCosa ti serve oggi? Puoi anche usare il microfono per parlarmi! 🎤`;
   }
 
   /**
