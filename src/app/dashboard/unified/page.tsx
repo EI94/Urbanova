@@ -117,6 +117,9 @@ export default function UnifiedDashboardPage() {
   // Funzioni per gestione conversazioni
   const handleDeleteConversation = async (sessionId: string) => {
     try {
+      console.log('🗑️ [Chat History] INIZIO eliminazione conversazione:', sessionId);
+      console.log('🗑️ [Chat History] Chat history PRIMA:', chatHistory.length, 'conversazioni');
+      
       setIsDeleting(true);
       
       // Elimina dal localStorage
@@ -124,15 +127,20 @@ export default function UnifiedDashboardPage() {
       
       // Aggiorna stato locale
       const updatedHistory = chatHistoryService.getChatSessions();
-      setChatHistory(updatedHistory);
+      console.log('🗑️ [Chat History] Chat history DOPO eliminazione:', updatedHistory.length, 'conversazioni');
+      console.log('🗑️ [Chat History] Conversazioni rimanenti:', updatedHistory.map(c => ({ id: c.id, title: c.title })));
+      
+      // Forza creazione di nuovo array per React
+      setChatHistory([...updatedHistory]);
       
       // Se era la conversazione corrente, resetta
       if (currentSessionId === sessionId) {
+        console.log('🗑️ [Chat History] Era conversazione corrente, resetto stato');
         setCurrentSessionId(null);
         setMessages([]);
       }
       
-      console.log('✅ [Chat History] Conversazione eliminata:', sessionId);
+      console.log('✅ [Chat History] Conversazione eliminata con successo:', sessionId);
       
       // Mostra feedback positivo
       // TODO: Aggiungere toast notification
@@ -154,8 +162,10 @@ export default function UnifiedDashboardPage() {
   };
 
   const handleConfirmDelete = async () => {
+    console.log('🗑️ [Chat History] CONFERMA eliminazione:', deleteModal.sessionId);
     await handleDeleteConversation(deleteModal.sessionId);
     setDeleteModal({ isOpen: false, sessionId: '', title: '' });
+    console.log('🗑️ [Chat History] Modal chiuso dopo eliminazione');
   };
 
   // SessionId persistente per utente
@@ -179,6 +189,11 @@ export default function UnifiedDashboardPage() {
       }
     }
   }, [currentUser?.uid, getPersistentSessionId]);
+
+  // Forza aggiornamento chat history quando cambia
+  useEffect(() => {
+    console.log('🔄 [Chat History] Chat history aggiornato:', chatHistory.length, 'conversazioni');
+  }, [chatHistory]);
   
   // Mappa tool names tecnici a nomi user-friendly
   const getFriendlyToolName = (toolId: string): string => {
@@ -1654,6 +1669,7 @@ export default function UnifiedDashboardPage() {
                   </div>
                 ) : (
                   <ConversationList
+                    key={`conversation-list-${chatHistory.length}-${Date.now()}`}
                     chatHistory={chatHistory}
                     onSelectConversation={(chat) => {
                       setMessages(chat.messages);

@@ -88,10 +88,21 @@ class ChatHistoryService {
   // Elimina una sessione
   deleteChatSession(sessionId: string): void {
     try {
+      console.log('🗑️ [ChatHistoryService] Eliminando sessione:', sessionId);
       const sessions = this.getChatSessions();
+      console.log('🗑️ [ChatHistoryService] Sessioni PRIMA eliminazione:', sessions.length);
+      console.log('🗑️ [ChatHistoryService] Sessioni da eliminare:', sessions.filter(s => s.id === sessionId).map(s => ({ id: s.id, title: s.title })));
+      
       const filteredSessions = sessions.filter(s => s.id !== sessionId);
+      console.log('🗑️ [ChatHistoryService] Sessioni DOPO filtro:', filteredSessions.length);
+      
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filteredSessions));
       console.log('✅ [Chat History] Sessione eliminata:', sessionId);
+      
+      // Verifica che sia stata effettivamente eliminata
+      const verifySessions = this.getChatSessions();
+      console.log('✅ [ChatHistoryService] Verifica finale - sessioni rimanenti:', verifySessions.length);
+      
     } catch (error) {
       console.error('❌ [Chat History] Errore eliminazione sessione:', error);
     }
