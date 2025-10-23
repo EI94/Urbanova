@@ -321,8 +321,8 @@ export class OpenAIFunctionCallingSystem {
       console.error('❌ [FunctionCalling] Errore decisione intelligente:', error);
       console.error('❌ [FunctionCalling] Stack:', (error as Error).stack);
       
-      // Fallback intelligente basato sul messaggio utente
-      const fallbackResponse = this.generateFallbackResponse(userMessage);
+      // Fallback intelligente basato sul messaggio utente e contesto RAG
+      const fallbackResponse = this.generateFallbackResponse(userMessage, ragContext);
       
       return {
         action: 'conversation',
@@ -1082,12 +1082,22 @@ Ora analizza il messaggio utente e decidi la migliore azione.`;
   }
 
   /**
-   * Genera risposta di fallback intelligente basata sul messaggio utente
+   * Genera risposta di fallback intelligente basata sul messaggio utente e contesto RAG
    */
-  private generateFallbackResponse(userMessage: string): string {
+  private generateFallbackResponse(userMessage: string, ragContext?: RAGContext): string {
     const message = userMessage.toLowerCase();
     
-    // Saluti
+    // Se abbiamo memoria della conversazione, usa quella invece del fallback generico
+    if (ragContext && ragContext.conversationHistory && ragContext.conversationHistory.length > 0) {
+      console.log('🧠 [FunctionCalling] Usando memoria conversazione per risposta contestuale');
+      
+      // Per saluti in conversazione esistente, rispondi in modo contestuale
+      if (message.includes('ciao') || message.includes('salve') || message.includes('buongiorno') || message.includes('buonasera')) {
+        return `Ciao! 👋 Come posso aiutarti oggi?`;
+      }
+    }
+    
+    // Saluti (solo per nuove conversazioni)
     if (message.includes('ciao') || message.includes('salve') || message.includes('buongiorno') || message.includes('buonasera')) {
       return `Ciao! 👋 Sono l'assistente di Urbanova. Posso aiutarti con:\n\n• 📊 Analisi di fattibilità\n• 📈 Business Plan\n• 🏗️ Gestione progetti\n• 📧 Comunicazioni\n\nCosa posso fare per te oggi?`;
     }

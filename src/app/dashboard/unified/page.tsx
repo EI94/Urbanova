@@ -226,6 +226,9 @@ export default function UnifiedDashboardPage() {
   // 🎤 Voice AI Hook - Design Johnny Ive
   const { handleTranscription, handleSpeaking } = useVoiceAI();
   
+  // Voice mode state
+  const [isVoiceMode, setIsVoiceMode] = useState(false);
+  
   // Stato per sintesi vocale
   const [isSpeaking, setIsSpeaking] = useState(false);
   
@@ -488,29 +491,33 @@ export default function UnifiedDashboardPage() {
       });
       setCurrentSessionId(sessionId);
 
-      // 🎤 Sintesi vocale automatica della risposta - Design Johnny Ive
-      setTimeout(() => {
-        console.log('🔊 [UNIFIED] Avvio sintesi vocale risposta...');
-        handleSpeaking(true);
-        
-        const utterance = new SpeechSynthesisUtterance(aiResponse.content);
-        utterance.lang = 'it-IT';
-        utterance.rate = 0.9;
-        utterance.pitch = 1.0;
-        utterance.volume = 0.8;
-        
-        utterance.onend = () => {
-          console.log('🔊 [UNIFIED] Sintesi vocale completata');
-          handleSpeakingState(false);
-        };
-        
-        utterance.onerror = (event) => {
-          console.error('❌ [UNIFIED] Errore sintesi vocale:', event.error);
-          handleSpeakingState(false);
-        };
-        
-        speechSynthesis.speak(utterance);
-      }, 500);
+      // 🎤 Sintesi vocale automatica della risposta - SOLO in modalità voce
+      if (isVoiceMode) {
+        setTimeout(() => {
+          console.log('🔊 [UNIFIED] Avvio sintesi vocale risposta (modalità voce attiva)...');
+          handleSpeaking(true);
+          
+          const utterance = new SpeechSynthesisUtterance(aiResponse.content);
+          utterance.lang = 'it-IT';
+          utterance.rate = 0.9;
+          utterance.pitch = 1.0;
+          utterance.volume = 0.8;
+          
+          utterance.onend = () => {
+            console.log('🔊 [UNIFIED] Sintesi vocale completata');
+            handleSpeakingState(false);
+          };
+          
+          utterance.onerror = (event) => {
+            console.error('❌ [UNIFIED] Errore sintesi vocale:', event.error);
+            handleSpeakingState(false);
+          };
+          
+          speechSynthesis.speak(utterance);
+        }, 500);
+      } else {
+        console.log('🔇 [UNIFIED] Sintesi vocale disabilitata (modalità testo)');
+      }
 
       // Salva nella chat history persistente se è una conversazione significativa
       if (finalMessages.length > 2) {
@@ -1206,6 +1213,7 @@ export default function UnifiedDashboardPage() {
                     <VoiceAIChatGPT
                       onTranscription={(text) => {
                         console.log('🎤 [UNIFIED] Trascrizione ricevuta:', text);
+                        setIsVoiceMode(true); // Attiva modalità voce
                         handleTranscription(text);
                         setInputValue(text);
                       }}
@@ -1216,7 +1224,10 @@ export default function UnifiedDashboardPage() {
                       <input
                         type="text"
                         value={inputValue}
-                        onChange={e => setInputValue(e.target.value)}
+                        onChange={e => {
+                          setInputValue(e.target.value);
+                          setIsVoiceMode(false); // Disattiva modalità voce quando scrive
+                        }}
                         onKeyPress={handleKeyPress}
                         placeholder="Chiedi qualcosa..."
                         className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm input-box"
@@ -1458,6 +1469,7 @@ export default function UnifiedDashboardPage() {
                       <VoiceAIChatGPT
                         onTranscription={(text) => {
                           console.log('🎤 [UNIFIED-TOOLS] Trascrizione ricevuta:', text);
+                          setIsVoiceMode(true); // Attiva modalità voce
                           handleTranscription(text);
                           setInputValue(text);
                         }}
@@ -1468,7 +1480,10 @@ export default function UnifiedDashboardPage() {
                       <input
                         type="text"
                         value={inputValue}
-                        onChange={e => setInputValue(e.target.value)}
+                        onChange={e => {
+                          setInputValue(e.target.value);
+                          setIsVoiceMode(false); // Disattiva modalità voce quando scrive
+                        }}
                         onKeyPress={handleKeyPress}
                         placeholder="Chiedi qualcosa..."
                         className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent input-box"

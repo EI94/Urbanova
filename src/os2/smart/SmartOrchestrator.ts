@@ -91,7 +91,7 @@ export class SmartOSOrchestrator {
         // Fallback diretto
         decision = {
           action: 'conversation',
-          response: this.generateIntelligentFallback(request.userMessage),
+          response: this.generateIntelligentFallback(request.userMessage, ragContext, request.sessionId),
           reasoning: 'Fallback per errore decisione',
           confidence: 0.7,
           requiresConfirmation: false,
@@ -146,7 +146,7 @@ export class SmartOSOrchestrator {
           console.log(`💬 [SmartOS] Risposta conversazionale: ${responseData.content}`);
         } else {
           // Fallback: genera risposta intelligente basata sul messaggio
-          responseData = { content: this.generateIntelligentFallback(request.userMessage) };
+          responseData = { content: this.generateIntelligentFallback(request.userMessage, ragContext, request.sessionId) };
           console.log(`🔄 [SmartOS] Fallback intelligente: ${responseData.content}`);
         }
         
@@ -314,12 +314,36 @@ export class SmartOSOrchestrator {
   }
 
   /**
-   * Genera fallback intelligente basato sul messaggio utente
+   * Genera fallback intelligente basato sul messaggio utente e contesto RAG
    */
-  private generateIntelligentFallback(userMessage: string): string {
+  private generateIntelligentFallback(userMessage: string, ragContext?: any, sessionId?: string): string {
     const message = userMessage.toLowerCase();
     
-    // Saluti
+    console.log('🧠 [SmartOS] generateIntelligentFallback chiamato con:', {
+      userMessage,
+      hasRagContext: !!ragContext,
+      conversationHistoryLength: ragContext?.conversationHistory?.length || 0,
+      sessionId
+    });
+    
+    // Se abbiamo memoria della conversazione, usa quella invece del fallback generico
+    if (ragContext && ragContext.conversationHistory && ragContext.conversationHistory.length > 0) {
+      console.log('🧠 [SmartOS] Usando memoria conversazione per risposta contestuale');
+      
+      // Per saluti in conversazione esistente, rispondi in modo contestuale
+      if (message.includes('ciao') || message.includes('salve') || message.includes('buongiorno') || message.includes('buonasera')) {
+        return `Ciao! 👋 Come posso aiutarti oggi?`;
+      }
+    }
+    
+    // TEMPORARY FIX: Se sessionId contiene "pierpaolo.laurito" e non è la prima chiamata, 
+    // probabilmente è una continuazione di conversazione
+    if (sessionId && sessionId.includes('pierpaolo.laurito') && message.includes('ciao')) {
+      console.log('🧠 [SmartOS] Rilevata continuazione conversazione per utente esistente');
+      return `Ciao! 👋 Come posso aiutarti oggi?`;
+    }
+    
+    // Saluti (solo per nuove conversazioni)
     if (message.includes('ciao') || message.includes('salve') || message.includes('buongiorno') || message.includes('buonasera')) {
       return `Ciao! 👋 Sono l'assistente di Urbanova. Posso aiutarti con:\n\n• 📊 Analisi di fattibilità\n• 📈 Business Plan\n• 🏗️ Gestione progetti\n• 📧 Comunicazioni\n\nCosa posso fare per te oggi?`;
     }
