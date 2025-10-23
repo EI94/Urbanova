@@ -6,6 +6,7 @@ export interface ChatMessage {
   content: string;
   timestamp: Date;
   intelligentData?: IntelligentData;
+  resultData?: ResultData; // Nuovo: dati risultato per analisi
 }
 
 export interface IntelligentData {
@@ -30,6 +31,22 @@ export interface Visualization {
   data: any;
   title: string;
   description?: string;
+}
+
+// Nuovo: Dati risultato per analisi
+export interface ResultData {
+  type: 'feasibility' | 'businessPlan' | 'sensitivity' | 'project';
+  data: any;
+  summary: string;
+  actions: ResultAction[];
+}
+
+export interface ResultAction {
+  type: 'view_details' | 'edit' | 'export' | 'compare' | 'save';
+  label: string;
+  url?: string;
+  data?: any;
+  icon?: string;
 }
 
 export interface ChatSession {

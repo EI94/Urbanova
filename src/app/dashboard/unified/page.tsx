@@ -54,6 +54,7 @@ import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 import MarkdownRenderer from '@/components/ui/MarkdownRenderer';
 import { GeographicSearch, GeographicSearchResult } from '@/components/ui/GeographicSearch';
 import { VoiceAIChatGPT, useVoiceAI } from '@/app/components/os2/VoiceAIChatGPT';
+import { ResultMessage } from '@/components/chat/ResultMessage';
 // TEMPORANEAMENTE DISABILITATO: import { InteractiveMap, MapMarker } from '@/components/map/InteractiveMap';
 // TEMPORANEAMENTE DISABILITATO: import { useMapData } from '@/hooks/useMapData';
 
@@ -102,12 +103,54 @@ export default function UnifiedDashboardPage() {
   const [showQuickActions, setShowQuickActions] = useState(true);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   
-  // Workspace management
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
-  const [showWorkspaceManager, setShowWorkspaceManager] = useState(false);
+  // SessionId persistente per utente
+  const getPersistentSessionId = useCallback(() => {
+    if (currentUser?.uid) {
+      return `session_${currentUser.uid}`;
+    }
+    return 'session_anonymous';
+  }, [currentUser?.uid]);
+  
+  // Carica chat esistente quando l'utente torna alla dashboard
+  useEffect(() => {
+    if (currentUser?.uid) {
+      const sessionId = getPersistentSessionId();
+      const existingSession = chatHistoryService.getChatSession(sessionId);
+      
+      if (existingSession && existingSession.messages.length > 0) {
+        console.log('📂 [Dashboard] Caricando chat esistente:', existingSession.messages.length, 'messaggi');
+        setMessages(existingSession.messages);
+        setCurrentSessionId(sessionId);
+      }
+    }
+  }, [currentUser?.uid, getPersistentSessionId]);
+  
+  // Mappa tool names tecnici a nomi user-friendly
+  const getFriendlyToolName = (toolId: string): string => {
+    const friendlyNames: Record<string, string> = {
+      'feasibility_analyze': 'Analisi Fattibilità',
+      'business_plan_calculate': 'Business Plan',
+      'business_plan_sensitivity': 'Analisi Sensibilità',
+      'business_plan_export': 'Esportazione Business Plan',
+      'project_save': 'Salvataggio Progetto',
+      'project_create': 'Creazione Progetto',
+      'project_list': 'Lista Progetti',
+      'project_query': 'Ricerca Progetti',
+      'conversation_general': 'Elaborazione',
+      'workflow_execute': 'Workflow',
+    };
+    
+    return friendlyNames[toolId] || toolId;
+  };
   
   // Project previews from chat
   const [projectPreviews, setProjectPreviews] = useState<ProjectPreviewType[]>([]);
+  
+  // Result preview per mostrare risultati analisi
+  // const [resultPreview, setResultPreview] = useState<{
+  //   type: 'feasibility' | 'businessPlan' | 'sensitivity';
+  //   data: any;
+  // } | null>(null); // Rimosso - ora integrato nella chat
 
   // Notifications, Profile, Settings
   const [showNotifications, setShowNotifications] = useState(false);
@@ -189,7 +232,7 @@ export default function UnifiedDashboardPage() {
 
         // Carica workspace dell'utente
         if (currentUser) {
-          await loadWorkspaces();
+          // await loadWorkspaces(); // Temporaneamente disabilitato
           // Carica notifiche e profilo utente
           await loadUserData();
         }
@@ -338,7 +381,7 @@ export default function UnifiedDashboardPage() {
           message: inputValue,
           userId: currentUser?.uid || 'anonymous',
           userEmail: currentUser?.email || 'user@urbanova.life',
-          sessionId: Date.now().toString(),
+          sessionId: getPersistentSessionId(), // SessionId persistente!
         }),
       });
 
@@ -365,6 +408,12 @@ export default function UnifiedDashboardPage() {
         } : {})
       };
 
+      // Gestisci result preview per analisi
+      if (data.resultData) {
+        // Aggiungi resultData al messaggio AI
+        aiResponse.resultData = data.resultData;
+      }
+      
       // Gestisci project preview se presente
       if (data.projectPreview) {
         setProjectPreviews(prev => [data.projectPreview, ...prev]);
@@ -373,6 +422,17 @@ export default function UnifiedDashboardPage() {
 
       const finalMessages = [...newMessages, aiResponse];
       setMessages(finalMessages);
+      
+      // Salva chat in localStorage per persistenza
+      const sessionId = getPersistentSessionId();
+      chatHistoryService.saveChatSession({
+        id: sessionId,
+        title: `Chat ${new Date().toLocaleDateString()}`,
+        preview: aiResponse.content.substring(0, 100),
+        timestamp: new Date(),
+        messages: finalMessages
+      });
+      setCurrentSessionId(sessionId);
 
       // 🎤 Sintesi vocale automatica della risposta - Design Johnny Ive
       setTimeout(() => {
@@ -475,21 +535,21 @@ export default function UnifiedDashboardPage() {
   };
 
   // Carica workspace dell'utente
-  const loadWorkspaces = async () => {
-    try {
-      if (!currentUser) return;
-      
-      const response = await fetch(`/api/workspace/user/${currentUser.uid}`);
-      const data = await response.json();
-      
-      if (data.success) {
-        setWorkspaces(data.workspaces);
-        console.log('✅ [Workspace] Workspace caricati:', data.workspaces.length);
-      }
-    } catch (error) {
-      console.error('❌ [Workspace] Errore caricamento workspace:', error);
-    }
-  };
+  // const loadWorkspaces = async () => { // Temporaneamente disabilitato
+  //   try {
+  //     if (!currentUser) return;
+  //     
+  //     const response = await fetch(`/api/workspace/user/${currentUser.uid}`);
+  //     const data = await response.json();
+  //     
+  //     if (data.success) {
+  //       setWorkspaces(data.workspaces);
+  //       console.log('✅ [Workspace] Workspace caricati:', data.workspaces.length);
+  //     }
+  //   } catch (error) {
+  //     console.error('❌ [Workspace] Errore caricamento workspace:', error);
+  //   }
+  // };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -583,7 +643,7 @@ export default function UnifiedDashboardPage() {
               
               {/* Workspace */}
               <button 
-                onClick={() => setShowWorkspaceManager(true)}
+                onClick={() => {/* setShowWorkspaceManager(true) */}}
                 className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
                 title="Gestione Workspace"
               >
@@ -946,6 +1006,30 @@ export default function UnifiedDashboardPage() {
                           >
                             <MarkdownRenderer content={message.content} className="text-sm leading-relaxed" />
                             
+                            {/* Mostra ResultMessage se presente */}
+                            {message.resultData && (
+                              <div className="mt-3">
+                                <ResultMessage 
+                                  resultData={message.resultData}
+                                  onActionClick={(action) => {
+                                    if (action.type === 'view_details') {
+                                      if (message.resultData?.type === 'feasibility') {
+                                        setActiveTab('feasibility-analysis');
+                                      } else if (message.resultData?.type === 'businessPlan') {
+                                        setActiveTab('business-plan');
+                                      }
+                                    } else if (action.type === 'edit') {
+                                      // Apri modal di modifica o naviga
+                                      console.log('Edit action:', action);
+                                    } else if (action.type === 'export') {
+                                      // Trigger export
+                                      console.log('Export action:', action);
+                                    }
+                                  }}
+                                />
+                              </div>
+                            )}
+                            
                             {/* Mostra dati intelligenti se presenti */}
                             {message.intelligentData && (
                               <div className="mt-3 space-y-2">
@@ -1028,10 +1112,10 @@ export default function UnifiedDashboardPage() {
                     
                     {isLoading && (
                       <div className="flex justify-start">
-                        <div className="bg-gray-100 text-gray-900 px-4 py-3 rounded-2xl">
+                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 text-gray-900 px-4 py-3 rounded-2xl border border-blue-200">
                           <div className="flex items-center space-x-2">
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
-                            <span className="text-sm">Sto pensando...</span>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                            <span className="text-sm font-medium">Sto analizzando la tua richiesta...</span>
                           </div>
                         </div>
                       </div>
@@ -1351,7 +1435,7 @@ export default function UnifiedDashboardPage() {
                 {activeToolExecutions.length > 0 && (
                   <div className="bg-white rounded-lg shadow border border-gray-200">
                     <div className="p-4 border-b border-gray-200">
-                      <h3 className="font-medium text-gray-900">Esecuzioni Tool Attive</h3>
+                      <h3 className="font-medium text-gray-900">Sto elaborando...</h3>
                     </div>
                     <div className="p-4 space-y-3">
                       {activeToolExecutions.map(execution => (
@@ -1362,10 +1446,10 @@ export default function UnifiedDashboardPage() {
                             </div>
                             <div>
                               <p className="text-sm font-medium text-gray-900">
-                                {execution.toolId} - {execution.action}
+                                {getFriendlyToolName(execution.toolId)}
                               </p>
                               <p className="text-xs text-gray-500">
-                                {execution.status === 'running' ? 'In corso...' : 'Completato'}
+                                {execution.status === 'running' ? 'Sto elaborando...' : 'Completato'}
                               </p>
                             </div>
                           </div>
@@ -1627,19 +1711,12 @@ export default function UnifiedDashboardPage() {
         </div>
       )}
 
-      {/* Workspace Manager Modal */}
-      <WorkspaceManager
-        isOpen={showWorkspaceManager}
-        onClose={() => setShowWorkspaceManager(false)}
-        workspaces={workspaces}
-        onWorkspaceCreated={(workspace) => {
-          setWorkspaces(prev => [workspace, ...prev]);
-        }}
-        onMemberInvited={() => {
-          // Ricarica i workspace per aggiornare i membri
-          loadWorkspaces();
-        }}
-      />
+      {/* Workspace Manager Modal - Temporaneamente disabilitato */}
+      {/* <WorkspaceManager ... /> */}
+      {/* Result Preview Modal - Rimosso, ora integrato nella chat */}
+      {/* {resultPreview && (
+        <ResultPreview ... />
+      )} */}
     </div>
   );
 }

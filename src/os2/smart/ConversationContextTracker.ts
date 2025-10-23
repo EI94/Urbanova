@@ -36,10 +36,12 @@ export interface ConversationContext {
 /**
  * Context Tracker Intelligente
  * Traccia operazioni e contesto conversazionale per risolvere riferimenti impliciti
+ * PERSISTENTE tra pagine e sessioni
  */
 export class ConversationContextTracker {
   private contexts: Map<string, ConversationContext> = new Map();
   private maxStackSize = 10;
+  private readonly STORAGE_KEY = 'urbanova_context_tracker';
   
   /**
    * Ottiene o inizializza context per una sessione
@@ -87,6 +89,9 @@ export class ConversationContextTracker {
     
     console.log(`📝 [ContextTracker] Operazione registrata: ${operation.type} (${operation.tool})`);
     console.log(`   Entità menzionate: ${context.mentionedEntities.projects.length} progetti, ${context.mentionedEntities.locations.length} località`);
+    
+    // Salva in storage per persistenza
+    this.saveToStorage();
   }
   
   /**
@@ -247,8 +252,53 @@ export function getContextTracker(): ConversationContextTracker {
   if (!instance) {
     instance = new ConversationContextTracker();
     console.log('🧠 [ContextTracker] Inizializzato');
+    instance.loadFromStorage(); // Carica context persistenti
   }
   return instance;
 }
+
+// Aggiungi metodi di persistenza alla classe
+ConversationContextTracker.prototype.loadFromStorage = function() {
+  try {
+    if (typeof window === 'undefined') return; // SSR safety
+    
+    const stored = localStorage.getItem('urbanova_context_tracker');
+    if (!stored) return;
+    
+    const data = JSON.parse(stored);
+    Object.entries(data).forEach(([sessionId, context]: [string, any]) => {
+      // Converte timestamp da stringa a Date
+      if (context.lastOperation) {
+        context.lastOperation.timestamp = new Date(context.lastOperation.timestamp);
+      }
+      context.operationStack = context.operationStack.map((op: any) => ({
+        ...op,
+        timestamp: new Date(op.timestamp)
+      }));
+      
+      this.contexts.set(sessionId, context);
+    });
+    
+    console.log(`📂 [ContextTracker] Caricati ${this.contexts.size} context da storage`);
+  } catch (error) {
+    console.error('❌ [ContextTracker] Errore caricamento storage:', error);
+  }
+};
+
+ConversationContextTracker.prototype.saveToStorage = function() {
+  try {
+    if (typeof window === 'undefined') return; // SSR safety
+    
+    const data: Record<string, any> = {};
+    this.contexts.forEach((context, sessionId) => {
+      data[sessionId] = context;
+    });
+    
+    localStorage.setItem('urbanova_context_tracker', JSON.stringify(data));
+    console.log(`💾 [ContextTracker] Salvati ${this.contexts.size} context in storage`);
+  } catch (error) {
+    console.error('❌ [ContextTracker] Errore salvataggio storage:', error);
+  }
+};
 
 

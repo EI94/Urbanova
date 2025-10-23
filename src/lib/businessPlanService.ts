@@ -30,70 +30,274 @@ export interface BusinessPlanInput {
   // Origine del Business Plan (per tracciamento storico)
   sourceFeasibilityId?: string; // ID dell'analisi di fattibilità da cui è stato creato
   
-  // Ricavi
-  averagePrice: number; // Prezzo medio per unità
-  unitMix?: { type: string; count: number; price: number }[];
-  salesCalendar: { period: string; units: number }[]; // es. [{period: 't1', units: 1}, {period: 't2', units: 3}]
-  discounts?: number; // % sconto medio
-  salesCommission: number; // % commissione vendita
+  // ============================================================================
+  // RICAVI AVANZATI - OPZIONI MULTIPLE
+  // ============================================================================
+  revenueConfig: {
+    method: 'TOTAL' | 'PER_UNIT' | 'DETAILED' | 'PER_SQM'; // Metodo di input ricavi
+    totalRevenue?: number; // Valore totale ricavi
+    averagePrice?: number; // Prezzo medio per unità
+    pricePerSqm?: number; // Prezzo per mq
+    averageUnitSize?: number; // mq medi per unità
+    unitMix?: { 
+      type: string; 
+      count: number; 
+      price: number; 
+      size?: number; // mq per unità
+    }[];
+    salesCalendar: { period: string; units: number }[]; // Timeline vendite
+    discounts?: number; // % sconto medio
+    salesCommission: number; // % commissione vendita
+    priceEscalation?: number; // % incremento prezzi nel tempo
+  };
   
-  // Costi diretti
-  constructionCostPerUnit?: number; // Costo costruzione per unità
-  constructionCostPerSqm?: number; // Oppure €/mq
-  averageUnitSize?: number; // mq medi per calcolo da €/mq
-  contingency: number; // % contingenze
+  // ============================================================================
+  // COSTI AVANZATI - OPZIONI MULTIPLE E DETTAGLIATE
+  // ============================================================================
+  costConfig: {
+    // Costi di costruzione
+    constructionMethod: 'PER_UNIT' | 'PER_SQM' | 'DETAILED' | 'TOTAL';
+    constructionCostPerUnit?: number; // Costo costruzione per unità
+    constructionCostPerSqm?: number; // Costo costruzione per mq
+    totalConstructionCost?: number; // Costo totale costruzione
+    averageUnitSize?: number; // mq medi per calcolo
+    constructionBreakdown?: {
+      structure: number; // Struttura portante
+      finishes: number; // Finiture
+      systems: number; // Impianti
+      external: number; // Esterni e verde
+    };
+    
+    // Contingenze e rischi
+    contingency: number; // % contingenze generali
+    contingencyBreakdown?: {
+      design: number; // % contingenze progettazione
+      construction: number; // % contingenze costruzione
+      market: number; // % contingenze mercato
+    };
+    
+    // Costi indiretti dettagliati
+    softCosts: {
+      percentage: number; // % costi indiretti
+      breakdown?: {
+        design: number; // Progettazione
+        permits: number; // Permessi e autorizzazioni
+        supervision: number; // Direzione lavori
+        safety: number; // Sicurezza
+        insurance: number; // Assicurazioni
+        marketing: number; // Marketing e vendite
+      };
+    };
+    
+    // Costi urbanistici
+    developmentCharges: {
+      method: 'PER_SQM' | 'TOTAL' | 'DETAILED';
+      perSqm?: number; // €/mq
+      total?: number; // Valore totale
+      breakdown?: {
+        urbanization: number; // Oneri urbanizzazione
+        utilities: number; // Allacci
+        permits: number; // Permessi
+        taxes: number; // Tasse
+      };
+    };
+    
+    // Costi finanziari
+    financingCosts?: {
+      arrangementFee: number; // % commissione di istruttoria
+      commitmentFee: number; // % commissione di impegno
+      guaranteeFee: number; // % commissione fideiussione
+    };
+  };
   
-  // Costi indiretti
-  softCostPercentage: number; // % per progettazione, DL, sicurezza
-  developmentCharges: number; // Oneri di urbanizzazione (€/mq o valore fisso)
-  utilities: number; // Allacci
-  
-  // Terreno - Configurabile per scenario
+  // ============================================================================
+  // SCENARI TERRAIN AVANZATI - LOGICA SMART E FLESSIBILE
+  // ============================================================================
   landScenarios: LandScenario[];
   
-  // Finanza
-  discountRate: number; // Tasso di sconto per VAN
-  costOfCapital?: number; // Costo del capitale
-  debt?: DebtConfiguration;
+  // ============================================================================
+  // FINANZA AVANZATA - AMMORTAMENTI E SCENARI MULTIPLI
+  // ============================================================================
+  financeConfig: {
+    discountRate: number; // Tasso di sconto per VAN
+    costOfCapital?: number; // Costo del capitale
+    
+    // Finanziamento avanzato
+    debt?: {
+      enabled: boolean;
+      amount: number; // Importo finanziamento
+      interestRate: number; // Tasso interesse
+      term: number; // Durata in anni
+      ltv: number; // Loan-to-Value ratio
+      dscr: number; // Debt Service Coverage Ratio target
+      fees: number; // Commissioni e spese
+      
+      // Ammortamenti avanzati
+      amortizationType: 'FRENCH' | 'ITALIAN' | 'BULLET' | 'CUSTOM'; // Tipo ammortamento
+      gracePeriod?: number; // Periodo di grazia in mesi
+      balloonPayment?: number; // Pagamento finale (bullet)
+      customSchedule?: { // Piano personalizzato
+        period: number; // Periodo (mesi)
+        principal: number; // Capitale
+        interest: number; // Interessi
+        total: number; // Totale rata
+      }[];
+      
+      // Scenari finanziari
+      scenarios?: {
+        id: string;
+        name: string;
+        ltv: number;
+        interestRate: number;
+        term: number;
+        fees: number;
+      }[];
+    };
+    
+    // Analisi di sensibilità finanziaria
+    sensitivityAnalysis?: {
+      interestRateRange: { min: number; max: number; step: number };
+      ltvRange: { min: number; max: number; step: number };
+      termRange: { min: number; max: number; step: number };
+    };
+  };
   
-  // Tempi
-  constructionTimeline: { phase: string; period: string }[]; // es. [{phase: 'Fondazioni', period: 't1'}]
-  permitDelay?: number; // Mesi di ritardo permessi
+  // ============================================================================
+  // TIMING E CALENDARIO AVANZATO
+  // ============================================================================
+  timingConfig: {
+    constructionTimeline: { phase: string; period: string; percentage?: number }[]; // Timeline costruzione
+    permitDelay?: number; // Mesi di ritardo permessi
+    milestoneDates?: {
+      startConstruction: string; // Data inizio costruzione
+      completion: string; // Data completamento
+      firstSale: string; // Prima vendita
+      lastSale: string; // Ultima vendita
+    };
+  };
   
-  // Fiscalità (semplificata)
-  vatOnLand?: number; // % IVA su terreno
-  taxOnProfit?: number; // % imposte su utile
+  // ============================================================================
+  // FISCALITÀ E TASSE
+  // ============================================================================
+  taxConfig?: {
+    vatOnLand?: number; // % IVA su terreno
+    taxOnProfit?: number; // % imposte su utile
+    withholdingTax?: number; // % ritenuta d'acconto
+    stampDuty?: number; // % imposta di registro
+  };
   
-  // Target e soglie
-  targetMargin?: number; // % margine target
-  minimumDSCR?: number; // DSCR minimo accettabile (default 1.2)
+  // ============================================================================
+  // TARGET E OBIETTIVI AVANZATI
+  // ============================================================================
+  targets: {
+    margin: number; // Margine target %
+    minimumDSCR: number; // DSCR minimo accettabile
+    targetIRR?: number; // TIR target
+    targetNPV?: number; // VAN target
+    paybackPeriod?: number; // Payback target (anni)
+    
+    // Obiettivi per scenario
+    scenarioTargets?: {
+      [scenarioId: string]: {
+        margin: number;
+        dscr: number;
+        irr: number;
+        npv: number;
+      };
+    };
+  };
 }
 
 export interface LandScenario {
   id: string;
   name: string; // es. "S1: Cash", "S2: Permuta", "S3: Pagamento Differito"
-  type: 'CASH' | 'PERMUTA' | 'DEFERRED_PAYMENT' | 'MIXED' | 'EARN_OUT' | 'OPTION';
+  type: 'CASH' | 'PERMUTA' | 'DEFERRED_PAYMENT' | 'MIXED' | 'EARN_OUT' | 'OPTION' | 'REVERSE_PERMUTA';
+  description?: string; // Descrizione dello scenario per l'utente
+  
+  // ============================================================================
+  // CONFIGURAZIONE SMART DEL TERRAIN
+  // ============================================================================
   
   // Cash upfront
   upfrontPayment?: number;
+  upfrontPaymentPeriod?: string; // es. 't0', 't1'
   
-  // Permuta
-  unitsInPermuta?: number;
-  cashContribution?: number;
-  cashContributionPeriod?: string; // es. 't2'
+  // Permuta tradizionale (noi diamo case al proprietario terreno)
+  permuta?: {
+    unitsToGive: number; // Case da dare al proprietario terreno
+    unitValue: number; // Valore per unità da dare
+    cashContribution?: number; // Contributo cash aggiuntivo
+    cashContributionPeriod?: string; // Quando pagare il contributo
+    whoReceivesCash?: 'US' | 'OWNER'; // Chi riceve i soldi dalla vendita
+  };
+  
+  // Permuta inversa (proprietario terreno ci dà soldi quando vendiamo)
+  reversePermuta?: {
+    unitsToGive: number; // Case da dare al proprietario terreno
+    unitValue: number; // Valore per unità da dare
+    cashBackPercentage?: number; // % dei ricavi che ci torna
+    cashBackPeriod?: string; // Quando riceviamo i soldi
+    minimumCashBack?: number; // Importo minimo garantito
+  };
   
   // Pagamento differito
-  deferredPayment?: number;
-  deferredPaymentPeriod?: string; // es. 't1'
+  deferredPayment?: {
+    amount: number; // Importo da pagare
+    period: string; // Quando pagare
+    interestRate?: number; // Tasso interesse sul differito
+    collateral?: string; // Garanzie richieste
+  };
   
-  // Earn-out
-  earnOutPercentage?: number; // % su extra-prezzo
-  earnOutThreshold?: number; // Soglia prezzo per attivazione
+  // Earn-out (pagamento basato su performance)
+  earnOut?: {
+    basePayment: number; // Pagamento base
+    earnOutPercentage: number; // % su extra-prezzo
+    earnOutThreshold: number; // Soglia prezzo per attivazione
+    earnOutCap?: number; // Massimo earn-out
+    earnOutPeriod?: string; // Quando pagare l'earn-out
+  };
   
-  // Opzione
-  optionFee?: number;
-  optionExercisePeriod?: string;
-  optionExercisePrice?: number;
+  // Opzione di acquisto
+  option?: {
+    optionFee: number; // Canone opzione
+    optionPeriod: string; // Durata opzione
+    exercisePrice: number; // Prezzo di esercizio
+    exercisePeriod: string; // Quando esercitare
+    optionFeeRefundable?: boolean; // Se il canone è rimborsabile
+  };
+  
+  // ============================================================================
+  // CALCOLI AUTOMATICI E VALIDAZIONI
+  // ============================================================================
+  
+  // Validazione scenario
+  validation?: {
+    isValid: boolean;
+    warnings?: string[];
+    errors?: string[];
+    suggestions?: string[];
+  };
+  
+  // Calcoli automatici
+  calculations?: {
+    totalLandCost: number; // Costo totale terreno
+    netPresentValue: number; // VAN del costo terreno
+    effectiveCost: number; // Costo effettivo considerando timing
+    riskLevel: 'LOW' | 'MEDIUM' | 'HIGH'; // Livello di rischio
+  };
+  
+  // ============================================================================
+  // METADATI E TRACCIAMENTO
+  // ============================================================================
+  
+  // Metadati per l'OS
+  metadata?: {
+    complexity: number; // 1-5 livello di complessità
+    negotiationLeverage: number; // 1-5 leva negoziale
+    cashFlowImpact: 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE'; // Impatto cash flow
+    riskFactors: string[]; // Fattori di rischio
+    opportunities: string[]; // Opportunità
+  };
 }
 
 export interface DebtConfiguration {

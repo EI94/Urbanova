@@ -131,8 +131,10 @@ export class SmartOSOrchestrator {
         }
 
         // 4. Genera risposta finale
+        let responseData: { content: string; resultData?: any } = { content: '' };
+        
         if (decision.functionCalls && functionResults.length > 0) {
-          finalResponse = await this.generateResponseFromFunctionResults(
+          responseData = await this.generateResponseFromFunctionResults(
             request.userMessage,
             decision.functionCalls,
             functionResults,
@@ -140,13 +142,15 @@ export class SmartOSOrchestrator {
           );
         } else if (decision.action === 'conversation' && decision.response) {
           // Per risposte conversazionali dirette, usa la risposta di OpenAI
-          finalResponse = decision.response;
-          console.log(`💬 [SmartOS] Risposta conversazionale: ${finalResponse}`);
+          responseData = { content: decision.response };
+          console.log(`💬 [SmartOS] Risposta conversazionale: ${responseData.content}`);
         } else {
           // Fallback: genera risposta intelligente basata sul messaggio
-          finalResponse = this.generateIntelligentFallback(request.userMessage);
-          console.log(`🔄 [SmartOS] Fallback intelligente: ${finalResponse}`);
+          responseData = { content: this.generateIntelligentFallback(request.userMessage) };
+          console.log(`🔄 [SmartOS] Fallback intelligente: ${responseData.content}`);
         }
+        
+        finalResponse = responseData.content;
       }
 
       // 5. Applica guardrails
@@ -222,6 +226,7 @@ export class SmartOSOrchestrator {
       return {
         success: guardrailResult.passed,
         response: finalResponse,
+        resultData: responseData.resultData, // Nuovo: dati risultato per UI
         functionCalls: decision.functionCalls || [],
         artifacts: functionResults.map(r => r.result) || [],
         kpis: [],
@@ -274,22 +279,22 @@ export class SmartOSOrchestrator {
         // Genera risposta basata sul tipo di skill
         switch (functionCall.name) {
           case 'conversation.general':
-            return result.response || 'Come posso aiutarti oggi?';
+            return { content: result.response || 'Come posso aiutarti oggi?' };
 
           case 'feasibility.analyze':
-            return this.formatFeasibilityResponse(result);
+            return { content: this.formatFeasibilityResponse(result) };
 
           case 'business_plan.calculate':
-            return this.formatBusinessPlanResponse(result);
+            return { content: this.formatBusinessPlanResponse(result) };
 
           case 'project.list':
-            return this.formatProjectListResponse(result);
+            return { content: this.formatProjectListResponse(result) };
 
           case 'project_save':
-            return this.formatProjectSaveResponse(result);
+            return { content: this.formatProjectSaveResponse(result) };
 
           case 'project_create':
-            return this.formatProjectCreateResponse(result);
+            return { content: this.formatProjectCreateResponse(result) };
 
           default:
             return this.formatGenericFunctionResponse(functionCall.name, result);
@@ -297,11 +302,11 @@ export class SmartOSOrchestrator {
       }
 
       // Per multiple function calls o fallimenti, genera risposta aggregata
-      return this.formatAggregatedResponse(functionCalls, functionResults);
+      return { content: this.formatAggregatedResponse(functionCalls, functionResults) };
 
     } catch (error) {
       console.error('❌ [SmartOS] Errore generazione risposta:', error);
-      return 'Ho elaborato la tua richiesta. Come posso aiutarti ulteriormente?';
+      return { content: 'Ho elaborato la tua richiesta. Come posso aiutarti ulteriormente?' };
     }
   }
 
@@ -427,22 +432,113 @@ Tipo: ${result.type}
 Come posso aiutarti ulteriormente?`;
   }
 
-  private formatGenericFunctionResponse(functionName: string, result: any): string {
+  private formatGenericFunctionResponse(functionName: string, result: any): { content: string; resultData?: any } {
     const skillNames: { [key: string]: string } = {
       'business_plan.run': 'Business Plan',
+      'business_plan_calculate': 'Business Plan',
       'feasibility_analysis.run': 'Analisi di Fattibilità',
+      'feasibility_analyze': 'Analisi di Fattibilità',
       'project.list': 'Lista Progetti',
+      'project_save': 'Salvataggio Progetto',
+      'project_create': 'Creazione Progetto',
+      'project_query': 'Ricerca Progetti',
       'rdo_send.run': 'Invio RDO',
       'email_send.run': 'Invio Email',
+      'conversation_general': 'Elaborazione',
+      'business_plan_sensitivity': 'Analisi Sensibilità',
+      'business_plan_export': 'Esportazione Business Plan',
     };
 
     const skillName = skillNames[functionName] || functionName;
     
-    return `✅ **${skillName} Completato**
+    // 🎨 UX ELEGANTE - Mostra risultati invece di "completato"
+    if (functionName === 'feasibility_analyze' && result) {
+      return this.formatFeasibilityResult(result);
+    }
+    
+    if (functionName === 'business_plan_calculate' && result) {
+      return this.formatBusinessPlanResult(result);
+    }
+    
+    if (functionName === 'conversation_general') {
+      // Per conversation_general, mostra solo "Sto pensando..." durante elaborazione
+      return { content: result?.response || 'Sto elaborando la tua richiesta...' };
+    }
+    
+    // Per altri tool, messaggio minimale ed elegante
+    return { content: `✅ **${skillName} completato**
 
-Operazione eseguita con successo. ${result ? 'Risultati disponibili.' : ''}
+Come posso aiutarti ulteriormente?` };
+  }
 
-Come posso aiutarti ulteriormente?`;
+  /**
+   * Formatta risultato analisi fattibilità con UX elegante
+   */
+  private formatFeasibilityResult(result: any): { content: string; resultData?: any } {
+    if (!result) return { content: 'Analisi completata.' };
+    
+    const roi = result.roi ? `${result.roi.toFixed(1)}%` : 'N/A';
+    const margin = result.margin ? `€${(result.margin / 1000).toFixed(0)}k` : 'N/A';
+    const location = result.location || 'Progetto';
+    
+    const content = `🏗️ **Analisi Fattibilità: ${location}**
+
+📊 **Risultati Chiave:**
+• **ROI**: ${roi}
+• **Margine**: ${margin}
+• **Fattibilità**: ${result.feasible ? '✅ Positiva' : '⚠️ Da valutare'}
+
+${result.summary ? `\n💡 **Sintesi**: ${result.summary}` : ''}
+
+🔍 Vuoi vedere l'analisi dettagliata o modificare qualche parametro?`;
+
+    const resultData = {
+      type: 'feasibility',
+      data: result,
+      summary: result.summary || `Analisi fattibilità per ${location} completata con ROI ${roi} e margine ${margin}.`,
+      actions: [
+        { type: 'view_details', label: 'Vedi Analisi Completa', icon: 'eye' },
+        { type: 'edit', label: 'Modifica Parametri', icon: 'edit' },
+        { type: 'export', label: 'Esporta Report', icon: 'download' }
+      ]
+    };
+
+    return { content, resultData };
+  }
+
+  /**
+   * Formatta risultato business plan con UX elegante
+   */
+  private formatBusinessPlanResult(result: any): { content: string; resultData?: any } {
+    if (!result) return { content: 'Business Plan completato.' };
+    
+    const projectName = result.projectName || 'Progetto';
+    const roi = result.roi ? `${result.roi.toFixed(1)}%` : 'N/A';
+    const npv = result.npv ? `€${(result.npv / 1000).toFixed(0)}k` : 'N/A';
+    
+    const content = `📈 **Business Plan: ${projectName}**
+
+💰 **Indicatori Finanziari:**
+• **ROI**: ${roi}
+• **NPV**: ${npv}
+• **Payback**: ${result.paybackPeriod ? `${result.paybackPeriod} anni` : 'N/A'}
+
+${result.summary ? `\n💡 **Sintesi**: ${result.summary}` : ''}
+
+📋 Vuoi esportare il business plan o fare un'analisi di sensibilità?`;
+
+    const resultData = {
+      type: 'businessPlan',
+      data: result,
+      summary: result.summary || `Business plan per ${projectName} completato con ROI ${roi} e NPV ${npv}.`,
+      actions: [
+        { type: 'view_details', label: 'Vedi Piano Completo', icon: 'eye' },
+        { type: 'edit', label: 'Modifica Parametri', icon: 'edit' },
+        { type: 'export', label: 'Esporta Business Plan', icon: 'download' }
+      ]
+    };
+
+    return { content, resultData };
   }
 
   /**
