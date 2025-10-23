@@ -104,12 +104,22 @@ export class ConversationContextTracker {
       context.mentionedEntities.projects.push(result.projectName);
     }
     
-    // Estrai località
+    // Estrai località (anche da testo libero)
     if (inputs.location && !context.mentionedEntities.locations.includes(inputs.location)) {
       context.mentionedEntities.locations.push(inputs.location);
     }
     
-    // TODO: Estrazione più sofisticata via NLP/LLM
+    // Estrai località da analisi comparativa (es. "Milano vs Roma")
+    const inputText = JSON.stringify(inputs).toLowerCase();
+    const italianCities = ['milano', 'roma', 'torino', 'napoli', 'firenze', 'bologna', 'venezia', 'palermo', 'genova', 'bari'];
+    italianCities.forEach(city => {
+      if (inputText.includes(city)) {
+        const capitalCity = city.charAt(0).toUpperCase() + city.slice(1);
+        if (!context.mentionedEntities.locations.includes(capitalCity)) {
+          context.mentionedEntities.locations.push(capitalCity);
+        }
+      }
+    });
   }
   
   /**
@@ -143,9 +153,10 @@ export class ConversationContextTracker {
     
     const parts: string[] = [];
     
-    // Last operation
+    // Last operation con dettagli
     parts.push(`📊 ULTIMA OPERAZIONE: ${context.lastOperation.tool}`);
     parts.push(`   ${context.lastOperation.summary}`);
+    parts.push(`   Input: ${JSON.stringify(context.lastOperation.inputs).substring(0, 100)}`);
     
     // Current data
     if (context.currentData.projectName) {

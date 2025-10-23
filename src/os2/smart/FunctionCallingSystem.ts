@@ -8,6 +8,7 @@ import { SkillCatalog } from '../skills/SkillCatalog';
 import { CacheFactory } from '../utils/ResponseCache';
 import { getWorkflowEngine, WorkflowTemplates } from '../workflows/WorkflowEngine';
 import { getContextTracker } from './ConversationContextTracker';
+import { getIntentResolver } from './IntentResolver';
 
 export interface FunctionCall {
   name: string;
@@ -50,6 +51,7 @@ export class OpenAIFunctionCallingSystem {
   private ragSystem: any;
   private skillCatalog: SkillCatalog;
   private contextTracker = getContextTracker();
+  private intentResolver = getIntentResolver();
 
   constructor() {
     this.openai = new OpenAI({
@@ -264,6 +266,27 @@ export class OpenAIFunctionCallingSystem {
     try {
       console.log('🧠 [FunctionCalling] Prendendo decisione intelligente per:', userMessage);
 
+      // 0. 🎯 INTENT RESOLUTION - Risolve ambiguità con context PRIMA di OpenAI
+      const sessionId = context.userContext?.sessionId || 'default';
+      const resolvedIntent = this.intentResolver.resolveIntent(userMessage, sessionId);
+      
+      if (resolvedIntent.shouldForce && resolvedIntent.toolName) {
+        console.log(`🎯 [IntentResolver] Intent forzato: ${resolvedIntent.toolName}`);
+        console.log(`   Reasoning: ${resolvedIntent.reasoning}`);
+        
+        return {
+          action: 'function_call',
+          functionCalls: [{
+            name: resolvedIntent.toolName,
+            arguments: resolvedIntent.enrichedParams || {},
+            confidence: 0.95,
+            reasoning: resolvedIntent.reasoning || 'Intent risolto da context'
+          }],
+          reasoning: `Intent Resolution: ${resolvedIntent.reasoning}`,
+          confidence: 0.95
+        };
+      }
+      
       // 1. Costruisci contesto completo per LLM
       const ragContext = await this.ragSystem.buildConversationContext(userMessage, context);
       
@@ -432,9 +455,11 @@ PATTERN 1 - Domande COMPARATIVE senza oggetto:
   → CHIAMA project_query O usa conversation_general con dati memoria
 
 PATTERN 2 - Pronomi VAGHI:
-• "Salva questi dati" / "questo progetto"
+• "Salva questi dati" / "questo progetto" / "questi risultati"
   → Riferimento a ULTIMA OPERAZIONE
-  → CHIAMA project_save con dati da ultima operazione
+  → DEVI chiamare project_save O feasibility_save con dati da CONTESTO SOPRA
+  → USA projectName/location dall'ultima operazione
+  → NON dire "non ci sono dati", GUARDA SOPRA nel CONTESTO!
   
 PATTERN 3 - Context SWITCH:
 • "No torna indietro, fai X" / "Dimenticalo, fai Y"
@@ -442,16 +467,18 @@ PATTERN 3 - Context SWITCH:
   → CHIAMA function per X/Y
   
 PATTERN 4 - Azioni con parametri MANCANTI:
-• "Crea BP dettagliato" senza dati
-  → NON chiedere parametri
-  → USA DEFAULTS + dati da ultima operazione se disponibili
-  → CHIAMA business_plan_calculate
+• "Crea BP dettagliato" / "Fai BP completo" senza dati espliciti
+  → NON chiedere parametri, NON dire "procederò con..."
+  → CHIAMA SUBITO business_plan_calculate con DEFAULTS
+  → USA dati da CONTESTO se disponibili
+  → **MAI** rispondere conversazionalmente, **SEMPRE** chiamare tool
 
-PATTERN 5 - Domande ANALITICHE:
-• "Analizza pro e contro"
-  → SE ci sono opzioni/scenari discussi: usa quelli
-  → CHIAMA feasibility_analyze multi scenario
-  → O conversation_general se troppo vago
+PATTERN 5 - Domande ANALITICHE comparative:
+• "Analizza pro e contro" / "confronta" / "valuta opzioni"
+  → SE ci sono LOCALITÀ/PROGETTI nel CONTESTO SOPRA: usa quelli!
+  → CHIAMA feasibility_analyze O business_plan_sensitivity
+  → USA progetti/località da ULTIMA OPERAZIONE o MENZIONATI
+  → **NON** dire "avrei bisogno di sapere", GUARDA il CONTESTO!
 
 Sei Urbanova OS, l'assistente AI avanzato per lo sviluppo immobiliare.
 
@@ -675,6 +702,21 @@ User: "Fai BP completo"
 Context: Nessun dato precedente
 ✅ CORRETTO: Call business_plan_calculate CON DEFAULTS
 ❌ SBAGLIATO: "Ho bisogno di..." (chiedere parametri)
+
+User: "Crea business plan dettagliato"
+Context: Nessun dato
+✅ CORRETTO: Call business_plan_calculate SUBITO con defaults
+❌ SBAGLIATO: "Per creare... utilizzerò..." (conversational)
+
+User (dopo feasibility Torino): "Salva questi dati per dopo"
+Context: Ultima op = feasibility_analyze Torino
+✅ CORRETTO: Call project_save con projectName="Torino"
+❌ SBAGLIATO: "Non ci sono dati recenti" (IGNORARE CONTESTO!)
+
+User (dopo "terreno Milano vs Roma"): "Analizza pro e contro per entrambi"
+Context: Località menzionate = Milano, Roma
+✅ CORRETTO: Call feasibility_analyze per Milano + Roma
+❌ SBAGLIATO: "avrei bisogno di sapere" (IGNORARE CONTESTO!)
 
 🎯 **DEFAULTS INTELLIGENTI** (USA SEMPRE SE MANCANTI):
 
