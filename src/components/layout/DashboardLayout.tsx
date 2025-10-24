@@ -46,6 +46,7 @@ import { OsPersistentInterface } from '@/app/components/os2/OsPersistentInterfac
 import { useOsSidecar } from '@/hooks/os2/useOsSidecar';
 // OS 2.0 sempre abilitato - feature flag rimosso
 import { Bot, Sparkles } from 'lucide-react';
+import { BUDGET_SUPPLIERS_V1 } from '@/config/flags';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -483,6 +484,19 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   <BarChart3 className="w-4 h-4 mr-3" />
                   Business Plan
                 </Link>
+                {BUDGET_SUPPLIERS_V1 && (
+                  <Link
+                    href="/dashboard/projects/test-project/budget-suppliers"
+                    className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
+                      isActive('/dashboard/projects/test-project/budget-suppliers')
+                        ? 'bg-blue-50 text-blue-700 shadow-sm'
+                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
+                  >
+                    <Building2 className="w-4 h-4 mr-3" />
+                    Budget & Fornitori
+                  </Link>
+                )}
                 <Link
                   href="/dashboard/permits-compliance"
                   className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${

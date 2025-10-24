@@ -2,6 +2,9 @@
 
 // 🛡️ OS PROTECTION - Importa protezione CSS per chat history service
 import '@/lib/osProtection';
+import { db } from './firebase';
+import { collection, query, where, getDocs, doc, deleteDoc } from 'firebase/firestore';
+
 export interface ChatMessage {
   id: string;
   type: 'user' | 'assistant';
@@ -148,6 +151,12 @@ class ChatHistoryService {
         }
       }
       
+      // 🔥 SINCRONIZZAZIONE FIREBASE: Elimina anche le memorie RAG associate
+      this.deleteFirebaseMemories(sessionId).catch(error => {
+        console.error('❌ [ChatHistoryService] Errore eliminazione Firebase:', error);
+        // Non bloccare l'operazione se Firebase fallisce
+      });
+      
       // Verifica che sia stata effettivamente eliminata
       const verifySessions = this.getChatSessions();
       console.log('✅ [ChatHistoryService] Verifica finale - sessioni rimanenti:', verifySessions.length);
@@ -165,6 +174,47 @@ class ChatHistoryService {
       console.error('❌ [Chat History] Errore eliminazione sessione:', error);
       // Rethrow per permettere al chiamante di gestire l'errore
       throw error;
+    }
+  }
+
+  // 🔥 NUOVO: Elimina memorie Firebase associate alla sessione
+  private async deleteFirebaseMemories(sessionId: string): Promise<void> {
+    try {
+      console.log('🔥 [ChatHistoryService] Eliminando memorie Firebase per sessione:', sessionId);
+      
+      // Estrai userId dalla sessionId (formato: session_userId_persistent)
+      const userIdMatch = sessionId.match(/session_(.+)_persistent/);
+      if (!userIdMatch) {
+        console.warn('⚠️ [ChatHistoryService] SessionId non riconosciuto per Firebase:', sessionId);
+        return;
+      }
+      
+      const userId = userIdMatch[1];
+      console.log('🔥 [ChatHistoryService] UserId estratto:', userId);
+      
+      // Cerca memorie RAG associate alla sessione
+      const memoriesRef = collection(db, 'os2_rag_memories');
+      const q = query(
+        memoriesRef,
+        where('userId', '==', userId),
+        where('sessionId', '==', sessionId)
+      );
+      
+      const snapshot = await getDocs(q);
+      console.log('🔥 [ChatHistoryService] Trovate memorie Firebase da eliminare:', snapshot.size);
+      
+      // Elimina tutte le memorie trovate
+      const deletePromises = snapshot.docs.map(docSnapshot => {
+        console.log('🔥 [ChatHistoryService] Eliminando memoria Firebase:', docSnapshot.id);
+        return deleteDoc(doc(db, 'os2_rag_memories', docSnapshot.id));
+      });
+      
+      await Promise.all(deletePromises);
+      console.log('✅ [ChatHistoryService] Memorie Firebase eliminate:', deletePromises.length);
+      
+    } catch (error) {
+      console.error('❌ [ChatHistoryService] Errore eliminazione Firebase:', error);
+      // Non bloccare l'operazione principale se Firebase fallisce
     }
   }
 
