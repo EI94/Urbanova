@@ -189,11 +189,6 @@ export default function UnifiedDashboardPage() {
       }
     }
   }, [currentUser?.uid, getPersistentSessionId]);
-
-  // Forza aggiornamento chat history quando cambia
-  useEffect(() => {
-    console.log('🔄 [Chat History] Chat history aggiornato:', chatHistory.length, 'conversazioni');
-  }, [chatHistory]);
   
   // Mappa tool names tecnici a nomi user-friendly
   const getFriendlyToolName = (toolId: string): string => {
@@ -1721,7 +1716,7 @@ export default function UnifiedDashboardPage() {
                   </div>
                 ) : (
                   <ConversationList
-                    key={`conversation-list-${chatHistory.length}-${Date.now()}`}
+                    key={`conversation-list-${chatHistory.length}`}
                     chatHistory={chatHistory}
                     onSelectConversation={(chat) => {
                       setMessages(chat.messages);
