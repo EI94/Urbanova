@@ -56,6 +56,7 @@ import MarkdownRenderer from '@/components/ui/MarkdownRenderer';
 import { GeographicSearch, GeographicSearchResult } from '@/components/ui/GeographicSearch';
 import { VoiceAIChatGPT, useVoiceAI } from '@/app/components/os2/VoiceAIChatGPT';
 import { useOpenAITTS } from '@/hooks/useOpenAITTS';
+import { VoiceModeOverlay } from '@/components/ui/VoiceModeOverlay';
 import { ResultMessage } from '@/components/chat/ResultMessage';
 import { ConversationDeleteModal } from '@/components/ui/ConversationDeleteModal';
 import { ConversationList } from '@/components/ui/ConversationList';
@@ -107,6 +108,11 @@ export default function UnifiedDashboardPage() {
   const [showChatHistory, setShowChatHistory] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(true);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  
+  // 🎤 Voice Mode State
+  const [isVoiceModeActive, setIsVoiceModeActive] = useState(false);
+  const [showVoiceOverlay, setShowVoiceOverlay] = useState(false);
+  const [transcribedText, setTranscribedText] = useState('');
   
   // Conversation deletion
   const [deleteModal, setDeleteModal] = useState<{
@@ -269,8 +275,8 @@ export default function UnifiedDashboardPage() {
   // 🎤 OpenAI TTS Hook - Voce naturale di alta qualità
   const { synthesize, stop, isPlaying: isTTSPlaying, isLoading: isTTSLoading, error: TTSError } = useOpenAITTS();
   
-  // Voice mode state
-  const [isVoiceMode, setIsVoiceMode] = useState(false);
+  // Voice mode state (rimosso duplicato)
+  const isVoiceMode = isVoiceModeActive;
   
   // Speaking state (per compatibilità con VoiceAI)
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -1018,7 +1024,8 @@ export default function UnifiedDashboardPage() {
                 <VoiceAIChatGPT
                   onTranscription={(text) => {
                     console.log('🎤 [UNIFIED] Trascrizione ricevuta:', text);
-                    setIsVoiceMode(true); // Attiva modalità voce
+                    setIsVoiceModeActive(true); // Attiva modalità voce
+                    setTranscribedText(text);
                     handleTranscription(text);
                     setInputValue(text);
                     
@@ -1027,10 +1034,16 @@ export default function UnifiedDashboardPage() {
                       console.log('🚀 [UNIFIED] Auto-invio messaggio trascritto:', text);
                       setTimeout(() => {
                         handleSendMessage();
+                        setShowVoiceOverlay(false); // Chiudi overlay dopo invio
                       }, 500); // Piccolo delay per UX migliore
                     }
                   }}
-                  onSpeaking={handleSpeakingState}
+                  onSpeaking={(speaking) => {
+                    handleSpeakingState(speaking);
+                    if (speaking) {
+                      setShowVoiceOverlay(true); // Mostra overlay quando parla
+                    }
+                  }}
                   className="mr-2"
                 />
                   
@@ -1039,7 +1052,7 @@ export default function UnifiedDashboardPage() {
                     value={inputValue}
                     onChange={e => {
                       setInputValue(e.target.value);
-                      setIsVoiceMode(false); // Disattiva modalità voce quando scrive
+                      setIsVoiceModeActive(false); // Disattiva modalità voce quando scrive
                     }}
                     onKeyPress={handleKeyPress}
                     placeholder="Chiedi qualcosa..."
@@ -1304,7 +1317,7 @@ export default function UnifiedDashboardPage() {
                   <VoiceAIChatGPT
                     onTranscription={(text) => {
                       console.log('🎤 [UNIFIED-TOOLS] Trascrizione ricevuta:', text);
-                      setIsVoiceMode(true); // Attiva modalità voce
+                      setIsVoiceModeActive(true); // Attiva modalità voce
                       handleTranscription(text);
                       setInputValue(text);
                     }}
@@ -1317,7 +1330,7 @@ export default function UnifiedDashboardPage() {
                     value={inputValue}
                     onChange={e => {
                       setInputValue(e.target.value);
-                      setIsVoiceMode(false); // Disattiva modalità voce quando scrive
+                      setIsVoiceModeActive(false); // Disattiva modalità voce quando scrive
                     }}
                     onKeyPress={handleKeyPress}
                     placeholder="Chiedi qualcosa..."
@@ -1592,6 +1605,20 @@ export default function UnifiedDashboardPage() {
         onConfirm={handleConfirmDelete}
         conversationTitle={deleteModal.title}
         isLoading={isDeleting}
+      />
+
+      {/* 🎤 Voice Mode Overlay */}
+      <VoiceModeOverlay
+        isOpen={showVoiceOverlay}
+        onClose={() => setShowVoiceOverlay(false)}
+        isListening={isVoiceModeActive}
+        isSpeaking={isSpeaking}
+        transcribedText={transcribedText}
+        onToggleMute={() => {
+          // Implementa toggle mute se necessario
+          console.log('🔇 [Voice] Toggle mute');
+        }}
+        isMuted={false}
       />
     </DashboardLayout>
   );

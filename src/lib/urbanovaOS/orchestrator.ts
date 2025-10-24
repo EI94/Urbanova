@@ -4566,7 +4566,13 @@ Il tuo target di €${targetPrice.toLocaleString()}/m² è ${targetPrice > data.
       // 🔧 FIX RADICALE: Forza attivazione PRIMA del controllo condizionale
       const messageText = request.message.content.toLowerCase();
       if (messageText.includes('analisi di fattibilità') || messageText.includes('studio di fattibilità') || 
-          messageText.includes('fattibilità') || (messageText.includes('terreno') && messageText.includes('edificabili'))) {
+          messageText.includes('fattibilità') || (messageText.includes('terreno') && messageText.includes('edificabili')) ||
+          messageText.includes('crea una analisi') || messageText.includes('fai una analisi') ||
+          messageText.includes('crea un analisi') || messageText.includes('fai un analisi') ||
+          (messageText.includes('terreno') && messageText.includes('metri quadrati')) ||
+          (messageText.includes('villette') && messageText.includes('euro')) ||
+          (messageText.includes('costo') && messageText.includes('realizzarle')) ||
+          (messageText.includes('vendere') && messageText.includes('euro'))) {
         console.log('🔧 [FIX RADICALE] Rilevata richiesta di fattibilità, forzando attivazione tool...');
         userIntent.toolsRequired = ['feasibility_analysis'];
         userIntent.primary = 'feasibility';
