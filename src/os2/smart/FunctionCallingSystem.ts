@@ -216,6 +216,69 @@ export class OpenAIFunctionCallingSystem {
   }
 
   /**
+   * Controlla se il messaggio contiene dati completi per analisi fattibilità
+   */
+  private shouldForceFeasibilityAnalysis(message: string): boolean {
+    const msgLower = message.toLowerCase();
+    
+    // Controlla se contiene parole chiave per analisi fattibilità
+    const hasFeasibilityKeywords = 
+      msgLower.includes('analisi di fattibilità') ||
+      msgLower.includes('analisi fattibilità') ||
+      msgLower.includes('fattibilità') ||
+      msgLower.includes('aiuti a fare') ||
+      msgLower.includes('aiutarmi a fare');
+    
+    if (!hasFeasibilityKeywords) return false;
+    
+    // Controlla se contiene dati sufficienti
+    const hasLocation = this.extractLocation(message) !== 'Non specificata';
+    const hasArea = this.extractArea(message) > 0;
+    const hasUnits = this.extractUnits(message) > 0;
+    const hasPrices = this.extractSalePrice(message) > 0 || this.extractConstructionCost(message) > 0;
+    
+    // Se ha almeno 3 dei 4 parametri principali, forza l'analisi
+    const dataCount = [hasLocation, hasArea, hasUnits, hasPrices].filter(Boolean).length;
+    
+    console.log(`🔥 [Feasibility Check] Keywords: ${hasFeasibilityKeywords}, Data: ${dataCount}/4`);
+    console.log(`   Location: ${hasLocation}, Area: ${hasArea}, Units: ${hasUnits}, Prices: ${hasPrices}`);
+    
+    return dataCount >= 3;
+  }
+
+  /**
+   * Estrae parametri per analisi fattibilità dal messaggio
+   */
+  private extractFeasibilityParams(message: string): any {
+    const location = this.extractLocation(message);
+    const landArea = this.extractArea(message);
+    const units = this.extractUnits(message);
+    const salePrice = this.extractSalePrice(message);
+    const constructionCost = this.extractConstructionCost(message);
+    const projectName = this.extractProjectName(message);
+    
+    // Calcola area per unità se non specificata
+    const areaPerUnit = landArea > 0 && units > 0 ? Math.floor(landArea / units) : 100;
+    
+    // Usa defaults intelligenti per parametri mancanti
+    const params = {
+      projectName: projectName || 'Progetto Analisi',
+      location: location || 'Italia Centro',
+      landArea: landArea || 1000,
+      units: units || 10,
+      areaPerUnit: areaPerUnit,
+      salePrice: salePrice || 250000,
+      constructionCost: constructionCost || (areaPerUnit * 1200), // 1200€/mq default
+      landCost: landArea * 200, // 200€/mq default
+      financingRate: 0.05, // 5% default
+      projectDuration: 24 // 24 mesi default
+    };
+    
+    console.log(`🔥 [Feasibility Params] Estratti:`, params);
+    return params;
+  }
+
+  /**
    * Estrae informazioni dal messaggio utente
    */
   private extractLocation(message: string): string {
@@ -232,19 +295,81 @@ export class OpenAIFunctionCallingSystem {
   }
 
   private extractArea(message: string): number {
-    const match = message.match(/(\d+)\s*m[²2]?/i);
-    return match ? parseInt(match[1]) : 0;
+    // Pattern più robusti per area edificabile
+    const patterns = [
+      /(\d+)\s*m[²2]?\s*edificabili/i,
+      /(\d+)\s*m[²2]?\s*buildable/i,
+      /(\d+)\s*m[²2]?\s*di\s*terreno/i,
+      /(\d+)\s*m[²2]?/i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = message.match(pattern);
+      if (match) return parseInt(match[1]);
+    }
+    return 0;
   }
 
   private extractProjectName(message: string): string {
-    // Estrae nome progetto se presente
-    const match = message.match(/progetto\s+([a-zA-Z\s]+)/i);
-    return match ? match[1].trim() : 'Nuovo Progetto';
+    // Pattern più robusti per nome progetto
+    const patterns = [
+      /progetto\s+([a-zA-Z0-9\s]+?)(?:\s+a\s+roma|\s+edificabili|\s+incredibile)/i,
+      /del\s+progetto\s+([a-zA-Z0-9\s]+?)(?:\s+a\s+roma|\s+edificabili)/i,
+      /progetto\s+([a-zA-Z0-9\s]+)/i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = message.match(pattern);
+      if (match) return match[1].trim();
+    }
+    return 'Nuovo Progetto';
   }
 
   private extractUnits(message: string): number {
-    const match = message.match(/(\d+)\s*unità/i);
-    return match ? parseInt(match[1]) : 0;
+    const patterns = [
+      /(\d+)\s*villette/i,
+      /(\d+)\s*appartamenti/i,
+      /(\d+)\s*unità/i,
+      /(\d+)\s*case/i,
+      /(\d+)\s*strutture/i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = message.match(pattern);
+      if (match) return parseInt(match[1]);
+    }
+    return 0;
+  }
+
+  private extractSalePrice(message: string): number {
+    const patterns = [
+      /(\d+)\s*k\s*per\s*villetta/i,
+      /(\d+)\s*k\s*per\s*unità/i,
+      /(\d+)\s*k\s*per\s*appartamento/i,
+      /(\d+)\s*000\s*€/i,
+      /(\d+)\s*k\s*€/i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = message.match(pattern);
+      if (match) return parseInt(match[1]) * 1000; // Converti k in migliaia
+    }
+    return 0;
+  }
+
+  private extractConstructionCost(message: string): number {
+    const patterns = [
+      /(\d+)\s*k\s*per\s*realizzare/i,
+      /(\d+)\s*k\s*per\s*costruire/i,
+      /(\d+)\s*k\s*costo/i,
+      /realizzare\s*a\s*(\d+)\s*k/i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = message.match(pattern);
+      if (match) return parseInt(match[1]) * 1000;
+    }
+    return 0;
   }
 
   /**
@@ -274,6 +399,23 @@ export class OpenAIFunctionCallingSystem {
             reasoning: resolvedIntent.reasoning || 'Intent risolto da context'
           }],
           reasoning: `Intent Resolution: ${resolvedIntent.reasoning}`,
+          confidence: 0.95
+        };
+      }
+
+      // 3. Controllo specifico per analisi fattibilità con dati completi
+      if (this.shouldForceFeasibilityAnalysis(userMessage)) {
+        const params = this.extractFeasibilityParams(userMessage);
+        console.log(`🔥 [Feasibility] Forzando analisi con parametri:`, params);
+        return {
+          action: 'function_call',
+          functionCalls: [{
+            name: 'feasibility_analyze',
+            arguments: params,
+            confidence: 0.95,
+            reasoning: 'Dati completi forniti per analisi fattibilità'
+          }],
+          reasoning: 'Analisi fattibilità con dati completi',
           confidence: 0.95
         };
       }
@@ -579,11 +721,23 @@ Quando l'utente chiede aiuto generico, CHIEDI informazioni prima di eseguire.
 • "Crea business plan per questo progetto" → business_plan_calculate
 • "Calcola ROI per terreno 1000mq" → feasibility_analyze
 • "Mostra i miei progetti" → project_list
+• "Voglio che mi aiuti a fare un analisi di fattibilità del progetto Ciliegie 30 a Roma. E' un progetto incredibile: 240 mq edificabili. Stimiamo di fare 4 villette da 112 mq ciascuna" → feasibility_analyze IMMEDIATAMENTE
 
 🚨 **REGOLA CHIAVE**: 
 Se l'utente chiede AIUTO GENERICO → COLLABORA prima di eseguire
 Se l'utente dice di FARE qualcosa con DATI → ESEGUI immediatamente
 • "prepara", "preparare" → function appropriata
+
+🔥 **REGOLA CRITICA PER ANALISI FATTIBILITÀ**:
+Se il messaggio contiene:
+- Nome progetto specifico ("Ciliegie 30", "Green Park", etc.)
+- Località ("Roma", "Milano", etc.) 
+- Area edificabile ("240 mq", "1000 mq", etc.)
+- Numero unità ("4 villette", "20 appartamenti", etc.)
+- Prezzi ("390k", "250k", etc.)
+→ CHIAMA feasibility_analyze IMMEDIATAMENTE con i dati estratti
+→ NON chiedere informazioni aggiuntive
+→ USA defaults solo per parametri mancanti (es. costi costruzione)
 
 🔥 REGOLA ANTI-TEORIA:
 SE vedi verbo d'azione + oggetto (es. "analizza impatto", "crea bp", "fai sensitivity"):

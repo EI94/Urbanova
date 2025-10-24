@@ -368,11 +368,11 @@ export class AdvancedRAGSystem {
     try {
       // Carica dati di mercato recenti per l'utente
       const marketRef = collection(db, 'market_intelligence');
-      const q = query(
+      const q = firestoreQuery(
         marketRef,
         where('userId', '==', userId),
         orderBy('timestamp', 'desc'),
-        limit(5)
+        firestoreLimit(5)
       );
       
       const snapshot = await getDocs(q);
