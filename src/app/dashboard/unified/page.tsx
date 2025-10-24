@@ -1408,7 +1408,10 @@ export default function UnifiedDashboardPage() {
 
         {/* Chat History Panel - Stile ChatGPT */}
         {showChatHistory && (
-          <div className="w-80 bg-gray-900 text-white shadow-lg border-l border-gray-700">
+          <div className="fixed inset-0 bg-black/20 z-40" onClick={() => setShowChatHistory(false)} />
+        )}
+        {showChatHistory && (
+          <div className="fixed left-0 top-0 h-full w-80 bg-gray-900 text-white shadow-lg border-r border-gray-700 z-50">
             <div className="p-4 border-b border-gray-700">
               <div className="flex items-center justify-between">
                 <h3 className="font-medium text-white">Conversazioni</h3>
