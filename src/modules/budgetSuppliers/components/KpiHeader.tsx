@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Euro } from 'lucide-react';
 
 interface KpiMetric {
   label: string;
@@ -81,11 +81,10 @@ export function KpiHeader() {
       
       {/* Titolo */}
       <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
-          <span className="text-white text-lg">💰</span>
+        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+          <Euro className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Budget & Fornitori</h1>
           <p className="text-sm text-gray-600">Gestione computo e fornitori</p>
         </div>
       </div>

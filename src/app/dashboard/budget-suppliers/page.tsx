@@ -13,7 +13,7 @@ import { BudgetSuppliersLayout } from '@/modules/budgetSuppliers/components/Layo
 
 export default function BudgetSuppliersPage() {
   return (
-    <DashboardLayout>
+    <DashboardLayout title="Budget & Fornitori">
       <BudgetSuppliersLayout />
     </DashboardLayout>
   );
