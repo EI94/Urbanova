@@ -20,3 +20,5 @@ export { SalRecorder } from './SalRecorder';
 export { VariationsDialog } from './VariationsDialog';
 export { DriftDashboard } from './DriftDashboard';
 export { SyncBpButton } from './SyncBpButton';
+export { OnboardingGuide } from './OnboardingGuide';
+export { MainDashboard } from './MainDashboard';

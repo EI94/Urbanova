@@ -18,34 +18,8 @@ interface KpiMetric {
 }
 
 const mockKpis: KpiMetric[] = [
-  {
-    label: 'Totale Budget',
-    value: 1250000,
-    delta: 2.5,
-    deltaType: 'positive',
-    icon: <TrendingUp className="w-4 h-4" />
-  },
-  {
-    label: 'Best Offer',
-    value: 1180000,
-    delta: -5.6,
-    deltaType: 'negative',
-    icon: <TrendingDown className="w-4 h-4" />
-  },
-  {
-    label: 'Contratti',
-    value: 1150000,
-    delta: 0,
-    deltaType: 'neutral',
-    icon: <Minus className="w-4 h-4" />
-  },
-  {
-    label: 'Consuntivo',
-    value: 1120000,
-    delta: -2.6,
-    deltaType: 'negative',
-    icon: <TrendingDown className="w-4 h-4" />
-  }
+  // Rimossi i dati mock per una UX più pulita
+  // I KPI verranno popolati dinamicamente quando l'utente seleziona un progetto
 ];
 
 export function KpiHeader() {
