@@ -103,6 +103,10 @@ export default function UnifiedDashboardPage() {
     title: string;
   }>({ isOpen: false, sessionId: '', title: '' });
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Voice AI hooks
+  const { handleTranscription, handleSpeaking } = useVoiceAI();
+  const [isVoiceMode, setIsVoiceMode] = useState(false);
   
   // Funzioni per gestione conversazioni
   const handleConfirmDelete = async () => {
@@ -346,9 +350,9 @@ export default function UnifiedDashboardPage() {
             <div className={`p-4 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
               <div className="flex items-center space-x-3">
                 <div className="flex-1 relative">
-                      <input
-                        type="text"
-                        value={inputValue}
+                  <input
+                    type="text"
+                    value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyPress={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
@@ -356,17 +360,41 @@ export default function UnifiedDashboardPage() {
                         handleSendMessage();
                       }
                     }}
-                        placeholder="Chiedi qualcosa..."
+                    placeholder="Chiedi qualcosa..."
                     className={`w-full px-4 py-3 rounded-lg border transition-colors ${
                       darkMode 
                         ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500' 
                         : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'
                     }`}
-                        disabled={isLoading}
-                      />
+                    disabled={isLoading}
+                  />
                 </div>
-                      <button
-                        onClick={handleSendMessage}
+                
+                {/* 🎤 Voice AI ChatGPT Style */}
+                <VoiceAIChatGPT
+                  onTranscription={(text) => {
+                    console.log('🎤 [UNIFIED] Trascrizione ricevuta:', text);
+                    setIsVoiceMode(true); // Attiva modalità voce
+                    handleTranscription(text);
+                    setInputValue(text);
+                    
+                    // 🚀 AUTO-INVIO: Invia automaticamente il messaggio trascritto
+                    if (text.trim()) {
+                      console.log('🚀 [UNIFIED] Auto-invio messaggio trascritto:', text);
+                      setTimeout(() => {
+                        handleSendMessage();
+                      }, 500); // Piccolo delay per UX migliore
+                    }
+                  }}
+                  onSpeaking={(isSpeaking) => {
+                    console.log('🎤 [UNIFIED] Speaking state:', isSpeaking);
+                    // Puoi aggiungere logica per mostrare indicatori di speaking
+                  }}
+                  className="flex-shrink-0"
+                />
+                
+                <button
+                  onClick={handleSendMessage}
                   disabled={isLoading || !inputValue.trim()}
                   className={`px-4 py-3 rounded-lg transition-colors ${
                     isLoading || !inputValue.trim()
@@ -377,11 +405,11 @@ export default function UnifiedDashboardPage() {
                   {isLoading ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
-                        <Send className="w-4 h-4" />
+                    <Send className="w-4 h-4" />
                   )}
-                    </button>
-                  </div>
-                </div>
+                </button>
+              </div>
+            </div>
               </div>
                 </div>
               </div>
