@@ -261,17 +261,11 @@ export class OpenAIFunctionCallingSystem {
     const areaPerUnit = landArea > 0 && units > 0 ? Math.floor(landArea / units) : 100;
     
     // Usa defaults intelligenti per parametri mancanti
+    // Il skill feasibility.analyze si aspetta: landArea, constructionCostPerSqm, salePrice
     const params = {
-      projectName: projectName || 'Progetto Analisi',
-      location: location || 'Italia Centro',
       landArea: landArea || 1000,
-      units: units || 10,
-      areaPerUnit: areaPerUnit,
-      salePrice: salePrice || 250000,
-      constructionCost: constructionCost || (areaPerUnit * 1200), // 1200€/mq default
-      landCost: landArea * 200, // 200€/mq default
-      financingRate: 0.05, // 5% default
-      projectDuration: 24 // 24 mesi default
+      constructionCostPerSqm: constructionCost > 0 ? Math.floor(constructionCost / areaPerUnit) : 1200, // €/mq
+      salePrice: salePrice > 0 ? Math.floor(salePrice / areaPerUnit) : 2500 // €/mq
     };
     
     console.log(`🔥 [Feasibility Params] Estratti:`, params);
@@ -305,7 +299,7 @@ export class OpenAIFunctionCallingSystem {
     
     for (const pattern of patterns) {
       const match = message.match(pattern);
-      if (match) return parseInt(match[1]);
+      if (match && match[1]) return parseInt(match[1]);
     }
     return 0;
   }
@@ -320,7 +314,7 @@ export class OpenAIFunctionCallingSystem {
     
     for (const pattern of patterns) {
       const match = message.match(pattern);
-      if (match) return match[1].trim();
+      if (match && match[1]) return match[1].trim();
     }
     return 'Nuovo Progetto';
   }
@@ -336,7 +330,7 @@ export class OpenAIFunctionCallingSystem {
     
     for (const pattern of patterns) {
       const match = message.match(pattern);
-      if (match) return parseInt(match[1]);
+      if (match && match[1]) return parseInt(match[1]);
     }
     return 0;
   }
@@ -352,7 +346,7 @@ export class OpenAIFunctionCallingSystem {
     
     for (const pattern of patterns) {
       const match = message.match(pattern);
-      if (match) return parseInt(match[1]) * 1000; // Converti k in migliaia
+      if (match && match[1]) return parseInt(match[1]) * 1000; // Converti k in migliaia
     }
     return 0;
   }
@@ -367,7 +361,7 @@ export class OpenAIFunctionCallingSystem {
     
     for (const pattern of patterns) {
       const match = message.match(pattern);
-      if (match) return parseInt(match[1]) * 1000;
+      if (match && match[1]) return parseInt(match[1]) * 1000;
     }
     return 0;
   }
@@ -399,7 +393,9 @@ export class OpenAIFunctionCallingSystem {
             reasoning: resolvedIntent.reasoning || 'Intent risolto da context'
           }],
           reasoning: `Intent Resolution: ${resolvedIntent.reasoning}`,
-          confidence: 0.95
+          confidence: 0.95,
+          requiresConfirmation: false,
+          context: { relevantMemories: [] }
         };
       }
 
@@ -410,13 +406,15 @@ export class OpenAIFunctionCallingSystem {
         return {
           action: 'function_call',
           functionCalls: [{
-            name: 'feasibility_analyze',
+            name: 'feasibility.analyze',
             arguments: params,
             confidence: 0.95,
             reasoning: 'Dati completi forniti per analisi fattibilità'
           }],
           reasoning: 'Analisi fattibilità con dati completi',
-          confidence: 0.95
+          confidence: 0.95,
+          requiresConfirmation: false,
+          context: { relevantMemories: [] }
         };
       }
       
@@ -463,8 +461,8 @@ export class OpenAIFunctionCallingSystem {
       console.error('❌ [FunctionCalling] Errore decisione intelligente:', error);
       console.error('❌ [FunctionCalling] Stack:', (error as Error).stack);
       
-      // Fallback intelligente basato sul messaggio utente e contesto RAG
-      const fallbackResponse = this.generateFallbackResponse(userMessage, ragContext);
+      // Fallback intelligente basato sul messaggio utente
+      const fallbackResponse = this.generateFallbackResponse(userMessage, undefined);
       
       return {
         action: 'conversation',
@@ -618,7 +616,7 @@ PATTERN 5 - Domande ANALITICHE comparative:
 Sei Urbanova OS, l'assistente AI avanzato per lo sviluppo immobiliare.
 
 🎯 TUA MISSIONE:
-${template.purpose.mission}
+${template.purpose.primary}
 
 👤 CHI SEI:
 ${template.role.identity}
@@ -717,11 +715,11 @@ Quando l'utente chiede aiuto generico, CHIEDI informazioni prima di eseguire.
 • "Mi serve un business plan" → RISPOSTA COLLABORATIVA
 
 🎯 **QUANDO ESEGUIRE IMMEDIATAMENTE (attivare tool)**:
-• "Fai analisi fattibilità per Milano, 20 unità, 3M budget" → feasibility_analyze
+• "Fai analisi fattibilità per Milano, 20 unità, 3M budget" → feasibility.analyze
 • "Crea business plan per questo progetto" → business_plan_calculate
-• "Calcola ROI per terreno 1000mq" → feasibility_analyze
+• "Calcola ROI per terreno 1000mq" → feasibility.analyze
 • "Mostra i miei progetti" → project_list
-• "Voglio che mi aiuti a fare un analisi di fattibilità del progetto Ciliegie 30 a Roma. E' un progetto incredibile: 240 mq edificabili. Stimiamo di fare 4 villette da 112 mq ciascuna" → feasibility_analyze IMMEDIATAMENTE
+• "Voglio che mi aiuti a fare un analisi di fattibilità del progetto Ciliegie 30 a Roma. E' un progetto incredibile: 240 mq edificabili. Stimiamo di fare 4 villette da 112 mq ciascuna" → feasibility.analyze IMMEDIATAMENTE
 
 🚨 **REGOLA CHIAVE**: 
 Se l'utente chiede AIUTO GENERICO → COLLABORA prima di eseguire
@@ -735,7 +733,7 @@ Se il messaggio contiene:
 - Area edificabile ("240 mq", "1000 mq", etc.)
 - Numero unità ("4 villette", "20 appartamenti", etc.)
 - Prezzi ("390k", "250k", etc.)
-→ CHIAMA feasibility_analyze IMMEDIATAMENTE con i dati estratti
+→ CHIAMA feasibility.analyze IMMEDIATAMENTE con i dati estratti
 → NON chiedere informazioni aggiuntive
 → USA defaults solo per parametri mancanti (es. costi costruzione)
 
@@ -764,9 +762,9 @@ ESEMPI OBBLIGATORI:
 "Crea business plan" → business_plan_calculate ✅ (NON: "Per creare un BP...")
 "Analizza impatto +10%" → business_plan_sensitivity ✅ (NON: "L'impatto sarebbe...")
 "Analizza impatto costi" → business_plan_sensitivity ✅ (NON teoria)
-"Confronta A vs B" → feasibility x2 ✅ (NON: "Per confrontare...")
+"Confronta A vs B" → feasibility.analyze x2 ✅ (NON: "Per confrontare...")
 "Mostra progetti" → project_list ✅ (NON: "I tuoi progetti sono...")
-"Fai analisi" → feasibility_analyze ✅ (NON: "Posso fare...")
+"Fai analisi" → feasibility.analyze ✅ (NON: "Posso fare...")
 "Salva come X" → project_save ✅ (NON: project_list!)
 "Salva progetto" → project_save ✅
 "Crea nuovo progetto" → project_create ✅
@@ -778,7 +776,7 @@ User: "Mi serve sensitivity per banca"
 ❌ SBAGLIATO: "Posso eseguire sensitivity..." (parlare)
 
 User: "Confronta 3 opzioni"
-✅ CORRETTO: Call feasibility_analyze x3 + comparison
+✅ CORRETTO: Call feasibility.analyze x3 + comparison
 ❌ SBAGLIATO: "Per confrontare..." (teoria)
 
 User: "Analizza impatto costi +10%"
@@ -798,7 +796,7 @@ User: "Quale ha il miglior ROI?"
 ❌ SBAGLIATO: "Dipende da..." (teoria)
 
 User: "Ho 3 terreni: Milano, Roma, Bologna"
-✅ CORRETTO: Call feasibility_analyze x3
+✅ CORRETTO: Call feasibility.analyze x3
 ❌ SBAGLIATO: "Posso analizzare..." (parlare)
 
 User: "Mi serve DSCR"
@@ -839,7 +837,7 @@ Context: Ultima operazione = feasibility_analyze su Napoli
 
 User: "No torna indietro, fai Napoli"
 Context: Napoli menzionato 2 messaggi fa
-✅ CORRETTO: Call feasibility_analyze per Napoli
+✅ CORRETTO: Call feasibility.analyze per Napoli
 ❌ SBAGLIATO: "Cosa intendi?" (ignorare menzione)
 
 User: "Quale conviene?"
@@ -887,13 +885,13 @@ Business Plan:
 
 ESEMPIO A:
 User: "Fammi un'analisi completa"
-You: 1. CHIAMA feasibility_analyze con defaults
+You: 1. CHIAMA feasibility.analyze con defaults
      2. MOSTRA risultati
      3. POI: "Ho usato valori medi Italia. Vuoi modificare?"
 
 ESEMPIO B:
 User: "Analizza terreno Roma"
-You: 1. CHIAMA feasibility_analyze con location Roma + defaults
+You: 1. CHIAMA feasibility.analyze con location Roma + defaults
      2. ESEGUI analisi
      3. POI: "Analisi Roma completata. Confermi parametri?"
 
@@ -1107,8 +1105,8 @@ Ora analizza il messaggio utente e decidi la migliore azione.`;
       userId: context.userContext.userId,
       userEmail: context.userContext.userEmail,
       sessionId: context.userContext.sessionId,
-      projectId: context.userContext.projectId,
-      userRoles: context.userContext.userRoles,
+      projectId: context.userContext.projectId || '',
+      userRoles: context.userContext.userRoles as Array<'viewer' | 'editor' | 'admin'>,
       environment: 'production' as const,
     };
 
@@ -1207,13 +1205,10 @@ Ora analizza il messaggio utente e decidi la migliore azione.`;
     const enriched = { ...args };
 
     // Defaults per feasibility.analyze
-    if (functionName === 'feasibility.analyze' || functionName === 'feasibility_analyze') {
-      if (!enriched.constructionCost) enriched.constructionCost = 1200; // €/mq media Italia
+    if (functionName === 'feasibility.analyze') {
+      if (!enriched.landArea) enriched.landArea = 1000; // mq default
+      if (!enriched.constructionCostPerSqm) enriched.constructionCostPerSqm = 1200; // €/mq media Italia
       if (!enriched.salePrice) enriched.salePrice = 2500; // €/mq media Italia
-      if (!enriched.location && !args.landArea) enriched.location = "Italia Centro";
-      if (!enriched.units && enriched.landArea) {
-        enriched.units = Math.floor((enriched.landArea * 0.8) / 100); // Indice 0.8, 100mq/unità
-      }
     }
 
     // Defaults per business_plan.calculate
