@@ -255,6 +255,10 @@ export default function BillingPage() {
                 <Target className="w-5 h-5" />
                 <span>Business Plan</span>
               </Link>
+              <Link href="/dashboard/budget-suppliers" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                <Euro className="w-5 h-5" />
+                <span>Budget & Fornitori</span>
+              </Link>
               <Link href="/dashboard/permits-compliance" className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
                 <Shield className="w-5 h-5" />
                 <span>Permessi & Compliance</span>

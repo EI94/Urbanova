@@ -322,3 +322,4 @@ Il modulo Budget & Fornitori è **PRONTO PER PRODUZIONE**.
 *Report generato automaticamente dal sistema di test Urbanova*  
 *Data: 24 Ottobre 2024*  
 *Versione: v1.0.0*
+

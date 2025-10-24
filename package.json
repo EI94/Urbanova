@@ -48,7 +48,6 @@
     "phase3:integration": "tsx scripts/phase3-execution.ts --integration-only",
     "phase3:execute": "tsx scripts/phase3-execution.ts",
     "phase3:full": "npm run phase2:full && npm run phase3:execute",
-    "seed:budget-suppliers": "tsx scripts/seedBudgetSuppliersDemo.ts",
     "phase4:api": "tsx scripts/phase4-execution.ts --api-only",
     "phase4:search": "tsx scripts/phase4-execution.ts --search-only",
     "phase4:cache": "tsx scripts/phase4-execution.ts --cache-only",

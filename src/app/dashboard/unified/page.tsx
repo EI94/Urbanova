@@ -28,6 +28,7 @@ import {
   Pause,
   BuildingIcon,
   EuroIcon,
+  Euro,
   TrendingUpIcon,
   CalendarIcon,
   Users,
@@ -844,6 +845,13 @@ export default function UnifiedDashboardPage() {
                 >
                   <FileText className="w-4 h-4 mr-3" />
                   Business Plan
+                </Link>
+                <Link
+                  href="/dashboard/budget-suppliers"
+                  className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                >
+                  <Euro className="w-4 h-4 mr-3" />
+                  Budget & Fornitori
                 </Link>
                 <Link
                   href="/dashboard/permits-compliance"

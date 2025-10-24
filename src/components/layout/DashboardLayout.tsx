@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageSquare, Bell, User, Users, Settings, X, Building2, BarChart3, FileText } from 'lucide-react';
+import { MessageSquare, Bell, User, Users, Settings, X, Building2, BarChart3, FileText, Euro } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
@@ -486,14 +486,14 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                 </Link>
                 {BUDGET_SUPPLIERS_V1 && (
                   <Link
-                    href="/dashboard/projects/test-project/budget-suppliers"
+                    href="/dashboard/budget-suppliers"
                     className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ${
-                      isActive('/dashboard/projects/test-project/budget-suppliers')
+                      isActive('/dashboard/budget-suppliers')
                         ? 'bg-blue-50 text-blue-700 shadow-sm'
                         : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                     }`}
                   >
-                    <Building2 className="w-4 h-4 mr-3" />
+                    <Euro className="w-4 h-4 mr-3" />
                     Budget & Fornitori
                   </Link>
                 )}

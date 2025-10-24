@@ -536,3 +536,4 @@ test.describe('Budget & Suppliers E2E', () => {
     await expect(page.locator('text=I prezzi \'Benchmark Lazio 2023\' sono riferimenti indicativi, non vincolanti.')).toBeVisible();
   });
 });
+
