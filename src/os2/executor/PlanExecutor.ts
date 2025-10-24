@@ -19,6 +19,7 @@ import { getMetrics } from '../telemetry/metrics';
 import { getEventBus, PlanStartedEvent, StepStartedEvent, StepSucceededEvent, StepFailedEvent, PlanCompletedEvent } from '../events/EventBus';
 import { getSkillStatusLine } from '../conversation/systemPrompt';
 import osTranslations from '../../../i18n/it/os2.json';
+import { BudgetSuppliersEvents, BudgetSuppliersStatusMessages } from '../../modules/budgetSuppliers/osTools/tools';
 
 /**
  * Audit Log Entry
@@ -86,6 +87,25 @@ export class PlanExecutor {
     this.skillCatalog = SkillCatalog.getInstance();
   }
   
+  /**
+   * Gestisce eventi Budget Suppliers per status tracking
+   */
+  private handleBudgetSuppliersEvents(skillId: string, event: string, data?: any) {
+    if (skillId.startsWith('budget_suppliers.')) {
+      const statusMessage = BudgetSuppliersStatusMessages[event as keyof typeof BudgetSuppliersStatusMessages];
+      if (statusMessage) {
+        // Emetti evento per LiveTicker
+        this.eventBus.emit({
+          type: 'budget_suppliers_status',
+          skillId,
+          status: statusMessage,
+          data,
+          timestamp: Date.now()
+        });
+      }
+    }
+  }
+
   /**
    * Esegue un ActionPlan completo rispettando la modalità OS
    */

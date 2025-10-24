@@ -22,7 +22,13 @@ export type MetricType =
   | 't_plan_complete_ms'     // ✨ Time to plan completion
   | 'steps_count'            // ✨ Total steps in plan
   | 'steps_failed_count'     // ✨ Failed steps count
-  | 'live_stream_errors';    // ✨ SSE connection errors
+  | 'live_stream_errors'     // ✨ SSE connection errors
+  // Budget Suppliers specific metrics
+  | 't_rfp_to_award_ms'      // ✨ Time from RFP creation to award (median)
+  | 'items_with_valid_offer_pct' // ✨ Percentage of items with valid offers
+  | 'delta_budget_vs_contract'   // ✨ Budget vs contract delta by category
+  | 'bundle_vs_single_pct'       // ✨ Percentage of bundle contracts vs single
+  | 'drift_alerts_count';        // ✨ Number of drift alerts
 
 /**
  * Metric data point
@@ -110,6 +116,50 @@ export interface OsMetricsSummary {
   periodStart: Date;
   periodEnd: Date;
   totalRequests: number;
+}
+
+/**
+ * Budget Suppliers Metrics Summary
+ */
+export interface BudgetSuppliersMetricsSummary {
+  // KPI 1: Time from RFP to Award (median)
+  medianRfpToAwardTime: number;
+  
+  // KPI 2: Percentage of items with valid offers
+  itemsWithValidOfferPercentage: number;
+  
+  // KPI 3: Budget vs Contract delta by category
+  budgetVsContractDelta: {
+    category: string;
+    deltaPercentage: number;
+    deltaAmount: number;
+  }[];
+  
+  // KPI 4: Bundle vs Single contracts percentage
+  bundleVsSinglePercentage: number;
+  
+  // KPI 5: Drift alerts count
+  driftAlertsCount: number;
+  
+  // Period
+  periodStart: Date;
+  periodEnd: Date;
+  totalRfps: number;
+  totalContracts: number;
+  totalItems: number;
+}
+
+/**
+ * Budget Suppliers Sparkline Data
+ */
+export interface BudgetSuppliersSparklineData {
+  metric: string;
+  values: number[];
+  timestamps: Date[];
+  currentValue: number;
+  previousValue: number;
+  changePercentage: number;
+  trend: 'up' | 'down' | 'stable';
 }
 
 /**
@@ -371,6 +421,145 @@ export class MetricsService {
   }
   
   /**
+   * Track Budget Suppliers RFP to Award time
+   */
+  public async trackRfpToAwardTime(data: {
+    rfpId: string;
+    projectId: string;
+    userId: string;
+    rfpCreatedAt: number;
+    awardCompletedAt: number;
+  }): Promise<void> {
+    const timeToAward = data.awardCompletedAt - data.rfpCreatedAt;
+    
+    await this.emit({
+      type: 't_rfp_to_award_ms',
+      name: 'RFP to Award Time',
+      value: timeToAward,
+      unit: 'ms',
+      projectId: data.projectId,
+      userId: data.userId,
+      labels: {
+        rfpId: data.rfpId,
+      },
+    });
+  }
+  
+  /**
+   * Track items with valid offers percentage
+   */
+  public async trackItemsWithValidOffers(data: {
+    projectId: string;
+    userId: string;
+    totalItems: number;
+    itemsWithValidOffers: number;
+  }): Promise<void> {
+    const percentage = data.totalItems > 0 
+      ? (data.itemsWithValidOffers / data.totalItems) * 100 
+      : 0;
+    
+    await this.emit({
+      type: 'items_with_valid_offer_pct',
+      name: 'Items with Valid Offers Percentage',
+      value: percentage,
+      unit: 'percentage',
+      projectId: data.projectId,
+      userId: data.userId,
+      labels: {
+        totalItems: data.totalItems.toString(),
+        itemsWithOffers: data.itemsWithValidOffers.toString(),
+      },
+    });
+  }
+  
+  /**
+   * Track budget vs contract delta by category
+   */
+  public async trackBudgetVsContractDelta(data: {
+    projectId: string;
+    userId: string;
+    category: string;
+    budgetAmount: number;
+    contractAmount: number;
+  }): Promise<void> {
+    const deltaAmount = contractAmount - budgetAmount;
+    const deltaPercentage = budgetAmount > 0 
+      ? (deltaAmount / budgetAmount) * 100 
+      : 0;
+    
+    await this.emit({
+      type: 'delta_budget_vs_contract',
+      name: 'Budget vs Contract Delta',
+      value: deltaPercentage,
+      unit: 'percentage',
+      projectId: data.projectId,
+      userId: data.userId,
+      labels: {
+        category: data.category,
+      },
+      metadata: {
+        budgetAmount: data.budgetAmount,
+        contractAmount: data.contractAmount,
+        deltaAmount: deltaAmount,
+      },
+    });
+  }
+  
+  /**
+   * Track bundle vs single contracts percentage
+   */
+  public async trackBundleVsSinglePercentage(data: {
+    projectId: string;
+    userId: string;
+    totalContracts: number;
+    bundleContracts: number;
+  }): Promise<void> {
+    const percentage = data.totalContracts > 0 
+      ? (data.bundleContracts / data.totalContracts) * 100 
+      : 0;
+    
+    await this.emit({
+      type: 'bundle_vs_single_pct',
+      name: 'Bundle vs Single Contracts Percentage',
+      value: percentage,
+      unit: 'percentage',
+      projectId: data.projectId,
+      userId: data.userId,
+      labels: {
+        totalContracts: data.totalContracts.toString(),
+        bundleContracts: data.bundleContracts.toString(),
+      },
+    });
+  }
+  
+  /**
+   * Track drift alerts count
+   */
+  public async trackDriftAlerts(data: {
+    projectId: string;
+    userId: string;
+    alertType: 'budget' | 'schedule' | 'quality' | 'scope';
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    itemId?: string;
+    contractId?: string;
+  }): Promise<void> {
+    await this.emit({
+      type: 'drift_alerts_count',
+      name: 'Drift Alerts Count',
+      value: 1,
+      unit: 'count',
+      projectId: data.projectId,
+      userId: data.userId,
+      labels: {
+        alertType: data.alertType,
+        severity: data.severity,
+        itemId: data.itemId || '',
+        contractId: data.contractId || '',
+      },
+    });
+  }
+  
+  /**
    * Get aggregated metrics
    */
   public getAggregatedMetrics(type: MetricType): AggregatedMetric {
@@ -529,6 +718,133 @@ export class MetricsService {
         percentage: totalPlans > 0 ? (totalSseErrors / totalPlans) * 100 : 0,
       },
     };
+  }
+  
+  /**
+   * Get Budget Suppliers metrics summary
+   */
+  public getBudgetSuppliersSummary(): BudgetSuppliersMetricsSummary {
+    const rfpToAwardMetrics = this.getAggregatedMetrics('t_rfp_to_award_ms');
+    const itemsWithOffersMetrics = this.getAggregatedMetrics('items_with_valid_offer_pct');
+    const bundleVsSingleMetrics = this.getAggregatedMetrics('bundle_vs_single_pct');
+    const driftAlertsMetrics = this.getAggregatedMetrics('drift_alerts_count');
+    
+    // Calculate budget vs contract delta by category
+    const budgetVsContractMetrics = this.inMemoryMetrics
+      .filter(m => m.type === 'delta_budget_vs_contract')
+      .reduce((acc, m) => {
+        const category = m.labels?.category || 'unknown';
+        if (!acc[category]) {
+          acc[category] = {
+            category,
+            deltaPercentage: 0,
+            deltaAmount: 0,
+            count: 0,
+          };
+        }
+        acc[category].deltaPercentage += m.value;
+        acc[category].deltaAmount += m.metadata?.deltaAmount || 0;
+        acc[category].count++;
+        return acc;
+      }, {} as Record<string, { category: string; deltaPercentage: number; deltaAmount: number; count: number }>);
+    
+    const budgetVsContractDelta = Object.values(budgetVsContractMetrics).map(item => ({
+      category: item.category,
+      deltaPercentage: item.count > 0 ? item.deltaPercentage / item.count : 0,
+      deltaAmount: item.count > 0 ? item.deltaAmount / item.count : 0,
+    }));
+    
+    const timestamps = this.inMemoryMetrics.map(m => m.timestamp);
+    
+    return {
+      medianRfpToAwardTime: rfpToAwardMetrics.p50,
+      itemsWithValidOfferPercentage: itemsWithOffersMetrics.avg,
+      budgetVsContractDelta,
+      bundleVsSinglePercentage: bundleVsSingleMetrics.avg,
+      driftAlertsCount: driftAlertsMetrics.sum,
+      periodStart: timestamps.length > 0 
+        ? new Date(Math.min(...timestamps.map(t => t.getTime())))
+        : new Date(),
+      periodEnd: timestamps.length > 0
+        ? new Date(Math.max(...timestamps.map(t => t.getTime())))
+        : new Date(),
+      totalRfps: this.inMemoryMetrics.filter(m => m.type === 't_rfp_to_award_ms').length,
+      totalContracts: this.inMemoryMetrics.filter(m => m.type === 'bundle_vs_single_pct').length,
+      totalItems: this.inMemoryMetrics.filter(m => m.type === 'items_with_valid_offer_pct').length,
+    };
+  }
+  
+  /**
+   * Get Budget Suppliers sparkline data for last 4 weeks
+   */
+  public getBudgetSuppliersSparklines(): BudgetSuppliersSparklineData[] {
+    const fourWeeksAgo = new Date();
+    fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28);
+    
+    const recentMetrics = this.inMemoryMetrics.filter(m => 
+      m.timestamp >= fourWeeksAgo && 
+      ['t_rfp_to_award_ms', 'items_with_valid_offer_pct', 'delta_budget_vs_contract', 'bundle_vs_single_pct', 'drift_alerts_count'].includes(m.type)
+    );
+    
+    const sparklines: BudgetSuppliersSparklineData[] = [];
+    
+    // Group by metric type and week
+    const metricTypes = ['t_rfp_to_award_ms', 'items_with_valid_offer_pct', 'delta_budget_vs_contract', 'bundle_vs_single_pct', 'drift_alerts_count'];
+    
+    metricTypes.forEach(metricType => {
+      const metrics = recentMetrics.filter(m => m.type === metricType);
+      
+      if (metrics.length === 0) return;
+      
+      // Group by week
+      const weeklyData = new Map<string, number[]>();
+      
+      metrics.forEach(m => {
+        const weekStart = new Date(m.timestamp);
+        weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // Start of week
+        const weekKey = weekStart.toISOString().split('T')[0];
+        
+        if (!weeklyData.has(weekKey)) {
+          weeklyData.set(weekKey, []);
+        }
+        weeklyData.get(weekKey)!.push(m.value);
+      });
+      
+      // Calculate weekly averages
+      const weeklyAverages = Array.from(weeklyData.entries())
+        .map(([week, values]) => ({
+          week,
+          average: values.reduce((sum, v) => sum + v, 0) / values.length,
+          timestamp: new Date(week),
+        }))
+        .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+      
+      if (weeklyAverages.length < 2) return;
+      
+      const values = weeklyAverages.map(w => w.average);
+      const timestamps = weeklyAverages.map(w => w.timestamp);
+      const currentValue = values[values.length - 1];
+      const previousValue = values[values.length - 2];
+      const changePercentage = previousValue !== 0 
+        ? ((currentValue - previousValue) / previousValue) * 100 
+        : 0;
+      
+      let trend: 'up' | 'down' | 'stable' = 'stable';
+      if (changePercentage > 5) trend = 'up';
+      else if (changePercentage < -5) trend = 'down';
+      
+      sparklines.push({
+        metric: metricType,
+        values,
+        timestamps,
+        currentValue,
+        previousValue,
+        changePercentage,
+        trend,
+      });
+    });
+    
+    return sparklines;
   }
   
   /**

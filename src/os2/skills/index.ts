@@ -10,6 +10,7 @@ import * as salRecord from './sal.record';
 import * as salesProposal from './sales.proposal';
 import * as projectSave from './project.save';
 import * as projectCreate from './project.create';
+import * as budgetSuppliersTools from './budgetSuppliers.tools';
 
 // ============================================================================
 // SKILL WRAPPER
@@ -53,6 +54,14 @@ export const SKILLS: Skill[] = [
   
   // Sales Skills
   createSkill(salesProposal.meta, salesProposal.invoke),
+  
+  // Budget Suppliers Skills
+  createSkill(budgetSuppliersTools.generateBoQMeta, budgetSuppliersTools.generateBoQInvoke),
+  createSkill(budgetSuppliersTools.launchRFPMeta, budgetSuppliersTools.launchRFPInvoke),
+  createSkill(budgetSuppliersTools.ingestOfferMeta, budgetSuppliersTools.ingestOfferInvoke),
+  createSkill(budgetSuppliersTools.compareOffersMeta, budgetSuppliersTools.compareOffersInvoke),
+  createSkill(budgetSuppliersTools.createBundleContractMeta, budgetSuppliersTools.createBundleContractInvoke),
+  createSkill(budgetSuppliersTools.syncBusinessPlanMeta, budgetSuppliersTools.syncBusinessPlanInvoke),
 ];
 
 /**

@@ -48,6 +48,7 @@
     "phase3:integration": "tsx scripts/phase3-execution.ts --integration-only",
     "phase3:execute": "tsx scripts/phase3-execution.ts",
     "phase3:full": "npm run phase2:full && npm run phase3:execute",
+    "seed:budget-suppliers": "tsx scripts/seedBudgetSuppliersDemo.ts",
     "phase4:api": "tsx scripts/phase4-execution.ts --api-only",
     "phase4:search": "tsx scripts/phase4-execution.ts --search-only",
     "phase4:cache": "tsx scripts/phase4-execution.ts --cache-only",
@@ -112,6 +113,7 @@
     "@types/morgan": "^1.9.10",
     "@types/pg": "^8.15.5",
     "@types/supertest": "^6.0.3",
+    "@types/xlsx": "^0.0.35",
     "autoprefixer": "^10.4.21",
     "axios": "^1.11.0",
     "chart.js": "^4.5.0",
@@ -164,6 +166,7 @@
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^3.4.17",
     "winston": "^3.17.0",
+    "xlsx": "^0.18.5",
     "zod": "^3.25.76"
   },
   "devDependencies": {
@@ -173,6 +176,7 @@
     "@eslint/eslintrc": "^3.3.1",
     "@jest/expect": "^29.7.0",
     "@jest/globals": "^29.7.0",
+    "@playwright/test": "^1.56.1",
     "@tailwindcss/postcss": "^4.1.12",
     "@types/cheerio": "^0.22.35",
     "@types/jest": "^29.5.14",
