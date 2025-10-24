@@ -25,6 +25,20 @@ export interface ChatSession {
 class ChatHistoryService {
   private readonly STORAGE_KEY = 'urbanova_chat_history';
   private readonly MAX_SESSIONS = 50; // Massimo 50 chat salvate
+  private fallbackStorage: ChatSession[] = []; // Fallback in-memory se localStorage fallisce
+
+  // Verifica se localStorage è disponibile
+  private isLocalStorageAvailable(): boolean {
+    try {
+      if (typeof window === 'undefined') return false;
+      const test = '__localStorage_test__';
+      localStorage.setItem(test, test);
+      localStorage.removeItem(test);
+      return true;
+    } catch {
+      return false;
+    }
+  }
 
   // Salva una sessione di chat
   saveChatSession(session: ChatSession): void {
@@ -52,6 +66,11 @@ class ChatHistoryService {
   // Recupera tutte le sessioni di chat
   getChatSessions(): ChatSession[] {
     try {
+      if (!this.isLocalStorageAvailable()) {
+        console.warn('⚠️ [ChatHistoryService] localStorage non disponibile, uso fallback in-memory');
+        return this.fallbackStorage;
+      }
+      
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (!stored) return [];
       
@@ -70,7 +89,8 @@ class ChatHistoryService {
       }));
     } catch (error) {
       console.error('❌ [Chat History] Errore recupero sessioni:', error);
-      return [];
+      console.warn('⚠️ [ChatHistoryService] Fallback a storage in-memory');
+      return this.fallbackStorage;
     }
   }
 
@@ -89,6 +109,15 @@ class ChatHistoryService {
   deleteChatSession(sessionId: string): void {
     try {
       console.log('🗑️ [ChatHistoryService] Eliminando sessione:', sessionId);
+      
+      // Verifica che localStorage sia disponibile
+      if (!this.isLocalStorageAvailable()) {
+        console.warn('⚠️ [ChatHistoryService] localStorage non disponibile, uso fallback in-memory');
+        this.fallbackStorage = this.fallbackStorage.filter(s => s.id !== sessionId);
+        console.log('✅ [ChatHistoryService] Sessione eliminata da fallback:', sessionId);
+        return;
+      }
+      
       const sessions = this.getChatSessions();
       console.log('🗑️ [ChatHistoryService] Sessioni PRIMA eliminazione:', sessions.length);
       console.log('🗑️ [ChatHistoryService] Sessioni da eliminare:', sessions.filter(s => s.id === sessionId).map(s => ({ id: s.id, title: s.title })));
@@ -96,15 +125,46 @@ class ChatHistoryService {
       const filteredSessions = sessions.filter(s => s.id !== sessionId);
       console.log('🗑️ [ChatHistoryService] Sessioni DOPO filtro:', filteredSessions.length);
       
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filteredSessions));
-      console.log('✅ [Chat History] Sessione eliminata:', sessionId);
+      // Verifica che il filtro abbia funzionato
+      if (filteredSessions.length === sessions.length) {
+        console.warn('⚠️ [ChatHistoryService] Nessuna sessione eliminata - ID non trovato:', sessionId);
+        return;
+      }
+      
+      // Salva nel localStorage con error handling robusto
+      try {
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filteredSessions));
+        console.log('✅ [Chat History] Sessione eliminata:', sessionId);
+      } catch (storageError) {
+        console.error('❌ [ChatHistoryService] Errore salvataggio localStorage:', storageError);
+        // Prova a pulire localStorage e riprovare
+        try {
+          localStorage.removeItem(this.STORAGE_KEY);
+          localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filteredSessions));
+          console.log('✅ [ChatHistoryService] localStorage pulito e ripristinato');
+        } catch (retryError) {
+          console.error('❌ [ChatHistoryService] Errore critico localStorage:', retryError);
+          throw retryError;
+        }
+      }
       
       // Verifica che sia stata effettivamente eliminata
       const verifySessions = this.getChatSessions();
       console.log('✅ [ChatHistoryService] Verifica finale - sessioni rimanenti:', verifySessions.length);
       
+      // Verifica finale che la sessione sia stata eliminata
+      const stillExists = verifySessions.some(s => s.id === sessionId);
+      if (stillExists) {
+        console.error('❌ [ChatHistoryService] ERRORE CRITICO: Sessione ancora presente dopo eliminazione!');
+        console.error('❌ [ChatHistoryService] Sessioni rimanenti:', verifySessions.map(s => ({ id: s.id, title: s.title })));
+      } else {
+        console.log('✅ [ChatHistoryService] Eliminazione confermata - sessione non più presente');
+      }
+      
     } catch (error) {
       console.error('❌ [Chat History] Errore eliminazione sessione:', error);
+      // Rethrow per permettere al chiamante di gestire l'errore
+      throw error;
     }
   }
 

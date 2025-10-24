@@ -122,13 +122,40 @@ export default function UnifiedDashboardPage() {
       
       setIsDeleting(true);
       
-      // Elimina dal localStorage
-      chatHistoryService.deleteChatSession(sessionId);
+      // Verifica che la sessione esista prima di eliminarla
+      const sessionToDelete = chatHistory.find(s => s.id === sessionId);
+      if (!sessionToDelete) {
+        console.warn('⚠️ [Chat History] Sessione non trovata per eliminazione:', sessionId);
+        setIsDeleting(false);
+        return;
+      }
       
-      // Aggiorna stato locale
+      console.log('🗑️ [Chat History] Eliminando sessione:', { id: sessionToDelete.id, title: sessionToDelete.title });
+      
+      // Elimina dal localStorage con error handling robusto
+      try {
+        chatHistoryService.deleteChatSession(sessionId);
+      } catch (deleteError) {
+        console.error('❌ [Chat History] Errore durante eliminazione:', deleteError);
+        setIsDeleting(false);
+        // Mostra errore all'utente
+        alert('Errore durante l\'eliminazione della conversazione. Riprova.');
+        return;
+      }
+      
+      // Aggiorna stato locale con verifica robusta
       const updatedHistory = chatHistoryService.getChatSessions();
       console.log('🗑️ [Chat History] Chat history DOPO eliminazione:', updatedHistory.length, 'conversazioni');
       console.log('🗑️ [Chat History] Conversazioni rimanenti:', updatedHistory.map(c => ({ id: c.id, title: c.title })));
+      
+      // Verifica che l'eliminazione sia avvenuta
+      const stillExists = updatedHistory.some(s => s.id === sessionId);
+      if (stillExists) {
+        console.error('❌ [Chat History] ERRORE: Sessione ancora presente dopo eliminazione!');
+        setIsDeleting(false);
+        alert('Errore: la conversazione non è stata eliminata. Riprova.');
+        return;
+      }
       
       // Forza creazione di nuovo array per React
       setChatHistory([...updatedHistory]);
@@ -146,8 +173,8 @@ export default function UnifiedDashboardPage() {
       // TODO: Aggiungere toast notification
       
     } catch (error) {
-      console.error('❌ [Chat History] Errore eliminazione:', error);
-      // TODO: Aggiungere toast di errore
+      console.error('❌ [Chat History] Errore critico eliminazione:', error);
+      alert('Errore critico durante l\'eliminazione. Contatta il supporto.');
     } finally {
       setIsDeleting(false);
     }
