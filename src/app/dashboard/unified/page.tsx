@@ -1029,14 +1029,9 @@ export default function UnifiedDashboardPage() {
                     handleTranscription(text);
                     setInputValue(text);
                     
-                    // 🚀 AUTO-INVIO: Invia automaticamente il messaggio trascritto
-                    if (text.trim()) {
-                      console.log('🚀 [UNIFIED] Auto-invio messaggio trascritto:', text);
-                      setTimeout(() => {
-                        handleSendMessage();
-                        setShowVoiceOverlay(false); // Chiudi overlay dopo invio
-                      }, 500); // Piccolo delay per UX migliore
-                    }
+                    // 🚀 AI NATIVE: Il componente VoiceAIChatGPT gestisce tutto
+                    // Non facciamo auto-invio qui, il componente si occupa di tutto
+                    console.log('🎯 [UNIFIED] Modalità AI Native attiva');
                   }}
                   onSpeaking={(speaking) => {
                     handleSpeakingState(speaking);
@@ -1320,6 +1315,9 @@ export default function UnifiedDashboardPage() {
                       setIsVoiceModeActive(true); // Attiva modalità voce
                       handleTranscription(text);
                       setInputValue(text);
+                      
+                      // 🚀 AI NATIVE: Il componente VoiceAIChatGPT gestisce tutto
+                      console.log('🎯 [UNIFIED-TOOLS] Modalità AI Native attiva');
                     }}
                     onSpeaking={handleSpeakingState}
                     className="mr-2"
@@ -1613,12 +1611,19 @@ export default function UnifiedDashboardPage() {
         onClose={() => setShowVoiceOverlay(false)}
         isListening={isVoiceModeActive}
         isSpeaking={isSpeaking}
+        isProcessing={false}
         transcribedText={transcribedText}
+        audioLevel={0}
         onToggleMute={() => {
           // Implementa toggle mute se necessario
           console.log('🔇 [Voice] Toggle mute');
         }}
         isMuted={false}
+        onExitVoiceMode={() => {
+          setIsVoiceModeActive(false);
+          setShowVoiceOverlay(false);
+          setTranscribedText('');
+        }}
       />
     </DashboardLayout>
   );

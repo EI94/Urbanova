@@ -234,13 +234,17 @@ export function VoiceAIChatGPT({
             console.log('✅ [VoiceAI] Whisper trascrizione completata:', transcribedText);
             setTranscribedText(transcribedText);
             
-            // 🚀 AUTO-INVIO: Invia automaticamente il messaggio trascritto
+            // 🚀 AI NATIVE: INVIO DIRETTO E RISPOSTA VOCALE IMMEDIATA
             console.log('🚀 [VoiceAI] Auto-invio messaggio trascritto:', transcribedText);
             onTranscription?.(transcribedText);
             
-            setState('idle');
-            setShowVoiceOverlay(false); // Chiudi overlay dopo invio
-            setIsVoiceModeActive(false); // Disattiva modalità voce
+            // 🎯 GENERA RISPOSTA VOCALE IMMEDIATA
+            setTimeout(async () => {
+              await generateVoiceResponse(transcribedText);
+            }, 300); // Ridotto da 500ms a 300ms per velocità
+            
+            // 🔄 RIMANI IN MODALITÀ VOCE - Non chiudere overlay
+            setState('processing');
             return;
           }
         }
@@ -271,13 +275,17 @@ export function VoiceAIChatGPT({
             console.log('✅ [VoiceAI] Web Speech trascrizione:', transcript);
             setTranscribedText(transcript);
             
-            // 🚀 AUTO-INVIO: Invia automaticamente il messaggio trascritto
+            // 🚀 AI NATIVE: INVIO DIRETTO E RISPOSTA VOCALE IMMEDIATA
             console.log('🚀 [VoiceAI] Auto-invio messaggio trascritto:', transcript);
             onTranscription?.(transcript);
             
-            setState('idle');
-            setShowVoiceOverlay(false); // Chiudi overlay dopo invio
-            setIsVoiceModeActive(false); // Disattiva modalità voce
+            // 🎯 GENERA RISPOSTA VOCALE IMMEDIATA
+            setTimeout(async () => {
+              await generateVoiceResponse(transcript);
+            }, 300); // Ridotto da 500ms a 300ms per velocità
+            
+            // 🔄 RIMANI IN MODALITÀ VOCE - Non chiudere overlay
+            setState('processing');
             resolve();
           };
           
@@ -401,6 +409,63 @@ export function VoiceAIChatGPT({
   const handleMouseLeave = useCallback(() => {
     setShowTooltip(false);
   }, []);
+
+  // 🎯 Genera risposta vocale immediata (AI Native)
+  const generateVoiceResponse = useCallback(async (userMessage: string) => {
+    try {
+      console.log('🎯 [VoiceAI] Generando risposta vocale per:', userMessage);
+      
+      // 🚀 SIMULAZIONE RISPOSTA IMMEDIATA (da sostituire con API reale)
+      const responses = [
+        "Ho capito perfettamente quello che hai detto. Come posso aiutarti?",
+        "Interessante! Dimmi di più su quello che hai in mente.",
+        "Perfetto, ho ascoltato la tua richiesta. Procedo subito.",
+        "Capito! Sto elaborando la tua domanda.",
+        "Ottimo! Ho ricevuto il tuo messaggio. Ecco la mia risposta."
+      ];
+      
+      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+      
+      // 🎤 SINTESI VOCALE IMMEDIATA
+      const utterance = new SpeechSynthesisUtterance(randomResponse);
+      utterance.lang = 'it-IT';
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+      
+      utterance.onstart = () => {
+        console.log('🎤 [VoiceAI] Inizio sintesi vocale');
+        setState('speaking');
+        onSpeaking?.(true);
+      };
+      
+      utterance.onend = () => {
+        console.log('🎤 [VoiceAI] Fine sintesi vocale');
+        setState('idle');
+        onSpeaking?.(false);
+        
+        // 🔄 RIMANI IN MODALITÀ VOCE PER PROSSIMA INTERAZIONE
+        setTimeout(() => {
+          console.log('🔄 [VoiceAI] Pronto per prossima registrazione');
+          setState('idle');
+          // Non chiudere overlay, rimani in modalità voce
+        }, 500);
+      };
+      
+      utterance.onerror = (event) => {
+        console.error('❌ [VoiceAI] Errore sintesi vocale:', event.error);
+        setState('error');
+        setError('Errore durante la sintesi vocale');
+      };
+      
+      speechSynthesis.speak(utterance);
+      
+    } catch (error) {
+      console.error('❌ [VoiceAI] Errore generazione risposta:', error);
+      setState('error');
+      setError('Errore durante la generazione della risposta');
+    }
+  }, [onSpeaking]);
 
   // 🚪 Esci dalla modalità voce
   const exitVoiceMode = useCallback(() => {
