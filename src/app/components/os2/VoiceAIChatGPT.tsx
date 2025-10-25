@@ -7,6 +7,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { VoiceModeOverlay } from '@/components/ui/VoiceModeOverlay';
+import { useVoiceAI } from './useVoiceAI';
 
 interface VoiceAIChatGPTProps {
   onTranscription?: (text: string) => void;
@@ -604,25 +605,5 @@ export function VoiceAIChatGPT({
   );
 }
 
-// Hook per gestire stato Voice AI
-export function useVoiceAI() {
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isTranscribing, setIsTranscribing] = useState(false);
+export { VoiceAIChatGPT, useVoiceAI };
 
-  const handleTranscription = useCallback((text: string) => {
-    console.log('🎤 [useVoiceAI] Trascrizione ricevuta:', text);
-    setIsTranscribing(false);
-  }, []);
-
-  const handleSpeaking = useCallback((speaking: boolean) => {
-    console.log('🔊 [useVoiceAI] Stato speaking:', speaking);
-    setIsSpeaking(speaking);
-  }, []);
-
-  return {
-    isSpeaking,
-    isTranscribing,
-    handleTranscription,
-    handleSpeaking,
-  };
-}

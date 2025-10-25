@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Mic, Volume2, VolumeX, X, Loader, MessageCircle, Zap } from 'lucide-react';
 
 interface VoiceModeOverlayProps {
@@ -26,16 +26,6 @@ export function VoiceModeOverlay({
   isMuted,
   onExitVoiceMode,
 }: VoiceModeOverlayProps) {
-  const [pulseAnimation, setPulseAnimation] = useState(false);
-
-  useEffect(() => {
-    if (isListening || isSpeaking) {
-      setPulseAnimation(true);
-    } else {
-      setPulseAnimation(false);
-    }
-  }, [isListening, isSpeaking]);
-
   if (!isOpen) return null;
 
   const getStatusText = () => {
