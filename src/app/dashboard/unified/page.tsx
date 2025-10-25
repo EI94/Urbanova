@@ -54,7 +54,7 @@ import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
 import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 import MarkdownRenderer from '@/components/ui/MarkdownRenderer';
 import { GeographicSearch, GeographicSearchResult } from '@/components/ui/GeographicSearch';
-import { VoiceAIChatGPT, useVoiceAI } from '@/app/components/os2/VoiceAIChatGPT';
+import { VoiceAIChatGPT } from '@/app/components/os2/VoiceAIChatGPT';
 import { useOpenAITTS } from '@/hooks/useOpenAITTS';
 import { VoiceModeOverlay } from '@/components/ui/VoiceModeOverlay';
 import { ResultMessage } from '@/components/chat/ResultMessage';
@@ -270,7 +270,7 @@ export default function UnifiedDashboardPage() {
   const [showInteractiveMap, setShowInteractiveMap] = useState(false);
   
   // 🎤 Voice AI Hook - Design Johnny Ive (per compatibilità)
-  const { handleTranscription, handleSpeaking } = useVoiceAI();
+  // const { handleTranscription, handleSpeaking } = useVoiceAI();
   
   // 🎤 OpenAI TTS Hook - Voce naturale di alta qualità
   const { synthesize, stop, isPlaying: isTTSPlaying, isLoading: isTTSLoading, error: TTSError } = useOpenAITTS();
@@ -284,8 +284,8 @@ export default function UnifiedDashboardPage() {
   // Gestione sintesi vocale (per compatibilità con VoiceAI)
   const handleSpeakingState = useCallback((speaking: boolean) => {
     setIsSpeaking(speaking);
-    handleSpeaking(speaking); // Ripristinato per compatibilità
-  }, [handleSpeaking]);
+    // handleSpeaking(speaking); // Commentato per evitare errori
+  }, []);
   
   // TEMPORANEAMENTE DISABILITATO: Hook per dati mappa
   // const {
@@ -1026,7 +1026,7 @@ export default function UnifiedDashboardPage() {
                     console.log('🎤 [UNIFIED] Trascrizione ricevuta:', text);
                     setIsVoiceModeActive(true); // Attiva modalità voce
                     setTranscribedText(text);
-                    handleTranscription(text);
+                    // handleTranscription(text); // Commentato per evitare errori
                     setInputValue(text);
                     
                     // 🚀 AI NATIVE: Il componente VoiceAIChatGPT gestisce tutto
@@ -1313,7 +1313,7 @@ export default function UnifiedDashboardPage() {
                     onTranscription={(text) => {
                       console.log('🎤 [UNIFIED-TOOLS] Trascrizione ricevuta:', text);
                       setIsVoiceModeActive(true); // Attiva modalità voce
-                      handleTranscription(text);
+                      // handleTranscription(text); // Commentato per evitare errori
                       setInputValue(text);
                       
                       // 🚀 AI NATIVE: Il componente VoiceAIChatGPT gestisce tutto
