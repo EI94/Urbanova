@@ -38,6 +38,7 @@ export function VoiceAIChatGPT({
   const [microphones, setMicrophones] = useState<MicrophoneDevice[]>([]);
   const [selectedMicrophone, setSelectedMicrophone] = useState<string>('default');
   const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
+  const [audioLevel, setAudioLevel] = useState<number>(0); // 🎤 Livello audio in tempo reale
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -91,8 +92,32 @@ export function VoiceAIChatGPT({
         } 
       });
       
-      // Chiudi stream immediatamente dopo aver ottenuto i permessi
-      stream.getTracks().forEach(track => track.stop());
+      // 🎤 MONITORAGGIO LIVELLO AUDIO IN TEMPO REALE
+      const audioContext = new AudioContext();
+      const analyser = audioContext.createAnalyser();
+      const microphone = audioContext.createMediaStreamSource(stream);
+      microphone.connect(analyser);
+      
+      analyser.fftSize = 256;
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      
+      // Funzione per aggiornare il livello audio
+      const updateAudioLevel = () => {
+        analyser.getByteFrequencyData(dataArray);
+        const average = dataArray.reduce((a, b) => a + b) / bufferLength;
+        const normalizedLevel = Math.min(average / 128, 1); // Normalizza tra 0 e 1
+        setAudioLevel(normalizedLevel);
+        
+        if (stream.active) {
+          requestAnimationFrame(updateAudioLevel);
+        }
+      };
+      
+      updateAudioLevel();
+      
+      // Salva stream per cleanup
+      streamRef.current = stream;
       
       setPermissionGranted(true);
       setState('idle');
@@ -100,6 +125,9 @@ export function VoiceAIChatGPT({
       
       // Rileva microfoni dopo aver ottenuto i permessi
       await detectMicrophones();
+      
+      // Chiudi modal dopo successo
+      setShowModal(false);
       
     } catch (error) {
       console.error('❌ [VoiceAI] Errore richiesta permessi:', error);
@@ -539,8 +567,18 @@ export function VoiceAIChatGPT({
               <div className="flex items-center gap-2">
                 <Mic className="w-4 h-4 text-gray-500" />
                 <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div className="h-full bg-green-500 w-1/3 animate-pulse"></div>
+                  <div 
+                    className={`h-full transition-all duration-100 ${
+                      audioLevel > 0.7 ? 'bg-red-500' : 
+                      audioLevel > 0.4 ? 'bg-yellow-500' : 
+                      audioLevel > 0.1 ? 'bg-green-500' : 'bg-gray-400'
+                    }`}
+                    style={{ width: `${Math.max(audioLevel * 100, 5)}%` }}
+                  ></div>
                 </div>
+                <span className="text-xs text-gray-500">
+                  {Math.round(audioLevel * 100)}%
+                </span>
               </div>
             </div>
             
