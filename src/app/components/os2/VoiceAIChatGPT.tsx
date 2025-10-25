@@ -373,31 +373,6 @@ export function VoiceAIChatGPT({
     }
   }, [isMuted, onSpeaking]);
 
-  // 🎯 Gestione click principale
-  const handleMainClick = useCallback(async () => {
-    if (disabled) return;
-    
-    if (state === 'listening') {
-      stopRecording();
-    } else if (state === 'speaking') {
-      speechSynthesis.cancel();
-      setState('idle');
-      onSpeaking?.(false);
-    } else if (state === 'error') {
-      setError(null);
-      setState('idle');
-    } else {
-      // Controlla permessi prima di iniziare
-      const hasPermission = await checkMicrophonePermission();
-      
-      if (!hasPermission) {
-        setShowModal(true);
-        await detectMicrophones();
-      } else {
-        await startRecording();
-      }
-    }
-  }, [disabled, state, stopRecording, onSpeaking, checkMicrophonePermission, detectMicrophones, startRecording]);
 
   // 🎯 Gestione hover tooltip
   const handleMouseEnter = useCallback(() => {
