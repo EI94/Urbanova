@@ -605,5 +605,5 @@ export function VoiceAIChatGPT({
   );
 }
 
-export { VoiceAIChatGPT, useVoiceAI };
+export { useVoiceAI };
 
