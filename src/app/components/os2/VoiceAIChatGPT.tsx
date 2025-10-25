@@ -7,7 +7,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { VoiceModeOverlay } from '@/components/ui/VoiceModeOverlay';
-// import { useVoiceAI } from './useVoiceAI';
+import { useVoiceAI } from './useVoiceAI';
 
 interface VoiceAIChatGPTProps {
   onTranscription?: (text: string) => void;
@@ -605,5 +605,5 @@ export function VoiceAIChatGPT({
   );
 }
 
-// export { useVoiceAI };
+export { useVoiceAI };
 
