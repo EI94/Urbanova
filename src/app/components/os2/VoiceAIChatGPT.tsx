@@ -1,10 +1,10 @@
 'use client';
 
 // 🎤 VOICE AI CHATGPT STYLE - Design Johnny Ive
-// Esperienza identica a ChatGPT con tooltip, modal e gestione permessi
+// Esperienza identica a ChatGPT con permessi nativi browser e overlay fluido
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Mic, MicOff, Volume2, VolumeX, X, Settings, Check } from 'lucide-react';
+import { Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { VoiceModeOverlay } from '@/components/ui/VoiceModeOverlay';
 
@@ -17,11 +17,7 @@ interface VoiceAIChatGPTProps {
 
 type VoiceAIState = 'idle' | 'requesting_permission' | 'listening' | 'processing' | 'speaking' | 'error';
 
-interface MicrophoneDevice {
-  deviceId: string;
-  label: string;
-  isDefault: boolean;
-}
+// 🎤 INTERFACCIA SEMPLIFICATA - Solo permessi nativi browser
 
 export function VoiceAIChatGPT({ 
   onTranscription, 
@@ -32,13 +28,9 @@ export function VoiceAIChatGPT({
   
   const [state, setState] = useState<VoiceAIState>('idle');
   const [isMuted, setIsMuted] = useState(false);
-  const [showModal, setShowModal] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [transcribedText, setTranscribedText] = useState<string>('');
-  const [microphones, setMicrophones] = useState<MicrophoneDevice[]>([]);
-  const [selectedMicrophone, setSelectedMicrophone] = useState<string>('default');
-  const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
   const [audioLevel, setAudioLevel] = useState<number>(0); // 🎤 Livello audio in tempo reale
   const [showVoiceOverlay, setShowVoiceOverlay] = useState(false); // 🎨 Overlay Johnny Ive
   const [isVoiceModeActive, setIsVoiceModeActive] = useState(false); // 🎯 Modalità voce attiva
@@ -51,108 +43,24 @@ export function VoiceAIChatGPT({
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
 
-  // 🎤 Rileva microfono disponibili
-  const detectMicrophones = useCallback(async () => {
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const audioInputs = devices
-        .filter(device => device.kind === 'audioinput')
-        .map(device => ({
-          deviceId: device.deviceId,
-          label: device.label || `Microfono ${device.deviceId.slice(0, 8)}`,
-          isDefault: device.deviceId === 'default'
-        }));
-      
-      setMicrophones(audioInputs);
-      console.log('🎤 [VoiceAI] Microfoni rilevati:', audioInputs);
-    } catch (error) {
-      console.error('❌ [VoiceAI] Errore rilevamento microfoni:', error);
-    }
-  }, []);
-
-  // 🔐 Controlla permessi microfono
-  const checkMicrophonePermission = useCallback(async () => {
-    try {
-      const result = await navigator.permissions.query({ name: 'microphone' as PermissionName });
-      setPermissionGranted(result.state === 'granted');
-      console.log('🔐 [VoiceAI] Stato permessi:', result.state);
-      return result.state === 'granted';
-    } catch (error) {
-      console.warn('⚠️ [VoiceAI] Impossibile controllare permessi:', error);
-      return false;
-    }
-  }, []);
-
-  // 🎤 Richiedi permessi microfono
-  const requestMicrophonePermission = useCallback(async () => {
-    try {
-      setState('requesting_permission');
-      setError(null);
-      
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: {
-          deviceId: selectedMicrophone === 'default' ? undefined : selectedMicrophone,
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
-        } 
-      });
-      
-      // 🎤 MONITORAGGIO LIVELLO AUDIO IN TEMPO REALE
-      const audioContext = new AudioContext();
-      const analyser = audioContext.createAnalyser();
-      const microphone = audioContext.createMediaStreamSource(stream);
-      microphone.connect(analyser);
-      
-      analyser.fftSize = 256;
-      const bufferLength = analyser.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
-      
-      // Funzione per aggiornare il livello audio
-      const updateAudioLevel = () => {
-        analyser.getByteFrequencyData(dataArray);
-        const average = dataArray.reduce((a, b) => a + b) / bufferLength;
-        const normalizedLevel = Math.min(average / 128, 1); // Normalizza tra 0 e 1
-        setAudioLevel(normalizedLevel);
-        
-        if (stream.active) {
-          requestAnimationFrame(updateAudioLevel);
-        }
-      };
-      
-      updateAudioLevel();
-      
-      // Salva stream per cleanup
-      streamRef.current = stream;
-      
-      setPermissionGranted(true);
+  // 🎯 Gestione click principale - SOLO PERMESSI NATIVI BROWSER
+  const handleMainClick = useCallback(async () => {
+    if (disabled) return;
+    
+    if (state === 'listening') {
+      stopRecording();
+    } else if (state === 'speaking') {
+      speechSynthesis.cancel();
       setState('idle');
-      console.log('✅ [VoiceAI] Permessi microfono concessi');
-      
-      // Rileva microfoni dopo aver ottenuto i permessi
-      await detectMicrophones();
-      
-      // Chiudi modal dopo successo
-      setShowModal(false);
-      
-    } catch (error) {
-      console.error('❌ [VoiceAI] Errore richiesta permessi:', error);
-      setPermissionGranted(false);
-      setState('error');
-      
-      if (error instanceof Error) {
-        if (error.name === 'NotAllowedError') {
-          setError('Permessi microfono negati. Abilita l\'accesso al microfono nelle impostazioni del browser.');
-        } else if (error.name === 'NotFoundError') {
-          setError('Nessun microfono trovato. Collega un microfono e riprova.');
-        } else {
-          setError(`Errore microfono: ${error.message}`);
-        }
-      } else {
-        setError('Errore sconosciuto durante l\'accesso al microfono.');
-      }
+      onSpeaking?.(false);
+    } else if (state === 'error') {
+      setError(null);
+      setState('idle');
+    } else {
+      // 🚀 DIRETTO ALLA REGISTRAZIONE - Il browser gestirà i permessi
+      await startRecording();
     }
-  }, [selectedMicrophone, detectMicrophones]);
+  }, [disabled, state, stopRecording, onSpeaking, startRecording]);
 
   // 🎤 Avvia registrazione audio con rilevamento automatico fine parlato
   const startRecording = useCallback(async () => {
@@ -162,9 +70,9 @@ export function VoiceAIChatGPT({
       setShowVoiceOverlay(true); // 🎨 Mostra overlay Johnny Ive
       setIsVoiceModeActive(true); // 🎯 Attiva modalità voce
       
+      // 🚀 PERMESSI NATIVI BROWSER - Nessuna modal custom
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
-          deviceId: selectedMicrophone === 'default' ? undefined : selectedMicrophone,
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true
@@ -260,8 +168,19 @@ export function VoiceAIChatGPT({
       setError('Errore durante l\'avvio della registrazione');
       setShowVoiceOverlay(false);
       setIsVoiceModeActive(false);
+      
+      // 🎯 GESTIONE ERRORI PERMESSI NATIVI
+      if (error instanceof Error) {
+        if (error.name === 'NotAllowedError') {
+          setError('Permessi microfono negati. Abilita l\'accesso al microfono nelle impostazioni del browser.');
+        } else if (error.name === 'NotFoundError') {
+          setError('Nessun microfono trovato. Collega un microfono e riprova.');
+        } else {
+          setError(`Errore microfono: ${error.message}`);
+        }
+      }
     }
-  }, [selectedMicrophone]);
+  }, []);
 
   // 🛑 Ferma registrazione
   const stopRecording = useCallback(() => {
@@ -500,17 +419,6 @@ export function VoiceAIChatGPT({
     }
   }, [stopRecording]);
 
-  // 🎯 Gestione permessi dal modal
-  const handlePermissionGranted = useCallback(async () => {
-    setShowModal(false);
-    await startRecording();
-  }, [startRecording]);
-
-  // 🎯 Inizializzazione
-  useEffect(() => {
-    checkMicrophonePermission();
-  }, [checkMicrophonePermission]);
-
   // 🎯 Cleanup
   useEffect(() => {
     return () => {
@@ -636,85 +544,6 @@ export function VoiceAIChatGPT({
       {error && (
         <div className="text-xs text-red-500 max-w-32 truncate">
           {error}
-        </div>
-      )}
-
-      {/* 🎤 Modal permessi microfono stile ChatGPT */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Permessi microfono
-              </h3>
-              <button
-                onClick={() => setShowModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <p className="text-gray-600 mb-4">
-              Urbanova vorrebbe utilizzare il microfono per la modalità vocale.
-            </p>
-            
-            {/* Selezione microfono */}
-            {microphones.length > 0 && (
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Seleziona microfono:
-                </label>
-                <select
-                  value={selectedMicrophone}
-                  onChange={(e) => setSelectedMicrophone(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  {microphones.map((mic) => (
-                    <option key={mic.deviceId} value={mic.deviceId}>
-                      {mic.label} {mic.isDefault ? '(Predefinito)' : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-            
-            {/* Indicatore livello audio */}
-            <div className="mb-4">
-              <div className="flex items-center gap-2">
-                <Mic className="w-4 h-4 text-gray-500" />
-                <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full transition-all duration-100 ${
-                      audioLevel > 0.7 ? 'bg-red-500' : 
-                      audioLevel > 0.4 ? 'bg-yellow-500' : 
-                      audioLevel > 0.1 ? 'bg-green-500' : 'bg-gray-400'
-                    }`}
-                    style={{ width: `${Math.max(audioLevel * 100, 5)}%` }}
-                  ></div>
-                </div>
-                <span className="text-xs text-gray-500">
-                  {Math.round(audioLevel * 100)}%
-                </span>
-              </div>
-            </div>
-            
-            {/* Pulsanti azione */}
-            <div className="flex gap-3">
-              <button
-                onClick={requestMicrophonePermission}
-                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-              >
-                Consenti durante la visita
-              </button>
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
-              >
-                Non consentire mai
-              </button>
-            </div>
-          </div>
         </div>
       )}
 
