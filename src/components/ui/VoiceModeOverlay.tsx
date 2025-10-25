@@ -1,16 +1,17 @@
-'use client';
-
 import React, { useEffect, useState } from 'react';
-import { Mic, MicOff, Volume2, VolumeX, X, Waves, Zap } from 'lucide-react';
+import { Mic, Volume2, VolumeX, X, Loader, MessageCircle, Zap } from 'lucide-react';
 
 interface VoiceModeOverlayProps {
   isOpen: boolean;
   onClose: () => void;
   isListening: boolean;
   isSpeaking: boolean;
+  isProcessing: boolean;
   transcribedText: string;
+  audioLevel: number;
   onToggleMute: () => void;
   isMuted: boolean;
+  onExitVoiceMode: () => void;
 }
 
 export function VoiceModeOverlay({
@@ -18,164 +19,144 @@ export function VoiceModeOverlay({
   onClose,
   isListening,
   isSpeaking,
+  isProcessing,
   transcribedText,
+  audioLevel,
   onToggleMute,
-  isMuted
+  isMuted,
+  onExitVoiceMode,
 }: VoiceModeOverlayProps) {
-  const [pulseScale, setPulseScale] = useState(1);
-  const [waveAnimation, setWaveAnimation] = useState(0);
+  const [pulseAnimation, setPulseAnimation] = useState(false);
 
-  // Animazione pulse per listening
   useEffect(() => {
-    if (isListening) {
-      const interval = setInterval(() => {
-        setPulseScale(prev => prev === 1 ? 1.2 : 1);
-      }, 600);
-      return () => clearInterval(interval);
+    if (isListening || isSpeaking) {
+      setPulseAnimation(true);
+    } else {
+      setPulseAnimation(false);
     }
-  }, [isListening]);
-
-  // Animazione onde per speaking
-  useEffect(() => {
-    if (isSpeaking) {
-      const interval = setInterval(() => {
-        setWaveAnimation(prev => (prev + 1) % 3);
-      }, 200);
-      return () => clearInterval(interval);
-    }
-  }, [isSpeaking]);
+  }, [isListening, isSpeaking]);
 
   if (!isOpen) return null;
 
+  const getStatusText = () => {
+    if (isProcessing) return 'Urbanova sta elaborando...';
+    if (isListening) return 'Urbanova ti sta ascoltando...';
+    if (isSpeaking) return 'Urbanova sta rispondendo...';
+    return 'Modalità Vocale Attiva';
+  };
+
+  const getStatusIcon = () => {
+    if (isProcessing) {
+      return <Loader className="w-16 h-16 text-white animate-spin" />;
+    }
+    if (isListening) {
+      return <Mic className="w-16 h-16 text-white animate-pulse" />;
+    }
+    if (isSpeaking) {
+      return <Volume2 className="w-16 h-16 text-white animate-bounce" />;
+    }
+    return <MessageCircle className="w-16 h-16 text-white" />;
+  };
+
+  const getAudioLevelColor = () => {
+    if (audioLevel > 0.7) return 'bg-red-500';
+    if (audioLevel > 0.4) return 'bg-yellow-500';
+    if (audioLevel > 0.1) return 'bg-green-500';
+    return 'bg-gray-400';
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
-      <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full mx-4 relative overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
+    <div className="fixed inset-0 bg-gradient-to-br from-blue-600 via-purple-700 to-indigo-800 z-[100] flex items-center justify-center p-4">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]"></div>
+      </div>
+
+      {/* Close Button */}
+      <button 
+        onClick={onClose} 
+        className="absolute top-6 right-6 text-white hover:text-gray-200 transition-colors z-10"
+      >
+        <X className="w-8 h-8" />
+      </button>
+
+      {/* Main Content */}
+      <div className="flex flex-col items-center text-white text-center space-y-8 max-w-2xl mx-auto">
+        
+        {/* Icon Container */}
+        <div className="relative flex items-center justify-center w-40 h-40 bg-white bg-opacity-20 rounded-full backdrop-blur-sm">
+          {getStatusIcon()}
+          
+          {/* Pulse Animation */}
+          {(isListening || isSpeaking) && (
+            <>
+              <div className="absolute inset-0 rounded-full border-4 border-white border-opacity-30 animate-ping"></div>
+              <div className="absolute inset-0 rounded-full border-2 border-white border-opacity-50 animate-pulse"></div>
+            </>
+          )}
+          
+          {/* Audio Level Indicator */}
+          {isListening && (
+            <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-32 h-2 bg-white bg-opacity-20 rounded-full overflow-hidden">
+              <div 
+                className={`h-full transition-all duration-100 ${getAudioLevelColor()}`}
+                style={{ width: `${Math.max(audioLevel * 100, 5)}%` }}
+              ></div>
             </div>
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">Modalità Voce</h2>
-              <p className="text-sm text-gray-500">Urbanova ti ascolta</p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
+          )}
         </div>
 
-        {/* Main Voice Interface */}
-        <div className="text-center mb-8">
-          {/* Voice Status Circle */}
-          <div className="relative inline-block mb-6">
-            <div 
-              className={`w-32 h-32 rounded-full flex items-center justify-center transition-all duration-300 ${
-                isListening 
-                  ? 'bg-gradient-to-r from-green-400 to-blue-500 shadow-lg shadow-green-500/30' 
-                  : isSpeaking 
-                    ? 'bg-gradient-to-r from-purple-400 to-pink-500 shadow-lg shadow-purple-500/30'
-                    : 'bg-gradient-to-r from-gray-300 to-gray-400'
-              }`}
-              style={{
-                transform: `scale(${pulseScale})`,
-                transition: 'transform 0.6s ease-in-out'
-              }}
-            >
-              {isListening ? (
-                <Mic className="w-12 h-12 text-white" />
-              ) : isSpeaking ? (
-                <Volume2 className="w-12 h-12 text-white" />
-              ) : (
-                <MicOff className="w-12 h-12 text-white" />
-              )}
-            </div>
-
-            {/* Wave Animation for Speaking */}
-            {isSpeaking && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                {[0, 1, 2].map((i) => (
-                  <div
-                    key={i}
-                    className={`absolute w-32 h-32 rounded-full border-2 border-purple-300 transition-all duration-200 ${
-                      waveAnimation === i ? 'opacity-100 scale-150' : 'opacity-0 scale-100'
-                    }`}
-                    style={{
-                      animationDelay: `${i * 200}ms`
-                    }}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Status Text */}
-          <div className="mb-6">
-            {isListening && (
-              <div className="space-y-2">
-                <h3 className="text-lg font-medium text-gray-900">Ti sto ascoltando...</h3>
-                <p className="text-sm text-gray-600">Parla normalmente, Urbanova capirà quando hai finito</p>
-              </div>
-            )}
-            {isSpeaking && (
-              <div className="space-y-2">
-                <h3 className="text-lg font-medium text-gray-900">Urbanova sta rispondendo...</h3>
-                <p className="text-sm text-gray-600">Ascolta la risposta audio</p>
-              </div>
-            )}
-            {!isListening && !isSpeaking && (
-              <div className="space-y-2">
-                <h3 className="text-lg font-medium text-gray-900">Pronto per la modalità voce</h3>
-                <p className="text-sm text-gray-600">Clicca il microfono per iniziare</p>
-              </div>
-            )}
-          </div>
-
-          {/* Transcribed Text */}
+        {/* Status Text */}
+        <div className="space-y-4">
+          <h2 className="text-5xl font-bold bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+            {getStatusText()}
+          </h2>
+          
           {transcribedText && (
-            <div className="bg-gray-50 rounded-2xl p-4 mb-6">
-              <div className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Waves className="w-4 h-4 text-blue-600" />
-                </div>
-                <div className="text-left">
-                  <p className="text-sm font-medium text-gray-700 mb-1">Trascrizione:</p>
-                  <p className="text-sm text-gray-600 italic">"{transcribedText}"</p>
-                </div>
-              </div>
+            <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-6 border border-white border-opacity-20">
+              <p className="text-xl text-white text-opacity-90 italic leading-relaxed">
+                "{transcribedText}"
+              </p>
             </div>
           )}
         </div>
 
         {/* Controls */}
-        <div className="flex items-center justify-center space-x-4">
+        <div className="flex items-center space-x-6 mt-8">
+          {/* Mute Toggle */}
           <button
             onClick={onToggleMute}
-            className={`p-3 rounded-full transition-all duration-200 ${
-              isMuted 
-                ? 'bg-red-100 text-red-600 hover:bg-red-200' 
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
+            className="p-4 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition-all duration-200 backdrop-blur-sm border border-white border-opacity-20 flex items-center space-x-3"
           >
-            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+            {isMuted ? (
+              <VolumeX className="w-6 h-6 text-white" />
+            ) : (
+              <Volume2 className="w-6 h-6 text-white" />
+            )}
+            <span className="text-lg font-medium">
+              {isMuted ? 'Riattiva Audio' : 'Muto'}
+            </span>
           </button>
-          
+
+          {/* Exit Voice Mode */}
           <button
-            onClick={onClose}
-            className="px-6 py-3 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition-colors font-medium"
+            onClick={onExitVoiceMode}
+            className="p-4 bg-red-500 bg-opacity-80 rounded-full hover:bg-opacity-100 transition-all duration-200 backdrop-blur-sm border border-red-400 border-opacity-50 flex items-center space-x-3"
           >
-            Esci dalla modalità voce
+            <Zap className="w-6 h-6 text-white" />
+            <span className="text-lg font-medium">Esci Modalità Voce</span>
           </button>
         </div>
 
         {/* Instructions */}
-        <div className="mt-6 text-center">
-          <p className="text-xs text-gray-500">
-            Puoi uscire dalla modalità voce dicendo "esci dalla modalità voce" o cliccando il pulsante
+        <div className="text-center text-white text-opacity-70 text-sm max-w-md">
+          <p>
+            {isListening 
+              ? "Parla normalmente, Urbanova capirà quando hai finito"
+              : isSpeaking 
+              ? "Urbanova sta rispondendo alla tua domanda"
+              : "Clicca sul microfono per iniziare a parlare"
+            }
           </p>
         </div>
       </div>

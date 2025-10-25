@@ -6,6 +6,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Mic, MicOff, Volume2, VolumeX, X, Settings, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { VoiceModeOverlay } from '@/components/ui/VoiceModeOverlay';
 
 interface VoiceAIChatGPTProps {
   onTranscription?: (text: string) => void;
@@ -39,11 +40,16 @@ export function VoiceAIChatGPT({
   const [selectedMicrophone, setSelectedMicrophone] = useState<string>('default');
   const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
   const [audioLevel, setAudioLevel] = useState<number>(0); // 🎤 Livello audio in tempo reale
+  const [showVoiceOverlay, setShowVoiceOverlay] = useState(false); // 🎨 Overlay Johnny Ive
+  const [isVoiceModeActive, setIsVoiceModeActive] = useState(false); // 🎯 Modalità voce attiva
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const recognitionRef = useRef<any>(null);
+  const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
 
   // 🎤 Rileva microfono disponibili
   const detectMicrophones = useCallback(async () => {
@@ -148,11 +154,13 @@ export function VoiceAIChatGPT({
     }
   }, [selectedMicrophone, detectMicrophones]);
 
-  // 🎤 Avvia registrazione audio
+  // 🎤 Avvia registrazione audio con rilevamento automatico fine parlato
   const startRecording = useCallback(async () => {
     try {
       setState('listening');
       setError(null);
+      setShowVoiceOverlay(true); // 🎨 Mostra overlay Johnny Ive
+      setIsVoiceModeActive(true); // 🎯 Attiva modalità voce
       
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -165,6 +173,66 @@ export function VoiceAIChatGPT({
       
       streamRef.current = stream;
       
+      // 🎤 SETUP AUDIO CONTEXT PER RILEVAMENTO SILENZIO
+      const audioContext = new AudioContext();
+      const analyser = audioContext.createAnalyser();
+      const microphone = audioContext.createMediaStreamSource(stream);
+      microphone.connect(analyser);
+      
+      audioContextRef.current = audioContext;
+      analyserRef.current = analyser;
+      
+      analyser.fftSize = 256;
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      
+      // 🎯 RILEVAMENTO AUTOMATICO FINE PARLATO
+      let isSpeaking = false;
+      let silenceStartTime = 0;
+      const SILENCE_THRESHOLD = 0.01; // Soglia silenzio
+      const SILENCE_DURATION = 2000; // 2 secondi di silenzio per fermare
+      
+      const checkAudioLevel = () => {
+        analyser.getByteFrequencyData(dataArray);
+        const average = dataArray.reduce((a, b) => a + b) / bufferLength;
+        const normalizedLevel = Math.min(average / 128, 1);
+        
+        setAudioLevel(normalizedLevel);
+        
+        if (normalizedLevel > SILENCE_THRESHOLD) {
+          // 🎤 UTENTE STA PARLANDO
+          isSpeaking = true;
+          silenceStartTime = 0;
+          
+          // Cancella timeout silenzio
+          if (silenceTimeoutRef.current) {
+            clearTimeout(silenceTimeoutRef.current);
+            silenceTimeoutRef.current = null;
+          }
+        } else if (isSpeaking) {
+          // 🔇 SILENZIO RILEVATO
+          if (silenceStartTime === 0) {
+            silenceStartTime = Date.now();
+          }
+          
+          const silenceDuration = Date.now() - silenceStartTime;
+          
+          if (silenceDuration >= SILENCE_DURATION) {
+            // 🛑 FERMA AUTOMATICAMENTE DOPO SILENZIO
+            console.log('🔇 [VoiceAI] Silenzio rilevato, fermando registrazione...');
+            stopRecording();
+            return;
+          }
+        }
+        
+        if (stream.active) {
+          requestAnimationFrame(checkAudioLevel);
+        }
+      };
+      
+      checkAudioLevel();
+      
+      // 🎤 SETUP MEDIA RECORDER
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType: 'audio/webm;codecs=opus'
       });
@@ -184,12 +252,14 @@ export function VoiceAIChatGPT({
       };
       
       mediaRecorder.start();
-      console.log('🎤 [VoiceAI] Registrazione avviata');
+      console.log('🎤 [VoiceAI] Registrazione avviata con rilevamento automatico fine parlato');
       
     } catch (error) {
       console.error('❌ [VoiceAI] Errore avvio registrazione:', error);
       setState('error');
       setError('Errore durante l\'avvio della registrazione');
+      setShowVoiceOverlay(false);
+      setIsVoiceModeActive(false);
     }
   }, [selectedMicrophone]);
 
@@ -200,9 +270,21 @@ export function VoiceAIChatGPT({
       console.log('🛑 [VoiceAI] Registrazione fermata');
     }
     
+    // 🧹 CLEANUP AUDIO CONTEXT
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+    
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
+    }
+    
+    // 🧹 CLEANUP TIMEOUT SILENZIO
+    if (silenceTimeoutRef.current) {
+      clearTimeout(silenceTimeoutRef.current);
+      silenceTimeoutRef.current = null;
     }
   }, []);
 
@@ -232,8 +314,14 @@ export function VoiceAIChatGPT({
           if (transcribedText) {
             console.log('✅ [VoiceAI] Whisper trascrizione completata:', transcribedText);
             setTranscribedText(transcribedText);
+            
+            // 🚀 AUTO-INVIO: Invia automaticamente il messaggio trascritto
+            console.log('🚀 [VoiceAI] Auto-invio messaggio trascritto:', transcribedText);
             onTranscription?.(transcribedText);
+            
             setState('idle');
+            setShowVoiceOverlay(false); // Chiudi overlay dopo invio
+            setIsVoiceModeActive(false); // Disattiva modalità voce
             return;
           }
         }
@@ -263,8 +351,14 @@ export function VoiceAIChatGPT({
             const transcript = event.results[0][0].transcript;
             console.log('✅ [VoiceAI] Web Speech trascrizione:', transcript);
             setTranscribedText(transcript);
+            
+            // 🚀 AUTO-INVIO: Invia automaticamente il messaggio trascritto
+            console.log('🚀 [VoiceAI] Auto-invio messaggio trascritto:', transcript);
             onTranscription?.(transcript);
+            
             setState('idle');
+            setShowVoiceOverlay(false); // Chiudi overlay dopo invio
+            setIsVoiceModeActive(false); // Disattiva modalità voce
             resolve();
           };
           
@@ -389,6 +483,23 @@ export function VoiceAIChatGPT({
     setShowTooltip(false);
   }, []);
 
+  // 🚪 Esci dalla modalità voce
+  const exitVoiceMode = useCallback(() => {
+    console.log('🚪 [VoiceAI] Uscita dalla modalità voce');
+    setIsVoiceModeActive(false);
+    setShowVoiceOverlay(false);
+    setTranscribedText('');
+    setState('idle');
+    
+    // Ferma eventuali registrazioni o sintesi in corso
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      stopRecording();
+    }
+    if (speechSynthesis.speaking) {
+      speechSynthesis.cancel();
+    }
+  }, [stopRecording]);
+
   // 🎯 Gestione permessi dal modal
   const handlePermissionGranted = useCallback(async () => {
     setShowModal(false);
@@ -408,6 +519,12 @@ export function VoiceAIChatGPT({
       }
       if (recognitionRef.current) {
         recognitionRef.current.stop();
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+      if (silenceTimeoutRef.current) {
+        clearTimeout(silenceTimeoutRef.current);
       }
     };
   }, []);
@@ -600,6 +717,20 @@ export function VoiceAIChatGPT({
           </div>
         </div>
       )}
+
+      {/* 🎨 OVERLAY JOHNNY IVE - Modalità Voce */}
+      <VoiceModeOverlay
+        isOpen={showVoiceOverlay}
+        onClose={() => setShowVoiceOverlay(false)}
+        isListening={state === 'listening'}
+        isSpeaking={state === 'speaking'}
+        isProcessing={state === 'processing'}
+        transcribedText={transcribedText}
+        audioLevel={audioLevel}
+        onToggleMute={() => setIsMuted(!isMuted)}
+        isMuted={isMuted}
+        onExitVoiceMode={exitVoiceMode}
+      />
     </div>
   );
 }
