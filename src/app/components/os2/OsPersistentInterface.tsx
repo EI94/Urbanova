@@ -23,7 +23,8 @@ import { MessageItem } from './MessageItem';
 import { Composer } from './Composer';
 import { FiltersDrawer } from './FiltersDrawer';
 import { ActionPlanPanel } from './ActionPlanPanel';
-import { VoiceAIChatGPT, useVoiceAI } from './VoiceAIChatGPT';
+import { VoiceAIChatGPT } from './VoiceAIChatGPT';
+import { useVoiceAI } from './useVoiceAI';
 import '@/app/styles/os-persistent.css';
 import '@/app/styles/voice-ai-chatgpt.css';
 
