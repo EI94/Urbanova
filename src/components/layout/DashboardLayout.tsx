@@ -42,8 +42,14 @@ import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 import { NotificationStats } from '@/types/notifications';
 import { UserProfile } from '@/types/userProfile';
 import AuthGuard from '@/components/AuthGuard';
-import { OsPersistentInterface } from '@/app/components/os2/OsPersistentInterface';
+import dynamic from 'next/dynamic';
 import { useOsSidecar } from '@/hooks/os2/useOsSidecar';
+
+// 🚀 LAZY LOAD: Carica OsPersistentInterface solo quando necessario per evitare problemi di inizializzazione
+const OsPersistentInterface = dynamic(
+  () => import('@/app/components/os2/OsPersistentInterface').then((mod) => ({ default: mod.OsPersistentInterface })),
+  { ssr: false }
+);
 // OS 2.0 sempre abilitato - feature flag rimosso
 import { Bot, Sparkles } from 'lucide-react';
 import { BUDGET_SUPPLIERS_V1 } from '@/config/flags';
