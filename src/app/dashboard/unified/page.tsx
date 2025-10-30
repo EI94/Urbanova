@@ -127,6 +127,9 @@ interface ToolExecution {
 }
 
 export default function UnifiedDashboardPage() {
+  // 🛡️ GUARD: Renderizza solo dopo mount client per evitare TDZ
+  const [mounted, setMounted] = useState(false);
+  
   const { t } = useLanguage();
   // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
   let authContext;
@@ -140,6 +143,10 @@ export default function UnifiedDashboardPage() {
   const authLoading = (authContext && typeof authContext === 'object' && 'loading' in authContext) ? authContext.loading : false;
   const { darkMode, setDarkMode } = useDarkMode();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeToolExecutions, setActiveToolExecutions] = useState<ToolExecution[]>([]);
@@ -828,6 +835,21 @@ export default function UnifiedDashboardPage() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className={`${darkMode ? 'text-white' : 'text-gray-900'}`}>Caricamento...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 🛡️ GUARD: Renderizza solo dopo mount client per evitare TDZ
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-base-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-blue-600 text-white shadow-lg mb-4 animate-pulse">
+            <Bot className="w-8 h-8" />
+          </div>
+          <h1 className="text-2xl font-bold text-slate-800">Urbanova</h1>
+          <p className="text-slate-500 mt-2">Caricamento...</p>
         </div>
       </div>
     );

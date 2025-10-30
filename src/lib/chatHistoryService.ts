@@ -1,7 +1,9 @@
 // Servizio per gestire la chat history persistente
 
-// 🛡️ OS PROTECTION - Importa protezione CSS per chat history service
-import '@/lib/osProtection';
+// 🛡️ OS PROTECTION - Carica solo lato client per evitare TDZ
+if (typeof window !== 'undefined') {
+  import('@/lib/osProtection').catch(() => {});
+}
 import { db } from './firebase';
 import { collection, query, where, getDocs, doc, deleteDoc } from 'firebase/firestore';
 
