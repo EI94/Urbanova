@@ -60,11 +60,23 @@ const VoiceAIChatGPT = dynamic(
   () => import('@/app/components/os2/VoiceAIChatGPT').then(mod => ({ default: mod.VoiceAIChatGPT })),
   { ssr: false }
 );
-import { useOpenAITTS } from '@/hooks/useOpenAITTS';
-import { VoiceModeOverlay } from '@/components/ui/VoiceModeOverlay';
-import { ResultMessage } from '@/components/chat/ResultMessage';
-import { ConversationDeleteModal } from '@/components/ui/ConversationDeleteModal';
-import { ConversationList } from '@/components/ui/ConversationList';
+// Dynamic imports per evitare problemi di inizializzazione TDZ (Audio/window non disponibili durante SSR/init)
+const VoiceModeOverlay = dynamic(
+  () => import('@/components/ui/VoiceModeOverlay').then(mod => ({ default: mod.VoiceModeOverlay })),
+  { ssr: false }
+);
+const ResultMessage = dynamic(
+  () => import('@/components/chat/ResultMessage').then(mod => ({ default: mod.ResultMessage })),
+  { ssr: false }
+);
+const ConversationDeleteModal = dynamic(
+  () => import('@/components/ui/ConversationDeleteModal').then(mod => ({ default: mod.ConversationDeleteModal })),
+  { ssr: false }
+);
+const ConversationList = dynamic(
+  () => import('@/components/ui/ConversationList').then(mod => ({ default: mod.ConversationList })),
+  { ssr: false }
+);
 // Caricamento dinamico DashboardLayout per evitare problemi di inizializzazione post-login
 const DashboardLayout = dynamic(
   () => import('@/components/layout/DashboardLayout').then(mod => ({ default: mod.default })),
@@ -281,8 +293,69 @@ export default function UnifiedDashboardPage() {
   // 🎤 Voice AI Hook - Design Johnny Ive (per compatibilità)
   // const { handleTranscription, handleSpeaking } = useVoiceAI();
   
-  // 🎤 OpenAI TTS Hook - Voce naturale di alta qualità
-  const { synthesize, stop, isPlaying: isTTSPlaying, isLoading: isTTSLoading, error: TTSError } = useOpenAITTS();
+  // 🎤 OpenAI TTS - Fallback diretto senza hook per evitare TDZ (Audio/window non disponibili durante init)
+  const [isTTSPlaying, setIsTTSPlaying] = useState(false);
+  const [isTTSLoading, setIsTTSLoading] = useState(false);
+  const [TTSError, setTTSError] = useState<string | null>(null);
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  
+  const synthesize = useCallback(async (text: string, options?: any) => {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      setIsTTSLoading(true);
+      setTTSError(null);
+      
+      const response = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, ...(options || {}) }),
+      });
+      
+      if (!response.ok) throw new Error('TTS failed');
+      
+      const data = await response.json();
+      const audioBlob = new Blob([Uint8Array.from(atob(data.audio), c => c.charCodeAt(0))], { type: 'audio/mp3' });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      // Ferma audio precedente
+      if (currentAudioRef.current) {
+        currentAudioRef.current.pause();
+        currentAudioRef.current = null;
+      }
+      
+      const audio = new Audio(audioUrl);
+      currentAudioRef.current = audio;
+      
+      audio.onplay = () => setIsTTSPlaying(true);
+      audio.onended = () => {
+        setIsTTSPlaying(false);
+        URL.revokeObjectURL(audioUrl);
+        currentAudioRef.current = null;
+      };
+      audio.onerror = () => {
+        setIsTTSPlaying(false);
+        setIsTTSLoading(false);
+        setTTSError('Errore riproduzione audio');
+      };
+      
+      setIsTTSLoading(false);
+      await audio.play();
+    } catch (error) {
+      console.error('❌ [TTS] Error:', error);
+      setIsTTSLoading(false);
+      setTTSError(error instanceof Error ? error.message : 'Errore sconosciuto');
+    }
+  }, []);
+  
+  const stop = useCallback(() => {
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current.currentTime = 0;
+      setIsTTSPlaying(false);
+      currentAudioRef.current = null;
+    }
+  }, []);
   
   // Voice mode state (rimosso duplicato)
   const isVoiceMode = isVoiceModeActive;
