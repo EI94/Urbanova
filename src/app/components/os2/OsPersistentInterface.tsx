@@ -23,7 +23,11 @@ import { MessageItem } from './MessageItem';
 import { Composer } from './Composer';
 import { FiltersDrawer } from './FiltersDrawer';
 import { ActionPlanPanel } from './ActionPlanPanel';
-import { VoiceAIChatGPT } from './VoiceAIChatGPT';
+import dynamic from 'next/dynamic';
+const VoiceAIChatGPT = dynamic(
+  () => import('./VoiceAIChatGPT').then(mod => ({ default: mod.VoiceAIChatGPT })),
+  { ssr: false }
+);
 import { useVoiceAI } from './useVoiceAI';
 import '@/app/styles/os-persistent.css';
 import '@/app/styles/voice-ai-chatgpt.css';
