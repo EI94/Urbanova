@@ -262,8 +262,9 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
         if (auth && typeof auth === 'object' && 'currentUser' in auth && auth.currentUser?.uid) {
           console.log('🔄 [DashboardLayout] Caricamento dati per utente:', auth.currentUser.uid);
           
-          // Carica notifiche con gestione errori
+          // Carica notifiche con gestioneSignature errori - import dinamico
           try {
+            const { firebaseNotificationService } = await import('@/lib/firebaseNotificationService');
             const notificationsData = await firebaseNotificationService.getNotificationStats(auth.currentUser?.uid || '');
             setNotifications(notificationsData);
             console.log('✅ [DashboardLayout] Notifiche caricate:', notificationsData);
