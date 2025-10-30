@@ -3,7 +3,11 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import '@/lib/osProtection'; // OS Protection per auth guard
+// Carica la protezione OS solo lato client per evitare side-effects in fase di init
+if (typeof window !== 'undefined') {
+  // import dinamico per evitare esecuzione a livello di modulo
+  import('@/lib/osProtection').catch(() => {});
+}
 
 interface AuthGuardProps {
   children: React.ReactNode;

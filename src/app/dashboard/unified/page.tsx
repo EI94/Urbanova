@@ -54,13 +54,22 @@ import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
 import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 import MarkdownRenderer from '@/components/ui/MarkdownRenderer';
 import { GeographicSearch, GeographicSearchResult } from '@/components/ui/GeographicSearch';
-import { VoiceAIChatGPT } from '@/app/components/os2/VoiceAIChatGPT';
+import dynamic from 'next/dynamic';
+// Caricamento dinamico per evitare problemi di inizializzazione post-login
+const VoiceAIChatGPT = dynamic(
+  () => import('@/app/components/os2/VoiceAIChatGPT').then(mod => ({ default: mod.VoiceAIChatGPT })),
+  { ssr: false }
+);
 import { useOpenAITTS } from '@/hooks/useOpenAITTS';
 import { VoiceModeOverlay } from '@/components/ui/VoiceModeOverlay';
 import { ResultMessage } from '@/components/chat/ResultMessage';
 import { ConversationDeleteModal } from '@/components/ui/ConversationDeleteModal';
 import { ConversationList } from '@/components/ui/ConversationList';
-import DashboardLayout from '@/components/layout/DashboardLayout';
+// Caricamento dinamico DashboardLayout per evitare problemi di inizializzazione post-login
+const DashboardLayout = dynamic(
+  () => import('@/components/layout/DashboardLayout').then(mod => ({ default: mod.default })),
+  { ssr: false }
+);
 // TEMPORANEAMENTE DISABILITATO: import { InteractiveMap, MapMarker } from '@/components/map/InteractiveMap';
 // TEMPORANEAMENTE DISABILITATO: import { useMapData } from '@/hooks/useMapData';
 

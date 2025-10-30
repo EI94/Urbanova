@@ -34,7 +34,11 @@ import UserProfilePanelFixed from '@/components/ui/UserProfilePanelFixed';
 import WorkspaceManager from '@/components/workspace/WorkspaceManager';
 import SettingsPanel from '@/components/ui/SettingsPanel';
 import { useAuth } from '@/contexts/AuthContext';
-import '@/lib/osProtection'; // OS Protection per dashboard
+// Carica la protezione OS solo lato client per evitare side-effects in fase di init
+if (typeof window !== 'undefined') {
+  // import dinamico per evitare esecuzione a livello di modulo
+  import('@/lib/osProtection').catch(() => {});
+}
 import { useLanguage } from '@/contexts/LanguageContext';
 import { notificationTriggerService } from '@/lib/notificationTriggerService';
 import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
