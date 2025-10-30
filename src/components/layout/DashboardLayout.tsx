@@ -801,8 +801,9 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
       <FeedbackWidget className="" />
       
       {/* 🆕 OS 2.0 Persistent Interface - Design Johnny Ive */}
+      {isOpen && (
       <OsPersistentInterface
-        isOpen={isOpen}
+        isOpen={true}
         onClose={close}
         onMessageSend={async (message: string) => {
           try {
@@ -843,6 +844,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
           console.log('🎬 [OS2] Action clicked:', actionId, 'on message:', messageId);
         }}
       />
+      )}
     </div>
   );
 }
