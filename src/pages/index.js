@@ -2,7 +2,11 @@ import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
 import { useAuth } from '@/contexts/AuthContext';
-import '@/lib/osProtection'; // OS Protection per index page
+// Carica OS Protection solo lato client, dopo il mount, per evitare side-effects in init
+// (spostato dal livello di modulo per prevenire errori di inizializzazione in produzione)
+if (typeof window !== 'undefined') {
+  import('@/lib/osProtection').catch(() => {});
+}
 
 export default function HomePage() {
   const router = useRouter();

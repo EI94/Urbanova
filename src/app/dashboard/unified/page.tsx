@@ -92,6 +92,10 @@ interface ToolExecution {
 
 export default function UnifiedDashboardPage() {
   const { t } = useLanguage();
+  // Evita qualsiasi rendering prima del mount client per prevenire TDZ/cicli di init
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  if (!mounted) return null;
   // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
   let authContext;
   try {
