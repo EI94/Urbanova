@@ -4,8 +4,37 @@ import { MessageSquare, Bell, User, Users, Settings, X, Building2, BarChart3, Fi
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
-import { NotificationPreferencesComponent } from '@/components/ui/NotificationPreferences';
-// Rimossi tutti i sistemi di protezione globale dopo fix chirurgico
+import dynamic from 'next/dynamic';
+
+// Dynamic imports per evitare TDZ - componenti renderizzati dopo mount
+const NotificationPreferencesComponent = dynamic(
+  () => import('@/components/ui/NotificationPreferences').then(mod => ({ default: mod.NotificationPreferencesComponent })),
+  { ssr: false }
+);
+const FeedbackWidget = dynamic(
+  () => import('@/components/ui/FeedbackWidget').then(mod => ({ default: mod.default })),
+  { ssr: false }
+);
+const LanguageSelector = dynamic(
+  () => import('@/components/ui/LanguageSelector').then(mod => ({ default: mod.default })),
+  { ssr: false }
+);
+const NotificationsPanel = dynamic(
+  () => import('@/components/ui/NotificationsPanel').then(mod => ({ default: mod.default })),
+  { ssr: false }
+);
+const UserProfilePanelFixed = dynamic(
+  () => import('@/components/ui/UserProfilePanelFixed').then(mod => ({ default: mod.default })),
+  { ssr: false }
+);
+const WorkspaceManager = dynamic(
+  () => import('@/components/workspace/WorkspaceManager').then(mod => ({ default: mod.default })),
+  { ssr: false }
+);
+const SettingsPanel = dynamic(
+  () => import('@/components/ui/SettingsPanel').then(mod => ({ default: mod.default })),
+  { ssr: false }
+);
 
 import {
   DashboardIcon,
@@ -27,12 +56,6 @@ import {
   ProjectIcon,
   MapIcon,
 } from '@/components/icons';
-import FeedbackWidget from '@/components/ui/FeedbackWidget';
-import LanguageSelector from '@/components/ui/LanguageSelector';
-import NotificationsPanel from '@/components/ui/NotificationsPanel';
-import UserProfilePanelFixed from '@/components/ui/UserProfilePanelFixed';
-import WorkspaceManager from '@/components/workspace/WorkspaceManager';
-import SettingsPanel from '@/components/ui/SettingsPanel';
 import { useAuth } from '@/contexts/AuthContext';
 // Carica la protezione OS solo lato client per evitare side-effects in fase di init
 if (typeof window !== 'undefined') {
@@ -46,7 +69,6 @@ import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 import { NotificationStats } from '@/types/notifications';
 import { UserProfile } from '@/types/userProfile';
 import AuthGuard from '@/components/AuthGuard';
-import dynamic from 'next/dynamic';
 import { useOsSidecar } from '@/hooks/os2/useOsSidecar';
 
 // 🚀 LAZY LOAD: Carica OsPersistentInterface solo quando necessario per evitare problemi di inizializzazione
