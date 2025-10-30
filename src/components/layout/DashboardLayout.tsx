@@ -63,9 +63,7 @@ if (typeof window !== 'undefined') {
   import('@/lib/osProtection').catch(() => {});
 }
 import { useLanguage } from '@/contexts/LanguageContext';
-import { notificationTriggerService } from '@/lib/notificationTriggerService';
-import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
-import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
+// Servizi importati dinamicamente per evitare TDZ
 import { NotificationStats } from '@/types/notifications';
 import { UserProfile } from '@/types/userProfile';
 import AuthGuard from '@/components/AuthGuard';
@@ -95,6 +93,9 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
 }
 
 function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayoutProps) {
+  // 🛡️ GUARD: Renderizza solo dopo mount client per evitare TDZ
+  const [mounted, setMounted] = useState(false);
+  
   const { t } = useLanguage();
   const router = useRouter();
   
@@ -136,13 +137,20 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [workspaces, setWorkspaces] = useState<any[]>([]);
 
+  // 🛡️ GUARD: Inizializza mounted dopo il mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Funzione per generare notifiche di test
   const generateTestNotifications = async () => {
     try {
       if (auth && typeof auth === 'object' && 'currentUser' in auth && auth.currentUser?.uid) {
+        const { notificationTriggerService } = await import('@/lib/notificationTriggerService');
         await notificationTriggerService.generateTestNotifications(auth.currentUser.uid);
         console.log('✅ Notifiche di test generate');
         // Ricarica le statistiche delle notifiche
+        const { firebaseNotificationService } = await import('@/lib/firebaseNotificationService');
         const notificationsData = await firebaseNotificationService.getNotificationStats(auth.currentUser.uid);
         setNotifications(notificationsData);
       }
@@ -246,6 +254,9 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
 
   // Carica notifiche e profilo utente solo se l'utente è autenticato
   useEffect(() => {
+    // Non caricare nulla se non siamo ancora montati
+    if (!mounted) return;
+    
     const loadData = async () => {
       try {
         if (auth && typeof auth === 'object' && 'currentUser' in auth && auth.currentUser?.uid) {
@@ -268,8 +279,9 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
             });
           }
           
-          // Carica profilo utente con gestione errori
+          // Carica profilo utente con gestione errori - import dinamico
           try {
+            const { firebaseUserProfileService } = await import('@/lib/firebaseUserProfileService');
             const profileData = await firebaseUserProfileService.getUserProfile(auth.currentUser?.uid || '');
             setUserProfile(profileData);
             console.log('✅ [DashboardLayout] Profilo caricato:', profileData);
@@ -301,11 +313,11 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
       }
     };
 
-    // Carica solo se l'utente è autenticato
+    // Carica solo se l'utente è autenticato e siamo montati
     if (auth && typeof auth === 'object' && 'currentUser' in auth && auth.currentUser?.uid) {
       loadData();
     }
-  }, [auth && typeof auth === 'object' && 'currentUser' in auth ? auth.currentUser?.uid : null]);
+  }, [mounted, auth && typeof auth === 'object' && 'currentUser' in auth ? auth.currentUser?.uid : null]);
 
   const handleLogout = async () => {
     try {
