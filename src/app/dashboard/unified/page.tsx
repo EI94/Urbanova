@@ -43,17 +43,41 @@ import { useDarkMode } from '@/contexts/DarkModeContext';
 import { dashboardService, DashboardStats } from '@/lib/dashboardService';
 import { chatHistoryService, ChatSession } from '@/lib/chatHistoryService';
 import { ChatMessage } from '@/types/chat';
-import FeedbackWidget from '@/components/ui/FeedbackWidget';
-import WorkspaceManager from '@/components/workspace/WorkspaceManager';
-import ProjectPreview from '@/components/chat/ProjectPreview';
-import NotificationsPanel from '@/components/ui/NotificationsPanel';
-import UserProfilePanelFixed from '@/components/ui/UserProfilePanelFixed';
+// Dynamic imports per evitare TDZ - componenti renderizzati dopo mount
+const FeedbackWidget = dynamic(
+  () => import('@/components/ui/FeedbackWidget').then(mod => ({ default: mod.default })),
+  { ssr: false }
+);
+const WorkspaceManager = dynamic(
+  () => import('@/components/workspace/WorkspaceManager').then(mod => ({ default: mod.default })),
+  { ssr: false }
+);
+const ProjectPreview = dynamic(
+  () => import('@/components/chat/ProjectPreview').then(mod => ({ default: mod.default })),
+  { ssr: false }
+);
+const NotificationsPanel = dynamic(
+  () => import('@/components/ui/NotificationsPanel').then(mod => ({ default: mod.default })),
+  { ssr: false }
+);
+const UserProfilePanelFixed = dynamic(
+  () => import('@/components/ui/UserProfilePanelFixed').then(mod => ({ default: mod.default })),
+  { ssr: false }
+);
+const MarkdownRenderer = dynamic(
+  () => import('@/components/ui/MarkdownRenderer').then(mod => ({ default: mod.default })),
+  { ssr: false }
+);
+const GeographicSearch = dynamic(
+  () => import('@/components/ui/GeographicSearch').then(mod => ({ default: mod.GeographicSearch })),
+  { ssr: false }
+);
+
 import { Workspace } from '@/types/workspace';
 import { ProjectPreview as ProjectPreviewType } from '@/lib/intentService';
 import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
 import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
-import MarkdownRenderer from '@/components/ui/MarkdownRenderer';
-import { GeographicSearch, GeographicSearchResult } from '@/components/ui/GeographicSearch';
+import type { GeographicSearchResult } from '@/components/ui/GeographicSearch';
 import dynamic from 'next/dynamic';
 // Caricamento dinamico per evitare problemi di inizializzazione post-login
 const VoiceAIChatGPT = dynamic(
