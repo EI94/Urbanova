@@ -124,17 +124,48 @@ export class UrbanovaOS2 {
   }
   
   constructor() {
-    this.skillCatalog = SkillCatalog.getInstance();
-    
-    // Carica skill reali
-    this.loadRealSkills();
-    
-    this.planner = new Planner();
-    this.executor = new PlanExecutor();
-    this.arbitrator = new Arbitrator();
-    this.fallbackManager = new FallbackManager();
-    
-    console.log('🚀 [OS2 Smart] Urbanova OS 2.0 Smart inizializzato con RAG + Function Calling + Guardrails');
+    // LAZY: Tutti i componenti vengono inizializzati solo quando necessari
+    // Questo evita completamente TDZ durante l'import del modulo
+    // Niente viene eseguito qui - tutto è lazy tramite getter
+    console.log('🚀 [OS2 Smart] Urbanova OS 2.0 Smart costruttore completato (tutti i componenti sono lazy)');
+  }
+  
+  // LAZY getters per tutti i componenti
+  private get skillCatalog() {
+    if (!this.skillCatalog) {
+      (this as any).skillCatalog = SkillCatalog.getInstance();
+      // Carica skill reali solo quando catalog viene accessato per la prima volta
+      this.loadRealSkills();
+    }
+    return (this as any).skillCatalog;
+  }
+  
+  private get planner() {
+    if (!(this as any)._planner) {
+      (this as any)._planner = new Planner();
+    }
+    return (this as any)._planner;
+  }
+  
+  private get executor() {
+    if (!(this as any)._executor) {
+      (this as any)._executor = new PlanExecutor();
+    }
+    return (this as any)._executor;
+  }
+  
+  private get arbitrator() {
+    if (!(this as any)._arbitrator) {
+      (this as any)._arbitrator = new Arbitrator();
+    }
+    return (this as any)._arbitrator;
+  }
+  
+  private get fallbackManager() {
+    if (!(this as any)._fallbackManager) {
+      (this as any)._fallbackManager = new FallbackManager();
+    }
+    return (this as any)._fallbackManager;
   }
   
   /**

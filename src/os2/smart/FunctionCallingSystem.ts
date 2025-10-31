@@ -48,19 +48,18 @@ export interface SmartDecision {
 export class OpenAIFunctionCallingSystem {
   private openai: OpenAI;
   private paraHelpEngine: ParaHelpDecisionEngine;
-  // LAZY: Inizializzato solo quando accessato per evitare TDZ
+  // LAZY: Tutti inizializzati solo quando accessati per evitare TDZ
   private _ragSystem: ReturnType<typeof getRAGSystem> | null = null;
-  private skillCatalog: SkillCatalog;
-  private contextTracker = getContextTracker();
-  private intentResolver = getIntentResolver();
+  private _skillCatalog: SkillCatalog | null = null;
+  private _contextTracker: ReturnType<typeof getContextTracker> | null = null;
+  private _intentResolver: ReturnType<typeof getIntentResolver> | null = null;
 
   constructor() {
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
     this.paraHelpEngine = new ParaHelpDecisionEngine(URBANOVA_PARAHELP_TEMPLATE);
-    this.skillCatalog = SkillCatalog.getInstance();
-    console.log(`🔧 [FunctionCalling] Inizializzato con ${this.skillCatalog.list().length} skill nel catalog`);
+    console.log(`🔧 [FunctionCalling] Inizializzato (skill catalog lazy)`);
   }
   
   private get ragSystem() {
@@ -68,6 +67,27 @@ export class OpenAIFunctionCallingSystem {
       this._ragSystem = getRAGSystem();
     }
     return this._ragSystem;
+  }
+  
+  private get skillCatalog() {
+    if (!this._skillCatalog) {
+      this._skillCatalog = SkillCatalog.getInstance();
+    }
+    return this._skillCatalog;
+  }
+  
+  private get contextTracker() {
+    if (!this._contextTracker) {
+      this._contextTracker = getContextTracker();
+    }
+    return this._contextTracker;
+  }
+  
+  private get intentResolver() {
+    if (!this._intentResolver) {
+      this._intentResolver = getIntentResolver();
+    }
+    return this._intentResolver;
   }
 
   /**

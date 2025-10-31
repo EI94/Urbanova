@@ -15,11 +15,26 @@ import type { ProjectMemory, UserMemory } from '../memory/types';
  * Planner intelligente che genera ActionPlan da intent/entities
  */
 export class Planner {
-  private skillCatalog: SkillCatalog;
-  private memoryStore = getMemoryStore();
+  // LAZY: Inizializzati solo quando accessati per evitare TDZ
+  private _skillCatalog: SkillCatalog | null = null;
+  private _memoryStore: ReturnType<typeof getMemoryStore> | null = null;
   
   constructor() {
-    this.skillCatalog = SkillCatalog.getInstance();
+    // Niente inizializzazione qui - tutto lazy
+  }
+  
+  private get skillCatalog() {
+    if (!this._skillCatalog) {
+      this._skillCatalog = SkillCatalog.getInstance();
+    }
+    return this._skillCatalog;
+  }
+  
+  private get memoryStore() {
+    if (!this._memoryStore) {
+      this._memoryStore = getMemoryStore();
+    }
+    return this._memoryStore;
   }
   
   /**

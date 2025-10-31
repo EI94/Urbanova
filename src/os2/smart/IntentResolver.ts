@@ -14,7 +14,15 @@ export interface ResolvedIntent {
  * Intent Resolver - Analizza messaggio con context per risolvere ambiguità
  */
 export class IntentResolver {
-  private contextTracker = getContextTracker();
+  // LAZY: Inizializzato solo quando accessato per evitare TDZ
+  private _contextTracker: ReturnType<typeof getContextTracker> | null = null;
+  
+  private get contextTracker() {
+    if (!this._contextTracker) {
+      this._contextTracker = getContextTracker();
+    }
+    return this._contextTracker;
+  }
   
   /**
    * Risolve intent da messaggio + context
