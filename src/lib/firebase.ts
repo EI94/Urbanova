@@ -153,31 +153,25 @@ const getStorageProxy = (): ReturnType<typeof getStorage> => {
   return _storage;
 };
 
-// Export usando Object.defineProperty per proprietà lazy - NON viene eseguito a livello di modulo
-const firebaseExports: any = {};
-
-Object.defineProperty(firebaseExports, 'auth', {
-  get: getAuthProxy,
-  enumerable: true,
-  configurable: true
+// Export usando Proxy wrapper che delega ai getter lazy - NESSUNA esecuzione immediata
+// I Proxy esterni sono vuoti e delegano solo quando vengono accessati
+export const auth = new Proxy({} as ReturnType<typeof getAuth>, {
+  get(target, prop) {
+    return (getAuthProxy() as any)[prop];
+  }
 });
 
-Object.defineProperty(firebaseExports, 'db', {
-  get: getDbProxy,
-  enumerable: true,
-  configurable: true
+export const db = new Proxy({} as ReturnType<typeof getFirestore>, {
+  get(target, prop) {
+    return (getDbProxy() as any)[prop];
+  }
 });
 
-Object.defineProperty(firebaseExports, 'storage', {
-  get: getStorageProxy,
-  enumerable: true,
-  configurable: true
+export const storage = new Proxy({} as ReturnType<typeof getStorage>, {
+  get(target, prop) {
+    return (getStorageProxy() as any)[prop];
+  }
 });
-
-// Export come costanti per compatibilità - ma internamente usano getter lazy
-export const auth = firebaseExports.auth;
-export const db = firebaseExports.db;
-export const storage = firebaseExports.storage;
 
 // Configurazione per gestire errori di connessione - solo lato client e dopo init
 if (typeof window !== 'undefined') {
