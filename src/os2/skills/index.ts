@@ -35,18 +35,32 @@ function createSkill<TInput = unknown, TOutput = unknown>(
  */
 let _SKILLS: Skill[] | null = null;
 
-export function getSKILLS(): Skill[] {
+// LAZY ASYNC: Carica skill modules solo quando necessario con import() asincrono
+// NON usare require() perché webpack lo valuta comunque durante bundle
+export async function getSKILLSAsync(): Promise<Skill[]> {
   if (!_SKILLS) {
-    // Carica skill modules solo quando necessario
-    const businessPlanRun = require('./businessPlan.run');
-    const sensitivityRun = require('./sensitivity.run');
-    const termSheetCreate = require('./termSheet.create');
-    const rdoCreate = require('./rdo.create');
-    const salRecord = require('./sal.record');
-    const salesProposal = require('./sales.proposal');
-    const projectSave = require('./project.save');
-    const projectCreate = require('./project.create');
-    const budgetSuppliersTools = require('./budgetSuppliers.tools');
+    // Carica skill modules solo quando necessario - ASYNC import
+    const [
+      businessPlanRun,
+      sensitivityRun,
+      termSheetCreate,
+      rdoCreate,
+      salRecord,
+      salesProposal,
+      projectSave,
+      projectCreate,
+      budgetSuppliersTools,
+    ] = await Promise.all([
+      import('./businessPlan.run'),
+      import('./sensitivity.run'),
+      import('./termSheet.create'),
+      import('./rdo.create'),
+      import('./sal.record'),
+      import('./sales.proposal'),
+      import('./project.save'),
+      import('./project.create'),
+      import('./budgetSuppliers.tools'),
+    ]);
     
     _SKILLS = [
       // Business Plan Skills
@@ -79,16 +93,33 @@ export function getSKILLS(): Skill[] {
   return _SKILLS;
 }
 
+// Sync wrapper per compatibilità - SOLO se _SKILLS è già caricato
+export function getSKILLS(): Skill[] {
+  if (!_SKILLS) {
+    throw new Error('SKILLS not loaded. Call getSKILLSAsync() first or ensure skills are loaded.');
+  }
+  return _SKILLS;
+}
+
 // Export per compatibilità - RIMOSSO completamente perché new Proxy() viene valutato durante bundle
 // Usa getSKILLS() direttamente invece di SKILLS
 // Se qualcuno importa SKILLS, restituisce array vuoto (compatibilità)
 export const SKILLS: Skill[] = [];
 
 /**
- * Metadata di tutte le skill (per discovery) - LAZY
+ * Metadata di tutte le skill (per discovery) - LAZY ASYNC
  */
+export async function getSKILL_METASAsync(): Promise<SkillMeta[]> {
+  const skills = await getSKILLSAsync();
+  return skills.map(skill => skill.meta);
+}
+
+// Sync wrapper per compatibilità - SOLO se _SKILLS è già caricato
 export function getSKILL_METAS(): SkillMeta[] {
-  return getSKILLS().map(skill => skill.meta);
+  if (!_SKILLS) {
+    throw new Error('SKILLS not loaded. Call getSKILLSAsync() first.');
+  }
+  return _SKILLS.map(skill => skill.meta);
 }
 
 // Export per compatibilità - RIMOSSO export const SKILL_METAS perché viene valutato durante bundle
@@ -96,10 +127,11 @@ export function getSKILL_METAS(): SkillMeta[] {
 export const SKILL_METAS: SkillMeta[] = [];
 
 /**
- * Conta skill per categoria
+ * Conta skill per categoria - LAZY ASYNC
  */
-export function getSkillsByCategory(): Record<string, number> {
-  return getSKILLS().reduce((acc, skill) => {
+export async function getSkillsByCategoryAsync(): Promise<Record<string, number>> {
+  const skills = await getSKILLSAsync();
+  return skills.reduce((acc, skill) => {
     const category = skill.meta.category || 'general';
     acc[category] = (acc[category] || 0) + 1;
     return acc;
@@ -107,41 +139,80 @@ export function getSkillsByCategory(): Record<string, number> {
 }
 
 /**
- * Filtra skill per visibility
+ * Filtra skill per visibility - LAZY ASYNC
  */
-export function getGlobalSkills(): Skill[] {
-  return getSKILLS().filter(s => s.meta.visibility === 'global');
+export async function getGlobalSkillsAsync(): Promise<Skill[]> {
+  const skills = await getSKILLSAsync();
+  return skills.filter(s => s.meta.visibility === 'global');
 }
 
 /**
- * Filtra skill per context
+ * Filtra skill per context - LAZY ASYNC
  */
-export function getContextSkills(context: string): Skill[] {
-  return getSKILLS().filter(s => 
+export async function getContextSkillsAsync(context: string): Promise<Skill[]> {
+  const skills = await getSKILLSAsync();
+  return skills.filter(s => 
     typeof s.meta.visibility === 'object' && 
     s.meta.visibility.context === context
   );
 }
 
 /**
- * Filtra skill per RBAC
+ * Filtra skill per RBAC - LAZY ASYNC
  */
-export function getSkillsByRole(role: 'viewer' | 'editor' | 'admin'): Skill[] {
-  return getSKILLS().filter(s => 
+export async function getSkillsByRoleAsync(role: 'viewer' | 'editor' | 'admin'): Promise<Skill[]> {
+  const skills = await getSKILLSAsync();
+  return skills.filter(s => 
     !s.meta.rbac || s.meta.rbac.includes(role)
   );
 }
 
 /**
- * Trova skill per ID
+ * Trova skill per ID - LAZY ASYNC
  */
-export function findSkill(skillId: string): Skill | undefined {
-  return getSKILLS().find(s => s.meta.id === skillId);
+export async function findSkillAsync(skillId: string): Promise<Skill | undefined> {
+  const skills = await getSKILLSAsync();
+  return skills.find(s => s.meta.id === skillId);
 }
 
-// Default export - LAZY (function, non valutata durante bundle)
-// Export la function direttamente, non chiamarla!
-export default getSKILLS;
+// Sync wrappers per compatibilità - SOLO se _SKILLS è già caricato
+export function getSkillsByCategory(): Record<string, number> {
+  if (!_SKILLS) throw new Error('SKILLS not loaded');
+  return _SKILLS.reduce((acc, skill) => {
+    const category = skill.meta.category || 'general';
+    acc[category] = (acc[category] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+}
+
+export function getGlobalSkills(): Skill[] {
+  if (!_SKILLS) throw new Error('SKILLS not loaded');
+  return _SKILLS.filter(s => s.meta.visibility === 'global');
+}
+
+export function getContextSkills(context: string): Skill[] {
+  if (!_SKILLS) throw new Error('SKILLS not loaded');
+  return _SKILLS.filter(s => 
+    typeof s.meta.visibility === 'object' && 
+    s.meta.visibility.context === context
+  );
+}
+
+export function getSkillsByRole(role: 'viewer' | 'editor' | 'admin'): Skill[] {
+  if (!_SKILLS) throw new Error('SKILLS not loaded');
+  return _SKILLS.filter(s => 
+    !s.meta.rbac || s.meta.rbac.includes(role)
+  );
+}
+
+export function findSkill(skillId: string): Skill | undefined {
+  if (!_SKILLS) throw new Error('SKILLS not loaded');
+  return _SKILLS.find(s => s.meta.id === skillId);
+}
+
+// Default export - LAZY ASYNC (function, non valutata durante bundle)
+// Export la function async direttamente, non chiamarla!
+export default getSKILLSAsync;
 
 // Re-export types
 export type {

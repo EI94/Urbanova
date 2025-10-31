@@ -174,25 +174,34 @@ export class UrbanovaOS2 {
    */
   private loadRealSkills(): void {
     // LAZY: Carica skills solo quando necessario, in modo asincrono per evitare TDZ
-    // Non usare require() durante import - usa dynamic import
+    // NON usare require() - usa SOLO async import()
     if (typeof window !== 'undefined') {
       import('./skills/index')
-        .then((skillsModule) => {
-          // Usa getSKILLS() function se disponibile (lazy), altrimenti fallback
-          const getSKILLS = skillsModule.getSKILLS;
-          if (typeof getSKILLS === 'function') {
-            const realSkills = getSKILLS();
-            if (realSkills && Array.isArray(realSkills) && realSkills.length > 0) {
-              this.skillCatalog.loadRealSkills(realSkills);
+        .then(async (skillsModule) => {
+          // Usa getSKILLSAsync() per caricamento asincrono sicuro
+          const getSKILLSAsync = skillsModule.getSKILLSAsync;
+          if (typeof getSKILLSAsync === 'function') {
+            try {
+              const realSkills = await getSKILLSAsync();
+              if (realSkills && Array.isArray(realSkills) && realSkills.length > 0) {
+                this.skillCatalog.loadRealSkills(realSkills);
+                console.log(`✅ [OS2] Caricate ${realSkills.length} skill reali`);
+              }
+            } catch (error) {
+              console.warn('⚠️ [OS2] Errore caricamento skill async:', error);
             }
           } else if (typeof skillsModule.default === 'function') {
-            // Fallback: default export è una function
-            const realSkills = skillsModule.default();
-            if (realSkills && Array.isArray(realSkills) && realSkills.length > 0) {
-              this.skillCatalog.loadRealSkills(realSkills);
+            // Fallback: default export è una function async
+            try {
+              const realSkills = await skillsModule.default();
+              if (realSkills && Array.isArray(realSkills) && realSkills.length > 0) {
+                this.skillCatalog.loadRealSkills(realSkills);
+              }
+            } catch (error) {
+              console.warn('⚠️ [OS2] Errore caricamento skill default:', error);
             }
           } else {
-            console.warn('⚠️ [OS2] getSKILLS non trovato in skills/index');
+            console.warn('⚠️ [OS2] getSKILLSAsync non trovato in skills/index');
           }
         })
         .catch((error) => {
