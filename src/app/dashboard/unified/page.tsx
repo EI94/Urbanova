@@ -37,12 +37,14 @@ import {
   X,
 } from 'lucide-react';
 
+// Context hooks e servizi vengono usati solo dopo mount - import statici OK qui
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDarkMode } from '@/contexts/DarkModeContext';
-import { dashboardService, DashboardStats } from '@/lib/dashboardService';
-import { chatHistoryService, ChatSession } from '@/lib/chatHistoryService';
+// Servizi importati dinamicamente per evitare TDZ
 import { ChatMessage } from '@/types/chat';
+import type { DashboardStats } from '@/lib/dashboardService';
+import type { ChatSession } from '@/lib/chatHistoryService';
 // Dynamic imports per evitare TDZ - componenti renderizzati dopo mount
 const FeedbackWidget = dynamic(
   () => import('@/components/ui/FeedbackWidget').then(mod => ({ default: mod.default })),
@@ -192,6 +194,9 @@ export default function UnifiedDashboardPage() {
       
       console.log('🗑️ [Chat History] Eliminando sessione:', { id: sessionToDelete.id, title: sessionToDelete.title });
       
+      // Import dinamico per evitare TDZ
+      const { chatHistoryService } = await import('@/lib/chatHistoryService');
+      
       // Elimina dal localStorage con error handling robusto
       try {
         chatHistoryService.deleteChatSession(sessionId);
@@ -265,7 +270,10 @@ export default function UnifiedDashboardPage() {
   
   // Carica chat esistente quando l'utente torna alla dashboard
   useEffect(() => {
-    if (currentUser?.uid) {
+    if (!mounted || !currentUser?.uid) return;
+    
+    const loadExistingSession = async () => {
+      const { chatHistoryService } = await import('@/lib/chatHistoryService');
       const sessionId = getPersistentSessionId();
       const existingSession = chatHistoryService.getChatSession(sessionId);
       
@@ -274,8 +282,10 @@ export default function UnifiedDashboardPage() {
         setMessages(existingSession.messages);
         setCurrentSessionId(sessionId);
       }
-    }
-  }, [currentUser?.uid, getPersistentSessionId]);
+    };
+    
+    loadExistingSession();
+  }, [mounted, currentUser?.uid, getPersistentSessionId]);
   
   // Mappa tool names tecnici a nomi user-friendly
   const getFriendlyToolName = (toolId: string): string => {
@@ -437,14 +447,16 @@ export default function UnifiedDashboardPage() {
         }
         console.log('🔍 [DEBUG CRASH] Utente autenticato, procedo con caricamento - PUNTO CRITICO WEB 5');
 
-        // Inizializza i dati della dashboard se necessario
+        // Inizializza i dati della dashboard se necessario - import dinamico
+        const { dashboardService } = await import('@/lib/dashboardService');
         await dashboardService.initializeDashboardData();
 
         // Carica le statistiche iniziali
         const initialStats = await dashboardService.getDashboardStats();
         setStats(initialStats);
 
-        // Carica la chat history persistente
+        // Carica la chat history persistente - import dinamico
+        const { chatHistoryService } = await import('@/lib/chatHistoryService');
         const savedChatHistory = chatHistoryService.getChatSessions();
         setChatHistory(savedChatHistory);
         console.log('✅ [Chat History] Caricate sessioni salvate:', savedChatHistory.length);
@@ -470,22 +482,36 @@ export default function UnifiedDashboardPage() {
 
   // Sottoscrizione agli aggiornamenti in tempo reale
   useEffect(() => {
-    if (!stats) return;
+    if (!stats || !mounted) return;
 
     console.log('🔄 [Unified Dashboard] Sottoscrizione aggiornamenti real-time...');
 
-    const unsubscribe = dashboardService.subscribeToDashboardUpdates(newStats => {
-      console.log('🔄 [Unified Dashboard] Aggiornamento real-time ricevuto:', newStats);
-      setStats(newStats);
-    }, currentUser?.uid);
+    let unsubscribe: (() => void) | undefined;
+    
+    const setupSubscription = async () => {
+      const { dashboardService } = await import('@/lib/dashboardService');
+      unsubscribe = dashboardService.subscribeToDashboardUpdates((newStats) => {
+        console.log('🔄 [Unified Dashboard] Aggiornamento real-time ricevuto:', newStats);
+        setStats(newStats);
+      }, currentUser?.uid);
+    };
 
-    return unsubscribe;
-  }, [stats]);
+    setupSubscription();
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [stats, mounted, currentUser?.uid]);
 
   // Carica dati utente (notifiche e profilo)
   const loadUserData = async () => {
     try {
       if (!currentUser?.uid) return;
+
+      const [{ firebaseNotificationService }, { firebaseUserProfileService }] = await Promise.all([
+        import('@/lib/firebaseNotificationService'),
+        import('@/lib/firebaseUserProfileService'),
+      ]);
 
       const [notificationsData, profileData] = await Promise.all([
         firebaseNotificationService.getNotifications(currentUser.uid),
@@ -668,7 +694,8 @@ export default function UnifiedDashboardPage() {
       const finalMessages = [...newMessages, aiResponse];
       setMessages(finalMessages);
       
-      // Salva chat in localStorage per persistenza
+      // Salva chat in localStorage per persistenza - import dinamico
+      const { chatHistoryService } = await import('@/lib/chatHistoryService');
       const sessionId = getPersistentSessionId();
       chatHistoryService.saveChatSession({
         id: sessionId,
@@ -700,6 +727,9 @@ export default function UnifiedDashboardPage() {
 
       // Salva nella chat history persistente se è una conversazione significativa
       if (finalMessages.length > 2) {
+        // Import dinamico per evitare TDZ
+        const { chatHistoryService } = await import('@/lib/chatHistoryService');
+        
         let sessionToUpdate: ChatSession | null = null;
         
         // Se abbiamo una sessione corrente, aggiornala
@@ -741,8 +771,10 @@ export default function UnifiedDashboardPage() {
       const finalMessages = [...newMessages, fallbackResponse];
       setMessages(finalMessages);
 
-      // Salva anche il fallback nella chat history
+      // Salva anche il fallback nella chat history - import dinamico
       if (finalMessages.length > 2) {
+        const { chatHistoryService } = await import('@/lib/chatHistoryService');
+        
         let sessionToUpdate: ChatSession | null = null;
         
         if (currentSessionId) {
