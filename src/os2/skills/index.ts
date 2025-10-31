@@ -79,8 +79,9 @@ export function getSKILLS(): Skill[] {
   return _SKILLS;
 }
 
-// Export per compatibilità - usa getSKILLS() internamente
-export const SKILLS: Skill[] = getSKILLS();
+// Export per compatibilità - LAZY getter invece di const valutata subito
+// NON export const SKILLS = getSKILLS() perché verrebbe valutato durante bundle!
+// Usa getSKILLS() direttamente oppure export default getSKILLS
 
 /**
  * Metadata di tutte le skill (per discovery) - LAZY
@@ -89,8 +90,8 @@ export function getSKILL_METAS(): SkillMeta[] {
   return getSKILLS().map(skill => skill.meta);
 }
 
-// Export per compatibilità
-export const SKILL_METAS: SkillMeta[] = getSKILL_METAS();
+// Export per compatibilità - LAZY, non valutato durante bundle
+export const SKILL_METAS = getSKILL_METAS;
 
 /**
  * Conta skill per categoria
@@ -136,8 +137,8 @@ export function findSkill(skillId: string): Skill | undefined {
   return getSKILLS().find(s => s.meta.id === skillId);
 }
 
-// Default export - LAZY
-export default getSKILLS();
+// Default export - LAZY (function, non valutata durante bundle)
+export default getSKILLS;
 
 // Re-export types
 export type {
