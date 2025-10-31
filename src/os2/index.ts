@@ -178,9 +178,21 @@ export class UrbanovaOS2 {
     if (typeof window !== 'undefined') {
       import('./skills/index')
         .then((skillsModule) => {
-          const realSkills = skillsModule.SKILLS || skillsModule.default;
-          if (realSkills && Array.isArray(realSkills)) {
-            this.skillCatalog.loadRealSkills(realSkills);
+          // Usa getSKILLS() function se disponibile (lazy), altrimenti fallback
+          const getSKILLS = skillsModule.getSKILLS;
+          if (typeof getSKILLS === 'function') {
+            const realSkills = getSKILLS();
+            if (realSkills && Array.isArray(realSkills) && realSkills.length > 0) {
+              this.skillCatalog.loadRealSkills(realSkills);
+            }
+          } else if (typeof skillsModule.default === 'function') {
+            // Fallback: default export è una function
+            const realSkills = skillsModule.default();
+            if (realSkills && Array.isArray(realSkills) && realSkills.length > 0) {
+              this.skillCatalog.loadRealSkills(realSkills);
+            }
+          } else {
+            console.warn('⚠️ [OS2] getSKILLS non trovato in skills/index');
           }
         })
         .catch((error) => {

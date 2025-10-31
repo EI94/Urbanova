@@ -98,13 +98,19 @@ export function getSKILL_METAS(): SkillMeta[] {
 }
 
 // Export per compatibilità - PROXY LAZY: nessuna valutazione durante bundle
-export const SKILL_METAS = new Proxy([] as SkillMeta[], {
-  get(target, prop) {
-    const metas = getSKILL_METAS();
-    const value = (metas as any)[prop];
-    return typeof value === 'function' ? value.bind(metas) : value;
+let _SKILL_METAS_PROXY: SkillMeta[] | null = null;
+export const SKILL_METAS = (() => {
+  if (!_SKILL_METAS_PROXY && typeof window !== 'undefined') {
+    _SKILL_METAS_PROXY = new Proxy([] as SkillMeta[], {
+      get(target, prop) {
+        const metas = getSKILL_METAS();
+        const value = (metas as any)[prop];
+        return typeof value === 'function' ? value.bind(metas) : value;
+      }
+    }) as SkillMeta[];
   }
-}) as SkillMeta[];
+  return _SKILL_METAS_PROXY || ([] as SkillMeta[]);
+})();
 
 /**
  * Conta skill per categoria
