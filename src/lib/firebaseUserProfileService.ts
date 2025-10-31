@@ -316,6 +316,7 @@ class FirebaseUserProfileService {
 
       const newValue = !profile.security.twoFactorEnabled;
 
+      const db = await getFirebaseDb();
       const profileRef = doc(db, 'userProfiles', userId);
       await updateDoc(profileRef, {
         'security.twoFactorEnabled': newValue,
