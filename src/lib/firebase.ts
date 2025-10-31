@@ -89,60 +89,89 @@ export const getStorageInstance = () => {
   return storageInstance;
 };
 
-// Export lazy per evitare TDZ - non eseguono codice a livello di modulo
-export const auth = (() => {
-  // Ritorna getter che inizializza solo quando accessato
-  return new Proxy({} as ReturnType<typeof getAuth>, {
-    get(target, prop) {
-      const instance = getAuthInstance();
-      if (!instance) {
-        throw new Error('Firebase Auth non inizializzato. Assicurati che window sia disponibile.');
-      }
-      const value = (instance as any)[prop];
-      // Se è una funzione, bind al contesto
-      if (typeof value === 'function') {
-        return value.bind(instance);
-      }
-      return value;
-    }
-  });
-})();
+// Export lazy per evitare TDZ - Proxy creati solo quando accessati per la prima volta
+let authProxy: ReturnType<typeof getAuth> | null = null;
+let dbProxy: ReturnType<typeof getFirestore> | null = null;
+let storageProxy: ReturnType<typeof getStorage> | null = null;
 
-export const db = (() => {
-  // Ritorna getter che inizializza solo quando accessato
-  return new Proxy({} as ReturnType<typeof getFirestore>, {
-    get(target, prop) {
-      const instance = getDbInstance();
-      if (!instance) {
-        throw new Error('Firebase Firestore non inizializzato. Assicurati che window sia disponibile.');
+const createAuthProxy = (): ReturnType<typeof getAuth> => {
+  if (!authProxy) {
+    authProxy = new Proxy({} as ReturnType<typeof getAuth>, {
+      get(target, prop) {
+        const instance = getAuthInstance();
+        if (!instance) {
+          throw new Error('Firebase Auth non inizializzato. Assicurati che window sia disponibile.');
+        }
+        const value = (instance as any)[prop];
+        if (typeof value === 'function') {
+          return value.bind(instance);
+        }
+        return value;
       }
-      const value = (instance as any)[prop];
-      // Se è una funzione, bind al contesto
-      if (typeof value === 'function') {
-        return value.bind(instance);
-      }
-      return value;
-    }
-  });
-})();
+    });
+  }
+  return authProxy;
+};
 
-export const storage = (() => {
-  // Ritorna getter che inizializza solo quando accessato
-  return new Proxy({} as ReturnType<typeof getStorage>, {
-    get(target, prop) {
-      const instance = getStorageInstance();
-      if (!instance) {
-        throw new Error('Firebase Storage non inizializzato. Assicurati che window sia disponibile.');
+const createDbProxy = (): ReturnType<typeof getFirestore> => {
+  if (!dbProxy) {
+    dbProxy = new Proxy({} as ReturnType<typeof getFirestore>, {
+      get(target, prop) {
+        const instance = getDbInstance();
+        if (!instance) {
+          throw new Error('Firebase Firestore non inizializzato. Assicurati che window sia disponibile.');
+        }
+        const value = (instance as any)[prop];
+        if (typeof value === 'function') {
+          return value.bind(instance);
+        }
+        return value;
       }
-      const value = (instance as any)[prop];
-      // Se è una funzione, bind al contesto
-      if (typeof value === 'function') {
-        return value.bind(instance);
+    });
+  }
+  return dbProxy;
+};
+
+const createStorageProxy = (): ReturnType<typeof getStorage> => {
+  if (!storageProxy) {
+    storageProxy = new Proxy({} as ReturnType<typeof getStorage>, {
+      get(target, prop) {
+        const instance = getStorageInstance();
+        if (!instance) {
+          throw new Error('Firebase Storage non inizializzato. Assicurati che window sia disponibile.');
+        }
+        const value = (instance as any)[prop];
+        if (typeof value === 'function') {
+          return value.bind(instance);
+        }
+        return value;
       }
-      return value;
-    }
-  });
-})();
+    });
+  }
+  return storageProxy;
+};
+
+// Export getters che creano Proxy solo quando accessati
+export const auth = new Proxy({} as ReturnType<typeof getAuth>, {
+  get(target, prop) {
+    const proxy = createAuthProxy();
+    return (proxy as any)[prop];
+  }
+});
+
+export const db = new Proxy({} as ReturnType<typeof getFirestore>, {
+  get(target, prop) {
+    const proxy = createDbProxy();
+    return (proxy as any)[prop];
+  }
+});
+
+export const storage = new Proxy({} as ReturnType<typeof getStorage>, {
+  get(target, prop) {
+    const proxy = createStorageProxy();
+    return (proxy as any)[prop];
+  }
+});
 
 // Configurazione per gestire errori di connessione - solo lato client e dopo init
 if (typeof window !== 'undefined') {
