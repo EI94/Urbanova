@@ -9,8 +9,10 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 
-// 🛡️ OS PROTECTION - Importa protezione CSS per firebase auth service
-import '@/lib/osProtection';
+// 🛡️ OS PROTECTION - Carica solo lato client per evitare TDZ
+if (typeof window !== 'undefined') {
+  import('@/lib/osProtection').catch(() => {});
+}
 
 import { auth, db } from './firebase';
 

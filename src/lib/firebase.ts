@@ -6,8 +6,10 @@ import { getStorage, connectStorageEmulator } from 'firebase/storage';
 
 // 🛡️ GLOBAL ERROR INTERCEPTOR - DEVE ESSERE PRIMO
 import '@/lib/globalErrorInterceptor';
-// 🛡️ OS PROTECTION - Importa protezione CSS per firebase
-import '@/lib/osProtection';
+// 🛡️ OS PROTECTION - Carica solo lato client per evitare TDZ
+if (typeof window !== 'undefined') {
+  import('@/lib/osProtection').catch(() => {});
+}
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
