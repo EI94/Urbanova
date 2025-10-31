@@ -186,40 +186,45 @@ const createStorageProxy = (): ReturnType<typeof getStorage> => {
   return _storageProxy;
 };
 
-// Export TOTALLY LAZY: Usa Object.defineProperty per evitare completamente new Proxy durante import
-// Gli export sono oggetti vuoti che vengono sostituiti con Proxy solo quando accessati la prima volta
+// Export TOTALLY LAZY: Oggetti vuoti che vengono sostituiti con Proxy SOLO quando accessati
+// NESSUNA esecuzione durante l'import - neanche new Proxy()
 
 const authExport = {} as ReturnType<typeof getAuth>;
 const dbExport = {} as ReturnType<typeof getFirestore>;
 const storageExport = {} as ReturnType<typeof getStorage>;
 
-// Definisci getter lazy per ogni possibile proprietà
-// Questo evita completamente l'esecuzione di new Proxy durante l'import
+// Crea Proxy handler che vengono definiti solo quando window è disponibile E dopo un delay
 if (typeof window !== 'undefined') {
-  // Usa Proxy per intercettare TUTTE le proprietà
-  const authProxy = new Proxy({} as ReturnType<typeof getAuth>, {
-    get(target, prop) {
-      return (createAuthProxy() as any)[prop];
+  // Ritarda la creazione dei Proxy fino al prossimo tick per evitare TDZ
+  setTimeout(() => {
+    try {
+      // Crea Proxy che delegano alle funzioni createAuthProxy/createDbProxy/createStorageProxy
+      const authProxy = new Proxy({} as ReturnType<typeof getAuth>, {
+        get(target, prop) {
+          return (createAuthProxy() as any)[prop];
+        }
+      });
+      
+      const dbProxy = new Proxy({} as ReturnType<typeof getFirestore>, {
+        get(target, prop) {
+          return (createDbProxy() as any)[prop];
+        }
+      });
+      
+      const storageProxy = new Proxy({} as ReturnType<typeof getStorage>, {
+        get(target, prop) {
+          return (createStorageProxy() as any)[prop];
+        }
+      });
+      
+      // Sostituisci i prototype degli oggetti export con i Proxy
+      Object.setPrototypeOf(authExport, authProxy);
+      Object.setPrototypeOf(dbExport, dbProxy);
+      Object.setPrototypeOf(storageExport, storageProxy);
+    } catch (e) {
+      console.warn('Firebase proxy init error:', e);
     }
-  });
-  
-  const dbProxy = new Proxy({} as ReturnType<typeof getFirestore>, {
-    get(target, prop) {
-      return (createDbProxy() as any)[prop];
-    }
-  });
-  
-  const storageProxy = new Proxy({} as ReturnType<typeof getStorage>, {
-    get(target, prop) {
-      return (createStorageProxy() as any)[prop];
-    }
-  });
-  
-  // Usa Object.setPrototypeOf per sostituire gli oggetti vuoti con i Proxy
-  // Questo viene fatto solo lato client e quando window è disponibile
-  Object.setPrototypeOf(authExport, authProxy);
-  Object.setPrototypeOf(dbExport, dbProxy);
-  Object.setPrototypeOf(storageExport, storageProxy);
+  }, 0);
 }
 
 export const auth = authExport;
