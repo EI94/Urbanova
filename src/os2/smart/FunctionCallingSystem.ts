@@ -48,7 +48,8 @@ export interface SmartDecision {
 export class OpenAIFunctionCallingSystem {
   private openai: OpenAI;
   private paraHelpEngine: ParaHelpDecisionEngine;
-  private ragSystem: any;
+  // LAZY: Inizializzato solo quando accessato per evitare TDZ
+  private _ragSystem: ReturnType<typeof getRAGSystem> | null = null;
   private skillCatalog: SkillCatalog;
   private contextTracker = getContextTracker();
   private intentResolver = getIntentResolver();
@@ -58,9 +59,15 @@ export class OpenAIFunctionCallingSystem {
       apiKey: process.env.OPENAI_API_KEY,
     });
     this.paraHelpEngine = new ParaHelpDecisionEngine(URBANOVA_PARAHELP_TEMPLATE);
-    this.ragSystem = getRAGSystem();
     this.skillCatalog = SkillCatalog.getInstance();
     console.log(`🔧 [FunctionCalling] Inizializzato con ${this.skillCatalog.list().length} skill nel catalog`);
+  }
+  
+  private get ragSystem() {
+    if (!this._ragSystem) {
+      this._ragSystem = getRAGSystem();
+    }
+    return this._ragSystem;
   }
 
   /**

@@ -141,29 +141,77 @@ const getStorageLazy = (): ReturnType<typeof getStorage> => {
   return _storage;
 };
 
-// Export Proxy che delegano SOLO quando viene accessata una proprietà
-// NON viene chiamato nulla durante l'import - solo quando viene fatto auth.currentUser, db.collection, etc.
+// Export LAZY: I Proxy vengono creati solo quando window è disponibile
+// Questo evita completamente l'esecuzione durante l'import del modulo
+let _authProxy: ReturnType<typeof getAuth> | null = null;
+let _dbProxy: ReturnType<typeof getFirestore> | null = null;
+let _storageProxy: ReturnType<typeof getStorage> | null = null;
+
+const createAuthProxy = (): ReturnType<typeof getAuth> => {
+  if (!_authProxy) {
+    _authProxy = new Proxy({} as ReturnType<typeof getAuth>, {
+      get(target, prop) {
+        const instance = getAuthLazy();
+        const value = (instance as any)[prop];
+        return typeof value === 'function' ? value.bind(instance) : value;
+      }
+    });
+  }
+  return _authProxy;
+};
+
+const createDbProxy = (): ReturnType<typeof getFirestore> => {
+  if (!_dbProxy) {
+    _dbProxy = new Proxy({} as ReturnType<typeof getFirestore>, {
+      get(target, prop) {
+        const instance = getDbLazy();
+        const value = (instance as any)[prop];
+        return typeof value === 'function' ? value.bind(instance) : value;
+      }
+    });
+  }
+  return _dbProxy;
+};
+
+const createStorageProxy = (): ReturnType<typeof getStorage> => {
+  if (!_storageProxy) {
+    _storageProxy = new Proxy({} as ReturnType<typeof getStorage>, {
+      get(target, prop) {
+        const instance = getStorageLazy();
+        const value = (instance as any)[prop];
+        return typeof value === 'function' ? value.bind(instance) : value;
+      }
+    });
+  }
+  return _storageProxy;
+};
+
+// Export getter che creano Proxy solo quando accessati E quando window è disponibile
 export const auth = new Proxy({} as ReturnType<typeof getAuth>, {
   get(target, prop) {
-    const instance = getAuthLazy();
-    const value = (instance as any)[prop];
-    return typeof value === 'function' ? value.bind(instance) : value;
+    // Se window non è disponibile, ritorna undefined per evitare errori SSR
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+    return (createAuthProxy() as any)[prop];
   }
 });
 
 export const db = new Proxy({} as ReturnType<typeof getFirestore>, {
   get(target, prop) {
-    const instance = getDbLazy();
-    const value = (instance as any)[prop];
-    return typeof value === 'function' ? value.bind(instance) : value;
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+    return (createDbProxy() as any)[prop];
   }
 });
 
 export const storage = new Proxy({} as ReturnType<typeof getStorage>, {
   get(target, prop) {
-    const instance = getStorageLazy();
-    const value = (instance as any)[prop];
-    return typeof value === 'function' ? value.bind(instance) : value;
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+    return (createStorageProxy() as any)[prop];
   }
 });
 
