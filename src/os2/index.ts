@@ -109,19 +109,13 @@ export interface OS2Response {
  * Urbanova OS 2.0 Smart - Main Orchestrator con sistema intelligente
  */
 export class UrbanovaOS2 {
-  private planner: Planner;
-  private executor: PlanExecutor;
-  private skillCatalog: SkillCatalog;
-  private arbitrator: Arbitrator;
-  private fallbackManager: FallbackManager;
-  // LAZY: Inizializzato solo quando accessato per evitare TDZ durante import
+  // LAZY: Tutti i componenti sono lazy - nessuna inizializzazione durante import
+  private _skillCatalog: SkillCatalog | null = null;
+  private _planner: Planner | null = null;
+  private _executor: PlanExecutor | null = null;
+  private _arbitrator: Arbitrator | null = null;
+  private _fallbackManager: FallbackManager | null = null;
   private _smartOrchestrator: ReturnType<typeof getSmartOSOrchestrator> | null = null;
-  private get smartOrchestrator() {
-    if (!this._smartOrchestrator) {
-      this._smartOrchestrator = getSmartOSOrchestrator();
-    }
-    return this._smartOrchestrator;
-  }
   
   constructor() {
     // LAZY: Tutti i componenti vengono inizializzati solo quando necessari
@@ -132,40 +126,47 @@ export class UrbanovaOS2 {
   
   // LAZY getters per tutti i componenti
   private get skillCatalog() {
-    if (!this.skillCatalog) {
-      (this as any).skillCatalog = SkillCatalog.getInstance();
+    if (!this._skillCatalog) {
+      this._skillCatalog = SkillCatalog.getInstance();
       // Carica skill reali solo quando catalog viene accessato per la prima volta
       this.loadRealSkills();
     }
-    return (this as any).skillCatalog;
+    return this._skillCatalog;
   }
   
   private get planner() {
-    if (!(this as any)._planner) {
-      (this as any)._planner = new Planner();
+    if (!this._planner) {
+      this._planner = new Planner();
     }
-    return (this as any)._planner;
+    return this._planner;
   }
   
   private get executor() {
-    if (!(this as any)._executor) {
-      (this as any)._executor = new PlanExecutor();
+    if (!this._executor) {
+      this._executor = new PlanExecutor();
     }
-    return (this as any)._executor;
+    return this._executor;
   }
   
   private get arbitrator() {
-    if (!(this as any)._arbitrator) {
-      (this as any)._arbitrator = new Arbitrator();
+    if (!this._arbitrator) {
+      this._arbitrator = new Arbitrator();
     }
-    return (this as any)._arbitrator;
+    return this._arbitrator;
   }
   
   private get fallbackManager() {
-    if (!(this as any)._fallbackManager) {
-      (this as any)._fallbackManager = new FallbackManager();
+    if (!this._fallbackManager) {
+      this._fallbackManager = new FallbackManager();
     }
-    return (this as any)._fallbackManager;
+    return this._fallbackManager;
+  }
+  
+  private get smartOrchestrator() {
+    if (!this._smartOrchestrator) {
+      this._smartOrchestrator = getSmartOSOrchestrator();
+    }
+    return this._smartOrchestrator;
   }
   
   /**
