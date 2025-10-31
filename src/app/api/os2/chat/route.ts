@@ -6,7 +6,8 @@ import { NextRequest, NextResponse } from 'next/server';
 // import { getOS2, OS2Request } from '@/os2';
 type OS2Request = any; // Type only, verrà risolto dinamicamente
 import { broadcastEvent, SseEvent } from '../stream/route';
-import { getSkillStatusLine } from '@/os2/conversation/systemPrompt';
+// LAZY: Import dinamico per evitare TDZ durante bundle
+// import { getSkillStatusLine } from '@/os2/conversation/systemPrompt';
 
 /**
  * POST /api/os2/chat
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest) {
           planId: 'current', // Will be updated with actual planId
           stepId: `step_${stepIndex}`,
           skillId,
-          label: label || getSkillStatusLine(skillId),
+          label: label || (await import('@/os2/conversation/systemPrompt')).getSkillStatusLine(skillId),
           ts: Date.now(),
         };
         broadcastEvent(userId, sessionId, event);
