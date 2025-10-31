@@ -1,6 +1,15 @@
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
-import { auth } from './firebase';
 import { useState, useEffect, useCallback } from 'react';
+
+// Lazy loader per firebase - evita TDZ
+let firebaseModulePromise: Promise<typeof import('./firebase')> | null = null;
+const getFirebaseAuth = async () => {
+  if (!firebaseModulePromise) {
+    firebaseModulePromise = import('./firebase');
+  }
+  const module = await firebaseModulePromise;
+  return module.auth;
+};
 
 /**
  * Servizio per gestire le notifiche push mobile
@@ -268,6 +277,7 @@ class PushNotificationService {
    */
   private async getAuthToken(): Promise<string | null> {
     try {
+      const auth = await getFirebaseAuth();
       if (auth.currentUser) {
         return await auth.currentUser.getIdToken();
       }

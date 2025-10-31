@@ -9,11 +9,30 @@ import {
   orderBy,
   serverTimestamp } from 'firebase/firestore';
 
-// 🛡️ OS PROTECTION - Importa protezione CSS per firebase user profile service
-import '@/lib/osProtection';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { safeCollection } from './firebaseUtils';
-import { db, storage } from './firebase';
+
+// 🛡️ OS PROTECTION - Carica solo lato client per evitare TDZ
+if (typeof window !== 'undefined') {
+  import('@/lib/osProtection').catch(() => {});
+}
+
+// Lazy loader per firebase - evita TDZ
+let firebaseModulePromise: Promise<typeof import('./firebase')> | null = null;
+const getFirebaseDb = async () => {
+  if (!firebaseModulePromise) {
+    firebaseModulePromise = import('./firebase');
+  }
+  const module = await firebaseModulePromise;
+  return module.db;
+};
+const getFirebaseStorage = async () => {
+  if (!firebaseModulePromise) {
+    firebaseModulePromise = import('./firebase');
+  }
+  const module = await firebaseModulePromise;
+  return module.storage;
+};
 
 // Importa i tipi dalla definizione centrale
 import { UserProfile, LoginAttempt } from '@/types/userProfile';
@@ -78,6 +97,7 @@ class FirebaseUserProfileService {
     try {
       console.log('🔄 [FirebaseUserProfile] Caricamento profilo per:', userId);
       
+      const db = await getFirebaseDb();
       const profileRef = doc(db, 'userProfiles', userId);
       const profileSnap = await getDoc(profileRef);
 
@@ -150,6 +170,7 @@ class FirebaseUserProfileService {
         updatedAt: new Date(),
       };
 
+      const db = await getFirebaseDb();
       const profileRef = doc(db, 'userProfiles', userId);
       await setDoc(profileRef, {
         ...defaultProfile,
@@ -206,6 +227,7 @@ class FirebaseUserProfileService {
 
   async updateUserProfile(userId: string, updates: ProfileUpdate): Promise<UserProfile | null> {
     try {
+      const db = await getFirebaseDb();
       const profileRef = doc(db, 'userProfiles', userId);
 
       // Se displayName viene aggiornato, aggiorna anche firstName e lastName
@@ -240,6 +262,7 @@ class FirebaseUserProfileService {
       const currentProfile = await this.getUserProfile(userId);
       if (currentProfile?.avatar) {
         try {
+          const storage = await getFirebaseStorage();
           const oldAvatarRef = ref(storage, `avatars/${userId}/avatar`);
           await deleteObject(oldAvatarRef);
           console.log('🗑️ [FirebaseUserProfile] Avatar precedente eliminato');
@@ -249,6 +272,7 @@ class FirebaseUserProfileService {
       }
 
       // Carica nuovo avatar con il file reale
+      const storage = await getFirebaseStorage();
       const avatarRef = ref(storage, `avatars/${userId}/avatar`);
       const uploadResult = await uploadBytes(avatarRef, file);
       const downloadURL = await getDownloadURL(uploadResult.ref);
@@ -267,6 +291,7 @@ class FirebaseUserProfileService {
 
   async deleteAvatar(userId: string): Promise<boolean> {
     try {
+      const storage = await getFirebaseStorage();
       const avatarRef = ref(storage, `avatars/${userId}/avatar`);
       await deleteObject(avatarRef);
 
@@ -330,6 +355,7 @@ class FirebaseUserProfileService {
         // Mantieni solo gli ultimi 10 tentativi
         const updatedHistory = loginHistory.slice(0, 10);
 
+        const db = await getFirebaseDb();
         const profileRef = doc(db, 'userProfiles', userId);
         await updateDoc(profileRef, {
           'security.loginHistory': updatedHistory,
@@ -479,6 +505,7 @@ class FirebaseUserProfileService {
       await this.deleteAvatar(userId);
 
       // Elimina profilo
+      const db = await getFirebaseDb();
       const profileRef = doc(db, 'userProfiles', userId);
       await setDoc(profileRef, { deleted: true, deletedAt: serverTimestamp() }, { merge: true });
 

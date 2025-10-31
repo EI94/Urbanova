@@ -4,8 +4,17 @@
 if (typeof window !== 'undefined') {
   import('@/lib/osProtection').catch(() => {});
 }
-import { db } from './firebase';
 import { collection, query, where, getDocs, doc, deleteDoc } from 'firebase/firestore';
+
+// Lazy loader per firebase - evita TDZ
+let firebaseModulePromise: Promise<typeof import('./firebase')> | null = null;
+const getFirebaseDb = async () => {
+  if (!firebaseModulePromise) {
+    firebaseModulePromise = import('./firebase');
+  }
+  const module = await firebaseModulePromise;
+  return module.db;
+};
 
 export interface ChatMessage {
   id: string;
@@ -195,6 +204,7 @@ class ChatHistoryService {
       console.log('🔥 [ChatHistoryService] UserId estratto:', userId);
       
       // Cerca memorie RAG associate alla sessione
+      const db = await getFirebaseDb();
       const memoriesRef = collection(db, 'os2_rag_memories');
       const q = query(
         memoriesRef,
@@ -208,6 +218,7 @@ class ChatHistoryService {
       // Elimina tutte le memorie trovate
       const deletePromises = snapshot.docs.map(docSnapshot => {
         console.log('🔥 [ChatHistoryService] Eliminando memoria Firebase:', docSnapshot.id);
+        const db = await getFirebaseDb();
         return deleteDoc(doc(db, 'os2_rag_memories', docSnapshot.id));
       });
       

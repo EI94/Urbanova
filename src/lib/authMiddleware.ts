@@ -1,5 +1,14 @@
 import { NextRequest } from 'next/server';
-import { auth } from './firebase';
+
+// Lazy loader per firebase - evita TDZ
+let firebaseModulePromise: Promise<typeof import('./firebase')> | null = null;
+const getFirebaseAuth = async () => {
+  if (!firebaseModulePromise) {
+    firebaseModulePromise = import('./firebase');
+  }
+  const module = await firebaseModulePromise;
+  return module.auth;
+};
 
 /**
  * Middleware di autenticazione per API routes
@@ -44,6 +53,7 @@ export async function verifyAuthFromHeader(request: NextRequest): Promise<AuthRe
     // Verifica il token Firebase
     let decodedToken;
     try {
+      const auth = await getFirebaseAuth();
       decodedToken = await auth.verifyIdToken(token);
     } catch (error) {
       console.error('❌ [AuthMiddleware] Token Firebase non valido:', error);
