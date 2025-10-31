@@ -89,71 +89,83 @@ export const getStorageInstance = () => {
   return storageInstance;
 };
 
-// 🔥 EXPORT LAZY - SOLUZIONE DEFINITIVA: NESSUNA esecuzione durante import
-// Usa Object.defineProperty sul modulo esportato stesso per definire getter lazy
-// Questo è l'unico modo per evitare completamente l'esecuzione durante l'import
+// 🔥 EXPORT LAZY - SOLUZIONE DEFINITIVA: Proxy creati immediatamente ma NON accedono istanze fino a quando necessario
+// I Proxy sono creati durante l'import ma NON chiamano getAuthInstance/getDbInstance/getStorageInstance
+// fino a quando una proprietà viene effettivamente accessata
 
-// Cache per le istanze
+// Cache per le istanze (solo quando effettivamente necessarie)
 let _auth: ReturnType<typeof getAuth> | null = null;
 let _db: ReturnType<typeof getFirestore> | null = null;
 let _storage: ReturnType<typeof getStorage> | null = null;
 
-// Oggetti dummy che verranno sostituiti con getter
-const authDummy = {} as ReturnType<typeof getAuth>;
-const dbDummy = {} as ReturnType<typeof getFirestore>;
-const storageDummy = {} as ReturnType<typeof getStorage>;
-
-// Definisci getter solo quando window è disponibile E dopo un delay
-if (typeof window !== 'undefined') {
-  // Usa setTimeout per ritardare la definizione delle proprietà
-  setTimeout(() => {
-    try {
-      // Sostituisci gli oggetti dummy con Proxy lazy solo ora
-      Object.setPrototypeOf(authDummy, new Proxy({}, {
-        get(target, prop) {
-          if (!_auth) {
-            const instance = getAuthInstance();
-            if (!instance) throw new Error('Firebase Auth non inizializzato');
-            _auth = instance;
-          }
-          const value = (_auth as any)[prop];
-          return typeof value === 'function' ? value.bind(_auth) : value;
-        }
-      }));
-      
-      Object.setPrototypeOf(dbDummy, new Proxy({}, {
-        get(target, prop) {
-          if (!_db) {
-            const instance = getDbInstance();
-            if (!instance) throw new Error('Firebase Firestore non inizializzato');
-            _db = instance;
-          }
-          const value = (_db as any)[prop];
-          return typeof value === 'function' ? value.bind(_db) : value;
-        }
-      }));
-      
-      Object.setPrototypeOf(storageDummy, new Proxy({}, {
-        get(target, prop) {
-          if (!_storage) {
-            const instance = getStorageInstance();
-            if (!instance) throw new Error('Firebase Storage non inizializzato');
-            _storage = instance;
-          }
-          const value = (_storage as any)[prop];
-          return typeof value === 'function' ? value.bind(_storage) : value;
-        }
-      }));
-    } catch (e) {
-      console.warn('Firebase lazy init error:', e);
+// Funzioni helper che inizializzano SOLO quando chiamate (non durante l'import)
+const getAuthLazy = (): ReturnType<typeof getAuth> => {
+  if (!_auth) {
+    if (typeof window === 'undefined') {
+      throw new Error('Firebase Auth non disponibile lato server');
     }
-  }, 0);
-}
+    const instance = getAuthInstance();
+    if (!instance) {
+      throw new Error('Firebase Auth non inizializzato. Assicurati che window sia disponibile.');
+    }
+    _auth = instance;
+  }
+  return _auth;
+};
 
-// Export gli oggetti dummy - verranno popolati solo quando accessati dopo il delay
-export const auth = authDummy;
-export const db = dbDummy;
-export const storage = storageDummy;
+const getDbLazy = (): ReturnType<typeof getFirestore> => {
+  if (!_db) {
+    if (typeof window === 'undefined') {
+      throw new Error('Firebase Firestore non disponibile lato server');
+    }
+    const instance = getDbInstance();
+    if (!instance) {
+      throw new Error('Firebase Firestore non inizializzato. Assicurati che window sia disponibile.');
+    }
+    _db = instance;
+  }
+  return _db;
+};
+
+const getStorageLazy = (): ReturnType<typeof getStorage> => {
+  if (!_storage) {
+    if (typeof window === 'undefined') {
+      throw new Error('Firebase Storage non disponibile lato server');
+    }
+    const instance = getStorageInstance();
+    if (!instance) {
+      throw new Error('Firebase Storage non inizializzato. Assicurati che window sia disponibile.');
+    }
+    _storage = instance;
+  }
+  return _storage;
+};
+
+// Export Proxy che delegano SOLO quando viene accessata una proprietà
+// NON viene chiamato nulla durante l'import - solo quando viene fatto auth.currentUser, db.collection, etc.
+export const auth = new Proxy({} as ReturnType<typeof getAuth>, {
+  get(target, prop) {
+    const instance = getAuthLazy();
+    const value = (instance as any)[prop];
+    return typeof value === 'function' ? value.bind(instance) : value;
+  }
+});
+
+export const db = new Proxy({} as ReturnType<typeof getFirestore>, {
+  get(target, prop) {
+    const instance = getDbLazy();
+    const value = (instance as any)[prop];
+    return typeof value === 'function' ? value.bind(instance) : value;
+  }
+});
+
+export const storage = new Proxy({} as ReturnType<typeof getStorage>, {
+  get(target, prop) {
+    const instance = getStorageLazy();
+    const value = (instance as any)[prop];
+    return typeof value === 'function' ? value.bind(instance) : value;
+  }
+});
 
 // Configurazione per gestire errori di connessione - solo lato client e dopo init
 if (typeof window !== 'undefined') {
