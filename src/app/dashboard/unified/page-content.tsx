@@ -160,35 +160,19 @@ interface ToolExecution {
 }
 
 // Componente interno che usa i context hooks
-function UnifiedDashboardPageContent() {
-  // Ora carichiamo i moduli in modo sincrono solo dopo che sono stati caricati
-  // Questo componente viene renderizzato solo dopo che loadContextModules() è completato
-  const [contextModules, setContextModules] = useState<{
+// Questo componente viene renderizzato solo DOPO che i context modules sono stati caricati dal wrapper
+// Gli hook vengono sempre chiamati (non condizionalmente) per rispettare le regole di React
+function UnifiedDashboardPageContent({
+  contextModules,
+}: {
+  contextModules: {
     useLanguage: typeof import('@/contexts/LanguageContext').useLanguage;
     useAuth: typeof import('@/contexts/AuthContext').useAuth;
     useDarkMode: typeof import('@/contexts/DarkModeContext').useDarkMode;
-  } | null>(null);
-  
-  useEffect(() => {
-    loadContextModules().then(modules => {
-      setContextModules(modules);
-    });
-  }, []);
-  
-  if (!contextModules) {
-    return (
-      <div className="min-h-screen bg-base-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-blue-600 text-white shadow-lg mb-4 animate-pulse">
-            <Building2 className="w-8 h-8" />
-          </div>
-          <h1 className="text-2xl font-bold text-slate-800">Urbanova</h1>
-          <p className="text-slate-500 mt-2">Caricamento...</p>
-        </div>
-      </div>
-    );
-  }
-  
+  };
+}) {
+  // Gli hook vengono SEMPRE chiamati - non condizionalmente
+  // I moduli sono garantiti essere disponibili perché passati come props dal wrapper
   const { useLanguage, useAuth, useDarkMode } = contextModules;
   
   const { t } = useLanguage();
@@ -1895,5 +1879,32 @@ export default function UnifiedDashboardPage() {
     );
   }
   
-  return <UnifiedDashboardPageContent />;
+  // Carica i moduli e passa al componente interno
+  const [contextModules, setContextModules] = useState<{
+    useLanguage: typeof import('@/contexts/LanguageContext').useLanguage;
+    useAuth: typeof import('@/contexts/AuthContext').useAuth;
+    useDarkMode: typeof import('@/contexts/DarkModeContext').useDarkMode;
+  } | null>(null);
+  
+  useEffect(() => {
+    loadContextModules().then(modules => {
+      setContextModules(modules);
+    });
+  }, []);
+  
+  if (!contextModules) {
+    return (
+      <div className="min-h-screen bg-base-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-blue-600 text-white shadow-lg mb-4 animate-pulse">
+            <Building2 className="w-8 h-8" />
+          </div>
+          <h1 className="text-2xl font-bold text-slate-800">Urbanova</h1>
+          <p className="text-slate-500 mt-2">Caricamento moduli...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  return <UnifiedDashboardPageContent contextModules={contextModules} />;
 }
