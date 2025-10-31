@@ -11,26 +11,93 @@ import {
   FALLBACK_LANGUAGE,
 } from '@/lib/languageConfig';
 
-// Importa le traduzioni
-import { en } from '@/translations/en';
-import { es } from '@/translations/es';
-import { it } from '@/translations/it';
+// Importa le traduzioni - lazy loading per evitare TDZ
 import { LanguageContextType, SupportedLanguage, LanguageSettings } from '@/types/language';
 
-// Mappa delle traduzioni
-const translations = {
-  it,
-  en,
-  es,
-  // Aggiungi altre lingue qui quando disponibili
-  fr: it, // Fallback temporaneo
-  de: it, // Fallback temporaneo
-  pt: it, // Fallback temporaneo
-  ru: it, // Fallback temporaneo
-  zh: it, // Fallback temporaneo
-  ja: it, // Fallback temporaneo
-  ko: it, // Fallback temporaneo
+// Cache delle traduzioni - caricata solo quando necessario
+let translationsCache: Record<string, any> | null = null;
+
+const loadTranslations = async () => {
+  if (!translationsCache && typeof window !== 'undefined') {
+    try {
+      const [it, en, es] = await Promise.all([
+        import('@/translations/it'),
+        import('@/translations/en'),
+        import('@/translations/es'),
+      ]);
+      
+      translationsCache = {
+        it: it.it || it.default || {},
+        en: en.en || en.default || {},
+        es: es.es || es.default || {},
+        // Fallback temporanei
+        fr: it.it || it.default || {},
+        de: it.it || it.default || {},
+        pt: it.it || it.default || {},
+        ru: it.it || it.default || {},
+        zh: it.it || it.default || {},
+        ja: it.it || it.default || {},
+        ko: it.it || it.default || {},
+      };
+    } catch (error) {
+      console.error('❌ [LanguageContext] Errore caricamento traduzioni:', error);
+      // Fallback vuoto
+      translationsCache = {
+        it: {},
+        en: {},
+        es: {},
+        fr: {},
+        de: {},
+        pt: {},
+        ru: {},
+        zh: {},
+        ja: {},
+        ko: {},
+      };
+    }
+  }
+  return translationsCache || {};
 };
+
+// Funzione helper per ottenere traduzioni
+const getTranslations = () => {
+  if (!translationsCache) {
+    // Caricamento sincrono se già disponibile (SSR fallback)
+    try {
+      const it = require('@/translations/it');
+      const en = require('@/translations/en');
+      const es = require('@/translations/es');
+      translationsCache = {
+        it: it.it || it.default || {},
+        en: en.en || en.default || {},
+        es: es.es || es.default || {},
+        fr: it.it || it.default || {},
+        de: it.it || it.default || {},
+        pt: it.it || it.default || {},
+        ru: it.it || it.default || {},
+        zh: it.it || it.default || {},
+        ja: it.it || it.default || {},
+        ko: it.it || it.default || {},
+      };
+    } catch (error) {
+      translationsCache = {
+        it: {},
+        en: {},
+        es: {},
+        fr: {},
+        de: {},
+        pt: {},
+        ru: {},
+        zh: {},
+        ja: {},
+        ko: {},
+      };
+    }
+  }
+  return translationsCache;
+};
+
+const translations = getTranslations();
 
 // Funzione per ottenere traduzione nidificata
 function getNestedTranslation(obj: any, path: string): string {

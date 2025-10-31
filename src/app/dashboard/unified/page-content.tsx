@@ -131,6 +131,18 @@ export default function UnifiedDashboardPage() {
   // 🛡️ GUARD: Renderizza solo dopo mount client per evitare TDZ
   const [mounted, setMounted] = useState(false);
   
+  useEffect(() => {
+    // Aspetta che il DOM sia completamente pronto
+    if (typeof window !== 'undefined') {
+      // Doppio ritardo per assicurarsi che tutti i moduli siano inizializzati
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setMounted(true);
+        });
+      });
+    }
+  }, []);
+  
   const { t } = useLanguage();
   // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
   let authContext;
@@ -144,10 +156,6 @@ export default function UnifiedDashboardPage() {
   const authLoading = (authContext && typeof authContext === 'object' && 'loading' in authContext) ? authContext.loading : false;
   const { darkMode, setDarkMode } = useDarkMode();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  
-  useEffect(() => {
-    setMounted(true);
-  }, []);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeToolExecutions, setActiveToolExecutions] = useState<ToolExecution[]>([]);
