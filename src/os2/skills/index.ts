@@ -79,16 +79,10 @@ export function getSKILLS(): Skill[] {
   return _SKILLS;
 }
 
-// Export per compatibilità - PROXY LAZY: nessuna valutazione durante bundle
-export const SKILLS = new Proxy([] as Skill[], {
-  get(target, prop) {
-    // Quando qualcuno accede a SKILLS, carica le skill se necessario
-    const skills = getSKILLS();
-    // Delega tutte le proprietà all'array reale
-    const value = (skills as any)[prop];
-    return typeof value === 'function' ? value.bind(skills) : value;
-  }
-}) as Skill[];
+// Export per compatibilità - RIMOSSO completamente perché new Proxy() viene valutato durante bundle
+// Usa getSKILLS() direttamente invece di SKILLS
+// Se qualcuno importa SKILLS, restituisce array vuoto (compatibilità)
+export const SKILLS: Skill[] = [];
 
 /**
  * Metadata di tutte le skill (per discovery) - LAZY
