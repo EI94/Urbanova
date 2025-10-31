@@ -118,43 +118,27 @@ const getStorageDirect = (): ReturnType<typeof getStorage> => {
   return instance;
 };
 
-// Export usando getter properties che NON vengono eseguiti durante l'import del modulo
-// Usiamo un oggetto dummy e definiamo le proprietà solo quando window è disponibile
-const firebaseExports = {} as {
-  auth: ReturnType<typeof getAuth>;
-  db: ReturnType<typeof getFirestore>;
-  storage: ReturnType<typeof getStorage>;
+// Export usando Proxy che NON accedono alle istanze fino a quando non vengono effettivamente usati
+// I Proxy sono creati immediatamente ma NON accedono a nulla fino a quando viene fatto accesso a una proprietà
+const createLazyProxy = <T>(getter: () => T): T => {
+  return new Proxy({} as T, {
+    get(target, prop) {
+      // Solo quando viene accessata una proprietà, chiama il getter
+      const instance = getter();
+      const value = (instance as any)[prop];
+      if (typeof value === 'function') {
+        return value.bind(instance);
+      }
+      return value;
+    }
+  });
 };
 
-// Definisci le proprietà solo quando window è disponibile e dopo un delay
-if (typeof window !== 'undefined') {
-  // Usa requestAnimationFrame per assicurarsi che tutto sia pronto
-  requestAnimationFrame(() => {
-    Object.defineProperty(firebaseExports, 'auth', {
-      get: getAuthDirect,
-      enumerable: true,
-      configurable: true
-    });
-    
-    Object.defineProperty(firebaseExports, 'db', {
-      get: getDbDirect,
-      enumerable: true,
-      configurable: true
-    });
-    
-    Object.defineProperty(firebaseExports, 'storage', {
-      get: getStorageDirect,
-      enumerable: true,
-      configurable: true
-    });
-  });
-}
-
-// Export - queste NON vengono eseguite durante l'import, solo le proprietà vengono definite dopo
-// Webpack/Next.js vedrà queste come proprietà di un oggetto, non come esecuzione immediata
-export const auth = firebaseExports.auth;
-export const db = firebaseExports.db;
-export const storage = firebaseExports.storage;
+// Export - Proxy vuoti che delegano solo quando viene fatto accesso a una proprietà
+// NON viene eseguito codice durante l'import, solo quando viene accessato auth.currentUser, db.collection, etc.
+export const auth = createLazyProxy(getAuthDirect);
+export const db = createLazyProxy(getDbDirect);
+export const storage = createLazyProxy(getStorageDirect);
 
 // Configurazione per gestire errori di connessione - solo lato client e dopo init
 if (typeof window !== 'undefined') {
