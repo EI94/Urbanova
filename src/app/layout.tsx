@@ -12,9 +12,12 @@ import Toaster from '@/components/ui/Toaster';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { DarkModeProvider } from '@/contexts/DarkModeContext';
-import '@/lib/globalErrorInterceptor'; // GLOBAL ERROR INTERCEPTOR - DEVE ESSERE PRIMO
-import '@/lib/cssErrorHandler'; // CSS Error Handler
-import '@/lib/osProtection'; // OS Protection
+// Dynamic imports per evitare TDZ - caricati solo lato client
+if (typeof window !== 'undefined') {
+  import('@/lib/globalErrorInterceptor').catch(() => {});
+  import('@/lib/cssErrorHandler').catch(() => {});
+  import('@/lib/osProtection').catch(() => {});
+}
 import CommandPaletteWrapper from '@/components/CommandPaletteWrapper';
 import { EnvironmentBanner } from '@/components/ui/EnvironmentBanner';
 
