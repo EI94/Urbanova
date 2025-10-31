@@ -227,9 +227,13 @@ if (typeof window !== 'undefined') {
   }, 0);
 }
 
+console.log(`🔍 [TDZ DEBUG] firebase.ts - Export auth/db/storage valutato, timestamp: ${Date.now()}, typeof window: ${typeof window}, stack:`, new Error().stack?.split('\n').slice(1, 5).join('\n'));
+
 export const auth = authExport;
 export const db = dbExport;
 export const storage = storageExport;
+
+console.log(`🔍 [TDZ DEBUG] firebase.ts - Export auth/db/storage completato, timestamp: ${Date.now()}`);
 
 // Configurazione per gestire errori di connessione - solo lato client e dopo init
 if (typeof window !== 'undefined') {
