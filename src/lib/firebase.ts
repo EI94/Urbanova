@@ -89,89 +89,72 @@ export const getStorageInstance = () => {
   return storageInstance;
 };
 
-// Export lazy per evitare TDZ - NESSUNA esecuzione di codice a livello di modulo
-// Usa getter lazy che creano Proxy solo quando accessati
-let _auth: ReturnType<typeof getAuth> | undefined = undefined;
-let _db: ReturnType<typeof getFirestore> | undefined = undefined;
-let _storage: ReturnType<typeof getStorage> | undefined = undefined;
+// Export lazy per evitare TDZ - SOLUZIONE DEFINITIVA
+// NON creare Proxy a livello di modulo - solo funzioni getter che vengono chiamate quando necessario
+// Gli export sono funzioni che restituiscono le istanze solo quando chiamate
 
-// Helper per creare Proxy lazy
-const getAuthProxy = (): ReturnType<typeof getAuth> => {
-  if (!_auth) {
-    const instance = getAuthInstance();
-    if (!instance) {
-      throw new Error('Firebase Auth non inizializzato. Assicurati che window sia disponibile.');
-    }
-    _auth = new Proxy(instance, {
-      get(target, prop) {
-        const value = (target as any)[prop];
-        if (typeof value === 'function') {
-          return value.bind(target);
-        }
-        return value;
-      }
-    }) as ReturnType<typeof getAuth>;
+// Helper per ottenere istanze direttamente (senza Proxy intermedi)
+const getAuthDirect = (): ReturnType<typeof getAuth> => {
+  const instance = getAuthInstance();
+  if (!instance) {
+    throw new Error('Firebase Auth non inizializzato. Assicurati che window sia disponibile.');
   }
-  return _auth;
+  return instance;
 };
 
-const getDbProxy = (): ReturnType<typeof getFirestore> => {
-  if (!_db) {
-    const instance = getDbInstance();
-    if (!instance) {
-      throw new Error('Firebase Firestore non inizializzato. Assicurati che window sia disponibile.');
-    }
-    _db = new Proxy(instance, {
-      get(target, prop) {
-        const value = (target as any)[prop];
-        if (typeof value === 'function') {
-          return value.bind(target);
-        }
-        return value;
-      }
-    }) as ReturnType<typeof getFirestore>;
+const getDbDirect = (): ReturnType<typeof getFirestore> => {
+  const instance = getDbInstance();
+  if (!instance) {
+    throw new Error('Firebase Firestore non inizializzato. Assicurati che window sia disponibile.');
   }
-  return _db;
+  return instance;
 };
 
-const getStorageProxy = (): ReturnType<typeof getStorage> => {
-  if (!_storage) {
-    const instance = getStorageInstance();
-    if (!instance) {
-      throw new Error('Firebase Storage non inizializzato. Assicurati che window sia disponibile.');
-    }
-    _storage = new Proxy(instance, {
-      get(target, prop) {
-        const value = (target as any)[prop];
-        if (typeof value === 'function') {
-          return value.bind(target);
-        }
-        return value;
-      }
-    }) as ReturnType<typeof getStorage>;
+const getStorageDirect = (): ReturnType<typeof getStorage> => {
+  const instance = getStorageInstance();
+  if (!instance) {
+    throw new Error('Firebase Storage non inizializzato. Assicurati che window sia disponibile.');
   }
-  return _storage;
+  return instance;
 };
 
-// Export usando Proxy wrapper che delega ai getter lazy - NESSUNA esecuzione immediata
-// I Proxy esterni sono vuoti e delegano solo quando vengono accessati
-export const auth = new Proxy({} as ReturnType<typeof getAuth>, {
-  get(target, prop) {
-    return (getAuthProxy() as any)[prop];
-  }
-});
+// Export usando getter properties che NON vengono eseguiti durante l'import del modulo
+// Usiamo un oggetto dummy e definiamo le proprietà solo quando window è disponibile
+const firebaseExports = {} as {
+  auth: ReturnType<typeof getAuth>;
+  db: ReturnType<typeof getFirestore>;
+  storage: ReturnType<typeof getStorage>;
+};
 
-export const db = new Proxy({} as ReturnType<typeof getFirestore>, {
-  get(target, prop) {
-    return (getDbProxy() as any)[prop];
-  }
-});
+// Definisci le proprietà solo quando window è disponibile e dopo un delay
+if (typeof window !== 'undefined') {
+  // Usa requestAnimationFrame per assicurarsi che tutto sia pronto
+  requestAnimationFrame(() => {
+    Object.defineProperty(firebaseExports, 'auth', {
+      get: getAuthDirect,
+      enumerable: true,
+      configurable: true
+    });
+    
+    Object.defineProperty(firebaseExports, 'db', {
+      get: getDbDirect,
+      enumerable: true,
+      configurable: true
+    });
+    
+    Object.defineProperty(firebaseExports, 'storage', {
+      get: getStorageDirect,
+      enumerable: true,
+      configurable: true
+    });
+  });
+}
 
-export const storage = new Proxy({} as ReturnType<typeof getStorage>, {
-  get(target, prop) {
-    return (getStorageProxy() as any)[prop];
-  }
-});
+// Export - queste NON vengono eseguite durante l'import, solo le proprietà vengono definite dopo
+// Webpack/Next.js vedrà queste come proprietà di un oggetto, non come esecuzione immediata
+export const auth = firebaseExports.auth;
+export const db = firebaseExports.db;
+export const storage = firebaseExports.storage;
 
 // Configurazione per gestire errori di connessione - solo lato client e dopo init
 if (typeof window !== 'undefined') {
