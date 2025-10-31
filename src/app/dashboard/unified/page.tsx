@@ -77,8 +77,7 @@ const GeographicSearch = dynamic(
 
 import { Workspace } from '@/types/workspace';
 import { ProjectPreview as ProjectPreviewType } from '@/lib/intentService';
-import { firebaseNotificationService } from '@/lib/firebaseNotificationService';
-import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
+// Servizi importati dinamicamente per evitare TDZ - rimossi import statici
 import type { GeographicSearchResult } from '@/components/ui/GeographicSearch';
 import dynamic from 'next/dynamic';
 // Caricamento dinamico per evitare problemi di inizializzazione post-login
