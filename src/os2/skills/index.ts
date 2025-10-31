@@ -97,20 +97,9 @@ export function getSKILL_METAS(): SkillMeta[] {
   return getSKILLS().map(skill => skill.meta);
 }
 
-// Export per compatibilità - PROXY LAZY: nessuna valutazione durante bundle
-let _SKILL_METAS_PROXY: SkillMeta[] | null = null;
-export const SKILL_METAS = (() => {
-  if (!_SKILL_METAS_PROXY && typeof window !== 'undefined') {
-    _SKILL_METAS_PROXY = new Proxy([] as SkillMeta[], {
-      get(target, prop) {
-        const metas = getSKILL_METAS();
-        const value = (metas as any)[prop];
-        return typeof value === 'function' ? value.bind(metas) : value;
-      }
-    }) as SkillMeta[];
-  }
-  return _SKILL_METAS_PROXY || ([] as SkillMeta[]);
-})();
+// Export per compatibilità - RIMOSSO export const SKILL_METAS perché viene valutato durante bundle
+// Usa getSKILL_METAS() direttamente invece di SKILL_METAS
+export const SKILL_METAS: SkillMeta[] = [];
 
 /**
  * Conta skill per categoria
@@ -157,6 +146,7 @@ export function findSkill(skillId: string): Skill | undefined {
 }
 
 // Default export - LAZY (function, non valutata durante bundle)
+// Export la function direttamente, non chiamarla!
 export default getSKILLS;
 
 // Re-export types
