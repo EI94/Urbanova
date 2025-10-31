@@ -88,13 +88,24 @@ export async function POST(request: NextRequest) {
         broadcastEvent(userId, sessionId, event);
       },
       
-      onStepStarted: (stepIndex: number, skillId: string, label: string) => {
+      onStepStarted: async (stepIndex: number, skillId: string, label: string) => {
+        // LAZY: Carica getSkillStatusLine solo se label non è fornito
+        let finalLabel = label;
+        if (!finalLabel) {
+          try {
+            const systemPromptModule = await import('@/os2/conversation/systemPrompt');
+            finalLabel = systemPromptModule.getSkillStatusLine(skillId);
+          } catch (error) {
+            console.warn('⚠️ [OS2 Chat] Errore caricamento systemPrompt:', error);
+            finalLabel = 'Elaboro richiesta…';
+          }
+        }
         const event: SseEvent = {
           type: 'step_started',
           planId: 'current', // Will be updated with actual planId
           stepId: `step_${stepIndex}`,
           skillId,
-          label: label || (await import('@/os2/conversation/systemPrompt')).getSkillStatusLine(skillId),
+          label: finalLabel,
           ts: Date.now(),
         };
         broadcastEvent(userId, sessionId, event);
