@@ -19,7 +19,15 @@ import { MessageItem } from './MessageItem';
 import { Composer } from './Composer';
 import { FiltersDrawer } from './FiltersDrawer';
 import { ActionPlanPanel } from './ActionPlanPanel';
-import { VoiceAI, useVoiceAI } from './VoiceAI';
+// LAZY: Import dinamico per evitare TDZ - VoiceAI viene valutato durante bundle se importato staticamente
+// import { VoiceAI, useVoiceAI } from './VoiceAI';
+import dynamic from 'next/dynamic';
+const VoiceAI = dynamic(
+  () => import('./VoiceAI').then(mod => ({ default: mod.VoiceAI })),
+  { ssr: false }
+);
+// useVoiceAI viene da useVoiceAI.ts (separato) per evitare conflitti
+import { useVoiceAI } from './useVoiceAI';
 import '@/app/styles/os2-sidecar.css';
 
 interface SidecarProps {

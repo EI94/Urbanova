@@ -23,6 +23,7 @@ export function VoiceAI({
   disabled = false,
   className 
 }: VoiceAIProps) {
+  console.log(`🔍 [TDZ DEBUG] VoiceAI FUNCTION RENDER - timestamp: ${Date.now()}, typeof window: ${typeof window}`);
   const [state, setState] = useState<VoiceState>('idle');
   const [isMuted, setIsMuted] = useState(false);
   const [transcribedText, setTranscribedText] = useState('');
@@ -378,7 +379,10 @@ export function VoiceAI({
 }
 
 // 🎤 Hook per gestire Voice AI nell'OS 2.0
+// NOTA: Questo hook è DUPLICATO - c'è anche useVoiceAI.ts separato
+// Sidecar.tsx ora usa useVoiceAI.ts per evitare conflitti
 export function useVoiceAI() {
+  console.log(`🔍 [TDZ DEBUG] VoiceAI.tsx useVoiceAI() CHIAMATO - timestamp: ${Date.now()}`);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [lastTranscription, setLastTranscription] = useState('');
