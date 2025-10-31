@@ -1,8 +1,10 @@
 import { Firestore, collection, initializeApp, getFirestore } from 'firebase/firestore';
 import { initializeApp as initApp } from 'firebase/app';
 
-// 🛡️ OS PROTECTION - Importa protezione CSS per firebase utils
-import '@/lib/osProtection';
+// 🛡️ OS PROTECTION - Carica solo lato client per evitare TDZ
+if (typeof window !== 'undefined') {
+  import('@/lib/osProtection').catch(() => {});
+}
 
 /**
  * Funzione helper per verificare che Firebase sia inizializzato correttamente

@@ -1,9 +1,9 @@
 // 🛡️ OS PROTECTION - PROTEZIONE SPECIFICA PER URBANOVA OS
 // Previene crash CSS durante l'analisi di fattibilità dell'OS
 
-console.log('🛡️ [OS PROTECTION] Inizializzazione protezione OS...');
-
+// Carica solo lato client - non eseguire codice a livello di modulo per evitare TDZ
 if (typeof window !== 'undefined') {
+  console.log('🛡️ [OS PROTECTION] Inizializzazione protezione OS...');
   
   // 🛡️ INTERCETTA ERRORI CSS SPECIFICI DELL'OS
   const originalConsoleError = console.error;

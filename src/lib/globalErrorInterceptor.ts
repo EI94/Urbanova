@@ -1,9 +1,9 @@
 // 🚨 GLOBAL ERROR INTERCEPTOR - SOLUZIONE ULTRA-AGGRESSIVA
 // Intercetta TUTTI gli errori CSS-in-JS e auth destructuring a livello globale
 
-console.log('🚨 [GLOBAL ERROR INTERCEPTOR] Inizializzazione interceptor globale...');
-
+// Carica solo lato client - non eseguire codice a livello di modulo per evitare TDZ
 if (typeof window !== 'undefined') {
+  console.log('🚨 [GLOBAL ERROR INTERCEPTOR] Inizializzazione interceptor globale...');
   
   // 🚨 INTERCETTA TUTTI GLI ERRORI CSS-IN-JS
   const originalConsoleError = console.error;

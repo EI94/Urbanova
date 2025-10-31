@@ -1,9 +1,9 @@
 // 🎯 CSS ERROR HANDLER - SOLUZIONE CHIRURGICA PER ERRORI CSS-IN-JS
 // Intercetta solo gli errori CSS specifici durante l'analisi di fattibilità
 
-console.log('🎯 [CSS ERROR HANDLER] Inizializzazione handler CSS...');
-
+// Carica solo lato client - non eseguire codice a livello di modulo per evitare TDZ
 if (typeof window !== 'undefined') {
+  console.log('🎯 [CSS ERROR HANDLER] Inizializzazione handler CSS...');
   console.log('🎯 [CSS ERROR HANDLER] Window disponibile, attivando handler...');
   
   // 🎯 INTERCETTA SOLO ERRORI CSS SPECIFICI

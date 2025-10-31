@@ -3,18 +3,7 @@ require('./src/polyfills.js');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 🛡️ GLOBAL ERROR INTERCEPTOR - DEVE ESSERE PRIMO
-  webpack: (config, { isServer }) => {
-    // Importa protezione globale
-    if (!isServer) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        '@/lib/globalErrorInterceptor': require.resolve('./src/lib/globalErrorInterceptor.ts'),
-        '@/lib/osProtection': require.resolve('./src/lib/osProtection.ts')
-      };
-    }
-    return config;
-  },
+  // Rimossi alias webpack che causavano TDZ - i moduli vengono caricati dinamicamente
   reactStrictMode: false,
   experimental: {
     // Next.js 13.4 e superiori hanno App Router abilitato di default
