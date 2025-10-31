@@ -215,10 +215,9 @@ class ChatHistoryService {
       const snapshot = await getDocs(q);
       console.log('🔥 [ChatHistoryService] Trovate memorie Firebase da eliminare:', snapshot.size);
       
-      // Elimina tutte le memorie trovate
+      // Elimina tutte le memorie trovate - db già ottenuto sopra
       const deletePromises = snapshot.docs.map(docSnapshot => {
         console.log('🔥 [ChatHistoryService] Eliminando memoria Firebase:', docSnapshot.id);
-        const db = await getFirebaseDb();
         return deleteDoc(doc(db, 'os2_rag_memories', docSnapshot.id));
       });
       
