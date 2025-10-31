@@ -2,7 +2,9 @@
 // Endpoint di test per verificare funzionamento OS2
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getOS2, OS2Request } from '@/os2';
+// LAZY: Import dinamico per evitare TDZ durante bundle
+// import { getOS2, OS2Request } from '@/os2';
+type OS2Request = any; // Type only, verrà risolto dinamicamente
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,8 +33,9 @@ export async function POST(request: NextRequest) {
       userConfirmations: body.userConfirmations || [],
     };
     
-    // Processa con OS2
-    const os2 = getOS2();
+    // Processa con OS2 - LAZY: Carica getOS2 solo quando necessario
+    const os2Module = await import('@/os2');
+    const os2 = os2Module.getOS2();
     const response = await os2.process(os2Request);
     
     console.log('✅ [OS2 Test API] Response generata:', {
@@ -84,8 +87,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  // Health check OS2
-  const os2 = getOS2();
+  // Health check OS2 - LAZY: Carica getOS2 solo quando necessario
+  const os2Module = await import('@/os2');
+  const os2 = os2Module.getOS2();
   const health = await os2.healthCheck();
   
   return NextResponse.json({
