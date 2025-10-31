@@ -41,10 +41,38 @@ import {
   X,
 } from 'lucide-react';
 
-// Context hooks e servizi vengono usati solo dopo mount - import statici OK qui
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { useDarkMode } from '@/contexts/DarkModeContext';
+// LAZY: Context hooks caricati dinamicamente per evitare TDZ durante bundle
+// Carichiamo i moduli in modo asincrono prima che il componente venga renderizzato
+// I moduli context vengono caricati solo quando necessario (dopo mount)
+let contextModulesLoaded = false;
+let contextModulesPromise: Promise<{
+  useLanguage: typeof import('@/contexts/LanguageContext').useLanguage;
+  useAuth: typeof import('@/contexts/AuthContext').useAuth;
+  useDarkMode: typeof import('@/contexts/DarkModeContext').useDarkMode;
+}> | null = null;
+
+const loadContextModules = async () => {
+  if (!contextModulesPromise) {
+    contextModulesPromise = Promise.all([
+      import('@/contexts/LanguageContext'),
+      import('@/contexts/AuthContext'),
+      import('@/contexts/DarkModeContext'),
+    ]).then(([languageModule, authModule, darkModeModule]) => {
+      contextModulesLoaded = true;
+      return {
+        useLanguage: languageModule.useLanguage,
+        useAuth: authModule.useAuth,
+        useDarkMode: darkModeModule.useDarkMode,
+      };
+    });
+  }
+  return contextModulesPromise;
+};
+
+// Import statici rimossi - ora caricati dinamicamente
+// import { useLanguage } from '@/contexts/LanguageContext';
+// import { useAuth } from '@/contexts/AuthContext';
+// import { useDarkMode } from '@/contexts/DarkModeContext';
 // Servizi importati dinamicamente per evitare TDZ
 import { ChatMessage } from '@/types/chat';
 import type { DashboardStats } from '@/lib/dashboardService';
@@ -131,23 +159,37 @@ interface ToolExecution {
   error?: string;
 }
 
-export default function UnifiedDashboardPage() {
-  console.log(`🔍 [TDZ DEBUG] UnifiedDashboardPage FUNCTION RENDER - timestamp: ${Date.now()}, typeof window: ${typeof window}`);
-  // 🛡️ GUARD: Renderizza solo dopo mount client per evitare TDZ
-  const [mounted, setMounted] = useState(false);
+// Componente interno che usa i context hooks
+function UnifiedDashboardPageContent() {
+  // Ora carichiamo i moduli in modo sincrono solo dopo che sono stati caricati
+  // Questo componente viene renderizzato solo dopo che loadContextModules() è completato
+  const [contextModules, setContextModules] = useState<{
+    useLanguage: typeof import('@/contexts/LanguageContext').useLanguage;
+    useAuth: typeof import('@/contexts/AuthContext').useAuth;
+    useDarkMode: typeof import('@/contexts/DarkModeContext').useDarkMode;
+  } | null>(null);
   
   useEffect(() => {
-    console.log(`🔍 [TDZ DEBUG] UnifiedDashboardPage useEffect MOUNT - timestamp: ${Date.now()}, typeof window: ${typeof window}`);
-    // Aspetta che il DOM sia completamente pronto
-    if (typeof window !== 'undefined') {
-      // Doppio ritardo per assicurarsi che tutti i moduli siano inizializzati
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setMounted(true);
-        });
-      });
-    }
+    loadContextModules().then(modules => {
+      setContextModules(modules);
+    });
   }, []);
+  
+  if (!contextModules) {
+    return (
+      <div className="min-h-screen bg-base-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-blue-600 text-white shadow-lg mb-4 animate-pulse">
+            <Building2 className="w-8 h-8" />
+          </div>
+          <h1 className="text-2xl font-bold text-slate-800">Urbanova</h1>
+          <p className="text-slate-500 mt-2">Caricamento...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  const { useLanguage, useAuth, useDarkMode } = contextModules;
   
   const { t } = useLanguage();
   // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
