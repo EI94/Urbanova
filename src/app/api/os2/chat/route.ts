@@ -2,7 +2,9 @@
 // Endpoint principale per conversazione OS 2.0
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getOS2, OS2Request } from '@/os2';
+// LAZY: Import dinamico per evitare TDZ durante bundle
+// import { getOS2, OS2Request } from '@/os2';
+type OS2Request = any; // Type only, verrà risolto dinamicamente
 import { broadcastEvent, SseEvent } from '../stream/route';
 import { getSkillStatusLine } from '@/os2/conversation/systemPrompt';
 
@@ -52,7 +54,9 @@ export async function POST(request: NextRequest) {
     };
     
     // Process with OS2 (con SSE callbacks + timing tracking)
-    const os2 = getOS2();
+    // LAZY: Carica getOS2 solo quando necessario per evitare TDZ
+    const os2Module = await import('@/os2');
+    const os2 = os2Module.getOS2();
     const startTime = Date.now();
     const requestSentAt = Date.now();
     let firstStatusAt: number | undefined;
