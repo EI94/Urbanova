@@ -30,30 +30,7 @@ const UnifiedDashboardPageContent = dynamic(
 );
 
 export default function UnifiedDashboardPage() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    // Ritarda ulteriormente per assicurarsi che tutti i moduli siano inizializzati
-    const timer = setTimeout(() => {
-      setMounted(true);
-    }, 0);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (!mounted) {
-    return (
-      <div className="min-h-screen bg-base-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-blue-600 text-white shadow-lg mb-4 animate-pulse">
-            <Building2 className="w-8 h-8" />
-          </div>
-          <h1 className="text-2xl font-bold text-slate-800">Urbanova</h1>
-          <p className="text-slate-500 mt-2">Inizializzazione...</p>
-        </div>
-      </div>
-    );
-  }
-
+  // Il dynamic import di Next.js gestisce già il loading, 
+  // non serve altro ritardo - massima performance
   return <UnifiedDashboardPageContent />;
 }
