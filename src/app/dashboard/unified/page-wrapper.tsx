@@ -3,15 +3,13 @@
 /**
  * Wrapper minimo per UnifiedDashboardPage
  * Carica la pagina principale solo dopo il mount completo per evitare TDZ
- * 
- * Questo wrapper minimizza qualsiasi esecuzione di codice a livello di modulo
  */
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { Building2 } from 'lucide-react';
 
 // Dynamic import dell'intera pagina - caricata solo dopo mount
-const UnifiedDashboardPageContent = dynamic(
+const UnifiedDashboardPage = dynamic(
   () => import('./page-content').then(mod => ({ default: mod.default })),
   { 
     ssr: false,
@@ -29,11 +27,11 @@ const UnifiedDashboardPageContent = dynamic(
   }
 );
 
-export default function UnifiedDashboardPage() {
+export default function UnifiedDashboardPageWrapper() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Ritarda ulteriormente per assicurarsi che tutti i moduli siano inizializzati
+    // Ritarda ulteriormente per assicurarsi che tutto sia pronto
     const timer = setTimeout(() => {
       setMounted(true);
     }, 0);
@@ -55,5 +53,6 @@ export default function UnifiedDashboardPage() {
     );
   }
 
-  return <UnifiedDashboardPageContent />;
+  return <UnifiedDashboardPage />;
 }
+
