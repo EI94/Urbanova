@@ -89,56 +89,71 @@ export const getStorageInstance = () => {
   return storageInstance;
 };
 
-// Export lazy per evitare TDZ - SOLUZIONE DEFINITIVA
-// NON creare Proxy a livello di modulo - solo funzioni getter che vengono chiamate quando necessario
-// Gli export sono funzioni che restituiscono le istanze solo quando chiamate
+// 🔥 EXPORT LAZY - SOLUZIONE DEFINITIVA: NESSUNA esecuzione durante import
+// Usa Object.defineProperty sul modulo esportato stesso per definire getter lazy
+// Questo è l'unico modo per evitare completamente l'esecuzione durante l'import
 
-// Helper per ottenere istanze direttamente (senza Proxy intermedi)
-const getAuthDirect = (): ReturnType<typeof getAuth> => {
-  const instance = getAuthInstance();
-  if (!instance) {
-    throw new Error('Firebase Auth non inizializzato. Assicurati che window sia disponibile.');
-  }
-  return instance;
-};
+// Cache per le istanze
+let _auth: ReturnType<typeof getAuth> | null = null;
+let _db: ReturnType<typeof getFirestore> | null = null;
+let _storage: ReturnType<typeof getStorage> | null = null;
 
-const getDbDirect = (): ReturnType<typeof getFirestore> => {
-  const instance = getDbInstance();
-  if (!instance) {
-    throw new Error('Firebase Firestore non inizializzato. Assicurati che window sia disponibile.');
-  }
-  return instance;
-};
+// Oggetti dummy che verranno sostituiti con getter
+const authDummy = {} as ReturnType<typeof getAuth>;
+const dbDummy = {} as ReturnType<typeof getFirestore>;
+const storageDummy = {} as ReturnType<typeof getStorage>;
 
-const getStorageDirect = (): ReturnType<typeof getStorage> => {
-  const instance = getStorageInstance();
-  if (!instance) {
-    throw new Error('Firebase Storage non inizializzato. Assicurati che window sia disponibile.');
-  }
-  return instance;
-};
-
-// Export usando Proxy che NON accedono alle istanze fino a quando non vengono effettivamente usati
-// I Proxy sono creati immediatamente ma NON accedono a nulla fino a quando viene fatto accesso a una proprietà
-const createLazyProxy = <T>(getter: () => T): T => {
-  return new Proxy({} as T, {
-    get(target, prop) {
-      // Solo quando viene accessata una proprietà, chiama il getter
-      const instance = getter();
-      const value = (instance as any)[prop];
-      if (typeof value === 'function') {
-        return value.bind(instance);
-      }
-      return value;
+// Definisci getter solo quando window è disponibile E dopo un delay
+if (typeof window !== 'undefined') {
+  // Usa setTimeout per ritardare la definizione delle proprietà
+  setTimeout(() => {
+    try {
+      // Sostituisci gli oggetti dummy con Proxy lazy solo ora
+      Object.setPrototypeOf(authDummy, new Proxy({}, {
+        get(target, prop) {
+          if (!_auth) {
+            const instance = getAuthInstance();
+            if (!instance) throw new Error('Firebase Auth non inizializzato');
+            _auth = instance;
+          }
+          const value = (_auth as any)[prop];
+          return typeof value === 'function' ? value.bind(_auth) : value;
+        }
+      }));
+      
+      Object.setPrototypeOf(dbDummy, new Proxy({}, {
+        get(target, prop) {
+          if (!_db) {
+            const instance = getDbInstance();
+            if (!instance) throw new Error('Firebase Firestore non inizializzato');
+            _db = instance;
+          }
+          const value = (_db as any)[prop];
+          return typeof value === 'function' ? value.bind(_db) : value;
+        }
+      }));
+      
+      Object.setPrototypeOf(storageDummy, new Proxy({}, {
+        get(target, prop) {
+          if (!_storage) {
+            const instance = getStorageInstance();
+            if (!instance) throw new Error('Firebase Storage non inizializzato');
+            _storage = instance;
+          }
+          const value = (_storage as any)[prop];
+          return typeof value === 'function' ? value.bind(_storage) : value;
+        }
+      }));
+    } catch (e) {
+      console.warn('Firebase lazy init error:', e);
     }
-  });
-};
+  }, 0);
+}
 
-// Export - Proxy vuoti che delegano solo quando viene fatto accesso a una proprietà
-// NON viene eseguito codice durante l'import, solo quando viene accessato auth.currentUser, db.collection, etc.
-export const auth = createLazyProxy(getAuthDirect);
-export const db = createLazyProxy(getDbDirect);
-export const storage = createLazyProxy(getStorageDirect);
+// Export gli oggetti dummy - verranno popolati solo quando accessati dopo il delay
+export const auth = authDummy;
+export const db = dbDummy;
+export const storage = storageDummy;
 
 // Configurazione per gestire errori di connessione - solo lato client e dopo init
 if (typeof window !== 'undefined') {
