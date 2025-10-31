@@ -79,9 +79,16 @@ export function getSKILLS(): Skill[] {
   return _SKILLS;
 }
 
-// Export per compatibilità - LAZY getter invece di const valutata subito
-// NON export const SKILLS = getSKILLS() perché verrebbe valutato durante bundle!
-// Usa getSKILLS() direttamente oppure export default getSKILLS
+// Export per compatibilità - PROXY LAZY: nessuna valutazione durante bundle
+export const SKILLS = new Proxy([] as Skill[], {
+  get(target, prop) {
+    // Quando qualcuno accede a SKILLS, carica le skill se necessario
+    const skills = getSKILLS();
+    // Delega tutte le proprietà all'array reale
+    const value = (skills as any)[prop];
+    return typeof value === 'function' ? value.bind(skills) : value;
+  }
+}) as Skill[];
 
 /**
  * Metadata di tutte le skill (per discovery) - LAZY
@@ -90,8 +97,14 @@ export function getSKILL_METAS(): SkillMeta[] {
   return getSKILLS().map(skill => skill.meta);
 }
 
-// Export per compatibilità - LAZY, non valutato durante bundle
-export const SKILL_METAS = getSKILL_METAS;
+// Export per compatibilità - PROXY LAZY: nessuna valutazione durante bundle
+export const SKILL_METAS = new Proxy([] as SkillMeta[], {
+  get(target, prop) {
+    const metas = getSKILL_METAS();
+    const value = (metas as any)[prop];
+    return typeof value === 'function' ? value.bind(metas) : value;
+  }
+}) as SkillMeta[];
 
 /**
  * Conta skill per categoria
