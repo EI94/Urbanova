@@ -89,59 +89,82 @@ export const getStorageInstance = () => {
   return storageInstance;
 };
 
-// Export diretti per compatibilità - inizializzano immediatamente se lato client
+// Export lazy per evitare TDZ - non eseguono codice a livello di modulo
 export const auth = (() => {
-  if (typeof window !== 'undefined') {
-    // Inizializza immediatamente se siamo lato client
-    if (!authInstance) {
-      initializeFirebase();
+  // Ritorna getter che inizializza solo quando accessato
+  return new Proxy({} as ReturnType<typeof getAuth>, {
+    get(target, prop) {
+      const instance = getAuthInstance();
+      if (!instance) {
+        throw new Error('Firebase Auth non inizializzato. Assicurati che window sia disponibile.');
+      }
+      const value = (instance as any)[prop];
+      // Se è una funzione, bind al contesto
+      if (typeof value === 'function') {
+        return value.bind(instance);
+      }
+      return value;
     }
-    return authInstance!;
-  }
-  return null as any;
+  });
 })();
 
 export const db = (() => {
-  if (typeof window !== 'undefined') {
-    // Inizializza immediatamente se siamo lato client
-    if (!dbInstance) {
-      initializeFirebase();
+  // Ritorna getter che inizializza solo quando accessato
+  return new Proxy({} as ReturnType<typeof getFirestore>, {
+    get(target, prop) {
+      const instance = getDbInstance();
+      if (!instance) {
+        throw new Error('Firebase Firestore non inizializzato. Assicurati che window sia disponibile.');
+      }
+      const value = (instance as any)[prop];
+      // Se è una funzione, bind al contesto
+      if (typeof value === 'function') {
+        return value.bind(instance);
+      }
+      return value;
     }
-    return dbInstance!;
-  }
-  return null as any;
+  });
 })();
 
 export const storage = (() => {
-  if (typeof window !== 'undefined') {
-    // Inizializza immediatamente se siamo lato client
-    if (!storageInstance) {
-      initializeFirebase();
+  // Ritorna getter che inizializza solo quando accessato
+  return new Proxy({} as ReturnType<typeof getStorage>, {
+    get(target, prop) {
+      const instance = getStorageInstance();
+      if (!instance) {
+        throw new Error('Firebase Storage non inizializzato. Assicurati che window sia disponibile.');
+      }
+      const value = (instance as any)[prop];
+      // Se è una funzione, bind al contesto
+      if (typeof value === 'function') {
+        return value.bind(instance);
+      }
+      return value;
     }
-    return storageInstance!;
-  }
-  return null as any;
+  });
 })();
 
-// Verifica di sicurezza per l'inizializzazione di Firebase
+// Configurazione per gestire errori di connessione - solo lato client e dopo init
 if (typeof window !== 'undefined') {
-  // Solo nel browser, verifica che db sia inizializzato
-  if (!db) {
-    console.error('❌ Firebase Firestore non inizializzato correttamente');
-  } else {
-    console.log('✅ Firebase Firestore inizializzato correttamente');
-    
-    // ESPORTA istanze Firebase globalmente per il wrapper ultra-nucleare
-    (window as any).__firebaseApp = app;
-    (window as any).__firebaseDb = db;
-    (window as any).__firebaseAuth = auth;
-    (window as any).__firebaseStorage = storage;
-    console.log('🔥 [FIREBASE GLOBAL] Istanze Firebase esportate globalmente per wrapper ultra-nucleare');
-  }
-}
-
-// Configurazione per gestire errori di connessione
-if (typeof window !== 'undefined') {
+  // Ritarda la configurazione errori fino a quando Firebase è inizializzato
+  setTimeout(() => {
+    // Verifica di sicurezza per l'inizializzazione di Firebase
+    const dbInstance = getDbInstance();
+    if (!dbInstance) {
+      console.error('❌ Firebase Firestore non inizializzato correttamente');
+    } else {
+      console.log('✅ Firebase Firestore inizializzato correttamente');
+      
+      // ESPORTA istanze Firebase globalmente per il wrapper ultra-nucleare
+      (window as any).__firebaseApp = app;
+      (window as any).__firebaseDb = dbInstance;
+      (window as any).__firebaseAuth = getAuthInstance();
+      (window as any).__firebaseStorage = getStorageInstance();
+      console.log('🔥 [FIREBASE GLOBAL] Istanze Firebase esportate globalmente per wrapper ultra-nucleare');
+    }
+  }, 100);
+  
+  // Configurazione per gestire errori di connessione
   // Gestione errori Firebase più robusta
   window.addEventListener('error', (event) => {
     const errorMessage = event.error?.message || event.message || 'Unknown error';

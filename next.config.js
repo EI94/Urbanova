@@ -1,5 +1,5 @@
-// Import polyfills per File API
-require('./src/polyfills.js');
+// Polyfills caricati solo quando necessario - rimosso require statico per evitare TDZ
+// require('./src/polyfills.js'); // COMMENTATO - causava TDZ
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
