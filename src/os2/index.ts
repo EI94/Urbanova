@@ -114,7 +114,14 @@ export class UrbanovaOS2 {
   private skillCatalog: SkillCatalog;
   private arbitrator: Arbitrator;
   private fallbackManager: FallbackManager;
-  private smartOrchestrator = getSmartOSOrchestrator();
+  // LAZY: Inizializzato solo quando accessato per evitare TDZ durante import
+  private _smartOrchestrator: ReturnType<typeof getSmartOSOrchestrator> | null = null;
+  private get smartOrchestrator() {
+    if (!this._smartOrchestrator) {
+      this._smartOrchestrator = getSmartOSOrchestrator();
+    }
+    return this._smartOrchestrator;
+  }
   
   constructor() {
     this.skillCatalog = SkillCatalog.getInstance();

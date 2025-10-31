@@ -46,10 +46,39 @@ export interface SmartOSResponse {
  * Combina tutti i sistemi intelligenti in un flusso unificato
  */
 export class SmartOSOrchestrator {
-  private ragSystem = getRAGSystem();
-  private functionCallingSystem = getFunctionCallingSystem();
-  private guardrailsSystem = getGuardrailsSystem();
-  private evaluationSystem = getEvaluationSystem();
+  // LAZY: Inizializzati solo quando accessati per evitare TDZ durante import
+  private _ragSystem: ReturnType<typeof getRAGSystem> | null = null;
+  private _functionCallingSystem: ReturnType<typeof getFunctionCallingSystem> | null = null;
+  private _guardrailsSystem: ReturnType<typeof getGuardrailsSystem> | null = null;
+  private _evaluationSystem: ReturnType<typeof getEvaluationSystem> | null = null;
+  
+  private get ragSystem() {
+    if (!this._ragSystem) {
+      this._ragSystem = getRAGSystem();
+    }
+    return this._ragSystem;
+  }
+  
+  private get functionCallingSystem() {
+    if (!this._functionCallingSystem) {
+      this._functionCallingSystem = getFunctionCallingSystem();
+    }
+    return this._functionCallingSystem;
+  }
+  
+  private get guardrailsSystem() {
+    if (!this._guardrailsSystem) {
+      this._guardrailsSystem = getGuardrailsSystem();
+    }
+    return this._guardrailsSystem;
+  }
+  
+  private get evaluationSystem() {
+    if (!this._evaluationSystem) {
+      this._evaluationSystem = getEvaluationSystem();
+    }
+    return this._evaluationSystem;
+  }
 
   /**
    * Processa una richiesta completa attraverso il sistema smart
