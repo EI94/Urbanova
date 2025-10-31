@@ -14,7 +14,24 @@ if (typeof window !== 'undefined') {
   import('@/lib/osProtection').catch(() => {});
 }
 
-import { auth, db } from './firebase';
+// Lazy loader per firebase - evita TDZ importando solo quando necessario
+let firebaseModulePromise: Promise<typeof import('./firebase')> | null = null;
+
+const getFirebaseAuth = async () => {
+  if (!firebaseModulePromise) {
+    firebaseModulePromise = import('./firebase');
+  }
+  const module = await firebaseModulePromise;
+  return module.auth;
+};
+
+const getFirebaseDb = async () => {
+  if (!firebaseModulePromise) {
+    firebaseModulePromise = import('./firebase');
+  }
+  const module = await firebaseModulePromise;
+  return module.db;
+};
 
 // Interfaccia per l'utente
 export interface User {
@@ -58,6 +75,7 @@ class FirebaseAuthService {
     lastName?: string
   ): Promise<AuthResult> {
     try {
+      const auth = await getFirebaseAuth();
       if (!auth) {
         throw new Error('Firebase auth non disponibile');
       }
@@ -132,6 +150,7 @@ class FirebaseAuthService {
 
   async login(email: string, password: string): Promise<AuthResult> {
     try {
+      const auth = await getFirebaseAuth();
       if (!auth) {
         throw new Error('Firebase auth non disponibile');
       }
@@ -186,6 +205,7 @@ class FirebaseAuthService {
 
   async logout(): Promise<boolean> {
     try {
+      const auth = await getFirebaseAuth();
       if (!auth) {
         throw new Error('Firebase auth non disponibile');
       }
@@ -204,6 +224,7 @@ class FirebaseAuthService {
 
   async resetPassword(email: string): Promise<boolean> {
     try {
+      const auth = await getFirebaseAuth();
       if (!auth) {
         throw new Error('Firebase auth non disponibile');
       }
@@ -225,7 +246,8 @@ class FirebaseAuthService {
   // STATO AUTENTICAZIONE
   // ========================================
 
-  onAuthStateChanged(callback: (user: User | null) => void) {
+  async onAuthStateChanged(callback: (user: User | null) => void) {
+    const auth = await getFirebaseAuth();
     if (!auth) {
       console.error('❌ [Firebase Auth] auth non disponibile, callback con null');
       callback(null);
@@ -282,7 +304,8 @@ class FirebaseAuthService {
   // UTENTE CORRENTE
   // ========================================
 
-  getCurrentUser(): User | null {
+  async getCurrentUser(): Promise<User | null> {
+    const auth = await getFirebaseAuth();
     if (!auth) {
       console.error('❌ [Firebase Auth] auth non disponibile in getCurrentUser');
       return null;
@@ -305,6 +328,7 @@ class FirebaseAuthService {
 
   private async createUserProfile(uid: string, profileData: any): Promise<void> {
     try {
+      const db = await getFirebaseDb();
       const userRef = doc(db, 'users', uid);
       await setDoc(userRef, {
         ...profileData,
@@ -318,6 +342,7 @@ class FirebaseAuthService {
 
   private async getUserProfile(uid: string): Promise<any> {
     try {
+      const db = await getFirebaseDb();
       const userRef = doc(db, 'users', uid);
       const userSnap = await getDoc(userRef);
 
@@ -333,6 +358,7 @@ class FirebaseAuthService {
 
   private async updateLastLogin(uid: string): Promise<void> {
     try {
+      const db = await getFirebaseDb();
       const userRef = doc(db, 'users', uid);
       await setDoc(
         userRef,
@@ -352,6 +378,7 @@ class FirebaseAuthService {
 
   async updateUserProfile(uid: string, updates: any): Promise<boolean> {
     try {
+      const db = await getFirebaseDb();
       const userRef = doc(db, 'users', uid);
       await setDoc(
         userRef,

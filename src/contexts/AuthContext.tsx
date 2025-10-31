@@ -213,7 +213,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         const firebaseAuthService = await getFirebaseAuthService();
         const User = await getFirebaseUser();
-        unsubscribe = firebaseAuthService.onAuthStateChanged((user: any | null) => {
+        unsubscribe = await firebaseAuthService.onAuthStateChanged((user: any | null) => {
           console.log('🔥 [AuthProvider] onAuthStateChanged callback:', user ? 'User logged in' : 'User logged out');
           setCurrentUser(user);
           setLoading(false);

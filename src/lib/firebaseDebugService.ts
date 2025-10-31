@@ -1,16 +1,25 @@
 import { onAuthStateChanged, User } from 'firebase/auth';
 import {addDoc, getDocs, doc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { safeCollection } from './firebaseUtils';
-// CHIRURGICO: Protezione ultra-sicura per evitare crash auth import
-let auth;
-try {
-  const firebaseModule = require('./firebase');
-  auth = firebaseModule.auth;
-} catch (error) {
-  console.error('❌ [firebaseDebugService] Errore import auth:', error);
-  auth = null;
-}
-import { db } from './firebase';
+
+// Lazy loader per firebase - evita TDZ importando solo quando necessario
+let firebaseModulePromise: Promise<typeof import('./firebase')> | null = null;
+
+const getFirebaseAuth = async () => {
+  if (!firebaseModulePromise) {
+    firebaseModulePromise = import('./firebase');
+  }
+  const module = await firebaseModulePromise;
+  return module.auth;
+};
+
+const getFirebaseDb = async () => {
+  if (!firebaseModulePromise) {
+    firebaseModulePromise = import('./firebase');
+  }
+  const module = await firebaseModulePromise;
+  return module.db;
+};
 
 export class FirebaseDebugService {
   private static instance: FirebaseDebugService;
@@ -47,6 +56,7 @@ export class FirebaseDebugService {
       console.log('✅ Test scrittura documento OK:', testDoc.id);
 
       // Test 3: Lettura documento
+      const db = await getFirebaseDb();
       const readDoc = await getDoc(doc(db, 'test', testDoc.id));
       if (readDoc.exists()) {
         console.log('✅ Test lettura documento OK');
@@ -86,7 +96,8 @@ export class FirebaseDebugService {
     try {
       console.log('🔍 Test connessione Auth...');
 
-      return new Promise(resolve => {
+      return new Promise(async (resolve) => {
+        const auth = await getFirebaseAuth();
         const unsubscribe = onAuthStateChanged(auth, user => {
           unsubscribe();
 
@@ -263,6 +274,7 @@ export class FirebaseDebugService {
       // Pulisci il documento di test
       setTimeout(async () => {
         try {
+          const db = await getFirebaseDb();
           await getDoc(doc(db, 'feasibilityProjects', docRef.id));
           console.log('🧹 Documento di test mantenuto per debug');
         } catch (error) {
