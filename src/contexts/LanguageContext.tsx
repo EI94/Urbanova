@@ -59,27 +59,29 @@ const loadTranslations = async () => {
   return translationsCache || {};
 };
 
-// Funzione helper per ottenere traduzioni
+// Funzione helper per ottenere traduzioni - LAZY: non viene eseguita durante import
 const getTranslations = () => {
   if (!translationsCache) {
-    // Caricamento sincrono se già disponibile (SSR fallback)
-    try {
-      const it = require('@/translations/it');
-      const en = require('@/translations/en');
-      const es = require('@/translations/es');
-      translationsCache = {
-        it: it.it || it.default || {},
-        en: en.en || en.default || {},
-        es: es.es || es.default || {},
-        fr: it.it || it.default || {},
-        de: it.it || it.default || {},
-        pt: it.it || it.default || {},
-        ru: it.it || it.default || {},
-        zh: it.it || it.default || {},
-        ja: it.it || it.default || {},
-        ko: it.it || it.default || {},
-      };
-    } catch (error) {
+    // Solo lato client - non usare require durante import
+    if (typeof window !== 'undefined') {
+      // Caricamento asincrono lazy
+      loadTranslations().catch(() => {
+        // Fallback vuoto se caricamento async fallisce
+        translationsCache = {
+          it: {},
+          en: {},
+          es: {},
+          fr: {},
+          de: {},
+          pt: {},
+          ru: {},
+          zh: {},
+          ja: {},
+          ko: {},
+        };
+      });
+    } else {
+      // SSR: usa cache vuota
       translationsCache = {
         it: {},
         en: {},
@@ -94,10 +96,18 @@ const getTranslations = () => {
       };
     }
   }
-  return translationsCache;
+  return translationsCache || {};
 };
 
-const translations = getTranslations();
+// LAZY: Non inizializza durante import - solo quando necessario
+let translations: Record<string, any> | null = null;
+
+const getTranslationsSafe = () => {
+  if (!translations) {
+    translations = getTranslations();
+  }
+  return translations;
+};
 
 // Funzione per ottenere traduzione nidificata
 function getNestedTranslation(obj: any, path: string): string {
@@ -146,7 +156,8 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
         const detectedLanguage = savedLanguage || detectBrowserLanguage();
 
         // 3. Verifica che la lingua sia supportata
-        const finalLanguage = translations[detectedLanguage] ? detectedLanguage : DEFAULT_LANGUAGE;
+        const translationsData = getTranslationsSafe();
+        const finalLanguage = translationsData[detectedLanguage] ? detectedLanguage : DEFAULT_LANGUAGE;
 
         setCurrentLanguage(finalLanguage);
         setIsInitialized(true);
@@ -168,7 +179,8 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
       console.log(`🔄 [LanguageProvider] Cambio lingua da ${currentLanguage} a ${language}`);
 
       // Verifica che la lingua sia supportata
-      if (!translations[language]) {
+      const translationsData = getTranslationsSafe();
+      if (!translationsData[language]) {
         console.warn(`⚠️ [LanguageProvider] Lingua ${language} non supportata, uso fallback`);
         language = FALLBACK_LANGUAGE;
       }
@@ -201,7 +213,8 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   // Funzione di traduzione
   const t = (key: string, namespace?: string, params?: Record<string, string | number>): string => {
     try {
-      const translationData = translations[currentLanguage] || translations[DEFAULT_LANGUAGE];
+      const translationsData = getTranslationsSafe();
+      const translationData = translationsData[currentLanguage] || translationsData[DEFAULT_LANGUAGE];
 
       // Costruisci il percorso completo
       const fullPath = namespace ? `${namespace}.${key}` : key;

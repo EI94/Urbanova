@@ -76,15 +76,58 @@ const auditLogger = new AuditLogger();
  * Executor che esegue ActionPlan step-by-step
  */
 export class PlanExecutor {
-  private skillCatalog: SkillCatalog;
-  private rbacEnforcer = getRbacEnforcer();
-  private guardrail = getGuardrail();
-  private auditLog = getAuditLog();
-  private metrics = getMetrics();
-  private eventBus = getEventBus();
+  // LAZY: Tutti i componenti inizializzati solo quando accessati per evitare TDZ
+  private _skillCatalog: SkillCatalog | null = null;
+  private _rbacEnforcer: ReturnType<typeof getRbacEnforcer> | null = null;
+  private _guardrail: ReturnType<typeof getGuardrail> | null = null;
+  private _auditLog: ReturnType<typeof getAuditLog> | null = null;
+  private _metrics: ReturnType<typeof getMetrics> | null = null;
+  private _eventBus: ReturnType<typeof getEventBus> | null = null;
   
   constructor() {
-    this.skillCatalog = SkillCatalog.getInstance();
+    // Niente inizializzazione - tutto lazy
+  }
+  
+  private get skillCatalog() {
+    if (!this._skillCatalog) {
+      this._skillCatalog = SkillCatalog.getInstance();
+    }
+    return this._skillCatalog;
+  }
+  
+  private get rbacEnforcer() {
+    if (!this._rbacEnforcer) {
+      this._rbacEnforcer = getRbacEnforcer();
+    }
+    return this._rbacEnforcer;
+  }
+  
+  private get guardrail() {
+    if (!this._guardrail) {
+      this._guardrail = getGuardrail();
+    }
+    return this._guardrail;
+  }
+  
+  private get auditLog() {
+    if (!this._auditLog) {
+      this._auditLog = getAuditLog();
+    }
+    return this._auditLog;
+  }
+  
+  private get metrics() {
+    if (!this._metrics) {
+      this._metrics = getMetrics();
+    }
+    return this._metrics;
+  }
+  
+  private get eventBus() {
+    if (!this._eventBus) {
+      this._eventBus = getEventBus();
+    }
+    return this._eventBus;
   }
   
   /**

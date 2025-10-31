@@ -173,15 +173,19 @@ export class UrbanovaOS2 {
    * Carica skill reali nel catalog
    */
   private loadRealSkills(): void {
-    try {
-      const skillsModule = require('./skills/index');
-      const realSkills = skillsModule.SKILLS || skillsModule.default;
-      
-      if (realSkills && Array.isArray(realSkills)) {
-        this.skillCatalog.loadRealSkills(realSkills);
-      }
-    } catch (error) {
-      console.warn('⚠️ [OS2] Impossibile caricare skill reali, uso placeholder');
+    // LAZY: Carica skills solo quando necessario, in modo asincrono per evitare TDZ
+    // Non usare require() durante import - usa dynamic import
+    if (typeof window !== 'undefined') {
+      import('./skills/index')
+        .then((skillsModule) => {
+          const realSkills = skillsModule.SKILLS || skillsModule.default;
+          if (realSkills && Array.isArray(realSkills)) {
+            this.skillCatalog.loadRealSkills(realSkills);
+          }
+        })
+        .catch((error) => {
+          console.warn('⚠️ [OS2] Impossibile caricare skill reali, uso placeholder:', error);
+        });
     }
   }
   
