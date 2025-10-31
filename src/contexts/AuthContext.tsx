@@ -2,9 +2,36 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-import { firebaseAuthService, User } from '@/lib/firebaseAuthService';
+// Lazy loader per firebaseAuthService - caricato solo quando necessario
+let firebaseAuthServicePromise: Promise<typeof import('@/lib/firebaseAuthService')> | null = null;
+
+const getFirebaseAuthService = async () => {
+  if (!firebaseAuthServicePromise) {
+    firebaseAuthServicePromise = import('@/lib/firebaseAuthService');
+  }
+  const module = await firebaseAuthServicePromise;
+  return module.firebaseAuthService;
+};
+
+const getFirebaseUser = async () => {
+  if (!firebaseAuthServicePromise) {
+    firebaseAuthServicePromise = import('@/lib/firebaseAuthService');
+  }
+  const module = await firebaseAuthServicePromise;
+  return module.User;
+};
 
 // Interfaccia per il contesto di autenticazione
+interface User {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  firstName?: string;
+  lastName?: string;
+  role?: string;
+  company?: string;
+}
+
 interface AuthContextType {
   currentUser: User | null;
   loading: boolean;
@@ -116,6 +143,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     lastName?: string
   ) {
     try {
+      const firebaseAuthService = await getFirebaseAuthService();
       const result = await firebaseAuthService.signup(
         email,
         password,
@@ -138,6 +166,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Funzione per login
   async function login(email: string, password: string) {
     try {
+      const firebaseAuthService = await getFirebaseAuthService();
       const result = await firebaseAuthService.login(email, password);
 
       if (result.success) {
@@ -154,6 +183,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Funzione per logout
   async function logout() {
     try {
+      const firebaseAuthService = await getFirebaseAuthService();
       await firebaseAuthService.logout();
       setCurrentUser(null);
     } catch (error: any) {
@@ -165,6 +195,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Funzione per reset password
   async function resetPassword(email: string) {
     try {
+      const firebaseAuthService = await getFirebaseAuthService();
       await firebaseAuthService.resetPassword(email);
     } catch (error: any) {
       console.error('Errore durante il reset password:', error);
@@ -176,19 +207,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     console.log('🔥 [AuthProvider] useEffect onAuthStateChanged...');
     
-    try {
-      const unsubscribe = firebaseAuthService.onAuthStateChanged((user: User | null) => {
-        console.log('🔥 [AuthProvider] onAuthStateChanged callback:', user ? 'User logged in' : 'User logged out');
-        setCurrentUser(user);
+    let unsubscribe: (() => void) | undefined;
+    
+    const setupAuth = async () => {
+      try {
+        const firebaseAuthService = await getFirebaseAuthService();
+        const User = await getFirebaseUser();
+        unsubscribe = firebaseAuthService.onAuthStateChanged((user: any | null) => {
+          console.log('🔥 [AuthProvider] onAuthStateChanged callback:', user ? 'User logged in' : 'User logged out');
+          setCurrentUser(user);
+          setLoading(false);
+        });
+      } catch (error) {
+        console.error('❌ [AuthProvider] Errore in onAuthStateChanged:', error);
         setLoading(false);
-      });
+      }
+    };
 
-      return unsubscribe;
-    } catch (error) {
-      console.error('❌ [AuthProvider] Errore in onAuthStateChanged:', error);
-      setLoading(false);
-      return () => {}; // unsubscribe function vuota
-    }
+    setupAuth();
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   const value = {
