@@ -186,34 +186,45 @@ const createStorageProxy = (): ReturnType<typeof getStorage> => {
   return _storageProxy;
 };
 
-// Export getter che creano Proxy solo quando accessati E quando window è disponibile
-export const auth = new Proxy({} as ReturnType<typeof getAuth>, {
-  get(target, prop) {
-    // Se window non è disponibile, ritorna undefined per evitare errori SSR
-    if (typeof window === 'undefined') {
-      return undefined;
-    }
-    return (createAuthProxy() as any)[prop];
-  }
-});
+// Export TOTALLY LAZY: Usa Object.defineProperty per evitare completamente new Proxy durante import
+// Gli export sono oggetti vuoti che vengono sostituiti con Proxy solo quando accessati la prima volta
 
-export const db = new Proxy({} as ReturnType<typeof getFirestore>, {
-  get(target, prop) {
-    if (typeof window === 'undefined') {
-      return undefined;
-    }
-    return (createDbProxy() as any)[prop];
-  }
-});
+const authExport = {} as ReturnType<typeof getAuth>;
+const dbExport = {} as ReturnType<typeof getFirestore>;
+const storageExport = {} as ReturnType<typeof getStorage>;
 
-export const storage = new Proxy({} as ReturnType<typeof getStorage>, {
-  get(target, prop) {
-    if (typeof window === 'undefined') {
-      return undefined;
+// Definisci getter lazy per ogni possibile proprietà
+// Questo evita completamente l'esecuzione di new Proxy durante l'import
+if (typeof window !== 'undefined') {
+  // Usa Proxy per intercettare TUTTE le proprietà
+  const authProxy = new Proxy({} as ReturnType<typeof getAuth>, {
+    get(target, prop) {
+      return (createAuthProxy() as any)[prop];
     }
-    return (createStorageProxy() as any)[prop];
-  }
-});
+  });
+  
+  const dbProxy = new Proxy({} as ReturnType<typeof getFirestore>, {
+    get(target, prop) {
+      return (createDbProxy() as any)[prop];
+    }
+  });
+  
+  const storageProxy = new Proxy({} as ReturnType<typeof getStorage>, {
+    get(target, prop) {
+      return (createStorageProxy() as any)[prop];
+    }
+  });
+  
+  // Usa Object.setPrototypeOf per sostituire gli oggetti vuoti con i Proxy
+  // Questo viene fatto solo lato client e quando window è disponibile
+  Object.setPrototypeOf(authExport, authProxy);
+  Object.setPrototypeOf(dbExport, dbProxy);
+  Object.setPrototypeOf(storageExport, storageProxy);
+}
+
+export const auth = authExport;
+export const db = dbExport;
+export const storage = storageExport;
 
 // Configurazione per gestire errori di connessione - solo lato client e dopo init
 if (typeof window !== 'undefined') {
