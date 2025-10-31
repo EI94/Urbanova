@@ -433,6 +433,9 @@ export default function UnifiedDashboardPage() {
 
   // Carica dati dashboard e chat history
   useEffect(() => {
+    // Non caricare nulla se non siamo ancora montati
+    if (!mounted) return;
+    
     console.log('🔍 [DEBUG CRASH] useEffect initializeDashboard - PUNTO CRITICO WEB 4');
     const initializeDashboard = async () => {
       try {
@@ -478,7 +481,7 @@ export default function UnifiedDashboardPage() {
     };
 
     initializeDashboard();
-  }, [currentUser?.uid]);
+  }, [mounted, currentUser?.uid]);
 
   // Sottoscrizione agli aggiornamenti in tempo reale
   useEffect(() => {
