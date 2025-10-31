@@ -1,8 +1,17 @@
 // 📊 EVALUATION SYSTEM - Sistema di valutazione e monitoring per OS 2.0 Smart
 // Metriche, monitoring e valutazione continua delle performance
 
-import { db } from '../../lib/firebase';
 import { collection, addDoc, query, where, getDocs, orderBy, limit, serverTimestamp } from 'firebase/firestore';
+
+// Lazy loader per firebase - evita TDZ
+let firebaseModulePromise: Promise<typeof import('../../lib/firebase')> | null = null;
+const getFirebaseDb = async () => {
+  if (!firebaseModulePromise) {
+    firebaseModulePromise = import('../../lib/firebase');
+  }
+  const module = await firebaseModulePromise;
+  return module.db;
+};
 
 export interface EvaluationMetrics {
   // Metriche di Performance
@@ -89,6 +98,7 @@ export class EvaluationSystem {
         Object.entries(event).filter(([_, value]) => value !== undefined)
       );
 
+      const db = await getFirebaseDb();
       const docRef = await addDoc(collection(db, this.collectionName), {
         ...cleanEvent,
         timestamp: serverTimestamp(),
@@ -150,6 +160,7 @@ export class EvaluationSystem {
       const startDate = new Date(endDate.getTime() - days * 24 * 60 * 60 * 1000);
 
       // Query eventi
+      const db = await getFirebaseDb();
       let q = query(
         collection(db, this.collectionName),
         where('timestamp', '>=', startDate),
@@ -204,6 +215,7 @@ export class EvaluationSystem {
   ): Promise<void> {
     try {
       // Trova l'evento e aggiorna con feedback
+      const db = await getFirebaseDb();
       const eventsRef = collection(db, this.collectionName);
       const q = query(eventsRef, where('id', '==', eventId));
       const snapshot = await getDocs(q);

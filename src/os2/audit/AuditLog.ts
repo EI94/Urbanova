@@ -1,7 +1,6 @@
 // 📋 AUDIT LOG - Persistence e export eventi OS 2.0
 // Traccia: who, what, when, mode, planId, diffs
 
-import { db } from '../../lib/firebase';
 import {
   collection,
   doc,
@@ -15,6 +14,16 @@ import {
   Timestamp,
   serverTimestamp,
 } from 'firebase/firestore';
+
+// Lazy loader per firebase - evita TDZ
+let firebaseModulePromise: Promise<typeof import('../../lib/firebase')> | null = null;
+const getFirebaseDb = async () => {
+  if (!firebaseModulePromise) {
+    firebaseModulePromise = import('../../lib/firebase');
+  }
+  const module = await firebaseModulePromise;
+  return module.db;
+};
 import { OsMode } from '../planner/ActionPlan';
 
 /**
@@ -95,6 +104,7 @@ export class AuditLogService {
         Object.entries(event).filter(([_, value]) => value !== undefined)
       );
       
+      const db = await getFirebaseDb();
       const docRef = await addDoc(collection(db, this.collectionName), {
         ...cleanEvent,
         timestamp: serverTimestamp(),
@@ -114,6 +124,7 @@ export class AuditLogService {
    */
   public async getEvents(filters: AuditLogFilters = {}): Promise<AuditEvent[]> {
     try {
+      const db = await getFirebaseDb();
       let q = query(collection(db, this.collectionName));
       
       // Apply filters
@@ -186,6 +197,7 @@ export class AuditLogService {
    */
   public async getPlanAudit(planId: string): Promise<AuditEvent[]> {
     try {
+      const db = await getFirebaseDb();
       const q = query(
         collection(db, this.collectionName),
         where('planId', '==', planId),

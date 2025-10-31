@@ -1,8 +1,17 @@
 // 📊 METRICS - Telemetry per OS 2.0
 // Winston/OpenTelemetry compatible
 
-import { db } from '../../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
+// Lazy loader per firebase - evita TDZ
+let firebaseModulePromise: Promise<typeof import('../../lib/firebase')> | null = null;
+const getFirebaseDb = async () => {
+  if (!firebaseModulePromise) {
+    firebaseModulePromise = import('../../lib/firebase');
+  }
+  const module = await firebaseModulePromise;
+  return module.db;
+};
 
 /**
  * Metric types
@@ -200,6 +209,7 @@ export class MetricsService {
     
     // Persist to Firestore (async, non-blocking)
     try {
+      const db = await getFirebaseDb();
       await addDoc(collection(db, this.collectionName), {
         ...dataPoint,
         timestamp: serverTimestamp(),

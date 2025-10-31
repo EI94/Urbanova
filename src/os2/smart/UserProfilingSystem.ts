@@ -1,8 +1,17 @@
 // 👤 USER PROFILING SYSTEM - Apprendimento automatico preferenze utente
 // Simile a come Cursor apprende le preferenze dello sviluppatore
 
-import { db } from '../../lib/firebase';
 import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
+
+// Lazy loader per firebase - evita TDZ
+let firebaseModulePromise: Promise<typeof import('../../lib/firebase')> | null = null;
+const getFirebaseDb = async () => {
+  if (!firebaseModulePromise) {
+    firebaseModulePromise = import('../../lib/firebase');
+  }
+  const module = await firebaseModulePromise;
+  return module.db;
+};
 
 // ============================================================================
 // TYPES
@@ -80,6 +89,7 @@ export class UserProfilingSystem {
       }
 
       // Carica da Firestore
+      const db = await getFirebaseDb();
       const profileRef = doc(collection(db, 'os2_user_profiles'), userId);
       const profileDoc = await getDoc(profileRef);
 
@@ -251,6 +261,7 @@ export class UserProfilingSystem {
       if (updated) {
         profile.updatedAt = new Date();
         
+        const db = await getFirebaseDb();
         const profileRef = doc(collection(db, 'os2_user_profiles'), userId);
         const cleanProfile = Object.fromEntries(
           Object.entries(profile).filter(([_, v]) => v !== undefined)

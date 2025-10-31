@@ -2,8 +2,17 @@
 // Sistema avanzato di memoria e contesto per conversazioni intelligenti
 
 import { OpenAI } from 'openai';
-import { db } from '../../lib/firebase';
 import { collection, query as firestoreQuery, where, getDocs, orderBy, limit as firestoreLimit, doc, getDoc, addDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+
+// Lazy loader per firebase - evita TDZ
+let firebaseModulePromise: Promise<typeof import('../../lib/firebase')> | null = null;
+const getFirebaseDb = async () => {
+  if (!firebaseModulePromise) {
+    firebaseModulePromise = import('../../lib/firebase');
+  }
+  const module = await firebaseModulePromise;
+  return module.db;
+};
 import { getInMemoryFallback } from './InMemoryFallback';
 
 export interface RAGContext {
@@ -129,6 +138,7 @@ export class AdvancedRAGSystem {
       console.log(`📝 [RAG] Salvando in Firestore: os2_rag_memories/${memoryDoc.id}`);
       
       // Salva in Firestore v9+
+      const db = await getFirebaseDb();
       const memoriesRef = collection(db, 'os2_rag_memories');
       const docRef = doc(memoriesRef, memoryDoc.id);
       await setDoc(docRef, cleanMemoryDoc);
@@ -166,6 +176,7 @@ export class AdvancedRAGSystem {
       console.log(`🔍 [RAG] Recupero memorie recenti per user ${context.userContext.userId}...`);
       
       // Cerca memorie in Firestore
+      const db = await getFirebaseDb();
       const memoriesRef = collection(db, 'os2_rag_memories');
       
       // Query semplice: ultime N memorie utente, ordinate per timestamp
@@ -353,6 +364,7 @@ export class AdvancedRAGSystem {
    */
   private async loadProjectContext(projectId: string): Promise<any> {
     try {
+      const db = await getFirebaseDb();
       const projectDoc = await getDoc(doc(db, 'feasibilityProjects', projectId));
       return projectDoc.exists() ? projectDoc.data() : null;
     } catch (error) {
@@ -367,6 +379,7 @@ export class AdvancedRAGSystem {
   private async loadMarketContext(userId: string): Promise<any> {
     try {
       // Carica dati di mercato recenti per l'utente
+      const db = await getFirebaseDb();
       const marketRef = collection(db, 'market_intelligence');
       const q = firestoreQuery(
         marketRef,

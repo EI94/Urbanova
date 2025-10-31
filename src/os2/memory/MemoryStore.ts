@@ -12,7 +12,6 @@ import {
   SessionMemorySchema,
   UserMemorySchema,
 } from './types';
-import { db } from '../../lib/firebase';
 import {
   collection,
   doc,
@@ -25,6 +24,16 @@ import {
   getDocs,
   serverTimestamp,
 } from 'firebase/firestore';
+
+// Lazy loader per firebase - evita TDZ
+let firebaseModulePromise: Promise<typeof import('../../lib/firebase')> | null = null;
+const getFirebaseDb = async () => {
+  if (!firebaseModulePromise) {
+    firebaseModulePromise = import('../../lib/firebase');
+  }
+  const module = await firebaseModulePromise;
+  return module.db;
+};
 
 /**
  * Interfaccia astratta per Memory Store
@@ -65,6 +74,7 @@ export class FirestoreMemoryStore implements IMemoryStore {
   
   async getProjectMemory(projectId: string): Promise<ProjectMemory | null> {
     try {
+      const db = await getFirebaseDb();
       const docRef = doc(db, this.projectCollection, projectId);
       const docSnap = await getDoc(docRef);
       
@@ -102,6 +112,7 @@ export class FirestoreMemoryStore implements IMemoryStore {
   async setProjectMemory(memory: ProjectMemory): Promise<void> {
     try {
       const validated = ProjectMemorySchema.parse(memory);
+      const db = await getFirebaseDb();
       const docRef = doc(db, this.projectCollection, validated.projectId);
       
       await setDoc(docRef, {
@@ -118,6 +129,7 @@ export class FirestoreMemoryStore implements IMemoryStore {
   
   async updateProjectMemory(update: ProjectMemoryUpdate): Promise<void> {
     try {
+      const db = await getFirebaseDb();
       const docRef = doc(db, this.projectCollection, update.projectId);
       const updateData: any = { updatedAt: serverTimestamp() };
       
@@ -148,6 +160,7 @@ export class FirestoreMemoryStore implements IMemoryStore {
   
   async deleteProjectMemory(projectId: string): Promise<void> {
     try {
+      const db = await getFirebaseDb();
       const docRef = doc(db, this.projectCollection, projectId);
       await deleteDoc(docRef);
       console.log(`✅ [MemoryStore] Project memory eliminata: ${projectId}`);
@@ -161,6 +174,7 @@ export class FirestoreMemoryStore implements IMemoryStore {
   
   async getSessionMemory(sessionId: string): Promise<SessionMemory | null> {
     try {
+      const db = await getFirebaseDb();
       const docRef = doc(db, this.sessionCollection, sessionId);
       const docSnap = await getDoc(docRef);
       
@@ -191,6 +205,7 @@ export class FirestoreMemoryStore implements IMemoryStore {
   async setSessionMemory(memory: SessionMemory): Promise<void> {
     try {
       const validated = SessionMemorySchema.parse(memory);
+      const db = await getFirebaseDb();
       const docRef = doc(db, this.sessionCollection, validated.sessionId);
       
       await setDoc(docRef, {
@@ -207,6 +222,7 @@ export class FirestoreMemoryStore implements IMemoryStore {
   
   async updateSessionMemory(update: SessionMemoryUpdate): Promise<void> {
     try {
+      const db = await getFirebaseDb();
       const docRef = doc(db, this.sessionCollection, update.sessionId);
       const updateData: any = { lastActivityAt: serverTimestamp() };
       
@@ -241,6 +257,7 @@ export class FirestoreMemoryStore implements IMemoryStore {
   
   async deleteSessionMemory(sessionId: string): Promise<void> {
     try {
+      const db = await getFirebaseDb();
       const docRef = doc(db, this.sessionCollection, sessionId);
       await deleteDoc(docRef);
       console.log(`✅ [MemoryStore] Session memory eliminata: ${sessionId}`);
@@ -254,6 +271,7 @@ export class FirestoreMemoryStore implements IMemoryStore {
   
   async getUserMemory(userId: string): Promise<UserMemory | null> {
     try {
+      const db = await getFirebaseDb();
       const docRef = doc(db, this.userCollection, userId);
       const docSnap = await getDoc(docRef);
       
@@ -304,6 +322,7 @@ export class FirestoreMemoryStore implements IMemoryStore {
   async setUserMemory(memory: UserMemory): Promise<void> {
     try {
       const validated = UserMemorySchema.parse(memory);
+      const db = await getFirebaseDb();
       const docRef = doc(db, this.userCollection, validated.userId);
       
       await setDoc(docRef, {
@@ -320,6 +339,7 @@ export class FirestoreMemoryStore implements IMemoryStore {
   
   async updateUserMemory(update: UserMemoryUpdate): Promise<void> {
     try {
+      const db = await getFirebaseDb();
       const docRef = doc(db, this.userCollection, update.userId);
       const updateData: any = { updatedAt: serverTimestamp() };
       
@@ -369,6 +389,7 @@ export class FirestoreMemoryStore implements IMemoryStore {
   
   async deleteUserMemory(userId: string): Promise<void> {
     try {
+      const db = await getFirebaseDb();
       const docRef = doc(db, this.userCollection, userId);
       await deleteDoc(docRef);
       console.log(`✅ [MemoryStore] User memory eliminata: ${userId}`);
