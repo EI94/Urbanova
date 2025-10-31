@@ -5,7 +5,10 @@
 import { UrbanovaOSClassificationEngine, ClassificationResult } from './ml/classificationEngine';
 import { AdvancedConversationalEngine } from './conversational/advancedConversationalEngine';
 // Feature flag OS_V2_ENABLED rimosso - OS2 sempre attivo
-import { getOS2, type OS2Request, type OS2Response } from '@/os2';
+// LAZY: Import dinamico per evitare TDZ durante bundle - getOS2 caricato solo quando necessario
+// import { getOS2, type OS2Request, type OS2Response } from '@/os2';
+type OS2Request = any; // Type only, verrà risolto dinamicamente
+type OS2Response = any; // Type only, verrà risolto dinamicamente
 
 // Definizione locale per evitare errori di import
 interface ChatMessage {
@@ -194,8 +197,10 @@ export interface Entity {
 // URBANOVA OS ORCHESTRATORE
 // ============================================================================
 
-// 🛡️ OS PROTECTION - Importa protezione CSS per l'orchestrator
-import '@/lib/osProtection';
+// 🛡️ OS PROTECTION - LAZY: Carica solo lato client per evitare TDZ
+if (typeof window !== 'undefined') {
+  import('@/lib/osProtection').catch(() => {});
+}
 
 export class UrbanovaOSOrchestrator {
   private classificationEngine: UrbanovaOSClassificationEngine;
@@ -294,8 +299,9 @@ export class UrbanovaOSOrchestrator {
         environment: request.context.environment,
       };
       
-      // Processa con OS2
-      const os2 = getOS2();
+      // Processa con OS2 - LAZY: Carica getOS2 solo quando necessario
+      const os2Module = await import('@/os2');
+      const os2 = os2Module.getOS2();
       const os2Response = await os2.process(os2Request);
       
       // Converti OS2Response in UrbanovaOSResponse
