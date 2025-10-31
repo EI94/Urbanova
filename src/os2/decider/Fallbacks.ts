@@ -55,11 +55,20 @@ export interface FallbackResult {
  */
 export class FallbackManager {
   private strategies: Map<string, FallbackStrategy> = new Map();
-  private skillCatalog: SkillCatalog;
+  // LAZY: Inizializzato solo quando accessato per evitare TDZ
+  private _skillCatalog: SkillCatalog | null = null;
   
   constructor() {
-    this.skillCatalog = SkillCatalog.getInstance();
-    this.registerDefaultStrategies();
+    // Niente inizializzazione - tutto lazy
+  }
+  
+  private get skillCatalog() {
+    if (!this._skillCatalog) {
+      this._skillCatalog = SkillCatalog.getInstance();
+      // Registra strategie default solo quando catalog viene accessato per la prima volta
+      this.registerDefaultStrategies();
+    }
+    return this._skillCatalog;
   }
   
   /**
