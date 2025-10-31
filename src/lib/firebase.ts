@@ -4,8 +4,10 @@ import { getAuth, connectAuthEmulator } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 
-// 🛡️ GLOBAL ERROR INTERCEPTOR - DEVE ESSERE PRIMO
-import '@/lib/globalErrorInterceptor';
+// 🛡️ GLOBAL ERROR INTERCEPTOR - Carica solo lato client per evitare TDZ
+if (typeof window !== 'undefined') {
+  import('@/lib/globalErrorInterceptor').catch(() => {});
+}
 // 🛡️ OS PROTECTION - Carica solo lato client per evitare TDZ
 if (typeof window !== 'undefined') {
   import('@/lib/osProtection').catch(() => {});
@@ -23,23 +25,103 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || 'G-QHNDTK9P3L',
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase - Solo lato client per evitare TDZ
+let app: ReturnType<typeof initializeApp> | null = null;
+let authInstance: ReturnType<typeof getAuth> | null = null;
+let dbInstance: ReturnType<typeof getFirestore> | null = null;
+let storageInstance: ReturnType<typeof getStorage> | null = null;
 
-// Initialize Firebase services
-console.log('🔥 [FIREBASE INIT] Inizializzando Firebase services...');
-console.log('🔥 [FIREBASE INIT] app:', app);
+const initializeFirebase = () => {
+  if (typeof window === 'undefined') {
+    console.warn('⚠️ [FIREBASE INIT] Tentativo di inizializzazione lato server, skip');
+    return;
+  }
+  
+  if (app) {
+    return; // Già inizializzato
+  }
+  
+  app = initializeApp(firebaseConfig);
+  
+  // Initialize Firebase services
+  console.log('🔥 [FIREBASE INIT] Inizializzando Firebase services...');
+  console.log('🔥 [FIREBASE INIT] app:', app);
+  
+  authInstance = getAuth(app);
+  console.log('🔥 [FIREBASE INIT] auth:', authInstance);
+  
+  dbInstance = getFirestore(app);
+  console.log('🔥 [FIREBASE INIT] db:', dbInstance);
+  console.log('🔥 [FIREBASE INIT] db type:', typeof dbInstance);
+  console.log('🔥 [FIREBASE INIT] db constructor:', dbInstance?.constructor?.name);
+  
+  storageInstance = getStorage(app);
+  console.log('🔥 [FIREBASE INIT] storage:', storageInstance);
+};
 
-export const auth = getAuth(app);
-console.log('🔥 [FIREBASE INIT] auth:', auth);
+// Inizializza Firebase immediatamente se siamo lato client (ma solo dopo window è disponibile)
+if (typeof window !== 'undefined') {
+  // Usa setTimeout per ritardare dopo che tutti i moduli sono stati inizializzati
+  setTimeout(() => {
+    initializeFirebase();
+  }, 0);
+}
 
-export const db = getFirestore(app);
-console.log('🔥 [FIREBASE INIT] db:', db);
-console.log('🔥 [FIREBASE INIT] db type:', typeof db);
-console.log('🔥 [FIREBASE INIT] db constructor:', db?.constructor?.name);
+// Export getters che inizializzano se necessario
+export const getAuthInstance = () => {
+  if (typeof window !== 'undefined' && !authInstance) {
+    initializeFirebase();
+  }
+  return authInstance;
+};
 
-export const storage = getStorage(app);
-console.log('🔥 [FIREBASE INIT] storage:', storage);
+export const getDbInstance = () => {
+  if (typeof window !== 'undefined' && !dbInstance) {
+    initializeFirebase();
+  }
+  return dbInstance;
+};
+
+export const getStorageInstance = () => {
+  if (typeof window !== 'undefined' && !storageInstance) {
+    initializeFirebase();
+  }
+  return storageInstance;
+};
+
+// Export diretti per compatibilità - inizializzano immediatamente se lato client
+export const auth = (() => {
+  if (typeof window !== 'undefined') {
+    // Inizializza immediatamente se siamo lato client
+    if (!authInstance) {
+      initializeFirebase();
+    }
+    return authInstance!;
+  }
+  return null as any;
+})();
+
+export const db = (() => {
+  if (typeof window !== 'undefined') {
+    // Inizializza immediatamente se siamo lato client
+    if (!dbInstance) {
+      initializeFirebase();
+    }
+    return dbInstance!;
+  }
+  return null as any;
+})();
+
+export const storage = (() => {
+  if (typeof window !== 'undefined') {
+    // Inizializza immediatamente se siamo lato client
+    if (!storageInstance) {
+      initializeFirebase();
+    }
+    return storageInstance!;
+  }
+  return null as any;
+})();
 
 // Verifica di sicurezza per l'inizializzazione di Firebase
 if (typeof window !== 'undefined') {
