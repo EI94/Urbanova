@@ -41,38 +41,11 @@ import {
   X,
 } from 'lucide-react';
 
-// LAZY: Context hooks caricati dinamicamente per evitare TDZ durante bundle
-// Carichiamo i moduli in modo asincrono prima che il componente venga renderizzato
-// I moduli context vengono caricati solo quando necessario (dopo mount)
-let contextModulesLoaded = false;
-let contextModulesPromise: Promise<{
-  useLanguage: typeof import('@/contexts/LanguageContext').useLanguage;
-  useAuth: typeof import('@/contexts/AuthContext').useAuth;
-  useDarkMode: typeof import('@/contexts/DarkModeContext').useDarkMode;
-}> | null = null;
-
-const loadContextModules = async () => {
-  if (!contextModulesPromise) {
-    contextModulesPromise = Promise.all([
-      import('@/contexts/LanguageContext'),
-      import('@/contexts/AuthContext'),
-      import('@/contexts/DarkModeContext'),
-    ]).then(([languageModule, authModule, darkModeModule]) => {
-      contextModulesLoaded = true;
-      return {
-        useLanguage: languageModule.useLanguage,
-        useAuth: authModule.useAuth,
-        useDarkMode: darkModeModule.useDarkMode,
-      };
-    });
-  }
-  return contextModulesPromise;
-};
-
-// Import statici rimossi - ora caricati dinamicamente
-// import { useLanguage } from '@/contexts/LanguageContext';
-// import { useAuth } from '@/contexts/AuthContext';
-// import { useDarkMode } from '@/contexts/DarkModeContext';
+// Import statici dei context hooks - OK perché i context modules non valutano codice durante import
+// Il problema TDZ è dentro i context modules stessi, non qui
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useDarkMode } from '@/contexts/DarkModeContext';
 // Servizi importati dinamicamente per evitare TDZ
 import { ChatMessage } from '@/types/chat';
 import type { DashboardStats } from '@/lib/dashboardService';
@@ -160,21 +133,9 @@ interface ToolExecution {
 }
 
 // Componente interno che usa i context hooks
-// Questo componente viene renderizzato solo DOPO che i context modules sono stati caricati dal wrapper
-// Gli hook vengono sempre chiamati (non condizionalmente) per rispettare le regole di React
-function UnifiedDashboardPageContent({
-  contextModules,
-}: {
-  contextModules: {
-    useLanguage: typeof import('@/contexts/LanguageContext').useLanguage;
-    useAuth: typeof import('@/contexts/AuthContext').useAuth;
-    useDarkMode: typeof import('@/contexts/DarkModeContext').useDarkMode;
-  };
-}) {
+// Gli hook vengono sempre chiamati nello stesso ordine (regole di React)
+function UnifiedDashboardPageContent() {
   // Gli hook vengono SEMPRE chiamati - non condizionalmente
-  // I moduli sono garantiti essere disponibili perché passati come props dal wrapper
-  const { useLanguage, useAuth, useDarkMode } = contextModules;
-  
   const { t } = useLanguage();
   // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
   let authContext;
