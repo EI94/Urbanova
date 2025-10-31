@@ -1,5 +1,10 @@
+// 🔍 DEBUG TDZ: Log immediato per capire quando questo file viene valutato
+console.log(`🔍 [TDZ DEBUG] VoiceModeOverlay.tsx MODULO IMPORTATO - timestamp: ${Date.now()}, typeof window: ${typeof window}, stack:`, new Error().stack?.split('\n').slice(1, 5).join('\n'));
+
 import React from 'react';
 import { Mic, Volume2, VolumeX, X, Loader, MessageCircle, Zap } from 'lucide-react';
+
+console.log(`🔍 [TDZ DEBUG] VoiceModeOverlay.tsx - Imports completati, timestamp: ${Date.now()}`);
 
 interface VoiceModeOverlayProps {
   isOpen: boolean;
@@ -26,6 +31,7 @@ export function VoiceModeOverlay({
   isMuted,
   onExitVoiceMode,
 }: VoiceModeOverlayProps) {
+  console.log(`🔍 [TDZ DEBUG] VoiceModeOverlay FUNCTION RENDER - timestamp: ${Date.now()}, typeof window: ${typeof window}`);
   if (!isOpen) return null;
 
   const getStatusText = () => {
