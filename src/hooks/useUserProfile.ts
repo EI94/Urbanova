@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { firebaseUserProfileService } from '@/lib/firebaseUserProfileService';
 import { UserProfile, ProfileUpdate } from '@/types/userProfile';
 import { toast } from 'react-hot-toast';
@@ -16,12 +16,23 @@ export function useUserProfile(userId: string | undefined): UseUserProfileReturn
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  
+  // 🛡️ GUARD: Previene loop infinito
+  const isLoadingRef = useRef(false);
+  const loadedUserIdRef = useRef<string | null>(null);
 
   // Carica il profilo iniziale
   const loadProfile = useCallback(async () => {
     if (!userId) return;
+    
+    // 🛡️ GUARD: Se stiamo già caricando o abbiamo già caricato questo userId, SKIP
+    if (isLoadingRef.current || loadedUserIdRef.current === userId) {
+      console.log('⏭️ [useUserProfile] Skip - già caricato o in caricamento per:', userId);
+      return;
+    }
 
     try {
+      isLoadingRef.current = true;
       setLoading(true);
       console.log('🔄 [useUserProfile] Caricamento profilo per:', userId);
       
@@ -39,13 +50,16 @@ export function useUserProfile(userId: string | undefined): UseUserProfileReturn
 
       if (userProfile) {
         setProfile(userProfile);
+        loadedUserIdRef.current = userId; // Marca come caricato
         console.log('✅ [useUserProfile] Profilo caricato:', userProfile);
       }
     } catch (error) {
       console.error('❌ [useUserProfile] Errore caricamento profilo:', error);
-      toast.error('Errore nel caricamento del profilo');
+      // NON mostrare toast su errore - evita spam durante loop
+      // toast.error('Errore nel caricamento del profilo');
     } finally {
       setLoading(false);
+      isLoadingRef.current = false;
     }
   }, [userId]);
 
@@ -135,10 +149,11 @@ export function useUserProfile(userId: string | undefined): UseUserProfileReturn
 
   // Carica il profilo quando userId cambia
   useEffect(() => {
-    if (userId) {
+    if (userId && loadedUserIdRef.current !== userId) {
       loadProfile();
     }
-  }, [userId, loadProfile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]); // 🛡️ NON includere loadProfile nelle dipendenze per evitare loop
 
   return {
     profile,

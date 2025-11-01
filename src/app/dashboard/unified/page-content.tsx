@@ -46,7 +46,6 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDarkMode } from '@/contexts/DarkModeContext';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
 // Servizi importati dinamicamente per evitare TDZ
 import { ChatMessage } from '@/types/chat';
 import type { DashboardStats } from '@/lib/dashboardService';
@@ -912,10 +911,8 @@ export default function UnifiedDashboardPageContent() {
   }
 
   return (
-    <ErrorBoundary>
-      <DashboardLayout title="Dashboard">
-
-        <div className={`flex-1 p-6 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <DashboardLayout title="Dashboard">
+      <div className={`flex-1 p-6 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
         {/* Contenuto principale OS 2.0 */}
         {activeTab === 'overview' && (
           <div className="flex flex-col h-[calc(100vh-120px)] space-y-4">
@@ -1663,10 +1660,10 @@ export default function UnifiedDashboardPageContent() {
             </div>
           </div>
         )}
-        </div>
-        
-        {/* Feedback Widget */}
-        <FeedbackWidget />
+      </div>
+      
+      {/* Feedback Widget */}
+      <FeedbackWidget />
       
       {/* Notifications Panel */}
       <NotificationsPanel
@@ -1810,7 +1807,6 @@ export default function UnifiedDashboardPageContent() {
           setTranscribedText('');
         }}
       />
-      </DashboardLayout>
-    </ErrorBoundary>
+    </DashboardLayout>
   );
 }

@@ -139,6 +139,10 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
   });
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [workspaces, setWorkspaces] = useState<any[]>([]);
+  
+  // 🛡️ GUARD: Previene loop infinito nel caricamento dati
+  const isLoadingDataRef = useRef(false);
+  const loadedUserIdRef = useRef<string | null>(null);
 
   // 🛡️ GUARD: Inizializza mounted dopo il mount
   useEffect(() => {
@@ -260,68 +264,80 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
     // Non caricare nulla se non siamo ancora montati
     if (!mounted) return;
     
+    const userId = auth && typeof auth === 'object' && 'currentUser' in auth ? auth.currentUser?.uid : null;
+    
+    // 🛡️ GUARD: Se stiamo già caricando o abbiamo già caricato questo userId, SKIP
+    if (!userId || isLoadingDataRef.current || loadedUserIdRef.current === userId) {
+      if (loadedUserIdRef.current === userId) {
+        console.log('⏭️ [DashboardLayout] Skip - dati già caricati per:', userId);
+      }
+      return;
+    }
+    
     const loadData = async () => {
       try {
-        if (auth && typeof auth === 'object' && 'currentUser' in auth && auth.currentUser?.uid) {
-          console.log('🔄 [DashboardLayout] Caricamento dati per utente:', auth.currentUser.uid);
-          
-          // Carica notifiche con gestione errori - import dinamico
-          try {
-            const { firebaseNotificationService } = await import('@/lib/firebaseNotificationService');
-            const notificationsData = await firebaseNotificationService.getNotificationStats(auth.currentUser?.uid || '');
-            setNotifications(notificationsData);
-            console.log('✅ [DashboardLayout] Notifiche caricate:', notificationsData);
-          } catch (notificationError) {
-            console.error('❌ [DashboardLayout] Errore caricamento notifiche:', notificationError);
-            // Non bloccare il caricamento se le notifiche falliscono
-            setNotifications({
-              unread: 0, 
-              total: 0, 
-              read: 0, 
-              dismissed: 0, 
-              byType: {}, 
-            });
-          }
-          
-          // Carica profilo utente con gestione errori - import dinamico
-          try {
-            const { firebaseUserProfileService } = await import('@/lib/firebaseUserProfileService');
-            const profileData = await firebaseUserProfileService.getUserProfile(auth.currentUser?.uid || '');
-            setUserProfile(profileData);
-            console.log('✅ [DashboardLayout] Profilo caricato:', profileData);
-          } catch (profileError) {
-            console.error('❌ [DashboardLayout] Errore caricamento profilo:', profileError);
-            // Non bloccare il caricamento se il profilo fallisce
-            setUserProfile(null);
-          }
-          
-          // Carica workspace dell'utente con gestione errori
-          try {
-            const { workspaceService } = await import('@/lib/workspaceService');
-            const workspaceData = await workspaceService.getWorkspacesByUser(auth.currentUser?.uid || '');
-            setWorkspaces(workspaceData);
-            console.log('✅ [DashboardLayout] Workspace caricati:', workspaceData);
-          } catch (workspaceError) {
-            console.error('❌ [DashboardLayout] Errore caricamento workspace:', workspaceError);
-            // Non bloccare il caricamento se i workspace falliscono
-            setWorkspaces([]);
-          }
-          
-          console.log('✅ [DashboardLayout] Caricamento dati completato');
-        } else {
-          console.log('⚠️ [DashboardLayout] Nessun utente autenticato, skip caricamento dati');
+        isLoadingDataRef.current = true;
+        console.log('🔄 [DashboardLayout] Caricamento dati per utente:', userId);
+        
+        // Carica notifiche con gestione errori - import dinamico
+        try {
+          const { firebaseNotificationService } = await import('@/lib/firebaseNotificationService');
+          const notificationsData = await firebaseNotificationService.getNotificationStats(userId || '');
+          setNotifications(notificationsData);
+          console.log('✅ [DashboardLayout] Notifiche caricate:', notificationsData);
+        } catch (notificationError) {
+          console.error('❌ [DashboardLayout] Errore caricamento notifiche:', notificationError);
+          // Non bloccare il caricamento se le notifiche falliscono
+          setNotifications({
+            unread: 0, 
+            total: 0, 
+            read: 0, 
+            dismissed: 0, 
+            byType: {}, 
+          });
         }
+        
+        // Carica profilo utente con gestione errori - import dinamico
+        try {
+          const { firebaseUserProfileService } = await import('@/lib/firebaseUserProfileService');
+          const profileData = await firebaseUserProfileService.getUserProfile(userId || '');
+          setUserProfile(profileData);
+          console.log('✅ [DashboardLayout] Profilo caricato:', profileData);
+        } catch (profileError) {
+          console.error('❌ [DashboardLayout] Errore caricamento profilo:', profileError);
+          // Non bloccare il caricamento se il profilo fallisce
+          setUserProfile(null);
+        }
+        
+        // Carica workspace dell'utente con gestione errori
+        try {
+          const { workspaceService } = await import('@/lib/workspaceService');
+          const workspaceData = await workspaceService.getWorkspacesByUser(userId || '');
+          setWorkspaces(workspaceData);
+          console.log('✅ [DashboardLayout] Workspace caricati:', workspaceData);
+        } catch (workspaceError) {
+          console.error('❌ [DashboardLayout] Errore caricamento workspace:', workspaceError);
+          // Non bloccare il caricamento se i workspace falliscono
+          setWorkspaces([]);
+        }
+        
+        // Marca come caricato
+        loadedUserIdRef.current = userId;
+        console.log('✅ [DashboardLayout] Caricamento dati completato');
       } catch (error) {
         console.error('❌ [DashboardLayout] Errore generale caricamento dati:', error);
         // Non bloccare l'app per errori di caricamento dati
+      } finally {
+        isLoadingDataRef.current = false;
       }
     };
 
     // Carica solo se l'utente è autenticato e siamo montati
-    if (auth && typeof auth === 'object' && 'currentUser' in auth && auth.currentUser?.uid) {
+    if (userId) {
       loadData();
     }
-  }, [mounted, auth && typeof auth === 'object' && 'currentUser' in auth ? auth.currentUser?.uid : null]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted, auth && typeof auth === 'object' && 'currentUser' in auth ? auth.currentUser?.uid : null]); // 🛡️ Dipendenze specifiche per evitare loop
 
   const handleLogout = async () => {
     try {
