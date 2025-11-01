@@ -132,9 +132,9 @@ interface ToolExecution {
   error?: string;
 }
 
-// Componente interno che usa i context hooks
-// Gli hook vengono sempre chiamati nello stesso ordine (regole di React)
-function UnifiedDashboardPageContent() {
+// Componente principale - gli hook vengono sempre chiamati nello stesso ordine (regole di React)
+export default function UnifiedDashboardPageContent() {
+  console.log(`🔍 [TDZ DEBUG] UnifiedDashboardPageContent FUNCTION RENDER - timestamp: ${Date.now()}, typeof window: ${typeof window}`);
   // Gli hook vengono SEMPRE chiamati - non condizionalmente
   const { t } = useLanguage();
   // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
@@ -1806,76 +1806,4 @@ function UnifiedDashboardPageContent() {
       />
     </DashboardLayout>
   );
-}
-
-// Wrapper esterno che carica i context modules prima di renderizzare il componente
-export default function UnifiedDashboardPage() {
-  console.log(`🔍 [TDZ DEBUG] UnifiedDashboardPage FUNCTION RENDER - timestamp: ${Date.now()}, typeof window: ${typeof window}`);
-  // 🛡️ GUARD: Renderizza solo dopo mount client per evitare TDZ
-  const [mounted, setMounted] = useState(false);
-  const [contextsReady, setContextsReady] = useState(false);
-  
-  useEffect(() => {
-    console.log(`🔍 [TDZ DEBUG] UnifiedDashboardPage useEffect MOUNT - timestamp: ${Date.now()}, typeof window: ${typeof window}`);
-    // Aspetta che il DOM sia completamente pronto
-    if (typeof window !== 'undefined') {
-      // Carica context modules in modo asincrono
-      loadContextModules().then(() => {
-        console.log(`🔍 [TDZ DEBUG] Context modules caricati, timestamp: ${Date.now()}`);
-        setContextsReady(true);
-        // Doppio ritardo per assicurarsi che tutti i moduli siano inizializzati
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            setMounted(true);
-          });
-        });
-      }).catch((error) => {
-        console.error('❌ [UnifiedDashboard] Errore caricamento context modules:', error);
-        // Prova comunque a mountare con fallback
-        setContextsReady(true);
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            setMounted(true);
-          });
-        });
-      });
-    }
-  }, []);
-  
-  if (!contextsReady || !mounted) {
-    return (
-      <div className="min-h-screen bg-base-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-blue-600 text-white shadow-lg mb-4 animate-pulse">
-            <Building2 className="w-8 h-8" />
-          </div>
-          <h1 className="text-2xl font-bold text-slate-800">Urbanova</h1>
-          <p className="text-slate-500 mt-2">Caricamento...</p>
-        </div>
-      </div>
-    );
-  }
-  
-  // Carica i moduli e passa al componente interno
-  const [contextModules, setContextModules] = useState<{
-    useLanguage: typeof import('@/contexts/LanguageContext').useLanguage;
-    useAuth: typeof import('@/contexts/AuthContext').useAuth;
-    useDarkMode: typeof import('@/contexts/DarkModeContext').useDarkMode;
-  } | null>(null);
-  
-  if (!contextModules) {
-    return (
-      <div className="min-h-screen bg-base-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-blue-600 text-white shadow-lg mb-4 animate-pulse">
-            <Building2 className="w-8 h-8" />
-          </div>
-          <h1 className="text-2xl font-bold text-slate-800">Urbanova</h1>
-          <p className="text-slate-500 mt-2">Caricamento moduli...</p>
-        </div>
-      </div>
-    );
-  }
-  
-  return <UnifiedDashboardPageContent contextModules={contextModules} />;
 }
