@@ -912,9 +912,10 @@ export default function UnifiedDashboardPageContent() {
   }
 
   return (
-    <DashboardLayout title="Dashboard">
+    <ErrorBoundary>
+      <DashboardLayout title="Dashboard">
 
-      <div className={`flex-1 p-6 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <div className={`flex-1 p-6 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
         {/* Contenuto principale OS 2.0 */}
         {activeTab === 'overview' && (
           <div className="flex flex-col h-[calc(100vh-120px)] space-y-4">
@@ -1662,10 +1663,10 @@ export default function UnifiedDashboardPageContent() {
             </div>
           </div>
         )}
-      </div>
-      
-      {/* Feedback Widget */}
-      <FeedbackWidget />
+        </div>
+        
+        {/* Feedback Widget */}
+        <FeedbackWidget />
       
       {/* Notifications Panel */}
       <NotificationsPanel
