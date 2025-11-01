@@ -55,24 +55,30 @@ export function VoiceAIChatGPT({
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
 
-  // 🎯 Gestione click principale - SOLO PERMESSI NATIVI BROWSER
-  const handleMainClick = useCallback(async () => {
-    if (disabled) return;
-    
-    if (state === 'listening') {
-      stopRecording();
-    } else if (state === 'speaking') {
-      speechSynthesis.cancel();
-      setState('idle');
-      onSpeaking?.(false);
-    } else if (state === 'error') {
-      setError(null);
-      setState('idle');
-    } else {
-      // 🚀 DIRETTO ALLA REGISTRAZIONE - Il browser gestirà i permessi
-      await startRecording();
+  // 🛑 Ferma registrazione (DEFINITA PRIMA per evitare TDZ)
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop();
+      console.log('🛑 [VoiceAI] Registrazione fermata');
     }
-  }, [disabled, state, stopRecording, onSpeaking, startRecording]);
+    
+    // 🧹 CLEANUP AUDIO CONTEXT
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+    
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    
+    // 🧹 CLEANUP TIMEOUT SILENZIO
+    if (silenceTimeoutRef.current) {
+      clearTimeout(silenceTimeoutRef.current);
+      silenceTimeoutRef.current = null;
+    }
+  }, []);
 
   // 🎤 Avvia registrazione audio con rilevamento automatico fine parlato
   const startRecording = useCallback(async () => {
@@ -194,30 +200,24 @@ export function VoiceAIChatGPT({
     }
   }, []);
 
-  // 🛑 Ferma registrazione
-  const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      mediaRecorderRef.current.stop();
-      console.log('🛑 [VoiceAI] Registrazione fermata');
-    }
+  // 🎯 Gestione click principale - SOLO PERMESSI NATIVI BROWSER (DOPO stopRecording/startRecording)
+  const handleMainClick = useCallback(async () => {
+    if (disabled) return;
     
-    // 🧹 CLEANUP AUDIO CONTEXT
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-      audioContextRef.current = null;
+    if (state === 'listening') {
+      stopRecording();
+    } else if (state === 'speaking') {
+      speechSynthesis.cancel();
+      setState('idle');
+      onSpeaking?.(false);
+    } else if (state === 'error') {
+      setError(null);
+      setState('idle');
+    } else {
+      // 🚀 DIRETTO ALLA REGISTRAZIONE - Il browser gestirà i permessi
+      await startRecording();
     }
-    
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-    
-    // 🧹 CLEANUP TIMEOUT SILENZIO
-    if (silenceTimeoutRef.current) {
-      clearTimeout(silenceTimeoutRef.current);
-      silenceTimeoutRef.current = null;
-    }
-  }, []);
+  }, [disabled, state, stopRecording, onSpeaking, startRecording]);
 
   // 📝 Trascrizione audio con Whisper + Fallback Web Speech
   const transcribeAudio = useCallback(async (audioBlob: Blob) => {
