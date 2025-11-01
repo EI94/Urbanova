@@ -5,6 +5,24 @@
 if (typeof window !== 'undefined') {
   console.log('🚨 [GLOBAL ERROR INTERCEPTOR] Inizializzazione interceptor globale...');
   
+  // 🚨 CATTURA TUTTI GLI ERRORI NON GESTITI (inclusi React)
+  window.addEventListener('error', (event) => {
+    console.error('🔴🔴🔴 [GLOBAL] ERRORE NON GESTITO CATTURATO:', event.error);
+    console.error('🔴 Message:', event.message);
+    console.error('🔴 Filename:', event.filename);
+    console.error('🔴 Line:', event.lineno, 'Column:', event.colno);
+    console.error('🔴 Stack:', event.error?.stack);
+    // NON previeni il default - lascia che Next.js mostri l'ErrorBoundary
+  });
+  
+  // 🚨 CATTURA TUTTE LE PROMISE REJECTIONS NON GESTITE
+  window.addEventListener('unhandledrejection', (event) => {
+    console.error('🔴🔴🔴 [GLOBAL] PROMISE REJECTION NON GESTITA:', event.reason);
+    console.error('🔴 Reason:', event.reason);
+    console.error('🔴 Stack:', event.reason?.stack);
+    // NON previeni il default
+  });
+  
   // 🚨 INTERCETTA TUTTI GLI ERRORI CSS-IN-JS
   const originalConsoleError = console.error;
   console.error = function(...args: any[]) {
