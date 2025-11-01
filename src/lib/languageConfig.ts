@@ -1,6 +1,13 @@
 // Configurazione lingue supportate - Urbanova AI
+
+// 🔍 DEBUG TDZ: Log immediato per capire quando questo file viene valutato
+console.log(`🔍 [TDZ DEBUG] languageConfig.ts MODULO IMPORTATO - timestamp: ${Date.now()}, typeof window: ${typeof window}, stack:`, new Error().stack?.split('\n').slice(1, 5).join('\n'));
+
 import { LanguageConfig, SupportedLanguage } from '@/types/language';
 
+console.log(`🔍 [TDZ DEBUG] languageConfig.ts - Types importati, timestamp: ${Date.now()}`);
+
+console.log(`🔍 [TDZ DEBUG] languageConfig.ts - Definendo SUPPORTED_LANGUAGES, timestamp: ${Date.now()}`);
 export const SUPPORTED_LANGUAGES: Record<SupportedLanguage, LanguageConfig> = {
   it: {
     code: 'it',
@@ -133,10 +140,14 @@ export const SUPPORTED_LANGUAGES: Record<SupportedLanguage, LanguageConfig> = {
     },
   },
 };
+console.log(`🔍 [TDZ DEBUG] languageConfig.ts - SUPPORTED_LANGUAGES definito, timestamp: ${Date.now()}`);
 
+console.log(`🔍 [TDZ DEBUG] languageConfig.ts - Definendo DEFAULT_LANGUAGE, timestamp: ${Date.now()}`);
 export const DEFAULT_LANGUAGE: SupportedLanguage = 'it';
+console.log(`🔍 [TDZ DEBUG] languageConfig.ts - DEFAULT_LANGUAGE definito: ${DEFAULT_LANGUAGE}, timestamp: ${Date.now()}`);
 
 export const FALLBACK_LANGUAGE: SupportedLanguage = 'en';
+console.log(`🔍 [TDZ DEBUG] languageConfig.ts - FALLBACK_LANGUAGE definito: ${FALLBACK_LANGUAGE}, timestamp: ${Date.now()}`);
 
 // Funzione per ottenere la configurazione di una lingua
 export function getLanguageConfig(language: SupportedLanguage): LanguageConfig {
