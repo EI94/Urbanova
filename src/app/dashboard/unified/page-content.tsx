@@ -158,6 +158,22 @@ function UnifiedDashboardPageContent() {
   >('overview');
   
   // Chat history e quick actions
+  // 🛡️ GUARD: Renderizza solo dopo mount client per evitare TDZ
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    console.log(`🔍 [TDZ DEBUG] UnifiedDashboardPageContent useEffect MOUNT - timestamp: ${Date.now()}, typeof window: ${typeof window}`);
+    // Aspetta che il DOM sia completamente pronto
+    if (typeof window !== 'undefined') {
+      // Doppio ritardo per assicurarsi che tutti i moduli siano inizializzati
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setMounted(true);
+        });
+      });
+    }
+  }, []);
+  
   const [chatHistory, setChatHistory] = useState<ChatSession[]>([]);
   const [showChatHistory, setShowChatHistory] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(true);
@@ -1846,12 +1862,6 @@ export default function UnifiedDashboardPage() {
     useAuth: typeof import('@/contexts/AuthContext').useAuth;
     useDarkMode: typeof import('@/contexts/DarkModeContext').useDarkMode;
   } | null>(null);
-  
-  useEffect(() => {
-    loadContextModules().then(modules => {
-      setContextModules(modules);
-    });
-  }, []);
   
   if (!contextModules) {
     return (
