@@ -3,7 +3,7 @@
 import { MessageSquare, Bell, User, Users, Settings, X, Building2, BarChart3, FileText, Euro } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 
 // Dynamic imports per evitare TDZ - componenti renderizzati dopo mount
