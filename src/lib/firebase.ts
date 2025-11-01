@@ -227,6 +227,9 @@ export const storage = storageExport;
 
 console.log(`🔍 [TDZ DEBUG] firebase.ts - Export auth/db/storage completato, timestamp: ${Date.now()}`);
 
+// 🔥 EXPORT HELPERS per ottenere istanze REALI (non Proxy) per uso in firebaseUtils.ts
+export { getDbLazy, getAuthLazy, getStorageLazy };
+
 // Configurazione per gestire errori di connessione - solo lato client e dopo init
 if (typeof window !== 'undefined') {
   // Ritarda la configurazione errori fino a quando Firebase è inizializzato
