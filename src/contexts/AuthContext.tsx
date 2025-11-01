@@ -1,6 +1,11 @@
 'use client';
 
+// 🔍 DEBUG TDZ: Log immediato per capire quando questo file viene valutato
+console.log(`🔍 [TDZ DEBUG] AuthContext.tsx MODULO IMPORTATO - timestamp: ${Date.now()}, typeof window: ${typeof window}, stack:`, new Error().stack?.split('\n').slice(1, 5).join('\n'));
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
+console.log(`🔍 [TDZ DEBUG] AuthContext.tsx - React importato, timestamp: ${Date.now()}`);
 
 // Lazy loader per firebaseAuthService - caricato solo quando necessario
 let firebaseAuthServicePromise: Promise<typeof import('@/lib/firebaseAuthService')> | null = null;

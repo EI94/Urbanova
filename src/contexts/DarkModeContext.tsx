@@ -1,6 +1,11 @@
 'use client';
 
+// 🔍 DEBUG TDZ: Log immediato per capire quando questo file viene valutato
+console.log(`🔍 [TDZ DEBUG] DarkModeContext.tsx MODULO IMPORTATO - timestamp: ${Date.now()}, typeof window: ${typeof window}, stack:`, new Error().stack?.split('\n').slice(1, 5).join('\n'));
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
+
+console.log(`🔍 [TDZ DEBUG] DarkModeContext.tsx - React importato, timestamp: ${Date.now()}`);
 
 interface DarkModeContextType {
   darkMode: boolean;
