@@ -2,11 +2,9 @@
 // Centralizza registrazione e export skill
 
 // 🔍 DEBUG TDZ: Log immediato per capire quando questo file viene valutato
-console.log(`🔍 [TDZ DEBUG] skills/index.ts MODULO IMPORTATO - timestamp: ${Date.now()}, typeof window: ${typeof window}, stack:`, new Error().stack?.split('\n').slice(1, 5).join('\n'));
 
 import { Skill, SkillMeta } from './SkillCatalog';
 
-console.log(`🔍 [TDZ DEBUG] skills/index.ts - SkillCatalog importato, timestamp: ${Date.now()}`);
 
 // LAZY: Import dinamico per evitare TDZ durante bundle - NON importare subito
 // import * as businessPlanRun from './businessPlan.run';
@@ -43,9 +41,7 @@ let _SKILLS: Skill[] | null = null;
 // LAZY ASYNC: Carica skill modules solo quando necessario con import() asincrono
 // NON usare require() perché webpack lo valuta comunque durante bundle
 export async function getSKILLSAsync(): Promise<Skill[]> {
-  console.log(`🔍 [TDZ DEBUG] getSKILLSAsync() CHIAMATA - timestamp: ${Date.now()}, _SKILLS loaded: ${!!_SKILLS}, typeof window: ${typeof window}`);
   if (!_SKILLS) {
-    console.log(`🔍 [TDZ DEBUG] getSKILLSAsync() - Inizio caricamento skill modules, timestamp: ${Date.now()}`);
     // Carica skill modules solo quando necessario - ASYNC import
     const [
       businessPlanRun,
@@ -69,7 +65,6 @@ export async function getSKILLSAsync(): Promise<Skill[]> {
       import('./budgetSuppliers.tools'),
     ]);
     
-    console.log(`🔍 [TDZ DEBUG] getSKILLSAsync() - Tutti i moduli skill caricati, timestamp: ${Date.now()}, ora creo array SKILLS`);
     
     _SKILLS = [
       // Business Plan Skills
@@ -99,9 +94,7 @@ export async function getSKILLSAsync(): Promise<Skill[]> {
       createSkill(budgetSuppliersTools.syncBusinessPlanMeta, budgetSuppliersTools.syncBusinessPlanInvoke),
     ];
     
-    console.log(`🔍 [TDZ DEBUG] getSKILLSAsync() - Array SKILLS creato con ${_SKILLS.length} skill, timestamp: ${Date.now()}`);
   }
-  console.log(`🔍 [TDZ DEBUG] getSKILLSAsync() - Return SKILLS (${_SKILLS.length} items), timestamp: ${Date.now()}`);
   return _SKILLS;
 }
 
@@ -116,9 +109,7 @@ export function getSKILLS(): Skill[] {
 // Export per compatibilità - RIMOSSO completamente perché new Proxy() viene valutato durante bundle
 // Usa getSKILLS() direttamente invece di SKILLS
 // Se qualcuno importa SKILLS, restituisce array vuoto (compatibilità)
-console.log(`🔍 [TDZ DEBUG] skills/index.ts - Export const SKILLS valutato, timestamp: ${Date.now()}, typeof window: ${typeof window}`);
 export const SKILLS: Skill[] = [];
-console.log(`🔍 [TDZ DEBUG] skills/index.ts - Export const SKILLS completato, timestamp: ${Date.now()}`);
 
 /**
  * Metadata di tutte le skill (per discovery) - LAZY ASYNC

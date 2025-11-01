@@ -1,27 +1,17 @@
 'use client';
 
-// 🔍 DEBUG TDZ: Log immediato per capire quando questo file viene valutato
-console.log(`🔍 [TDZ DEBUG] VoiceAIChatGPT.tsx MODULO IMPORTATO - timestamp: ${Date.now()}, typeof window: ${typeof window}, stack:`, new Error().stack?.split('\n').slice(1, 5).join('\n'));
-
 // 🎤 VOICE AI CHATGPT STYLE - Design Johnny Ive
 // Esperienza identica a ChatGPT con permessi nativi browser e overlay fluido
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-
-console.log(`🔍 [TDZ DEBUG] VoiceAIChatGPT.tsx - React importato, timestamp: ${Date.now()}`);
 import { Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
-console.log(`🔍 [TDZ DEBUG] VoiceAIChatGPT.tsx - lucide-react importato, timestamp: ${Date.now()}`);
 import { cn } from '@/lib/utils';
-console.log(`🔍 [TDZ DEBUG] VoiceAIChatGPT.tsx - utils importato, timestamp: ${Date.now()}`);
-// LAZY: Import dinamico per evitare TDZ - VoiceModeOverlay viene valutato durante bundle se importato staticamente
-// import { VoiceModeOverlay } from '@/components/ui/VoiceModeOverlay';
 import dynamic from 'next/dynamic';
-console.log(`🔍 [TDZ DEBUG] VoiceAIChatGPT.tsx - dynamic importato, timestamp: ${Date.now()}`);
+
 const VoiceModeOverlay = dynamic(
   () => import('@/components/ui/VoiceModeOverlay').then(mod => ({ default: mod.VoiceModeOverlay })),
   { ssr: false }
 );
-console.log(`🔍 [TDZ DEBUG] VoiceAIChatGPT.tsx - VoiceModeOverlay dynamic definito, timestamp: ${Date.now()}`);
 
 interface VoiceAIChatGPTProps {
   onTranscription?: (text: string) => void;
@@ -40,7 +30,6 @@ export function VoiceAIChatGPT({
   disabled = false,
   className 
 }: VoiceAIChatGPTProps) {
-  console.log(`🔍 [TDZ DEBUG] VoiceAIChatGPT FUNCTION RENDER - timestamp: ${Date.now()}, typeof window: ${typeof window}`);
   
   const [state, setState] = useState<VoiceAIState>('idle');
   const [isMuted, setIsMuted] = useState(false);

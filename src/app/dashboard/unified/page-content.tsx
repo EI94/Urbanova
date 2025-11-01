@@ -1,10 +1,6 @@
 'use client';
 
-console.log(`🔍 [TDZ DEBUG] unified/page-content.tsx MODULO IMPORTATO - timestamp: ${Date.now()}, typeof window: ${typeof window}, stack:`, new Error().stack?.split('\n').slice(1, 5).join('\n'));
-
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-
-console.log(`🔍 [TDZ DEBUG] unified/page-content.tsx - React importato, timestamp: ${Date.now()}`);
 import Link from 'next/link';
 import {
   Search,
@@ -137,7 +133,6 @@ interface ToolExecution {
 
 // Componente principale - Hook React devono essere SEMPRE chiamati (non condizionalmente)
 export default function UnifiedDashboardPageContent() {
-  console.log(`🔍 [TDZ DEBUG] UnifiedDashboardPageContent RENDER - timestamp: ${Date.now()}, typeof window: ${typeof window}`);
   
   // Hook React devono essere SEMPRE chiamati - non condizionalmente
   const { t } = useLanguage();
@@ -166,7 +161,6 @@ export default function UnifiedDashboardPageContent() {
   const [mounted, setMounted] = useState(false);
   
   useEffect(() => {
-    console.log(`🔍 [TDZ DEBUG] UnifiedDashboardPageContent useEffect MOUNT - timestamp: ${Date.now()}, typeof window: ${typeof window}`);
     // Aspetta che il DOM sia completamente pronto
     if (typeof window !== 'undefined') {
       // Doppio ritardo per assicurarsi che tutti i moduli siano inizializzati

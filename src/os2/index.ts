@@ -175,26 +175,19 @@ export class UrbanovaOS2 {
   private loadRealSkills(): void {
     // LAZY: Carica skills solo quando necessario, in modo asincrono per evitare TDZ
     // NON usare require() - usa SOLO async import()
-    console.log(`🔍 [TDZ DEBUG] loadRealSkills() CHIAMATA - timestamp: ${Date.now()}, typeof window: ${typeof window}`);
     if (typeof window !== 'undefined') {
-      console.log(`🔍 [TDZ DEBUG] loadRealSkills() - Inizio import('./skills/index'), timestamp: ${Date.now()}`);
       import('./skills/index')
         .then(async (skillsModule) => {
-          console.log(`🔍 [TDZ DEBUG] loadRealSkills() - skills/index importato, timestamp: ${Date.now()}, keys:`, Object.keys(skillsModule));
           // Usa getSKILLSAsync() per caricamento asincrono sicuro
           const getSKILLSAsync = skillsModule.getSKILLSAsync;
-          console.log(`🔍 [TDZ DEBUG] loadRealSkills() - getSKILLSAsync type: ${typeof getSKILLSAsync}, timestamp: ${Date.now()}`);
           if (typeof getSKILLSAsync === 'function') {
             try {
-              console.log(`🔍 [TDZ DEBUG] loadRealSkills() - Chiamo getSKILLSAsync(), timestamp: ${Date.now()}`);
               const realSkills = await getSKILLSAsync();
-              console.log(`🔍 [TDZ DEBUG] loadRealSkills() - getSKILLSAsync() completato, ${realSkills?.length || 0} skill, timestamp: ${Date.now()}`);
               if (realSkills && Array.isArray(realSkills) && realSkills.length > 0) {
                 this.skillCatalog.loadRealSkills(realSkills);
                 console.log(`✅ [OS2] Caricate ${realSkills.length} skill reali`);
               }
             } catch (error) {
-              console.error(`🔍 [TDZ DEBUG] loadRealSkills() - ERRORE caricamento skill async:`, error);
               console.warn('⚠️ [OS2] Errore caricamento skill async:', error);
             }
           } else if (typeof skillsModule.default === 'function') {
@@ -733,7 +726,6 @@ export function getOS2(): UrbanovaOS2 {
 }
 
 // 🔍 DEBUG TDZ: Log immediato per capire quando questo file viene valutato
-console.log(`🔍 [TDZ DEBUG] os2/index.ts EXPORT SECTION - timestamp: ${Date.now()}, typeof window: ${typeof window}, stack:`, new Error().stack?.split('\n').slice(1, 5).join('\n'));
 
 // Export types
 export type { OS2Request, OS2Response };
@@ -742,5 +734,4 @@ export { PlanExecutor } from './executor/PlanExecutor';
 export { SkillCatalog } from './skills/SkillCatalog';
 export * from './planner/ActionPlan';
 
-console.log(`🔍 [TDZ DEBUG] os2/index.ts - Export completato, timestamp: ${Date.now()}`);
 

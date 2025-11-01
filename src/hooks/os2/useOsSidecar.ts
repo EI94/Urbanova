@@ -1,14 +1,9 @@
 'use client';
 
-// 🔍 DEBUG TDZ: Log immediato per capire quando questo file viene valutato
-console.log(`🔍 [TDZ DEBUG] useOsSidecar.ts MODULO IMPORTATO - timestamp: ${Date.now()}, typeof window: ${typeof window}, stack:`, new Error().stack?.split('\n').slice(1, 5).join('\n'));
-
 // 🎨 USE OS SIDECAR - State management per sidecar OS 2.0
 // Hook per open/close, filters, pinned views, keyboard shortcuts
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-
-console.log(`🔍 [TDZ DEBUG] useOsSidecar.ts - React hooks importati, timestamp: ${Date.now()}`);
 
 /**
  * Stato di un messaggio OS
@@ -115,7 +110,6 @@ interface UseOsSidecarState {
  * Hook principale
  */
 export function useOsSidecar(): UseOsSidecarState {
-  console.log(`🔍 [TDZ DEBUG] useOsSidecar() HOOK CHIAMATO - timestamp: ${Date.now()}`);
   // State
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<OsMode>('ask_to_act');

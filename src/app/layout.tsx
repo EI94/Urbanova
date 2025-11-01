@@ -71,7 +71,6 @@ export const metadata: Metadata = {
   manifest: '/site.webmanifest',
 };
 
-console.log(`🔍 [TDZ DEBUG] app/layout.tsx EXPORT default valutato - timestamp: ${Date.now()}, typeof window: ${typeof window}, stack:`, new Error().stack?.split('\n').slice(1, 5).join('\n'));
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

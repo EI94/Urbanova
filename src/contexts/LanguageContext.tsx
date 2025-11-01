@@ -1,11 +1,6 @@
 'use client';
 
-// 🔍 DEBUG TDZ: Log immediato per capire quando questo file viene valutato
-console.log(`🔍 [TDZ DEBUG] LanguageContext.tsx MODULO IMPORTATO - timestamp: ${Date.now()}, typeof window: ${typeof window}, stack:`, new Error().stack?.split('\n').slice(1, 5).join('\n'));
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-console.log(`🔍 [TDZ DEBUG] LanguageContext.tsx - React importato, timestamp: ${Date.now()}`);
 
 import {
   getLanguageConfig,
@@ -15,8 +10,6 @@ import {
   DEFAULT_LANGUAGE,
   FALLBACK_LANGUAGE,
 } from '@/lib/languageConfig';
-
-console.log(`🔍 [TDZ DEBUG] LanguageContext.tsx - languageConfig importato, timestamp: ${Date.now()}`);
 
 // Importa le traduzioni - lazy loading per evitare TDZ
 import { LanguageContextType, SupportedLanguage, LanguageSettings } from '@/types/language';
