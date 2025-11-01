@@ -357,13 +357,14 @@ match /deviceTokens/{tokenId} {
     // ============================================================================
     
     match /workspaces/{workspaceId} {
-      // Lettura: membri del workspace
+      // Lettura: owner O membri del workspace
       allow read: if isAuthenticated() && 
-                   exists(/databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid));
+                   (resource.data.ownerId == request.auth.uid ||
+                    exists(/databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid)));
       
       // Scrittura: owner del workspace
-      allow create, update, delete: if isAuthenticated() && 
-                                     resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && 
+                            resource.data.ownerId == request.auth.uid;
       
       // Permetti creazione workspace per utenti autenticati
       allow create: if isAuthenticated() && 
