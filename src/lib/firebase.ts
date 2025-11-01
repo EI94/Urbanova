@@ -59,13 +59,8 @@ const initializeFirebase = () => {
   console.log('🔥 [FIREBASE INIT] storage:', storageInstance);
 };
 
-// Inizializza Firebase immediatamente se siamo lato client (ma solo dopo window è disponibile)
-if (typeof window !== 'undefined') {
-  // Usa setTimeout per ritardare dopo che tutti i moduli sono stati inizializzati
-  setTimeout(() => {
-    initializeFirebase();
-  }, 0);
-}
+// NON inizializzare subito - lascia che i Proxy inizializzino al primo accesso
+// Questo evita race condition e TDZ durante module evaluation
 
 // Export getters che inizializzano se necessario
 export const getAuthInstance = () => {
@@ -193,38 +188,35 @@ const authExport = {} as ReturnType<typeof getAuth>;
 const dbExport = {} as ReturnType<typeof getFirestore>;
 const storageExport = {} as ReturnType<typeof getStorage>;
 
-// Crea Proxy handler che vengono definiti solo quando window è disponibile E dopo un delay
+// Crea Proxy IMMEDIATAMENTE se window è disponibile (nessun setTimeout per evitare race condition)
 if (typeof window !== 'undefined') {
-  // Ritarda la creazione dei Proxy fino al prossimo tick per evitare TDZ
-  setTimeout(() => {
-    try {
-      // Crea Proxy che delegano alle funzioni createAuthProxy/createDbProxy/createStorageProxy
-      const authProxy = new Proxy({} as ReturnType<typeof getAuth>, {
-        get(target, prop) {
-          return (createAuthProxy() as any)[prop];
-        }
-      });
-      
-      const dbProxy = new Proxy({} as ReturnType<typeof getFirestore>, {
-        get(target, prop) {
-          return (createDbProxy() as any)[prop];
-        }
-      });
-      
-      const storageProxy = new Proxy({} as ReturnType<typeof getStorage>, {
-        get(target, prop) {
-          return (createStorageProxy() as any)[prop];
-        }
-      });
-      
-      // Sostituisci i prototype degli oggetti export con i Proxy
-      Object.setPrototypeOf(authExport, authProxy);
-      Object.setPrototypeOf(dbExport, dbProxy);
-      Object.setPrototypeOf(storageExport, storageProxy);
-    } catch (e) {
-      console.warn('Firebase proxy init error:', e);
-    }
-  }, 0);
+  try {
+    // Crea Proxy che delegano alle funzioni createAuthProxy/createDbProxy/createStorageProxy
+    const authProxy = new Proxy({} as ReturnType<typeof getAuth>, {
+      get(target, prop) {
+        return (createAuthProxy() as any)[prop];
+      }
+    });
+    
+    const dbProxy = new Proxy({} as ReturnType<typeof getFirestore>, {
+      get(target, prop) {
+        return (createDbProxy() as any)[prop];
+      }
+    });
+    
+    const storageProxy = new Proxy({} as ReturnType<typeof getStorage>, {
+      get(target, prop) {
+        return (createStorageProxy() as any)[prop];
+      }
+    });
+    
+    // Sostituisci i prototype degli oggetti export con i Proxy
+    Object.setPrototypeOf(authExport, authProxy);
+    Object.setPrototypeOf(dbExport, dbProxy);
+    Object.setPrototypeOf(storageExport, storageProxy);
+  } catch (e) {
+    console.warn('Firebase proxy init error:', e);
+  }
 }
 
 console.log(`🔍 [TDZ DEBUG] firebase.ts - Export auth/db/storage valutato, timestamp: ${Date.now()}, typeof window: ${typeof window}, stack:`, new Error().stack?.split('\n').slice(1, 5).join('\n'));
