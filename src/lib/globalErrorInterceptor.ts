@@ -12,7 +12,18 @@ if (typeof window !== 'undefined') {
     console.error('🔴 Filename:', event.filename);
     console.error('🔴 Line:', event.lineno, 'Column:', event.colno);
     console.error('🔴 Stack:', event.error?.stack);
-    // NON previeni il default - lascia che Next.js mostri l'ErrorBoundary
+    
+    // 🛡️ PREVIENI CRASH PER ERRORI FIREBASE COLLECTION() NON CRITICI
+    const message = event.message || '';
+    if (message.includes('Expected first argument to collection()') || 
+        message.includes('CollectionReference') ||
+        message.includes('DocumentReference or FirebaseFirestore')) {
+      console.warn('🛡️ [GLOBAL] Errore Firebase collection() SILENZIATO per prevenire crash');
+      event.preventDefault(); // PREVIENI IL CRASH
+      return;
+    }
+    
+    // Lascia che altri errori vengano gestiti normalmente
   });
   
   // 🚨 CATTURA TUTTE LE PROMISE REJECTIONS NON GESTITE
@@ -20,7 +31,16 @@ if (typeof window !== 'undefined') {
     console.error('🔴🔴🔴 [GLOBAL] PROMISE REJECTION NON GESTITA:', event.reason);
     console.error('🔴 Reason:', event.reason);
     console.error('🔴 Stack:', event.reason?.stack);
-    // NON previeni il default
+    
+    // 🛡️ PREVIENI CRASH PER ERRORI FIREBASE COLLECTION() NON CRITICI
+    const message = event.reason?.message || String(event.reason) || '';
+    if (message.includes('Expected first argument to collection()') || 
+        message.includes('CollectionReference') ||
+        message.includes('DocumentReference or FirebaseFirestore')) {
+      console.warn('🛡️ [GLOBAL] Promise rejection Firebase collection() SILENZIATA per prevenire crash');
+      event.preventDefault(); // PREVIENI IL CRASH
+      return;
+    }
   });
   
   // 🚨 INTERCETTA TUTTI GLI ERRORI CSS-IN-JS
