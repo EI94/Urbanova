@@ -43,14 +43,6 @@ if (typeof window !== 'undefined') {
     db = getFirestore(app);
     storage = getStorage(app);
     
-      app: !!app,
-      auth: !!auth,
-      db: !!db,
-      dbType: db?.type,
-      dbConstructor: db?.constructor?.name,
-      storage: !!storage,
-    });
-    
     // Export globale per debug
     (window as any).__FIREBASE_APP = app;
     (window as any).__FIREBASE_AUTH = auth;
@@ -74,8 +66,3 @@ export const getStorageInstance = () => storage;
 
 // Export default
 export default app;
-
-  auth: !!auth,
-  db: !!db,
-  storage: !!storage,
-});
