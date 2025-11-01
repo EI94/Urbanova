@@ -1,11 +1,14 @@
 // Servizio Email per Urbanova AI Land Scraping
-import {addDoc,
+import {
+  addDoc,
+  collection,
   getDocs,
   updateDoc,
   doc,
   query,
   where,
-  orderBy } from 'firebase/firestore';
+  orderBy
+} from 'firebase/firestore';
 import { Resend } from 'resend';
 
 import { db } from './firebase';

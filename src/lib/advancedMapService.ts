@@ -1,4 +1,6 @@
-import {doc,
+import {
+  collection,
+  doc,
   setDoc,
   getDocs,
   getDoc,
@@ -8,7 +10,8 @@ import {doc,
   orderBy,
   limit,
   serverTimestamp,
-  GeoPoint } from 'firebase/firestore';
+  GeoPoint
+} from 'firebase/firestore';
 
 import { db } from './firebase';
 
