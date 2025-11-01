@@ -3,7 +3,6 @@
 
 // Carica solo lato client - non eseguire codice a livello di modulo per evitare TDZ
 if (typeof window !== 'undefined') {
-  console.log('🚨 [GLOBAL ERROR INTERCEPTOR] Inizializzazione interceptor globale...');
   
   // 🚨 CATTURA TUTTI GLI ERRORI NON GESTITI (inclusi React)
   window.addEventListener('error', (event) => {
@@ -66,7 +65,6 @@ if (typeof window !== 'undefined') {
     );
 
     if (isCSSError) {
-      console.log('🚨 [GLOBAL ERROR INTERCEPTOR] ERRORE CSS INTERCETTATO E SILENZIATO:', message);
       return; // NON propagare l'errore
     }
     
@@ -95,7 +93,6 @@ if (typeof window !== 'undefined') {
     );
 
     if (isCSSError) {
-      console.log('🚨 [GLOBAL ERROR INTERCEPTOR] ERRORE CSS GLOBALE INTERCETTATO E SILENZIATO:', errorMessage);
       return true; // Previeni il crash
     }
     
@@ -128,7 +125,6 @@ if (typeof window !== 'undefined') {
     );
 
     if (isCSSError) {
-      console.log('🚨 [GLOBAL ERROR INTERCEPTOR] PROMISE REJECTION CSS INTERCETTATA E SILENZIATA:', message);
       event.preventDefault(); // Previeni il crash
       return;
     }
@@ -174,7 +170,6 @@ if (typeof window !== 'undefined') {
     );
 
     if (isAuthError) {
-      console.log('🚨 [GLOBAL ERROR INTERCEPTOR] ERRORE AUTH INTERCETTATO E SILENZIATO:', message);
       return; // NON propagare l'errore
     }
     
@@ -216,7 +211,6 @@ if (typeof window !== 'undefined') {
     );
 
     if (isAuthError) {
-      console.log('🚨 [GLOBAL ERROR INTERCEPTOR] ERRORE AUTH GLOBALE INTERCETTATO E SILENZIATO:', errorMessage);
       return true; // Previeni il crash
     }
     
@@ -262,7 +256,6 @@ if (typeof window !== 'undefined') {
     );
 
     if (isAuthError) {
-      console.log('🚨 [GLOBAL ERROR INTERCEPTOR] PROMISE REJECTION AUTH INTERCETTATA E SILENZIATA:', message);
       event.preventDefault(); // Previeni il crash
       return;
     }
@@ -323,7 +316,6 @@ if (typeof window !== 'undefined') {
       );
 
       if (isCSSError || isAuthError) {
-        console.log('🚨 [GLOBAL ERROR INTERCEPTOR] EVENT ERROR INTERCETTATO E SILENZIATO:', message);
         event.preventDefault(); // Previeni il crash
         return;
       }
@@ -334,11 +326,9 @@ if (typeof window !== 'undefined') {
   const originalImport = window.import;
   if (originalImport) {
     window.import = function(module: string) {
-      console.log('🚨 [GLOBAL ERROR INTERCEPTOR] Dynamic import intercettato:', module);
       
       // Se è un import CSS, bloccalo
       if (module.includes('.css') || module.includes('styles') || module.includes('chunk-mgcl')) {
-        console.log('🚨 [GLOBAL ERROR INTERCEPTOR] Import CSS bloccato:', module);
         return Promise.resolve({}); // Ritorna un modulo vuoto
       }
       
@@ -353,7 +343,6 @@ if (typeof window !== 'undefined') {
     
     // Se è una richiesta CSS, bloccala
     if (url.includes('.css') || url.includes('styles') || url.includes('chunk-mgcl')) {
-      console.log('🚨 [GLOBAL ERROR INTERCEPTOR] Fetch CSS bloccato:', url);
       return Promise.resolve(new Response('', { status: 200, statusText: 'OK' }));
     }
     
@@ -366,13 +355,11 @@ if (typeof window !== 'undefined') {
     const element = originalCreateElement.call(document, tagName);
     
     if (tagName.toLowerCase() === 'style') {
-      console.log('🚨 [GLOBAL ERROR INTERCEPTOR] Creazione elemento style intercettata');
       
       // Override dei metodi problematici
       const originalAppendChild = element.appendChild;
       element.appendChild = function(child: Node) {
         if (child.nodeType === Node.TEXT_NODE && child.textContent?.includes('@import')) {
-          console.log('🚨 [GLOBAL ERROR INTERCEPTOR] @import bloccato in style element');
           return child; // Non fare nulla
         }
         return originalAppendChild.call(element, child);
@@ -388,13 +375,11 @@ if (typeof window !== 'undefined') {
     const element = originalCreateElementNS.call(document, namespaceURI, qualifiedName);
     
     if (qualifiedName.toLowerCase() === 'link') {
-      console.log('🚨 [GLOBAL ERROR INTERCEPTOR] Creazione elemento link intercettata');
       
       // Override dell'attributo href
       const originalSetAttribute = element.setAttribute;
       element.setAttribute = function(name: string, value: string) {
         if (name.toLowerCase() === 'href' && (value.includes('.css') || value.includes('styles'))) {
-          console.log('🚨 [GLOBAL ERROR INTERCEPTOR] Link CSS bloccato:', value);
           return; // Non impostare l'attributo
         }
         return originalSetAttribute.call(element, name, value);
@@ -408,7 +393,6 @@ if (typeof window !== 'undefined') {
   const originalInsertRule = CSSStyleSheet.prototype.insertRule;
   CSSStyleSheet.prototype.insertRule = function(rule: string, index?: number) {
     if (rule.includes('@import')) {
-      console.log('🚨 [GLOBAL ERROR INTERCEPTOR] @import bloccato in insertRule:', rule);
       return 0; // Ritorna un indice valido
     }
     return originalInsertRule.call(this, rule, index);
@@ -418,7 +402,6 @@ if (typeof window !== 'undefined') {
   const originalReplaceSync = CSSStyleSheet.prototype.replaceSync;
   CSSStyleSheet.prototype.replaceSync = function(text: string) {
     if (text.includes('@import')) {
-      console.log('🚨 [GLOBAL ERROR INTERCEPTOR] @import bloccato in replaceSync');
       return; // Non fare nulla
     }
     return originalReplaceSync.call(this, text);
@@ -428,19 +411,15 @@ if (typeof window !== 'undefined') {
   const originalReplace = CSSStyleSheet.prototype.replace;
   CSSStyleSheet.prototype.replace = function(text: string) {
     if (text.includes('@import')) {
-      console.log('🚨 [GLOBAL ERROR INTERCEPTOR] @import bloccato in replace');
       return Promise.resolve(); // Ritorna una promise risolta
     }
     return originalReplace.call(this, text);
   };
   
-  console.log('✅ [GLOBAL ERROR INTERCEPTOR] Interceptor globale attivo');
   
 } else {
-  console.log('⚠️ [GLOBAL ERROR INTERCEPTOR] Window non disponibile, interceptor non attivato');
 }
 
 export function globalErrorInterceptorCheck() {
-  console.log('🚨 [GLOBAL ERROR INTERCEPTOR] Check manuale eseguito');
   return true;
 }

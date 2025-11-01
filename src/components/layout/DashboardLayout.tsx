@@ -155,7 +155,6 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
       if (auth && typeof auth === 'object' && 'currentUser' in auth && auth.currentUser?.uid) {
         const { notificationTriggerService } = await import('@/lib/notificationTriggerService');
         await notificationTriggerService.generateTestNotifications(auth.currentUser.uid);
-        console.log('✅ Notifiche di test generate');
         // Ricarica le statistiche delle notifiche
         const { firebaseNotificationService } = await import('@/lib/firebaseNotificationService');
         const notificationsData = await firebaseNotificationService.getNotificationStats(auth.currentUser.uid);
@@ -168,7 +167,6 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
 
   // 🔧 FIX NAVIGAZIONE: Intercettatore universale per tutti i click sui link
   useEffect(() => {
-    console.log('🚀 [NAVIGATION INTERCEPTOR] Inizializzazione intercettatore navigazione, pathname:', pathname);
     
     const handleNavigationClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -177,11 +175,9 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
       const link = target.closest('a[href]') as HTMLAnchorElement;
       
       if (link && link.href) {
-        console.log('🔍 [NAVIGATION INTERCEPTOR] Click rilevato su link:', link.href, 'pathname attuale:', pathname);
         
         // Controlla se siamo in una pagina di feasibility analysis
         if (pathname?.includes('/feasibility-analysis/')) {
-          console.log('🔄 [NAVIGATION INTERCEPTOR] Rilevata pagina feasibility-analysis, forzando navigazione');
           
           // Preveni la navigazione normale
           event.preventDefault();
@@ -191,17 +187,14 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
           const url = new URL(link.href);
           const destinationPath = url.pathname;
           
-          console.log('🎯 [NAVIGATION INTERCEPTOR] Navigazione forzata verso:', destinationPath);
           
           // Forza la navigazione
           try {
             router.push(destinationPath);
-            console.log('✅ [NAVIGATION INTERCEPTOR] Router.push eseguito');
             
             // Fallback dopo 100ms
             setTimeout(() => {
               if (window.location.pathname === pathname) {
-                console.log('⚠️ [NAVIGATION INTERCEPTOR] Router.push fallito, uso window.location');
                 window.location.href = destinationPath;
               }
             }, 100);
@@ -215,11 +208,9 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
       // Gestisci anche i pulsanti "Indietro" e altri elementi di navigazione
       const button = target.closest('button') as HTMLButtonElement;
       if (button && button.textContent?.includes('Indietro')) {
-        console.log('🔍 [NAVIGATION INTERCEPTOR] Click rilevato su pulsante Indietro, pathname attuale:', pathname);
         
         // Controlla se siamo in una pagina di feasibility analysis
         if (pathname?.includes('/feasibility-analysis/')) {
-          console.log('🔄 [NAVIGATION INTERCEPTOR] Pulsante Indietro in pagina feasibility-analysis, forzando navigazione');
           
           // Preveni il comportamento normale del pulsante
           event.preventDefault();
@@ -228,17 +219,14 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
           // Naviga alla pagina principale delle analisi di fattibilità
           const destinationPath = '/dashboard/feasibility-analysis';
           
-          console.log('🎯 [NAVIGATION INTERCEPTOR] Navigazione pulsante Indietro verso:', destinationPath);
           
           // Forza la navigazione
           try {
             router.push(destinationPath);
-            console.log('✅ [NAVIGATION INTERCEPTOR] Router.push pulsante Indietro eseguito');
             
             // Fallback dopo 100ms
             setTimeout(() => {
               if (window.location.pathname === pathname) {
-                console.log('⚠️ [NAVIGATION INTERCEPTOR] Router.push pulsante Indietro fallito, uso window.location');
                 window.location.href = destinationPath;
               }
             }, 100);
@@ -254,7 +242,6 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
     document.addEventListener('click', handleNavigationClick, true);
     
     return () => {
-      console.log('🧹 [NAVIGATION INTERCEPTOR] Rimozione intercettatore');
       document.removeEventListener('click', handleNavigationClick, true);
     };
   }, [pathname, router]);
@@ -269,7 +256,6 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
     // 🛡️ GUARD: Se stiamo già caricando o abbiamo già caricato questo userId, SKIP
     if (!userId || isLoadingDataRef.current || loadedUserIdRef.current === userId) {
       if (loadedUserIdRef.current === userId) {
-        console.log('⏭️ [DashboardLayout] Skip - dati già caricati per:', userId);
       }
       return;
     }
@@ -277,14 +263,12 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
     const loadData = async () => {
       try {
         isLoadingDataRef.current = true;
-        console.log('🔄 [DashboardLayout] Caricamento dati per utente:', userId);
         
         // Carica notifiche con gestione errori - import dinamico
         try {
           const { firebaseNotificationService } = await import('@/lib/firebaseNotificationService');
           const notificationsData = await firebaseNotificationService.getNotificationStats(userId || '');
           setNotifications(notificationsData);
-          console.log('✅ [DashboardLayout] Notifiche caricate:', notificationsData);
         } catch (notificationError) {
           console.error('❌ [DashboardLayout] Errore caricamento notifiche:', notificationError);
           // Non bloccare il caricamento se le notifiche falliscono
@@ -302,7 +286,6 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
           const { firebaseUserProfileService } = await import('@/lib/firebaseUserProfileService');
           const profileData = await firebaseUserProfileService.getUserProfile(userId || '');
           setUserProfile(profileData);
-          console.log('✅ [DashboardLayout] Profilo caricato:', profileData);
         } catch (profileError) {
           console.error('❌ [DashboardLayout] Errore caricamento profilo:', profileError);
           // Non bloccare il caricamento se il profilo fallisce
@@ -314,7 +297,6 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
           const { workspaceService } = await import('@/lib/workspaceService');
           const workspaceData = await workspaceService.getWorkspacesByUser(userId || '');
           setWorkspaces(workspaceData);
-          console.log('✅ [DashboardLayout] Workspace caricati:', workspaceData);
         } catch (workspaceError) {
           console.error('❌ [DashboardLayout] Errore caricamento workspace:', workspaceError);
           // Non bloccare il caricamento se i workspace falliscono
@@ -323,7 +305,6 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
         
         // Marca come caricato
         loadedUserIdRef.current = userId;
-        console.log('✅ [DashboardLayout] Caricamento dati completato');
       } catch (error) {
         console.error('❌ [DashboardLayout] Errore generale caricamento dati:', error);
         // Non bloccare l'app per errori di caricamento dati
@@ -413,15 +394,12 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   }`}
                   onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     // 🔧 FIX: Forza navigazione anche se si è in una sottopagina
-                    console.log('🔍 [DASHBOARD LAYOUT] Click su Dashboard, pathname attuale:', pathname);
                     if (pathname?.includes('/feasibility-analysis/') || pathname?.includes('/design-center/') || pathname?.includes('/business-plan/') || pathname?.includes('/progetti/')) {
                       e.preventDefault();
-                      console.log('🔄 [DASHBOARD LAYOUT] Navigazione forzata da', pathname, 'a /dashboard');
                       try {
                         router.push('/dashboard');
                         setTimeout(() => {
                           if (window.location.pathname === pathname) {
-                            console.log('⚠️ [DASHBOARD LAYOUT] Router.push fallito, uso window.location');
                             window.location.href = '/dashboard';
                           }
                         }, 100);
@@ -430,7 +408,6 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                         window.location.href = '/dashboard';
                       }
                     } else {
-                      console.log('✅ [DASHBOARD LAYOUT] Navigazione normale per pathname:', pathname);
                     }
                   }}
                 >
@@ -464,17 +441,14 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   }`}
                   onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     // 🔧 FIX: Forza navigazione anche se si è in una sottopagina di feasibility-analysis
-                    console.log('🔍 [DASHBOARD LAYOUT] Click su Analisi Fattibilità, pathname attuale:', pathname);
                     if (pathname?.includes('/feasibility-analysis/')) {
                       e.preventDefault();
-                      console.log('🔄 [DASHBOARD LAYOUT] Navigazione forzata da', pathname, 'a /dashboard/feasibility-analysis');
                       try {
                         // Usa router.push con fallback a window.location
                         router.push('/dashboard/feasibility-analysis');
                         // Fallback: se router.push fallisce, usa window.location dopo un breve delay
                         setTimeout(() => {
                           if (window.location.pathname === pathname) {
-                            console.log('⚠️ [DASHBOARD LAYOUT] Router.push fallito, uso window.location');
                             window.location.href = '/dashboard/feasibility-analysis';
                           }
                         }, 100);
@@ -483,7 +457,6 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                         window.location.href = '/dashboard/feasibility-analysis';
                       }
                     } else {
-                      console.log('✅ [DASHBOARD LAYOUT] Navigazione normale per pathname:', pathname);
                     }
                   }}
                 >
@@ -499,15 +472,12 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   }`}
                   onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     // 🔧 FIX: Forza navigazione anche se si è in una sottopagina di design-center
-                    console.log('🔍 [DASHBOARD LAYOUT] Click su Design Center, pathname attuale:', pathname);
                     if (pathname?.includes('/design-center/')) {
                       e.preventDefault();
-                      console.log('🔄 [DASHBOARD LAYOUT] Navigazione forzata da', pathname, 'a /dashboard/design-center');
                       try {
                         router.push('/dashboard/design-center');
                         setTimeout(() => {
                           if (window.location.pathname === pathname) {
-                            console.log('⚠️ [DASHBOARD LAYOUT] Router.push fallito, uso window.location');
                             window.location.href = '/dashboard/design-center';
                           }
                         }, 100);
@@ -516,7 +486,6 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                         window.location.href = '/dashboard/design-center';
                       }
                     } else {
-                      console.log('✅ [DASHBOARD LAYOUT] Navigazione normale per pathname:', pathname);
                     }
                   }}
                 >
@@ -539,15 +508,12 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   }`}
                   onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     // 🔧 FIX: Forza navigazione anche se si è in una sottopagina di business-plan
-                    console.log('🔍 [DASHBOARD LAYOUT] Click su Business Plan, pathname attuale:', pathname);
                     if (pathname?.includes('/business-plan/')) {
                       e.preventDefault();
-                      console.log('🔄 [DASHBOARD LAYOUT] Navigazione forzata da', pathname, 'a /dashboard/business-plan');
                       try {
                         router.push('/dashboard/business-plan');
                         setTimeout(() => {
                           if (window.location.pathname === pathname) {
-                            console.log('⚠️ [DASHBOARD LAYOUT] Router.push fallito, uso window.location');
                             window.location.href = '/dashboard/business-plan';
                           }
                         }, 100);
@@ -556,7 +522,6 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                         window.location.href = '/dashboard/business-plan';
                       }
                     } else {
-                      console.log('✅ [DASHBOARD LAYOUT] Navigazione normale per pathname:', pathname);
                     }
                   }}
                 >
@@ -614,15 +579,12 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                   }`}
                   onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     // 🔧 FIX: Forza navigazione anche se si è in una sottopagina
-                    console.log('🔍 [DASHBOARD LAYOUT] Click su Progetti, pathname attuale:', pathname);
                     if (pathname?.includes('/feasibility-analysis/') || pathname?.includes('/design-center/') || pathname?.includes('/business-plan/') || pathname?.includes('/progetti/')) {
                       e.preventDefault();
-                      console.log('🔄 [DASHBOARD LAYOUT] Navigazione forzata da', pathname, 'a /dashboard/progetti');
                       try {
                         router.push('/dashboard/progetti');
                         setTimeout(() => {
                           if (window.location.pathname === pathname) {
-                            console.log('⚠️ [DASHBOARD LAYOUT] Router.push fallito, uso window.location');
                             window.location.href = '/dashboard/progetti';
                           }
                         }, 100);
@@ -631,7 +593,6 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
                         window.location.href = '/dashboard/progetti';
                       }
                     } else {
-                      console.log('✅ [DASHBOARD LAYOUT] Navigazione normale per pathname:', pathname);
                     }
                   }}
                 >

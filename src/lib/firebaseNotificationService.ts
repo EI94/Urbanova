@@ -141,7 +141,6 @@ class FirebaseNotificationService {
     actions?: Notification['actions'];
   }): Promise<Notification | null> {
     try {
-      console.log('📝 [FirebaseNotification] Creazione notifica con preferenze per utente:', data.userId);
       
       // Verifica se il tipo di notifica è abilitato
       const isTypeEnabled = await notificationPreferencesService.isNotificationTypeEnabled(
@@ -150,14 +149,12 @@ class FirebaseNotificationService {
       );
       
       if (!isTypeEnabled) {
-        console.log('🚫 [FirebaseNotification] Tipo notifica disabilitato:', data.type);
         return null;
       }
       
       // Verifica se è in quiet hours
       const isQuietHours = await notificationPreferencesService.isQuietHours(data.userId);
       if (isQuietHours) {
-        console.log('🚫 [FirebaseNotification] In quiet hours, notifica bloccata');
         return null;
       }
       
@@ -230,7 +227,6 @@ class FirebaseNotificationService {
         isRead: true,
         updatedAt: serverTimestamp(),
       });
-      console.log('✅ [FirebaseNotification] Notifica marcata come letta:', notificationId);
     } catch (error) {
       console.error('❌ [FirebaseNotification] Error marking notification as read:', error);
       throw new Error('Failed to mark notification as read');
@@ -244,7 +240,6 @@ class FirebaseNotificationService {
         isRead: false,
         updatedAt: serverTimestamp(),
       });
-      console.log('✅ [FirebaseNotification] Notifica marcata come non letta:', notificationId);
     } catch (error) {
       console.error('❌ [FirebaseNotification] Error marking notification as unread:', error);
       throw new Error('Failed to mark notification as unread');
@@ -333,7 +328,6 @@ class FirebaseNotificationService {
 
   async getNotificationStats(userId: string): Promise<NotificationStats> {
     try {
-      console.log('🔄 [FirebaseNotification] Caricamento statistiche notifiche per:', userId);
       
       // Total count
       const totalQuery = query(collection(db, 'notifications'), where('userId', '==', userId));
@@ -593,7 +587,6 @@ class FirebaseNotificationService {
       );
       
       if (hasWelcomeNotification) {
-        console.log('✅ [FirebaseNotification] Utente ha già una notifica di benvenuto');
         return null;
       }
       
@@ -628,7 +621,6 @@ class FirebaseNotificationService {
 
   async cleanupDuplicateWelcomeNotifications(userId: string): Promise<void> {
     try {
-      console.log('🧹 [FirebaseNotification] Pulizia notifiche benvenuto duplicate per utente:', userId);
       
       const welcomeNotifications = await this.getNotifications(userId, {
         type: 'SYSTEM',
@@ -642,7 +634,6 @@ class FirebaseNotificationService {
       );
       
       if (duplicateWelcomeNotifications.length <= 1) {
-        console.log('✅ [FirebaseNotification] Nessuna notifica benvenuto duplicata trovata');
         return;
       }
       
@@ -653,14 +644,12 @@ class FirebaseNotificationService {
       
       const notificationsToDelete = sortedNotifications.slice(1); // Rimuovi tutte tranne la prima
       
-      console.log(`🗑️ [FirebaseNotification] Eliminando ${notificationsToDelete.length} notifiche benvenuto duplicate`);
       
       for (const notification of notificationsToDelete) {
         await this.deleteNotification(notification.id);
         console.log(`🗑️ Eliminata notifica duplicata: ${notification.id}`);
       }
       
-      console.log('✅ [FirebaseNotification] Pulizia notifiche benvenuto completata');
     } catch (error) {
       console.error('❌ [FirebaseNotification] Errore pulizia notifiche benvenuto:', error);
     }

@@ -3,8 +3,6 @@
 
 // Carica solo lato client - non eseguire codice a livello di modulo per evitare TDZ
 if (typeof window !== 'undefined') {
-  console.log('🎯 [CSS ERROR HANDLER] Inizializzazione handler CSS...');
-  console.log('🎯 [CSS ERROR HANDLER] Window disponibile, attivando handler...');
   
   // 🎯 INTERCETTA SOLO ERRORI CSS SPECIFICI
   const originalConsoleError = console.error;
@@ -19,10 +17,8 @@ if (typeof window !== 'undefined') {
         message.includes('styled-components') ||
         message.includes('emotion')) {
       
-      console.log('🎯 [CSS ERROR HANDLER] Errore CSS intercettato e silenziato:', message);
       
       // Log per debug ma non propagare l'errore
-      console.log('🛡️ [CSS ERROR HANDLER] Stack trace:', new Error().stack);
       
       return; // NON propagare l'errore
     }
@@ -42,8 +38,6 @@ if (typeof window !== 'undefined') {
         errorMessage.includes('styled-components') ||
         errorMessage.includes('emotion')) {
       
-      console.log('🎯 [CSS ERROR HANDLER] Errore CSS globale intercettato e silenziato:', errorMessage);
-      console.log('🛡️ [CSS ERROR HANDLER] Source:', source, 'Line:', lineno);
       
       return true; // Previeni il crash
     }
@@ -54,13 +48,10 @@ if (typeof window !== 'undefined') {
     return false;
   };
   
-  console.log('✅ [CSS ERROR HANDLER] Handler CSS attivo');
   
 } else {
-  console.log('⚠️ [CSS ERROR HANDLER] Window non disponibile');
 }
 
 export function cssErrorHandlerCheck() {
-  console.log('🎯 [CSS ERROR HANDLER] Check manuale eseguito');
   return true;
 }

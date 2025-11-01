@@ -53,7 +53,6 @@ export class WorkspaceService {
     ownerEmail: string
   ): Promise<string> {
     try {
-      console.log('🔄 [Workspace] Creazione workspace:', request.name);
 
       // Usa addDoc invece di runTransaction per evitare problemi di tipo
       const workspaceData: Omit<Workspace, 'id'> = {
@@ -79,7 +78,6 @@ export class WorkspaceService {
 
       // Crea il workspace
       const workspaceRef = await addDoc(collection(db, this.WORKSPACES_COLLECTION), workspaceData);
-      console.log('✅ [Workspace] Workspace creato:', workspaceRef.id);
 
       // Aggiungi il proprietario come membro
       const memberData: Omit<WorkspaceMember, 'id'> = {
@@ -100,7 +98,6 @@ export class WorkspaceService {
       };
 
       await addDoc(collection(db!, this.MEMBERS_COLLECTION), memberData);
-      console.log('✅ [Workspace] Membro proprietario aggiunto');
 
       return workspaceRef.id;
     } catch (error) {
@@ -112,7 +109,6 @@ export class WorkspaceService {
   // Ottieni workspace per utente
   async getWorkspacesByUser(userId: string): Promise<Workspace[]> {
     try {
-      console.log('🔄 [Workspace] Caricamento workspace per utente:', userId);
 
       // Trova tutti i workspace dove l'utente è membro
       const membersQuery = query(
@@ -140,7 +136,6 @@ export class WorkspaceService {
         ...doc.data()
       })) as Workspace[];
 
-      console.log('✅ [Workspace] Workspace caricati:', workspaces.length);
       return workspaces;
     } catch (error) {
       console.error('❌ [Workspace] Errore caricamento workspace:', error);
@@ -175,7 +170,6 @@ export class WorkspaceService {
     invitedBy: string
   ): Promise<string> {
     try {
-      console.log('🔄 [Workspace] Invito membro:', request.email);
 
       return await runTransaction(db, async (transaction) => {
         // Verifica che il workspace esista
@@ -244,16 +238,13 @@ export class WorkspaceService {
               'Collega Urbanova' // TODO: Ottenere il nome reale dell'utente che invita
             );
             
-            console.log('✅ [Workspace] Notifica invito creata per:', invitedUserId);
           } else {
-            console.log('ℹ️ [Workspace] Utente non trovato per email:', request.email);
           }
         } catch (notificationError) {
           console.warn('⚠️ [Workspace] Errore creazione notifica invito (non critico):', notificationError);
           // Non bloccare il processo per errori di notifica
         }
 
-        console.log('✅ [Workspace] Invito creato:', invitationRef.id);
         return invitationRef.id;
       });
     } catch (error) {
@@ -268,7 +259,6 @@ export class WorkspaceService {
     userId: string
   ): Promise<string> {
     try {
-      console.log('🔄 [Workspace] Accettazione invito:', invitationId);
 
       return await runTransaction(db, async (transaction) => {
         // Carica invito
@@ -314,7 +304,6 @@ export class WorkspaceService {
           updatedAt: serverTimestamp()
         });
 
-        console.log('✅ [Workspace] Invito accettato:', invitationId);
         return invitation.workspaceId;
       });
     } catch (error) {
@@ -330,7 +319,6 @@ export class WorkspaceService {
     sharedBy: string
   ): Promise<string> {
     try {
-      console.log('🔄 [Workspace] Condivisione progetto:', request.projectId);
 
       return await runTransaction(db, async (transaction) => {
         // Verifica che l'utente sia membro del workspace
@@ -397,7 +385,6 @@ export class WorkspaceService {
           metadata: { collaboratorCount: allUserIds.length }
         });
 
-        console.log('✅ [Workspace] Progetto condiviso:', sharedProjectRef.id);
         return sharedProjectRef.id;
       });
     } catch (error) {
@@ -409,7 +396,6 @@ export class WorkspaceService {
   // Ottieni progetti condivisi per workspace
   async getSharedProjects(workspaceId: string, userId: string): Promise<SharedProject[]> {
     try {
-      console.log('🔄 [Workspace] Caricamento progetti condivisi:', workspaceId);
 
       // Verifica che l'utente sia membro del workspace
       const memberQuery = query(
@@ -437,7 +423,6 @@ export class WorkspaceService {
         ...doc.data()
       })) as SharedProject[];
 
-      console.log('✅ [Workspace] Progetti condivisi caricati:', sharedProjects.length);
       return sharedProjects;
     } catch (error) {
       console.error('❌ [Workspace] Errore caricamento progetti condivisi:', error);

@@ -27,19 +27,16 @@ export function useUserProfile(userId: string | undefined): UseUserProfileReturn
     
     // 🛡️ GUARD: Se stiamo già caricando o abbiamo già caricato questo userId, SKIP
     if (isLoadingRef.current || loadedUserIdRef.current === userId) {
-      console.log('⏭️ [useUserProfile] Skip - già caricato o in caricamento per:', userId);
       return;
     }
 
     try {
       isLoadingRef.current = true;
       setLoading(true);
-      console.log('🔄 [useUserProfile] Caricamento profilo per:', userId);
       
       let userProfile = await firebaseUserProfileService.getUserProfile(userId);
       
       if (!userProfile) {
-        console.log('🆕 [useUserProfile] Creazione nuovo profilo');
         userProfile = await firebaseUserProfileService.createUserProfile(userId, {
           email: '',
           displayName: 'Utente',
@@ -51,7 +48,6 @@ export function useUserProfile(userId: string | undefined): UseUserProfileReturn
       if (userProfile) {
         setProfile(userProfile);
         loadedUserIdRef.current = userId; // Marca come caricato
-        console.log('✅ [useUserProfile] Profilo caricato:', userProfile);
       }
     } catch (error) {
       console.error('❌ [useUserProfile] Errore caricamento profilo:', error);
@@ -69,7 +65,6 @@ export function useUserProfile(userId: string | undefined): UseUserProfileReturn
 
     try {
       setSaving(true);
-      console.log('💾 [useUserProfile] Aggiornamento profilo:', updates);
       
       // Filtra solo i campi che sono effettivamente cambiati
       const changesToSave: ProfileUpdate = {};
@@ -82,7 +77,6 @@ export function useUserProfile(userId: string | undefined): UseUserProfileReturn
       });
 
       if (Object.keys(changesToSave).length === 0) {
-        console.log('ℹ️ [useUserProfile] Nessun cambiamento da salvare');
         return;
       }
 
@@ -91,7 +85,6 @@ export function useUserProfile(userId: string | undefined): UseUserProfileReturn
       if (updatedProfile) {
         setProfile(updatedProfile);
         toast.success('Profilo aggiornato con successo');
-        console.log('✅ [useUserProfile] Profilo aggiornato:', updatedProfile);
       }
     } catch (error) {
       console.error('❌ [useUserProfile] Errore aggiornamento profilo:', error);
@@ -107,7 +100,6 @@ export function useUserProfile(userId: string | undefined): UseUserProfileReturn
 
     try {
       setSaving(true);
-      console.log('📸 [useUserProfile] Upload avatar:', file.name);
 
       // Crea un URL temporaneo per l'anteprima immediata
       const tempUrl = URL.createObjectURL(file);
@@ -124,7 +116,6 @@ export function useUserProfile(userId: string | undefined): UseUserProfileReturn
         if (updatedProfile) {
           setProfile(updatedProfile);
           toast.success('Immagine caricata e salvata con successo');
-          console.log('✅ [useUserProfile] Avatar salvato:', avatarUrl);
         }
       } else {
         throw new Error('Upload fallito');

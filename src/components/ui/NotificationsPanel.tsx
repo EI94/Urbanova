@@ -53,7 +53,6 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
     if (!userId) return;
 
     const unsubscribe = firebaseNotificationService.getNotificationsRealtime(userId, (realtimeNotifications) => {
-      console.log('🔄 [NotificationsPanel] Notifiche real-time ricevute:', realtimeNotifications.length);
       setNotifications(realtimeNotifications);
     });
 

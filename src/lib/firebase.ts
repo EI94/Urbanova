@@ -36,7 +36,6 @@ let db: Firestore | null = null;
 let storage: FirebaseStorage | null = null;
 
 if (typeof window !== 'undefined') {
-  console.log('🔥 [FIREBASE] Inizializzazione immediata lato client...');
   
   try {
     app = initializeApp(firebaseConfig);
@@ -44,7 +43,6 @@ if (typeof window !== 'undefined') {
     db = getFirestore(app);
     storage = getStorage(app);
     
-    console.log('✅ [FIREBASE] Inizializzato:', {
       app: !!app,
       auth: !!auth,
       db: !!db,
@@ -62,7 +60,6 @@ if (typeof window !== 'undefined') {
     console.error('❌ [FIREBASE] Errore inizializzazione:', error);
   }
 } else {
-  console.log('⚠️ [FIREBASE] Server-side rendering - istanze null');
 }
 
 // ========================================
@@ -78,7 +75,6 @@ export const getStorageInstance = () => storage;
 // Export default
 export default app;
 
-console.log('✅ [FIREBASE] Modulo caricato, istanze:', {
   auth: !!auth,
   db: !!db,
   storage: !!storage,

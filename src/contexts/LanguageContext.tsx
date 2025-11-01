@@ -162,7 +162,6 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
         setCurrentLanguage(finalLanguage);
         setIsInitialized(true);
 
-        console.log(`🌍 [LanguageProvider] Lingua inizializzata: ${finalLanguage}`);
       } catch (error) {
         console.error('❌ [LanguageProvider] Errore inizializzazione lingua:', error);
         setCurrentLanguage(DEFAULT_LANGUAGE);
@@ -176,7 +175,6 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   // Funzione per cambiare lingua
   const changeLanguage = async (language: SupportedLanguage): Promise<void> => {
     try {
-      console.log(`🔄 [LanguageProvider] Cambio lingua da ${currentLanguage} a ${language}`);
 
       // Verifica che la lingua sia supportata
       const translationsData = getTranslationsSafe();
@@ -203,7 +201,6 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
         }
       }
 
-      console.log(`✅ [LanguageProvider] Lingua cambiata con successo: ${language}`);
     } catch (error) {
       console.error('❌ [LanguageProvider] Errore cambio lingua:', error);
       throw error;

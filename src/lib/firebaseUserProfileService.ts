@@ -95,7 +95,6 @@ class FirebaseUserProfileService {
 
   async getUserProfile(userId: string): Promise<UserProfile | null> {
     try {
-      console.log('🔄 [FirebaseUserProfile] Caricamento profilo per:', userId);
       
       const db = await getFirebaseDb();
       const profileRef = doc(db, 'userProfiles', userId);
@@ -103,7 +102,6 @@ class FirebaseUserProfileService {
 
       if (profileSnap.exists()) {
         const data = profileSnap.data();
-        console.log('✅ [FirebaseUserProfile] Profilo trovato:', data);
         return {
           id: profileSnap.id,
           ...data,
@@ -117,7 +115,6 @@ class FirebaseUserProfileService {
         } as UserProfile;
       }
 
-      console.log('ℹ️ [FirebaseUserProfile] Nessun profilo trovato per:', userId);
       return null;
     } catch (error) {
       console.error('❌ [FirebaseUserProfile] Errore caricamento profilo:', error);
@@ -142,7 +139,6 @@ class FirebaseUserProfileService {
     }
   ): Promise<UserProfile> {
     try {
-      console.log('🆕 [FirebaseUserProfile] Creazione profilo per:', userId);
       
       const defaultProfile: Omit<UserProfile, 'id'> = {
         userId,
@@ -182,7 +178,6 @@ class FirebaseUserProfileService {
         },
       });
 
-      console.log('✅ [FirebaseUserProfile] Profilo creato con successo per:', userId);
       return {
         id: userId,
         ...defaultProfile,
@@ -253,7 +248,6 @@ class FirebaseUserProfileService {
 
   async uploadAvatar(userId: string, file: File): Promise<string | null> {
     try {
-      console.log('📸 [FirebaseUserProfile] Upload avatar:', file.name, file.size, file.type);
       
       // Elimina avatar precedente se esiste
       const currentProfile = await this.getUserProfile(userId);
@@ -262,9 +256,7 @@ class FirebaseUserProfileService {
           const storage = await getFirebaseStorage();
           const oldAvatarRef = ref(storage, `avatars/${userId}/avatar`);
           await deleteObject(oldAvatarRef);
-          console.log('🗑️ [FirebaseUserProfile] Avatar precedente eliminato');
         } catch (error) {
-          console.log('ℹ️ [FirebaseUserProfile] Nessun avatar precedente da eliminare');
         }
       }
 
@@ -274,7 +266,6 @@ class FirebaseUserProfileService {
       const uploadResult = await uploadBytes(avatarRef, file);
       const downloadURL = await getDownloadURL(uploadResult.ref);
 
-      console.log('✅ [FirebaseUserProfile] Avatar caricato:', downloadURL);
 
       // Aggiorna profilo con nuovo URL avatar
       await this.updateUserProfile(userId, { avatar: downloadURL } as any);

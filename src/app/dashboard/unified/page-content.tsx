@@ -193,8 +193,6 @@ export default function UnifiedDashboardPageContent() {
   // Funzioni per gestione conversazioni
   const handleDeleteConversation = async (sessionId: string) => {
     try {
-      console.log('🗑️ [Chat History] INIZIO eliminazione conversazione:', sessionId);
-      console.log('🗑️ [Chat History] Chat history PRIMA:', chatHistory.length, 'conversazioni');
       
       setIsDeleting(true);
       
@@ -206,7 +204,6 @@ export default function UnifiedDashboardPageContent() {
         return;
       }
       
-      console.log('🗑️ [Chat History] Eliminando sessione:', { id: sessionToDelete.id, title: sessionToDelete.title });
       
       // Import dinamico per evitare TDZ
       const { chatHistoryService } = await import('@/lib/chatHistoryService');
@@ -224,8 +221,6 @@ export default function UnifiedDashboardPageContent() {
       
       // Aggiorna stato locale con verifica robusta
       const updatedHistory = chatHistoryService.getChatSessions();
-      console.log('🗑️ [Chat History] Chat history DOPO eliminazione:', updatedHistory.length, 'conversazioni');
-      console.log('🗑️ [Chat History] Conversazioni rimanenti:', updatedHistory.map(c => ({ id: c.id, title: c.title })));
       
       // Verifica che l'eliminazione sia avvenuta
       const stillExists = updatedHistory.some(s => s.id === sessionId);
@@ -241,12 +236,10 @@ export default function UnifiedDashboardPageContent() {
       
       // Se era la conversazione corrente, resetta
       if (currentSessionId === sessionId) {
-        console.log('🗑️ [Chat History] Era conversazione corrente, resetto stato');
         setCurrentSessionId(null);
         setMessages([]);
       }
       
-      console.log('✅ [Chat History] Conversazione eliminata con successo:', sessionId);
       
       // Mostra feedback positivo
       // TODO: Aggiungere toast notification
@@ -268,10 +261,8 @@ export default function UnifiedDashboardPageContent() {
   };
 
   const handleConfirmDelete = async () => {
-    console.log('🗑️ [Chat History] CONFERMA eliminazione:', deleteModal.sessionId);
     await handleDeleteConversation(deleteModal.sessionId);
     setDeleteModal({ isOpen: false, sessionId: '', title: '' });
-    console.log('🗑️ [Chat History] Modal chiuso dopo eliminazione');
   };
 
   // SessionId persistente per utente
@@ -450,7 +441,6 @@ export default function UnifiedDashboardPageContent() {
     // Non caricare nulla se non siamo ancora montati
     if (!mounted) return;
     
-    console.log('🔍 [DEBUG CRASH] useEffect initializeDashboard - PUNTO CRITICO WEB 4');
     const initializeDashboard = async () => {
       try {
         setLoading(true);
@@ -462,7 +452,6 @@ export default function UnifiedDashboardPageContent() {
           setLoading(false);
           return;
         }
-        console.log('🔍 [DEBUG CRASH] Utente autenticato, procedo con caricamento - PUNTO CRITICO WEB 5');
 
         // Inizializza i dati della dashboard se necessario - import dinamico
         const { dashboardService } = await import('@/lib/dashboardService');
@@ -476,7 +465,6 @@ export default function UnifiedDashboardPageContent() {
         const { chatHistoryService } = await import('@/lib/chatHistoryService');
         const savedChatHistory = chatHistoryService.getChatSessions();
         setChatHistory(savedChatHistory);
-        console.log('✅ [Chat History] Caricate sessioni salvate:', savedChatHistory.length);
 
         // Carica workspace dell'utente
         if (currentUser) {
@@ -485,7 +473,6 @@ export default function UnifiedDashboardPageContent() {
           await loadUserData();
         }
 
-        console.log('✅ [Unified Dashboard] Statistiche iniziali caricate:', initialStats);
       } catch (error) {
         console.error('❌ [Unified Dashboard] Errore inizializzazione:', error);
         setError('Impossibile caricare le statistiche della dashboard');
@@ -501,14 +488,12 @@ export default function UnifiedDashboardPageContent() {
   useEffect(() => {
     if (!mounted || !currentUser?.uid) return;
 
-    console.log('🔄 [Unified Dashboard] Sottoscrizione aggiornamenti real-time...');
 
     let unsubscribe: (() => void) | undefined;
     
     const setupSubscription = async () => {
       const { dashboardService } = await import('@/lib/dashboardService');
       unsubscribe = dashboardService.subscribeToDashboardUpdates((newStats) => {
-        console.log('🔄 [Unified Dashboard] Aggiornamento real-time ricevuto:', newStats);
         setStats(newStats);
       }, currentUser?.uid);
     };
@@ -537,7 +522,6 @@ export default function UnifiedDashboardPageContent() {
 
       setNotifications(notificationsData);
       setUserProfile(profileData);
-      console.log('✅ [User Data] Notifiche e profilo caricati');
     } catch (error) {
       console.error('❌ [User Data] Errore caricamento dati utente:', error);
     }
@@ -759,13 +743,11 @@ export default function UnifiedDashboardPageContent() {
           sessionToUpdate.messages = finalMessages;
           sessionToUpdate.preview = aiResponse.content.substring(0, 100) + '...';
           chatHistoryService.saveChatSession(sessionToUpdate);
-          console.log('✅ [Chat History] Sessione aggiornata:', sessionToUpdate.title || 'Senza titolo');
         } else {
           // Crea nuova sessione
           const newSession = chatHistoryService.createSessionFromMessages(finalMessages);
           chatHistoryService.saveChatSession(newSession);
           setCurrentSessionId(newSession.id);
-          console.log('✅ [Chat History] Nuova sessione creata:', newSession.title || 'Senza titolo');
         }
         
         // Ricarica la chat history
@@ -1645,7 +1627,6 @@ export default function UnifiedDashboardPageContent() {
                     setMessages(chat.messages);
                     setCurrentSessionId(chat.id);
                     setShowChatHistory(false);
-                    console.log('✅ [Chat History] Sessione caricata:', chat.title || 'Senza titolo');
                   }}
                   onDeleteConversation={(sessionId: string, title: string) => handleDeleteClick(sessionId, title)}
                   selectedSessionId={currentSessionId || ''}

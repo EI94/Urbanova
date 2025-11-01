@@ -89,7 +89,6 @@ class DashboardService {
    */
   async getDashboardStats(): Promise<DashboardStats> {
     try {
-      console.log('📊 [DashboardService] Recupero statistiche dashboard...');
 
       const [projects, activities, metrics] = await Promise.all([
         this.getAllProjects(),
@@ -99,7 +98,6 @@ class DashboardService {
 
       const stats = this.calculateDashboardStats(projects, activities, metrics);
 
-      console.log('✅ [DashboardService] Statistiche dashboard calcolate:', stats);
       return stats;
     } catch (error) {
       console.error('❌ [DashboardService] Errore recupero statistiche:', error);
@@ -111,7 +109,6 @@ class DashboardService {
    * Sottoscrive ai cambiamenti della dashboard in tempo reale
    */
   subscribeToDashboardUpdates(callback: (stats: DashboardStats) => void, userId?: string): () => void {
-    console.log('🔄 [DashboardService] Sottoscrizione aggiornamenti dashboard...');
 
     // 🔒 CONTROLLO AUTENTICAZIONE: Solo se l'utente è autenticato
     if (!userId) {
@@ -127,7 +124,6 @@ class DashboardService {
     // const projectsUnsubscribe = onSnapshot(
     //   projectsRef, 
     //   async snapshot => {
-    //     console.log('🔄 [DashboardService] Progetti aggiornati, ricalcolo statistiche...');
 
     //     try {
     //       const projects = this.parseProjectsSnapshot(snapshot);
@@ -167,7 +163,6 @@ class DashboardService {
     // const activitiesUnsubscribe = onSnapshot(
     //   activitiesRef, 
     //   async snapshot => {
-    //     console.log('🔄 [DashboardService] Attività aggiornate, ricalcolo statistiche...');
 
     //     try {
     //       const projects = await this.getAllProjects();
@@ -191,7 +186,6 @@ class DashboardService {
     return () => {
       projectsUnsubscribe();
       activitiesUnsubscribe();
-      console.log('🔌 [DashboardService] Sottoscrizioni dashboard disconnesse');
     };
   }
 
@@ -273,7 +267,6 @@ class DashboardService {
         timestamp: Timestamp.fromDate(activity.timestamp),
       });
 
-      console.log('✅ [DashboardService] Attività dashboard registrata:', activity.type);
     } catch (error) {
       console.error('❌ [DashboardService] Errore registrazione attività:', error);
     }
@@ -290,7 +283,6 @@ class DashboardService {
         lastUpdated: serverTimestamp(),
       }, { merge: true });
 
-      console.log('✅ [DashboardService] Metriche progetto aggiornate:', projectId);
     } catch (error) {
       console.error('❌ [DashboardService] Errore aggiornamento metriche:', error);
     }
@@ -473,7 +465,6 @@ class DashboardService {
    */
   async initializeDashboardData(): Promise<void> {
     try {
-      console.log('🚀 [DashboardService] Inizializzazione dati dashboard...');
 
       // Verifica se esistono già progetti
       const existingProjects = await this.getAllProjects();
@@ -564,7 +555,6 @@ class DashboardService {
           });
         }
 
-        console.log('✅ [DashboardService] Dati dashboard inizializzati con successo');
       } else {
         console.log(
           '✅ [DashboardService] Progetti esistenti trovati, dashboard già inizializzata'
