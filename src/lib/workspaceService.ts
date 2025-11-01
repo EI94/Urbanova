@@ -1,5 +1,6 @@
 // Servizio per la gestione dei workspace collaborativi
 import {
+  collection,
   doc,
   addDoc,
   updateDoc,
