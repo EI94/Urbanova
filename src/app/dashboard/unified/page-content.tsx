@@ -46,6 +46,7 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDarkMode } from '@/contexts/DarkModeContext';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 // Servizi importati dinamicamente per evitare TDZ
 import { ChatMessage } from '@/types/chat';
 import type { DashboardStats } from '@/lib/dashboardService';
@@ -1808,6 +1809,7 @@ export default function UnifiedDashboardPageContent() {
           setTranscribedText('');
         }}
       />
-    </DashboardLayout>
+      </DashboardLayout>
+    </ErrorBoundary>
   );
 }
