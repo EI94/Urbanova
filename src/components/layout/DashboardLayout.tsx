@@ -139,7 +139,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
   // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
   let authContext;
   try {
-    authContext = useAuth();
+    authContext = contextHooks.useAuth();
   } catch (error) {
     console.error('❌ [DashboardLayout] Errore useAuth:', error);
     authContext = { currentUser: null, loading: false };
