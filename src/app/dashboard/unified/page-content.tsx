@@ -83,7 +83,10 @@ const GeographicSearch = dynamic(
 import { Workspace } from '@/types/workspace';
 import { ProjectPreview as ProjectPreviewType } from '@/lib/intentService';
 // Servizi importati dinamicamente per evitare TDZ - rimossi import statici
-import type { GeographicSearchResult } from '@/components/ui/GeographicSearch';
+// RIMOSSO type import che causava evaluation durante bundle
+// import type { GeographicSearchResult } from '@/components/ui/GeographicSearch';
+// Type definito inline per evitare import che causa TDZ
+type GeographicSearchResult = any; // Temporaneo - verrà risolto dal dynamic import
 import dynamic from 'next/dynamic';
 // Caricamento dinamico per evitare problemi di inizializzazione post-login
 const VoiceAIChatGPT = dynamic(
