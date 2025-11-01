@@ -190,38 +190,35 @@ class FirebaseUserProfileService {
     } catch (error) {
       console.error('❌ [FirebaseUserProfile] Errore creazione profilo:', error);
       
-      // Se è un errore di permessi, restituisci un profilo temporaneo
-      if (error instanceof Error && error.message.includes('permission-denied')) {
-        console.warn('⚠️ [FirebaseUserProfile] Permessi insufficienti per creare profilo, usando profilo temporaneo');
-        return {
-          id: userId,
-          userId,
-          firstName: profileData.firstName || '',
-          lastName: profileData.lastName || '',
-          displayName: profileData.displayName,
-          email: profileData.email,
-          timezone: 'Europe/Rome',
-          language: 'it',
-          dateFormat: 'DD/MM/YYYY',
-          currency: 'EUR',
-          preferences: {
-            theme: 'light',
-            sidebarCollapsed: false,
-            emailNotifications: true,
-            pushNotifications: true,
-          },
-          security: {
-            twoFactorEnabled: false,
-            lastPasswordChange: new Date(),
-            loginHistory: [],
-          },
-          metadata: {},
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-      }
-      
-      throw new Error('Failed to create user profile');
+      // SEMPRE restituisci un profilo temporaneo per evitare crash della dashboard
+      // Questo gestisce TUTTI i casi di errore: permessi, db non disponibile, network, ecc.
+      console.warn('⚠️ [FirebaseUserProfile] Usando profilo temporaneo per evitare crash');
+      return {
+        id: userId,
+        userId,
+        firstName: profileData.firstName || '',
+        lastName: profileData.lastName || '',
+        displayName: profileData.displayName,
+        email: profileData.email,
+        timezone: 'Europe/Rome',
+        language: 'it',
+        dateFormat: 'DD/MM/YYYY',
+        currency: 'EUR',
+        preferences: {
+          theme: 'light',
+          sidebarCollapsed: false,
+          emailNotifications: true,
+          pushNotifications: true,
+        },
+        security: {
+          twoFactorEnabled: false,
+          lastPasswordChange: new Date(),
+          loginHistory: [],
+        },
+        metadata: {},
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
     }
   }
 
