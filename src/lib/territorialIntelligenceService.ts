@@ -11,7 +11,7 @@ import {doc,
   GeoPoint } from 'firebase/firestore';
 
 import { db } from './firebase';
-import { safeCollection } from './firebaseUtils';
+
 
 export interface MarketTrend {
   id: string;
@@ -298,7 +298,7 @@ export class TerritorialIntelligenceService {
     try {
       console.log('📊 [TerritorialIntelligence] Recupero trend per zona:', zone);
 
-      const trendsRef = safeCollection(this.MARKET_TRENDS_COLLECTION);
+      const trendsRef = collection(db!, this.MARKET_TRENDS_COLLECTION);
       let q = query(trendsRef, where('zone', '==', zone));
 
       if (city) {
@@ -336,7 +336,7 @@ export class TerritorialIntelligenceService {
     try {
       console.log('🗺️ [TerritorialIntelligence] Recupero analisi zona:', zone);
 
-      const analysisRef = safeCollection(this.ZONE_ANALYSIS_COLLECTION);
+      const analysisRef = collection(db!, this.ZONE_ANALYSIS_COLLECTION);
       let q = query(analysisRef, where('zone', '==', zone));
 
       if (city) {

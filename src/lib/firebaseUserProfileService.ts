@@ -10,7 +10,7 @@ import {
   serverTimestamp } from 'firebase/firestore';
 
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { safeCollection } from './firebaseUtils';
+
 
 // 🛡️ OS PROTECTION - Carica solo lato client per evitare TDZ
 if (typeof window !== 'undefined') {
@@ -338,7 +338,7 @@ class FirebaseUserProfileService {
         timestamp: serverTimestamp(),
       };
 
-      await addDoc(safeCollection('loginHistory'), loginData);
+      await addDoc(collection(db!, 'loginHistory'), loginData);
 
       // Aggiorna anche la cronologia nel profilo (ultimi 10)
       const profile = await this.getUserProfile(userId);
@@ -368,7 +368,7 @@ class FirebaseUserProfileService {
   async getLoginHistory(userId: string, limit: number = 50): Promise<LoginAttempt[]> {
     try {
       const q = query(
-        safeCollection('loginHistory'),
+        collection(db!, 'loginHistory'),
         where('userId', '==', userId),
         orderBy('timestamp', 'desc')
       );

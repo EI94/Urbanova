@@ -13,7 +13,7 @@ import {doc,
   addDoc } from 'firebase/firestore';
 
 import { db } from './firebase';
-import { safeCollection } from './firebaseUtils';
+
 
 // 🛡️ OS PROTECTION - Importa protezione CSS per permits service
 import '@/lib/osProtection';
@@ -384,7 +384,7 @@ export class PermitsService {
     try {
       console.log('📋 [PermitsService] Recupero permessi progetto:', projectId);
 
-      const permitsRef = safeCollection(this.PERMITS_COLLECTION);
+      const permitsRef = collection(db!, this.PERMITS_COLLECTION);
       const q = query(
         permitsRef,
         where('projectId', '==', projectId),
@@ -421,7 +421,7 @@ export class PermitsService {
     try {
       console.log('📋 [PermitsService] Recupero permessi utente:', userId);
 
-      const permitsRef = safeCollection(this.PERMITS_COLLECTION);
+      const permitsRef = collection(db!, this.PERMITS_COLLECTION);
       const q = query(permitsRef, where('createdBy', '==', userId), orderBy('createdAt', 'desc'));
 
       const querySnapshot = await getDocs(q);
@@ -511,7 +511,7 @@ export class PermitsService {
     try {
       console.log('📋 [PermitsService] Recupero tutti i tipi permesso');
 
-      const typesRef = safeCollection(this.PERMIT_TYPES_COLLECTION);
+      const typesRef = collection(db!, this.PERMIT_TYPES_COLLECTION);
       const querySnapshot = await getDocs(typesRef);
 
       const types: PermitType[] = [];
@@ -876,7 +876,7 @@ export class PermitsService {
    */
   private async getAllPermits(): Promise<Permit[]> {
     try {
-      const permitsRef = safeCollection(this.PERMITS_COLLECTION);
+      const permitsRef = collection(db!, this.PERMITS_COLLECTION);
       const q = query(permitsRef, orderBy('createdAt', 'desc'));
 
       const querySnapshot = await getDocs(q);

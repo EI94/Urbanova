@@ -14,7 +14,7 @@ import {addDoc,
   runTransaction } from 'firebase/firestore';
 
 import { db } from './firebase';
-import { safeCollection } from './firebaseUtils';
+
 import {
   SAL,
   SALStatus,
@@ -99,7 +99,7 @@ export class SALService {
         tags: ['draft', 'pending'],
       };
 
-      const docRef = await addDoc(safeCollection(this.COLLECTION), {
+      const docRef = await addDoc(collection(db!, this.COLLECTION), {
         ...sal,
         createdAt: serverTimestamp(),
       });
@@ -451,7 +451,7 @@ export class SALService {
   async getProjectSALs(projectId: string): Promise<SAL[]> {
     try {
       const q = query(
-        safeCollection(this.COLLECTION),
+        collection(db!, this.COLLECTION),
         where('projectId', '==', projectId),
         orderBy('createdAt', 'desc')
       );

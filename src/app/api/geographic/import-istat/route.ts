@@ -86,11 +86,10 @@ export async function GET(request: NextRequest) {
  */
 async function getComuniCount(): Promise<number> {
   try {
-    const { safeCollection } = await import('@/lib/firebaseUtils');
     const { getDocs } = await import('firebase/firestore');
     
     // CHIRURGICO: Conta REALMENTE tutti i documenti invece di stima hardcoded
-    const snapshot = await getDocs(safeCollection('comuni_italiani'));
+    const snapshot = await getDocs(collection(db!, 'comuni_italiani'));
     const realCount = snapshot.size;
     
     console.log(`🔢 [getComuniCount] Conteggio reale: ${realCount} documenti`);

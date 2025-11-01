@@ -1,6 +1,5 @@
 // Servizio di Fallback per Feedback - Funziona anche offline
-import { addDoc } from 'firebase/firestore';
-import { safeCollection } from '@/lib/firebaseUtils';
+import {  addDoc , collection } from 'firebase/firestore';
 
 export interface FeedbackData {
   id: string;
@@ -132,7 +131,7 @@ class FeedbackFallbackService {
           delete (firebaseData as any).id;
           delete (firebaseData as any).localId;
 
-          const docRef = await addDoc(safeCollection('feedback'), firebaseData);
+          const docRef = await addDoc(collection(db!, 'feedback'), firebaseData);
           syncedIds.push(item.id);
 
           console.log(`✅ [FeedbackFallback] Feedback sincronizzato: ${item.id} -> ${docRef.id}`);

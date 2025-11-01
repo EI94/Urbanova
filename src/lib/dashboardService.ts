@@ -13,7 +13,6 @@ import {
 } from 'firebase/firestore';
 
 import { db } from './firebase';
-import { safeCollection } from './firebaseUtils';
 
 // 🛡️ OS PROTECTION - Importa protezione CSS per dashboard service
 import '@/lib/osProtection';
@@ -120,8 +119,8 @@ class DashboardService {
       return () => {};
     }
 
-    const projectsRef = safeCollection(this.PROJECTS_COLLECTION);
-    const activitiesRef = safeCollection(this.ACTIVITIES_COLLECTION);
+    const projectsRef = collection(db!, this.PROJECTS_COLLECTION);
+    const activitiesRef = collection(db!, this.ACTIVITIES_COLLECTION);
 
     // CHIRURGICO: Disabilitato onSnapshot temporaneamente per evitare 400 error
     // const projectsUnsubscribe = onSnapshot(
@@ -200,7 +199,7 @@ class DashboardService {
    */
   async getAllProjects(): Promise<Project[]> {
     try {
-      const projectsRef = safeCollection(this.PROJECTS_COLLECTION);
+      const projectsRef = collection(db!, this.PROJECTS_COLLECTION);
       const q = query(projectsRef, orderBy('updatedAt', 'desc'));
 
       const snapshot = await getDocs(q);
@@ -216,7 +215,7 @@ class DashboardService {
    */
   async getAllProjectMetrics(): Promise<ProjectMetrics[]> {
     try {
-      const metricsRef = safeCollection(this.METRICS_COLLECTION);
+      const metricsRef = collection(db!, this.METRICS_COLLECTION);
       const q = query(metricsRef, orderBy('lastUpdated', 'desc'));
 
       const snapshot = await getDocs(q);
@@ -251,7 +250,7 @@ class DashboardService {
    */
   async getRecentActivities(limitCount: number = 10): Promise<DashboardActivity[]> {
     try {
-      const activitiesRef = safeCollection(this.ACTIVITIES_COLLECTION);
+      const activitiesRef = collection(db!, this.ACTIVITIES_COLLECTION);
       const q = query(activitiesRef, orderBy('timestamp', 'desc'), limit(limitCount));
 
       const snapshot = await getDocs(q);
@@ -267,7 +266,7 @@ class DashboardService {
    */
   async logDashboardActivity(activity: Omit<DashboardActivity, 'id'>): Promise<void> {
     try {
-      const activitiesRef = safeCollection(this.ACTIVITIES_COLLECTION);
+      const activitiesRef = collection(db!, this.ACTIVITIES_COLLECTION);
       await setDoc(doc(activitiesRef), {
         ...activity,
         timestamp: Timestamp.fromDate(activity.timestamp),

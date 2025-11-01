@@ -11,7 +11,7 @@ import { db } from '@/lib/firebase';
 
 // 🛡️ OS PROTECTION - Importa protezione CSS per feedback service
 import '@/lib/osProtection';
-import { safeCollection } from './firebaseUtils';
+
 
 export interface Feedback {
   id: string;
@@ -37,7 +37,7 @@ export class FeedbackService {
   // Ottieni tutti i feedback (solo per admin)
   async getAllFeedback(): Promise<Feedback[]> {
     try {
-      const feedbacksRef = safeCollection(this.COLLECTION);
+      const feedbacksRef = collection(db!, this.COLLECTION);
       const q = query(feedbacksRef, orderBy('createdAt', 'desc'));
 
       const snapshot = await getDocs(q);
@@ -54,7 +54,7 @@ export class FeedbackService {
   // Ottieni feedback per stato
   async getFeedbackByStatus(status: Feedback['status']): Promise<Feedback[]> {
     try {
-      const feedbacksRef = safeCollection(this.COLLECTION);
+      const feedbacksRef = collection(db!, this.COLLECTION);
       const q = query(feedbacksRef, where('status', '==', status), orderBy('createdAt', 'desc'));
 
       const snapshot = await getDocs(q);
@@ -71,7 +71,7 @@ export class FeedbackService {
   // Ottieni feedback per priorità
   async getFeedbackByPriority(priority: Feedback['priority']): Promise<Feedback[]> {
     try {
-      const feedbacksRef = safeCollection(this.COLLECTION);
+      const feedbacksRef = collection(db!, this.COLLECTION);
       const q = query(
         feedbacksRef,
         where('priority', '==', priority),

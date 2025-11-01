@@ -13,7 +13,7 @@ import {doc,
 
 import { DesignTemplate } from './designCenterService';
 import { db } from './firebase';
-import { safeCollection } from './firebaseUtils';
+
 
 export interface DesignProject {
   id: string;
@@ -160,7 +160,7 @@ export class DesignProjectService {
     try {
       console.log('📋 [DesignProjectService] Recupero progetti utente:', userId);
 
-      const projectsRef = safeCollection(this.COLLECTION_NAME);
+      const projectsRef = collection(db!, this.COLLECTION_NAME);
       const q = query(projectsRef, where('userId', '==', userId), orderBy('createdAt', 'desc'));
 
       const querySnapshot = await getDocs(q);

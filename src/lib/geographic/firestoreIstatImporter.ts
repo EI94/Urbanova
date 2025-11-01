@@ -3,7 +3,6 @@
  * Importa tutti i comuni italiani dal dataset ufficiale ISTAT in Firestore
  */
 
-import { safeCollection } from '@/lib/firebaseUtils';
 import { db } from '@/lib/firebase';
 import { 
   doc, 
@@ -349,7 +348,7 @@ export class FirestoreIstatImporter {
           const firestoreBatch = writeBatch(db);
           
           for (const comune of batch) {
-            const docRef = doc(safeCollection('comuni_italiani'));
+            const docRef = doc(collection(db!, 'comuni_italiani'));
             firestoreBatch.set(docRef, comune);
           }
           

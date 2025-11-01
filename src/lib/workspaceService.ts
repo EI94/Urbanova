@@ -16,7 +16,7 @@ import {
   onSnapshot,
   Unsubscribe
 } from 'firebase/firestore';
-import { safeCollection } from './firebaseUtils';
+
 import { db } from './firebase.ts';
 
 // 🛡️ OS PROTECTION - Importa protezione CSS per workspace service
@@ -98,7 +98,7 @@ export class WorkspaceService {
         }
       };
 
-      await addDoc(safeCollection(this.MEMBERS_COLLECTION), memberData);
+      await addDoc(collection(db!, this.MEMBERS_COLLECTION), memberData);
       console.log('✅ [Workspace] Membro proprietario aggiunto');
 
       return workspaceRef.id;
@@ -115,7 +115,7 @@ export class WorkspaceService {
 
       // Trova tutti i workspace dove l'utente è membro
       const membersQuery = query(
-        safeCollection(this.MEMBERS_COLLECTION),
+        collection(db!, this.MEMBERS_COLLECTION),
         where('userId', '==', userId),
         where('status', '==', 'active')
       );
@@ -189,7 +189,7 @@ export class WorkspaceService {
 
         // Verifica che non sia già membro
         const existingMemberQuery = query(
-          safeCollection(this.MEMBERS_COLLECTION),
+          collection(db!, this.MEMBERS_COLLECTION),
           where('workspaceId', '==', workspaceId),
           where('email', '==', request.email)
         );
@@ -303,7 +303,7 @@ export class WorkspaceService {
           permissions: this.getDefaultPermissions(invitation.role)
         };
 
-        const memberRef = doc(safeCollection(this.MEMBERS_COLLECTION));
+        const memberRef = doc(collection(db!, this.MEMBERS_COLLECTION));
         transaction.set(memberRef, memberData);
 
         // Aggiorna contatore posti utilizzati
@@ -334,7 +334,7 @@ export class WorkspaceService {
       return await runTransaction(db, async (transaction) => {
         // Verifica che l'utente sia membro del workspace
         const memberQuery = query(
-          safeCollection(this.MEMBERS_COLLECTION),
+          collection(db!, this.MEMBERS_COLLECTION),
           where('workspaceId', '==', workspaceId),
           where('userId', '==', sharedBy),
           where('status', '==', 'active')
@@ -412,7 +412,7 @@ export class WorkspaceService {
 
       // Verifica che l'utente sia membro del workspace
       const memberQuery = query(
-        safeCollection(this.MEMBERS_COLLECTION),
+        collection(db!, this.MEMBERS_COLLECTION),
         where('workspaceId', '==', workspaceId),
         where('userId', '==', userId),
         where('status', '==', 'active')
@@ -448,7 +448,7 @@ export class WorkspaceService {
   async getWorkspaceMembers(workspaceId: string): Promise<WorkspaceMember[]> {
     try {
       const membersQuery = query(
-        safeCollection(this.MEMBERS_COLLECTION),
+        collection(db!, this.MEMBERS_COLLECTION),
         where('workspaceId', '==', workspaceId),
         where('status', '==', 'active'),
         orderBy('joinedAt', 'asc')

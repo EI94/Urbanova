@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { addDoc } from 'firebase/firestore';
-import { safeCollection } from '@/lib/firebaseUtils';
+import {  addDoc , collection } from 'firebase/firestore';
+
 import { realEmailService } from '@/lib/realEmailService';
 
 export async function POST(request: NextRequest) {
@@ -163,7 +163,7 @@ export async function POST(request: NextRequest) {
       };
 
       console.log('💾 [Feedback] Tentativo salvataggio su Firebase...');
-      const feedbackRef = await addDoc(safeCollection('feedback'), feedbackData);
+      const feedbackRef = await addDoc(collection(db!, 'feedback'), feedbackData);
       firebaseSuccess = true;
       console.log('✅ [Feedback] Feedback salvato su Firebase con ID:', feedbackRef.id);
     } catch (firebaseError) {

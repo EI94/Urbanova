@@ -1602,12 +1602,11 @@ Vuoi che approfondisca qualche aspetto specifico o generi un'analisi di sensibil
       
       // Import dinamico per evitare errori di build
       const { db } = await import('@/lib/firebase');
-      const { getDocs, query, orderBy, limit } = await import('firebase/firestore');
-      const { safeCollection } = await import('@/lib/firebaseUtils');
+      const { getDocs, query, orderBy, limit, collection } = await import('firebase/firestore');
       
       // Query per ottenere i progetti di fattibilità
       const projectsQuery = query(
-        safeCollection('feasibilityProjects'),
+        collection(db!, 'feasibilityProjects'),
         orderBy('createdAt', 'desc'),
         limit(10)
       );

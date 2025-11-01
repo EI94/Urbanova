@@ -14,7 +14,7 @@ import {doc,
   GeoPoint } from 'firebase/firestore';
 
 import { db } from './firebase';
-import { safeCollection } from './firebaseUtils';
+
 
 export interface ProjectLocation {
   id: string;
@@ -411,7 +411,7 @@ export class ProjectMapService {
    */
   private async getCachedGeocoding(address: string): Promise<GeocodingResult | null> {
     try {
-      const cacheRef = safeCollection(this.GEOCODING_CACHE_COLLECTION);
+      const cacheRef = collection(db!, this.GEOCODING_CACHE_COLLECTION);
       const q = query(
         cacheRef,
         where('address', '==', address.toLowerCase()),
@@ -441,7 +441,7 @@ export class ProjectMapService {
     try {
       console.log('📋 [ProjectMapService] Recupero tutte le posizioni progetto');
 
-      const locationsRef = safeCollection(this.PROJECT_LOCATIONS_COLLECTION);
+      const locationsRef = collection(db!, this.PROJECT_LOCATIONS_COLLECTION);
       const q = query(locationsRef, orderBy('createdAt', 'desc'));
 
       const querySnapshot = await getDocs(q);

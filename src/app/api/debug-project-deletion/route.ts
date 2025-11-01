@@ -8,7 +8,7 @@ import {doc,
 import { NextRequest, NextResponse } from 'next/server';
 
 import { db } from '@/lib/firebase';
-import { safeCollection } from '@/lib/firebaseUtils';
+
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const collectionRef = safeCollection('feasibilityProjects');
+    const collectionRef = collection(db!, 'feasibilityProjects');
     const projectRef = doc(collectionRef, projectId);
 
     // 1. VERIFICA SE IL PROGETTO ESISTE PRIMA

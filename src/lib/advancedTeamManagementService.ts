@@ -38,7 +38,7 @@ interface TeamActivity {
 import { UserProfile } from '@/types/userProfile';
 
 import { db } from './firebase';
-import { safeCollection } from './firebaseUtils';
+
 import { realEmailService } from './realEmailService';
 
 export interface TeamManagementStats {
@@ -95,7 +95,7 @@ class AdvancedTeamManagementService {
     try {
       console.log('🔍 [TeamService] Recupero membri team:', teamId);
 
-      const membersRef = safeCollection(this.MEMBERS_COLLECTION);
+      const membersRef = collection(db!, this.MEMBERS_COLLECTION);
       const q = query(
         membersRef,
         where('teamId', '==', teamId),
@@ -195,7 +195,7 @@ class AdvancedTeamManagementService {
       }
 
       // Crea l'invito
-      const invitationRef = safeCollection(this.INVITATIONS_COLLECTION);
+      const invitationRef = collection(db!, this.INVITATIONS_COLLECTION);
       const invitationDocRef = doc(invitationRef);
       await setDoc(invitationDocRef, {
         ...invitationData,
@@ -370,7 +370,7 @@ class AdvancedTeamManagementService {
    */
   subscribeToTeamChanges(teamId: string, callback: (members: TeamMember[]) => void): () => void {
     // CHIRURGICO: Disabilitato onSnapshot temporaneamente per evitare 400 error e loop infiniti
-    // const membersRef = safeCollection(this.MEMBERS_COLLECTION);
+    // const membersRef = collection(db!, this.MEMBERS_COLLECTION);
     // const q = query(membersRef, where('teamId', '==', teamId), where('isActive', '==', true));
 
     // const unsubscribe = onSnapshot(q, snapshot => {
@@ -414,7 +414,7 @@ class AdvancedTeamManagementService {
   // Metodi privati di supporto
 
   private async getMemberByEmail(email: string): Promise<TeamMember | null> {
-    const membersRef = safeCollection(this.MEMBERS_COLLECTION);
+    const membersRef = collection(db!, this.MEMBERS_COLLECTION);
     const q = query(membersRef, where('email', '==', email), where('isActive', '==', true));
     const snapshot = await getDocs(q);
 
@@ -449,7 +449,7 @@ class AdvancedTeamManagementService {
   }
 
   private async getPendingInvitations(teamId: string): Promise<TeamInvitation[]> {
-    const invitationsRef = safeCollection(this.INVITATIONS_COLLECTION);
+    const invitationsRef = collection(db!, this.INVITATIONS_COLLECTION);
     const q = query(
       invitationsRef,
       where('teamId', '==', teamId),
@@ -476,7 +476,7 @@ class AdvancedTeamManagementService {
   }
 
   private async getRecentActivities(teamId: string, limit: number): Promise<TeamActivity[]> {
-    const activitiesRef = safeCollection(this.ACTIVITIES_COLLECTION);
+    const activitiesRef = collection(db!, this.ACTIVITIES_COLLECTION);
     const q = query(
       activitiesRef,
       where('teamId', '==', teamId),
@@ -501,7 +501,7 @@ class AdvancedTeamManagementService {
   }
 
   private async getTeamPerformance(teamId: string): Promise<TeamPerformance[]> {
-    const performanceRef = safeCollection(this.PERFORMANCE_COLLECTION);
+    const performanceRef = collection(db!, this.PERFORMANCE_COLLECTION);
     const q = query(performanceRef, where('teamId', '==', teamId), orderBy('lastActivity', 'desc'));
 
     const snapshot = await getDocs(q);
@@ -546,7 +546,7 @@ class AdvancedTeamManagementService {
 
   private async logTeamActivity(activity: Omit<TeamActivity, 'id'>): Promise<void> {
     try {
-      const activitiesRef = safeCollection(this.ACTIVITIES_COLLECTION);
+      const activitiesRef = collection(db!, this.ACTIVITIES_COLLECTION);
       await setDoc(doc(activitiesRef), {
         ...activity,
         timestamp: Timestamp.fromDate(activity.timestamp),
@@ -655,7 +655,7 @@ class AdvancedTeamManagementService {
     startDate: Date,
     endDate: Date
   ): Promise<TeamActivity[]> {
-    const activitiesRef = safeCollection(this.ACTIVITIES_COLLECTION);
+    const activitiesRef = collection(db!, this.ACTIVITIES_COLLECTION);
     const q = query(
       activitiesRef,
       where('teamId', '==', teamId),
@@ -685,7 +685,7 @@ class AdvancedTeamManagementService {
     startDate: Date,
     endDate: Date
   ): Promise<TeamPerformance[]> {
-    const performanceRef = safeCollection(this.PERFORMANCE_COLLECTION);
+    const performanceRef = collection(db!, this.PERFORMANCE_COLLECTION);
     const q = query(
       performanceRef,
       where('teamId', '==', teamId),

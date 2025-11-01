@@ -1,8 +1,8 @@
-import {getDocs, deleteDoc, doc, writeBatch } from 'firebase/firestore';
+import { getDocs, deleteDoc, doc, writeBatch , collection } from 'firebase/firestore';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { db } from '@/lib/firebase';
-import { safeCollection } from '@/lib/firebaseUtils';
+
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const collectionRef = safeCollection('feasibilityProjects');
+    const collectionRef = collection(db!, 'feasibilityProjects');
 
     // 1. Ottieni tutti i progetti
     console.log('🔍 Recupero tutti i progetti...');

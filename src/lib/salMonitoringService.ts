@@ -305,7 +305,7 @@ export class SALMonitoringService {
   private async saveAuditLog(auditLog: SALAuditLog): Promise<void> {
     try {
       // Salva su database (implementazione futura)
-      // await addDoc(safeCollection(this.AUDIT_COLLECTION), auditLog);
+      // await addDoc(collection(db!, this.AUDIT_COLLECTION), auditLog);
 
       // Per ora logghiamo solo
       console.log('📋 [SAL Audit]', auditLog);
@@ -317,7 +317,7 @@ export class SALMonitoringService {
   private async savePerformanceMetrics(data: any): Promise<void> {
     try {
       // Salva su database (implementazione futura)
-      // await addDoc(safeCollection(this.PERFORMANCE_COLLECTION), data);
+      // await addDoc(collection(db!, this.PERFORMANCE_COLLECTION), data);
 
       // Per ora logghiamo solo
       console.log('⚡ [SAL Performance]', data);
@@ -335,7 +335,7 @@ export class SALMonitoringService {
         timestamp: new Date(),
       };
 
-      // await addDoc(safeCollection('sal_workflow_metrics'), workflowData);
+      // await addDoc(collection(db!, 'sal_workflow_metrics'), workflowData);
       console.log('🔄 [SAL Workflow Metrics]', workflowData);
     } catch (error) {
       console.error('❌ [SAL Monitoring] Errore salvataggio workflow metrics:', error);
@@ -350,7 +350,7 @@ export class SALMonitoringService {
         generatedAt: new Date(),
       };
 
-      // await addDoc(safeCollection('sal_metrics_reports'), reportData);
+      // await addDoc(collection(db!, 'sal_metrics_reports'), reportData);
       console.log('📊 [SAL Metrics Report]', reportData);
     } catch (error) {
       console.error('❌ [SAL Monitoring] Errore salvataggio report:', error);
@@ -359,7 +359,7 @@ export class SALMonitoringService {
 
   private async saveErrorLog(errorData: any): Promise<void> {
     try {
-      // await addDoc(safeCollection('sal_error_logs'), errorData);
+      // await addDoc(collection(db!, 'sal_error_logs'), errorData);
       console.log('❌ [SAL Error Log]', errorData);
     } catch (error) {
       console.error('❌ [SAL Monitoring] Errore salvataggio error log:', error);

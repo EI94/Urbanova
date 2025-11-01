@@ -13,7 +13,7 @@ import {doc,
   addDoc } from 'firebase/firestore';
 
 import { db } from './firebase';
-import { safeCollection } from './firebaseUtils';
+
 
 // 🛡️ OS PROTECTION - Importa protezione CSS per project timeline service
 import '@/lib/osProtection';
@@ -309,7 +309,7 @@ export class ProjectTimelineService {
     try {
       console.log('📋 [ProjectTimelineService] Recupero task progetto:', projectId);
 
-      const tasksRef = safeCollection(this.TASKS_COLLECTION);
+      const tasksRef = collection(db!, this.TASKS_COLLECTION);
       const q = query(tasksRef, where('projectId', '==', projectId), orderBy('startDate', 'asc'));
 
       const querySnapshot = await getDocs(q);
@@ -341,7 +341,7 @@ export class ProjectTimelineService {
     try {
       console.log('🎯 [ProjectTimelineService] Recupero milestone progetto:', projectId);
 
-      const milestonesRef = safeCollection(this.MILESTONES_COLLECTION);
+      const milestonesRef = collection(db!, this.MILESTONES_COLLECTION);
       const q = query(milestonesRef, where('projectId', '==', projectId), orderBy('date', 'asc'));
 
       const querySnapshot = await getDocs(q);
@@ -373,7 +373,7 @@ export class ProjectTimelineService {
     try {
       console.log('📋 [ProjectTimelineService] Recupero task utente:', userId);
 
-      const tasksRef = safeCollection(this.TASKS_COLLECTION);
+      const tasksRef = collection(db!, this.TASKS_COLLECTION);
       const q = query(tasksRef, where('assignedTo.id', '==', userId), orderBy('startDate', 'asc'));
 
       const querySnapshot = await getDocs(q);

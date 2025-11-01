@@ -13,7 +13,7 @@
 import { addDoc, getDocs, getDoc, updateDoc, deleteDoc, doc, collection, query, where, orderBy, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import { notificationTriggerService } from './notificationTriggerService';
-import { safeCollection } from './firebaseUtils';
+
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -1689,7 +1689,7 @@ class BusinessPlanService {
   async getBusinessPlansByProject(projectId: string): Promise<any[]> {
     try {
       const q = query(
-        safeCollection(this.COLLECTION_NAME),
+        collection(db!, this.COLLECTION_NAME),
         where('projectId', '==', projectId)
       );
       

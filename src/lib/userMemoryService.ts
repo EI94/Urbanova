@@ -18,7 +18,6 @@ import {
 // import { predictiveAnalyticsService, PredictiveInsight, MarketForecast, ProjectOptimization } from './predictiveAnalyticsService';
 // import { marketIntelligenceOS, MarketIntelligenceQuery } from './marketIntelligenceOS';
 import { db } from '@/lib/firebase';
-import { safeCollection } from '@/lib/firebaseUtils';
 import { FeasibilityProject } from '@/types/feasibility';
 import { ChatMessage } from '@/types/chat';
 
@@ -565,7 +564,7 @@ export class UserMemoryService {
       }
       
       // Carica progetti reali da Firebase
-      const projectsRef = safeCollection('feasibilityProjects');
+      const projectsRef = collection(db!, 'feasibilityProjects');
       const q = query(
         projectsRef,
         where('createdBy', '==', userId),

@@ -14,7 +14,7 @@ import {doc,
   writeBatch } from 'firebase/firestore';
 
 import { db } from '@/lib/firebase';
-import { safeCollection } from './firebaseUtils';
+
 
 // ===== INTERFACES =====
 export interface Notification {
@@ -158,7 +158,7 @@ export class NotificationService {
         updatedAt: serverTimestamp(),
       };
 
-      const docRef = await addDoc(safeCollection('notifications'), notificationData);
+      const docRef = await addDoc(collection(db!, 'notifications'), notificationData);
       return docRef.id;
     } catch (error) {
       console.error('Error creating notification:', error);
@@ -205,7 +205,7 @@ export class NotificationService {
   async markAllAsRead(userId: string): Promise<void> {
     try {
       const q = query(
-        safeCollection('notifications'),
+        collection(db!, 'notifications'),
         where('userId', '==', userId),
         where('status', '==', 'unread')
       );
@@ -254,7 +254,7 @@ export class NotificationService {
     }
   ): Promise<Notification[]> {
     try {
-      let q = query(safeCollection('notifications'), where('userId', '==', userId));
+      let q = query(collection(db!, 'notifications'), where('userId', '==', userId));
 
       if (options?.status) {
         q = query(q, where('status', '==', options.status));
@@ -304,7 +304,7 @@ export class NotificationService {
     callback: (notifications: Notification[]) => void
   ): () => void {
     const q = query(
-      safeCollection('notifications'),
+      collection(db!, 'notifications'),
       where('userId', '==', userId),
       orderBy('createdAt', 'desc')
     );
@@ -343,7 +343,7 @@ export class NotificationService {
         updatedAt: serverTimestamp(),
       };
 
-      const docRef = await addDoc(safeCollection('notificationTemplates'), templateData);
+      const docRef = await addDoc(collection(db!, 'notificationTemplates'), templateData);
       return docRef.id;
     } catch (error) {
       console.error('Error creating template:', error);
@@ -367,7 +367,7 @@ export class NotificationService {
   async getTemplates(): Promise<NotificationTemplate[]> {
     try {
       const q = query(
-        safeCollection('notificationTemplates'),
+        collection(db!, 'notificationTemplates'),
         where('isActive', '==', true),
         orderBy('name')
       );
@@ -396,7 +396,7 @@ export class NotificationService {
 
       // Check if preference already exists
       const existingQ = query(
-        safeCollection('notificationPreferences'),
+        collection(db!, 'notificationPreferences'),
         where('userId', '==', preference.userId),
         where('category', '==', preference.category),
         where('type', '==', preference.type),
@@ -414,7 +414,7 @@ export class NotificationService {
         }
       } else {
         // Create new preference
-        const docRef = await addDoc(safeCollection('notificationPreferences'), preferenceData);
+        const docRef = await addDoc(collection(db!, 'notificationPreferences'), preferenceData);
         return docRef.id;
       }
       
@@ -428,7 +428,7 @@ export class NotificationService {
 
   async getPreferences(userId: string): Promise<NotificationPreference[]> {
     try {
-      const q = query(safeCollection('notificationPreferences'), where('userId', '==', userId));
+      const q = query(collection(db!, 'notificationPreferences'), where('userId', '==', userId));
 
       const snapshot = await getDocs(q);
       const preferences: NotificationPreference[] = [];
@@ -453,7 +453,7 @@ export class NotificationService {
         updatedAt: serverTimestamp(),
       };
 
-      const docRef = await addDoc(safeCollection('notificationRules'), ruleData);
+      const docRef = await addDoc(collection(db!, 'notificationRules'), ruleData);
       return docRef.id;
     } catch (error) {
       console.error('Error creating rule:', error);
@@ -477,7 +477,7 @@ export class NotificationService {
   async getActiveRules(): Promise<NotificationRule[]> {
     try {
       const q = query(
-        safeCollection('notificationRules'),
+        collection(db!, 'notificationRules'),
         where('isActive', '==', true),
         orderBy('priority', 'desc')
       );
@@ -506,7 +506,7 @@ export class NotificationService {
         errorCount: 0,
       };
 
-      const docRef = await addDoc(safeCollection('notificationChannels'), channelData);
+      const docRef = await addDoc(collection(db!, 'notificationChannels'), channelData);
       return docRef.id;
     } catch (error) {
       console.error('Error creating channel:', error);
@@ -546,7 +546,7 @@ export class NotificationService {
   async getUnreadCount(userId: string): Promise<number> {
     try {
       const q = query(
-        safeCollection('notifications'),
+        collection(db!, 'notifications'),
         where('userId', '==', userId),
         where('status', '==', 'unread')
       );
@@ -631,7 +631,7 @@ export class NotificationService {
   async cleanupExpiredNotifications(): Promise<number> {
     try {
       const now = Timestamp.now();
-      const q = query(safeCollection('notifications'), where('expiresAt', '<', now));
+      const q = query(collection(db!, 'notifications'), where('expiresAt', '<', now));
 
       const snapshot = await getDocs(q);
       const batch = writeBatch(db);

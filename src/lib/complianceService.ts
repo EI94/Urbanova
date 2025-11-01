@@ -15,7 +15,7 @@ import {
   getDoc 
 } from 'firebase/firestore';
 import { db } from './firebase';
-import { safeCollection } from './firebaseUtils';
+
 import {
   Municipality,
   ComplianceDocument,
@@ -122,7 +122,7 @@ export class ComplianceService {
             throw new Error('Firebase non inizializzato correttamente');
           }
 
-          const docRef = await addDoc(safeCollection(this.COLLECTIONS.documents), {
+          const docRef = await addDoc(collection(db!, this.COLLECTIONS.documents), {
             ...complianceDoc,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
@@ -211,7 +211,7 @@ export class ComplianceService {
           throw new Error('Firebase non inizializzato correttamente');
         }
 
-        await addDoc(safeCollection(this.COLLECTIONS.sections), {
+        await addDoc(collection(db!, this.COLLECTIONS.sections), {
           ...section,
           createdAt: serverTimestamp(),
         });
@@ -408,7 +408,7 @@ export class ComplianceService {
       };
 
       // Salva report
-      await addDoc(safeCollection(this.COLLECTIONS.reports), {
+      await addDoc(collection(db!, this.COLLECTIONS.reports), {
         ...report,
         createdAt: serverTimestamp(),
       });
@@ -453,7 +453,7 @@ export class ComplianceService {
   ): Promise<PatternRule[]> {
     try {
       let q = query(
-        safeCollection(this.COLLECTIONS.rules),
+        collection(db!, this.COLLECTIONS.rules),
         where('municipalityId', '==', municipalityId),
         where('status', '==', 'ACTIVE'),
         orderBy('priority', 'desc')
@@ -649,10 +649,10 @@ export class ComplianceService {
   }> {
     try {
       const [documents, sections, rules, reports, vectorStats] = await Promise.all([
-        getDocs(safeCollection(this.COLLECTIONS.documents)),
-        getDocs(safeCollection(this.COLLECTIONS.sections)),
-        getDocs(safeCollection(this.COLLECTIONS.rules)),
-        getDocs(safeCollection(this.COLLECTIONS.reports)),
+        getDocs(collection(db!, this.COLLECTIONS.documents)),
+        getDocs(collection(db!, this.COLLECTIONS.sections)),
+        getDocs(collection(db!, this.COLLECTIONS.rules)),
+        getDocs(collection(db!, this.COLLECTIONS.reports)),
         vectorStoreService.getStats(),
       ]);
 

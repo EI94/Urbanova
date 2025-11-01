@@ -1,8 +1,8 @@
-import {query, where, getDocs, limit } from 'firebase/firestore';
+import { query, where, getDocs, limit , collection } from 'firebase/firestore';
 
 import { feasibilityService, FeasibilityProject } from './feasibilityService';
 import { db } from './firebase';
-import { safeCollection } from './firebaseUtils';
+
 
 export interface ProjectIdentifier {
   name: string;
@@ -100,7 +100,7 @@ export class ProjectManagerService {
       console.log('🔍 Ricerca progetto esistente...', identifier);
 
       // Query per trovare progetti con lo stesso nome e indirizzo
-      const projectsRef = safeCollection('feasibilityProjects');
+      const projectsRef = collection(db!, 'feasibilityProjects');
       const q = query(
         projectsRef,
         where('name', '==', identifier.name),
@@ -176,7 +176,7 @@ export class ProjectManagerService {
    */
   async getUserProjects(userId: string): Promise<FeasibilityProject[]> {
     try {
-      const projectsRef = safeCollection('feasibilityProjects');
+      const projectsRef = collection(db!, 'feasibilityProjects');
       const q = query(
         projectsRef,
         where('userId', '==', userId)
