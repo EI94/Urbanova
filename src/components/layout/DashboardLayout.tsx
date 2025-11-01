@@ -56,10 +56,10 @@ import {
   ProjectIcon,
   MapIcon,
 } from '@/components/icons';
-// LAZY: Context hooks caricati dinamicamente per evitare TDZ durante bundle
-// NON importare staticamente - causano TDZ
-// import { useAuth } from '@/contexts/AuthContext';
-// import { useLanguage } from '@/contexts/LanguageContext';
+// Import statici context hooks - DEVONO essere statici per rispettare regole React hooks
+// Il problema TDZ deve essere risolto DENTRO i context modules, non qui
+import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 // Carica la protezione OS solo lato client per evitare side-effects in fase di init
 if (typeof window !== 'undefined') {
   // import dinamico per evitare esecuzione a livello di modulo
@@ -97,40 +97,9 @@ export default function DashboardLayout({ children, title = 'Dashboard' }: Dashb
 function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayoutProps) {
   // 🛡️ GUARD: Renderizza solo dopo mount client per evitare TDZ
   const [mounted, setMounted] = useState(false);
-  const [contextHooks, setContextHooks] = useState<{
-    useLanguage: any;
-    useAuth: any;
-  } | null>(null);
   
-  // Carica context hooks dinamicamente dopo mount
-  useEffect(() => {
-    Promise.all([
-      import('@/contexts/LanguageContext'),
-      import('@/contexts/AuthContext'),
-    ]).then(([lang, auth]) => {
-      setContextHooks({
-        useLanguage: lang.useLanguage,
-        useAuth: auth.useAuth,
-      });
-    });
-  }, []);
-  
-  // Loading state finché context hooks non sono pronti
-  if (!contextHooks) {
-    return (
-      <div className="min-h-screen bg-base-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-blue-600 text-white shadow-lg mb-4 animate-pulse">
-            <Building2 className="w-8 h-8" />
-          </div>
-          <h1 className="text-2xl font-bold text-slate-800">Urbanova</h1>
-          <p className="text-slate-500 mt-2">Caricamento...</p>
-        </div>
-      </div>
-    );
-  }
-  
-  const { t } = contextHooks.useLanguage();
+  // Hook React devono essere SEMPRE chiamati - non condizionalmente
+  const { t } = useLanguage();
   const router = useRouter();
   
   // 🎯 OS 2.0 Hook per gestire stato del Sidecar
@@ -139,7 +108,7 @@ function DashboardLayoutContent({ children, title = 'Dashboard' }: DashboardLayo
   // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
   let authContext;
   try {
-    authContext = contextHooks.useAuth();
+    authContext = useAuth();
   } catch (error) {
     console.error('❌ [DashboardLayout] Errore useAuth:', error);
     authContext = { currentUser: null, loading: false };

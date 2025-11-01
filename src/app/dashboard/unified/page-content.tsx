@@ -41,9 +41,11 @@ import {
   X,
 } from 'lucide-react';
 
-// SOLUZIONE RADICALE: NESSUN import statico di context - caricamento completamente lazy
-// Gli import statici causano module evaluation durante bundle che triggera TDZ
-// Carichiamo i context hooks SOLO dopo mount, in modo completamente dinamico
+// Import statici context hooks - DEVONO essere statici per rispettare regole React hooks
+// Il problema TDZ deve essere risolto DENTRO i context modules, non qui
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useDarkMode } from '@/contexts/DarkModeContext';
 // Servizi importati dinamicamente per evitare TDZ
 import { ChatMessage } from '@/types/chat';
 import type { DashboardStats } from '@/lib/dashboardService';
@@ -130,78 +132,23 @@ interface ToolExecution {
   error?: string;
 }
 
-// Componente che aspetta il caricamento dei context hooks prima di renderizzare
-// RADICALE: Wrapper senza import statici per evitare TDZ durante bundle
+// Componente principale - Hook React devono essere SEMPRE chiamati (non condizionalmente)
 export default function UnifiedDashboardPageContent() {
-  console.log(`🔍 [TDZ DEBUG] UnifiedDashboardPageContent WRAPPER RENDER - timestamp: ${Date.now()}, typeof window: ${typeof window}`);
+  console.log(`🔍 [TDZ DEBUG] UnifiedDashboardPageContent RENDER - timestamp: ${Date.now()}, typeof window: ${typeof window}`);
   
-  const [contextHooks, setContextHooks] = useState<{
-    useLanguage: any;
-    useAuth: any;
-    useDarkMode: any;
-  } | null>(null);
-  
-  useEffect(() => {
-    console.log(`🔍 [TDZ DEBUG] Caricamento context hooks dinamicamente...`);
-    // Carica i context hooks solo dopo mount, in modo completamente asincrono
-    Promise.all([
-      import('@/contexts/LanguageContext'),
-      import('@/contexts/AuthContext'),
-      import('@/contexts/DarkModeContext'),
-    ]).then(([lang, auth, dark]) => {
-      console.log(`🔍 [TDZ DEBUG] Context hooks caricati con successo`);
-      setContextHooks({
-        useLanguage: lang.useLanguage,
-        useAuth: auth.useAuth,
-        useDarkMode: dark.useDarkMode,
-      });
-    }).catch(error => {
-      console.error('❌ [UnifiedDashboard] Errore caricamento context hooks:', error);
-    });
-  }, []);
-  
-  if (!contextHooks) {
-    return (
-      <div className="min-h-screen bg-base-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-blue-600 text-white shadow-lg mb-4 animate-pulse">
-            <Building2 className="w-8 h-8" />
-          </div>
-          <h1 className="text-2xl font-bold text-slate-800">Urbanova</h1>
-          <p className="text-slate-500 mt-2">Inizializzazione...</p>
-        </div>
-      </div>
-    );
-  }
-  
-  return <UnifiedDashboardPageContentInner contextHooks={contextHooks} />;
-}
-
-// Componente interno che USA i context hooks (passati come props)
-function UnifiedDashboardPageContentInner({
-  contextHooks,
-}: {
-  contextHooks: {
-    useLanguage: any;
-    useAuth: any;
-    useDarkMode: any;
-  };
-}) {
-  console.log(`🔍 [TDZ DEBUG] UnifiedDashboardPageContentInner RENDER - timestamp: ${Date.now()}, typeof window: ${typeof window}`);
-  
-  // Ora gli hook vengono SEMPRE chiamati - non condizionalmente
-  const { t } = contextHooks.useLanguage();
+  // Hook React devono essere SEMPRE chiamati - non condizionalmente
+  const { t } = useLanguage();
   // CHIRURGICO: Protezione ultra-sicura per evitare crash auth destructuring
   let authContext;
   try {
-    authContext = contextHooks.useAuth();
+    authContext = useAuth();
   } catch (error) {
     console.error('❌ [UnifiedDashboard] Errore useAuth:', error);
     authContext = { currentUser: null, loading: false };
   }
   const currentUser = (authContext && typeof authContext === 'object' && 'currentUser' in authContext) ? authContext.currentUser : null;
   const authLoading = (authContext && typeof authContext === 'object' && 'loading' in authContext) ? authContext.loading : false;
-  const { darkMode, setDarkMode } = contextHooks.useDarkMode();
+  const { darkMode, setDarkMode } = useDarkMode();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
