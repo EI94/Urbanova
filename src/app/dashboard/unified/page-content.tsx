@@ -505,7 +505,7 @@ export default function UnifiedDashboardPageContent() {
 
   // Sottoscrizione agli aggiornamenti in tempo reale
   useEffect(() => {
-    if (!stats || !mounted) return;
+    if (!mounted || !currentUser?.uid) return;
 
     console.log('🔄 [Unified Dashboard] Sottoscrizione aggiornamenti real-time...');
 
@@ -524,7 +524,7 @@ export default function UnifiedDashboardPageContent() {
     return () => {
       if (unsubscribe) unsubscribe();
     };
-  }, [stats, mounted, currentUser?.uid]);
+  }, [mounted, currentUser?.uid]); // 🛡️ RIMOSSO stats dalle dipendenze per evitare loop infinito
 
   // Carica dati utente (notifiche e profilo)
   const loadUserData = async () => {
