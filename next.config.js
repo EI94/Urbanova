@@ -107,7 +107,7 @@ if (typeof globalThis !== 'undefined' && typeof globalThis.File === 'undefined')
   },
   // Disabilita completamente TypeScript per il build
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
+    removeConsole: false, // DISABILITATO per debug TDZ - i log sono essenziali
   },
 };
 
