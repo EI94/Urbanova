@@ -138,7 +138,7 @@
     "leaflet.markercluster": "^1.5.3",
     "lucide-react": "^0.539.0",
     "morgan": "^1.10.1",
-    "next": "15.5.2",
+    "next": "15.5.7",
     "next-auth": "^4.24.11",
     "nodemailer": "^6.10.1",
     "openai": "^5.16.0",
